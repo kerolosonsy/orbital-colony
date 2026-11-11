@@ -9,9 +9,21 @@ type Kg float64
 
 // Datasets are sensor readings for the generics chapter.
 type Datasets struct {
-	Depths  []int
-	Temps   []float64
-	Weights []Kg
+	Callsigns  []string
+	Readings   []string
+	Faults     []*FaultError
+	Orders     []string
+	Questions  []Question
+	Answers    map[int]int
+	TotalCents int
+	People     int
+	Docked     bool
+	Undocks    int
+	Drills     int
+	DrillPanic bool
+	Depths     []int
+	Temps      []float64
+	Weights    []Kg
 }
 
 // Swap exchanges what is on the drone's tile with the neighbouring tile in

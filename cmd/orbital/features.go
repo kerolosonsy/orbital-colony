@@ -12,6 +12,24 @@ import (
 
 func requirementTexts(lang string) map[string]string {
 	return map[string]string{
+		"rune":      tr(lang, "استخدم []rune أو range على نص أو utf8.", "Use []rune, range over a string, or utf8."),
+		"iota":      tr(lang, "استخدم iota جوه const.", "Use iota inside const."),
+		"const":     tr(lang, "عرّف ثابت بـ const.", "Declare a const."),
+		"defer":     tr(lang, "استخدم defer.", "Use defer."),
+		"recover":   tr(lang, "استخدم recover جوه دالة مؤجلة بـ defer.", "Call recover inside a deferred function literal."),
+		"errwrap":   tr(lang, "لف الخطأ بـ %w وافحصه بـ errors.Is أو errors.As.", "Wrap an error with %w and inspect it with errors.Is or errors.As."),
+		"errtype":   tr(lang, "عرّف نوع عليه Error() string.", "Define a type with Error() string."),
+		"funcvalue": tr(lang, "استخدم دالة كقيمة.", "Use a function as a value."),
+		"closure":   tr(lang, "رجّع دالة داخلية من دالة.", "Return a function literal from a function."),
+		"embed":     tr(lang, "استخدم field مضمّن من غير اسم.", "Use an embedded struct field."),
+		"variadic":  tr(lang, "استخدم parameter بـ ... .", "Use a variadic parameter."),
+		"bufchan":   tr(lang, "اعمل channel بسعة محددة.", "Make a buffered channel."),
+		"close":     tr(lang, "اقفل channel بـ close.", "Close a channel with close."),
+		"recursion": tr(lang, "اكتب دالة بتنادي نفسها.", "Write a recursive function."),
+		"fuzz":      tr(lang, "اكتب FuzzXxx بياخد *testing.F.", "Write FuzzXxx taking *testing.F."),
+		"subtest":   tr(lang, "استخدم t.Run لتست فرعي.", "Use t.Run for a subtest."),
+		"iface":     tr(lang, "عرّف interface بنفسك.", "Define your own interface."),
+
 		"for":         tr(lang, "المهمة دي لازم تستخدم حلقة for.", "This mission requires a for loop."),
 		"for2":        tr(lang, "المهمة دي محتاجة حلقتين for (واحدة جوه التانية).", "This mission needs two nested for loops."),
 		"if":          tr(lang, "المهمة دي لازم تستخدم if.", "This mission requires if."),
@@ -47,6 +65,7 @@ type features struct {
 	ptrParams, addrOf, ptrRecv, stringers  int
 	typeSwitches, goStmts, selects, chans  int
 	genericFuncs, genericTypes, benchmarks int
+	extra                                  map[string]bool
 	sels                                   map[string]int // every pkg.Name selector
 	calls                                  map[string]int // "pkg.Name" -> count
 	userFuncs                              map[string]int // name -> call count
@@ -160,6 +179,7 @@ func scan(code string) (*features, error) {
 		}
 		return true
 	})
+	ft.extra = scanP0(f, imports)
 	return ft, nil
 }
 
@@ -188,6 +208,8 @@ func checkRequirements(code string, reqs []string, languages ...string) []string
 	for _, r := range reqs {
 		ok := true
 		switch r {
+		case "rune", "iota", "const", "defer", "recover", "errwrap", "errtype", "funcvalue", "closure", "embed", "variadic", "bufchan", "close", "recursion", "fuzz", "subtest", "iface":
+			ok = ft.extra[r]
 		case "for":
 			ok = ft.loops >= 1
 		case "for2":

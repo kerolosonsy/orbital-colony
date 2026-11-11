@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"orbital/colony/levels"
@@ -19,16 +20,28 @@ type workspace struct {
 	colonyRel string // colony module path relative to root
 }
 
-func (ws *workspace) ensureModule() error {
+func (ws *workspace) ensureModule(l *levels.Level) error {
 	if err := os.MkdirAll(ws.root, 0o755); err != nil {
 		return err
 	}
-	gomod := filepath.Join(ws.root, "go.mod")
-	if _, err := os.Stat(gomod); err == nil {
-		return nil
+	catalogLevel := *l
+	catalogLevel.Deps = append([]string(nil), l.Deps...)
+	for _, level := range levels.All {
+		catalogLevel.Deps = append(catalogLevel.Deps, level.Deps...)
 	}
-	body := fmt.Sprintf("module play\n\ngo 1.24\n\nrequire orbital/colony v0.0.0\n\nreplace orbital/colony => %s\n", ws.colonyRel)
-	return os.WriteFile(gomod, []byte(body), 0o644)
+	colonyDir := filepath.Clean(filepath.Join(ws.root, ws.colonyRel))
+	files, err := moduleFiles(colonyDir, &catalogLevel)
+	if err != nil {
+		return err
+	}
+	// VS Code needs a relative replace so the workspace remains movable.
+	files["go.mod"] = strings.ReplaceAll(files["go.mod"], filepath.ToSlash(colonyDir), filepath.ToSlash(ws.colonyRel))
+	for name, body := range files {
+		if err := os.WriteFile(filepath.Join(ws.root, name), []byte(body), 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func editorFiles(l *levels.Level) []levels.LabFile {
@@ -41,7 +54,7 @@ func editorFiles(l *levels.Level) []levels.LabFile {
 // open writes the mission folder (never overwriting files the player
 // already edited there) and returns the main file's path.
 func (ws *workspace) open(l *levels.Level, current map[string]string) (string, error) {
-	if err := ws.ensureModule(); err != nil {
+	if err := ws.ensureModule(l); err != nil {
 		return "", err
 	}
 	dir := filepath.Join(ws.root, l.ID)
@@ -50,16 +63,22 @@ func (ws *workspace) open(l *levels.Level, current map[string]string) (string, e
 	}
 	first := ""
 	for _, f := range editorFiles(l) {
+		if !validLabName(f.Name) {
+			return "", fmt.Errorf("bad file name %q", f.Name)
+		}
 		path := filepath.Join(dir, f.Name)
 		if first == "" {
 			first = path
 		}
 		body := f.Starter
-		if c, ok := current[f.Name]; ok && !f.ReadOnly && c != "" {
+		if c, ok := current[f.Name]; ok && !f.ReadOnly && strings.HasSuffix(f.Name, ".go") && c != "" {
 			body = c
 		}
-		if _, err := os.Stat(path); err == nil && !f.ReadOnly {
+		if _, err := os.Stat(path); err == nil && !f.ReadOnly && strings.HasSuffix(f.Name, ".go") {
 			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			return "", err
 		}
 		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
 			return "", err
@@ -73,6 +92,9 @@ func (ws *workspace) read(l *levels.Level) (map[string]string, time.Time, error)
 	files := map[string]string{}
 	var newest time.Time
 	for _, f := range editorFiles(l) {
+		if !validLabName(f.Name) {
+			return nil, newest, fmt.Errorf("bad file name %q", f.Name)
+		}
 		path := filepath.Join(dir, f.Name)
 		b, err := os.ReadFile(path)
 		if err != nil {

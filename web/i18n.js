@@ -27,5 +27,5 @@ function localizeLevel(l) {
     files: e.files?.length ? e.files : l.files };
 }
 function localizeChapter(c) {
-  return LANG === "en" ? { ...c, title: c.titleEn || c.title, concept: c.conceptEn || c.concept } : c;
+  return LANG === "en" ? { ...c, title: c.titleEn || c.title, concept: c.conceptEn || c.concept, track: c.trackEn || c.track } : c;
 }

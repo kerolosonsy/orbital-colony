@@ -43,7 +43,8 @@ func main() {
 	}
 }
 
-func TestLabCannotAccessGradingFiles(t *testing.T) {
+// P0 deliberately permits filesystem access in local labs (PLAN owner decision 2).
+func TestLabCanAccessFiles(t *testing.T) {
 	files := map[string]string{"main_test.go": `package main
 import ("os"; "testing")
 func TestWrite(t *testing.T) { os.WriteFile("grading-file", nil, 0600) }
@@ -52,9 +53,10 @@ func TestWrite(t *testing.T) { os.WriteFile("grading-file", nil, 0600) }
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.Result.Success || resp.Phase != "require" || len(resp.Missing) == 0 {
-		t.Fatalf("lab code must also be rejected before execution: %+v", resp)
+	if resp.Phase != "lab" || len(resp.Steps) == 0 || !resp.Steps[0].OK {
+		t.Fatalf("lab filesystem access must run the player tests: %+v", resp)
 	}
+
 }
 
 func TestRequirementsRecognizeImportAliases(t *testing.T) {
@@ -84,7 +86,7 @@ func TestLocalVariableDoesNotCountAsImportedWaitGroup(t *testing.T) {
 func TestRestrictedImportsCannotUseAliasesOrInternalPackages(t *testing.T) {
 	for _, importSpec := range []string{`system "os"`, `_ "unsafe"`, `"orbital/colony/levels"`, `"orbital/colony/econ"`, `"embed"`, `"C"`} {
 		t.Run(importSpec, func(t *testing.T) {
-			if missing := restrictedImports("package main\nimport " + importSpec); len(missing) == 0 {
+			if missing := restrictedImports("package main\nimport "+importSpec, &levels.Level{}, "ar"); len(missing) == 0 {
 				t.Fatal("restricted package was accepted")
 			}
 		})
@@ -100,7 +102,7 @@ func TestLoud(t *testing.T) {
 	t.Fatal("OUTPUT-END-FAILURE")
 }
 `}
-	ok, output, err := testRunner(t).goTest(context.Background(), files, "-v", ".")
+	ok, output, err := testRunner(t).goTest(context.Background(), &levels.Level{}, files, "-v", ".")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -96,6 +96,7 @@ func main() {
 	mux.HandleFunc("GET /{$}", s.index)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(web)))
 	mux.HandleFunc("GET /api/levels", s.levels)
+	mux.HandleFunc("GET /api/services", s.services)
 	mux.HandleFunc("GET /api/preview", s.preview)
 	mux.HandleFunc("POST /api/run", s.runCode)
 	mux.HandleFunc("POST /api/workspace/open", s.workspaceOpen)
@@ -181,6 +182,7 @@ func (s *server) levels(w http.ResponseWriter, r *http.Request) {
 	if requestLang(r) == "en" {
 		for i := range chapters {
 			chapters[i].Title, chapters[i].Concept = chapters[i].TitleEn, chapters[i].ConceptEn
+			chapters[i].Track = chapters[i].TrackEn
 		}
 	}
 	writeJSON(w, map[string]any{"chapters": chapters, "levels": missions})

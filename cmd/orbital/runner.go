@@ -54,7 +54,7 @@ type runner struct {
 	colonyDir string
 }
 
-var errLine = regexp.MustCompile(`^\.?/?(\w+\.go):(\d+):(\d+): (.*)$`)
+var errLine = regexp.MustCompile(`^\.?/?([\w./-]+\.go):(\d+):(\d+): (.*)$`)
 
 func parseCompileLine(line string, languages ...string) (compileError, bool) {
 	lang := "ar"
@@ -133,12 +133,15 @@ func (r *runner) goCmd(ctx context.Context, dir string, args ...string) *exec.Cm
 	configureProcess(cmd)
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(), "ORBITAL_LANG="+contextLang(ctx), "GOFLAGS=-mod=mod", "GOWORK=off", "GOTOOLCHAIN=local", "GOPROXY=off")
+	for name := range serviceDefaults {
+		cmd.Env = append(cmd.Env, name+"="+serviceEnv(name))
+	}
 	return cmd
 }
 
 func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runResponse, error) {
 	lang := contextLang(ctx)
-	if missing := restrictedImports(code, lang); len(missing) > 0 {
+	if missing := restrictedImports(code, lvl, lang); len(missing) > 0 {
 		return rejectedImports(missing, lang), nil
 	}
 	dir, err := os.MkdirTemp("", "orbital-run-*")
@@ -147,8 +150,7 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	}
 	defer os.RemoveAll(dir)
 
-	gomod := fmt.Sprintf("module player\n\ngo 1.24\n\nrequire orbital/colony v0.0.0\n\nreplace orbital/colony => %s\n", r.colonyDir)
-	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(gomod), 0o644); err != nil {
+	if err := r.writeModule(dir, lvl); err != nil {
 		return nil, err
 	}
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(code), 0o644); err != nil {
@@ -157,7 +159,11 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 
 	resp := &runResponse{Phase: "compile", Events: []json.RawMessage{}}
 
-	bctx, cancel := context.WithTimeout(ctx, 90*time.Second)
+	buildTimeout := 90 * time.Second
+	if len(lvl.Deps) > 0 {
+		buildTimeout = 240 * time.Second
+	}
+	bctx, cancel := context.WithTimeout(ctx, buildTimeout)
 	defer cancel()
 	bout := &limitedBuffer{max: 64 << 10, lang: contextLang(ctx)}
 	args := []string{"build", "-o", "prog"}
@@ -168,7 +174,7 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	build.Stdout, build.Stderr = bout, bout
 	if err := runCommand(build); err != nil {
 		out := strings.ReplaceAll(bout.String(), dir+string(os.PathSeparator), "")
-		resp.CompileOutput = out
+		resp.CompileOutput = dependencyHint(out, lang)
 		for _, line := range strings.Split(out, "\n") {
 			if ce, ok := parseCompileLine(line, lang); ok {
 				resp.CompileErrors = append(resp.CompileErrors, ce)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,10 +28,18 @@ func TestLevelsSolvable(t *testing.T) {
 	r := testRunner(t)
 	for _, l := range levels.All {
 		if l.Kind == "lab" {
-			t.Run(l.ID, func(t *testing.T) { testLab(t, r, l) })
+			t.Run(l.ID, func(t *testing.T) {
+				if l.Service != "" && os.Getenv("ORBITAL_SERVICES") != "1" {
+					t.Skip("set ORBITAL_SERVICES=1 for service labs")
+				}
+				testLab(t, r, l)
+			})
 			continue
 		}
 		t.Run(l.ID, func(t *testing.T) {
+			if l.Service != "" && os.Getenv("ORBITAL_SERVICES") != "1" {
+				t.Skip("set ORBITAL_SERVICES=1 for service levels")
+			}
 			code, err := os.ReadFile(filepath.Join("testdata", "solutions", l.ID+".go"))
 			if err != nil {
 				t.Fatalf("no reference solution: %v", err)
@@ -188,14 +197,27 @@ func TestPreviewHasNoTimers(t *testing.T) {
 // build but must not pass).
 func testLab(t *testing.T, r *runner, l *levels.Level) {
 	dir := filepath.Join("testdata", "solutions", l.ID)
-	ents, err := os.ReadDir(dir)
+	files := map[string]string{}
+	err := filepath.WalkDir(dir, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		body, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		name, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
+		files[filepath.ToSlash(name)] = string(body)
+		return nil
+	})
 	if err != nil {
 		t.Fatalf("no reference solution: %v", err)
-	}
-	files := map[string]string{}
-	for _, e := range ents {
-		b, _ := os.ReadFile(filepath.Join(dir, e.Name()))
-		files[e.Name()] = string(b)
 	}
 	resp, err := r.RunLab(context.Background(), l, files)
 	if err != nil {

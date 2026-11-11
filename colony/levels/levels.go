@@ -12,6 +12,8 @@ import (
 )
 
 type Chapter struct {
+	Track     string `json:"track"`
+	TrackEn   string `json:"trackEn"`
 	N         int    `json:"n"`
 	Title     string `json:"title"`
 	Concept   string `json:"concept"`
@@ -30,19 +32,23 @@ type LevelText struct {
 }
 
 type Level struct {
-	En       *LevelText `json:"en,omitempty"`
-	ID       string     `json:"id"`
-	Chapter  int        `json:"chapter"`
-	Title    string     `json:"title"`
-	Goal     string     `json:"goal"`
-	Lesson   string     `json:"lesson"`
-	Starter  string     `json:"starter"`
-	Hints    []string   `json:"hints"`
-	Par      int        `json:"par"`  // ticks for 2 stars
-	Gold     int        `json:"gold"` // ticks for 3 stars
-	MaxTicks int        `json:"maxTicks"`
-	Requires []string   `json:"requires"` // source features, checked by the server
-	Race     bool       `json:"race"`     // build with -race; a detected race fails the mission
+	Deps      []string   `json:"deps,omitempty"`
+	Service   string     `json:"service,omitempty"`
+	CarryFrom string     `json:"carryFrom,omitempty"`
+	Bridge    []int      `json:"bridge,omitempty"`
+	En        *LevelText `json:"en,omitempty"`
+	ID        string     `json:"id"`
+	Chapter   int        `json:"chapter"`
+	Title     string     `json:"title"`
+	Goal      string     `json:"goal"`
+	Lesson    string     `json:"lesson"`
+	Starter   string     `json:"starter"`
+	Hints     []string   `json:"hints"`
+	Par       int        `json:"par"`  // ticks for 2 stars
+	Gold      int        `json:"gold"` // ticks for 3 stars
+	MaxTicks  int        `json:"maxTicks"`
+	Requires  []string   `json:"requires"` // source features, checked by the server
+	Race      bool       `json:"race"`     // build with -race; a detected race fails the mission
 
 	Setup func(w *sim.World) `json:"-"`
 
@@ -65,11 +71,14 @@ type Mutant struct {
 }
 
 type Lab struct {
-	ReqFile string   // file whose source is checked against Requires
-	Mutants []Mutant // the player's tests must fail on each
-	Buggy   string   // original main.go the player's tests must fail on
-	Hidden  string   // extra test file run against the player's main.go
-	Bench   *Bench
+	Fuzz        string
+	Bonus       bool
+	HiddenFiles map[string]string
+	ReqFile     string   // file whose source is checked against Requires
+	Mutants     []Mutant // the player's tests must fail on each
+	Buggy       string   // original main.go the player's tests must fail on
+	Hidden      string   // extra test file run against the player's main.go
+	Bench       *Bench
 }
 
 // Bench compares BenchmarkHiddenNaive with BenchmarkHiddenTheirs from the
@@ -79,23 +88,23 @@ type Bench struct {
 }
 
 var Chapters = []Chapter{
-	{1, "الهبوط", "استدعاء الدوال وترتيب الأوامر", true, "Landing", "Function calls and command order"},
-	{2, "التليمتري", "المتغيرات والأنواع والحساب", true, "Telemetry", "Variables, types, and arithmetic"},
-	{3, "الحلقات", "for بكل أشكالها", true, "Loops", "Every form of for"},
-	{4, "القرارات", "if و switch", true, "Decisions", "if and switch"},
-	{5, "الدوال والأخطاء", "func و error", true, "Functions and Errors", "func and error"},
-	{6, "المخازن", "slices و maps", true, "Storage", "slices and maps"},
-	{7, "بناء الأدوات", "structs و methods", true, "Building Tools", "structs and methods"},
-	{8, "العناوين", "pointers", true, "Addresses", "pointers"},
-	{9, "البروتوكولات", "interfaces", true, "Protocols", "interfaces"},
-	{10, "السرب", "goroutines و WaitGroup", true, "The Swarm", "goroutines and WaitGroup"},
-	{11, "قنوات الاتصال", "channels و select", true, "Communication Channels", "channels and select"},
-	{12, "السباق", "mutex و race detector", true, "The Race", "mutex and the race detector"},
-	{13, "العواصف", "context و timeouts", true, "Storms", "context and timeouts"},
-	{14, "القوالب", "generics", true, "Templates", "generics"},
-	{15, "الكهوف", "خوارزميات: BFS و sorting", true, "Caves", "Algorithms: BFS and sorting"},
-	{16, "المختبر", "go test و benchmarks", true, "The Lab", "go test and benchmarks"},
-	{17, "الأعماق", "طبقات، ومصفوفات 3D، وBFS ثلاثي الأبعاد", true, "The Depths", "Layers, 3D arrays, and three-dimensional BFS"},
+	{"الأساسيات", "Fundamentals", 1, "الهبوط", "استدعاء الدوال وترتيب الأوامر", true, "Landing", "Function calls and command order"},
+	{"الأساسيات", "Fundamentals", 2, "التليمتري", "المتغيرات والأنواع والحساب", true, "Telemetry", "Variables, types, and arithmetic"},
+	{"الأساسيات", "Fundamentals", 3, "الحلقات", "for بكل أشكالها", true, "Loops", "Every form of for"},
+	{"الأساسيات", "Fundamentals", 4, "القرارات", "if و switch", true, "Decisions", "if and switch"},
+	{"الأساسيات", "Fundamentals", 5, "الدوال والأخطاء", "func و error", true, "Functions and Errors", "func and error"},
+	{"الأساسيات", "Fundamentals", 6, "المخازن", "slices و maps", true, "Storage", "slices and maps"},
+	{"الأساسيات", "Fundamentals", 7, "بناء الأدوات", "structs و methods", true, "Building Tools", "structs and methods"},
+	{"الأساسيات", "Fundamentals", 8, "العناوين", "pointers", true, "Addresses", "pointers"},
+	{"الأساسيات", "Fundamentals", 9, "البروتوكولات", "interfaces", true, "Protocols", "interfaces"},
+	{"التزامن", "Concurrency", 10, "السرب", "goroutines و WaitGroup", true, "The Swarm", "goroutines and WaitGroup"},
+	{"التزامن", "Concurrency", 11, "قنوات الاتصال", "channels و select", true, "Communication Channels", "channels and select"},
+	{"التزامن", "Concurrency", 12, "السباق", "mutex و race detector", true, "The Race", "mutex and the race detector"},
+	{"التزامن", "Concurrency", 13, "العواصف", "context و timeouts", true, "Storms", "context and timeouts"},
+	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 14, "القوالب", "generics", true, "Templates", "generics"},
+	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 15, "الكهوف", "خوارزميات: BFS و sorting", true, "Caves", "Algorithms: BFS and sorting"},
+	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 16, "المختبر", "go test و benchmarks", true, "The Lab", "go test and benchmarks"},
+	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 17, "الأعماق", "طبقات، ومصفوفات 3D، وBFS ثلاثي الأبعاد", true, "The Depths", "Layers, 3D arrays, and three-dimensional BFS"},
 }
 
 var All []*Level

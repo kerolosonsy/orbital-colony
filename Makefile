@@ -121,3 +121,17 @@ doctor: ## اتأكد إن كل حاجة جاهزة على الجهاز
 
 clean: ## امسح ملفات البناء والـ logs (الحفظ مش بيتمسح)
 	rm -f $(BIN) $(LOGFILE)
+
+.PHONY: deps services-up services-down services-status
+deps: ## جهّز مكتبات المختبرات / Prepare lab dependencies (requires network)
+	cd labdeps && GOPROXY=https://proxy.golang.org go mod download all
+	cd labdeps && GOPROXY=off go build ./...
+
+services-up: ## شغّل الخدمات المحلية / Start local services
+	docker compose -f services/compose.yaml up -d
+
+services-down: ## اقفل الخدمات المحلية / Stop local services
+	docker compose -f services/compose.yaml down
+
+services-status: ## حالة الخدمات / Service status
+	docker compose -f services/compose.yaml ps

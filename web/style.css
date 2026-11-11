@@ -506,3 +506,9 @@ body.colony .goal-strip .par, body.colony #lvl-stars { display: none; }
   .acts { grid-column: auto; justify-content: flex-end; }
 }
 html[dir="ltr"] #btn-next .ico, html[dir="ltr"] #btn-start .ico { transform: scaleX(-1); }
+
+.track-group { margin-block-end: 12px; }
+.track-group > summary { padding: 10px 12px; border: 1px solid var(--rule); background: var(--ink-2); color: var(--paper); cursor: pointer; overflow-wrap: anywhere; }
+.track-group > summary:hover { background: var(--sheet-2); }
+.service-badge, .bridge-badge { display: inline-block; padding: 4px 8px; margin-block: 6px; border: 1px solid var(--rule); border-radius: 2px; color: var(--paper-2); background: var(--sheet-2); overflow-wrap: anywhere; }
+.service-badge[hidden] { display: none; }

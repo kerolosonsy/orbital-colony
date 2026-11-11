@@ -140,13 +140,14 @@ function md(src) {
 // ---------- files ----------
 // Missions have one file (main.go); lab levels have several tabs.
 function levelFiles(l) {
-  return l.files?.length ? l.files : [{ name: "main.go", starter: l.starter, readOnly: false }];
+  return l.files?.length ? l.files.map((f) => ({ ...f, readOnly: f.readOnly || !f.name.endsWith(".go") })) : [{ name: "main.go", starter: l.starter, readOnly: false }];
 }
 function fileCode(l, f) {
   const r = rec(l.id);
   if (!l.files?.length) return r.code ?? f.starter;
   if (f.readOnly) return f.starter;
-  return r.files?.[f.name] ?? f.starter;
+  const carried = l.carryFrom ? rec(l.carryFrom).files?.[f.name] : undefined;
+  return r.files?.[f.name] ?? carried ?? f.starter;
 }
 function saveFile(l, name, code) {
   const r = rec(l.id);
@@ -977,7 +978,12 @@ function parText(par, gold, dynamic) {
     : "";
 }
 function idx(id) { return S.levels.findIndex((l) => l.id === id); }
-function unlocked(i) { return i === 0 || rec(S.levels[i - 1].id).stars > 0 || rec(S.levels[i].id).stars > 0; }
+function unlocked(i) {
+  if (i < 0 || i >= S.levels.length) return false;
+  if (i === 0 || S.levels.slice(i).some((l) => rec(l.id).stars > 0)) return true;
+  const previous = S.levels[i - 1];
+  return !!previous.service || rec(previous.id).stars > 0;
+}
 function starHTML(n, total = 3) {
   return Array.from({ length: total }, (_, i) => `<svg class="star${i < n ? " on" : ""}" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg>`).join("");
 }
@@ -987,6 +993,30 @@ function updateOverall() {
   setDigits($("#overall-count"), done);
   $("#overall-total").textContent = S.levels.length;
   $("#overall-fill").style.transform = `scaleX(${done / Math.max(1, S.levels.length)})`;
+}
+
+async function refreshService(level) {
+  let badge = $("#service-badge");
+  if (!badge) {
+    badge = document.createElement("small");
+    badge.id = "service-badge";
+    badge.className = "service-badge";
+    badge.setAttribute("role", "status");
+    $("#lvl-goal").after(badge);
+  }
+  badge.hidden = !level.service;
+  if (!level.service) return;
+  const label = T("الخدمة المطلوبة: ", "Required service: ") + level.service;
+  badge.textContent = label + T(" · بنفحص الحالة…", " · Checking status…");
+  try {
+    const statuses = await api("/api/services");
+    if (S.cur !== level) return;
+    badge.textContent = label + (statuses[level.service]
+      ? T(" · متاحة", " · Available")
+      : T(" · مش متاحة — شغّل make services-up", " · Unavailable — run make services-up"));
+  } catch (e) {
+    if (S.cur === level) badge.textContent = label + T(" · تعذّر فحص الحالة", " · Status check failed");
+  }
 }
 
 let previewVersion = 0;
@@ -1005,6 +1035,7 @@ async function loadLevel(id) {
   $("#lvl-title").textContent = l.title;
   $("#lvl-goal").innerHTML = inline(l.goal);
   $("#goal-strip-text").innerHTML = inline(l.goal);
+  refreshService(l);
   parText(l.par, l.gold, false);
   $("#lesson").innerHTML = md(l.lesson);
   $("#hint-list").innerHTML = "";
@@ -1052,7 +1083,20 @@ const CHAPTER_UNITS = ["#d39b55", "#9fd2cb", "#93c45c", "#d75c9f", "#a45f3e", "#
 function renderMissions() {
   const list = $("#chapter-list");
   list.innerHTML = "";
+  const groups = new Map();
   for (const ch of S.chapters) {
+    let group = groups.get(ch.track);
+    if (!group) {
+      group = document.createElement("details");
+      group.className = "track-group";
+      group.dataset.track = ch.track;
+      groups.set(ch.track, group);
+      group.open = true;
+      const summary = document.createElement("summary");
+      summary.textContent = ch.track;
+      group.appendChild(summary);
+      list.appendChild(group);
+    }
     const row = document.createElement("div");
     const levels = S.levels.map((l, i) => [l, i]).filter(([l]) => l.chapter === ch.n);
     const anyOpen = levels.some(([, i]) => unlocked(i));
@@ -1074,7 +1118,7 @@ function renderMissions() {
       cells.appendChild(b);
     }
     row.appendChild(cells);
-    list.appendChild(row);
+    group.appendChild(row);
   }
   requestAnimationFrame(() => list.querySelector(".cell.current")?.scrollIntoView({ block: "center" }));
 }
@@ -1141,7 +1185,7 @@ async function run() {
   if (playback) finishPlayback();
   const me = ++runId;
   const ctl = runCtl = new AbortController();
-  const timer = setTimeout(() => ctl.abort("timeout"), RUN_TIMEOUT);
+  const timer = setTimeout(() => ctl.abort("timeout"), S.cur.kind === "lab" ? 30 * 60 * 1000 : RUN_TIMEOUT);
   S.running = true;
   S.failLogged = false;
   runButton(true);
@@ -1183,6 +1227,8 @@ async function run() {
     }
     lastErrors = [];
     if (r.phase === "lab") {
+      refreshService(level);
+      if (r.runtimeTip) log(r.runtimeTip, "c-tip");
       for (const st of r.steps || []) {
         log(`${st.ok ? T("نجح:", "Passed:") : T("فشل:", "Failed:")} ${st.title}`, st.ok ? "c-ok" : "c-err");
         if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-out"));
@@ -1255,6 +1301,10 @@ function finish(level, res, missing = []) {
     else text += T("<br>حل مثالي. مفيش أحسن من كده.", "<br>Perfect solution. It doesn't get better than this.");
   }
   if (improved && r.best === res.ticks && res.ticks > 0) text += T(`<br>أحسن رقم ليك: <b>${r.best}</b>`, `<br>Your best: <b>${r.best}</b>`);
+  for (const project of level.bridge || []) {
+    const number = String(project).padStart(3, "0");
+    text += `<br><span class="bridge-badge">${esc(T(`جاهز لمشروع ${number}`, `Ready for project ${number}`))}</span>`;
+  }
   $("#result-text").innerHTML = text;
   const nb = $("#btn-next");
   nb.classList.toggle("hidden", !next);

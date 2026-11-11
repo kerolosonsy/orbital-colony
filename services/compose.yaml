@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: orbital
+      POSTGRES_PASSWORD: orbital
+      POSTGRES_DB: orbital
+    ports:
+      - "127.0.0.1:5432:5432"
+  mongo:
+    image: mongo:7
+    ports:
+      - "127.0.0.1:27017:27017"
+  kafka:
+    image: redpandadata/redpanda:v24.3.5
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=512M
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=0.0.0.0:9092
+      - --advertise-kafka-addr=127.0.0.1:9092
+    ports:
+      - "127.0.0.1:9092:9092"

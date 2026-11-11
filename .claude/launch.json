@@ -6,6 +6,12 @@
       "runtimeExecutable": "go",
       "runtimeArgs": ["run", "./cmd/orbital"],
       "port": 7777
+    },
+    {
+      "name": "orbital-review",
+      "runtimeExecutable": "go",
+      "runtimeArgs": ["run", "./cmd/orbital", "-addr", "127.0.0.1:7791"],
+      "port": 7791
     }
   ]
 }
