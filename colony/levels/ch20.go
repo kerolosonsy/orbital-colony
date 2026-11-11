@@ -288,7 +288,9 @@ Implement ~LexFlight(source string) ([]CommandToken,error)~. Source longer than 
 - الخطأ عند العملية ولا عند بداية الجملة؟
 
 ## القواعد بتحدد الأولوية
-كمّل بالـlexer بتاعتك في main.go وضيف flight.go للمفسر. recursive descent دالة لكل مستوى أولوية، بتستهلك tokens بمؤشر. AST شجرة syntax مجردة بتحفظ البنية لتقييم لاحق.
+كمّل بالـ lexer بتاعتك في ~main.go~ وضيف ~flight.go~ للمفسر. recursive descent دالة لكل مستوى أولوية، بتستهلك tokens بمؤشر.
+
+AST شجرة syntax مجردة بتحفظ البنية لتقييم لاحق.
 ~~~text
 program   = { statement }
 statement = "let" name "=" expression ";" | "thrust" direction expression ";"
@@ -296,7 +298,11 @@ expression = term { ("+" | "-") term }
 term       = primary { ("*" | "/") primary }
 primary    = number | name | "(" expression ")" | ("+" | "-") primary
 ~~~
-الضرب أعمق من الجمع، فـ2+3*4 بتتجمع2+(3*4). الحلقة تخلي نفس المستوى left associative: 9-3-1 هي(9-3)-1. العلامة الأحادية تنادي primary تاني مباشرة. خليها دالة حرة primary(p *parser)، وبعد استهلاك العلامة نادِ primary(p)؛ فاحص المفاهيم بيتعرف على recursion المباشرة للدوال.  الأقواس تنادي expression تاني، بنفس recursion من14-5.
+الضرب أعمق من الجمع، فـ ~2+3*4~ بتتجمع ~2+(3*4)~. الحلقة تخلي نفس المستوى left associative: ~9-3-1~ هي ~(9-3)-1~.
+
+العلامة الأحادية تنادي ~primary~ تاني مباشرة. خليها دالة حرة ~primary(p *parser)~، وبعد استهلاك العلامة نادِ ~primary(p)~؛ فاحص المفاهيم بيتعرف على recursion المباشرة للدوال.
+
+الأقواس تنادي ~expression~ تاني، بنفس recursion من 14-5.
 ~~~go
 func primary(p *parser)(FlightExpr,error) {
  if p.peek().Kind=="(" {
@@ -313,10 +319,14 @@ func primary(p *parser)(FlightExpr,error) {
  return p.atom()
 }
 ~~~
-ده sketch بيفترض parser فيها tokens وnext ودوال peek وtake وexpression وatom؛ اختار الأسماء الداخلية بنفسك. ~take~ ترفض token الحالية من غير تعدي EOF. delimiter الناقصة موقعها token الحالية حتى eof. primaries جنب بعض خطأ؛ مفيش ضرب ضمني.
+ده sketch بيفترض ~parser~ فيها ~tokens~ و~next~ ودوال ~peek~ و~take~ و~expression~ و~atom~؛ اختار الأسماء الداخلية بنفسك.
+
+~take~ ترفض token الحالية من غير تعدي ~EOF~. delimiter الناقصة موقعها token الحالية حتى ~eof~. primaries جنب بعض خطأ؛ مفيش ضرب ضمني.
 
 ## interface لشجرة التعبير
-~FlightExpr~ بتشيل أي node عندها Eval(map[string]int64)(int64,error). interfaces من9-4 وmethods من فصل7: literal وvariable وbinary كلهم ينفّذوا نفس العقد. map هي environment لاستدعاء واحد.
+~FlightExpr~ بتشيل أي node عندها ~Eval(map[string]int64)(int64,error)~. interfaces من 9-4 وmethods من فصل 7: ~literal~ و~variable~ و~binary~ كلهم ينفّذوا نفس العقد.
+
+~map~ هي environment لاستدعاء واحد.
 ~~~go
 type literal struct {n int64}
 func(n literal)Eval(env map[string]int64)(int64,error){return n.n,nil}
@@ -325,23 +335,35 @@ env:=map[string]int64{"fuel":3}
 n,err:=expr.Eval(env)
 fmt.Println(n,err) // 7 <nil>
 ~~~
-احفظ token العملية في node. binary تقيّم الشمال وبعدين اليمين recursively وبعدها العملية. variable تستخدم bool الوجود في map؛ الغايبة خطأ عند اسمها. السالب الأحادي ممكن node طرح شمالها صفر ومكانها علامة السالب.
+احفظ token العملية في node. ~binary~ تقيّم الشمال وبعدين اليمين recursively وبعدها العملية.
+
+~variable~ تستخدم ~bool~ الوجود في ~map~؛ الغايبة خطأ عند اسمها. السالب الأحادي ممكن node طرح شمالها صفر ومكانها علامة السالب.
 ~~~go
 n,ok:=env[name]
 if !ok {return 0,&CommandError{Offset:offset,Message:"undefined variable"}}
 ~~~
-القيم int64 من20-3. كل ناتج وسيط لازم بين-1000000 و1000000. ضرب قيمتين صالحين أقصاه10^12 فحسابه قبل الفحص آمن فيint64. افحص القسمة على صفر قبل القسمة؛ قسمة الأعداد الصحيحة بتحذف الكسر ناحية الصفر. خطأ المدى أو القسمة عند العملية.
+القيم ~int64~ من 20-3. كل ناتج وسيط لازم بين -1000000 و 1000000. ضرب قيمتين صالحين أقصاه ~10^12~ فحسابه قبل الفحص آمن في ~int64~.
+
+افحص القسمة على صفر قبل القسمة؛ قسمة الأعداد الصحيحة بتحذف الكسر ناحية الصفر. خطأ المدى أو القسمة عند العملية.
 
 ## حلّل الأول وبعدها حرّك
-ابني قايمة الجمل كلها قبل أي تقييم عشان syntax غلط متحركش الدرون. قيّم يمين let بنجاح قبل تحديث environment. كل استدعاء environment جديدة. runtime error توقف الجمل اللي بعدها بس الحركات اللي خلصت تفضل.
+ابني قايمة الجمل كلها قبل أي تقييم عشان syntax غلط متحركش الدرون.
+
+قيّم يمين ~let~ بنجاح قبل تحديث environment. كل استدعاء environment جديدة. runtime error توقف الجمل اللي بعدها بس الحركات اللي خلصت تفضل.
 ~~~go
 type baseDrive struct{}
 func(baseDrive)Step(dir colony.Direction)bool{return colony.Move(dir)}
 err:=ExecuteFlight("let cells=2; thrust north cells;",baseDrive{})
 ~~~
-~FlightDrive~ interface عند المستهلك بدالة ~Step(colony.Direction) bool~. false معناها مسدود. adapter المثال بتحرك الدرون الحقيقي؛ integration بتفحص مكانه، وباقي التستات boundary محقونة. ~colony.Direction~ وMove والاتجاهات الأربع من فصل1. اربط أسماء الاتجاهات بالثوابت.
+~FlightDrive~ interface عند المستهلك بدالة ~Step(colony.Direction) bool~. ~false~ معناها مسدود.
 
-thrust تتحقق من العدد كله وبعدين Step لكل خلية؛ الصفر مفيش نداء. لو Step فشلت قف فوراً. الخلايا الناجحة السابقة اتحركت فعلاً ومفيش rollback. nil interface خطأ عادي؛ typed nil pointer برا العقد.
+adapter المثال بتحرك الدرون الحقيقي؛ integration بتفحص مكانه، وباقي التستات boundary محقونة. ~colony.Direction~ و~colony.Move~ والاتجاهات الأربع من فصل 1. اربط أسماء الاتجاهات بالثوابت.
+
+~thrust~ تتحقق من العدد كله وبعدين ~Step~ لكل خلية؛ الصفر مفيش نداء.
+
+لو ~Step~ فشلت قف فوراً. الخلايا الناجحة السابقة اتحركت فعلاً ومفيش rollback.
+
+~nil~ interface خطأ عادي؛ typed nil pointer برا العقد.
 
 ## أخطاء شائعة
 ~~~go
@@ -350,9 +372,27 @@ left=left+right // تطبيق الجمع فوراً ضيّع أولوية الض
 ~~~
 
 ## المهمة
-خلي ~LexFlight~ وأنواعها زي ما هي في main.go. نفّذ ~ExecuteFlight(source string,drive FlightDrive) error~ في flight.go، مع ~FlightDrive interface{Step(colony.Direction) bool}~ وAST باستخدام ~FlightExpr interface{Eval(map[string]int64)(int64,error)}~. اتبع القواعد فوق؛ الاتجاه east أوnorth أوwest أوsouth. الأسماء وحد الحجم وأخطاء lexer زي20-3. كل جملة لازم semicolon؛ newline مسافة؛ البرنامج الفاضي نجاح. الأسماء حتى keywords مسموحة كمتغيرات في مكان الاسم. let تضيف أوتستبدل بعد نجاح تقييم اليمين؛ كل استدعاء يبدأ جديد.
+خلي ~LexFlight~ وأنواعها زي ما هي في ~main.go~.
 
-حلّل البرنامج كله لـAST قبل أي حركة. + و- و* و/ left associative بالأولوية اللي فوق مع unary signs وأقواس. كل قيمة وناتج وسيط بين-1000000 و1000000؛ القسمة بتحذف الكسر ناحية الصفر وصفر divisor خطأ. عدد thrust من0 لـ32 قبل أي Step. Step false توقف فوراً وتسيب الخلايا السابقة اللي نجحت. أول خطأ يوقف؛ الحركات الناجحة السابقة في runtime تفضل. أخطاء اللغة lexical وsyntax وruntime كلها *CommandError مع Message مش فاضية وOffset بايت من صفر: token الحالية للـsyntax (EOF بطول المصدر)، الاسم للمتغير الغايب، العملية للحساب، وكلمة thrust لعدد باطل أوحركة مسدودة. nil drive خطأ قبل parsing. مفيش Report؛ المختبر يحرك الدرون الحقيقي بـadapter. النجمة التالتة شجر unary وأقواس عميقة وأخطاء المدى الوسيط.
+نفّذ ~ExecuteFlight(source string,drive FlightDrive) error~ في ~flight.go~، مع ~FlightDrive interface{Step(colony.Direction) bool}~ وAST باستخدام ~FlightExpr interface{Eval(map[string]int64)(int64,error)}~.
+
+اتبع القواعد فوق؛ الاتجاه ~east~ أو ~north~ أو ~west~ أو ~south~. الأسماء وحد الحجم وأخطاء lexer زي 20-3. كل جملة لازم semicolon؛ newline مسافة؛ البرنامج الفاضي نجاح.
+
+الأسماء حتى keywords مسموحة كمتغيرات في مكان الاسم. ~let~ تضيف أو تستبدل بعد نجاح تقييم اليمين؛ كل استدعاء يبدأ جديد.
+
+حلّل البرنامج كله لـ AST قبل أي حركة. ~+~ و~-~ و~*~ و~/~ left associative بالأولوية اللي فوق مع unary signs وأقواس.
+
+كل قيمة وناتج وسيط بين -1000000 و 1000000؛ القسمة بتحذف الكسر ناحية الصفر وصفر divisor خطأ.
+
+عدد ~thrust~ من 0 لـ 32 قبل أي ~Step~. ~Step~ بـ ~false~ توقف فوراً وتسيب الخلايا السابقة اللي نجحت.
+
+أول خطأ يوقف؛ الحركات الناجحة السابقة في runtime تفضل.
+
+أخطاء اللغة lexical وsyntax وruntime كلها ~*CommandError~ مع ~Message~ مش فاضية و~Offset~ بايت من صفر: token الحالية للـ syntax (~EOF~ بطول المصدر)، الاسم للمتغير الغايب، العملية للحساب، وكلمة ~thrust~ لعدد باطل أو حركة مسدودة.
+
+~nil~ drive خطأ قبل parsing. مفيش ~Report~؛ المختبر يحرك الدرون الحقيقي بـadapter.
+
+النجمة التالتة شجر unary وأقواس عميقة وأخطاء المدى الوسيط.
 `, Hints: []string{"حلّل كل الجمل قبل التنفيذ، وافصل expression وterm وprimary.", "خلي primary دالة بتنادي نفسها للعلامة الأحادية عشان شرط recursion.", "احفظ operator token فيAST؛ قيّم اليمين قبل let وافحص العدد قبل Step."},
 		En: &LevelText{Title: "Flight Evaluator", Goal: "Interpret flight programs with precedence and variables and move the real drone", Lesson: `# From Text to Real Movement
 
@@ -361,7 +401,9 @@ left=left+right // تطبيق الجمع فوراً ضيّع أولوية الض
 - Does an arithmetic error point at the operator or the statement?
 
 ## Grammar encodes precedence
-Continue with your lexer in main.go. Add flight.go for the interpreter. A recursive-descent parser has one function per precedence level, and consumes tokens using a cursor. An AST (abstract syntax tree) stores structure for a later evaluation pass.
+Continue with your lexer in ~main.go~. Add ~flight.go~ for the interpreter. A recursive-descent ~parser~ has one function per precedence level, and consumes ~tokens~ using a cursor.
+
+An AST (abstract syntax tree) stores structure for a later evaluation pass.
 ~~~text
 program   = { statement }
 statement = "let" name "=" expression ";" | "thrust" direction expression ";"
@@ -369,7 +411,9 @@ expression = term { ("+" | "-") term }
 term       = primary { ("*" | "/") primary }
 primary    = number | name | "(" expression ")" | ("+" | "-") primary
 ~~~
-Multiplication is deeper than addition, so 2+3*4 groups as 2+(3*4). Loops make operators at one level left associative: 9-3-1 means (9-3)-1. Unary signs call the primary function directly, so it is also directly recursive. Use a free function primary(p *parser) and call primary(p) again after consuming a unary sign; the requirement scanner recognizes direct function recursion. Parentheses call expression again, reusing recursion from 14-5.
+Multiplication is deeper than addition, so ~2+3*4~ groups as ~2+(3*4)~. Loops make operators at one level left associative: ~9-3-1~ means ~(9-3)-1.
+
+Unary signs call the ~primary~ function directly, so it is also directly recursive. Use a free function ~primary(p *parser)~ and call ~primary(p)~ again after consuming a unary sign; the requirement scanner recognizes direct function recursion. Parentheses call ~expression~ again, reusing recursion from 14-5.
 ~~~go
 func primary(p *parser)(FlightExpr,error) {
  if p.peek().Kind=="(" {
@@ -386,10 +430,14 @@ func primary(p *parser)(FlightExpr,error) {
  return p.atom()
 }
 ~~~
-This sketch assumes a parser with tokens, next, peek, take, expression and atom methods; define your own internal names. ~take~ must reject the current token without advancing past EOF. Missing delimiters point at the current token, including eof. Adjacent primaries are errors; implicit multiplication is not allowed.
+This sketch assumes a ~parser~ with ~tokens~, ~next~, ~peek~, ~take~, ~expression~ and ~atom~ methods; define your own internal names.
+
+~take~ must reject the current token without advancing past ~EOF~. Missing delimiters point at the current token, including ~eof~. Adjacent primaries are errors; implicit multiplication is not allowed.
 
 ## An interface for expression trees
-~FlightExpr~ holds any AST node with Eval(map[string]int64)(int64,error). Use interfaces from 9-4 and methods from chapter 7: literal, variable and binary nodes can implement this contract independently. A map is the environment for one execution.
+~FlightExpr~ holds any AST node with ~Eval(map[string]int64)(int64,error)~. Use interfaces from 9-4 and methods from chapter 7: ~literal~, ~variable~ and ~binary~ nodes can implement this contract independently.
+
+A map is the environment for one execution.
 ~~~go
 type literal struct {n int64}
 func(n literal)Eval(env map[string]int64)(int64,error){return n.n,nil}
@@ -398,23 +446,37 @@ env:=map[string]int64{"fuel":3}
 n,err:=expr.Eval(env)
 fmt.Println(n,err) // 7 <nil>
 ~~~
-Store each operator's token in its node. Binary evaluation recursively evaluates left then right, then applies the operator. A variable uses map lookup with its presence bool; missing is an error at that name. Unary minus can be a subtraction node with a zero left operand at the sign's position.
+Store each operator's token in its node. Binary evaluation recursively evaluates left then right, then applies the operator.
+
+A variable uses map lookup with its presence bool; missing is an error at that name. Unary minus can be a subtraction node with a zero left operand at the sign's position.
 ~~~go
 n,ok:=env[name]
 if !ok {return 0,&CommandError{Offset:offset,Message:"undefined variable"}}
 ~~~
-All values use int64 from 20-3. Require each intermediate result in [-1000000,1000000]. Two valid operands have a product at most 10^12, so computing before checking cannot overflow int64. Check division by zero before dividing; integer division truncates toward zero. Range and division errors point at the operator.
+All values use ~int64~ from 20-3. Require each intermediate result in [-1000000,1000000]. Two valid operands have a product at most 10^12, so computing before checking cannot overflow ~int64~.
+
+Check division by zero before dividing; integer division truncates toward zero. Range and division errors point at the operator.
 
 ## Parse first, then drive
-Build the entire statement list before evaluating anything, so syntax errors cannot move the drone. Evaluate let's right side successfully before updating the environment. Each call starts with a fresh environment. Runtime errors stop subsequent statements but retain completed movements.
+Build the entire statement list before evaluating anything, so syntax errors cannot move the drone.
+
+Evaluate ~let~'s right side successfully before updating the environment.
+
+Each call starts with a fresh environment. Runtime errors stop subsequent statements but retain completed movements.
 ~~~go
 type baseDrive struct{}
 func(baseDrive)Step(dir colony.Direction)bool{return colony.Move(dir)}
 err:=ExecuteFlight("let cells=2; thrust north cells;",baseDrive{})
 ~~~
-~FlightDrive~ is a consumer-owned interface with ~Step(colony.Direction) bool~. False means blocked. Its adapter above really moves the colony drone; hidden integration checks position, while other tests use an injected boundary. ~colony.Direction~, Move and the four constants come from chapter 1. Map direction names to those constants.
+~FlightDrive~ is a consumer-owned interface with ~Step(colony.Direction) bool~. False means blocked.
 
-A thrust first validates its full count, then calls Step once per cell; zero calls nothing. If Step fails, stop immediately. Previously successful cells remain moved, rather than claiming rollback. A nil interface returns an ordinary error; typed nil pointers are outside the domain.
+Its adapter above really moves the colony drone; hidden integration checks position, while other tests use an injected boundary. ~colony.Direction~, ~Move~ and the four constants come from chapter 1. Map direction names to those constants.
+
+A ~thrust~ first validates its full count, then calls ~Step~ once per cell; zero calls nothing.
+
+If ~Step~ fails, stop immediately. Previously successful cells remain moved, rather than claiming rollback.
+
+A ~nil~ interface returns an ordinary error; typed nil pointers are outside the domain.
 
 ## Common mistakes
 ~~~go
@@ -423,9 +485,25 @@ left=left+right // Applying addition immediately loses multiplication precedence
 ~~~
 
 ## Your mission
-Keep ~LexFlight~ and its types unchanged in main.go. Implement ~ExecuteFlight(source string,drive FlightDrive) error~ in flight.go with ~FlightDrive interface{Step(colony.Direction) bool}~ and an AST using ~FlightExpr interface{Eval(map[string]int64)(int64,error)}~. Follow the grammar above; direction is east, north, west, or south. Names, size limit and lexical errors follow 20-3. Every statement needs a semicolon; newlines are whitespace; an empty program succeeds. Names including keywords may be variables in name positions. let creates or replaces a variable after evaluating its RHS; each call starts fresh.
+Keep ~LexFlight~ and its types unchanged in ~main.go~. Implement ~ExecuteFlight(source string,drive FlightDrive) error~ in ~flight.go~ with ~FlightDrive interface{Step(colony.Direction) bool}~ and an AST using ~FlightExpr interface{Eval(map[string]int64)(int64,error)}~.
 
-Parse the entire program into AST nodes before any movement. +,-,*,/ are left associative with the stated precedence; unary signs and parentheses are supported. Values and all intermediates must stay in [-1000000,1000000]; division truncates toward zero and zero divisors fail. thrust count must be 0..32 before any Step. Step false fails immediately after retaining prior successful cells. Stop on the first error; successful prior runtime movements stay. All lexical, syntax and runtime language errors are *CommandError with nonempty Message and zero-based byte Offset: bad/current token for syntax (EOF at len(source)), name for undefined variable, operator for arithmetic, thrust keyword for bad count or blocked movement. nil drive returns an error before parsing. No Report; the lab drives the actual drone through an adapter. The third star checks deep unary/parenthesized trees and intermediate range errors.
+Follow the grammar above; direction is ~east~, ~north~, ~west~, or ~south~. Names, size limit and lexical errors follow 20-3. Every statement needs a semicolon; newlines are whitespace; an empty program succeeds.
+
+Names including keywords may be variables in name positions. ~let~ creates or replaces a variable after evaluating its RHS; each call starts fresh.
+
+Parse the entire program into AST nodes before any movement. ~+~, ~-~, ~*~, ~/~ are left associative with the stated precedence; unary signs and parentheses are supported.
+
+Values and all intermediates must stay in [-1000000,1000000]; division truncates toward zero and zero divisors fail.
+
+~thrust~ count must be 0..32 before any ~Step~. ~Step~ returning ~false~ fails immediately after retaining prior successful cells. Stop on the first error; successful prior runtime movements stay.
+
+All lexical, syntax and runtime language errors are ~*CommandError~ with nonempty ~Message~ and zero-based byte ~Offset~: bad/current token for syntax (~EOF~ at ~len(source)~), name for undefined variable, operator for arithmetic, ~thrust~ keyword for bad count or blocked movement.
+
+A ~nil~ drive returns an error before parsing.
+
+No ~Report~; the lab drives the actual drone through an adapter.
+
+The third star checks deep unary/parenthesized trees and intermediate range errors.
 `, Hints: []string{"Parse all statements first; separate expression, term, and primary.", "Make primary directly call itself for unary signs to satisfy recursion.", "Store operator tokens in AST nodes; evaluate before let and validate counts before Step."}, Files: []LabFile{{Name: "main.go", Starter: flightEvaluatorStarter}, {Name: "flight.go", Starter: flightEvaluatorFlightStarter}}}, Kind: "lab", Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: flightEvaluatorStarterAr}, {Name: "flight.go", Starter: flightEvaluatorFlightStarterAr}}, Lab: &Lab{ReqFile: "flight.go", Hidden: flightEvaluatorHidden, Bonus: true}, CarryFrom: "20-3-lexer", MaxTicks: 200})
 }
 
