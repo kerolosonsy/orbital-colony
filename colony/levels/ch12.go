@@ -1,0 +1,560 @@
+package levels
+
+import (
+	"fmt"
+	"strconv"
+
+	"orbital/colony/i18n"
+	"orbital/colony/internal/sim"
+)
+
+func init() {
+	add(&Level{
+		En: &LevelText{
+			Title: "The Shared Counter",
+			Goal:  "4 drones add to one variable. Report the correct total... without a data race",
+			Lesson: `# Data Race: Everyone Writes at Once 🏁
+
+This mission runs with the **race detector** (~go build -race~), a real Go tool that catches dangerous concurrency bugs.
+
+## The problem
+~total += n~ looks like one step, but it is actually 3:
+1. Read ~total~
+2. Add ~n~
+3. Write ~total~
+
+If one goroutine reads ~total = 10~ and another reads the same 10 before the first writes, both write 10 plus their own amount, and **an update is lost**. This is a **data race**.
+
+Worse, this bug appears **intermittently**: it might work 1000 times, then fail in production.
+
+## sync.Mutex: a lock
+
+~~~go
+var mu sync.Mutex
+
+mu.Lock()     // Wait if someone else holds the lock
+total += n    // Only one goroutine here at a time
+mu.Unlock()
+~~~
+
+The code between Lock and Unlock is the **critical section**. Keep it as **short** as possible.
+
+## defer with Unlock
+~~~go
+mu.Lock()
+defer mu.Unlock() // Unlock even if the function panics
+~~~
+
+## An alternative: sync/atomic
+For simple counters only:
+~~~go
+var total atomic.Int64
+total.Add(int64(n))
+~~~
+
+## ⚠️ Never copy a mutex
+A copied mutex is a completely different lock. Always pass a pointer (~*sync.Mutex~), or put it in a struct passed by pointer. ~go vet~ catches this mistake.`,
+			Starter: `package main
+
+import (
+	"orbital/colony"
+	"sync"
+)
+
+func main() {
+	total := 0
+	var wg sync.WaitGroup
+	drones := []*colony.Drone{colony.Main(), colony.Spawn(), colony.Spawn(), colony.Spawn()}
+
+	for row, d := range drones {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < row; i++ {
+				d.Move(colony.North)
+			}
+			for x := 0; x < 8; x++ {
+				n, _ := d.TryHarvest()
+				total += n // ⚠️ 4 goroutines write here at once
+				if x < 7 {
+					d.Move(colony.East)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	colony.Report(total)
+}
+`,
+			Hints: []string{
+				"Run the starter: the number might be correct, but the race detector catches the problem. Read its report in the Console.",
+				"Declare ~var mu sync.Mutex~ above, then surround ~total += n~ with ~mu.Lock()~ and ~mu.Unlock()~.",
+			},
+		},
+		ID: "12-1-shared-total", Chapter: 12, Title: "العدّاد المشترك",
+		Goal: "4 درونات بيجمعوا في نفس المتغير. ابعت المجموع الصح… من غير data race",
+		Par:  25, Gold: 20, MaxTicks: 300,
+		Requires: []string{"mutex"},
+		Race:     true,
+		Setup: func(w *sim.World) {
+			w.Init(8, 4, sim.Regolith)
+			w.Realtime, w.MaxDrones = true, 4
+			sum := 0
+			w.Each(func(_, _ int, t *sim.Tile) {
+				t.Entity, t.Size = sim.Crystal, 1+w.Rand.Intn(9)
+				sum += t.Size
+			})
+			want := strconv.Itoa(sum)
+			w.Check = func(w *sim.World) (bool, string) {
+				if reported(w, want) {
+					return true, i18n.T("المجموع صح", "The total is correct")
+				}
+				if n := len(w.Reports); n > 0 {
+					return false, i18n.T("القاعدة استلمت ", "Base received ") + w.Reports[n-1] + i18n.T(" والمطلوب ", "; expected ") + want
+				}
+				return false, fmt.Sprintf(i18n.T("كريستال في المخزن: %d", "Crystal in storage: %d"), w.Inv[sim.Crystal])
+			}
+		},
+		Starter: `package main
+
+import (
+	"orbital/colony"
+	"sync"
+)
+
+func main() {
+	total := 0
+	var wg sync.WaitGroup
+	drones := []*colony.Drone{colony.Main(), colony.Spawn(), colony.Spawn(), colony.Spawn()}
+
+	for row, d := range drones {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < row; i++ {
+				d.Move(colony.North)
+			}
+			for x := 0; x < 8; x++ {
+				n, _ := d.TryHarvest()
+				total += n // ⚠️ 4 goroutines بيكتبوا هنا في نفس الوقت
+				if x < 7 {
+					d.Move(colony.East)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	colony.Report(total)
+}
+`,
+		Hints: []string{
+			"شغّله زي ما هو: الرقم ممكن يطلع صح، بس الـ race detector هيمسك المشكلة. اقرا التقرير في الـ Console.",
+			"~var mu sync.Mutex~ فوق، وحوالين ~total += n~ اكتب ~mu.Lock()~ و~mu.Unlock()~.",
+		},
+		Lesson: `# Data race: لما الكل يكتب في نفس الوقت 🏁
+
+المهمة دي شغالة بالـ **race detector** (~go build -race~)، وده أداة حقيقية جوه Go بتمسك أخطر نوع bugs في الـ concurrency.
+
+## المشكلة
+~total += n~ شكلها خطوة واحدة، بس هي فعلياً 3 خطوات:
+1. اقرا ~total~
+2. زوّد ~n~
+3. اكتب ~total~
+
+لو goroutine قرت ~total = 10~، وواحدة تانية قرت نفس الـ 10 قبل ما الأولى تكتب، الاتنين هيكتبوا 10 + حاجة، وإضافة **هتضيع**. ده اسمه **data race**.
+
+الأوحش إن الـ bug ده بيظهر **أحياناً**: ممكن يشتغل صح 1000 مرة ويبوظ في الـ production.
+
+## sync.Mutex: قفل
+
+~~~go
+var mu sync.Mutex
+
+mu.Lock()     // لو حد تاني ماسك القفل، استنى
+total += n    // goroutine واحدة بس هنا في أي لحظة
+mu.Unlock()
+~~~
+
+الكود اللي بين Lock وUnlock اسمه **critical section**. خلّيه **قصير** على قد ما تقدر.
+
+## defer مع Unlock
+~~~go
+mu.Lock()
+defer mu.Unlock() // هيتفتح حتى لو حصل panic
+~~~
+
+## بديل: sync/atomic
+للعدّادات البسيطة بس:
+~~~go
+var total atomic.Int64
+total.Add(int64(n))
+~~~
+
+## ⚠️ متنسخش الـ mutex
+mutex اتنسخ = قفل تاني خالص. ابعته دايماً كـ pointer (~*sync.Mutex~)، أو خلّيه جوه struct بتبعت pointer ليه. و~go vet~ بيمسك الغلطة دي.`,
+	})
+
+	add(&Level{
+		En: &LevelText{
+			Title: "The Safe Registry",
+			Goal:  "3 drones measure and record into one map. Report the largest crystal's location",
+			Lesson: `# A Mutex Inside a Struct: A Common Go Pattern 🗃️
+
+Go maps are **not safe** for concurrent writes. The program can crash with ~fatal error: concurrent map writes~, or the race detector can report the problem.
+
+## Keep the lock beside the data it protects
+
+~~~go
+type Registry struct {
+	mu    sync.Mutex
+	sizes map[colony.Point]int
+}
+
+func (r *Registry) Record(p colony.Point, size int) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.sizes[p] = size
+}
+~~~
+
+This is a very common Go pattern:
+- The lock lives **inside** the struct, beside its data.
+- Access the data only through **methods**, each taking the lock.
+- Users of ~Registry~ need not know about the lock. This is **encapsulation**.
+
+## Why a pointer receiver?
+You need ~*Registry~ because a value receiver would **copy the mutex**. The copy is a different lock, making the protection ineffective. (Remember chapter 8?)
+
+## RWMutex: many reads, few writes
+~~~go
+var mu sync.RWMutex
+mu.RLock()   // Multiple readers may read at once
+mu.RUnlock()
+mu.Lock()    // Writing requires exclusive access
+mu.Unlock()
+~~~`,
+			Starter: `package main
+
+import (
+	"orbital/colony"
+	"sync"
+)
+
+// Registry is shared among the drones
+type Registry struct {
+	sizes map[colony.Point]int
+}
+
+func (r *Registry) Record(p colony.Point, size int) {
+	r.sizes[p] = size // ⚠️ Unsafe with multiple goroutines
+}
+
+func main() {
+	reg := &Registry{sizes: map[colony.Point]int{}}
+	var wg sync.WaitGroup
+	drones := []*colony.Drone{colony.Main(), colony.Spawn(), colony.Spawn()}
+
+	for row, d := range drones {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < row; i++ {
+				d.Move(colony.North)
+			}
+			for x := 0; x < 10; x++ {
+				reg.Record(colony.Point{X: x, Y: row}, d.Measure())
+				if x < 9 {
+					d.Move(colony.East)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+
+	// Search reg.sizes and report the largest crystal's location with colony.Report
+}
+`,
+			Hints: []string{
+				"Add ~mu sync.Mutex~ as a Registry field and lock it at the start of Record.",
+				"Add ~func (r *Registry) Best() colony.Point~ to lock and search for the largest crystal.",
+				"~colony.Report(reg.Best())~ sends the point as ~{3 1}~.",
+			},
+		},
+		ID: "12-2-registry", Chapter: 12, Title: "السجل الآمن",
+		Goal: "3 درونات بيقيسوا ويسجلوا في map واحدة. ابعت مكان أكبر كريستال",
+		Par:  30, Gold: 24, MaxTicks: 300,
+		Requires: []string{"mutex", "method"},
+		Race:     true,
+		Setup: func(w *sim.World) {
+			w.Init(10, 3, sim.Regolith)
+			w.Realtime, w.MaxDrones = true, 3
+			perm := w.Rand.Perm(30)
+			best, bestP := -1, sim.Point{}
+			w.Each(func(x, y int, t *sim.Tile) {
+				t.Entity, t.Size = sim.Crystal, perm[y*10+x]+1
+				if t.Size > best {
+					best, bestP = t.Size, sim.Point{X: x, Y: y}
+				}
+			})
+			want := fmt.Sprint(bestP)
+			w.Check = func(w *sim.World) (bool, string) {
+				if reported(w, want) {
+					return true, i18n.T("لقيت أكبر كريستال", "Largest crystal found")
+				}
+				if n := len(w.Reports); n > 0 {
+					return false, i18n.T("القاعدة استلمت ", "Base received ") + w.Reports[n-1] + i18n.T(" — ده مش مكان أكبر كريستال", " — that is not the largest crystal's location")
+				}
+				return false, i18n.T("القاعدة مستنية مكان أكبر كريستال (colony.Point)", "Base is waiting for the largest crystal's location (colony.Point)")
+			}
+		},
+		Starter: `package main
+
+import (
+	"orbital/colony"
+	"sync"
+)
+
+// Registry سجل مشترك بين الدرونات
+type Registry struct {
+	sizes map[colony.Point]int
+}
+
+func (r *Registry) Record(p colony.Point, size int) {
+	r.sizes[p] = size // ⚠️ مش آمن مع أكتر من goroutine
+}
+
+func main() {
+	reg := &Registry{sizes: map[colony.Point]int{}}
+	var wg sync.WaitGroup
+	drones := []*colony.Drone{colony.Main(), colony.Spawn(), colony.Spawn()}
+
+	for row, d := range drones {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < row; i++ {
+				d.Move(colony.North)
+			}
+			for x := 0; x < 10; x++ {
+				reg.Record(colony.Point{X: x, Y: row}, d.Measure())
+				if x < 9 {
+					d.Move(colony.East)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+
+	// لف على reg.sizes وابعت مكان أكبر واحد بـ colony.Report
+}
+`,
+		Hints: []string{
+			"ضيف ~mu sync.Mutex~ كحقل جوه Registry، واقفله في أول Record.",
+			"اعمل method تانية ~func (r *Registry) Best() colony.Point~ بتقفل وتدوّر على الأكبر.",
+			"~colony.Report(reg.Best())~ هتبعت النقطة بالشكل ~{3 1}~.",
+		},
+		Lesson: `# Mutex جوه struct: النمط الاحترافي 🗃️
+
+الـ maps في Go **مش آمنة** لو أكتر من goroutine بيكتبوا فيها في نفس الوقت. ممكن البرنامج يقع برسالة ~fatal error: concurrent map writes~، أو الـ race detector يمسكها.
+
+## خلّي القفل جنب البيانات اللي بيحميها
+
+~~~go
+type Registry struct {
+	mu    sync.Mutex
+	sizes map[colony.Point]int
+}
+
+func (r *Registry) Record(p colony.Point, size int) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.sizes[p] = size
+}
+~~~
+
+ده أشهر نمط في Go:
+- القفل **جوه** الـ struct، جنب البيانات بالظبط.
+- البيانات مش بيوصلها حد غير من خلال **methods**، وكل method بتقفل.
+- اللي بيستخدم ~Registry~ ميعرفش أصلاً إن فيه قفل. ده اسمه **encapsulation**.
+
+## ليه pointer receiver؟
+لازم ~*Registry~، لأن value receiver هيعمل **نسخة من الـ mutex**، والنسخة دي قفل مختلف خالص، فالحماية تبقى وهمية. (فاكر الفصل 8؟)
+
+## RWMutex: قراية كتير، كتابة قليلة
+~~~go
+var mu sync.RWMutex
+mu.RLock()   // كذا واحد يقدروا يقروا في نفس الوقت
+mu.RUnlock()
+mu.Lock()    // الكتابة لوحدها
+mu.Unlock()
+~~~`,
+	})
+
+	add(&Level{
+		En: &LevelText{
+			Title: "Deadlock",
+			Goal:  "The drones have stopped! Find and fix the deadlock, then harvest both rows",
+			Lesson: `# Deadlock: Each Waits for the Other 🔒🔒
+
+Imagine two people in a narrow corridor, each waiting for the other to pass first. Neither can move.
+
+~~~text
+Drone a: holds drill ✓ ... waiting for cart ⏳
+Drone b: holds cart ✓ ... waiting for drill ⏳
+~~~
+
+This is **deadlock**: each goroutine holds something and waits for something another holds.
+
+## The four conditions (Coffman)
+Deadlock occurs when all four conditions hold together:
+1. Only one participant can hold a resource at a time (mutual exclusion).
+2. A participant holding one resource waits for another.
+3. A lock cannot be forcibly taken away.
+4. A **cycle**: a waits for b, and b waits for a.
+
+Break any condition and the deadlock disappears.
+
+## The practical solution: a fixed lock order
+If **all** code locks drill before cart, the cycle cannot form.
+
+## How do you detect it?
+- Go sometimes reports: ~fatal error: all goroutines are asleep - deadlock!~
+- But if another goroutine is active (a timer, for example), the program may **simply hang**. Here Mission Control stops it after 200 ticks.
+- In real programs, ~kill -QUIT~ or ~SIGQUIT~ prints a stack trace for every goroutine, showing where each is stuck.
+
+## Better still: avoid holding two locks
+If you can design with one lock, or use channels instead, that is better.`,
+			Starter: `package main
+
+import (
+	"orbital/colony"
+	"sync"
+)
+
+// The colony has one drill and one cart. Every harvest needs both.
+var drill, cart sync.Mutex
+
+func harvestWith(d *colony.Drone, first, second *sync.Mutex) {
+	first.Lock()
+	d.Wait() // Prepare the equipment
+	second.Lock()
+	d.Harvest()
+	second.Unlock()
+	first.Unlock()
+}
+
+func work(d *colony.Drone, row int, first, second *sync.Mutex) {
+	for i := 0; i < row; i++ {
+		d.Move(colony.North)
+	}
+	for x := 0; x < 6; x++ {
+		harvestWith(d, first, second)
+		if x < 5 {
+			d.Move(colony.East)
+		}
+	}
+}
+
+func main() {
+	a, b := colony.Main(), colony.Spawn()
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() { defer wg.Done(); work(a, 0, &drill, &cart) }()
+	go func() { defer wg.Done(); work(b, 1, &cart, &drill) }()
+	wg.Wait()
+}
+`,
+			Hints: []string{
+				"Run it: the drones Wait, then stop forever. Drone a holds drill and waits for cart; drone b holds cart and waits for drill.",
+				"The classic fix: every goroutine acquires locks **in the same order**. For example, always drill first, then cart.",
+			},
+		},
+		ID: "12-3-deadlock", Chapter: 12, Title: "الجمود",
+		Goal: "الدرونات وقفت ومحدش بيتحرك! لاقي الـ deadlock وصلّحه، واحصد الصفين",
+		Par:  36, Gold: 28, MaxTicks: 200,
+		Requires: []string{"mutex"},
+		Setup: func(w *sim.World) {
+			w.Init(6, 2, sim.Regolith)
+			w.Realtime, w.MaxDrones = true, 2
+			ps := crystalRows(w, 0, 1)
+			w.Check = func(w *sim.World) (bool, string) {
+				left := remaining(w, ps)
+				return left == 0, fmt.Sprintf(i18n.T("كريستال فاضل: %d / %d", "Crystal remaining: %d / %d"), left, len(ps))
+			}
+		},
+		Starter: `package main
+
+import (
+	"orbital/colony"
+	"sync"
+)
+
+// في المستعمرة مثقاب واحد وعربية واحدة. كل حصاد محتاج الاتنين.
+var drill, cart sync.Mutex
+
+func harvestWith(d *colony.Drone, first, second *sync.Mutex) {
+	first.Lock()
+	d.Wait() // بيجهّز العدة
+	second.Lock()
+	d.Harvest()
+	second.Unlock()
+	first.Unlock()
+}
+
+func work(d *colony.Drone, row int, first, second *sync.Mutex) {
+	for i := 0; i < row; i++ {
+		d.Move(colony.North)
+	}
+	for x := 0; x < 6; x++ {
+		harvestWith(d, first, second)
+		if x < 5 {
+			d.Move(colony.East)
+		}
+	}
+}
+
+func main() {
+	a, b := colony.Main(), colony.Spawn()
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() { defer wg.Done(); work(a, 0, &drill, &cart) }()
+	go func() { defer wg.Done(); work(b, 1, &cart, &drill) }()
+	wg.Wait()
+}
+`,
+		Hints: []string{
+			"شغّله وشوف: الدرونات بتعمل Wait وبعدين بتقف للأبد. درون a ماسك drill ومستني cart، ودرون b ماسك cart ومستني drill.",
+			"الحل الكلاسيكي: كل الـ goroutines تقفل الأقفال **بنفس الترتيب**. مثلاً دايماً drill الأول وبعدين cart.",
+		},
+		Lesson: `# Deadlock: كل واحد مستني التاني 🔒🔒
+
+تخيّل اتنين في ممر ضيق، وكل واحد مستني التاني يعدّي الأول. محدش هيتحرك أبداً.
+
+~~~text
+درون a: مسك drill ✓ … مستني cart ⏳
+درون b: مسك cart ✓ … مستني drill ⏳
+~~~
+
+ده **deadlock**: كل goroutine ماسكة حاجة ومستنية حاجة ماسكها غيرها.
+
+## الشروط الأربعة (Coffman)
+الـ deadlock بيحصل لما الأربعة يتحققوا مع بعض:
+1. المورد بيتمسك من واحد بس في نفس الوقت (mutex).
+2. اللي ماسك حاجة بيستنى حاجة تانية.
+3. محدش يقدر ياخد القفل غصب.
+4. **دايرة**: a مستني b، وb مستني a.
+
+اكسر أي شرط منهم، والـ deadlock يختفي.
+
+## الحل العملي: ترتيب ثابت للأقفال
+لو **كل** الكود بيقفل drill قبل cart، الدايرة مستحيل تحصل.
+
+## إزاي تكتشفه؟
+- Go أحياناً بيقولك: ~fatal error: all goroutines are asleep - deadlock!~
+- بس لو فيه goroutine تانية شغالة (timer مثلاً)، البرنامج **بيعلّق وخلاص**. هنا الـ Mission Control بيقطع بعد 200 tick.
+- في البرامج الحقيقية: ~kill -QUIT~ أو ~SIGQUIT~ بيطبع stack trace لكل goroutine، فتشوف كل واحدة واقفة فين.
+
+## أحسن: متمسكش قفلين أصلاً
+لو تقدر تصمّم الكود بقفل واحد، أو بـ channels بدل الأقفال، يبقى أحسن.`,
+	})
+}

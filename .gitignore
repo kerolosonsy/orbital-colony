@@ -1,0 +1,7 @@
+.DS_Store
+/orbital
+/workspace/
+/saves/
+/backups/
+.orbital.pid
+.orbital.log

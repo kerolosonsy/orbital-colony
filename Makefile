@@ -1,0 +1,123 @@
+# Orbital Colony — كل الأوامر في مكان واحد. اكتب: make  (أو make help)
+#
+# الإعدادات (تقدر تغيّرها: make start PORT=8080)
+PORT    ?= 7777
+ADDR    ?= 127.0.0.1:$(PORT)
+BIN     := ./orbital
+PIDFILE := .orbital.pid
+LOGFILE := .orbital.log
+BACKUPS := backups
+OPEN    ?= open
+STAMP    = $(shell date +%Y%m%d-%H%M%S)
+
+.DEFAULT_GOAL := help
+.PHONY: help run start stop restart status logs open build test test-quick check fmt vet \
+        backup restore backups players reset-all clean doctor
+
+help: ## اعرض كل الأوامر
+	@echo "Orbital Colony"
+	@echo
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-11s %s\n", $$1, $$2}'
+	@echo
+	@echo "  PORT=$(PORT)   مثال: make start PORT=8080"
+
+# ---------- التشغيل ----------
+
+run: build ## شغّل اللعبة هنا في الـ terminal (Ctrl+C يقفلها)
+	@echo "→ http://$(ADDR)"
+	$(BIN) -addr $(ADDR)
+
+start: build ## شغّل اللعبة في الخلفية وافتح المتصفح
+	@if [ -f $(PIDFILE) ] && kill -0 $$(cat $(PIDFILE)) 2>/dev/null; then \
+		echo "اللعبة شغالة أصلاً (PID $$(cat $(PIDFILE))). استخدم: make restart"; exit 0; fi; \
+	if lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1; then \
+		echo "البورت $(PORT) مشغول ببرنامج تاني. جرّب: make start PORT=7778"; exit 1; fi; \
+	nohup $(BIN) -addr $(ADDR) > $(LOGFILE) 2>&1 & echo $$! > $(PIDFILE); \
+	for i in 1 2 3 4 5 6 7 8 9 10; do \
+		lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1 && break; \
+		kill -0 $$(cat $(PIDFILE)) 2>/dev/null || break; sleep 0.5; done; \
+	if lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1; then \
+		echo "✓ اللعبة شغالة: http://$(ADDR)  (PID $$(cat $(PIDFILE)))"; $(OPEN) http://$(ADDR); \
+	else echo "✗ اللعبة ماشتغلتش:"; cat $(LOGFILE); rm -f $(PIDFILE); exit 1; fi
+
+stop: ## اقفل اللعبة اللي شغالة في الخلفية
+	@if [ -f $(PIDFILE) ] && kill -0 $$(cat $(PIDFILE)) 2>/dev/null; then \
+		kill $$(cat $(PIDFILE)) && echo "✓ اتقفلت"; else echo "مفيش لعبة شغالة من make start"; fi; \
+	rm -f $(PIDFILE)
+
+restart: ## ابني من جديد وشغّل (استخدمها بعد أي تحديث)
+	@$(MAKE) --no-print-directory stop
+	@$(MAKE) --no-print-directory start
+
+status: ## هل اللعبة شغالة؟
+	@if [ -f $(PIDFILE) ] && kill -0 $$(cat $(PIDFILE)) 2>/dev/null; then \
+		echo "✓ شغالة: http://$(ADDR)  (PID $$(cat $(PIDFILE)))"; else echo "✗ مش شغالة. شغّلها: make start"; fi
+
+logs: ## تابع رسايل السيرفر (Ctrl+C للخروج)
+	@touch $(LOGFILE); tail -f $(LOGFILE)
+
+open: ## افتح اللعبة في المتصفح
+	$(OPEN) http://$(ADDR)
+
+build: ## ابني السيرفر
+	go build -o $(BIN) ./cmd/orbital
+
+# ---------- الاختبارات ----------
+
+test: ## كل الاختبارات: كل مهمة لازم تتحل (حوالي 4 دقايق)
+	cd colony && go test ./...
+	go test ./cmd/orbital/ -count=1 -timeout 30m
+
+test-quick: ## اختبارات سريعة (أقل من دقيقة)
+	cd colony && go test ./...
+	go test ./cmd/orbital/ -count=1 -run 'TestLevelOrder|TestPreviewHasNoTimers|TestGoalMustHold|TestCompileErrorTips|Profile|Lang|TestLevelsSolvable/(1-1|1-2|3-3)'
+
+check: fmt vet test-quick ## نسّق وافحص وجرّب بسرعة قبل ما تحفظ شغلك
+
+fmt: ## نسّق كود Go
+	gofmt -w cmd colony assets.go
+
+vet: ## افحص الكود بـ go vet
+	go vet ./...
+	cd colony && go vet ./...
+
+# ---------- الحفظ واللاعبين ----------
+
+players: ## اعرض اللاعبين المتسجلين
+	@ls saves/profiles 2>/dev/null | while read id; do \
+		name=$$(sed -n 's/.*"name": *"\([^"]*\)".*/\1/p' saves/profiles/$$id/profile.json 2>/dev/null); \
+		lang=$$(sed -n 's/.*"lang": *"\([^"]*\)".*/\1/p' saves/profiles/$$id/profile.json 2>/dev/null); \
+		echo "  $$id  →  $$name  ($$lang)"; done; \
+	[ -d saves/profiles ] || echo "لسه مفيش لاعبين. شغّل اللعبة الأول."
+
+backup: ## خد نسخة احتياطية من كل الحفظ والـ workspace
+	@mkdir -p $(BACKUPS)
+	@tar -czf $(BACKUPS)/orbital-$(STAMP).tar.gz $$(ls -d saves workspace 2>/dev/null) && \
+		echo "✓ $(BACKUPS)/orbital-$(STAMP).tar.gz"
+
+backups: ## اعرض النسخ الاحتياطية
+	@ls -1t $(BACKUPS)/*.tar.gz 2>/dev/null || echo "مفيش نسخ لسه. اعمل: make backup"
+
+restore: ## رجّع نسخة: make restore FILE=backups/orbital-....tar.gz
+	@[ -n "$(FILE)" ] || { echo "حدد النسخة: make restore FILE=backups/orbital-....tar.gz"; $(MAKE) --no-print-directory backups; exit 1; }
+	@[ -f "$(FILE)" ] || { echo "مش لاقي $(FILE)"; exit 1; }
+	@$(MAKE) --no-print-directory stop
+	@$(MAKE) --no-print-directory backup
+	@rm -rf saves workspace && tar -xzf "$(FILE)" && echo "✓ رجعت $(FILE). شغّل: make start"
+
+reset-all: ## امسح كل اللاعبين وابدأ من الصفر (بياخد نسخة الأول): make reset-all CONFIRM=yes
+	@[ "$(CONFIRM)" = "yes" ] || { echo "ده هيمسح كل اللاعبين وكل التقدّم."; echo "لو متأكد: make reset-all CONFIRM=yes  (هتتاخد نسخة احتياطية الأول)"; exit 1; }
+	@$(MAKE) --no-print-directory stop
+	@$(MAKE) --no-print-directory backup
+	@rm -rf saves workspace && echo "✓ اتمسح كل حاجة. افتح المتصفح وامسح بيانات الموقع كمان لو عاوز."
+
+# ---------- متفرقات ----------
+
+doctor: ## اتأكد إن كل حاجة جاهزة على الجهاز
+	@command -v go >/dev/null && echo "✓ $$(go version)" || echo "✗ Go مش متسطب: https://go.dev/dl"
+	@command -v code >/dev/null && echo "✓ VS Code (code)" || echo "• VS Code: افتحه ومن Command Palette اختار: Shell Command: Install 'code' command in PATH"
+	@command -v gopls >/dev/null && echo "✓ gopls" || echo "• gopls مش متسطب (للـ autocomplete): go install golang.org/x/tools/gopls@latest"
+	@lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1 && echo "• البورت $(PORT) مستخدم دلوقتي" || echo "✓ البورت $(PORT) فاضي"
+
+clean: ## امسح ملفات البناء والـ logs (الحفظ مش بيتمسح)
+	rm -f $(BIN) $(LOGFILE)

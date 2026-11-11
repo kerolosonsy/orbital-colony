@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "orbital",
+      "runtimeExecutable": "go",
+      "runtimeArgs": ["run", "./cmd/orbital"],
+      "port": 7777
+    }
+  ]
+}

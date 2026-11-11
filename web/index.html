@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="orbital-token" content="__ORBITAL_TOKEN__">
+<meta name="theme-color" content="#17142a">
+<title>Orbital Colony — اتعلّم Go وإنت بتمسح كوكب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-index" viewBox="0 0 24 24"><path d="M3.5 4.5h7v7h-7zM13.5 4.5h7v7h-7zM3.5 14.5h7v5h-7zM13.5 14.5h7v5h-7z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.8v14.4a.6.6 0 0 0 .9.5l11.4-7.2a.6.6 0 0 0 0-1L7.9 4.3a.6.6 0 0 0-.9.5z"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 9a8 8 0 1 1 .9 7M4 4v5h5"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM16 9.5l5 5M21 9.5l-5 5"/></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 5.5 14 12l-9 6.5zM18.5 5.5v13"/></symbol>
+    <symbol id="i-hint" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.3 1 2.1h5c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5zM12 6.5v13"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
+    <symbol id="i-colony" viewBox="0 0 24 24"><path d="M3 20h18M5 20V10l7-5 7 5v10M9 20v-5h6v5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20.5c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.2l-5.8 3.2 1.2-6.5L2.6 9.4l6.5-.8z"/></symbol>
+  </defs>
+</svg>
+
+<header class="titleblock">
+  <a class="brand" href="#" id="brand" aria-label="Orbital Colony">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11"/><path d="M5 16h22M16 5c4 3 4 19 0 22M16 5c-4 3-4 19 0 22"/><circle cx="25.5" cy="7" r="2.2"/></svg>
+    <span class="brand-name">ORBITAL<small>COLONY</small></span>
+  </a>
+  <button id="btn-missions" class="tool" title="فهرس الأوراق (كل المهمات)" data-en-title="Survey index (all missions)"><svg class="ico"><use href="#i-index"/></svg><span class="tool-label" data-en="Index">الفهرس</span></button>
+  <button id="btn-colony" class="tool" title="المستعمرة المفتوحة: كودك شغال على طول، بتجمع وتبيع وتشتري ترقيات" data-en-title="Open colony: your code runs nonstop, gathering, selling and buying upgrades"><svg class="ico"><use href="#i-colony"/></svg><span class="tool-label" data-en="Colony">المستعمرة</span></button>
+  <div class="sheet-title">
+    <b id="lvl-title"></b>
+    <span id="lvl-chapter" class="sheet-code"></span>
+  </div>
+  <div id="lvl-stars" class="stars" aria-label="النجوم" data-en-aria="Stars"></div>
+  <div class="spacer"></div>
+  <div class="survey-progress" title="الأوراق اللي اتمسحت من كل الأوراق" data-en-title="Sheets surveyed out of all sheets">
+    <span class="survey-count"><span id="overall-count">0</span><span class="of">/<span id="overall-total">0</span></span></span>
+    <span class="survey-bar"><i id="overall-fill"></i></span>
+  </div>
+  <button id="btn-lesson" class="tool only-narrow" title="الدرس" data-en-title="Lesson" aria-expanded="false"><svg class="ico"><use href="#i-book"/></svg></button>
+  <button id="btn-sound" class="tool" title="الصوت" data-en-title="Sound" aria-pressed="true"><svg class="ico"><use href="#i-sound"/></svg></button>
+  <button id="btn-vscode" class="tool" title="اكتب في VS Code بالـ autocomplete، واللعبة هتشوف كل save" data-en-title="Write in VS Code with autocomplete; the game sees every save"><svg class="ico"><use href="#i-code"/></svg><span class="tool-label">VS Code</span></button>
+  <button id="btn-lang" class="tool" title="English" data-en-title="العربية"><span class="lang-label" data-en="ع">EN</span></button>
+  <button id="btn-profile" class="tool" title="اللاعبين" data-en-title="Players"><svg class="ico"><use href="#i-user"/></svg><span class="tool-label" id="profile-name"></span></button>
+  <button id="btn-reset" class="tool" title="ارجع لكود البداية" data-en-title="Back to starter code"><svg class="ico"><use href="#i-reset"/></svg></button>
+  <button id="btn-run" class="run" title="Ctrl/⌘ + Enter"><svg class="ico"><use href="#i-play"/></svg><span>Run</span></button>
+</header>
+
+<div class="goal-strip" id="goal-strip"><svg class="ico"><use href="#i-target"/></svg><span id="goal-strip-text"></span><span class="par" id="goal-strip-par"></span></div>
+<main class="layout">
+  <section class="panel lesson-panel" id="lesson-panel">
+    <div class="goal">
+      <svg class="ico goal-ico"><use href="#i-target"/></svg>
+      <div>
+        <p id="lvl-goal"></p>
+        <p class="par" id="lvl-par"></p>
+      </div>
+    </div>
+    <article id="lesson" class="lesson"></article>
+    <div class="hints">
+      <div id="hint-list"></div>
+      <button id="btn-hint" class="tool wide"><svg class="ico"><use href="#i-hint"/></svg><span data-en="Hint">تلميح</span></button>
+    </div>
+  </section>
+
+  <section class="panel lesson-panel colony-panel" id="colony-panel">
+    <div class="col-status">
+      <div class="credits"><span class="cr-sym">CR</span><span id="col-credits">0</span></div>
+      <div class="col-meta"><span id="col-rate">—</span><span id="col-state" class="state-pill" data-en="Stopped">واقفة</span></div>
+      <div class="col-meta muted-row"><span id="col-size"></span><span id="col-levels"></span></div>
+    </div>
+    <table class="col-market" id="col-market"></table>
+    <div id="col-rewards" class="col-rewards"></div>
+    <div id="col-shop" class="col-shop"></div>
+  </section>
+
+  <section class="panel editor-panel">
+    <div class="panel-head"><div id="file-tabs" class="tabs"></div><span class="save" id="save-state"></span></div>
+    <div class="editor">
+      <div class="gutter" id="gutter"></div>
+      <div class="code-wrap">
+        <pre class="highlight" id="highlight" aria-hidden="true"></pre>
+        <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="الكود" data-en-aria="Code"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel world-panel">
+    <div class="hud">
+      <div class="energy" title="طاقة الدرون" data-en-title="Drone energy">
+        <span id="hud-tick">0</span>
+        <div class="energy-bar"><i id="energy-fill"></i></div>
+      </div>
+      <div id="hud-inv" class="inv"></div>
+    </div>
+    <div class="map-frame">
+      <canvas id="world"></canvas>
+    </div>
+    <div id="banner" class="banner hidden" role="status"></div>
+    <div class="legend" id="legend"></div>
+    <div class="controls">
+      <label class="speed"><span data-en="Speed">السرعة</span><input id="speed" type="range" min="1" max="60" value="6"></label>
+      <button id="btn-skip" class="tool small" disabled title="اعرض النتيجة على طول" data-en-title="Show the result now"><svg class="ico"><use href="#i-skip"/></svg></button>
+      <span id="link-box" class="hidden">
+        <label class="check" title="كل ما تعمل Save في VS Code، الكود يشتغل لوحده" data-en-title="Every save in VS Code runs the code"><input id="autorun" type="checkbox" checked><span data-en="Run on save">شغّل لما أحفظ</span></label>
+        <button id="btn-unlink" class="tool small" data-en="Unlink">فك الربط</button>
+      </span>
+      <span id="hud-progress" class="progress-note"></span>
+    </div>
+    <div class="console" id="console" aria-live="polite"></div>
+  </section>
+</main>
+
+<dialog id="missions" class="overlay hidden" aria-labelledby="index-title">
+  <div class="sheet index-sheet">
+    <div class="sheet-head">
+      <h2 id="index-title" data-en="Survey index · Kepler-G">فهرس أوراق المسح · كيبلر-ج</h2>
+      <button class="tool" data-close aria-label="قفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+    </div>
+    <div id="chapter-list" class="quads"></div>
+  </div>
+</dialog>
+
+<dialog id="result" class="overlay hidden" aria-labelledby="result-title">
+  <div class="sheet result-sheet">
+    <div class="stamp" aria-hidden="true"><span>SURVEYED</span><span id="stamp-code"></span></div>
+    <h2 class="result-title" id="result-title" data-en="Sheet surveyed">الورقة اتمسحت</h2>
+    <div id="result-stars" class="big-stars"></div>
+    <div id="result-text" class="result-text"></div>
+    <div class="result-actions">
+      <button class="tool" data-close data-en="Improve it">حسّن الحل</button>
+      <button id="btn-next" class="run"><span data-en="Next mission">المهمة الجاية</span><svg class="ico"><use href="#i-arrow"/></svg></button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="welcome" class="overlay hidden" aria-labelledby="welcome-title">
+  <div class="sheet welcome-sheet">
+    <canvas id="welcome-map" aria-hidden="true"></canvas>
+    <div class="welcome-copy">
+      <h2 id="welcome-title" data-en="Nobody has ever surveyed this planet.">الكوكب ده محدش مسحه قبل كده.</h2>
+      <p data-en-html="You command a colony on <b>Kepler-G</b>, and your drones only understand <b>Go</b>. Every mission is a survey sheet: you write real code, the real compiler builds it, and you watch the drone work.">إنت قائد مستعمرة على <b>كيبلر-ج</b>، والدرونات بتاعتك مبتفهمش غير <b>Go</b>. كل مهمة ورقة مسح: تكتب كود حقيقي، والـ compiler الحقيقي يبنيه، وتتفرج على الدرون وهو بيشتغل.</p>
+      <ul>
+        <li data-en-html="48 missions: from your first line of code to goroutines, generics and &lt;code&gt;go test&lt;/code&gt;.">48 مهمة: من أول سطر كود لحد الـ goroutines والـ generics واختبارات <code>go test</code>.</li>
+        <li data-en="The map changes every run, so your code has to think for itself.">الخريطة بتتغير كل مرة، فلازم الكود يفكّر بنفسه.</li>
+        <li data-en="Stars are for the smart solution, not just any solution.">النجوم للحل الذكي، مش لأي حل وخلاص.</li>
+      </ul>
+      <button id="btn-start" class="run big"><span data-en="Start surveying">ابدأ المسح</span><svg class="ico"><use href="#i-arrow"/></svg></button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="profiles" class="overlay hidden" aria-labelledby="profiles-title">
+  <div class="sheet profiles-sheet">
+    <div class="sheet-head">
+      <h2 id="profiles-title" data-en="Players on this computer">اللاعبين على الجهاز ده</h2>
+      <button class="tool" data-close aria-label="قفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+    </div>
+    <p class="profiles-note" data-en="Each player has their own missions, stars, code and colony. Switching keeps everything saved.">كل لاعب ليه مهماته ونجومه وكوده ومستعمرته. التبديل بيحفظ كل حاجة.</p>
+    <ul id="profile-list" class="profile-list"></ul>
+    <form id="profile-new" class="profile-new">
+      <input id="profile-new-name" maxlength="24" required placeholder="اسم اللاعب الجديد" data-en-placeholder="New player name" autocomplete="off">
+      <select id="profile-new-lang" aria-label="اللغة" data-en-aria="Language"><option value="ar">العربية</option><option value="en">English</option></select>
+      <button class="run" type="submit"><span data-en="Add player">ضيف لاعب</span></button>
+    </form>
+  </div>
+</dialog>
+
+<script src="/static/i18n.js"></script>
+<script src="/static/sprites.js"></script>
+<script src="/static/app.js"></script>
+<script src="/static/profiles.js"></script>
+<script src="/static/colony.js"></script>
+</body>
+</html>
