@@ -114,6 +114,7 @@ var Chapters = []Chapter{
 	{"التزامن", "Concurrency", 24, "خطوط الإمداد", "ملكية القنوات والضغط العكسي وخطوط المعالجة وHTTP والصور المتوازية", true, "Supply Lines", "Channel ownership, backpressure, pipelines, and concurrent HTTP and images"},
 	{"التزامن", "Concurrency", 25, "الموارد المشتركة", "شروط الرصيد والسباقات وخزان التصاريح والأحداث وكاش بصلاحية والعدّادات الذرّية", true, "Shared Resources", "Invariants, races, token buckets, event buses, TTL caches, and atomic counters"},
 	{"الخدمات", "Services", 26, "بوابة القاعدة", "سيرفر HTTP وREST وراوتر وmiddleware وأخطاء موحّدة وملفات ثابتة ورفع آمن", true, "Base Gateway", "HTTP servers, REST, routing, middleware, error envelopes, static files, and safe uploads"},
+	{"الخدمات", "Services", 27, "التصاريح والحماية", "bcrypt وJWT والجلسات والكوكيز وCSRF وCORS وحد الطلبات وروابط مختصرة", true, "Passes and Protection", "bcrypt, JWT, sessions, cookies, CSRF, CORS, rate limiting, and short links"},
 }
 
 var All []*Level

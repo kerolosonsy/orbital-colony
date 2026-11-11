@@ -83,7 +83,7 @@ func scan(code string) (*features, error) {
 		if err != nil {
 			return nil, err
 		}
-		name := path.Base(importPath)
+		name := importName(importPath)
 		if spec.Name != nil {
 			name = spec.Name.Name
 		}
@@ -185,9 +185,19 @@ func scan(code string) (*features, error) {
 
 func packageName(imports map[string]string, id *ast.Ident) string {
 	if importPath, ok := imports[id.Name]; ok && id.Obj == nil {
-		return path.Base(importPath)
+		return importName(importPath)
 	}
 	return ""
+}
+
+// importName is the default package name of an import path, skipping a
+// major-version suffix: "github.com/golang-jwt/jwt/v5" is package jwt.
+func importName(importPath string) string {
+	name := path.Base(importPath)
+	if dir := path.Dir(importPath); dir != "." && len(name) > 1 && name[0] == 'v' && strings.Trim(name[1:], "0123456789") == "" {
+		return path.Base(dir)
+	}
+	return name
 }
 
 // checkRequirements returns a message for every requirement the code misses.

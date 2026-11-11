@@ -64,6 +64,7 @@ func TestRequirementsRecognizeImportAliases(t *testing.T) {
 		{"waitgroup", `package main; import wait "sync"; var _ wait.WaitGroup`, "waitgroup"},
 		{"mutex", `package main; import lock "sync"; var _ lock.RWMutex`, "mutex"},
 		{"context", `package main; import ctx "context"; var _ ctx.Context`, "sel:context.Context"},
+		{"major version", `package main; import "github.com/golang-jwt/jwt/v5"; var _ jwt.Token`, "sel:jwt.Token"},
 		{"autopilot", `package main; import game "orbital/colony"; func main() { game.Autopilot(nil) }`, "autopilot"},
 		{"errors", `package main; import errpkg "errors"; func main() { _ = errpkg.Is(nil, nil) }`, "errcheck"},
 	}
