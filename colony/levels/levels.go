@@ -105,6 +105,7 @@ var Chapters = []Chapter{
 	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 15, "الكهوف", "خوارزميات: BFS وsorting وbinary search وrecursion وheap", true, "Caves", "Algorithms: BFS, sorting, binary search, recursion, and heaps"},
 	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 16, "المختبر", "go test وbenchmarks وfuzzing وساعة محقونة", true, "The Lab", "go test, benchmarks, fuzzing, and injected time"},
 	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 17, "الأعماق", "طبقات، ومصفوفات 3D، وBFS ثلاثي الأبعاد", true, "The Depths", "Layers, 3D arrays, and three-dimensional BFS"},
+	{"البيانات والأدوات", "Data and Tools", 18, "الأرشيف", "JSON وCSV ومعالجة النصوص والاختبار", true, "The Archive", "JSON, CSV, text processing, and testing"},
 }
 
 var All []*Level

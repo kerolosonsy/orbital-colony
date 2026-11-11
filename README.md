@@ -64,6 +64,7 @@ cd workspace/3-1-long-row && go run .
 | 14 | القوالب | generics، وconstraints، وStack[T] | ✅ |
 | 15 | الكهوف | BFS، والترتيب، وDijkstra، وbinary search، وrecursion، وheap | ✅ |
 | 16 | المختبر | go test، وtable tests، وmutation testing، وTDD، وbenchmarks، وfuzzing، وساعة محقونة | ✅ |
+| 18 | الأرشيف | JSON، وCSV، ومعالجة النصوص، وstreaming، وحفظ عن طريق interfaces | ✅ |
 
 ## هيكل المشروع
 
