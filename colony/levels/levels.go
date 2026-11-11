@@ -110,6 +110,7 @@ var Chapters = []Chapter{
 	{"البيانات والأدوات", "Data and Tools", 20, "المترجم", "تحليل النصوص والتحقق وlexer وشجرة التعبير", true, "The Interpreter", "Markup parsing, validation, lexing, and expression trees"},
 	{"البيانات والأدوات", "Data and Tools", 21, "سطر الأوامر والنظام", "flags والبيئة وأوامر فرعية وألعاب بعشوائية محقونة", true, "The Command Line", "Flags, environment, subcommands, and games with injected randomness"},
 	{"البيانات والأدوات", "Data and Tools", 22, "نظام الملفات", "شجرة الملفات وخطط النقل والحفظ الذرّي وبصمات الملفات", true, "The File System", "Filesystem trees, move plans, atomic saves, and streaming file hashes"},
+	{"البيانات والأدوات", "Data and Tools", 23, "الخزنة", "أكواد آمنة وAES-GCM وعنونة المحتوى ولقطات الشحنات", true, "The Vault", "Secure access codes, AES-GCM, content addressing, and supply snapshots"},
 }
 
 var All []*Level
