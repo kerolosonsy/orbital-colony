@@ -71,6 +71,7 @@ cd workspace/3-1-long-row && go run .
 | 22 | نظام الملفات / The File System | شجرة مرتبة، وتنظيم بخطة، وحفظ ذرّي، وكشف التكرار بالـ stream | ✅ |
 | 23 | الخزنة / The Vault | أكواد آمنة، وAES-GCM، وعناوين محتوى مضغوطة، وفهرس ولقطات للشحنات / Secure codes, AES-GCM, compressed content addresses, and supply snapshots | ✅ |
 | 24 | خطوط الإمداد / Supply Lines | ملكية القنوات، وطوابير محدودة، وطاقم عام، وfan-out/fan-in، وHTTP ونطاقات البايت وصور متوازية / Channel ownership, bounded queues, generic crews, fan-out/fan-in, HTTP ranges, and concurrent images | ✅ |
+| 25 | الموارد المشتركة / Shared Resources | شروط الرصيد، وتقرير السباق، وخزان التصاريح، وناقل الأحداث، وكاش بصلاحية، ومقارنة atomic وmutex / Invariants, race reports, token buckets, event buses, TTL caches, and atomic versus mutex benchmarks | ✅ |
 
 ## هيكل المشروع
 

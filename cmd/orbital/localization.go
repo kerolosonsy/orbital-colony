@@ -92,6 +92,9 @@ func economyShortfall(lang, message string) string {
 
 func mutantDescription(lang, description string) string {
 	for _, pair := range [][2]string{
+		{"تجاهل المسح السالب", "Skip negative scans"},
+		{"نسيان آخر مسح", "Omit final scan"},
+		{"مسح متحسب مرتين", "Double counted scan"},
 		{"حد الـ 50 كجم: جرّبت 50 بالظبط؟", "The 50 kg boundary: did you try exactly 50?"},
 		{"المسافة صفر مع شحنة", "Zero distance with cargo"},
 		{"تكلفة كل خانة مسافة", "Fuel cost per tile of distance"},
