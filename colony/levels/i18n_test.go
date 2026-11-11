@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"io"
 	"reflect"
+	"strings"
 	"testing"
 
 	"orbital/colony/econ"
@@ -89,7 +90,13 @@ func TestEnglishLearningContent(t *testing.T) {
 				}
 				assertEnglish(t, "file name", file.Name)
 				assertEnglish(t, file.Name, file.Starter)
-				t.Run(file.Name, func(t *testing.T) { assertSameCode(t, original.Starter, file.Starter) })
+				t.Run(file.Name, func(t *testing.T) {
+					if strings.HasSuffix(file.Name, ".go") {
+						assertSameCode(t, original.Starter, file.Starter)
+					} else if original.Starter != file.Starter {
+						t.Error("non-Go lab assets differ between languages")
+					}
+				})
 			}
 		})
 	}

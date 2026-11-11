@@ -113,6 +113,7 @@ var Chapters = []Chapter{
 	{"البيانات والأدوات", "Data and Tools", 23, "الخزنة", "أكواد آمنة وAES-GCM وعنونة المحتوى ولقطات الشحنات", true, "The Vault", "Secure access codes, AES-GCM, content addressing, and supply snapshots"},
 	{"التزامن", "Concurrency", 24, "خطوط الإمداد", "ملكية القنوات والضغط العكسي وخطوط المعالجة وHTTP والصور المتوازية", true, "Supply Lines", "Channel ownership, backpressure, pipelines, and concurrent HTTP and images"},
 	{"التزامن", "Concurrency", 25, "الموارد المشتركة", "شروط الرصيد والسباقات وخزان التصاريح والأحداث وكاش بصلاحية والعدّادات الذرّية", true, "Shared Resources", "Invariants, races, token buckets, event buses, TTL caches, and atomic counters"},
+	{"الخدمات", "Services", 26, "بوابة القاعدة", "سيرفر HTTP وREST وراوتر وmiddleware وأخطاء موحّدة وملفات ثابتة ورفع آمن", true, "Base Gateway", "HTTP servers, REST, routing, middleware, error envelopes, static files, and safe uploads"},
 }
 
 var All []*Level
