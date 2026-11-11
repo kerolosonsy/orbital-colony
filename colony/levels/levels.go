@@ -106,6 +106,8 @@ var Chapters = []Chapter{
 	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 16, "المختبر", "go test وbenchmarks وfuzzing وساعة محقونة", true, "The Lab", "go test, benchmarks, fuzzing, and injected time"},
 	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 17, "الأعماق", "طبقات، ومصفوفات 3D، وBFS ثلاثي الأبعاد", true, "The Depths", "Layers, 3D arrays, and three-dimensional BFS"},
 	{"البيانات والأدوات", "Data and Tools", 18, "الأرشيف", "JSON وCSV ومعالجة النصوص والاختبار", true, "The Archive", "JSON, CSV, text processing, and testing"},
+	{"البيانات والأدوات", "Data and Tools", 19, "الساعة الكونية", "المدد والمناطق الزمنية ومؤقتات قابلة للإلغاء", true, "The Cosmic Clock", "Durations, time zones, and cancelable concurrent timers"},
+	{"البيانات والأدوات", "Data and Tools", 20, "المترجم", "تحليل النصوص والتحقق وlexer وشجرة التعبير", true, "The Interpreter", "Markup parsing, validation, lexing, and expression trees"},
 }
 
 var All []*Level
