@@ -1,6 +1,10 @@
 package sim
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"time"
+)
 
 type FaultError struct {
 	Index   int
@@ -143,4 +147,64 @@ func (w *World) Order(i int) string {
 		return ""
 	}
 	return w.Data.Orders[i]
+}
+
+// CommandRecord preserves the context observed at a command boundary.
+type CommandRecord struct {
+	Stage       string
+	Deadline    time.Time
+	HasDeadline bool
+	Err         error
+}
+
+func (w *World) TraceCommand(ctx context.Context, stage string) {
+	deadline, ok := ctx.Deadline()
+	record := CommandRecord{Stage: stage, Deadline: deadline, HasDeadline: ok, Err: ctx.Err()}
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.Data.CommandLog = append(w.Data.CommandLog, record)
+}
+
+type RescueRequest struct{ ID, Priority int }
+
+// RescueArrivals returns the wave released by the previous successful rescue.
+// Call once initially and once after each rescue; snapshots do not consume it.
+func (w *World) RescueArrivals() []RescueRequest {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	wave := len(w.Data.Rescued)
+	if wave >= len(w.Data.RescueWaves) {
+		return nil
+	}
+	return append([]RescueRequest(nil), w.Data.RescueWaves[wave]...)
+}
+func rescueBefore(a, b RescueRequest) bool {
+	return a.Priority > b.Priority || a.Priority == b.Priority && a.ID < b.ID
+}
+
+// Rescue rejects out-of-order or unknown requests without changing pending work.
+func (w *World) Rescue(id int) bool {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if len(w.Data.RescuePending) == 0 {
+		w.Data.RescueFault = true
+		return false
+	}
+	best := 0
+	for i, request := range w.Data.RescuePending {
+		if rescueBefore(request, w.Data.RescuePending[best]) {
+			best = i
+		}
+	}
+	if w.Data.RescuePending[best].ID != id {
+		w.Data.RescueFault = true
+		return false
+	}
+	w.Data.RescuePending = append(w.Data.RescuePending[:best], w.Data.RescuePending[best+1:]...)
+	w.Data.Rescued = append(w.Data.Rescued, id)
+	wave := len(w.Data.Rescued)
+	if wave < len(w.Data.RescueWaves) {
+		w.Data.RescuePending = append(w.Data.RescuePending, w.Data.RescueWaves[wave]...)
+	}
+	return true
 }

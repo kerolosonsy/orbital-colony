@@ -62,8 +62,8 @@ cd workspace/3-1-long-row && go run .
 | 12 | السباق | mutex، والـ race detector الحقيقي (`-race`)، وdeadlock | ✅ |
 | 13 | العواصف | context: الإلغاء، والـ timeouts، وWithCancel | ✅ |
 | 14 | القوالب | generics، وconstraints، وStack[T] | ✅ |
-| 15 | الكهوف | BFS، والترتيب، وDijkstra | ✅ |
-| 16 | المختبر | go test، وtable tests، وmutation testing، وTDD، وbenchmarks | ✅ |
+| 15 | الكهوف | BFS، والترتيب، وDijkstra، وbinary search، وrecursion، وheap | ✅ |
+| 16 | المختبر | go test، وtable tests، وmutation testing، وTDD، وbenchmarks، وfuzzing، وساعة محقونة | ✅ |
 
 ## هيكل المشروع
 

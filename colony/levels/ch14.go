@@ -629,4 +629,428 @@ cmp.Ordered // كل الأنواع اللي بتتقارن، ومعمولة با
 - لما تلاقي نفسك بتكتب **نفس الكود** لأكتر من نوع: containers، وخوارزميات على slices وmaps.
 - **مش** لكل حاجة. لو دالة بتشتغل مع نوع واحد، خلّيها عادية. الـ generics بتصعّب القراية لو اتستخدمت من غير داعي.`,
 	})
+	add(&Level{ID: "14-4-airlock-queue", Chapter: 14, Kind: "lab", Title: "طابور البوابة", Goal: "ابني طابور generic يحافظ على ترتيب الوصول", Requires: []string{"generictype"}, Bridge: []int{27},
+		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: airlockQueueStarter, ReadOnly: false}},
+		Lesson: `# اللي وصل الأول يخرج الأول
+
+الـ stack اللي فات بيمشي LIFO. بوابة الضغط محتاجة العكس: FIFO، أول راكب يدخل هو أول راكب يخرج، مهما نوع بياناته.
+
+## قبل ما تكتب
+- الـ zero value تقدر تمثل طابور فاضي من غير constructor؟
+- هتميّز راكب قيمته صفر عن مفيش راكب إزاي؟
+
+## generic type بنفس السلوك
+~~~go
+type Tray[T any] struct { Slots []T }
+func (t *Tray[T]) Add(v T) { t.Slots = append(t.Slots,v) }
+var tray Tray[string]
+tray.Add("lens")
+~~~
+~T any~ بيسمح بأي نوع. ~Tray[string]~ نسخة بنوع محدد، والـ receiver لازم يذكر ~[T]~. الـ slice اللي قيمتها nil تقبل append، فمش محتاج تهيئة.
+
+## نتيجة ومعاها وجودها
+~~~go
+func first[T any](xs []T) (T,bool) {
+ if len(xs)>0 { return xs[0],true }
+ var zero T
+ return zero,false
 }
+n,ok := first([]int{0}) // n=0, ok=true
+~~~
+~var zero T~ القيمة الصفرية للنوع: صفر أو نص فاضي أو struct صفرية. bool بتقول هل فيه عنصر فعلاً؛ الصفر لوحده مش علامة للفاضي.
+
+## تحرير المراجع
+~~~go
+slots := []*int{new(int)}
+slots[0] = nil
+slots = slots[1:]
+~~~
+التقطيع لوحده ممكن يسيب العنصر القديم في المصفوفة الخلفية. امسح خانة العنصر قبل استبعاده. لما الطابور يفضى رجّع الـ slice لـ nil، عشان المصفوفة القديمة تتحرر؛ متخزّنش prefix مستهلك في field تاني.
+
+## شكل الاستدعاء
+~~~go
+var q Queue[string]
+q.Admit("medic")
+first,ok:=q.Front()
+fmt.Println(first,ok,q.Len()) // medic true 1
+last,ok:=q.Depart()
+fmt.Println(last,ok,q.Len()) // medic true 0
+~~~
+المثال بيختبر API فقط، مش تنفيذ التخزين. نفس الاستدعاءات تشتغل على Queue[int] أو أي struct.
+
+## أخطاء شائعة
+~~~go
+last := q.waiting[len(q.waiting)-1] // ده آخر واحد، وممكن panic لو فاضي
+~~~
+ده ترتيب stack مش بوابة. افحص الطول قبل الفهرسة. ~Front~ استعلام: متشيلش عنصر وإنت بتعرض أول الواصلين.
+
+## المهمة
+نفّذ ~Queue[T any]~؛ ~var q Queue[int]~ شغال فوراً. ~Admit(v)~ يضيف آخر الطابور، ~Depart() (T,bool)~ يشيل أول عنصر، و~Front() (T,bool)~ يقرأه بس. الاتنين يرجّعوا zero,false لو فاضي من غير panic. ~Len() int~ العدد الحالي.
+
+بعد Admit(4) وAdmit(9)، Depart ترجع 4,true وFront ترجع 9,true من غير تغيير Len. امسح المراجع المستهلكة، وتخلّص من التخزين لما يفضى. العقد تسلسلي ومش آمن لتزامن؛ مفيش Report في المختبر.
+`, Hints: []string{"الـ nil slice جاهزة لـ append.", "اقرأ أول خانة، وامسحها بقيمة صفرية من T قبل التقطيع.", "Front متغيّرش التخزين؛ جرّب فاضي ثم عنصر واحد ثم إعادة استعمال."},
+		En: &LevelText{Title: "Airlock Queue", Goal: "Build a generic queue that preserves arrival order", Files: []LabFile{{Name: "main.go", Starter: airlockQueueStarter, ReadOnly: false}}, Lesson: `# First Arrival, First Departure
+
+The previous stack used LIFO. An airlock needs FIFO: the first passenger admitted is the first to depart, regardless of the passenger data type.
+
+## Before you write
+- Can the zero value represent an empty queue without a constructor?
+- How will you distinguish a zero-valued passenger from no passenger?
+
+## A generic type with one behavior
+~~~go
+type Tray[T any] struct { Slots []T }
+func (t *Tray[T]) Add(v T) { t.Slots = append(t.Slots,v) }
+var tray Tray[string]
+tray.Add("lens")
+~~~
+~T any~ allows any type. ~Tray[string]~ supplies a concrete type, and the receiver must include ~[T]~. A nil slice accepts append, so initialization is unnecessary.
+
+## A result and its presence
+~~~go
+func first[T any](xs []T) (T,bool) {
+ if len(xs)>0 { return xs[0],true }
+ var zero T
+ return zero,false
+}
+n,ok := first([]int{0}) // n=0, ok=true
+~~~
+~var zero T~ gives the type's zero value: zero, empty text, or a zero struct. The bool records presence; zero alone cannot represent emptiness.
+
+## Release references
+~~~go
+slots := []*int{new(int)}
+slots[0] = nil
+slots = slots[1:]
+~~~
+Slicing alone can leave an old reference in the backing array. Clear the consumed slot before slicing it away. Reset the slice to nil when empty so the old array can be reclaimed; do not retain a consumed prefix in another field.
+
+## Calling the contract
+~~~go
+var q Queue[string]
+q.Admit("medic")
+first,ok:=q.Front()
+fmt.Println(first,ok,q.Len()) // medic true 1
+last,ok:=q.Depart()
+fmt.Println(last,ok,q.Len()) // medic true 0
+~~~
+This exercises the API rather than implementing storage. The same calls work for Queue[int] or any struct.
+
+## Common mistakes
+~~~go
+last := q.waiting[len(q.waiting)-1] // Last arrival; panics when empty
+~~~
+That is stack order. Check length before indexing. ~Front~ is a query and must leave the queue intact.
+
+## Your mission
+Implement ~Queue[T any]~ so ~var q Queue[int]~ works immediately. ~Admit(v)~ appends, ~Depart() (T,bool)~ removes the first passenger, and ~Front() (T,bool)~ only reads it. Both return zero,false when empty without panic. ~Len() int~ is the current count.
+
+After Admit(4) and Admit(9), Depart returns 4,true and Front returns 9,true without changing Len. Clear consumed references and release storage when empty. The contract is sequential, with no concurrent safety requirement and no Report.
+`, Hints: []string{"A nil slice is ready for append.", "Read the first slot, clear it using a zero T, then slice it away.", "Front must not modify storage; try empty, singleton, and reuse."}},
+		Lab: &Lab{ReqFile: "main.go", Hidden: airlockQueueHidden},
+	})
+	add(&Level{ID: "14-5-archive-tree", Chapter: 14, Kind: "lab", Title: "شجرة الأرشيف", Goal: "خزّن سجلات في شجرة generic بمقارنة وترتيب محددين", Requires: []string{"generictype", "recursion"}, Bridge: []int{28},
+		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: archiveTreeStarter, ReadOnly: false}},
+		Lesson: `# أرشيف بيتفرّع
+
+بدل ما تقارن بكل سجل، الشجرة بتختار فرع أصغر أو أكبر. هنا هنتعلّم recursion لأول مرة: دالة بتحل جزء أصغر من نفس المشكلة، وبتنادي نفسها عليه.
+
+## قبل ما تكتب
+- أنهي حالة توقف الاستدعاء من غير ما تنادي نفسك تاني؟
+- سجلين متساويين بالمقارنة: تحتفظ بالأول ولا تستبدله؟
+
+## comparator بدل افتراض نوع
+~~~go
+compare := func(a,b int) int {
+ if a<b {return -1}; if a>b {return 1}; return 0
+}
+fmt.Println(compare(3,8)) // -1
+~~~
+زي SortFunc، نتيجة سالبة معناها a يسبق b، وصفر معناها متساويين. ~func(T,T) int~ تسمح بنفس الشجرة لرقم أو نص أو struct. المقارنة لازم تبقى ثابتة ومتسقة وتحدد ترتيب كلي؛ مش هنصلّح comparator متناقضة.
+
+## recursion بمثال مش شجرة
+~~~go
+func countdown(n int) int {
+ if n<=0 {return 0}
+ return 1+countdown(n-1)
+}
+fmt.Println(countdown(3)) // 3
+~~~
+~n<=0~ حالة التوقف. كل نداء بيقرّبنا منها. بعد ما النداء الداخلي يرجع، الخارجي بيكمل. من غير حالة توقف هتستهلك الـ stack. هنا العمق صغير ومش محتاج goroutines.
+
+## عقد generic وفروع
+~~~go
+type Branch[T any] struct { Entry T; Left,Right *Branch[T] }
+b := &Branch[string]{Entry:"log"}
+fmt.Println(b.Left==nil) // true
+~~~
+الفرع الفاضي nil. القيم اللي مقارنةً تسبق العقدة تروح Left، واللي بعدها Right. عند الإدخال رجّع جذر الفرع بعد تعديله، عشان الأب يحتفظ بالوصلة حتى لو كان الفرع nil.
+
+## ترتيب الزيارة
+~~~text
+visit(left) → current → visit(right)
+~~~
+ده in-order: يعرض السجلات بترتيب المقارنة. تجميعه في slice جديدة يحافظ على استقلال النتيجة. الإدخال المرتّب ممكن يعمل سلسلة طويلة؛ الشجرة مش balanced.
+
+## شكل الاستدعاء
+~~~go
+var logs Archive[int]
+err:=logs.Order(compare)
+added,err:=logs.Store(7)
+fmt.Println(added,err,logs.Contains(7),logs.Records()) // true <nil> true [7]
+~~~
+~compare~ هي الدالة اللي فوق. ده استخدام الأرشيف بعد التنفيذ، مش خوارزمية بناء الشجرة.
+
+## أخطاء شائعة
+~~~go
+func countdown(n int) int { return countdown(n) } // مفيش تقدّم أو توقف
+~~~
+ومتستخدمش ~record < node.record~ مع T any: النوع ممكن يبقى struct. استخدم المقارنة المحقونة.
+
+## المهمة
+نفّذ ~Archive[T any]~. ~Order(func(T,T) int) error~ يحدد المقارنة في أرشيف فاضي؛ nil أو محاولة تغييرها بعد وجود سجلات ترجع error من غير تعديل. ~Store(record) (bool,error)~ يحتاج مقارنة، ويرجّع true لو أضاف، وfalse,nil لو تكرار حسب مقارنة صفر، مع الاحتفاظ بالسجل الأول.
+
+~Contains(record) bool~ يرجّع وجود سجل مساوٍ بالمقارنة. ~Records() []T~ نسخة مستقلة in-order. الـ zero value تقبل البحث والعرض وترجع فاضي؛ Store من غير Order ترجع خطأ من غير panic أو تعديل. استخدم دالة recursive للإدخال أو الزيارة. العقد تسلسلي؛ مفيش Report.
+`, Hints: []string{"ابدأ بالفرع nil كحالة توقف.", "نتيجة المقارنة صفر معناها تكرار: متغيّرش السجل القديم.", "في الزيارة اجمع الشمال ثم العقدة ثم اليمين؛ متخزّنش الناتج كـ slice مشتركة."},
+		En: &LevelText{Title: "Archive Tree", Goal: "Store records in a generic tree with a defined comparison order", Files: []LabFile{{Name: "main.go", Starter: archiveTreeStarter, ReadOnly: false}}, Lesson: `# A Branching Archive
+
+Instead of comparing with every record, a tree selects a smaller or larger branch. This lesson introduces recursion: a function solves a smaller instance of its problem by calling itself.
+
+## Before you write
+- Which case stops without another recursive call?
+- When two records compare equal, should you retain the first or replace it?
+
+## A comparator instead of a type assumption
+~~~go
+compare := func(a,b int) int {
+ if a<b {return -1}; if a>b {return 1}; return 0
+}
+fmt.Println(compare(3,8)) // -1
+~~~
+As with SortFunc, a negative result places a before b, and zero means equality. ~func(T,T) int~ lets the same tree accept numbers, strings, or structs. The comparator must be stable, consistent, and define a total order; contradictory comparators are outside the contract.
+
+## Recursion with a non-tree example
+~~~go
+func countdown(n int) int {
+ if n<=0 {return 0}
+ return 1+countdown(n-1)
+}
+fmt.Println(countdown(3)) // 3
+~~~
+~n<=0~ is the base case. Each call approaches it. When the inner call returns, the outer call continues. Without a base case the stack is exhausted. These small depths need no goroutines.
+
+## Generic nodes and branches
+~~~go
+type Branch[T any] struct { Entry T; Left,Right *Branch[T] }
+b := &Branch[string]{Entry:"log"}
+fmt.Println(b.Left==nil) // true
+~~~
+An empty branch is nil. Records comparing before the node go Left, and later ones go Right. Return the branch root after insertion so its parent retains the link even when the branch was nil.
+
+## Visit order
+~~~text
+visit(left) → current → visit(right)
+~~~
+This is in-order traversal and yields comparator order. Collect into a fresh slice to keep results independent. Sorted insertions may produce a long chain; this tree is not balanced.
+
+## Calling the contract
+~~~go
+var logs Archive[int]
+err:=logs.Order(compare)
+added,err:=logs.Store(7)
+fmt.Println(added,err,logs.Contains(7),logs.Records()) // true <nil> true [7]
+~~~
+~compare~ is the function above. This uses the completed archive rather than implementing its tree algorithm.
+
+## Common mistakes
+~~~go
+func countdown(n int) int { return countdown(n) } // No progress or base case
+~~~
+Do not use ~record < node.record~ for T any: it might be a struct. Use the injected comparator.
+
+## Your mission
+Implement ~Archive[T any]~. ~Order(func(T,T) int) error~ configures an empty archive. A nil comparator or reordering a populated archive returns an error without mutation. ~Store(record) (bool,error)~ requires a comparator, returns true for insertion, or false,nil for comparator equality, retaining the first record.
+
+~Contains(record) bool~ reports comparator equality. ~Records() []T~ returns an independent in-order snapshot. The zero value supports empty reads; Store before Order returns an error without panic or mutation. Use a recursive function for insertion or traversal. This is a sequential contract with no Report.
+`, Hints: []string{"Start with a nil branch as the base case.", "Zero comparison means duplicate: keep the original record.", "Traverse left, node, right; do not expose a shared result slice."}},
+		Lab: &Lab{ReqFile: "main.go", Hidden: archiveTreeHidden},
+	})
+}
+
+const airlockQueueStarter = `package main
+
+type Queue[T any] struct{ waiting []T }
+
+func (q *Queue[T]) Admit(passenger T) {}
+func (q *Queue[T]) Depart() (T, bool) { var zero T; return zero, false }
+func (q *Queue[T]) Front() (T, bool)  { var zero T; return zero, false }
+func (q *Queue[T]) Len() int          { return 0 }
+func main()                           {}
+`
+const airlockQueueHidden = `package main
+
+import (
+	"io"
+	"orbital/colony/levels"
+	"testing"
+)
+
+func hiddenFIFO[T comparable](t *testing.T, passengers []T) {
+	t.Helper()
+	var q Queue[T]
+	var zero T
+	if got, ok := q.Depart(); ok || got != zero || q.Len() != 0 {
+		t.Fatal("empty departure")
+	}
+	if got, ok := q.Front(); ok || got != zero {
+		t.Fatal("empty front")
+	}
+	var want []T
+	world := levels.Start("14-4-airlock-queue", io.Discard, 144)
+	r := world.Rand
+	for step := 0; step < 600; step++ {
+		if len(want) == 0 || r.Intn(2) == 0 {
+			v := passengers[world.Data.SensorReadings[step%256]%len(passengers)]
+			q.Admit(v)
+			want = append(want, v)
+		} else {
+			got, ok := q.Front()
+			if !ok || got != want[0] || q.Len() != len(want) {
+				t.Fatal("front mutated or wrong")
+			}
+			got, ok = q.Depart()
+			if !ok || got != want[0] {
+				t.Fatal("FIFO")
+			}
+			want = want[1:]
+		}
+		if q.Len() != len(want) {
+			t.Fatal("length transition")
+		}
+	}
+	for _, v := range want {
+		if got, ok := q.Depart(); !ok || got != v {
+			t.Fatal("drain")
+		}
+	}
+	if _, ok := q.Depart(); ok || q.Len() != 0 {
+		t.Fatal("empty after drain")
+	}
+	q.Admit(passengers[0])
+	if got, ok := q.Depart(); !ok || got != passengers[0] {
+		t.Fatal("reuse")
+	}
+}
+func TestHiddenZeroValueAndFIFO(t *testing.T) {
+	hiddenFIFO(t, []int{0, -8, 17})
+	hiddenFIFO(t, []string{"", "crew", "🚀"})
+	hiddenFIFO(t, []struct {
+		Gate int
+		Name string
+	}{{1, "a"}, {2, "b"}})
+}
+`
+
+const archiveTreeStarter = `package main
+
+import "errors"
+
+type archiveNode[T any] struct {
+	record      T
+	left, right *archiveNode[T]
+}
+type Archive[T any] struct {
+	root    *archiveNode[T]
+	compare func(T, T) int
+}
+
+func (a *Archive[T]) Order(compare func(T, T) int) error { return errors.New("order unfinished") }
+func (a *Archive[T]) Store(record T) (bool, error)       { return false, errors.New("store unfinished") }
+func (a *Archive[T]) Contains(record T) bool             { return false }
+func (a *Archive[T]) Records() []T                       { return nil }
+func main()                                              {}
+`
+const archiveTreeHidden = `package main
+
+import (
+	"cmp"
+	"io"
+	"orbital/colony/levels"
+	"slices"
+	"testing"
+)
+
+func hiddenArchive[T any](t *testing.T, inputs []T, compare func(T, T) int) {
+	t.Helper()
+	var archive Archive[T]
+	if archive.Contains(inputs[0]) || len(archive.Records()) != 0 {
+		t.Fatal("zero value read")
+	}
+	if _, err := archive.Store(inputs[0]); err == nil {
+		t.Fatal("missing comparator")
+	}
+	if err := archive.Order(nil); err == nil {
+		t.Fatal("nil order")
+	}
+	if err := archive.Order(compare); err != nil {
+		t.Fatal(err)
+	}
+	var want []T
+	for _, record := range inputs {
+		duplicate := slices.ContainsFunc(want, func(old T) bool { return compare(old, record) == 0 })
+		added, err := archive.Store(record)
+		if err != nil || added == duplicate {
+			t.Fatal("duplicate policy")
+		}
+		if !duplicate {
+			want = append(want, record)
+		}
+		if !archive.Contains(record) {
+			t.Fatal("search miss after insertion")
+		}
+	}
+	slices.SortFunc(want, compare)
+	got := archive.Records()
+	if !slices.EqualFunc(got, want, func(a, b T) bool { return compare(a, b) == 0 }) {
+		t.Fatalf("traversal %v want %v", got, want)
+	}
+	got[0] = inputs[len(inputs)-1]
+	if !slices.EqualFunc(archive.Records(), want, func(a, b T) bool { return compare(a, b) == 0 }) {
+		t.Fatal("snapshot aliases tree")
+	}
+	if archive.Order(compare) == nil {
+		t.Fatal("cannot reorder a populated tree")
+	}
+}
+func TestHiddenArchiveOrdering(t *testing.T) {
+	world := levels.Start("14-5-archive-tree", io.Discard, 145)
+	xs := []int{-5, 0, 5}
+	for i := 0; i < 200; i++ {
+		xs = append(xs, world.Data.SensorReadings[i]%300-150)
+	}
+	hiddenArchive(t, xs, cmp.Compare[int])
+	hiddenArchive(t, xs, func(a, b int) int { return cmp.Compare(b, a) })
+	for _, xs := range [][]int{{3}, {1, 2, 3, 4, 5}, {5, 4, 3, 2, 1}, {2, 2, 2}} {
+		hiddenArchive(t, xs, cmp.Compare[int])
+	}
+	hiddenArchive(t, []string{"z", "a", "z", "🚀"}, cmp.Compare[string])
+	type memo struct {
+		Rank int
+		Text string
+	}
+	hiddenArchive(t, []memo{{2, "first"}, {1, "low"}, {2, "ignored"}}, func(a, b memo) int { return cmp.Compare(a.Rank, b.Rank) })
+	var a Archive[int]
+	_ = a.Order(cmp.Compare[int])
+	_, _ = a.Store(4)
+	if a.Contains(3) || a.Contains(5) {
+		t.Fatal("missing search")
+	}
+	var b Archive[memo]
+	_ = b.Order(func(a, b memo) int { return cmp.Compare(a.Rank, b.Rank) })
+	_, _ = b.Store(memo{2, "first"})
+	_, _ = b.Store(memo{2, "ignored"})
+	if b.Records()[0].Text != "first" {
+		t.Fatal("duplicate replaced original")
+	}
+}
+`

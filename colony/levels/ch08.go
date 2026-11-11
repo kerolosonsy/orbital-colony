@@ -522,4 +522,225 @@ nil بيعبّر عن "مفيش قيمة" من غير ما تحتاج قيمة �
 ## النجوم ⭐
 كل سؤال للرادار بياخد tick. الرادار نفسه بيختار الأقرب، يعني حلّك بيمشي بالـ greedy تلقائياً.`,
 	})
+	add(&Level{ID: "8-4-cart-chain", Chapter: 8, Kind: "lab", Title: "سلسلة العربات", Goal: "وصّل وافصل عربات من سلسلة من غير ما تضيّع باقي القطر", Requires: []string{"pointer", "struct"}, Bridge: []int{29},
+		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: cartChainStarter, ReadOnly: false}},
+		Lesson: `# عربات ماسكة في بعض
+
+كل عربة شايلة اسمها وعنوان اللي بعدها. القطر مش محتاج generics ولا recursion: هنمشي على الوصلات بحلقة عادية، باستخدام pointers اللي عرفناها في الفصل ده.
+
+## قبل ما تكتب
+- مين لازم يتغيّر لما تدخل عربة قبل أول واحدة؟
+- هتحتفظ بعنوان باقي السلسلة إزاي وإنت بتغيّر وصلة؟
+
+## عقدة ووصلة
+~~~go
+type Lamp struct { Label string; Next *Lamp }
+last := &Lamp{Label: "blue"}
+first := &Lamp{Label: "red", Next: last}
+fmt.Println(first.Next.Label) // blue
+~~~
+~Next *Lamp~ ممكن يبقى nil: ده آخر السلسلة. ~&Lamp{...}~ بيعمل قيمة وياخد عنوانها؛ الـ pointer بيخلّي عقدة تشير لعقدة تانية من نفس النوع من غير حجم لا نهائي.
+
+## امشي من غير ما تغيّر البداية
+~~~go
+for p := first; p != nil; p = p.Next {
+ fmt.Println(p.Label)
 }
+~~~
+~p~ مؤشر مؤقت. تغيير p مش بيغيّر first. افحص nil قبل ما تقرأ field؛ القايمة الفاضية بدايتها nil.
+
+## غيّر الوصلة: مثال مختلف
+~~~go
+middle := &Lamp{Label: "green", Next: first.Next}
+first.Next = middle
+~~~
+دالة بناء صغيرة بتاخد الوصلة القديمة كـ pointer parameter:
+~~~go
+func linkedLamp(next *Lamp,label string) *Lamp {
+ return &Lamp{Label:label,Next:next}
+}
+extra:=linkedLamp(last,"white")
+fmt.Println(extra.Next.Label) // blue
+~~~
+استخدم نفس فكرة helper للعربات عند إدخال البداية أو الوسط، عشان دالة البناء تستقبل عنوان الجزء اللي هتكمل عليه.
+
+خزّن الوصلة القديمة في العقدة الجديدة قبل ما توصّلها. للحذف، العقدة السابقة بتشير للي بعد المحذوفة؛ حذف البداية حالة خاصة لأن Head نفسها بتتغيّر.
+
+## شكل الاستدعاء
+~~~go
+var convoy Convoy
+err:=convoy.Couple(0,"water")
+at:=convoy.Locate("water")
+tags:=convoy.Tags()
+removed:=convoy.Release("water")
+fmt.Println(err,at,tags,removed) // <nil> 0 [water] true
+~~~
+دي تجربة للعقد؛ تنفيذ الوصلات هو شغلك. ~ErrCoupling~ sentinel error موجودة في starter؛ رجّعها زي ما هي للموقع البايظ عشان errors.Is تقدر تتعرف عليها.
+
+## أخطاء شائعة
+~~~go
+first.Next = &Lamp{Label: "green"} // باقي السلسلة ضاع
+fmt.Println(last.Next.Label)      // nil: panic
+~~~
+الـ slice اللي بترجعها لازم تكون جديدة، عشان تعديلها ميغيّرش بيانات العربات. شغلنا هنا تسلسلي؛ الوصول المتزامن مش جزء من العقد.
+
+## المهمة
+نفّذ ~Convoy~ من عقد ~Cart{Tag string; Next *Cart}~ وبداية ~Head *Cart~؛ الـ zero value فاضية وشغالة. ~Couple(at, tag)~ تدخل قبل الموقع at من0 لحد الطول شامل الطرفين؛ أي موقع تاني يرجّع ~ErrCoupling~ من غير تعديل.
+
+~Release(tag) bool~ تحذف أول تطابق فقط؛ false لو مفيش. ~Locate(tag) int~ ترجع موقع أول تطابق من صفر، أو -1. ~Tags() []string~ ترجع نسخة مستقلة بالترتيب، وفاضية لو القطر فاضي. مثال: بعد Couple(0,"a") وCouple(1,"b")، Tags نتيجتها [a b]. مفيش Report في المختبر؛ التستات بتراجع العقد مباشرة.
+`, Hints: []string{"افصل حالة at=0 عن المشي للعقدة السابقة.", "احفظ Next القديمة في العقدة الجديدة؛ في الحذف خلّي السابق يعدّي العقدة المطلوبة.", "عدّ المواقع بحلقة؛ عند nil قبل الموقع المطلوب رجّع ErrCoupling من غير تعديل."},
+		En: &LevelText{Title: "Cart Chain", Goal: "Couple and release carts without losing the rest of the convoy", Files: []LabFile{{Name: "main.go", Starter: cartChainStarter, ReadOnly: false}}, Lesson: `# Carts Linked Together
+
+Each cart stores its tag and the address of the next cart. No generics or recursion are needed: follow pointers with an ordinary loop, using this chapter's pointer tools.
+
+## Before you write
+- What must change when inserting before the first cart?
+- How will you preserve the remaining chain while changing a link?
+
+## A node and a link
+~~~go
+type Lamp struct { Label string; Next *Lamp }
+last := &Lamp{Label: "blue"}
+first := &Lamp{Label: "red", Next: last}
+fmt.Println(first.Next.Label) // blue
+~~~
+~Next *Lamp~ may be nil, marking the end. ~&Lamp{...}~ creates a value and takes its address. A pointer lets a node refer to its own type without infinite size.
+
+## Walk without changing the beginning
+~~~go
+for p := first; p != nil; p = p.Next {
+ fmt.Println(p.Label)
+}
+~~~
+~p~ is a temporary pointer. Reassigning it does not change first. Check nil before reading a field; an empty list begins with nil.
+
+## Change a link: a different example
+~~~go
+middle := &Lamp{Label: "green", Next: first.Next}
+first.Next = middle
+~~~
+A small construction function receives the old link as a pointer parameter:
+~~~go
+func linkedLamp(next *Lamp,label string) *Lamp {
+ return &Lamp{Label:label,Next:next}
+}
+extra:=linkedLamp(last,"white")
+fmt.Println(extra.Next.Label) // blue
+~~~
+Use the same helper idea for cart insertion at the head or middle; the pointer parameter receives the address of the remaining chain.
+
+Save the old link in the new node before attaching it. To delete, the preceding node points past the removed node. Removing the first node is special because Head itself must change.
+
+## Calling the contract
+~~~go
+var convoy Convoy
+err:=convoy.Couple(0,"water")
+at:=convoy.Locate("water")
+tags:=convoy.Tags()
+removed:=convoy.Release("water")
+fmt.Println(err,at,tags,removed) // <nil> 0 [water] true
+~~~
+This exercises the contract; implementing links is your work. ~ErrCoupling~ is the starter's sentinel error. Return it unchanged for invalid positions so errors.Is can recognize it.
+
+## Common mistakes
+~~~go
+first.Next = &Lamp{Label: "green"} // Loses the remaining chain
+fmt.Println(last.Next.Label)      // nil: panic
+~~~
+Return a fresh slice so changing it cannot change cart data. This contract is sequential; concurrent access is outside its scope.
+
+## Your mission
+Implement ~Convoy~ using ~Cart{Tag string; Next *Cart}~ nodes and ~Head *Cart~. Its zero value is usable and empty. ~Couple(at, tag)~ inserts before zero-based position at, accepting 0 through length inclusive. Other positions return ~ErrCoupling~ without mutation.
+
+~Release(tag) bool~ deletes only the first match, returning false for a miss. ~Locate(tag) int~ returns the first zero-based position or -1. ~Tags() []string~ returns an independent ordered snapshot, empty for an empty convoy. For example, Couple(0,"a") then Couple(1,"b") yields [a b]. There is no Report in this lab; tests call the contract directly.
+`, Hints: []string{"Separate at=0 from walking to the preceding node.", "Preserve the old Next in the new node; deletion links the predecessor past a match.", "Count positions in a loop; nil before the required position means ErrCoupling without mutation."}},
+		Lab: &Lab{ReqFile: "main.go", Hidden: cartChainHidden},
+	})
+}
+
+const cartChainStarter = `package main
+
+import "errors"
+
+var ErrCoupling = errors.New("invalid coupling position")
+
+type Cart struct {
+	Tag  string
+	Next *Cart
+}
+type Convoy struct{ Head *Cart }
+
+func (c *Convoy) Couple(at int, tag string) error { return ErrCoupling }
+func (c *Convoy) Release(tag string) bool         { return false }
+func (c *Convoy) Locate(tag string) int           { return -1 }
+func (c *Convoy) Tags() []string                  { return nil }
+func main()                                       {}
+`
+const cartChainHidden = `package main
+
+import (
+	"errors"
+	"fmt"
+	"io"
+	"orbital/colony/levels"
+	"slices"
+	"testing"
+)
+
+func TestHiddenCouplings(t *testing.T) {
+	var convoy Convoy
+	if convoy.Head != nil || len(convoy.Tags()) != 0 || convoy.Release("none") || convoy.Locate("none") != -1 {
+		t.Fatal("empty convoy")
+	}
+	world := levels.Start("8-4-cart-chain", io.Discard, 829)
+	r := world.Rand
+	var want []string
+	for step := 0; step < 250; step++ {
+		at := r.Intn(len(want) + 1)
+		tag := fmt.Sprint(world.Data.SensorReadings[step] % 12)
+		if err := convoy.Couple(at, tag); err != nil {
+			t.Fatal(err)
+		}
+		want = append(want, "")
+		copy(want[at+1:], want[at:])
+		want[at] = tag
+		for _, bad := range []int{-1, len(want) + 1} {
+			if !errors.Is(convoy.Couple(bad, "bad"), ErrCoupling) {
+				t.Fatal("invalid position must match ErrCoupling")
+			}
+		}
+		if !slices.Equal(convoy.Tags(), want) || convoy.Locate(tag) != slices.Index(want, tag) {
+			t.Fatal("order or first match")
+		}
+		snapshot := convoy.Tags()
+		snapshot[0] = "changed"
+		if !slices.Equal(convoy.Tags(), want) {
+			t.Fatal("Tags aliases nodes")
+		}
+		if step%2 == 0 {
+			if !convoy.Release(tag) {
+				t.Fatal("release existing")
+			}
+			i := slices.Index(want, tag)
+			want = append(want[:i], want[i+1:]...)
+		}
+		if convoy.Release("missing") || !slices.Equal(convoy.Tags(), want) {
+			t.Fatal("missing release mutated convoy")
+		}
+	}
+	for len(want) > 0 {
+		tag := want[len(want)-1]
+		i := slices.Index(want, tag)
+		if !convoy.Release(tag) {
+			t.Fatal("drain")
+		}
+		want = append(want[:i], want[i+1:]...)
+		if !slices.Equal(convoy.Tags(), want) {
+			t.Fatal("drain order")
+		}
+	}
+	if convoy.Head != nil {
+		t.Fatal("last cart must clear head")
+	}
+}
+`

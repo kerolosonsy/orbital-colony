@@ -102,8 +102,8 @@ var Chapters = []Chapter{
 	{"التزامن", "Concurrency", 12, "السباق", "mutex و race detector", true, "The Race", "mutex and the race detector"},
 	{"التزامن", "Concurrency", 13, "العواصف", "context و timeouts", true, "Storms", "context and timeouts"},
 	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 14, "القوالب", "generics", true, "Templates", "generics"},
-	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 15, "الكهوف", "خوارزميات: BFS و sorting", true, "Caves", "Algorithms: BFS and sorting"},
-	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 16, "المختبر", "go test و benchmarks", true, "The Lab", "go test and benchmarks"},
+	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 15, "الكهوف", "خوارزميات: BFS وsorting وbinary search وrecursion وheap", true, "Caves", "Algorithms: BFS, sorting, binary search, recursion, and heaps"},
+	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 16, "المختبر", "go test وbenchmarks وfuzzing وساعة محقونة", true, "The Lab", "go test, benchmarks, fuzzing, and injected time"},
 	{"الحِرفة (generics، خوارزميات، تستات)", "Craft (generics, algorithms, tests)", 17, "الأعماق", "طبقات، ومصفوفات 3D، وBFS ثلاثي الأبعاد", true, "The Depths", "Layers, 3D arrays, and three-dimensional BFS"},
 }
 

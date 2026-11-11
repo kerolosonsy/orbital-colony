@@ -1,6 +1,8 @@
 package levels
 
 import (
+	"context"
+	"errors"
 	"fmt"
 
 	"orbital/colony/i18n"
@@ -643,4 +645,182 @@ err := g.Wait() // أول error بيلغي الباقي
 
 ده النمط اللي هتستخدمه في الشغل لما تبعت كذا request في نفس الوقت.`,
 	})
+	add(&Level{ID: "13-4-chain-of-command", Chapter: 13, Title: "سلسلة القيادة", Goal: "عدّي context عبر القيادة والوسيط والمسبار ورجّع سبب التوقف", Requires: []string{"sel:context.Context", "select"}, Bridge: []int{41}, Par: 50, Gold: 30, MaxTicks: 300,
+		Starter: chainOfCommandStarter, Lesson: `# نفس الأمر لآخر السلسلة
+
+الـ context مش إعداد ثابت للجهاز؛ هو عمر عملية واحدة. لو وسيط قطع السلسلة، المسبار هيفضل شغال بعد ما القيادة وقّفت المهمة.
+
+## قبل ما تكتب
+- مين مالك cancel ومين بس بيستقبل ctx؟
+- لو الأب انتهى قبل الدخول، هل لازم نبدأ شغل أصلاً؟
+
+## عدّي ctx كأول parameter
+~~~go
+func outer(ctx context.Context) error { return inner(ctx) }
+func inner(ctx context.Context) error { return ctx.Err() }
+~~~
+استورد ~context~. ~context.Context~ عقد بيمرر الإلغاء والموعد. المثال بيرجّع حالة السياق فوراً، مش بينتظر شغل. متحفظش ctx في struct؛ كل استدعاء يستقبل السياق اللي يخصه.
+
+## الانتظار يشارك في الإلغاء
+~~~go
+select {
+case <-ctx.Done():
+ return ctx.Err()
+case answer := <-answers:
+ return answer
 }
+~~~
+~Done~ قناة بتتقفل عند الإلغاء، و~Err~ nil قبل التوقف، وبعده Canceled أو DeadlineExceeded. لو القناتين جاهزين، select تختار أي واحدة؛ متفترضش أولوية. في المهمة مفيش نتيجة شغل، فاستنى Done فقط. السياق الملغي بالفعل يرجع فوراً.
+
+## موعد الأب لا يتمدّد
+~~~go
+parent,stop := context.WithTimeout(context.Background(),colony.Ticks(8))
+defer stop()
+child,cancel := context.WithTimeout(parent,colony.Ticks(80))
+defer cancel()
+deadline,ok := child.Deadline()
+fmt.Println(deadline,ok)
+~~~
+~Deadline()~ بترجّع الموعد وbool لوجوده. رغم طلب80، الابن يقف عند موعد الأب الأقرب. ~WithCancel~ بتدي إلغاء يدوي و~WithTimeout~ بتدي موعد؛ اللي أنشأ السياق لازم ينادي cancel. الدوال الداخلية ترجّع ctx.Err من غير استبدال السبب.
+
+## راقب حدود الاستدعاءات
+~~~go
+colony.TraceCommand(ctx,"relay.enter")
+err := next(ctx)
+colony.TraceCommand(ctx,"relay.exit")
+return err
+~~~
+~TraceCommand~ بتسجل الاسم وحالة السياق وموعده في العالم من غير ticks. دي مراقبة لحدود الدالة؛ مش بتلغي ولا بتستنى. خليها في الدوال التلاتة زي الـ starter.
+
+## أخطاء شائعة
+~~~go
+err := next(context.Background()) // فقد إلغاء الأب وموعده
+~~~
+ومتعملش context جديد في field أو ترجع nil بعد Done؛ كده القيادة مش هتعرف إن العملية اتوقفت.
+
+## المهمة
+كمّل ~command(ctx) → relay(ctx) → probe(ctx)~، كل واحدة تستقبل context.Context كأول parameter. سجّل بالترتيب command.enter ثم relay.enter ثم probe.enter، وبعد رجوع المسبار probe.exit ثم relay.exit ثم command.exit. ممنوع ctx في struct.
+
+نفّذ السلسلة مرتين زي main: أب ملغي بـ WithCancel، وبعدين أب بـ WithTimeout ومدته ~colony.Ticks(colony.Reading(0))~. المسبار ينتظر Done بـ select ويرجع Err، والوسيط والقيادة يرجّعوا نفس الخطأ. سجل كل حدود الدخول والخروج حتى لو ملغي مسبقاً. بعد التحقق إن السببين Canceled وDeadlineExceeded ابعت تقرير واحد بالنص ~canceled deadline~. التحقق بيراجع الأثر والموعد وحالة السياق، مش النص لوحده.
+`, Hints: []string{"مينفعش relay تعمل Background؛ عدّي ctx اللي وصلها.", "خلّي probe تستنى Done وتعيد ctx.Err؛ الخروج بيتسجّل بعد الانتظار.", "جرّب ملغي مسبقاً وبعدين موعد من Reading(0)، وارجع نفس الخطأ عبر كل المستويات."},
+		En: &LevelText{Title: "Chain of Command", Goal: "Pass context through command, relay, and probe and return the stop reason", Starter: chainOfCommandStarter, Lesson: `# One Order Through the Whole Chain
+
+A context describes one operation's lifetime, rather than permanent device configuration. If a relay breaks the chain, the probe can continue after command has stopped the mission.
+
+## Before you write
+- Who owns cancel, and who only receives ctx?
+- If the parent is already done on entry, should work even begin?
+
+## Pass ctx as the first parameter
+~~~go
+func outer(ctx context.Context) error { return inner(ctx) }
+func inner(ctx context.Context) error { return ctx.Err() }
+~~~
+Import ~context~. ~context.Context~ carries cancellation and deadlines. This example immediately returns context state rather than waiting for work. Do not store ctx in a struct; receive the relevant context on each call.
+
+## Waiting participates in cancellation
+~~~go
+select {
+case <-ctx.Done():
+ return ctx.Err()
+case answer := <-answers:
+ return answer
+}
+~~~
+~Done~ closes on cancellation. ~Err~ is nil before stopping, then Canceled or DeadlineExceeded. If both channels are ready, select may choose either; do not assume priority. This mission has no work result, so wait only for Done. An already-canceled context returns immediately.
+
+## A parent's deadline cannot be extended
+~~~go
+parent,stop := context.WithTimeout(context.Background(),colony.Ticks(8))
+defer stop()
+child,cancel := context.WithTimeout(parent,colony.Ticks(80))
+defer cancel()
+deadline,ok := child.Deadline()
+fmt.Println(deadline,ok)
+~~~
+~Deadline()~ returns a time and a presence bool. Despite requesting 80 ticks, the child stops at the parent's earlier deadline. ~WithCancel~ supplies manual cancellation; ~WithTimeout~ supplies a deadline. The creator must call cancel. Inner functions return ctx.Err without replacing its reason.
+
+## Observe call boundaries
+~~~go
+colony.TraceCommand(ctx,"relay.enter")
+err := next(ctx)
+colony.TraceCommand(ctx,"relay.exit")
+return err
+~~~
+~TraceCommand~ records the label, context state, and deadline in the world without ticks. It observes boundaries without canceling or waiting. Keep it in all three functions as shown in the starter.
+
+## Common mistakes
+~~~go
+err := next(context.Background()) // Loses the parent's cancellation and deadline
+~~~
+Do not put a replacement context in a field or return nil after Done; command would lose the reason the operation stopped.
+
+## Your mission
+Complete ~command(ctx) → relay(ctx) → probe(ctx)~, each taking context.Context first. Trace command.enter, relay.enter, probe.enter, then probe.exit, relay.exit, command.exit while unwinding. Do not store ctx in a struct.
+
+Run twice as in main: an already-canceled WithCancel parent, then a WithTimeout parent lasting ~colony.Ticks(colony.Reading(0))~. The probe waits for Done with select and returns Err; relay and command return the same error. Trace every boundary even when canceled before entry. After checking for Canceled and DeadlineExceeded, send exactly one report containing ~canceled deadline~. Verification inspects traces, deadline, and context state as well as the text.
+`, Hints: []string{"Relay must pass its received ctx instead of creating Background.", "Have probe wait for Done and return ctx.Err; trace exit after waiting.", "Exercise already-canceled and Reading(0) deadline parents, returning the error through every level."}}, Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			w.Realtime = true
+			w.Data.SensorReadings = []int{15 + w.Rand.Intn(10)}
+			w.Check = func(w *sim.World) (bool, string) {
+				stages := []string{"command.enter", "relay.enter", "probe.enter", "probe.exit", "relay.exit", "command.exit"}
+				valid := len(w.Data.CommandLog) == 12
+				if valid {
+					deadline := w.Data.CommandLog[6].Deadline
+					for i, record := range w.Data.CommandLog {
+						valid = valid && record.Stage == stages[i%6]
+						if i < 6 {
+							valid = valid && errors.Is(record.Err, context.Canceled)
+						} else {
+							valid = valid && record.HasDeadline && record.Deadline.Equal(deadline)
+							if i%6 < 3 {
+								valid = valid && record.Err == nil
+							} else {
+								valid = valid && errors.Is(record.Err, context.DeadlineExceeded)
+							}
+						}
+					}
+				}
+				if valid && len(w.Reports) == 1 && w.Reports[0] == "canceled deadline" {
+					return true, i18n.T("الإلغاء والموعد وصلوا للتلات مستويات ورجعوا للقيادة", "Cancellation and deadline reached all three levels and returned to command")
+				}
+				return false, i18n.T("مستني أثر دخول وخروج المستويات بالـ context الأصلي وتقرير canceled deadline", "Waiting for all entry/exit traces with the original context and a canceled deadline report")
+			}
+		}})
+}
+
+const chainOfCommandStarter = `package main
+
+import (
+	"context"
+	"orbital/colony"
+)
+
+func command(ctx context.Context) error {
+	colony.TraceCommand(ctx, "command.enter")
+	err := relay(ctx)
+	colony.TraceCommand(ctx, "command.exit")
+	return err
+}
+func relay(ctx context.Context) error {
+	colony.TraceCommand(ctx, "relay.enter")
+	err := probe(context.Background()) // Preserve the caller's context instead.
+	colony.TraceCommand(ctx, "relay.exit")
+	return err
+}
+func probe(ctx context.Context) error {
+	colony.TraceCommand(ctx, "probe.enter")
+	colony.TraceCommand(ctx, "probe.exit")
+	return nil
+}
+func main() {
+	canceled, stop := context.WithCancel(context.Background())
+	stop()
+	_ = command(canceled)
+	ctx, cancel := context.WithTimeout(context.Background(), colony.Ticks(colony.Reading(0)))
+	defer cancel()
+	_ = command(ctx)
+	colony.Report("unfinished")
+}
+`

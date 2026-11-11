@@ -1,6 +1,7 @@
 package colony
 
 import (
+	"context"
 	"errors"
 
 	"orbital/colony/internal/sim"
@@ -50,3 +51,16 @@ func FaultCode(err error) string {
 	}
 	return ""
 }
+
+// TraceCommand records the supplied context at a named command boundary.
+func TraceCommand(ctx context.Context, stage string) { world.TraceCommand(ctx, stage) }
+
+type RescueRequest = sim.RescueRequest
+
+// RescueArrivals returns a copy of the current arrivals, initially and after
+// every successful rescue. Read each wave once to avoid enqueueing duplicates.
+func RescueArrivals() []RescueRequest { return world.RescueArrivals() }
+
+// Rescue serves the highest-priority pending request (smaller ID breaks ties).
+// A rejected request permanently fails the mission, and releases no new wave.
+func Rescue(id int) bool { return world.Rescue(id) }

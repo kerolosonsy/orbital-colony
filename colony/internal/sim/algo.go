@@ -9,6 +9,11 @@ type Kg float64
 
 // Datasets are sensor readings for the generics chapter.
 type Datasets struct {
+	CommandLog     []CommandRecord
+	RescueWaves    [][]RescueRequest
+	RescuePending  []RescueRequest
+	Rescued        []int
+	RescueFault    bool
 	CargoAmounts   [3]int
 	SensorReadings []int
 	DrillAttempts  int

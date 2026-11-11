@@ -495,4 +495,201 @@ if ok {
 ## any
 ~any~ هو ~interface{}~: interface مفيهوش ولا method، فأي قيمة في Go بتحققه. عشان كده ~colony.Report(v any)~ بتقبل أي حاجة. بس كل مرة تستخدم ~any~، بتخسر مساعدة الـ compiler في الأنواع، فاستخدمه بحساب.`,
 	})
+	add(&Level{ID: "9-4-small-plugs", Chapter: 9, Kind: "lab", Title: "مقابس صغيرة", Goal: "افصل أوامر المنارات عن التيرمنال بمقابس صغيرة", Requires: []string{"iface", "sel:io.Reader"}, Bridge: []int{11, 22},
+		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: smallPlugsStarter, ReadOnly: false}},
+		Lesson: `# منطق يشتغل بأي سلك
+
+المنارات ليها دليل عناوين، لكن استقبال الأوامر مش لازم يعرف الدليل مخزّن فين. هنستخدم interfaces صغيرة بدل ربط المنطق بالتيرمنال.
+
+## قبل ما تكتب
+- الدالة محتاجة ملف كامل، ولا مجرد حاجة تعرف تقرأ منها؟
+- هتميّز نهاية الإدخال عن خطأ في السلك إزاي؟
+
+## io.Reader وio.Writer
+~~~go
+var in io.Reader = strings.NewReader("hello\n")
+var out bytes.Buffer
+_, err := io.Copy(&out, in)
+fmt.Println(out.String(), err)
+~~~
+استورد ~io~ و~strings~ و~bytes~ للمثال. ~io.Reader~ عقد Read، و~io.Writer~ عقد Write؛ ~strings.NewReader~ مصدر نص في الذاكرة و~bytes.Buffer~ بتجمع الناتج. ~io.Copy~ بينقل البيانات ويرجّع عدد البايتات وخطأ. المثال بينسخ نص، مش بيفسّر أوامر.
+
+## interface على قد الاحتياج
+~~~go
+type BadgeLookup interface { Badge(string) (int, bool) }
+func allowed(book BadgeLookup) bool {
+ rank, ok := book.Badge("pilot")
+ return ok && rank > 2
 }
+~~~
+أي نوع عليه Badge بالتوقيع ده يحقق العقد تلقائياً. عرّف interface عند المستهلك، بالـ method الوحيدة اللي محتاجها؛ متطلبش حفظ أو حذف طالما مش بتستخدمهم.
+
+## قراية سطر بسطر
+~~~go
+scanner := bufio.NewScanner(in)
+for scanner.Scan() {
+ word := strings.TrimSpace(scanner.Text())
+ _, err := fmt.Fprintln(&out, word)
+ if err != nil { return err }
+}
+return scanner.Err()
+~~~
+استورد ~bufio~. ~Scan~ بتقدّم سطر، ~Text~ بترجّعه من غير نهاية السطر، و~TrimSpace~ بتشيل المسافات الطرفية. بعد الحلقة ~Err~ بتميّز EOF العادي عن فشل القراية أو سطر أكبر من حد Scanner الافتراضي. ~fmt.Fprintln~ بتكتب سطر وبترجّع خطأ لازم يرجع للي ناداك.
+
+## أخطاء شائعة
+~~~go
+fmt.Println(address) // تجاهل out وكتب في التيرمنال
+for scanner.Scan() {} // نسي scanner.Err(): بلع فشل القراية
+~~~
+نهاية النص مش أمر إغلاق. وخطأ الكتابة لازم يوقّف القراية فوراً، بدل تكمّل وتضيّع ردود.
+
+## المهمة
+عرّف ~BeaconLookup~ فيه ~Beacon(string) (string, bool)~. نفّذ ~RelayOrders(in io.Reader, out io.Writer, beacons BeaconLookup) error~. كل سطر بعد TrimSpace مفتاح: لو موجود اطبع عنوانه بسطر، غير كده اطبع ~unknown~، بما فيه السطر الفاضي. المفاتيح حساسة لحالة الحروف، والتكرار مسموح.
+
+المفتاح ~end~ يكتب ~closed~ ويرجع فوراً من غير lookup ولا قراية اللي بعده. EOF العادي يكتب ~exhausted~. كل سطر ناتج ينتهي بـ newline. رجّع أخطاء القراية والكتابة من غير بلعها؛ استخدم Scanner بحدّه الافتراضي، ورجّع خطأه لو السطر طويل. دليل فاضي شغال. مفيش Report ولا وصول للـ stdin/stdout هنا.
+`, Hints: []string{"استقبل المصدر والوجهة كـ parameters، مش متغيرات عامة.", "افحص end قبل استدعاء Beacon؛ false معناها unknown.", "بعد كل Fprintln افحص الخطأ؛ بعد حلقة Scan افحص Err قبل exhausted."},
+		En: &LevelText{Title: "Small Plugs", Goal: "Separate beacon commands from the terminal with small interfaces", Files: []LabFile{{Name: "main.go", Starter: smallPlugsStarter, ReadOnly: false}}, Lesson: `# Logic That Works With Any Wire
+
+Beacons have an address directory, but command handling need not know where it is stored. Use small interfaces instead of binding logic to a terminal.
+
+## Before you write
+- Does the function need a whole file, or merely something it can read?
+- How will you distinguish exhausted input from a broken wire?
+
+## io.Reader and io.Writer
+~~~go
+var in io.Reader = strings.NewReader("hello\n")
+var out bytes.Buffer
+_, err := io.Copy(&out, in)
+fmt.Println(out.String(), err)
+~~~
+Import ~io~, ~strings~, and ~bytes~ for this example. ~io.Reader~ specifies Read and ~io.Writer~ specifies Write. ~strings.NewReader~ supplies memory text; ~bytes.Buffer~ collects output. ~io.Copy~ transfers bytes and returns a byte count and error. This example copies text rather than interpreting commands.
+
+## An interface sized to the need
+~~~go
+type BadgeLookup interface { Badge(string) (int, bool) }
+func allowed(book BadgeLookup) bool {
+ rank, ok := book.Badge("pilot")
+ return ok && rank > 2
+}
+~~~
+Any type with this Badge signature satisfies the interface automatically. Define it at the consumer with only the method needed; do not demand storage or deletion methods you never use.
+
+## Read line by line
+~~~go
+scanner := bufio.NewScanner(in)
+for scanner.Scan() {
+ word := strings.TrimSpace(scanner.Text())
+ _, err := fmt.Fprintln(&out, word)
+ if err != nil { return err }
+}
+return scanner.Err()
+~~~
+Import ~bufio~. ~Scan~ advances one line; ~Text~ returns it without its line ending; ~TrimSpace~ removes surrounding whitespace. After the loop, ~Err~ distinguishes normal EOF from read failure or a line exceeding Scanner's default limit. ~fmt.Fprintln~ writes a line and returns an error that must reach the caller.
+
+## Common mistakes
+~~~go
+fmt.Println(address) // Ignores out and writes to the terminal
+for scanner.Scan() {} // Forgetting scanner.Err() swallows read failures
+~~~
+Exhausted text is different from an explicit close command. Stop on a write error instead of continuing and losing replies.
+
+## Your mission
+Define ~BeaconLookup~ with ~Beacon(string) (string, bool)~. Implement ~RelayOrders(in io.Reader, out io.Writer, beacons BeaconLookup) error~. Each trimmed line is a key. Write its address on a line when found; otherwise write ~unknown~, including for a blank line. Keys are case sensitive and repeats are allowed.
+
+The key ~end~ writes ~closed~ and returns immediately without lookup or processing later lines. Normal EOF writes ~exhausted~. Every output line ends in a newline. Propagate read and write errors; use Scanner's default limit and return its error for an oversized line. Empty directories work. Do not use Report or stdin/stdout in this lab.
+`, Hints: []string{"Receive input and output as parameters, not globals.", "Check end before calling Beacon; false means unknown.", "Check every Fprintln error; after Scan, check Err before writing exhausted."}},
+		Lab: &Lab{ReqFile: "main.go", Hidden: smallPlugsHidden},
+	})
+}
+
+const smallPlugsStarter = `package main
+
+import (
+	"errors"
+	"io"
+)
+
+type BeaconLookup interface{ Beacon(string) (string, bool) }
+
+func RelayOrders(in io.Reader, out io.Writer, beacons BeaconLookup) error {
+	return errors.New("relay unfinished")
+}
+func main() {}
+`
+const smallPlugsHidden = `package main
+
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"io"
+	"orbital/colony/levels"
+	"strings"
+	"testing"
+)
+
+type hiddenBeacons map[string]string
+
+func (b hiddenBeacons) Beacon(tag string) (string, bool) { address, ok := b[tag]; return address, ok }
+
+var hiddenWireError = errors.New("wire failed")
+
+type hiddenBrokenReader struct{}
+
+func (hiddenBrokenReader) Read(p []byte) (int, error) { return 0, hiddenWireError }
+
+type hiddenBrokenWriter struct{ left int }
+
+func (w *hiddenBrokenWriter) Write(p []byte) (int, error) {
+	if w.left == 0 {
+		return 0, hiddenWireError
+	}
+	w.left--
+	return len(p), nil
+}
+func TestHiddenRelayOutcomes(t *testing.T) {
+	for _, tc := range []struct{ input, want string }{
+		{"", "exhausted\n"}, {"end\nignored\n", "closed\n"},
+		{" A \nA\n?\n\nend\n", "dock\ndock\nunknown\nunknown\nclosed\n"},
+		{"A", "dock\nexhausted\n"}, {"-1\n999\n", "unknown\nunknown\nexhausted\n"},
+	} {
+		var out bytes.Buffer
+		if err := RelayOrders(strings.NewReader(tc.input), &out, hiddenBeacons{"A": "dock"}); err != nil || out.String() != tc.want {
+			t.Fatalf("%q: %q %v", tc.input, out.String(), err)
+		}
+	}
+	var out bytes.Buffer
+	if err := RelayOrders(strings.NewReader("x\nend\n"), &out, hiddenBeacons{}); err != nil || out.String() != "unknown\nclosed\n" {
+		t.Fatal("empty directory")
+	}
+	world := levels.Start("9-4-small-plugs", io.Discard, 94)
+	entries := hiddenBeacons{}
+	var input, want strings.Builder
+	for i := 0; i < 80; i++ {
+		tag := fmt.Sprintf("b%d", world.Data.SensorReadings[i]%20)
+		entries[tag] = "pad-" + tag
+		fmt.Fprintln(&input, tag)
+		fmt.Fprintln(&want, entries[tag])
+	}
+	want.WriteString("exhausted\n")
+	out.Reset()
+	if err := RelayOrders(strings.NewReader(input.String()), &out, entries); err != nil || out.String() != want.String() {
+		t.Fatal("random relay")
+	}
+}
+func TestHiddenRelayFailures(t *testing.T) {
+	var out bytes.Buffer
+	if !errors.Is(RelayOrders(hiddenBrokenReader{}, &out, hiddenBeacons{}), hiddenWireError) || out.Len() != 0 {
+		t.Fatal("reader error swallowed")
+	}
+	for _, limit := range []int{0, 1} {
+		if !errors.Is(RelayOrders(strings.NewReader("A\nend\n"), &hiddenBrokenWriter{left: limit}, hiddenBeacons{"A": "dock"}), hiddenWireError) {
+			t.Fatal("writer error swallowed")
+		}
+	}
+	if RelayOrders(strings.NewReader(strings.Repeat("x", 100000)), &out, hiddenBeacons{}) == nil {
+		t.Fatal("scanner failure swallowed")
+	}
+}
+`

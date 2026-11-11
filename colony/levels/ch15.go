@@ -569,6 +569,286 @@ for {
 - BFS عادي: ⭐⭐
 - Dijkstra: ⭐⭐⭐`,
 	})
+	add(&Level{ID: "15-4-deep-probe", Chapter: 15, Title: "المسبار العميق", Goal: "ابحث في الأعماق المرتبة وعدّ المنطقة المتصلة بالقاعدة", Requires: []string{"recursion"}, Bridge: []int{24}, Par: 0, Gold: 0, MaxTicks: 100,
+		Starter: deepProbeStarter, Lesson: `# نص البحث وزيارة الفروع
+
+الأرشيف علّمنا recursion. هنستخدمها دلوقتي للانتشار على خريطة، ومعاها binary search لقائمة أعماق مرتبة. الاتنين بيقلّلوا شغل مكرر بقواعد واضحة.
+
+## قبل ما تكتب
+- لو العمق متكرر، أنهي index مطلوب؟
+- إيه اللي يمنع زيارة خانتين بيرجعوا لبعض للأبد؟
+
+## binary search بحد يمين مستبعد
+~~~go
+xs:=[]int{2,5,5,9}
+lo,hi:=0,len(xs)
+for lo<hi {
+ mid:=lo+(hi-lo)/2
+ if xs[mid]<6 {lo=mid+1} else {hi=mid}
+}
+fmt.Println(lo) // 3: أول قيمة >= 6، مش تطابق
+~~~
+مجال البحث ~[lo,hi)~. لو القيمة أصغر من الهدف، استبعدها وكل اللي قبلها. غير كده احتفظ بالمنتصف كمرشح. عند التوقف lo أول قيمة مش أقل من الهدف، فافحص الحدود والمساواة عشان تفرّق التطابق عن عدم الوجود. ده يختار أول تكرار، ويشتغل للفاضي كمان.
+
+## خريطة وذاكرة زيارة
+~~~go
+grid:=colony.Grid()
+seen:=map[colony.Point]bool{}
+p:=colony.Point{X:0,Y:0}
+seen[p]=true
+fmt.Println(grid[0][0],seen[p])
+~~~
+~Grid~ زي BFS: الأبعاد grid[x][y] مش العكس، والصخر ~colony.Rock~ حاجز. الـ map بتسجل الخانات اللي حسبتها، ومش محتاج تغيّر العالم نفسه.
+
+## انتشار recursive: مثال خط واحد
+~~~go
+func openRun(open []bool,i int) int {
+ if i<0 || i>=len(open) || !open[i] {return 0}
+ return 1+openRun(open,i+1)
+}
+fmt.Println(openRun([]bool{true,true,false},0)) // 2
+~~~
+ده خط واحد بلا رجوع، مش حل الخريطة. في شبكة فيها دوائر، علّم الخانة visited قبل النداء على الجيران. التوقف: خارج الحدود أو صخر أو visited. النداء يرجّع عدد الخانات الجديدة، وجمع الأعداد مع1 يعدّ الخانة الحالية.
+
+## أخطاء شائعة
+~~~go
+count := flood(grid,x+1,y,seen)
+seen[colony.Point{X:x,Y:y}]=true // متأخر: الجار ممكن يرجعلك قبل العلامة
+~~~
+ومتعدّش كل الأرض المفتوحة: جيب معزول مش متصل بالقاعدة مش جزء من المنطقة المطلوبة. ومينفعش أول تطابق في المنتصف يوقف البحث لو فيه تكرار قبله.
+
+## المهمة
+اقرأ ~colony.Depths()~ المرتبة تصاعدياً، والهدف ~colony.Reading(0)~. نفّذ binary search في ~depthIndex~ ترجع أول index للهدف أو -1 لو مش موجود.
+
+نفّذ ~flood~ recursive لحساب كل خانة غير Rock متصلة بـ(0,0) شمال/شرق/جنوب/غرب، وعدّ البداية مرة واحدة. ابعت تقرير واحد ~[]int{index,count}~، مثلاً [3 12]. متحصدش ومتعدّش الجيوب المعزولة. مدخلات المهمة فيها تكرارات وهدف ممكن يغيب؛ الدالتين يتعاملوا مع قائمة أو خريطة فاضية بأمان.
+`, Hints: []string{"استخدم مجال [lo,hi) وكمّل ناحية الشمال عند المساواة.", "في flood افحص الحدود والصخر والزيارة قبل عدّ الخانة.", "علّم seen قبل الجيران الأربعة، واجمع نتايجهم مع1."},
+		En: &LevelText{Title: "Deep Probe", Goal: "Search sorted depths and count the region connected to base", Starter: deepProbeStarter, Lesson: `# Halving the Search and Visiting Branches
+
+The archive introduced recursion. Apply it to spreading across a map, alongside binary search over sorted depths. Both avoid repeated work through explicit rules.
+
+## Before you write
+- If the depth repeats, which index is required?
+- What prevents neighboring cells from visiting each other forever?
+
+## Binary search with an exclusive upper bound
+~~~go
+xs:=[]int{2,5,5,9}
+lo,hi:=0,len(xs)
+for lo<hi {
+ mid:=lo+(hi-lo)/2
+ if xs[mid]<6 {lo=mid+1} else {hi=mid}
+}
+fmt.Println(lo) // 3: first value >= 6, not an exact match
+~~~
+Search in ~[lo,hi)~. If the middle value is too small, discard it and everything before it. Otherwise retain the middle as a candidate. At termination, lo is the first value not below the target. Check bounds and equality to distinguish a match from absence. This selects the first duplicate and handles empty slices.
+
+## A map and visit memory
+~~~go
+grid:=colony.Grid()
+seen:=map[colony.Point]bool{}
+p:=colony.Point{X:0,Y:0}
+seen[p]=true
+fmt.Println(grid[0][0],seen[p])
+~~~
+~Grid~ uses grid[x][y], as in BFS, and ~colony.Rock~ blocks passage. The map tracks counted cells without changing the world.
+
+## Recursive spreading: a line example
+~~~go
+func openRun(open []bool,i int) int {
+ if i<0 || i>=len(open) || !open[i] {return 0}
+ return 1+openRun(open,i+1)
+}
+fmt.Println(openRun([]bool{true,true,false},0)) // 2
+~~~
+This is a one-way line rather than the map solution. A grid has cycles, so mark a cell visited before visiting neighbors. Stop for out-of-bounds, rock, or already-visited cells. Each call returns a new-cell count; add those counts and one for the current cell.
+
+## Common mistakes
+~~~go
+count := flood(grid,x+1,y,seen)
+seen[colony.Point{X:x,Y:y}]=true // Too late: a neighbor can return before the mark
+~~~
+Do not count all open terrain: isolated pockets are outside the connected region. Finding a match in the middle also cannot end binary search when earlier duplicates may exist.
+
+## Your mission
+Read sorted ascending ~colony.Depths()~ and target ~colony.Reading(0)~. Implement binary search in ~depthIndex~, returning the first matching index or -1 for a miss.
+
+Implement recursive ~flood~ to count non-Rock cells connected to (0,0) by north/east/south/west steps, counting the start once. Send one ~[]int{index,count}~ report, for example [3 12]. Do not harvest or count isolated pockets. Inputs contain duplicates and may omit the target; both functions must safely handle empty depths or maps.
+`, Hints: []string{"Use [lo,hi) and continue left on equality.", "In flood, check bounds, rock, and visit state before counting.", "Mark seen before the four neighbors, then add their counts plus one."}}, Setup: func(w *sim.World) {
+			w.Init(7+w.Rand.Intn(4), 5+w.Rand.Intn(3), sim.Regolith)
+			w.RockBlocks = true
+			scatterRocks(w, 0.3)
+			// Isolated open pocket, unreachable from the origin.
+			w.At(w.W-1, w.H-1).Ground = sim.Regolith
+			w.At(w.W-2, w.H-1).Ground = sim.Rock
+			w.At(w.W-1, w.H-2).Ground = sim.Rock
+			depth := 10 + w.Rand.Intn(30)
+			n := 12 + w.Rand.Intn(8)
+			for i := 0; i < n; i++ {
+				depth += 1 + w.Rand.Intn(9)
+				w.Data.Depths = append(w.Data.Depths, depth, depth)
+			}
+			target := w.Data.Depths[w.Rand.Intn(len(w.Data.Depths))]
+			if w.Rand.Intn(3) == 0 {
+				target = w.Data.Depths[len(w.Data.Depths)-1] + 1
+			}
+			w.Data.SensorReadings = []int{target}
+			index := -1
+			for i, d := range w.Data.Depths {
+				if d == target {
+					index = i
+					break
+				}
+			}
+			want := fmt.Sprint([]int{index, len(w.BFS(sim.Point{}))})
+			w.Check = func(w *sim.World) (bool, string) {
+				if w.Harvests == 0 && len(w.Reports) == 1 && w.Reports[0] == want {
+					return true, i18n.T("أول عمق وعدد الخانات المتصلة صح", "First depth index and connected tile count are correct")
+				}
+				return false, i18n.T("مستني [أول موقع للعمق عدد الخانات المتصلة] من غير حصاد", "Waiting for [first-depth-index connected-tile-count] without harvesting")
+			}
+		}})
+	add(&Level{ID: "15-5-rescue-priority", Chapter: 15, Title: "أولوية الإنقاذ", Goal: "اخدم أعلى أولوية حتى مع وصول موجات استغاثة جديدة", Requires: []string{"sel:heap.Push"}, Bridge: []int{90}, Par: 0, Gold: 0, MaxTicks: 100,
+		Starter: rescuePriorityStarter, Lesson: `# طابور بيعيد ترتيب نفسه
+
+الـ FIFO بيحفظ الوصول. الإنقاذ محتاج كل مرة يختار أعلى أولوية من الموجود دلوقتي؛ طلب جديد ممكن يسبق اللي مستني. الـ heap يحافظ على أفضل عنصر في الجذر من غير ترتيب الكل كل مرة.
+
+## قبل ما تكتب
+- إيه قاعدة التعادل عشان النتيجة تبقى حتمية؟
+- هتدخل الوافدين الجدد قبل اختيار الطلب اللي بعده ولا بعده؟
+
+## عقد container/heap
+~~~go
+type Scores []int
+func (s Scores) Len() int { return len(s) }
+func (s Scores) Less(i,j int) bool { return s[i]<s[j] }
+func (s Scores) Swap(i,j int) { s[i],s[j]=s[j],s[i] }
+func (s *Scores) Push(v any) { *s=append(*s,v.(int)) }
+func (s *Scores) Pop() any {
+ old:=*s; n:=len(old); last:=old[n-1]; *s=old[:n-1]; return last
+}
+~~~
+استورد ~container/heap~. الـ interface محتاج Len وLess وSwap وPush وPop. Less بتقول مين يسبق؛ المثال أصغر رقم الأول، مش أولوية المهمة. pointer receivers لـPush/Pop عشان يغيّروا طول الـ slice. ~v.(int)~ type assertion اتعلمناها مع الإشارات؛ heap هياخد النوع اللي إحنا بندخله بس.
+
+## نادِ الحزمة مش الـ method
+~~~go
+s:=&Scores{}
+heap.Push(s,8)
+heap.Push(s,3)
+fmt.Println(heap.Pop(s).(int)) // 3
+~~~
+~heap.Push~ تضيف وتصلّح ترتيب الشجرة؛ ~heap.Pop~ تنقل أفضل عنصر لآخر الـ slice وبعدين تنادي Pop بتاعتك. عشان كده الـ method تشيل الآخر، مش الأول. ~heap.Init~ تجهّز slice موجودة؛ الفاضية جاهزة من غيرها. افحص Len قبل Pop.
+
+## موجات بتوصل
+~~~go
+arrivals:=colony.RescueArrivals()
+for _,request:=range arrivals {
+ fmt.Println(request.ID,request.Priority)
+}
+ok:=colony.Rescue(arrivals[0].ID) // مثال فقط، مش قاعدة الاختيار
+fmt.Println(ok)
+~~~
+~RescueRequest~ فيها ID فريد وPriority int. ~RescueArrivals~ نسخة من الموجة الحالية؛ اقراها مرة في البداية، ومرة بعد كل Rescue ناجحة، وضيفها كلها. ~Rescue(id)~ تقبل أعلى أولوية حالياً فقط، وبعد النجاح تفتح موجة جديدة؛ استعلام Arrivals نفسه مبيستهلكش الموجة.
+
+## أخطاء شائعة
+~~~go
+q.Push(request) // أضاف من غير إصلاح heap
+request := heap.Pop(q) // ممكن panic لو فاضي
+~~~
+لو رتّبت الدفعة الأولى مرة وبس، هتتجاهل أولوية الطلب الجديد. الـ ID الأصغر يكسر تعادل Priority، ومش ترتيب الوصول.
+
+## المهمة
+كمّل ~RescueHeap~: Priority الأكبر يسبق، ثم ID الأصغر. استخدم heap.Push وheap.Pop. ابدأ بالموجة الأولى؛ بعد كل Rescue ناجحة أدخل الموجة الجديدة قبل الاختيار التالي. كرّر لحد ما heap تفضى.
+
+اخدم كل طلب مرة واحدة وابعت عدد اللي اتخدموا بتقرير واحد. طلب غلط أو مكرر يفشّل المهمة حتى لو كملت؛ مفيش تعديل أولوية أو إلغاء في العقد ده، ومفيش goroutines أو انتظار حقيقي.
+`, Hints: []string{"في Less افحص Priority الأول، وID عند التعادل.", "Pop اللي أنت بتكتبها تشيل الآخر؛ heap.Pop هي اللي تختار الأفضل.", "بعد نجاح Rescue اقرأ Arrivals وضيفهم قبل اللفة التالية؛ متقراش الموجة مرتين."},
+		En: &LevelText{Title: "Rescue Priority", Goal: "Serve highest priority as new distress waves arrive", Starter: rescuePriorityStarter, Lesson: `# A Queue That Reorders Itself
+
+FIFO preserves arrival order. Rescue must select the highest priority currently waiting; new requests can overtake old ones. A heap retains the best element at its root without sorting everything each time.
+
+## Before you write
+- Which tie rule makes the result deterministic?
+- Will you enqueue new arrivals before or after selecting the next request?
+
+## The container/heap contract
+~~~go
+type Scores []int
+func (s Scores) Len() int { return len(s) }
+func (s Scores) Less(i,j int) bool { return s[i]<s[j] }
+func (s Scores) Swap(i,j int) { s[i],s[j]=s[j],s[i] }
+func (s *Scores) Push(v any) { *s=append(*s,v.(int)) }
+func (s *Scores) Pop() any {
+ old:=*s; n:=len(old); last:=old[n-1]; *s=old[:n-1]; return last
+}
+~~~
+Import ~container/heap~. The interface requires Len, Less, Swap, Push, and Pop. Less defines who precedes whom; the example puts smaller numbers first rather than mission priorities. Push/Pop need pointer receivers to change slice length. ~v.(int)~ is the type assertion from signals; we only insert the agreed type.
+
+## Call the package, not the method
+~~~go
+s:=&Scores{}
+heap.Push(s,8)
+heap.Push(s,3)
+fmt.Println(heap.Pop(s).(int)) // 3
+~~~
+~heap.Push~ inserts and repairs heap order. ~heap.Pop~ moves the best element to the end before calling your Pop method, which therefore removes the last element. ~heap.Init~ prepares an existing slice; an empty heap needs no initialization. Check Len before Pop.
+
+## Arriving waves
+~~~go
+arrivals:=colony.RescueArrivals()
+for _,request:=range arrivals {
+ fmt.Println(request.ID,request.Priority)
+}
+ok:=colony.Rescue(arrivals[0].ID) // Example only, not the selection rule
+fmt.Println(ok)
+~~~
+~RescueRequest~ has unique ID and integer Priority fields. ~RescueArrivals~ returns a copy of the current wave. Read it once initially and once after each successful Rescue, enqueueing every request. ~Rescue(id)~ accepts only the current highest priority and releases another wave after success; reading Arrivals does not consume a wave.
+
+## Common mistakes
+~~~go
+q.Push(request) // Inserts without repairing heap order
+request := heap.Pop(q) // Panics if empty
+~~~
+Sorting only the initial batch ignores newly arriving priorities. Smaller ID breaks equal Priority; arrival order does not.
+
+## Your mission
+Complete ~RescueHeap~: larger Priority first, then smaller ID. Use heap.Push and heap.Pop. Enqueue the initial wave; after every successful Rescue enqueue the new wave before selecting again. Continue until the heap is empty.
+
+Serve each request once and report the served count exactly once. An incorrect or duplicate request permanently fails the mission. Priority changes and cancellation are outside this contract; no goroutines or real waiting are needed.
+`, Hints: []string{"In Less, compare Priority first and ID on ties.", "Your Pop method removes the last element; heap.Pop selects the best.", "After successful Rescue, enqueue Arrivals before the next iteration; do not read a wave twice."}}, Setup: func(w *sim.World) {
+			w.Init(5, 3, sim.Regolith)
+			ids := w.Rand.Perm(40)
+			next := 0
+			for wave := 0; wave < 6; wave++ {
+				n := 1 + w.Rand.Intn(3)
+				if wave == 0 {
+					n = 4
+				}
+				requests := []sim.RescueRequest{}
+				for j := 0; j < n; j++ {
+					requests = append(requests, sim.RescueRequest{ID: ids[next] + 1, Priority: 1 + w.Rand.Intn(4)})
+					next++
+				}
+				if wave == 0 {
+					for i := range requests {
+						requests[i].Priority = 2
+					}
+				}
+				if wave == 1 {
+					requests[0].Priority = 9
+				}
+				w.Data.RescueWaves = append(w.Data.RescueWaves, requests)
+			}
+			w.Data.RescuePending = append([]sim.RescueRequest(nil), w.Data.RescueWaves[0]...)
+			want := fmt.Sprint(next)
+			w.Check = func(w *sim.World) (bool, string) {
+				if w.Data.RescueFault {
+					return false, i18n.T("طلب مش معروف أو مش الأعلى أولوية؛ ابدأ من جديد", "Unknown or out-of-priority request; restart the mission")
+				}
+				if len(w.Data.Rescued) == next && len(w.Data.RescuePending) == 0 && len(w.Reports) == 1 && w.Reports[0] == want {
+					return true, i18n.T("كل طلب اتخدم مرة وبالأولوية الصح", "Every request was served once in priority order")
+				}
+				return false, fmt.Sprintf(i18n.T("إنقاذ: %d / %d؛ ضيف الموجة الجديدة بعد كل خدمة", "Rescues: %d / %d; enqueue the new wave after each service"), len(w.Data.Rescued), next)
+			}
+		}})
 }
 
 func sortedInts(s []int) bool {
@@ -579,3 +859,52 @@ func sortedInts(s []int) bool {
 	}
 	return true
 }
+
+const deepProbeStarter = `package main
+
+import "orbital/colony"
+
+func depthIndex(depths []int, target int) int                                { return -1 }
+func flood(grid [][]colony.Ground, x, y int, seen map[colony.Point]bool) int { return 0 }
+func main() {
+	index := depthIndex(colony.Depths(), colony.Reading(0))
+	count := flood(colony.Grid(), 0, 0, map[colony.Point]bool{})
+	colony.Report([]int{index, count})
+}
+`
+const rescuePriorityStarter = `package main
+
+import (
+	"container/heap"
+	"orbital/colony"
+)
+
+type RescueHeap []colony.RescueRequest
+
+func (q RescueHeap) Len() int           { return len(q) }
+func (q RescueHeap) Less(i, j int) bool { return q[i].ID < q[j].ID }
+func (q RescueHeap) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
+func (q *RescueHeap) Push(v any)        { *q = append(*q, v.(colony.RescueRequest)) }
+func (q *RescueHeap) Pop() any {
+	old := *q
+	last := old[len(old)-1]
+	*q = old[:len(old)-1]
+	return last
+}
+func main() {
+	q := &RescueHeap{}
+	for _, request := range colony.RescueArrivals() {
+		heap.Push(q, request)
+	}
+	served := 0
+	for q.Len() > 0 {
+		request := heap.Pop(q).(colony.RescueRequest)
+		if !colony.Rescue(request.ID) {
+			return
+		}
+		served++
+		// Enqueue the newly released wave here.
+	}
+	colony.Report(served)
+}
+`
