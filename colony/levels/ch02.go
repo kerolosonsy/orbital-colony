@@ -2,7 +2,9 @@ package levels
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
+	"unicode/utf8"
 
 	"orbital/colony/i18n"
 	"orbital/colony/internal/sim"
@@ -259,4 +261,288 @@ ready := true              // bool: true أو false
 ## المهمة
 الخريطة حجمها بيتغير كل مرة. ابعت **المساحة** الأول، وبعدها **المحيط**.`,
 	})
+
+	callsignsStarter := `package main
+
+import (
+	"fmt"
+	"orbital/colony"
+)
+
+func main() {
+	fmt.Println(colony.Callsign(0))
+	// Build the report described in the lesson.
+}
+`
+	add(&Level{ID: "2-3-callsigns", Chapter: 2, Title: "أسماء النداء", Goal: "قارن bytes وrunes وابعت أول وآخر حرف لاسمين",
+		Requires: []string{"rune"}, Bridge: []int{6},
+		Par: 0, Gold: 0, MaxTicks: 20,
+		Starter: callsignsStarter, Lesson: `# النص مش عدد bytes بس 📡
+
+اسم الدرون ممكن يكون عربي أو فيه emoji. النهارده هنشوف ليه مساحة النص في الذاكرة مختلفة عن عدد حروفه، من غير حلقات ولا قوائم.
+
+## قبل ما تكتب
+- هل ~len~ بيعد الحروف ولا مساحة تخزينها؟
+- أول byte في اسم عربي هو أول حرف كامل؟
+
+## هات اسم واحد
+~~~go
+name := colony.Callsign(0)
+fmt.Println(name)
+~~~
+~colony.Callsign~ بتاخد رقم اسم وترجّع ~string~ واحدة. عندنا اسمين بس، أرقامهم 0 و1. الاتنين مضمون إنهم مش فاضيين، فمش محتاج تفحص حالة اسم فاضي.
+
+## byte وrune
+~~~go
+text := "é🚀"
+fmt.Println(len(text)) // 6
+~~~
+~len~ دالة جاهزة بترجّع عدد الـ bytes. UTF-8 ممكن يخزّن حرف واحد في أكتر من byte.
+
+الـ ~rune~ هي Unicode code point: قيمة حرف واحدة. ضيف ~"unicode/utf8"~ للـ imports، وبعدين:
+~~~go
+fmt.Println(utf8.RuneCountInString(text)) // 2
+~~~
+~RuneCountInString~ بتعد الـ runes بدل الـ bytes. العلامة المركّبة زي التشكيل بتتعد rune لوحدها؛ إحنا مش بنعد الشكل المرئي المركّب كله كحرف واحد.
+
+## أول وآخر rune: مثال محلول
+~~~go
+first, size := utf8.DecodeRuneInString(text)
+last, _ := utf8.DecodeLastRuneInString(text)
+fmt.Println(string(first), size, string(last)) // é 2 🚀
+~~~
+~DecodeRuneInString~ بترجّع أول rune وعدد الـ bytes اللي خدتها. ~DecodeLastRuneInString~ بتعمل نفس الفكرة لآخر rune. استخدم ~_~ لو مش محتاج العدد، زي ما اتعلّمنا في مسح المنطقة.
+
+~string(first)~ بتحوّل قيمة الـ rune لنص عشان تبعت حرف، بدل ما تبعت رقمه. المثال هنا لنص تجريبي؛ بيانات المهمة لازم تقراها بنفسك.
+
+## أخطاء شائعة
+~~~go
+first := string(text[0]) // غلط لو هدفك أول حرف
+~~~
+~text[0]~ بتجيب byte واحدة، مش rune كاملة. مع النص التجريبي دي قطعة من ترميز ~é~، فمش هتاخد الحرف المطلوب. وكمان متستخدمش ~len(name)~ مكان عدد الـ runes.
+
+## المهمة
+اقرأ الاسم 0 والاسم 1 بنداءين منفصلين. لكل اسم ابعت أربع تقارير منفصلة بـ ~colony.Report~: عدد الـ bytes، عدد الـ runes، أول rune كنص، وآخر rune كنص، بالترتيب ده.
+
+يعني ثمان تقارير في الآخر: الأربعة بتوع الاسم 0، وبعدهم الأربعة بتوع الاسم 1. مفيش عكس أسماء ولا حلقات في المهمة دي.`, Hints: []string{"ابدأ باسم 0 بس وشوف الفرق بين ~len~ و~utf8.RuneCountInString~ في الـ Console.", "الدالتين ~DecodeRuneInString~ و~DecodeLastRuneInString~ بيرجعوا قيمتين؛ استخدم ~_~ للعرض اللي مش محتاجه.", "حوّل كل rune لنص بـ ~string~، وابعت الأربع قيم بالترتيب قبل ما تعمل نفس الخطوات للاسم 1."},
+		En: &LevelText{Title: "Callsigns", Goal: "Report byte length, rune count, and endpoint characters for two callsigns", Starter: callsignsStarter, Lesson: `# Text Is More Than Bytes 📡
+
+A drone callsign can contain Arabic or emoji. Today we will distinguish storage size from character count, without loops or collections.
+
+## Before you write
+- Does ~len~ count characters or their storage?
+- Is the first byte of an Arabic name a complete character?
+
+## Read one callsign
+~~~go
+name := colony.Callsign(0)
+fmt.Println(name)
+~~~
+~colony.Callsign~ takes a name index and returns one ~string~. There are exactly two names, numbered 0 and 1. Both are guaranteed nonempty, so you do not need an empty-name condition.
+
+## Byte and rune
+~~~go
+text := "é🚀"
+fmt.Println(len(text)) // 6
+~~~
+~len~ is a built-in function returning the byte count. UTF-8 can store one character in several bytes.
+
+A ~rune~ is a Unicode code point: one character value. Add ~"unicode/utf8"~ to your imports, then:
+~~~go
+fmt.Println(utf8.RuneCountInString(text)) // 2
+~~~
+~RuneCountInString~ counts runes rather than bytes. A combining mark counts as its own rune; we are not counting a combined visual symbol as one character.
+
+## First and last rune: a worked example
+~~~go
+first, size := utf8.DecodeRuneInString(text)
+last, _ := utf8.DecodeLastRuneInString(text)
+fmt.Println(string(first), size, string(last)) // é 2 🚀
+~~~
+~DecodeRuneInString~ returns the first rune and its byte width. ~DecodeLastRuneInString~ does the same for the last rune. Use ~_~ when you do not need the width, just as in Survey the Area.
+
+~string(first)~ converts the rune value into text so you report a character rather than its number. This example uses sample text; read the mission inputs yourself.
+
+## Common mistakes
+~~~go
+first := string(text[0]) // Wrong for reading the first character
+~~~
+~text[0]~ reads a single byte, not a whole rune. Here it is only part of the encoding of ~é~, so it does not produce the required character. Also, do not substitute ~len(name)~ for the rune count.
+
+## Your mission
+Read callsigns 0 and 1 with separate calls. For each name, send four separate ~colony.Report~ calls: byte length, rune count, first rune as text, and last rune as text, in that order.
+
+There must be eight reports: the four for name 0, followed by the four for name 1. This mission requires no reversal or loops.`, Hints: []string{"Start with name 0 and compare ~len~ with ~utf8.RuneCountInString~ in the Console.", "Both decode functions return two values; use ~_~ for the width you do not need.", "Convert each rune with ~string~ and send the four values in order before repeating for name 1."}},
+		Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			// Both names are nonempty UTF-8; Arabic, emoji, and combining marks vary by seed.
+			names := []string{"قمر", "نور", "مسبار", "نُور"}
+			w.Data.Callsigns = []string{fmt.Sprintf("%s%d🚀", names[w.Rand.Intn(len(names))], w.Rand.Intn(10000)), fmt.Sprintf("🌙%d%s", w.Rand.Intn(10000), names[w.Rand.Intn(len(names))])}
+			var want []string
+			for _, name := range w.Data.Callsigns {
+				first, _ := utf8.DecodeRuneInString(name)
+				last, _ := utf8.DecodeLastRuneInString(name)
+				want = append(want, strconv.Itoa(len(name)), strconv.Itoa(utf8.RuneCountInString(name)), string(first), string(last))
+			}
+			w.Check = func(w *sim.World) (bool, string) {
+				if slices.Equal(w.Reports, want) {
+					return true, i18n.T("كل التقارير مطابقة وبالترتيب", "All reports match in order")
+				}
+				return false, i18n.T("التقارير لسه ناقصة أو مش مطابقة؛ راجع القيم وترتيبها", "Reports are missing or do not match; check values and order")
+			}
+		},
+	})
+
+	unitsStarter := `package main
+
+import (
+	"fmt"
+	"orbital/colony"
+)
+
+func main() {
+	fmt.Println(colony.CargoAmount(0))
+	// Build the report described in the lesson.
+}
+`
+	add(&Level{ID: "2-4-units", Chapter: 2, Title: "وحدات القياس", Goal: "عرّف أنواع الشحنات وحوّل ثلاث كميات لـ cells",
+		Requires: []string{"iota", "const"}, Bridge: []int{3, 8},
+		Par: 0, Gold: 0, MaxTicks: 20,
+		Starter: unitsStarter, Lesson: `# أسماء للأنواع ووحدات للشحنة 📦
+
+المخزن فيه cells مفردة وpacks وcrates. جمع أعدادهم مباشرة مش هيقولنا كمية الشحنة الحقيقية؛ لازم نوحّد الوحدة الأول.
+
+## قبل ما تكتب
+- هتميّز نوع العبوة عن عددها إزاي؟
+- هتجمع الكميات قبل التحويل ولا بعده؟
+
+## نوع باسم إنت مختاره
+~~~go
+type Minutes int
+~~~
+اكتب ~type~ برّه ~main~ عشان تعرّف نوع جديد أساسه ~int~. الاسم هنا بيوضح إن العدد مدّة، مش أي رقم وخلاص.
+
+~~~go
+visits := 3
+period := Minutes(visits)
+~~~
+~Minutes(visits)~ تحويل صريح. النوع الجديد مش بيتخلط تلقائي مع متغير ~int~، حتى لو الاتنين بيخزّنوا أعداد صحيحة.
+
+## const وiota
+~~~go
+type AccessLevel int
+const (
+ Guest AccessLevel = iota
+ Operator
+ Captain
+)
+~~~
+~const~ بتعرّف قيمة ثابتة متقدرش تغيّرها بعد كده. جوه مجموعة الثوابت، ~iota~ بتبدأ من صفر وتزيد واحد في كل سطر: Guest=0 وOperator=1 وCaptain=2.
+
+السطرين اللي بعد الأول بيكرروا نفس شكل التعريف تلقائياً. الثوابت التلاتة نوعهم ~AccessLevel~. ولو دالة مستنية ~int~، تقدر تحوّل الاسم بـ ~int(Operator)~.
+
+## معامل تحويل بنوع واضح: مثال محلول
+~~~go
+const VisitLength Minutes = 5
+visits := Minutes(3)
+duration := visits * VisitLength
+fmt.Println(duration) // 15
+~~~
+المعامل ~VisitLength~ ثابت نوعه Minutes. حوّلنا المتغير لنفس النوع، فالحساب واضح ومفيش خلط أنواع. دي زيارة تدريب، مش كميات مخزن المهمة.
+
+## اقرأ الكميات كأرقام
+~~~go
+amount := colony.CargoAmount(0)
+fmt.Println(amount)
+~~~
+~CargoAmount~ بترجّع ~int~ جاهز؛ مفيش نص محتاج يتحلّل. الأرقام 0 و1 و2 بتحدد العبوات: Cell وPack وCrate. كل كمية موجبة وبتتغيّر مع التشغيل.
+
+## أخطاء شائعة
+~~~go
+var minutes Minutes = 5
+var count int = 2
+fmt.Println(minutes + count) // مش هيتبني
+~~~
+النوعين مختلفين. لازم تحويل صريح قبل الحساب. وفي الشحنات، جمع عدد crates على عدد cells قبل تحويل الوحدة بيدي مجموع ملوش معنى.
+
+## المهمة
+عرّف ~CargoKind~ أساسه int، وثوابت ~Cell~ و~Pack~ و~Crate~ بـ iota بالترتيب 0 و1 و2. عرّف ~Cells~ أساسه int ومعاملات ثابتة من نوع Cells: ~CellFactor=1~ و~PackFactor=6~ و~CrateFactor=24~.
+
+اقرأ الكميات بنداءات منفصلة، باستخدام ~int(Cell)~ وباقي أسماء الأنواع. حوّلها لـ Cells واضرب كل كمية في معاملها. ابعت تقرير واحد: إجمالي cells كعدد صحيح. مفيش حلقات ولا parsing ولا أخطاء هنا.`, Hints: []string{"اكتب الأنواع والثوابت برّه ~main~، والكميات المتغيّرة جوّاها.", "مرّر ~int(Pack)~ مثلاً لقراءة كمية packs، وبعدها حوّل العدد لـ ~Cells~.", "كل كمية تتضرب في معامل نوعها قبل الجمع؛ التقرير المطلوب واحد بس."},
+		En: &LevelText{Title: "Cargo Units", Goal: "Define cargo kinds and convert three quantities to cells", Starter: unitsStarter, Lesson: `# Named Types and Cargo Units 📦
+
+Storage contains individual cells, packs, and crates. Adding their counts directly does not tell us the real cargo quantity; first use one common unit.
+
+## Before you write
+- How will you distinguish a package kind from its quantity?
+- Will you add quantities before or after conversion?
+
+## A type with your own name
+~~~go
+type Minutes int
+~~~
+Write ~type~ outside ~main~ to define a new type based on ~int~. Its name tells us this number is a duration rather than an arbitrary count.
+
+~~~go
+visits := 3
+period := Minutes(visits)
+~~~
+~Minutes(visits)~ is an explicit conversion. A named type does not automatically mix with an ~int~ variable, even though both store integers.
+
+## const and iota
+~~~go
+type AccessLevel int
+const (
+ Guest AccessLevel = iota
+ Operator
+ Captain
+)
+~~~
+~const~ defines a value you cannot change later. Inside a constant group, ~iota~ starts at zero and increases on each line: Guest=0, Operator=1, Captain=2.
+
+The later lines automatically repeat the first declaration's form. All three constants have type ~AccessLevel~. If a function expects ~int~, convert with ~int(Operator)~.
+
+## A typed conversion factor: a worked example
+~~~go
+const VisitLength Minutes = 5
+visits := Minutes(3)
+duration := visits * VisitLength
+fmt.Println(duration) // 15
+~~~
+~VisitLength~ is a constant of type Minutes. We converted the variable to the same type so the arithmetic does not mix types. This is a training visit, not the mission's cargo.
+
+## Read quantities as numbers
+~~~go
+amount := colony.CargoAmount(0)
+fmt.Println(amount)
+~~~
+~CargoAmount~ returns a ready-to-use ~int~; there is no text to parse. Indices 0, 1, and 2 identify Cell, Pack, and Crate. Each quantity is positive and varies between runs.
+
+## Common mistakes
+~~~go
+var minutes Minutes = 5
+var count int = 2
+fmt.Println(minutes + count) // Will not build
+~~~
+The types differ, so convert explicitly before arithmetic. For cargo, adding crate counts to cell counts before conversion produces a meaningless total.
+
+## Your mission
+Define ~CargoKind~ based on int, and ~Cell~, ~Pack~, ~Crate~ using iota in the order 0, 1, 2. Define ~Cells~ based on int and typed Cells constants ~CellFactor=1~, ~PackFactor=6~, ~CrateFactor=24~.
+
+Read the three quantities with separate calls using ~int(Cell)~ and the other kind names. Convert them to Cells and multiply each by its factor. Send one report containing the integer total in cells. No loops, parsing, or error handling are needed.`, Hints: []string{"Declare types and constants outside ~main~, and changing quantities inside it.", "For example, pass ~int(Pack)~ to read packs, then convert the quantity to ~Cells~.", "Multiply each quantity by its own factor before addition; send only one report."}},
+		Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			for kind := range w.Data.CargoAmounts {
+				w.Data.CargoAmounts[kind] = 1 + w.Rand.Intn(40)
+			}
+			want := []string{strconv.Itoa(w.Data.CargoAmounts[0] + 6*w.Data.CargoAmounts[1] + 24*w.Data.CargoAmounts[2])}
+			w.Check = func(w *sim.World) (bool, string) {
+				if slices.Equal(w.Reports, want) {
+					return true, i18n.T("كل التقارير مطابقة وبالترتيب", "All reports match in order")
+				}
+				return false, i18n.T("التقارير لسه ناقصة أو مش مطابقة؛ راجع القيم وترتيبها", "Reports are missing or do not match; check values and order")
+			}
+		},
+	})
+
 }

@@ -2,6 +2,7 @@ package levels
 
 import (
 	"fmt"
+	"slices"
 
 	"orbital/colony/i18n"
 	"orbital/colony/internal/sim"
@@ -583,4 +584,354 @@ left = append(left[:best], left[best+1:]...)
 ## فكّر 🤔
 greedy مش دايماً **أحسن** حل، بس غالباً قريب منه وسهل يتكتب. أحسن حل فعلاً اسمه "مشكلة البائع المتجوّل"، ودي من أصعب المشاكل في علوم الكمبيوتر.`,
 	})
+
+	compositeUnitsStarter := `package main
+
+import (
+	"fmt"
+	"orbital/colony"
+)
+
+func main() {
+	fmt.Println(colony.Invoice())
+	// Build the report described in the lesson.
+}
+`
+	add(&Level{ID: "7-4-composite-units", Chapter: 7, Title: "وحدات مركّبة", Goal: "استخدم embedding وmethod لتوزيع فاتورة الطاقم بالـ cents",
+		Requires: []string{"embed", "method"}, Bridge: []int{12},
+		Par: 0, Gold: 0, MaxTicks: 100,
+		Starter: compositeUnitsStarter, Lesson: `# وحدة جوّا وحدة 🧩
+
+عرفنا structs في نقاط الطريق وmethods في نظام الملاحة. دلوقتي هنجمع نوعين مع بعض بـ embedding، ونستخدمهم لتقسيم فاتورة الطاقم من غير ما نخلق أو نضيّع cent.
+
+## قبل ما تكتب
+- الحقول تبقى متاحة مباشرة على الوحدة المركّبة إزاي؟
+- مين يدفع cent الزيادة لما القسمة يبقى ليها باقي؟
+
+## embedding مش حقل باسم تاني
+~~~go
+type Badge struct { Name string }
+type Pilot struct { Badge }
+p := Pilot{Badge: Badge{Name: "Nova"}}
+fmt.Println(p.Name) // Nova
+~~~
+الحقل ~Badge~ جوه Pilot مكتوب بنوعه من غير اسم. ده embedding: حقول النوع الداخلي بتبقى متاحة على النوع الخارجي مباشرة. لسه Badge قيمة جوه Pilot؛ دي مش وراثة بين classes.
+
+~~~go
+p.Badge.Name = "Vega"
+fmt.Println(p.Name) // Vega
+~~~
+الطريقتين بيوصلوا لنفس الحقل. الأسماء المتكررة لو فيه أكتر من نوع داخلي ممكن تحتاج تحديد المسار؛ إحنا عندنا نوع داخلي واحد بس.
+
+## البيانات المالية
+~~~go
+total, people := colony.Invoice()
+fmt.Println(total, people)
+~~~
+~Invoice~ بترجّع إجمالي نهائي بالـ cents وعدد الطاقم. الإجمالي مش سالب والعدد موجب؛ مفيش parsing أو tips أو مدخلات ناقصة. الاتنين بيتغيّروا مع التشغيل، وممكن الإجمالي يبقى صفر أو الطاقم فرد واحد.
+
+## قسمة صحيحة وباقي: مثال محلول
+~~~go
+supplies, teams := 17, 4
+base := supplies / teams
+extra := supplies % teams
+fmt.Println(base, extra) // 4 1
+~~~
+~%~ بتجيب باقي القسمة، زي مثال divmod في 5-1. لو بنوزّع 17 فلتر على 4 فرق، كل فريق ياخد 4، وأول فريق ياخد واحد زيادة. النتيجة ~[5 4 4 4]~ ومجموعها لسه17.
+
+في الفاتورة هنطبق نفس السياسة على cents: أول remainder أفراد ياخدوا cent زيادة، والباقي ياخدوا base. مفيش تقريب عشري لكل فرد.
+
+## method على الوحدة المركّبة
+~~~go
+type Pilot struct { Badge }
+func (p Pilot) Label() string {
+ return p.Name
+}
+~~~
+دي method بقراءة فقط، زي 7-2؛ value receiver كفاية. بتستخدم الحقل المرقّى ~p.Name~ من غير كتابة ~p.Badge.Name~ كل مرة. في مهمتك الـ method هترجع slice بالأنصبة، بأدوات make وrange اللي عرفناها في الفصل6.
+
+## أخطاء شائعة
+~~~go
+type Pilot struct { badge Badge }
+p := Pilot{badge: Badge{Name: "Nova"}}
+fmt.Println(p.Name) // الحقل ده مش مترقّي
+~~~
+~badge Badge~ حقل مسمّى عادي، مش embedding. ولو قسّمت17 على4 وكرّرت الناتج4 بس، هتضيّع واحد؛ لازم توزّع الباقي كمان.
+
+## المهمة
+عرّف ~Ledger struct { TotalCents, People int }~، وضمّه بدون اسم حقل جوه ~CrewUnit struct { Ledger }~. اكتب ~Shares() []int~ كـ method على CrewUnit، واستخدم ~u.TotalCents~ و~u.People~ مباشرة.
+
+ابني الوحدة من Invoice، وابعت slice الأنصبة بتقرير واحد. ترتيبها هو ترتيب أفراد الطاقم: أول ~total%people~ أفراد بياخدوا cent زيادة، والباقي النصيب الأساسي. المجموع لازم يساوي الإجمالي بالظبط، حتى مع صفر أو فرد واحد.`, Hints: []string{"~Ledger~ جوه CrewUnit تكتبها لوحدها، من غير اسم حقل قبل النوع.", "استعمل method بترجّع ~[]int~ جديدة طولها عدد الطاقم.", "املأها بنصيب القسمة، وزوّد cent واحد بس لو index الفرد أقل من باقي القسمة."},
+		En: &LevelText{Title: "Composite Units", Goal: "Use embedding and a method to allocate crew invoice cents", Starter: compositeUnitsStarter, Lesson: `# One Unit Inside Another 🧩
+
+Waypoints introduced structs and Navigation System introduced methods. Now combine types with embedding and split a crew invoice without inventing or losing a cent.
+
+## Before you write
+- How can the outer unit expose its embedded fields directly?
+- Who receives the extra cent when division leaves a remainder?
+
+## Embedding is not a renamed field
+~~~go
+type Badge struct { Name string }
+type Pilot struct { Badge }
+p := Pilot{Badge: Badge{Name: "Nova"}}
+fmt.Println(p.Name) // Nova
+~~~
+Inside Pilot, ~Badge~ has a type but no field name. This is embedding: inner fields become available directly on the outer type. Badge is still a value inside Pilot; this is not class inheritance.
+
+~~~go
+p.Badge.Name = "Vega"
+fmt.Println(p.Name) // Vega
+~~~
+Both paths reach the same field. Conflicting names from several embedded types can require explicit paths; this mission embeds only one type.
+
+## Financial inputs
+~~~go
+total, people := colony.Invoice()
+fmt.Println(total, people)
+~~~
+~Invoice~ returns a final total in cents and a crew count. The total is nonnegative and the count positive; there is no parsing, tip calculation, or missing input. Both vary across runs. Zero total and a single crew member are valid.
+
+## Integer division and remainder: a worked example
+~~~go
+supplies, teams := 17, 4
+base := supplies / teams
+extra := supplies % teams
+fmt.Println(base, extra) // 4 1
+~~~
+~%~ returns the remainder, as in divmod in 5-1. Splitting 17 filters across four teams gives everyone 4 and the first team one extra. The result ~[5 4 4 4]~ still totals 17.
+
+Use the same rule for cents: the first remainder crew members get one extra cent; everyone else gets base. Do not round a decimal amount independently for each person.
+
+## A method on the composite unit
+~~~go
+type Pilot struct { Badge }
+func (p Pilot) Label() string {
+ return p.Name
+}
+~~~
+This read-only method uses a value receiver, as in 7-2. It accesses promoted ~p.Name~ without repeating ~p.Badge.Name~. Your mission method returns a shares slice using make and range from chapter 6.
+
+## Common mistakes
+~~~go
+type Pilot struct { badge Badge }
+p := Pilot{badge: Badge{Name: "Nova"}}
+fmt.Println(p.Name) // This field was not promoted
+~~~
+~badge Badge~ is an ordinary named field, not embedding. Also, repeating only the quotient 4 when splitting 17 by 4 loses one unit; distribute the remainder too.
+
+## Your mission
+Define ~Ledger struct { TotalCents, People int }~ and embed it without a field name in ~CrewUnit struct { Ledger }~. Write a ~Shares() []int~ method on CrewUnit using ~u.TotalCents~ and ~u.People~ directly.
+
+Build the unit from Invoice and report the shares slice once. Its order is crew order: the first ~total%people~ members receive an extra cent; the rest receive the base share. The sum must equal the total exactly, including zero total and one-person cases.`, Hints: []string{"Write ~Ledger~ alone inside CrewUnit, without a field name before the type.", "Return a fresh ~[]int~ from a method, with length equal to the crew count.", "Fill with the quotient and add one cent only when a member index is below the remainder."}},
+		Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			w.Data.People = 1 + w.Rand.Intn(7)
+			w.Data.TotalCents = w.Rand.Intn(5000)
+			if w.Rand.Intn(4) == 0 {
+				w.Data.TotalCents = (w.Data.TotalCents / w.Data.People) * w.Data.People
+			}
+			if w.Rand.Intn(8) == 0 {
+				w.Data.TotalCents = 0
+			}
+			shares := make([]int, w.Data.People)
+			for i := range shares {
+				shares[i] = w.Data.TotalCents / w.Data.People
+				if i < w.Data.TotalCents%w.Data.People {
+					shares[i]++
+				}
+			}
+			want := []string{fmt.Sprint(shares)}
+			w.Check = func(w *sim.World) (bool, string) {
+				if slices.Equal(w.Reports, want) {
+					return true, i18n.T("كل التقارير مطابقة وبالترتيب", "All reports match in order")
+				}
+				return false, i18n.T("التقارير لسه ناقصة أو مش مطابقة؛ راجع القيم وترتيبها", "Reports are missing or do not match; check values and order")
+			}
+		},
+	})
+
+	crewExamStarter := `package main
+
+import (
+	"fmt"
+	"orbital/colony"
+)
+
+func main() {
+	fmt.Println(colony.Exam())
+	// Build the report described in the lesson.
+}
+`
+	add(&Level{ID: "7-5-crew-exam", Chapter: 7, Title: "اختبار الطاقم", Goal: "جاوب اختبار أرض النباتات واحسب نسبة الأسئلة الصالحة",
+		Requires: []string{"struct", "range"}, Bridge: []int{5},
+		Par: 0, Gold: 0, MaxTicks: 100,
+		Starter: crewExamStarter, Lesson: `# سؤال كامل بدل متغيرات متفرّقة 🧑‍🚀
+
+الطاقم محتاج يراجع أرض كل محصول. بنك الأسئلة بيتغيّر وترتيب الاختيارات بيتبدّل، لكن كل سؤال بيجمع بياناته في struct واحدة زي ما نقاط الطريق جمعت X وY.
+
+## قبل ما تكتب
+- هتحافظ على رقم السؤال الأصلي لو تخطّيت سؤال بايظ إزاي؟
+- السؤال اللي ملوش اختيارات يدخل في مقام النسبة؟
+
+## اقرأ الأسئلة كـ structs
+~~~go
+questions := colony.Exam()
+for i, question := range questions {
+ fmt.Println(i, question.Prompt, question.Choices)
+}
+~~~
+~Exam~ بترجّع ~[]colony.Question~. كل Question فيها ~Prompt string~ اسم المحصول، و~Choices []string~ أسماء أراضٍ. ~range~ بترجّع index السؤال ونسخة من قيمته، زي slice النقاط في 7-1.
+
+~~~go
+if len(question.Choices) == 0 {
+ continue
+}
+~~~
+~continue~ بتنقل للّفة اللي بعدها، زي 5-2. افحص الاختيارات قبل الفهرسة؛ فيه سؤال offline من غير اختيارات، وسيبه من غير إجابة ولا زيادة في عدد الأسئلة الصالحة.
+
+## اختار حسب بيانات السؤال
+~~~go
+switch question.Prompt {
+case "moss":
+ fmt.Println("soil")
+case "lichen":
+ fmt.Println("ice")
+}
+~~~
+دي قواعد عرفنا أصلها في تضاريس مختلطة. في الاختبار ده الإجابات بالظبط: moss أرضها soil، وlichen أرضها ice، وcrystal مكانها regolith. مفيش parsing؛ قارن النصوص مباشرة، وبعدين دور في Choices على النص المطلوب.
+
+## سجّل الاختيار
+~~~go
+accepted := colony.Answer(0, 1)
+fmt.Println(accepted)
+~~~
+~Answer(i, choice)~ بتسجّل رقم الاختيار من صفر للسؤال i، وبترجّع bool لو الرقمين صالحين. true مش معناها الإجابة صح معرفياً؛ إنت بتحدد الصح بمقارنة الاختيار بقاعدة المحصول. استخدم index السؤال الأصلي من range، وindex الاختيار اللي لقيته، مش أرقام ثابتة زي المثال.
+
+## struct للنتيجة: مثال محلول
+~~~go
+type Progress struct { Done, Total int }
+p := Progress{Done: 2, Total: 3}
+percent := p.Done * 100 / p.Total
+fmt.Println(percent) // 66
+~~~
+المثال بيحسب تقدّم تدريب، مش درجات اختبار المهمة. جمع العدادات في struct بيخلّي علاقتهم واضحة. القسمة الصحيحة بتشيل الكسر، واضرب في100 قبل القسمة عشان متضيّعش النسبة.
+
+## أخطاء شائعة
+~~~go
+for i := range questions {
+ colony.Answer(i, 0) // أول اختيار مش دايماً الصح
+}
+~~~
+ترتيب الاختيارات بيتبدّل، والسؤال الفاضي أصلاً مفيهوش اختيار0. ولو حسبت كل عناصر بنك الأسئلة في المقام، هتخصم درجة سؤال ملوش إجابة. لو عدد الأسئلة الصالحة صفر، النسبة تبقى صفر من غير قسمة.
+
+## المهمة
+عرّف struct عندك للعدادين ~Correct~ و~Attempted~. جاوب كل سؤال صالح بالقاعدة: moss→soil، lichen→ice، crystal→regolith. سيب السؤال اللي من غير اختيارات من غير Answer.
+
+احسب ~correct*100/attempted~ كعدد صحيح، وابعت النسبة في تقرير واحد. المطلوب إجابات صحيحة لكل الأسئلة الصالحة، فالنتيجة النهائية100؛ التحقق بيراجع الإجابات المسجّلة نفسها كمان، مش التقرير بس.`, Hints: []string{"خلّي رقم السؤال i اللي من range زي ما هو، حتى لما تتخطى سؤال.", "استعمل switch على Prompt لتحديد نص الأرض، وبعدين range على Choices عشان تعرف رقمها.", "زوّد Attempted للسؤال الصالح بس، وCorrect بعد اختيار مطابق وقبول Answer؛ اضرب في100 قبل القسمة."},
+		En: &LevelText{Title: "Crew Exam", Goal: "Answer the crop-ground exam and score usable questions", Starter: crewExamStarter, Lesson: `# A Whole Question Instead of Scattered Variables 🧑‍🚀
+
+The crew is reviewing crop terrain. The bank and choice order vary, but every question groups its data in one struct, just as waypoints group X and Y.
+
+## Before you write
+- How will you retain the original question index when skipping a broken question?
+- Should a question without choices count in the percentage denominator?
+
+## Read questions as structs
+~~~go
+questions := colony.Exam()
+for i, question := range questions {
+ fmt.Println(i, question.Prompt, question.Choices)
+}
+~~~
+~Exam~ returns ~[]colony.Question~. Each Question has ~Prompt string~, the crop name, and ~Choices []string~, terrain names. ~range~ gives the question index and a copy of its value, like the points slice in 7-1.
+
+~~~go
+if len(question.Choices) == 0 {
+ continue
+}
+~~~
+~continue~ advances to the next iteration, as in 5-2. Check choices before indexing. One offline question has no choices; leave it unanswered and do not increase the usable-question count.
+
+## Choose using the question data
+~~~go
+switch question.Prompt {
+case "moss":
+ fmt.Println("soil")
+case "lichen":
+ fmt.Println("ice")
+}
+~~~
+These rules build on Mixed Terrain. For this exam, the exact answers are moss→soil, lichen→ice, crystal→regolith. No parsing is involved: compare strings directly, then find the required text in Choices.
+
+## Record a choice
+~~~go
+accepted := colony.Answer(0, 1)
+fmt.Println(accepted)
+~~~
+~Answer(i, choice)~ records a zero-based choice for question i and returns a bool indicating valid indices. True does not mean the answer is factually correct; you determine correctness by matching the crop rule. Use the original question index from range and the choice index you found, rather than the sample's fixed numbers.
+
+## A score struct: a worked example
+~~~go
+type Progress struct { Done, Total int }
+p := Progress{Done: 2, Total: 3}
+percent := p.Done * 100 / p.Total
+fmt.Println(percent) // 66
+~~~
+This computes training progress rather than the mission score. Grouping counters in a struct makes their relationship clear. Integer division discards the fraction; multiply by 100 before division to retain the percentage.
+
+## Common mistakes
+~~~go
+for i := range questions {
+ colony.Answer(i, 0) // The first choice is not always correct
+}
+~~~
+Choice order varies, and the empty question has no choice 0 at all. Counting all bank entries in the denominator also penalizes an unanswerable question. If there are no usable questions, report zero without dividing.
+
+## Your mission
+Define your own struct with ~Correct~ and ~Attempted~ counters. Answer every usable question using moss→soil, lichen→ice, crystal→regolith. Do not call Answer for the question without choices.
+
+Compute integer ~correct*100/attempted~ and send one percentage report. All usable answers must be correct, so the final score is 100. Verification also inspects recorded answers, not just your report.`, Hints: []string{"Keep the original range index i, even when skipping a question.", "Use switch on Prompt to select terrain text, then range over Choices to find its index.", "Count only usable questions; increment Correct after a matching accepted answer, and multiply by 100 before dividing."}},
+		Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			n := 4 + w.Rand.Intn(4)
+			crops := []string{"moss", "lichen", "crystal"}
+			correct := map[int]int{}
+			empty := w.Rand.Intn(n + 1)
+			for i := 0; i <= n; i++ {
+				if i == empty {
+					w.Data.Questions = append(w.Data.Questions, sim.Question{Prompt: "offline"})
+					continue
+				}
+				crop := crops[w.Rand.Intn(len(crops))]
+				choices := []string{"soil", "ice", "regolith"}
+				w.Rand.Shuffle(len(choices), func(i, j int) { choices[i], choices[j] = choices[j], choices[i] })
+				ground := "soil"
+				switch crop {
+				case "lichen":
+					ground = "ice"
+				case "crystal":
+					ground = "regolith"
+				}
+				for j, choice := range choices {
+					if choice == ground {
+						correct[i] = j
+					}
+				}
+				w.Data.Questions = append(w.Data.Questions, sim.Question{Prompt: crop, Choices: choices})
+			}
+			w.Check = func(w *sim.World) (bool, string) {
+				done := len(w.Data.Answers) == len(correct)
+				for i, choice := range correct {
+					got, ok := w.Data.Answers[i]
+					done = done && ok && got == choice
+				}
+				if done && len(w.Reports) == 1 && w.Reports[0] == "100" {
+					return true, i18n.T("كل الإجابات صح والسؤال الفاضي خارج النسبة", "All answers are correct and the empty question is excluded")
+				}
+				return false, i18n.T("مستني إجابة كل سؤال صالح والنسبة؛ سيب السؤال اللي من غير اختيارات", "Waiting for every usable answer and the score; skip the question without choices")
+			}
+		},
+	})
+
 }

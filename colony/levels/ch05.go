@@ -1,8 +1,11 @@
 package levels
 
 import (
+	"errors"
 	"fmt"
+	"slices"
 	"strconv"
+	"strings"
 
 	"orbital/colony/i18n"
 	"orbital/colony/internal/sim"
@@ -311,4 +314,522 @@ for {
 ## المهمة
 ~Harvest~ العادية متعطّلة هنا. استخدم ~TryHarvest~، واتعامل مع العاصفة، وابعت مجموع الكريستال اللي جمعته.`,
 	})
+
+	faultLogStarter := `package main
+
+import (
+	"fmt"
+	"orbital/colony"
+)
+
+func main() {
+	fmt.Println(colony.DiagnosticCount())
+	// Build the report described in the lesson.
+}
+`
+	add(&Level{ID: "5-3-fault-log", Chapter: 5, Title: "سجل الأعطال", Goal: "لف الأعطال وابعت كل كود وبعدهم سجل الأسباب",
+		Requires: []string{"errwrap"}, Bridge: []int{2, 14},
+		Par: 0, Gold: 0, MaxTicks: 100,
+		Starter: faultLogStarter, Lesson: `# الخطأ يحتفظ بسببه 🧰
+
+في عاصفة الكريستال اتعلّمنا إن الخطأ قيمة، وإن ~errors.Is~ بتعرف سبب معروف. دلوقتي هنضيف مكان العطل للرسالة، من غير ما نضيّع السبب الأصلي.
+
+## قبل ما تكتب
+- إزاي تضيف سياق للخطأ وتحافظ على هويته؟
+- هتجمع كل الأعطال إزاي من غير ما توقف عند أول واحد؟
+
+## افحص وحدة واحدة
+~~~go
+count := colony.DiagnosticCount()
+err := colony.Diagnose(0)
+fmt.Println(count, err)
+~~~
+~DiagnosticCount~ عدد الوحدات. لف بحلقة عدّ من صفر لحد قبل العدد ده، ونادِ ~Diagnose(i)~ لكل وحدة. النتيجة ~nil~ لو سليمة، أو error لو معطوبة. هنا مش محتاج slice تحفظ فيها الوحدات.
+
+## لف الخطأ بـ %w
+~~~go
+cause := errors.New("antenna offline")
+wrapped := fmt.Errorf("relay %d: %w", 7, cause)
+fmt.Println(wrapped) // relay 7: antenna offline
+~~~
+~errors.New~ بتعمل error برسالة بسيطة. ~fmt.Errorf~ بتعمل error جديد من صيغة: ~%d~ مكان عدد صحيح، و~%w~ مكان السبب اللي هيتحفظ جوه الخطأ الجديد. ضيف ~"errors"~ و~"fmt"~ للـ imports.
+
+~~~go
+fmt.Println(errors.Is(wrapped, cause)) // true
+~~~
+دي نفس ~errors.Is~ اللي عرفناها قبل كده. بعد اللف لسه قادرة توصل للسبب، مش بس تقارن شكل النص.
+
+## هات كود العطل
+~~~go
+code := colony.FaultCode(wrapped)
+fmt.Println(code)
+~~~
+~FaultCode~ بتفتّش داخل الأسباب الملفوفة باستخدام ~errors.As~ جوه المكتبة، وبترجّع كود كـ string. مع عطل جاي من ~Diagnose~ الكود موجود؛ مع خطأ عادي زي مثال الهوائي بترجّع نص فاضي. تفاصيل النوع الداخلي متشالة عن كود اللاعب، فمش محتاج pointers أو structs.
+
+## اجمع من غير قايمة: مثال محلول
+~~~go
+var all error
+all = errors.Join(all, errors.New("relay A"))
+all = errors.Join(all, errors.New("relay B"))
+fmt.Println(all)
+~~~
+المتغير ~all~ بيبدأ nil. ~errors.Join~ بتتجاهل nil وبتجمع الأسباب، فكل مرة بنرجّع القيمة الجديدة لنفس المتغير. الطباعة بتعرض رسالة كل سبب في سطر: relay A وبعدها relay B. دي تجربة لجمع إنذارين، مش حل فحوصات المهمة.
+
+## أخطاء شائعة
+~~~go
+wrapped := fmt.Errorf("relay: %v", cause)
+~~~
+~%v~ بتعرض نص السبب بس؛ ~errors.Is(wrapped, cause)~ مش هتلاقيه. استخدم ~%w~ لما تقصد تحافظ على السبب. ولو كتبت ~all = wrapped~ هتمسح الأعطال السابقة بدل ما تجمعها.
+
+## المهمة
+افحص كل الوحدات. لكل error لفّه بصيغة ~fmt.Errorf("bay %d: %w", i, err)~. اتأكد بـ ~errors.Is~ إن السبب محفوظ، وابعت ~colony.FaultCode(wrapped)~ كتقرير فوراً، من غير index أو بادئة.
+
+جمّع بـ ~all = errors.Join(all, wrapped)~. بعد الحلقة ابعت ~all~ نفسه كتقرير أخير لو مش nil؛ Report هيعرضه كنص متعدد السطور. في كل تشغيل فيه وحدات سليمة وعطلين على الأقل، ومفيش تقارير للوحدات السليمة.`, Hints: []string{"~var all error~ بيبدأ nil؛ مش محتاج قايمة أخطاء.", "عالِج بس ~err != nil~، ولف بـ ~%w~ قبل ما تجيب الكود.", "ابعت الأكواد واحد واحد، وحافظ على ~all~ بـ ~errors.Join~؛ السجل المجمّع يبقى آخر تقرير."},
+		En: &LevelText{Title: "Fault Log", Goal: "Wrap faults, report each code, then the combined causes", Starter: faultLogStarter, Lesson: `# Keep the Cause Inside the Error 🧰
+
+Crystal Storm taught us that errors are values and ~errors.Is~ recognizes known causes. Now add the fault location without losing the original cause.
+
+## Before you write
+- How can you add context while preserving error identity?
+- How will you collect every fault without stopping at the first?
+
+## Inspect one bay
+~~~go
+count := colony.DiagnosticCount()
+err := colony.Diagnose(0)
+fmt.Println(count, err)
+~~~
+~DiagnosticCount~ gives the bay count. Use a counting loop from zero up to that count and call ~Diagnose(i)~ for each bay. It returns ~nil~ for a healthy bay or an error for a faulty one. You do not need a slice of bays.
+
+## Wrap with %w
+~~~go
+cause := errors.New("antenna offline")
+wrapped := fmt.Errorf("relay %d: %w", 7, cause)
+fmt.Println(wrapped) // relay 7: antenna offline
+~~~
+~errors.New~ creates an error with a simple message. ~fmt.Errorf~ creates a new error from a format: ~%d~ inserts an integer, while ~%w~ preserves the cause inside the new error. Add ~"errors"~ and ~"fmt"~ to your imports.
+
+~~~go
+fmt.Println(errors.Is(wrapped, cause)) // true
+~~~
+This is the same ~errors.Is~ from the earlier mission. It can still reach the cause after wrapping, rather than merely comparing message text.
+
+## Read the fault code
+~~~go
+code := colony.FaultCode(wrapped)
+fmt.Println(code)
+~~~
+~FaultCode~ searches wrapped causes using ~errors.As~ inside the library and returns a string code. A fault from ~Diagnose~ has a code; an ordinary error like the antenna example returns empty text. The internal type stays behind the API, so player code needs no pointers or structs.
+
+## Accumulate without a collection: a worked example
+~~~go
+var all error
+all = errors.Join(all, errors.New("relay A"))
+all = errors.Join(all, errors.New("relay B"))
+fmt.Println(all)
+~~~
+~all~ starts as nil. ~errors.Join~ ignores nil and combines causes, so assign its new value back to the same variable each time. Printing shows one message per line: relay A, then relay B. This combines two sample alarms rather than solving the mission diagnostics.
+
+## Common mistakes
+~~~go
+wrapped := fmt.Errorf("relay: %v", cause)
+~~~
+~%v~ displays the cause's text but ~errors.Is(wrapped, cause)~ will not find it. Use ~%w~ to preserve the cause. Also, ~all = wrapped~ discards earlier faults instead of accumulating them.
+
+## Your mission
+Inspect every bay. Wrap each failure with ~fmt.Errorf("bay %d: %w", i, err)~. Check with ~errors.Is~ that its cause remains accessible and immediately report ~colony.FaultCode(wrapped)~, without an index or prefix.
+
+Accumulate with ~all = errors.Join(all, wrapped)~. After the loop, report ~all~ itself once if it is non-nil; Report renders it as multiline text. Every run includes healthy bays and at least two faults. Healthy bays produce no report.`, Hints: []string{"~var all error~ starts nil; no error collection is needed.", "Only process ~err != nil~, and wrap with ~%w~ before extracting the code.", "Report codes individually and accumulate with ~errors.Join~; the combined log is the last report."}},
+		Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			n := 5 + w.Rand.Intn(4)
+			w.Data.Faults = make([]*sim.FaultError, n)
+			var want []string
+			var all error
+			for i := 0; i < n; i++ {
+				if i == 1 || i == n-1 || (i > 1 && w.Rand.Intn(2) == 0) {
+					fault := &sim.FaultError{Index: i, Code: fmt.Sprintf("F%d", 100+w.Rand.Intn(900)), Message: "sensor offline"}
+					w.Data.Faults[i] = fault
+					want = append(want, fault.Code)
+					all = errors.Join(all, fmt.Errorf("bay %d: %w", i, fault))
+				}
+			}
+			want = append(want, all.Error())
+			w.Check = func(w *sim.World) (bool, string) {
+				if slices.Equal(w.Reports, want) {
+					return true, i18n.T("كل التقارير مطابقة وبالترتيب", "All reports match in order")
+				}
+				return false, i18n.T("التقارير لسه ناقصة أو مش مطابقة؛ راجع القيم وترتيبها", "Reports are missing or do not match; check values and order")
+			}
+		},
+	})
+
+	undockStarter := `package main
+
+import (
+	"fmt"
+	"orbital/colony"
+)
+
+func main() {
+	fmt.Println(colony.DrillAttempts())
+	// Build the report described in the lesson.
+}
+`
+	add(&Level{ID: "5-4-undock", Chapter: 5, Title: "فك الارتباط", Goal: "افصل الدرون بعد كل محاولة حفر وكمّل بعد panic",
+		Requires: []string{"defer", "recover"}, Bridge: []int{},
+		Par: 1, Gold: 1, MaxTicks: 20,
+		Starter: undockStarter, Lesson: `# حتى لو الحفر اتعطّل 🔧
+
+بعض الأعطال مش بترجع error: ~Drill~ ممكن تعمل ~panic~ فتوقف مسار التنفيذ العادي. الدرون محتاج حد أمان صغير يحافظ على فك الارتباط ويخلّي المهمة تكمل.
+
+## قبل ما تكتب
+- تحط التنضيف في دالة المحاولة ولا في main؟
+- بعد التعافي، هتكمل جوه المحاولة ولا عند المنادي؟
+
+## عدد المحاولات وأوامر الربط
+~~~go
+attempts := colony.DrillAttempts()
+colony.Dock()
+~~~
+~DrillAttempts~ بترجّع عدد صحيح للمحاولات المطلوبة. ~Dock~ بتربط الدرون عشان يبدأ الشغل.
+
+~~~go
+colony.Drill()
+~~~
+~Drill~ بتسجّل محاولة؛ ممكن تكمل عادي أو تعمل panic. لازم تكون مربوط قبل ندائها. حالة المثقاب ممكن تختلف بين تشغيل والتاني.
+
+~~~go
+colony.Undock()
+~~~
+~Undock~ بتفك الربط. مهم إنها تحصل مرة لكل محاولة حتى لو Drill ما رجعتش عادي.
+
+## defer بتضمن خطوة عند الخروج
+~~~go
+func announce() {
+ defer fmt.Println("finished")
+ fmt.Println("working")
+}
+~~~
+~defer~ بتسجّل نداء يتنفّذ لما الدالة تخرج، حتى أثناء panic. المثال بيطبع working وبعدها finished. لو سجلت أكتر من defer، آخر واحدة اتسجّلت بتتنفّذ الأول.
+
+## recover وحدّ الأمان: مثال محلول
+~~~go
+func trainingSignal() {
+ defer fmt.Println("signal closed")
+ defer func() {
+  issue := recover()
+  if issue != nil {
+   fmt.Println("recovered:", issue)
+  }
+ }()
+ panic("training signal")
+}
+~~~
+~panic~ في المثال بتطلق عطل تدريب. ~func() { ... }~ دالة من غير اسم، والأقواس ~()~ في آخرها بتجهّز نداءها المؤجل. ~recover~ لازم تتنادى مباشرة جوه الدالة المؤجلة دي؛ بترجّع سبب العطل أو nil لو مفيش panic.
+
+المثال بيطبع السبب وبعدين signal closed. التعافي بيرجّع ~trainingSignal~ للمنادي؛ مش بيكمّل بعد سطر panic. عشان كده حلقة المحاولات لازم تبقى في main، وكل محاولة في دالة لوحدها. احنا بنتعافى من عطل المثقاب المتوقع عشان ننضف ونكمّل.
+
+## تجهيز نص التقرير
+~~~go
+text := fmt.Sprintf("training:%d", 3)
+fmt.Println(text) // training:3
+~~~
+~Sprintf~ بترجّع string جاهزة بدل ما تطبعها. ~%d~ مكان العدد، زي صيغ Errorf في سجل الأعطال.
+
+## أخطاء شائعة
+~~~go
+func attempt() {
+ recover() // مش جوه defer
+ panic("training")
+}
+~~~
+النداء ده مش هيمسك panic اللي بعدها. وكمان لو أخّرت ~Undock~ لآخر main، المحاولات مش هتتفك واحدة واحدة. سجّل التنضيف جوه دالة المحاولة بعد Dock مباشرة.
+
+## المهمة
+كرّر عدد ~DrillAttempts()~ من المحاولات. كل واحدة تعمل Dock وDrill، وتضمن Undock مرة واحدة مع النجاح أو panic. بعد ما الكل يخلص، اتحرك East مرة واحدة، وابعت تقرير واحد ~ready:N~، حيث N عدد المحاولات اللي قريته. متبعتش تقارير تانية؛ رسائل التشخيص ينفع تطبعها بـ Println.`, Hints: []string{"خلّي الحلقة في main ودالة تانية لمسؤولية محاولة واحدة.", "سجّل فك الارتباط بـ defer بعد Dock مباشرة، عشان يفضل مضمون.", "خلي recover مباشرة جوه دالة مؤجلة؛ بعد رجوع المحاولة main تقدر تكمّل اللفة اللي بعدها."},
+		En: &LevelText{Title: "Undocking", Goal: "Undock after every drill attempt and continue after panic", Starter: undockStarter, Lesson: `# Even When Drilling Fails 🔧
+
+Some faults do not return errors: ~Drill~ can ~panic~, interrupting normal execution. The drone needs a small safety boundary that guarantees cleanup and lets the mission continue.
+
+## Before you write
+- Should cleanup belong to each attempt or to main?
+- After recovery, does execution resume inside the attempt or at its caller?
+
+## Attempt count and docking commands
+~~~go
+attempts := colony.DrillAttempts()
+colony.Dock()
+~~~
+~DrillAttempts~ returns the required integer attempt count. ~Dock~ attaches the drone before work begins.
+
+~~~go
+colony.Drill()
+~~~
+~Drill~ records an attempt and can either return normally or panic. Dock before calling it. Drill status can differ between runs.
+
+~~~go
+colony.Undock()
+~~~
+~Undock~ detaches the drone. It must happen once per attempt even if Drill does not return normally.
+
+## defer guarantees a step on exit
+~~~go
+func announce() {
+ defer fmt.Println("finished")
+ fmt.Println("working")
+}
+~~~
+~defer~ registers a call for function exit, including panic unwinding. This prints working, then finished. When several defers are registered, the last registered runs first.
+
+## recover and the safety boundary: a worked example
+~~~go
+func trainingSignal() {
+ defer fmt.Println("signal closed")
+ defer func() {
+  issue := recover()
+  if issue != nil {
+   fmt.Println("recovered:", issue)
+  }
+ }()
+ panic("training signal")
+}
+~~~
+~panic~ raises a training fault here. ~func() { ... }~ is an unnamed function, and its final ~()~ prepares the deferred call. ~recover~ must be called directly inside that deferred function; it returns the panic cause or nil when no panic occurred.
+
+The example prints the cause and then signal closed. Recovery returns ~trainingSignal~ to its caller; execution does not resume after the panic line. Keep the attempt loop in main and each attempt in its own function. We recover from the expected drill fault to clean up and continue.
+
+## Format the report text
+~~~go
+text := fmt.Sprintf("training:%d", 3)
+fmt.Println(text) // training:3
+~~~
+~Sprintf~ returns a formatted string instead of printing it. ~%d~ inserts the integer, as in Errorf formats from Fault Log.
+
+## Common mistakes
+~~~go
+func attempt() {
+ recover() // Not inside a defer
+ panic("training")
+}
+~~~
+This call does not catch the later panic. Also, postponing ~Undock~ until main exits fails to clean up attempts individually. Register cleanup inside the attempt immediately after Dock.
+
+## Your mission
+Perform ~DrillAttempts()~ attempts. Each calls Dock and Drill and guarantees exactly one Undock on success or panic. After all attempts finish, move East once and send one report ~ready:N~, where N is the attempt count you read. Send no other reports; diagnostic messages can use Println.`, Hints: []string{"Keep the loop in main and put one attempt in a separate function.", "Defer undocking immediately after Dock so cleanup is guaranteed.", "Call recover directly in a deferred function; after the attempt returns, main can continue the loop."}},
+		Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			n := 2 + w.Rand.Intn(5)
+			w.Data.DrillAttempts = n
+			w.Data.DrillPanic = w.Rand.Intn(2) == 0
+			want := fmt.Sprintf("ready:%d", n)
+			w.Check = func(w *sim.World) (bool, string) {
+				if w.Data.Drills == n && w.Data.Undocks == n && !w.Data.Docked && w.X == 1 && w.Y == 0 && len(w.Reports) == 1 && w.Reports[0] == want {
+					return true, i18n.T("كل محاولة اتفكت والدرون كمل رحلته", "Every attempt was cleaned up and the drone continued")
+				}
+				return false, i18n.T("مستني حفر وفك ارتباط لكل محاولة، وبعدهم حركة وتقرير الجاهزية", "Waiting for drilling and cleanup per attempt, then movement and readiness report")
+			}
+		},
+	})
+
+	commandTableStarter := `package main
+
+import (
+	"fmt"
+	"orbital/colony"
+)
+
+func main() {
+	fmt.Println(colony.OrderCount())
+	// Build the report described in the lesson.
+}
+`
+	add(&Level{ID: "5-5-command-table", Chapter: 5, Title: "لوحة الأوامر", Goal: "اختار دوال الأوامر ومرّرها وعدّ الناجح بـ closure",
+		Requires: []string{"funcvalue"}, Bridge: []int{11},
+		Par: 10, Gold: 10, MaxTicks: 30,
+		Starter: commandTableStarter, Lesson: `# الدالة ممكن تبقى قيمة 🎛️
+
+الدالة مش لازم تتنفّذ لحظة ما تختارها. ممكن تحتفظ بيها، تبعتها لدالة تانية، أو ترجعها كنتيجة. ده هيخلّي لوحة الأوامر تختار الشغل الأول وتنفّذه بعدين.
+
+## قبل ما تكتب
+- إيه الفرق بين اسم الدالة وندائها بالأقواس؟
+- العدّاد اللي جوه closure لازم يعيش فين عشان يفتكر النداءات السابقة؟
+
+## خزّن الدالة نفسها
+~~~go
+func beep() { fmt.Println("ping") }
+~~~
+دي دالة عادية زي اللي كتبناها في 5-1. جوه main نقدر نعمل:
+~~~go
+action := beep
+action()
+~~~
+~beep~ من غير أقواس قيمة نوعها ~func()~: دالة من غير مدخلات ولا ناتج. ~action()~ هو اللي بينفّذها. الدالة المجهولة اللي استخدمناها مع defer في المهمة اللي فاتت ينفع كمان نخزنها كقيمة.
+
+## رجّع دالة ومرّر دالة: مثال محلول
+~~~go
+func choose(name string) func() {
+ switch name {
+ case "beep":
+  return beep
+ }
+ return nil
+}
+func run(action func()) {
+ action()
+}
+~~~
+~func()~ بعد مدخلات choose هي نوع الناتج. ~run~ بتاخد دالة كـ parameter وتنفّذها. قيمة nil معناها مفيش دالة للاسم ده.
+
+~~~go
+action := choose("beep")
+if action != nil {
+ run(action) // ping
+}
+~~~
+المثال اختار صوت تجريبي ومرّره للتنفيذ؛ مش لوحة أوامر المهمة.
+
+## closure بتفتكر متغير برّه جسمها
+~~~go
+hits := 0
+countHit := func() { hits++ }
+run(countHit)
+run(countHit)
+fmt.Println(hits) // 2
+~~~
+~countHit~ بتستخدم hits اللي اتعرّفت برّه الدالة. دي closure: نفس المتغير بيتحدّث مع كل نداء. لو عرّفته جوّاها هيتصفّر كل مرة.
+
+## اقرأ ونضّف اسم الأمر
+~~~go
+n := colony.OrderCount()
+name := colony.Order(0)
+command := strings.TrimSpace(name)
+fmt.Println(n, command)
+~~~
+~OrderCount~ عدد الأوامر، و~Order(i)~ بترجّع نص أمر واحد. ضيف ~"strings"~؛ ~TrimSpace~ بتشيل المسافات من الأطراف بس، ومش بتغيّر الحروف الكبيرة. لف بحلقة عدّ عادية، من غير map أو slice.
+
+صيغة التقرير ممكن تتجهّز بـ ~fmt.Sprintf("id=%d", 7)~ فتطلع ~id=7~. للمجهول، ~fmt.Errorf("unknown:%s", command)~ بتعمل error و~%s~ بتحط النص مكانها.
+
+## أخطاء شائعة
+~~~go
+run(beep()) // غلط
+~~~
+ده بينادي beep بدري ويحاول يمرّر ناتج مش موجود. الصح تمرّر قيمة الدالة. وكمان متندهش على action وهي nil؛ افحصها بـ if الأول.
+
+## المهمة
+اكتب دالة بتاخد اسم الأمر وترجّع ~func()~، واختار جواها بـ switch: ~moss~ تبعت ~moss=N~ من ~Count(Moss)~، و~crystal~ تبعت ~crystal=N~، و~wait~ تعمل ~colony.Wait()~ وبعدين تبعت ~wait~.
+
+مرّر الدوال لدالة تنفيذ. استخدم closure واحدة بتلتقط عدّاد الأوامر المعروفة، ومرّرها للتنفيذ بعد كل أمر معروف. للأمر المجهول، حتى الفاضي، ابعت error بصيغة ~unknown:command~ وكمّل من غير زيادة العدّاد. النتيجة تقرير لكل أمر بالترتيب، وبعدهم تقرير أخير بالعدّاد كعدد صحيح. التكرارات كلها بتتنفّذ؛ شيل مسافات الأطراف، لكن ~WAIT~ مش ~wait~.`, Hints: []string{"الدالة اللي بتختار الأمر ترجع اسم دالة من غير أقواس، أو nil للمجهول.", "دالة التنفيذ تاخد parameter نوعه ~func()~؛ افحص nil في المنادي قبل ما تمرّرها.", "عرّف العدّاد برّه الدالة المجهولة، وزوّده من جواها بعد كل أمر معروف؛ ابعته بعد كل نتائج الأوامر."},
+		En: &LevelText{Title: "Command Table", Goal: "Choose and pass command functions, counting valid commands with a closure", Starter: commandTableStarter, Lesson: `# A Function Can Be a Value 🎛️
+
+A function does not have to run when you choose it. You can store it, pass it to another function, or return it. The command panel will choose work first and execute it later.
+
+## Before you write
+- How does a function name differ from calling it with parentheses?
+- Where must a closure's counter live to remember earlier calls?
+
+## Store the function itself
+~~~go
+func beep() { fmt.Println("ping") }
+~~~
+This is an ordinary function like those from 5-1. Inside main, write:
+~~~go
+action := beep
+action()
+~~~
+~beep~ without parentheses is a value of type ~func()~: a function with no inputs or result. ~action()~ executes it. The unnamed function used with defer in the previous mission can also be stored as a value.
+
+## Return and pass functions: a worked example
+~~~go
+func choose(name string) func() {
+ switch name {
+ case "beep":
+  return beep
+ }
+ return nil
+}
+func run(action func()) {
+ action()
+}
+~~~
+~func()~ after choose's parameters is its return type. ~run~ accepts a function parameter and executes it. A nil value means there is no function for that name.
+
+~~~go
+action := choose("beep")
+if action != nil {
+ run(action) // ping
+}
+~~~
+This chooses a sample sound and passes it for execution; it does not implement the mission's command panel.
+
+## A closure remembers an outer variable
+~~~go
+hits := 0
+countHit := func() { hits++ }
+run(countHit)
+run(countHit)
+fmt.Println(hits) // 2
+~~~
+~countHit~ uses hits, declared outside its body. This is a closure: each call updates the same variable. Declaring the counter inside would reset it on every call.
+
+## Read and trim a command
+~~~go
+n := colony.OrderCount()
+name := colony.Order(0)
+command := strings.TrimSpace(name)
+fmt.Println(n, command)
+~~~
+~OrderCount~ gives the number of commands, and ~Order(i)~ returns one command string. Import ~"strings"~; ~TrimSpace~ removes surrounding whitespace without changing case. Use an ordinary counting loop, with no map or slice.
+
+Prepare report text with ~fmt.Sprintf("id=%d", 7)~, producing ~id=7~. For unknown commands, ~fmt.Errorf("unknown:%s", command)~ makes an error; ~%s~ inserts the command text.
+
+## Common mistakes
+~~~go
+run(beep()) // Wrong
+~~~
+This calls beep early and tries to pass a nonexistent result. Pass the function value instead. Also, never call a nil action; check it with if first.
+
+## Your mission
+Write a function taking a command name and returning ~func()~. Choose with switch: ~moss~ reports ~moss=N~ from ~Count(Moss)~; ~crystal~ reports ~crystal=N~; ~wait~ calls ~colony.Wait()~ and then reports ~wait~.
+
+Pass functions to an executor function. Use one closure capturing a valid-command counter, passing it for execution after each known command. For unknown commands, including empty text, report an error formatted as ~unknown:command~ and continue without incrementing the counter. Send one report per command in order, followed by one final integer counter report. Execute repetitions every time; trim surrounding spaces, but ~WAIT~ is not ~wait~.`, Hints: []string{"The chooser returns a function name without parentheses, or nil for unknown commands.", "The executor takes a ~func()~ parameter; check nil in the caller before passing it.", "Declare the counter outside the unnamed function and increment it inside after known commands; report it after all command results."}},
+		Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			w.Inv[sim.Moss] = 10 + w.Rand.Intn(80)
+			w.Inv[sim.Crystal] = 1 + w.Rand.Intn(40)
+			w.Data.Orders = []string{"moss", " wait ", "crystal", "moss", "", fmt.Sprintf("bad%d", w.Rand.Intn(1000)), "WAIT"}
+			valid := []string{"moss", "crystal", "wait"}
+			for i := 0; i < 1+w.Rand.Intn(3); i++ {
+				w.Data.Orders = append(w.Data.Orders, valid[w.Rand.Intn(len(valid))])
+			}
+			w.Rand.Shuffle(len(w.Data.Orders), func(i, j int) { w.Data.Orders[i], w.Data.Orders[j] = w.Data.Orders[j], w.Data.Orders[i] })
+			var want []string
+			count, waits := 0, 0
+			for _, order := range w.Data.Orders {
+				command := strings.TrimSpace(order)
+				switch command {
+				case "moss":
+					want = append(want, fmt.Sprintf("moss=%d", w.Inv[sim.Moss]))
+					count++
+				case "crystal":
+					want = append(want, fmt.Sprintf("crystal=%d", w.Inv[sim.Crystal]))
+					count++
+				case "wait":
+					want = append(want, "wait")
+					waits++
+					count++
+				default:
+					want = append(want, "unknown:"+command)
+				}
+			}
+			want = append(want, strconv.Itoa(count))
+			w.Check = func(w *sim.World) (bool, string) {
+				if slices.Equal(w.Reports, want) && w.Tick == waits {
+					return true, i18n.T("الأوامر والعداد وصلوا صح", "Commands and counter are correct")
+				}
+				return false, i18n.T("راجع تنفيذ كل أمر، تقرير المجهول، وعدّاد الأوامر المعروفة", "Check command actions, unknown reports, and the valid-command counter")
+			}
+		},
+	})
+
 }

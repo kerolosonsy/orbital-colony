@@ -90,3 +90,57 @@ func (w *World) Invoice() (int, int) {
 	defer w.mu.Unlock()
 	return w.Data.TotalCents, w.Data.People
 }
+
+// Scalar and indexed access keeps early missions independent of slices.
+func (w *World) Callsign(i int) string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if i < 0 || i >= len(w.Data.Callsigns) {
+		return ""
+	}
+	return w.Data.Callsigns[i]
+}
+func (w *World) CargoAmount(kind int) int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if kind < 0 || kind >= len(w.Data.CargoAmounts) {
+		return 0
+	}
+	return w.Data.CargoAmounts[kind]
+}
+func (w *World) ReadingCount() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return len(w.Data.SensorReadings)
+}
+func (w *World) Reading(i int) int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if i < 0 || i >= len(w.Data.SensorReadings) {
+		return 0
+	}
+	return w.Data.SensorReadings[i]
+}
+func (w *World) DiagnosticCount() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return len(w.Data.Faults)
+}
+func (w *World) DrillAttempts() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.Data.DrillAttempts
+}
+func (w *World) OrderCount() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return len(w.Data.Orders)
+}
+func (w *World) Order(i int) string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if i < 0 || i >= len(w.Data.Orders) {
+		return ""
+	}
+	return w.Data.Orders[i]
+}

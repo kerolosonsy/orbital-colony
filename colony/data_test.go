@@ -2,6 +2,7 @@ package colony
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"testing"
 
@@ -85,5 +86,21 @@ func TestDeferredUndockSurvivesDrillPanic(t *testing.T) {
 				t.Fatal("undock not idempotent")
 			}
 		})
+	}
+}
+
+func TestFaultCodeFollowsWrappedAndJoinedCauses(t *testing.T) {
+	fault := &FaultError{Index: 2, Code: "F207", Message: "offline"}
+	wrapped := fmt.Errorf("bay: %w", fault)
+	joined := errors.Join(errors.New("unrelated"), wrapped)
+	for _, err := range []error{fault, wrapped, joined} {
+		if got := FaultCode(err); got != "F207" {
+			t.Fatalf("FaultCode(%v) = %q", err, got)
+		}
+	}
+	for _, err := range []error{nil, errors.New("F207: just text")} {
+		if got := FaultCode(err); got != "" {
+			t.Fatalf("ordinary error has fault code %q", got)
+		}
 	}
 }

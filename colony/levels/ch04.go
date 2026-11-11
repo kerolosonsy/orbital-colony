@@ -2,6 +2,7 @@ package levels
 
 import (
 	"fmt"
+	"slices"
 
 	"orbital/colony/i18n"
 	"orbital/colony/internal/sim"
@@ -289,4 +290,158 @@ case y > 2:
 ## المهمة
 كل خانة لها أرض مختلفة. الطحالب بتتزرع على soil (والـ regolith بعد Till)، والأشنة (Lichen) على ice.`,
 	})
+
+	checkpointStarter := `package main
+
+import (
+	"fmt"
+	"orbital/colony"
+)
+
+func main() {
+	fmt.Println(colony.Reading(0))
+	// Build the report described in the lesson.
+}
+`
+	add(&Level{ID: "4-3-checkpoint", Chapter: 4, Title: "بوابة الفحص", Goal: "صنّف قراءات صحيحة مع فحص الحدود والقيم خارج المدى",
+		Requires: []string{"if"}, Bridge: []int{1, 7},
+		Par: 0, Gold: 0, MaxTicks: 100,
+		Starter: checkpointStarter, Lesson: `# الحدود ليها صاحب 🚦
+
+بوابة الفحص بتستقبل أرقام صحيحة من حسّاسات الأكسجين. هنا مش محتاج تحوّل نصوص؛ شغلتك تقرر كل رقم ينتمي لأنهي فئة.
+
+## قبل ما تكتب
+- الرقم اللي على الحد بالظبط هينتمي للفئة اللي قبله ولا بعده؟
+- هتفحص المدى المسموح قبل التصنيف ولا بعده؟
+
+## قراءة رقم برقم
+~~~go
+count := colony.ReadingCount()
+n := colony.Reading(0)
+fmt.Println(count, n)
+~~~
+~ReadingCount~ بتقولك عدد القراءات. ~Reading(i)~ بتجيب قراءة واحدة كـ ~int~، ورقمها يبدأ من صفر. الأرقام جاهزة للحساب؛ مفيش parsing أو error.
+
+استخدم حلقة العدّ اللي عرفناها في الفصل 3 عشان تزور الأرقام من 0 لحد قبل count. مثلاً حلقة عرض عدّاد بسيطة:
+~~~go
+for i := 0; i < 3; i++ {
+ fmt.Println(i)
+}
+~~~
+
+## رتب شروطك
+~~~go
+power := 7
+label := "blocked"
+if power < 2 || power > 8 {
+ label = "blocked"
+} else if power < 5 {
+ label = "slow"
+} else {
+ label = "fast"
+}
+fmt.Println(label) // fast
+~~~
+ده مثال تصريح موتور: من 2 لـ8 مسموح، و5 بداية السرعة العالية. بنفحص القيم المرفوضة الأول، وبعدها الحدود من الأصغر للأكبر. أول شرط صحيح هو اللي بيتنفّذ، ومش بنكمل باقي السلسلة.
+
+~label~ اتعرّفت قبل if عشان نقدر نستخدمها في التقرير بعد نهاية الشروط.
+
+## أخطاء شائعة
+~~~go
+if power <= 5 {
+ label = "slow"
+}
+~~~
+لو 5 بداية fast، فـ ~<=~ حطّت القيمة دي في الفئة الغلط. كمان لو بدأت بفحص ~power < 5~ قبل المدى المسموح، رقم سالب ممكن يتصنّف slow بالغلط.
+
+## المهمة
+لف على كل القراءات وابعت تقرير نصّي منفصل لكل قراءة بنفس ترتيبها. المدى المسموح من 0 لـ100 شامل الطرفين؛ أي رقم أقل من 0 أو أكبر من 100 تقريره ~invalid~.
+
+جوه المدى: أقل من20 هو ~low~، من20 لأقل من50 هو ~ready~، من50 لأقل من80 هو ~high~، ومن80 لحد100 هو ~alert~. ابعت الكلمة بس بـ ~colony.Report(label)~، من غير index أو أرقام إضافية. القيم 20 و50 و80 بتبدأ الفئة الجديدة بالظبط.`, Hints: []string{"اقرأ ~ReadingCount~ واستعمل حلقة عدّ، بدل ما تعمل قايمة قراءات.", "ابدأ برفض ~n < 0 || n > 100~ قبل شروط الفئات.", "خلي شروط الحدود تصاعدية وبـ ~<~، وابعت تقرير واحد بعد سلسلة if لكل قراءة."},
+		En: &LevelText{Title: "Inspection Checkpoint", Goal: "Classify integer readings, including boundaries and out-of-range values", Starter: checkpointStarter, Lesson: `# Every Boundary Has an Owner 🚦
+
+The checkpoint receives integer oxygen readings. There is no text conversion here; decide which band owns each number.
+
+## Before you write
+- Does an exact threshold belong to the preceding or following band?
+- Will you validate the allowed range before or after classification?
+
+## Read one number at a time
+~~~go
+count := colony.ReadingCount()
+n := colony.Reading(0)
+fmt.Println(count, n)
+~~~
+~ReadingCount~ gives the number of readings. ~Reading(i)~ returns one ~int~, with indices starting at zero. Values are ready for arithmetic; no parsing or errors are involved.
+
+Use the counting loop from chapter 3 to visit indices from 0 up to, but not including, count. For example, this small display loop prints a counter:
+~~~go
+for i := 0; i < 3; i++ {
+ fmt.Println(i)
+}
+~~~
+
+## Order your conditions
+~~~go
+power := 7
+label := "blocked"
+if power < 2 || power > 8 {
+ label = "blocked"
+} else if power < 5 {
+ label = "slow"
+} else {
+ label = "fast"
+}
+fmt.Println(label) // fast
+~~~
+This worked example grants motor access: 2 through 8 are allowed, and 5 starts the fast band. Reject invalid values first, then test thresholds from smallest to largest. Only the first matching branch runs.
+
+~label~ is declared before the if so it can be used in a report after the branches.
+
+## Common mistakes
+~~~go
+if power <= 5 {
+ label = "slow"
+}
+~~~
+If 5 starts fast, ~<=~ puts that exact value in the wrong band. Also, testing ~power < 5~ before validating the range can wrongly classify a negative number as slow.
+
+## Your mission
+Visit every reading and send one separate text report for each, in input order. The allowed range is 0 through 100 inclusive; anything below 0 or above 100 is ~invalid~.
+
+Within that range: below 20 is ~low~, 20 to below 50 is ~ready~, 50 to below 80 is ~high~, and 80 through 100 is ~alert~. Send only the word with ~colony.Report(label)~, with no index or extra numbers. Exactly 20, 50, and 80 start their new bands.`, Hints: []string{"Read ~ReadingCount~ and use a counting loop rather than building a collection.", "Reject ~n < 0 || n > 100~ before testing bands.", "Test ascending thresholds with ~<~ and send one report after the if chain for each reading."}},
+		Setup: func(w *sim.World) {
+			w.Init(4, 2, sim.Regolith)
+			w.Data.SensorReadings = []int{-1, 0, 19, 20, 49, 50, 79, 80, 100, 101}
+			for i := 0; i < 5; i++ {
+				w.Data.SensorReadings = append(w.Data.SensorReadings, w.Rand.Intn(141)-20)
+			}
+			w.Rand.Shuffle(len(w.Data.SensorReadings), func(i, j int) {
+				w.Data.SensorReadings[i], w.Data.SensorReadings[j] = w.Data.SensorReadings[j], w.Data.SensorReadings[i]
+			})
+			var want []string
+			for _, n := range w.Data.SensorReadings {
+				band := "invalid"
+				switch {
+				case n < 0 || n > 100:
+				case n < 20:
+					band = "low"
+				case n < 50:
+					band = "ready"
+				case n < 80:
+					band = "high"
+				default:
+					band = "alert"
+				}
+				want = append(want, band)
+			}
+			w.Check = func(w *sim.World) (bool, string) {
+				if slices.Equal(w.Reports, want) {
+					return true, i18n.T("كل التقارير مطابقة وبالترتيب", "All reports match in order")
+				}
+				return false, i18n.T("التقارير لسه ناقصة أو مش مطابقة؛ راجع القيم وترتيبها", "Reports are missing or do not match; check values and order")
+			}
+		},
+	})
+
 }
