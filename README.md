@@ -78,6 +78,7 @@ cd workspace/3-1-long-row && go run .
 | 29 | قواعد البيانات / SQL Databases | SQL وSQLite، وترحيلات وتحويل ذرّي وحوض اتصالات وsqlx وGORM / SQL and SQLite, migrations, atomic transfers, connection pools, sqlx, and GORM | ✅ |
 | 30 | التخزين المتقدم / Advanced Storage | Redis وكاش جانبي، ومستندات MongoDB، وفهرس بحث، وفصل القراءة والكتابة / Redis cache-aside, MongoDB documents, search indexing, and read/write splitting | ✅ |
 | 31 | الشبكة الخام / Raw Networking | TCP وحدود السطور، وغرفة راديو، وUDP، وإطارات binary، وDNS، وفحص منافذ محلي / TCP and bounded lines, a radio hub, UDP, binary frames, DNS, and loopback port checks | ✅ |
+| 32 | البروتوكولات / Protocols | WebSocket وgRPC والبث وTLS وmTLS وHTTP/2 وSSH / WebSocket, unary and streaming gRPC, TLS, mTLS, HTTP/2, and SSH | ✅ |
 
 ## هيكل المشروع
 

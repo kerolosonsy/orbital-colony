@@ -85,7 +85,9 @@ func (r *runner) RunLab(ctx context.Context, lvl *levels.Level, edited map[strin
 		if !validLabName(f.Name) {
 			return nil, fmt.Errorf("bad file name %q", f.Name)
 		}
-		if !strings.HasSuffix(f.Name, ".go") {
+		// Shipped read-only sources are trusted, like dependencies; modern
+		// protoc output uses unsafe internally, but players cannot edit it.
+		if f.ReadOnly || !strings.HasSuffix(f.Name, ".go") {
 			continue
 		}
 		if missing := restrictedImports(files[f.Name], lvl, lang); len(missing) > 0 {
