@@ -120,6 +120,7 @@ var Chapters = []Chapter{
 	{"قواعد البيانات", "Databases", 30, "التخزين المتقدم", "Redis والكاش الجانبي ومستندات MongoDB وفهارس البحث وفصل القراءة والكتابة", true, "Advanced Storage", "Redis cache-aside, MongoDB documents, search indexes, and read/write splitting"},
 	{"الشبكات", "Networking", 31, "الشبكة الخام", "TCP وحدود السطور وغرفة راديو وUDP وإطارات binary وDNS وفحص منافذ محلي", true, "Raw Networking", "TCP, bounded lines, a radio hub, UDP, binary frames, DNS, and loopback port checks"},
 	{"الشبكات", "Networking", 32, "البروتوكولات", "WebSocket وgRPC والبث وTLS وmTLS وHTTP/2 وSSH", true, "Protocols", "WebSocket, unary and streaming gRPC, TLS, mTLS, HTTP/2, and SSH"},
+	{"الأنظمة", "Systems", 34, "محركات التخزين", "مخزن مفاتيح بصلاحية ولقطات وسجل كتابة مسبقة بـ checksums ودمج SSTables وتخزين chunks موزّع بالتكرار والإصلاح", true, "Storage Engines", "A TTL key store with snapshots, a checksummed write-ahead log, SSTable compaction, and replicated chunk storage with repair"},
 }
 
 var All []*Level
