@@ -76,6 +76,7 @@ cd workspace/3-1-long-row && go run .
 | 27 | التصاريح والحماية / Passes and Protection | تصاريح bcrypt وJWT، وجلسات بكوكيز آمنة وCSRF، وCORS، وحد طلبات لكل عميل، وروابط مختصرة Base62 / bcrypt and JWT passes, secure-cookie sessions with CSRF, CORS, per-client rate limits, and Base62 short links | ✅ |
 | 28 | الإطارات والتشغيل / Frameworks and Operations | نفس عقد REST على Gin وFiber، ومستند OpenAPI واختبار عقد بالمكتبة القياسية، وإغلاق مرتب بيصفّي الطلبات الجارية / The same REST contract on Gin and Fiber, an OpenAPI document with a standard-library contract test, and graceful shutdown that drains in-flight requests | ✅ |
 | 29 | قواعد البيانات / SQL Databases | SQL وSQLite، وترحيلات وتحويل ذرّي وحوض اتصالات وsqlx وGORM / SQL and SQLite, migrations, atomic transfers, connection pools, sqlx, and GORM | ✅ |
+| 30 | التخزين المتقدم / Advanced Storage | Redis وكاش جانبي، ومستندات MongoDB، وفهرس بحث، وفصل القراءة والكتابة / Redis cache-aside, MongoDB documents, search indexing, and read/write splitting | ✅ |
 
 ## هيكل المشروع
 

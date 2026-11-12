@@ -117,6 +117,7 @@ var Chapters = []Chapter{
 	{"الخدمات", "Services", 27, "التصاريح والحماية", "bcrypt وJWT والجلسات والكوكيز وCSRF وCORS وحد الطلبات وروابط مختصرة", true, "Passes and Protection", "bcrypt, JWT, sessions, cookies, CSRF, CORS, rate limiting, and short links"},
 	{"الخدمات", "Services", 28, "الإطارات والتشغيل", "Gin وFiber وعقد OpenAPI واختبار العقد وإغلاق مرتب بيصفّي الطلبات الجارية", true, "Frameworks and Operations", "Gin, Fiber, OpenAPI contracts, contract testing, and graceful shutdown that drains in-flight requests"},
 	{"قواعد البيانات", "Databases", 29, "قواعد البيانات", "SQL وSQLite والترحيلات والتحويلات الذرّية وحوض الاتصالات وsqlx وGORM", true, "SQL Databases", "SQL, SQLite, migrations, atomic transfers, connection pools, sqlx, and GORM"},
+	{"قواعد البيانات", "Databases", 30, "التخزين المتقدم", "Redis والكاش الجانبي ومستندات MongoDB وفهارس البحث وفصل القراءة والكتابة", true, "Advanced Storage", "Redis cache-aside, MongoDB documents, search indexes, and read/write splitting"},
 }
 
 var All []*Level
