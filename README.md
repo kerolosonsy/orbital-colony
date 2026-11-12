@@ -81,6 +81,7 @@ cd workspace/3-1-long-row && go run .
 | 32 | البروتوكولات / Protocols | WebSocket وgRPC والبث وTLS وmTLS وHTTP/2 وSSH / WebSocket, unary and streaming gRPC, TLS, mTLS, HTTP/2, and SSH | ✅ |
 | 34 | محركات التخزين / Storage Engines | مخزن مفاتيح بصلاحية ولقطات وسجل كتابة مسبقة بـ checksums ودمج SSTables وتخزين chunks موزّع بالتكرار والإصلاح / A TTL key store with snapshots, a checksummed write-ahead log, SSTable compaction, and replicated chunk storage with repair | ✅ |
 | 36 | التشغيل والمراقبة / Operations and Observability | مقاييس Prometheus وlabels محدودة، ومدير حاويات بـ interface، وسجلات slog منظّمة، وفحوص الجاهزية / Prometheus metrics and bounded labels, an interface-driven container manager, structured slog logs, and readiness probes | ✅ |
+| 33 | الوسطاء / Intermediaries | عميل بيعيد بأمان، ووكيل عكسي، وموزّع أحمال بفحص صحة، وبوابة API / Safe retrying clients, reverse proxies, health-checked load balancing, and an API gateway | ✅ |
 
 ## هيكل المشروع
 
