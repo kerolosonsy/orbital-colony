@@ -1014,3 +1014,1263 @@ func TestHiddenBonusExpiredSessionDeleted(t *testing.T) {
 	})
 }
 `
+
+func init() {
+	add(&Level{ID: "37-3-tenants", Chapter: 37, Kind: "lab", CarryFrom: "37-2-auth",
+		Title: "الأطقم المعزولة", Goal: "ضيف أطقم بأدوار owner/admin/member، وعزل كامل بين الأطقم (الغريب يشوف not found)، ومنع التصعيد، وسجل audit", Setup: seededLabRoom,
+		Requires: []string{"sel:sql.ErrNoRows", "map"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100}, Race: false, Service: "",
+		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}},
+		Lesson: `# مركز القيادة: الأطقم المعزولة
+
+## قبل ما تكتب
+- لو حد برا الطاقم سأل عن مهمة جوه الطاقم، المفروض يعرف إنها موجودة؟
+- مين يقدر يدّي صلاحية، وأعلى صلاحية يقدر يديها قد إيه؟
+
+## بتبني على إيه
+~main.go~ و ~auth.go~ جايين من المراحل اللي فاتت، والملف الجديد ~crews.go~. الدخول من ~37-2-auth~، والـ middleware اللي بيلف handler من فصل بوابة القاعدة (~26-3-router~)، والـ transactions من ~29-3-transfer~. الجديد قرارات الدمج بس.
+
+## العزل = not found
+الطاقم هو الـ tenant. أي طلب على طاقم إنت مش عضو فيه بيرجع 404 بالظبط زي الطاقم اللي مش موجود. لو رجّعت 403، الغريب يعرف إن الـ ID ده حقيقي ويقدر يعدّ الأطقم.
+~~~go
+role, err := c.Role(ctx, crewID, user.ID)
+if errors.Is(err, ErrNotFound) { return ErrNotFound } // غريب = مش موجود
+~~~
+الـ 403 للعضو بس: هو عارف إن الطاقم موجود، بس دوره مش كفاية.
+
+## الأدوار كرُتب
+خزّن الدور نص في القاعدة بـ ~CHECK (role IN (...))~، وقارن في Go برتبة رقمية من map. قاعدة منع التصعيد: محدش يدّي دور قد دوره أو أعلى منه.
+~~~go
+var level = map[string]int{"cadet": 1, "pilot": 2}
+if level[grant] >= level[mine] { return ErrForbidden }
+~~~
+
+## audit في نفس الـ transaction
+سطر الـ audit بيتكتب في نفس transaction التغيير. لو التغيير اتلغى، السطر يتلغي معاه؛ ولو السطر فشل، التغيير ميتمّش. الترتيب برقم ~seq~ لكل طاقم (~MAX(seq) + 1~ جوه الـ transaction) مش بالوقت، لأن طلبين ممكن ياخدوا نفس الثانية.
+~~~go
+tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(seq), 0) + 1 FROM audit WHERE crew_id = $1", id).Scan(&seq)
+~~~
+
+## أخطاء شائعة
+~~~go
+if role == "" { http.Error(w, "forbidden", 403) } // بيكشف إن الطاقم موجود
+if mine == "admin" || mine == "owner" { grant(role) } // admin يقدر يعمل owner جديد
+db.ExecContext(ctx, insertMember); db.ExecContext(ctx, insertAudit) // audit برا الـ transaction
+~~~
+
+## المهمة
+ضيف ترحيل 5: ~memberships(crew_id, user_id, role)~ بمفتاح ~(crew_id, user_id)~ و ~role~ واحد من ~owner, admin, member~، و ~audit(crew_id, seq, actor_id, action, target, at)~. في ~crews.go~ على ~Crews{Auth}~:
+
+~CreateCrew(ctx, actor, name)~ تنشئ طاقم بـ ID عشوائي، والمنشئ ~owner~، وسطر audit ~crew.create~ هدفه ID الطاقم. ~Role(ctx, crewID, userID)~ ترجع الدور أو ~ErrNotFound~. ~AddMember(ctx, actor, crewID, email, role)~: الغريب ~ErrNotFound~؛ العضو العادي ~ErrForbidden~؛ دور غير ~admin~ أو ~member~ يرجع ~ErrInvalidRole~؛ دور قد دور المنادي أو أعلى ~ErrForbidden~ (الـ owner يضيف admin أو member، والـ admin يضيف member بس)؛ إيميل مش متسجّل ~ErrNotFound~؛ عضو موجود ~ErrConflict~. النجاح بيكتب ~member.add~ هدفه ID المستخدم المضاف. ~Audit(ctx, actor, crewID)~ للـ admin والـ owner بس، بترتيب ~seq~.
+
+~NewCommandAPI(c)~ بيخدم كل مسارات ~NewAPI~، وكل المسارات دي محتاجة كوكي ~session~ (من غيرها 401 ~unauthorized~): ~POST /v1/crews~ بـ ~{"name"}~ يرجع 201 و ~{"id","name"}~ (اسم فاضي 400 ~bad_request~). ~POST /v1/crews/{crew}/members~ بـ ~{"email","role"}~ يرجع 201. ~GET /v1/crews/{crew}/audit~ يرجع 200 و ~{"entries":[{"actor","action","target"}]}~. ~GET /v1/crews/{crew}/tasks/{task}~ دلوقتي للأعضاء بس. الأخطاء: 404 ~not_found~، و 403 ~forbidden~، و 400 ~invalid_role~، و 409 ~conflict~.
+`,
+		Hints: []string{"ابدأ بترحيل 5 وRole؛ كل حاجة بعد كده بتبدأ بسؤال: المنادي دوره إيه في الطاقم ده؟", "اعمل map للرتب: member 1، admin 2، owner 3؛ الدور الممنوح لازم يكون أقل من دور المنادي.", "اكتب العضوية وسطر الـ audit في نفس الـ transaction، وفي HTTP حوّل ErrNotFound لـ 404 حتى لو الطاقم موجود."},
+		En: &LevelText{Title: "Isolated Crews", Goal: "Add crews with owner/admin/member roles, full isolation between crews (outsiders see not found), escalation prevention, and an audit log", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}},
+			Lesson: `# Command Center: Isolated Crews
+
+## Before you write
+- If someone outside a crew asks about a task inside it, should they learn that it exists?
+- Who may grant a role, and how high a role may they grant?
+
+## What this builds on
+~main.go~ and ~auth.go~ carry over from earlier stages, and the new file is ~crews.go~. Sign-in comes from ~37-2-auth~, handler-wrapping middleware from the Base Gateway chapter (~26-3-router~), and transactions from ~29-3-transfer~. Only the integration decisions are new.
+
+## Isolation means not found
+The crew is the tenant. Any request against a crew you do not belong to returns 404, exactly like a crew that does not exist. A 403 would tell an outsider the ID is real and let them enumerate crews.
+~~~go
+role, err := c.Role(ctx, crewID, user.ID)
+if errors.Is(err, ErrNotFound) { return ErrNotFound } // outsider = missing
+~~~
+403 is only for members: they already know the crew exists, but their role is not enough.
+
+## Roles as ranks
+Store the role as text with ~CHECK (role IN (...))~ and compare in Go with numeric ranks from a map. The no-escalation rule: nobody grants a role equal to or above their own.
+~~~go
+var level = map[string]int{"cadet": 1, "pilot": 2}
+if level[grant] >= level[mine] { return ErrForbidden }
+~~~
+
+## Audit in the same transaction
+The audit row is written in the same transaction as the change. If the change rolls back, so does the row; if the row fails, the change does not happen. Order by a per-crew ~seq~ (~MAX(seq) + 1~ inside the transaction), not by time, since two requests can share a second.
+~~~go
+tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(seq), 0) + 1 FROM audit WHERE crew_id = $1", id).Scan(&seq)
+~~~
+
+## Common mistakes
+~~~go
+if role == "" { http.Error(w, "forbidden", 403) } // reveals the crew exists
+if mine == "admin" || mine == "owner" { grant(role) } // an admin can mint a new owner
+db.ExecContext(ctx, insertMember); db.ExecContext(ctx, insertAudit) // audit outside the transaction
+~~~
+
+## Your mission
+Add migration 5: ~memberships(crew_id, user_id, role)~ keyed by ~(crew_id, user_id)~ with ~role~ one of ~owner, admin, member~, and ~audit(crew_id, seq, actor_id, action, target, at)~. In ~crews.go~ on ~Crews{Auth}~:
+
+~CreateCrew(ctx, actor, name)~ creates a crew with a random ID, makes the creator ~owner~, and writes audit ~crew.create~ targeting the crew ID. ~Role(ctx, crewID, userID)~ returns the role or ~ErrNotFound~. ~AddMember(ctx, actor, crewID, email, role)~: an outsider gets ~ErrNotFound~; a plain member ~ErrForbidden~; a role other than ~admin~ or ~member~ returns ~ErrInvalidRole~; a role equal to or above the caller's returns ~ErrForbidden~ (an owner adds admins or members, an admin adds members only); an unregistered email ~ErrNotFound~; an existing member ~ErrConflict~. Success writes ~member.add~ targeting the added user's ID. ~Audit(ctx, actor, crewID)~ is for admins and owners only, in ~seq~ order.
+
+~NewCommandAPI(c)~ serves every ~NewAPI~ route, and all of the following need a ~session~ cookie (without one: 401 ~unauthorized~): ~POST /v1/crews~ with ~{"name"}~ returns 201 and ~{"id","name"}~ (a blank name is 400 ~bad_request~). ~POST /v1/crews/{crew}/members~ with ~{"email","role"}~ returns 201. ~GET /v1/crews/{crew}/audit~ returns 200 and ~{"entries":[{"actor","action","target"}]}~. ~GET /v1/crews/{crew}/tasks/{task}~ is now members only. Errors: 404 ~not_found~, 403 ~forbidden~, 400 ~invalid_role~, 409 ~conflict~.
+`,
+			Hints: []string{"Start with migration 5 and Role; everything afterwards starts with: what is the caller's role in this crew?", "Make a rank map: member 1, admin 2, owner 3; the granted role must rank below the caller's.", "Write the membership and the audit row in one transaction, and in HTTP map ErrNotFound to 404 even when the crew exists."}},
+		Lab: &Lab{ReqFile: "crews.go", Bonus: false, Hidden: ch373Hidden},
+	})
+}
+
+const ch373Starter = `package main
+
+import (
+	"context"
+	"errors"
+	"net/http"
+)
+
+var (
+	ErrForbidden   = errors.New("forbidden")
+	ErrInvalidRole = errors.New("invalid role")
+)
+
+type AuditEntry struct {
+	Actor  string ` + "`json:\"actor\"`" + `
+	Action string ` + "`json:\"action\"`" + `
+	Target string ` + "`json:\"target\"`" + `
+}
+
+type Crews struct{ Auth *Auth }
+
+func (c *Crews) CreateCrew(ctx context.Context, actor User, name string) (Crew, error) {
+	return Crew{}, errors.New("TODO")
+}
+func (c *Crews) Role(ctx context.Context, crewID, userID string) (string, error) {
+	return "", errors.New("TODO")
+}
+func (c *Crews) AddMember(ctx context.Context, actor User, crewID, email, role string) error {
+	return errors.New("TODO")
+}
+func (c *Crews) Audit(ctx context.Context, actor User, crewID string) ([]AuditEntry, error) {
+	return nil, errors.New("TODO")
+}
+
+func NewCommandAPI(c *Crews) http.Handler { return NewAPI(c.Auth) }
+`
+
+// ch37People is shared by the hidden tests of stages 3 to 5: a signed-in
+// cast of users and a cookie header for each.
+const ch37People = `
+type hiddenClock struct{ now time.Time }
+
+func (c *hiddenClock) Now() time.Time { return c.now }
+
+type hiddenPerson struct {
+	user   User
+	cookie map[string]string
+}
+
+func hiddenCommand(t *testing.T, db *sql.DB, seed int64, names ...string) (*Crews, *hiddenClock, map[string]hiddenPerson) {
+	t.Helper()
+	ctx := context.Background()
+	if err := Migrate(ctx, db, len(Migrations)); err != nil {
+		t.Fatal(err)
+	}
+	clock := &hiddenClock{time.Unix(1_900_000_000, 0)}
+	a := &Auth{Store: NewStore(db), Now: clock.Now, Random: rand.New(rand.NewSource(seed)), TTL: 2 * time.Hour, Cost: bcrypt.MinCost}
+	people := map[string]hiddenPerson{}
+	for _, name := range names {
+		u, err := a.Register(ctx, name+"@colony", name+"-password")
+		if err != nil {
+			t.Fatal(err)
+		}
+		token, err := a.Login(ctx, name+"@colony", name+"-password")
+		if err != nil {
+			t.Fatal(err)
+		}
+		people[name] = hiddenPerson{u, map[string]string{"Cookie": SessionCookie + "=" + token}}
+	}
+	return &Crews{Auth: a}, clock, people
+}
+`
+
+const ch373Hidden = `package main
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"math/rand"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
+)
+` + ch37Backends + ch37People + `
+func TestHiddenCrewRoles(t *testing.T) {
+	eachBackend(t, func(t *testing.T, db *sql.DB) {
+		ctx := context.Background()
+		c, _, p := hiddenCommand(t, db, 3731, "owner", "admin", "member", "outsider", "spare", "extra")
+		crew, err := c.CreateCrew(ctx, p["owner"].user, "Orion")
+		if err != nil || crew.ID == "" || crew.Name != "Orion" {
+			t.Fatal(crew, err)
+		}
+		if role, err := c.Role(ctx, crew.ID, p["owner"].user.ID); err != nil || role != "owner" {
+			t.Fatal("creator role", role, err)
+		}
+		if _, err := c.Role(ctx, crew.ID, p["outsider"].user.ID); !errors.Is(err, ErrNotFound) {
+			t.Fatal("outsider role", err)
+		}
+		steps := []struct {
+			actor, email, role string
+			want               error
+		}{
+			{"owner", "admin@colony", "admin", nil},
+			{"admin", "member@colony", "member", nil},
+			{"admin", "spare@colony", "admin", ErrForbidden},
+			{"admin", "spare@colony", "owner", ErrInvalidRole},
+			{"owner", "spare@colony", "owner", ErrInvalidRole},
+			{"owner", "spare@colony", "captain", ErrInvalidRole},
+			{"member", "spare@colony", "member", ErrForbidden},
+			{"outsider", "spare@colony", "member", ErrNotFound},
+			{"owner", "ghost@colony", "member", ErrNotFound},
+			{"owner", "member@colony", "member", ErrConflict},
+		}
+		for _, s := range steps {
+			err := c.AddMember(ctx, p[s.actor].user, crew.ID, s.email, s.role)
+			if (s.want == nil && err != nil) || (s.want != nil && !errors.Is(err, s.want)) {
+				t.Fatal("add member", s, err)
+			}
+		}
+		if role, _ := c.Role(ctx, crew.ID, p["spare"].user.ID); role != "" {
+			t.Fatal("denied grant still created membership", role)
+		}
+		entries, err := c.Audit(ctx, p["admin"].user, crew.ID)
+		want := []AuditEntry{{p["owner"].user.ID, "crew.create", crew.ID}, {p["owner"].user.ID, "member.add", p["admin"].user.ID}, {p["admin"].user.ID, "member.add", p["member"].user.ID}}
+		if err != nil || fmt.Sprint(entries) != fmt.Sprint(want) {
+			t.Fatal("audit", entries, err)
+		}
+		if _, err := c.Audit(ctx, p["member"].user, crew.ID); !errors.Is(err, ErrForbidden) {
+			t.Fatal("member audit", err)
+		}
+		if _, err := c.Audit(ctx, p["outsider"].user, crew.ID); !errors.Is(err, ErrNotFound) {
+			t.Fatal("outsider audit", err)
+		}
+		other, err := c.CreateCrew(ctx, p["outsider"].user, "Lyra")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if entries, _ := c.Audit(ctx, p["outsider"].user, other.ID); len(entries) != 1 {
+			t.Fatal("audit leaks across crews", entries)
+		}
+		if err := c.AddMember(ctx, p["owner"].user, other.ID, "extra@colony", "member"); !errors.Is(err, ErrNotFound) {
+			t.Fatal("owner of one crew acted on another", err)
+		}
+	})
+}
+
+func TestHiddenCrewHTTPIsolation(t *testing.T) {
+	eachBackend(t, func(t *testing.T, db *sql.DB) {
+		c, _, p := hiddenCommand(t, db, 3732, "vega", "rigel", "deneb")
+		srv := httptest.NewServer(NewCommandAPI(c))
+		defer srv.Close()
+		cl := srv.Client()
+		code, _, body := hiddenGetJSON(t, cl, "POST", srv.URL+"/v1/crews", "{\"name\":\"Vega Wing\"}", nil)
+		if code != 401 || body["error"] != "unauthorized" {
+			t.Fatal("anonymous crew create", code, body)
+		}
+		code, _, body = hiddenGetJSON(t, cl, "POST", srv.URL+"/v1/crews", "{\"name\":\"  \"}", p["vega"].cookie)
+		if code != 400 || body["error"] != "bad_request" {
+			t.Fatal("blank crew", code, body)
+		}
+		code, _, body = hiddenGetJSON(t, cl, "POST", srv.URL+"/v1/crews", "{\"name\":\"Vega Wing\"}", p["vega"].cookie)
+		crewID, _ := body["id"].(string)
+		if code != 201 || crewID == "" || body["name"] != "Vega Wing" {
+			t.Fatal("create crew", code, body)
+		}
+		if err := c.Auth.Store.CreateTask(context.Background(), Task{"secret", crewID, "خريطة المخزن", false, 1}); err != nil {
+			t.Fatal(err)
+		}
+		code, _, body = hiddenGetJSON(t, cl, "POST", srv.URL+"/v1/crews/"+crewID+"/members", "{\"email\":\"rigel@colony\",\"role\":\"member\"}", p["vega"].cookie)
+		if code != 201 {
+			t.Fatal("add member", code, body)
+		}
+		missing := "/v1/crews/no-such-crew"
+		for _, path := range []string{"/v1/crews/" + crewID, missing} {
+			code, _, body = hiddenGetJSON(t, cl, "GET", srv.URL+path+"/tasks/secret", "", p["deneb"].cookie)
+			if code != 404 || body["error"] != "not_found" {
+				t.Fatal("outsider task", path, code, body)
+			}
+			code, _, body = hiddenGetJSON(t, cl, "GET", srv.URL+path+"/audit", "", p["deneb"].cookie)
+			if code != 404 || body["error"] != "not_found" {
+				t.Fatal("outsider audit", path, code, body)
+			}
+			code, _, body = hiddenGetJSON(t, cl, "POST", srv.URL+path+"/members", "{\"email\":\"deneb@colony\",\"role\":\"member\"}", p["deneb"].cookie)
+			if code != 404 || body["error"] != "not_found" {
+				t.Fatal("outsider self-invite", path, code, body)
+			}
+		}
+		code, _, body = hiddenGetJSON(t, cl, "GET", srv.URL+"/v1/crews/"+crewID+"/tasks/secret", "", p["rigel"].cookie)
+		if code != 200 || body["title"] != "خريطة المخزن" {
+			t.Fatal("member task", code, body)
+		}
+		code, _, _ = hiddenGetJSON(t, cl, "GET", srv.URL+"/v1/crews/"+crewID+"/tasks/secret", "", nil)
+		if code != 401 {
+			t.Fatal("anonymous task read", code)
+		}
+		for _, c2 := range []struct {
+			body, err string
+			code      int
+		}{{"{\"email\":\"deneb@colony\",\"role\":\"member\"}", "forbidden", 403}, {"{\"email\":\"deneb@colony\",\"role\":\"owner\"}", "forbidden", 403}} {
+			code, _, body = hiddenGetJSON(t, cl, "POST", srv.URL+"/v1/crews/"+crewID+"/members", c2.body, p["rigel"].cookie)
+			if code != c2.code || body["error"] != c2.err {
+				t.Fatal("member escalation", c2, code, body)
+			}
+		}
+		code, _, body = hiddenGetJSON(t, cl, "POST", srv.URL+"/v1/crews/"+crewID+"/members", "{\"email\":\"deneb@colony\",\"role\":\"pilot\"}", p["vega"].cookie)
+		if code != 400 || body["error"] != "invalid_role" {
+			t.Fatal("invalid role", code, body)
+		}
+		code, _, body = hiddenGetJSON(t, cl, "POST", srv.URL+"/v1/crews/"+crewID+"/members", "{\"email\":\"rigel@colony\",\"role\":\"member\"}", p["vega"].cookie)
+		if code != 409 || body["error"] != "conflict" {
+			t.Fatal("duplicate member", code, body)
+		}
+		code, _, body = hiddenGetJSON(t, cl, "GET", srv.URL+"/v1/crews/"+crewID+"/audit", "", p["rigel"].cookie)
+		if code != 403 || body["error"] != "forbidden" {
+			t.Fatal("member audit", code, body)
+		}
+		code, _, body = hiddenGetJSON(t, cl, "GET", srv.URL+"/v1/crews/"+crewID+"/audit", "", p["vega"].cookie)
+		entries, _ := body["entries"].([]any)
+		if code != 200 || len(entries) != 2 {
+			t.Fatal("owner audit", code, body)
+		}
+		last, _ := entries[1].(map[string]any)
+		if last["action"] != "member.add" || last["actor"] != p["vega"].user.ID || last["target"] != p["rigel"].user.ID {
+			t.Fatal("audit entry", last)
+		}
+	})
+}
+`
+
+func init() {
+	add(&Level{ID: "37-4-tasks", Chapter: 37, Kind: "lab", CarryFrom: "37-3-tenants",
+		Title: "لوحة المهام", Goal: "ضيف مهام بـ Idempotency-Key ونسخة متفائلة وصفحات بـ cursor ثابت من غير تكرار", Setup: seededLabRoom,
+		Requires: []string{"sel:strconv.Atoi", "sel:base64.RawURLEncoding"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100}, Race: false, Service: "",
+		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}},
+		Lesson: `# مركز القيادة: لوحة المهام
+
+## قبل ما تكتب
+- الشبكة قطعت بعد ما السيرفر أنشأ المهمة وقبل ما الرد يوصل. العميل هيعيد الطلب: المفروض يحصل إيه؟
+- اتنين فتحوا نفس المهمة وعدّلوها في نفس الوقت. مين تعديله يكسب؟
+
+## بتبني على إيه
+كل الملفات اللي فاتت جاية زي ما هي، والجديد ~tasks.go~. العضوية والـ 404 للغريب من ~37-3-tenants~، والـ transactions من ~29-3-transfer~ (اللي فيها request ID مكرر)، و ~sha256~ من فصل الخزنة. الجديد قرارات الدمج بس.
+
+## مفتاح التكرار
+العميل بيبعت هيدر ~Idempotency-Key~ بقيمة هو اختارها. أول طلب بالمفتاح ده بيتنفّذ ويتحفظ رده؛ أي إعادة بنفس المفتاح ونفس الجسم بترجع نفس الرد المحفوظ بالظبط من غير مهمة تانية. نفس المفتاح بجسم مختلف غلطة من العميل: 422.
+~~~go
+key := r.Header.Get("Idempotency-Key")
+sum := sha256.Sum256(raw) // بصمة الجسم
+~~~
+المفتاح بيخص المستخدم والطاقم: مفتاح Vega مبيأثرش على مفتاح Rigel.
+
+## احجز المفتاح أول حاجة
+الحجز (~INSERT ... ON CONFLICT DO NOTHING~) هو أول أمر في الـ transaction. كده الطلب التاني بنفس المفتاح بيستنى لحد ما الأول يعمل commit، وبعدين يلاقي الصف ويرجّع الرد المحفوظ. لو قريت الأول وبعدين كتبت، طلبين متوازيين هيشوفوا «مفيش» ويعملوا مهمتين.
+
+## نسخة متفائلة
+كل مهمة ليها ~version~. التعديل بيبعت النسخة اللي شافها، والـ ~UPDATE~ بيشترطها:
+~~~sql
+UPDATE beacons SET label = $1, version = version + 1 WHERE id = $2 AND version = $3
+~~~
+~RowsAffected~ بصفر معناها حد سبقك: رجّع 409 ومعاه النسخة الحالية عشان العميل يقرا تاني ويقرر.
+
+## صفحات بـ cursor
+~OFFSET~ بيكرر أو يفوّت صفوف لو حد ضاف مهمة بين صفحتين. بدل كده رتّب بمفتاح ثابت (~id~) واطلب اللي بعد آخر واحد شفته: ~WHERE id > $2 ORDER BY id LIMIT $3~. الـ cursor هو آخر ~id~ متغلّف بـ ~base64.RawURLEncoding~ عشان العميل يعامله كنص معتم.
+~~~go
+next := base64.RawURLEncoding.EncodeToString([]byte(last.ID))
+~~~
+اطلب ~limit + 1~ صف: لو جالك الزيادة، فيه صفحة كمان. ~strconv.Atoi~ بتحوّل ~limit~ من الـ query لرقم.
+
+## أخطاء شائعة
+~~~go
+if exists(key) { return saved } ; insert(key) // قراية ثم كتابة: طلبين متوازيين يعدّوا
+db.ExecContext(ctx, "UPDATE tasks SET title = $1 WHERE id = $2", title, id) // آخر واحد يمسح تعديل اللي قبله
+db.QueryContext(ctx, "SELECT ... LIMIT $1 OFFSET $2", n, page*n) // صفوف بتتكرر لما حد يضيف
+~~~
+
+## المهمة
+ضيف ترحيل 6: جدول للمفاتيح بمفتاح ~(crew_id, user_id, key)~ فيه البصمة والحالة والجسم المحفوظ. في ~tasks.go~ اعمل ~NewTaskAPI(c)~ اللي بيخدم كل مسارات ~NewCommandAPI~ ويضيف (كلهم بكوكي، والغريب 404 ~not_found~):
+
+~POST /v1/crews/{crew}/tasks~ بـ ~{"title"}~ وهيدر ~Idempotency-Key~ (من 1 لـ 128 حرف، وإلا 400 ~missing_idempotency_key~). عنوان فاضي أو JSON مكسور: 400 ~bad_request~. النجاح 201 والمهمة بـ ~version~ 1 و ~done~ false. الإعادة بنفس المفتاح والجسم: نفس الحالة ونفس الجسم بالبايت، وهيدر ~Idempotent-Replayed: true~، حتى لو الطلبات متوازية. نفس المفتاح بجسم تاني: 422 ~idempotency_mismatch~.
+
+~PATCH /v1/crews/{crew}/tasks/{task}~ بـ ~{"title"?, "done"?, "version"}~: ~version~ لازم 1 أو أكتر، والعنوان لو موجود مش فاضي، وإلا 400 ~bad_request~. النسخة الصح: 200 والمهمة بعد التعديل والنسخة زادت 1. النسخة القديمة: 409 و ~{"error":"version_conflict","version":N}~ بالنسخة الحالية. مهمة مش موجودة: 404.
+
+~GET /v1/crews/{crew}/tasks?limit=&cursor=~: ~limit~ افتراضي 20 ومن 1 لـ 100، و cursor مش base64 صح: 400 ~bad_request~. يرجع 200 و ~{"tasks":[...],"next":"..."}~ بترتيب ~id~، و ~next~ فاضي في آخر صفحة. اللف على كل الصفحات بيرجّع كل مهمة مرة واحدة، حتى لو اتضافت مهام بين الصفحات.
+`,
+		Hints: []string{"ابدأ بالـ PATCH: UPDATE بشرط version = $N، وRowsAffected صفر يبقى 409 أو 404.", "للصفحات: WHERE id > cursor ORDER BY id LIMIT limit+1؛ الـ cursor هو base64 لآخر id.", "للـ POST: اقرا الجسم بـ io.ReadAll واحسب sha256، واعمل INSERT للمفتاح كأول أمر في الـ transaction؛ لو اتكرر، اقرا الرد المحفوظ وقارن البصمة."},
+		En: &LevelText{Title: "Task Board", Goal: "Add tasks with Idempotency-Key, optimistic versions, and stable cursor pages without duplicates", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}},
+			Lesson: `# Command Center: Task Board
+
+## Before you write
+- The network drops after the server created a task but before the reply arrives. The client retries: what should happen?
+- Two people opened the same task and edited it at once. Whose edit wins?
+
+## What this builds on
+All earlier files carry over as they are, and the new file is ~tasks.go~. Membership and outsider 404s come from ~37-3-tenants~, transactions from ~29-3-transfer~ (with its repeated request ID), and ~sha256~ from the Vault chapter. Only the integration decisions are new.
+
+## The idempotency key
+The client sends an ~Idempotency-Key~ header with a value it chose. The first request with that key runs and its reply is saved; any retry with the same key and the same body returns exactly that saved reply without a second task. The same key with a different body is a client bug: 422.
+~~~go
+key := r.Header.Get("Idempotency-Key")
+sum := sha256.Sum256(raw) // body fingerprint
+~~~
+Keys belong to a user and a crew: Vega's key never affects Rigel's.
+
+## Claim the key first
+The claim (~INSERT ... ON CONFLICT DO NOTHING~) is the first statement in the transaction. A second request with the same key then waits until the first commits, finds the row, and returns the saved reply. If you read first and write later, two concurrent requests both see "nothing" and create two tasks.
+
+## Optimistic versions
+Every task has a ~version~. An edit sends the version it saw, and the ~UPDATE~ requires it:
+~~~sql
+UPDATE beacons SET label = $1, version = version + 1 WHERE id = $2 AND version = $3
+~~~
+Zero ~RowsAffected~ means someone got there first: return 409 with the current version so the client can re-read and decide.
+
+## Cursor pages
+~OFFSET~ repeats or skips rows when someone adds a task between pages. Instead, order by a stable key (~id~) and ask for what comes after the last one you saw: ~WHERE id > $2 ORDER BY id LIMIT $3~. The cursor is that last ~id~ wrapped in ~base64.RawURLEncoding~ so the client treats it as opaque text.
+~~~go
+next := base64.RawURLEncoding.EncodeToString([]byte(last.ID))
+~~~
+Fetch ~limit + 1~ rows: if the extra one arrives, there is another page. ~strconv.Atoi~ turns ~limit~ from the query into a number.
+
+## Common mistakes
+~~~go
+if exists(key) { return saved } ; insert(key) // read then write: two concurrent requests both pass
+db.ExecContext(ctx, "UPDATE tasks SET title = $1 WHERE id = $2", title, id) // the last writer erases the previous edit
+db.QueryContext(ctx, "SELECT ... LIMIT $1 OFFSET $2", n, page*n) // rows repeat when someone inserts
+~~~
+
+## Your mission
+Add migration 6: a key table keyed by ~(crew_id, user_id, key)~ holding the fingerprint, status, and saved body. In ~tasks.go~ write ~NewTaskAPI(c)~, which serves every ~NewCommandAPI~ route and adds (all need the cookie, and outsiders get 404 ~not_found~):
+
+~POST /v1/crews/{crew}/tasks~ with ~{"title"}~ and an ~Idempotency-Key~ header (1 to 128 characters, else 400 ~missing_idempotency_key~). A blank title or malformed JSON: 400 ~bad_request~. Success: 201 and the task with ~version~ 1 and ~done~ false. A retry with the same key and body: the same status and byte-identical body, plus ~Idempotent-Replayed: true~, even when requests are concurrent. The same key with another body: 422 ~idempotency_mismatch~.
+
+~PATCH /v1/crews/{crew}/tasks/{task}~ with ~{"title"?, "done"?, "version"}~: ~version~ must be 1 or more and a present title must be nonblank, else 400 ~bad_request~. The right version: 200 and the updated task with the version incremented by 1. A stale version: 409 and ~{"error":"version_conflict","version":N}~ with the current version. A missing task: 404.
+
+~GET /v1/crews/{crew}/tasks?limit=&cursor=~: ~limit~ defaults to 20 and must be 1 to 100, and a cursor that is not valid base64 is 400 ~bad_request~. Returns 200 and ~{"tasks":[...],"next":"..."}~ in ~id~ order, with an empty ~next~ on the last page. Walking every page returns each task exactly once, even when tasks are added between pages.
+`,
+			Hints: []string{"Start with PATCH: UPDATE with version = $N; zero RowsAffected is 409 or 404.", "For pages: WHERE id > cursor ORDER BY id LIMIT limit+1; the cursor is base64 of the last id.", "For POST: read the body with io.ReadAll and hash it with sha256, and INSERT the key as the transaction's first statement; on a duplicate, read the saved reply and compare fingerprints."}},
+		Lab: &Lab{ReqFile: "tasks.go", Bonus: false, Hidden: ch374Hidden},
+	})
+}
+
+const ch374Starter = `package main
+
+import "net/http"
+
+func NewTaskAPI(c *Crews) http.Handler { return NewCommandAPI(c) }
+`
+
+const ch374Hidden = `package main
+
+import (
+	"bytes"
+	"context"
+	"database/sql"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"math/rand"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
+)
+` + ch37Backends + ch37People + `
+type hiddenLockedRandom struct {
+	mu sync.Mutex
+	r  io.Reader
+}
+
+func (l *hiddenLockedRandom) Read(p []byte) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.r.Read(p)
+}
+
+func hiddenRaw(t *testing.T, c *http.Client, method, target, body string, header map[string]string) (int, http.Header, []byte) {
+	t.Helper()
+	req, _ := http.NewRequest(method, target, strings.NewReader(body))
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	raw, _ := io.ReadAll(resp.Body)
+	return resp.StatusCode, resp.Header, raw
+}
+
+func hiddenWith(h map[string]string, k, v string) map[string]string {
+	out := map[string]string{k: v}
+	for a, b := range h {
+		out[a] = b
+	}
+	return out
+}
+
+func hiddenTaskSetup(t *testing.T, db *sql.DB, seed int64) (*httptest.Server, map[string]hiddenPerson, string) {
+	t.Helper()
+	c, _, p := hiddenCommand(t, db, seed, "vega", "rigel", "deneb")
+	c.Auth.Random = &hiddenLockedRandom{r: c.Auth.Random}
+	crew, err := c.CreateCrew(context.Background(), p["vega"].user, "Board")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := c.AddMember(context.Background(), p["vega"].user, crew.ID, "rigel@colony", "member"); err != nil {
+		t.Fatal(err)
+	}
+	srv := httptest.NewServer(NewTaskAPI(c))
+	t.Cleanup(srv.Close)
+	return srv, p, crew.ID
+}
+
+func TestHiddenIdempotentCreate(t *testing.T) {
+	eachBackend(t, func(t *testing.T, db *sql.DB) {
+		srv, p, crew := hiddenTaskSetup(t, db, 3741)
+		cl := srv.Client()
+		base := srv.URL + "/v1/crews/" + crew + "/tasks"
+		vega := p["vega"].cookie
+		code, _, raw := hiddenRaw(t, cl, "POST", base, "{\"title\":\"x\"}", vega)
+		if code != 400 || !bytes.Contains(raw, []byte("missing_idempotency_key")) {
+			t.Fatal("missing key", code, string(raw))
+		}
+		code, _, raw = hiddenRaw(t, cl, "POST", base, "{\"title\":\"x\"}", hiddenWith(vega, "Idempotency-Key", strings.Repeat("k", 129)))
+		if code != 400 || !bytes.Contains(raw, []byte("missing_idempotency_key")) {
+			t.Fatal("long key", code, string(raw))
+		}
+		for _, bad := range []string{"{\"title\":\"  \"}", "{oops"} {
+			code, _, raw = hiddenRaw(t, cl, "POST", base, bad, hiddenWith(vega, "Idempotency-Key", "bad-"+bad))
+			if code != 400 || !bytes.Contains(raw, []byte("bad_request")) {
+				t.Fatal("bad body", bad, code, string(raw))
+			}
+		}
+		code, _, raw = hiddenRaw(t, cl, "POST", base, "{\"title\":\"x\"}", hiddenWith(p["deneb"].cookie, "Idempotency-Key", "k"))
+		if code != 404 {
+			t.Fatal("outsider create", code, string(raw))
+		}
+		body := "{\"title\":\"إصلاح الهوائي\"}"
+		key := hiddenWith(vega, "Idempotency-Key", fmt.Sprintf("op-%d", rand.New(rand.NewSource(3741)).Int63()))
+		code, h, first := hiddenRaw(t, cl, "POST", base, body, key)
+		var task map[string]any
+		json.Unmarshal(first, &task)
+		if code != 201 || task["title"] != "إصلاح الهوائي" || task["version"] != float64(1) || task["done"] != false || task["crew_id"] != crew || h.Get("Idempotent-Replayed") != "" {
+			t.Fatal("create", code, string(first), h)
+		}
+		for i := 0; i < 3; i++ {
+			code, h, again := hiddenRaw(t, cl, "POST", base, body, key)
+			if code != 201 || !bytes.Equal(bytes.TrimSpace(again), bytes.TrimSpace(first)) || h.Get("Idempotent-Replayed") != "true" {
+				t.Fatal("replay", code, string(again), h)
+			}
+		}
+		code, _, raw = hiddenRaw(t, cl, "POST", base, "{\"title\":\"other\"}", key)
+		if code != 422 || !bytes.Contains(raw, []byte("idempotency_mismatch")) {
+			t.Fatal("mismatch", code, string(raw))
+		}
+		code, _, raw = hiddenRaw(t, cl, "POST", base, body, hiddenWith(p["rigel"].cookie, "Idempotency-Key", key["Idempotency-Key"]))
+		if code != 201 || bytes.Equal(bytes.TrimSpace(raw), bytes.TrimSpace(first)) {
+			t.Fatal("keys must be per user", code, string(raw))
+		}
+		var wg sync.WaitGroup
+		results := make([]string, 8)
+		codes := make([]int, 8)
+		for i := range results {
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				req, _ := http.NewRequest("POST", base, strings.NewReader("{\"title\":\"parallel\"}"))
+				req.Header.Set("Cookie", vega["Cookie"])
+				req.Header.Set("Idempotency-Key", "parallel-key")
+				resp, err := cl.Do(req)
+				if err != nil {
+					return
+				}
+				defer resp.Body.Close()
+				raw, _ := io.ReadAll(resp.Body)
+				codes[i], results[i] = resp.StatusCode, strings.TrimSpace(string(raw))
+			}(i)
+		}
+		wg.Wait()
+		for i := range results {
+			if codes[i] != 201 || results[i] != results[0] {
+				t.Fatal("concurrent retries", codes, results)
+			}
+		}
+		var n int
+		if err := db.QueryRow("SELECT COUNT(*) FROM tasks WHERE crew_id = $1 AND title = 'parallel'", crew).Scan(&n); err != nil || n != 1 {
+			t.Fatal("concurrent retries created tasks:", n, err)
+		}
+	})
+}
+
+func TestHiddenOptimisticVersion(t *testing.T) {
+	eachBackend(t, func(t *testing.T, db *sql.DB) {
+		srv, p, crew := hiddenTaskSetup(t, db, 3742)
+		cl := srv.Client()
+		base := srv.URL + "/v1/crews/" + crew + "/tasks"
+		_, _, raw := hiddenRaw(t, cl, "POST", base, "{\"title\":\"seal hatch\"}", hiddenWith(p["vega"].cookie, "Idempotency-Key", "v1"))
+		var task map[string]any
+		json.Unmarshal(raw, &task)
+		id, _ := task["id"].(string)
+		item := base + "/" + id
+		code, _, body := hiddenGetJSON(t, cl, "PATCH", item, "{\"done\":true,\"version\":1}", p["rigel"].cookie)
+		if code != 200 || body["done"] != true || body["title"] != "seal hatch" || body["version"] != float64(2) {
+			t.Fatal("patch", code, body)
+		}
+		code, _, body = hiddenGetJSON(t, cl, "PATCH", item, "{\"title\":\"stale\",\"version\":1}", p["vega"].cookie)
+		if code != 409 || body["error"] != "version_conflict" || body["version"] != float64(2) {
+			t.Fatal("stale patch", code, body)
+		}
+		code, _, body = hiddenGetJSON(t, cl, "GET", item, "", p["vega"].cookie)
+		if code != 200 || body["title"] != "seal hatch" || body["version"] != float64(2) {
+			t.Fatal("stale patch changed the task", code, body)
+		}
+		for _, bad := range []string{"{\"title\":\"x\"}", "{\"title\":\" \",\"version\":2}", "{nope"} {
+			code, _, body = hiddenGetJSON(t, cl, "PATCH", item, bad, p["vega"].cookie)
+			if code != 400 || body["error"] != "bad_request" {
+				t.Fatal("bad patch", bad, code, body)
+			}
+		}
+		code, _, _ = hiddenGetJSON(t, cl, "PATCH", base+"/missing", "{\"version\":1}", p["vega"].cookie)
+		if code != 404 {
+			t.Fatal("missing task", code)
+		}
+		code, _, _ = hiddenGetJSON(t, cl, "PATCH", item, "{\"version\":2}", p["deneb"].cookie)
+		if code != 404 {
+			t.Fatal("outsider patch", code)
+		}
+		var wg sync.WaitGroup
+		wins := make([]int, 6)
+		for i := range wins {
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				req, _ := http.NewRequest("PATCH", item, strings.NewReader(fmt.Sprintf("{\"title\":\"racer %d\",\"version\":2}", i)))
+				req.Header.Set("Cookie", p["vega"].cookie["Cookie"])
+				resp, err := cl.Do(req)
+				if err == nil {
+					wins[i] = resp.StatusCode
+					resp.Body.Close()
+				}
+			}(i)
+		}
+		wg.Wait()
+		ok := 0
+		for _, code := range wins {
+			if code == 200 {
+				ok++
+			} else if code != 409 {
+				t.Fatal("concurrent patch status", wins)
+			}
+		}
+		if ok != 1 {
+			t.Fatal("exactly one concurrent edit must win", wins)
+		}
+	})
+}
+
+func TestHiddenCursorPages(t *testing.T) {
+	eachBackend(t, func(t *testing.T, db *sql.DB) {
+		srv, p, crew := hiddenTaskSetup(t, db, 3743)
+		cl := srv.Client()
+		base := srv.URL + "/v1/crews/" + crew + "/tasks"
+		rng := rand.New(rand.NewSource(3743))
+		total := 25 + rng.Intn(10)
+		for i := 0; i < total; i++ {
+			code, _, raw := hiddenRaw(t, cl, "POST", base, fmt.Sprintf("{\"title\":\"t%d\"}", i), hiddenWith(p["vega"].cookie, "Idempotency-Key", fmt.Sprint("p", i)))
+			if code != 201 {
+				t.Fatal(code, string(raw))
+			}
+		}
+		for _, q := range []string{"?limit=0", "?limit=101", "?limit=x", "?cursor=!!!"} {
+			code, _, body := hiddenGetJSON(t, cl, "GET", base+q, "", p["vega"].cookie)
+			if code != 400 || body["error"] != "bad_request" {
+				t.Fatal("bad query", q, code, body)
+			}
+		}
+		code, _, body := hiddenGetJSON(t, cl, "GET", base, "", p["vega"].cookie)
+		if tasks, _ := body["tasks"].([]any); code != 200 || len(tasks) != 20 || body["next"] == "" {
+			t.Fatal("default limit", code, len(tasks))
+		}
+		code, _, _ = hiddenGetJSON(t, cl, "GET", base, "", p["deneb"].cookie)
+		if code != 404 {
+			t.Fatal("outsider list", code)
+		}
+		seen := map[string]bool{}
+		cursor, pages, added := "", 0, 0
+		for {
+			target := base + "?limit=4"
+			if cursor != "" {
+				target += "&cursor=" + url.QueryEscape(cursor)
+			}
+			code, _, body := hiddenGetJSON(t, cl, "GET", target, "", p["rigel"].cookie)
+			tasks, _ := body["tasks"].([]any)
+			if code != 200 || len(tasks) > 4 {
+				t.Fatal("page", code, body)
+			}
+			for _, raw := range tasks {
+				task := raw.(map[string]any)
+				id := task["id"].(string)
+				if seen[id] || task["crew_id"] != crew {
+					t.Fatal("duplicate across pages", id)
+				}
+				seen[id] = true
+			}
+			pages++
+			if pages == 2 {
+				for i := 0; i < 3; i++ {
+					hiddenRaw(t, cl, "POST", base, fmt.Sprintf("{\"title\":\"late%d\"}", i), hiddenWith(p["vega"].cookie, "Idempotency-Key", fmt.Sprint("late", i)))
+				}
+				added = 3
+			}
+			next, _ := body["next"].(string)
+			if next == "" {
+				break
+			}
+			cursor = next
+		}
+		var n int
+		db.QueryRow("SELECT COUNT(*) FROM tasks WHERE crew_id = $1", crew).Scan(&n)
+		if n != total+added {
+			t.Fatal("task count", n)
+		}
+		if len(seen) < total { // every task that existed before the walk was seen
+			t.Fatal("pages ended early")
+		}
+		_ = errors.Is
+	})
+}
+`
+
+func init() {
+	add(&Level{ID: "37-5-operate", Chapter: 37, Kind: "lab", CarryFrom: "37-4-tasks",
+		Title: "غرفة التشغيل", Goal: "لف الـ API بـ request ID وشكل أخطاء ثابت وmetrics وحد طلبات وسجل من غير أسرار وإغلاق بيصفّي الطلبات الجارية", Setup: seededLabRoom,
+		Requires: []string{"recover", "mutex"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100, 91, 96}, Race: true, Service: "",
+		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}, {Name: "ops.go", Starter: ch375Starter}},
+		Lesson: `# مركز القيادة: غرفة التشغيل
+
+## قبل ما تكتب
+- مستخدم بعتلك رسالة «جالي خطأ». إزاي تلاقي طلبه بالظبط في السجل؟
+- السيرفر بيتقفل للتحديث وفيه طلب في النص. يكمّل ولا يتقطع؟
+
+## بتبني على إيه
+كل ملفات المراحل اللي فاتت جاية زي ما هي، والجديد ~ops.go~. الـ middleware وظرف الأخطاء من ~26-4-envelope~، وحد الطلبات من ~27-4-rate-limit~، والإغلاق المرتب من ~28-4-graceful~، و ~recover~ من فصل الدوال والأخطاء، و ~sync.Mutex~ من فصل السباق (12). الـ metrics والسجلات المنظمة هي نفس فكرة فصل التشغيل والمراقبة (36)، والحماية من الضغط نفس روح فصل الوسطاء (33). الجديد قرارات الدمج بس.
+
+## request ID في كل رد
+كل طلب بياخد ID: لو العميل بعت ~X-Request-ID~ سليم (حروف وأرقام وشرطة، لحد 64) نستخدمه، وإلا نولّد واحد من ~Ops.NewID~ المحقونة. الـ ID بيرجع في هيدر الرد، وفي جسم أي خطأ، وفي سطر السجل. كده رسالة المستخدم توصّلك لسطر واحد.
+~~~go
+var safeID = regexp.MustCompile("^[a-z0-9]{1,8}$")
+if !safeID.MatchString(id) { id = newID() }
+~~~
+متقبلش أي ID من العميل: نص فيه سطر جديد ممكن يزوّر سطر في السجل.
+
+## شكل خطأ واحد
+كل المراحل اللي فاتت بترجع ~{"error":"..."}~. الـ middleware بيضيف ~request_id~ لأي رد حالته 400 أو أكتر. عشان يعمل كده، بيلف ~ResponseWriter~: الردود الناجحة بتعدّي زي ما هي، وردود الأخطاء بتتجمّع في buffer وتتكتب من جديد.
+~~~go
+type capture struct {
+ http.ResponseWriter
+ status int
+}
+func (c *capture) WriteHeader(s int) { c.status = s; c.ResponseWriter.WriteHeader(s) }
+~~~
+الـ panic في أي handler بيتحوّل لـ 500 و ~{"error":"internal"}~ بـ ~defer~ و ~recover~، والسيرفر يكمّل.
+
+## metrics كنص
+~GET /metrics~ بيرجع نص بصيغة Prometheus المكتوبة باليد: سطر لكل حالة وعدّاد. مش محتاجين مكتبة؛ الصيغة بسيطة، والعدّادات محمية بـ ~sync.Mutex~ لأن الطلبات متوازية.
+~~~text
+command_requests_total{code="200"} 12
+command_requests_in_flight 1
+~~~
+
+## حد الطلبات بساعة محقونة
+نافذة ثابتة لكل عنوان IP (من ~net.SplitHostPort(r.RemoteAddr)~، مش من هيدر العميل يقدر يزوّره). النافذة بتبدأ مع أول طلب وعمرها ~Window~. الزيادة 429 مع ~Retry-After~ بالثواني الباقية مقرّبة لفوق.
+
+## سجل من غير أسرار
+سطر JSON لكل طلب فيه ~request_id~ و ~method~ و ~path~ و ~status~ بس. ~r.URL.Path~ من غير الـ query، ومن غير أي هيدر: الكوكي والـ tokens والباسوردات عمرهم ما يدخلوا السجل.
+
+## إغلاق بنافذة تصفية
+~Serve(ctx, ln, h, drain)~: لما ~ctx~ يتلغي، ~Shutdown~ بيقفل الـ listener فوراً ويستنى الطلبات الجارية لحد ~drain~. لو خلصت، ~Serve~ ترجع ~nil~. لو النافذة خلصت، ~Close~ بيقطع الباقي و ~Serve~ ترجع الخطأ.
+~~~go
+shutdownCtx, cancel := context.WithTimeout(context.Background(), drain)
+defer cancel()
+err := srv.Shutdown(shutdownCtx)
+~~~
+
+## أخطاء شائعة
+~~~go
+log.Printf("%s %s %v", r.Method, r.URL, r.Header) // الكوكي والـ query في السجل
+key := r.Header.Get("X-Forwarded-For") // العميل يختار مفتاح الحد بنفسه
+counts[status]++ // من غير قفل: data race
+srv.Shutdown(ctx) // ctx اللي اتلغى أصلاً: مفيش تصفية خالص
+~~~
+
+## المهمة
+في ~ops.go~ اكتب ~Operate(h, o)~ و ~Serve~. ~Ops~ فيها ~Now~ و ~Limit~ و ~Window~ و ~Log~ و ~NewID~؛ ضيف أي حقول خاصة محتاجها، و ~Operate~ هي اللي تجهزها.
+
+كل رد فيه ~X-Request-ID~: القيمة الجاية لو بتطابق ~^[A-Za-z0-9-]{1,64}$~، وإلا ~o.NewID()~. ~GET /metrics~ (مش بيتعد ولا بيتحد) يرجع 200 نص فيه ~command_requests_total{code="N"} count~ لكل حالة اترجعت، و ~command_requests_in_flight N~ للطلبات اللي جوه ~h~ دلوقتي. كل رد حالته 400 أو أكتر جسمه ~{"error":"...","request_id":"..."}~ بـ ~application/json~: كود الخطأ من جسم ~h~ لو فيه ~error~، وإلا اسم الحالة صغير بـ ~_~ (زي ~not_found~). الردود الناجحة بالبايت زي ما ~h~ كتبها. الـ panic: 500 و ~internal~. أكتر من ~Limit~ طلب من نفس IP في ~Window~ (تبدأ من أول طلب): 429 و ~rate_limited~ و ~Retry-After~ بالثواني الباقية لفوق، من غير ما ~h~ تتنادي. كل طلب (غير ~/metrics~) يكتب سطر JSON واحد في ~o.Log~ بالمفاتيح ~request_id, method, path, status~ بس. كل ده آمن مع طلبات متوازية (~-race~).
+
+~Serve(ctx, ln, h, drain)~ تخدم على ~ln~ لحد ما ~ctx~ يتلغي، وبعدها تبطّل تقبل اتصالات وتصفّي الجاري: ~nil~ لو خلص في ~drain~، وخطأ لو لأ (بعد ما تقطع الباقي). النجمة التالتة: ~command_requests_in_flight~ صح وطلب شغال.
+`,
+		Hints: []string{"ابدأ بـ Serve: srv.Serve في goroutine، استنى ctx.Done، وبعدين Shutdown بسياق جديد عمره drain.", "اعمل struct بيلف ResponseWriter: لو الحالة 400 أو أكتر جمّع الجسم في bytes.Buffer، وبعد ما h تخلص اكتب الشكل الموحد.", "قفل واحد sync.Mutex يحمي العدادات ونوافذ الحد والكتابة في Log؛ والـ recover جوه func فيها defer حوالين h.ServeHTTP."},
+		En: &LevelText{Title: "Operations Room", Goal: "Wrap the API with request IDs, a fixed error shape, metrics, rate limiting, secret-free logs, and shutdown that drains in-flight requests", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}, {Name: "ops.go", Starter: ch375Starter}},
+			Lesson: `# Command Center: Operations Room
+
+## Before you write
+- A user writes "I got an error". How do you find their exact request in the log?
+- The server is shutting down for an update while a request is halfway done. Does it finish or get cut off?
+
+## What this builds on
+Every file from the earlier stages carries over as is, and the new file is ~ops.go~. Middleware and the error envelope come from ~26-4-envelope~, rate limiting from ~27-4-rate-limit~, graceful shutdown from ~28-4-graceful~, ~recover~ from the Functions and Errors chapter, and ~sync.Mutex~ from The Race (12). Metrics and structured logs are the same idea as the Operations and Monitoring chapter (36), and load protection shares the spirit of the Brokers chapter (33). Only the integration decisions are new.
+
+## A request ID on every reply
+Each request gets an ID: if the client sent a safe ~X-Request-ID~ (letters, digits, and dashes, up to 64) we use it, otherwise we generate one from the injected ~Ops.NewID~. The ID goes back in the reply header, in every error body, and in the log line. A user's message then leads you to one line.
+~~~go
+var safeID = regexp.MustCompile("^[a-z0-9]{1,8}$")
+if !safeID.MatchString(id) { id = newID() }
+~~~
+Never accept any client ID: text with a newline could forge a log line.
+
+## One error shape
+Every earlier stage returns ~{"error":"..."}~. The middleware adds ~request_id~ to any reply with status 400 or above. To do that it wraps the ~ResponseWriter~: successful replies pass straight through, error replies are collected in a buffer and rewritten.
+~~~go
+type capture struct {
+ http.ResponseWriter
+ status int
+}
+func (c *capture) WriteHeader(s int) { c.status = s; c.ResponseWriter.WriteHeader(s) }
+~~~
+A panic in any handler becomes 500 and ~{"error":"internal"}~ through ~defer~ and ~recover~, and the server keeps running.
+
+## Metrics as text
+~GET /metrics~ returns hand-written Prometheus text format: one line per status and counter. No library is needed; the format is simple, and the counters are guarded by ~sync.Mutex~ because requests run concurrently.
+~~~text
+command_requests_total{code="200"} 12
+command_requests_in_flight 1
+~~~
+
+## Rate limiting with an injected clock
+A fixed window per IP address (from ~net.SplitHostPort(r.RemoteAddr)~, not from a header the client could forge). The window starts with the first request and lasts ~Window~. Extra requests get 429 with ~Retry-After~ in remaining seconds, rounded up.
+
+## A log without secrets
+One JSON line per request with only ~request_id~, ~method~, ~path~, and ~status~. ~r.URL.Path~ without the query, and no headers: cookies, tokens, and passwords never reach the log.
+
+## Shutdown with a drain window
+~Serve(ctx, ln, h, drain)~: when ~ctx~ is canceled, ~Shutdown~ closes the listener at once and waits for in-flight requests up to ~drain~. If they finish, ~Serve~ returns ~nil~. If the window runs out, ~Close~ cuts the rest and ~Serve~ returns the error.
+~~~go
+shutdownCtx, cancel := context.WithTimeout(context.Background(), drain)
+defer cancel()
+err := srv.Shutdown(shutdownCtx)
+~~~
+
+## Common mistakes
+~~~go
+log.Printf("%s %s %v", r.Method, r.URL, r.Header) // cookie and query in the log
+key := r.Header.Get("X-Forwarded-For") // the client picks its own limit key
+counts[status]++ // no lock: data race
+srv.Shutdown(ctx) // an already-canceled ctx: no drain at all
+~~~
+
+## Your mission
+In ~ops.go~ write ~Operate(h, o)~ and ~Serve~. ~Ops~ holds ~Now~, ~Limit~, ~Window~, ~Log~, and ~NewID~; add any private fields you need, and let ~Operate~ initialize them.
+
+Every reply carries ~X-Request-ID~: the incoming value if it matches ~^[A-Za-z0-9-]{1,64}$~, otherwise ~o.NewID()~. ~GET /metrics~ (neither counted nor limited) returns 200 text with ~command_requests_total{code="N"} count~ for every status returned, and ~command_requests_in_flight N~ for requests currently inside ~h~. Every reply with status 400 or above has the body ~{"error":"...","request_id":"..."}~ as ~application/json~: the error code from ~h~'s body if it has ~error~, otherwise the lowercase status text with ~_~ (like ~not_found~). Successful replies are byte-identical to what ~h~ wrote. A panic: 500 and ~internal~. More than ~Limit~ requests from one IP within ~Window~ (starting at the first request): 429, ~rate_limited~, and ~Retry-After~ in remaining seconds rounded up, without calling ~h~. Every request (except ~/metrics~) writes exactly one JSON line to ~o.Log~ with only the keys ~request_id, method, path, status~. All of this is safe under concurrent requests (~-race~).
+
+~Serve(ctx, ln, h, drain)~ serves on ~ln~ until ~ctx~ is canceled, then stops accepting connections and drains in-flight requests: ~nil~ if they finish within ~drain~, an error otherwise (after cutting the rest). Third star: ~command_requests_in_flight~ is correct while a request is running.
+`,
+			Hints: []string{"Start with Serve: srv.Serve in a goroutine, wait for ctx.Done, then Shutdown with a fresh context that lasts drain.", "Make a struct that wraps ResponseWriter: at status 400 or above collect the body in a bytes.Buffer, and after h returns write the shared shape.", "One sync.Mutex guards the counters, the limit windows, and writes to Log; put recover in a func with a defer around h.ServeHTTP."}},
+		Lab: &Lab{ReqFile: "ops.go", Bonus: true, Hidden: ch375Hidden},
+	})
+}
+
+const ch375Starter = `package main
+
+import (
+	"context"
+	"errors"
+	"io"
+	"net"
+	"net/http"
+	"time"
+)
+
+type Ops struct {
+	Now    func() time.Time
+	Limit  int
+	Window time.Duration
+	Log    io.Writer
+	NewID  func() string
+}
+
+func Operate(h http.Handler, o *Ops) http.Handler { return h }
+
+func Serve(ctx context.Context, ln net.Listener, h http.Handler, drain time.Duration) error {
+	return errors.New("TODO")
+}
+`
+
+const ch375Hidden = `package main
+
+import (
+	"bufio"
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"math/rand"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+)
+
+type hiddenOpsClock struct {
+	mu  sync.Mutex
+	now time.Time
+}
+
+func (c *hiddenOpsClock) Now() time.Time {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.now
+}
+
+func (c *hiddenOpsClock) Add(d time.Duration) {
+	c.mu.Lock()
+	c.now = c.now.Add(d)
+	c.mu.Unlock()
+}
+
+type hiddenLog struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (l *hiddenLog) Write(p []byte) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.buf.Write(p)
+}
+
+func (l *hiddenLog) String() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.buf.String()
+}
+
+func hiddenOps(limit int, seed int64) (*Ops, *hiddenOpsClock, *hiddenLog) {
+	clock := &hiddenOpsClock{now: time.Unix(1_900_000_000, 0)}
+	log := &hiddenLog{}
+	var mu sync.Mutex
+	rng := rand.New(rand.NewSource(seed))
+	return &Ops{Now: clock.Now, Limit: limit, Window: 10 * time.Second, Log: log, NewID: func() string {
+		mu.Lock()
+		defer mu.Unlock()
+		return fmt.Sprintf("gen-%d", rng.Int63())
+	}}, clock, log
+}
+
+func hiddenInner() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /ok", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		io.WriteString(w, "{\"status\":\"green\",\"n\":1}\n")
+	})
+	mux.HandleFunc("GET /gone", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "not_found"})
+	})
+	mux.HandleFunc("GET /teapot", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusTeapot)
+		io.WriteString(w, "plain words")
+	})
+	mux.HandleFunc("GET /boom", func(w http.ResponseWriter, r *http.Request) { panic("reactor fault") })
+	return mux
+}
+
+func hiddenCall(t *testing.T, c *http.Client, target string, header map[string]string) (int, http.Header, []byte) {
+	t.Helper()
+	req, _ := http.NewRequest("GET", target, nil)
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	raw, _ := io.ReadAll(resp.Body)
+	return resp.StatusCode, resp.Header, raw
+}
+
+func TestHiddenRequestIDsAndErrorShape(t *testing.T) {
+	o, _, log := hiddenOps(1000, 3751)
+	srv := httptest.NewServer(Operate(hiddenInner(), o))
+	defer srv.Close()
+	c := srv.Client()
+	code, h, raw := hiddenCall(t, c, srv.URL+"/ok", map[string]string{"X-Request-ID": "trace-Abc-42"})
+	if code != 200 || h.Get("X-Request-ID") != "trace-Abc-42" || string(raw) != "{\"status\":\"green\",\"n\":1}\n" {
+		t.Fatal("success passthrough", code, h, string(raw))
+	}
+	ids := map[string]bool{}
+	for _, bad := range []string{"", "has space", "line\\nbreak", strings.Repeat("a", 65), "semi;colon"} {
+		_, h, _ := hiddenCall(t, c, srv.URL+"/ok", map[string]string{"X-Request-ID": bad})
+		id := h.Get("X-Request-ID")
+		if !strings.HasPrefix(id, "gen-") || ids[id] {
+			t.Fatal("generated id", bad, id)
+		}
+		ids[id] = true
+	}
+	for _, cs := range []struct {
+		path, code string
+		status     int
+	}{{"/gone", "not_found", 404}, {"/teapot", "i'm_a_teapot", 418}, {"/boom", "internal", 500}, {"/nowhere", "not_found", 404}} {
+		code, h, raw := hiddenCall(t, c, srv.URL+cs.path, nil)
+		var body map[string]string
+		if json.Unmarshal(raw, &body) != nil || code != cs.status || body["error"] != cs.code || body["request_id"] != h.Get("X-Request-ID") || body["request_id"] == "" || !strings.HasPrefix(h.Get("Content-Type"), "application/json") || len(body) != 2 {
+			t.Fatal("error shape", cs, code, string(raw), h)
+		}
+	}
+	code, _, _ = hiddenCall(t, c, srv.URL+"/ok", nil)
+	if code != 200 {
+		t.Fatal("server died after a panic", code)
+	}
+	if lines := strings.Count(log.String(), "\n"); lines != 11 {
+		t.Fatal("one log line per request, got", lines)
+	}
+}
+
+func TestHiddenRateLimitAndMetrics(t *testing.T) {
+	o, clock, _ := hiddenOps(3, 3752)
+	srv := httptest.NewServer(Operate(hiddenInner(), o))
+	defer srv.Close()
+	c := srv.Client()
+	for i := 0; i < 3; i++ {
+		if code, _, _ := hiddenCall(t, c, srv.URL+"/ok", nil); code != 200 {
+			t.Fatal("under limit", i, code)
+		}
+	}
+	code, h, raw := hiddenCall(t, c, srv.URL+"/ok", nil)
+	if code != 429 || h.Get("Retry-After") != "10" || !bytes.Contains(raw, []byte("\"rate_limited\"")) || !bytes.Contains(raw, []byte(h.Get("X-Request-ID"))) {
+		t.Fatal("limit", code, h, string(raw))
+	}
+	clock.Add(3500 * time.Millisecond)
+	if code, h, _ := hiddenCall(t, c, srv.URL+"/boom", nil); code != 429 || h.Get("Retry-After") != "7" {
+		t.Fatal("limited request must not reach the handler", code, h.Get("Retry-After"))
+	}
+	code, _, raw = hiddenCall(t, c, srv.URL+"/metrics", nil)
+	text := string(raw)
+	if code != 200 || !strings.Contains(text, "command_requests_total{code=\"200\"} 3\n") || !strings.Contains(text, "command_requests_total{code=\"429\"} 2\n") || strings.Contains(text, "code=\"500\"") || !strings.Contains(text, "command_requests_in_flight 0\n") {
+		t.Fatal("metrics", code, text)
+	}
+	clock.Add(6500 * time.Millisecond)
+	if code, _, _ := hiddenCall(t, c, srv.URL+"/ok", nil); code != 200 {
+		t.Fatal("new window", code)
+	}
+
+	o2, _, _ := hiddenOps(5, 3753)
+	srv2 := httptest.NewServer(Operate(hiddenInner(), o2))
+	defer srv2.Close()
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	ok := 0
+	for i := 0; i < 24; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			resp, err := srv2.Client().Get(srv2.URL + "/ok")
+			if err != nil {
+				return
+			}
+			resp.Body.Close()
+			if resp.StatusCode == 200 {
+				mu.Lock()
+				ok++
+				mu.Unlock()
+			}
+		}()
+	}
+	wg.Wait()
+	if ok != 5 {
+		t.Fatal("concurrent limit let through", ok)
+	}
+	_, _, raw = hiddenCall(t, srv2.Client(), srv2.URL+"/metrics", nil)
+	if !strings.Contains(string(raw), "command_requests_total{code=\"200\"} 5\n") || !strings.Contains(string(raw), "command_requests_total{code=\"429\"} 19\n") {
+		t.Fatal("concurrent metrics", string(raw))
+	}
+}
+
+func TestHiddenLogRedaction(t *testing.T) {
+	o, _, log := hiddenOps(100, 3754)
+	srv := httptest.NewServer(Operate(hiddenInner(), o))
+	defer srv.Close()
+	secret := fmt.Sprintf("s3cr3t%d", rand.New(rand.NewSource(3754)).Int63())
+	hiddenCall(t, srv.Client(), srv.URL+"/gone?token="+secret+"&password="+secret, map[string]string{"Cookie": "session=" + secret, "Authorization": "Bearer " + secret, "X-Request-ID": "probe-1"})
+	text := log.String()
+	if strings.Contains(text, secret) {
+		t.Fatal("secret leaked into the log:", text)
+	}
+	sc := bufio.NewScanner(strings.NewReader(text))
+	for sc.Scan() {
+		var line map[string]any
+		if err := json.Unmarshal(sc.Bytes(), &line); err != nil || len(line) != 4 || line["request_id"] != "probe-1" || line["method"] != "GET" || line["path"] != "/gone" || line["status"] != float64(404) {
+			t.Fatal("log line", sc.Text(), err)
+		}
+	}
+}
+
+func hiddenServe(t *testing.T, h http.Handler, drain time.Duration) (string, context.CancelFunc, chan error) {
+	t.Helper()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() { done <- Serve(ctx, ln, h, drain) }()
+	return "http://" + ln.Addr().String(), cancel, done
+}
+
+func TestHiddenGracefulDrain(t *testing.T) {
+	entered, release := make(chan struct{}), make(chan struct{})
+	slow := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		close(entered)
+		<-release
+		io.WriteString(w, "landed")
+	})
+	base, cancel, done := hiddenServe(t, slow, 3*time.Second)
+	got := make(chan string, 1)
+	go func() {
+		resp, err := http.Get(base + "/dock")
+		if err != nil {
+			got <- "error: " + err.Error()
+			return
+		}
+		defer resp.Body.Close()
+		raw, _ := io.ReadAll(resp.Body)
+		got <- string(raw)
+	}()
+	<-entered
+	cancel()
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		conn, err := net.DialTimeout("tcp", strings.TrimPrefix(base, "http://"), 100*time.Millisecond)
+		if err != nil {
+			break
+		}
+		conn.Close()
+		if time.Now().After(deadline) {
+			t.Fatal("listener still accepting after shutdown began")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	select {
+	case err := <-done:
+		t.Fatal("Serve returned before draining", err)
+	default:
+	}
+	close(release)
+	if body := <-got; body != "landed" {
+		t.Fatal("in-flight request was cut:", body)
+	}
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal("clean drain must return nil", err)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("Serve did not return")
+	}
+}
+
+func TestHiddenDrainWindowExpires(t *testing.T) {
+	entered, release := make(chan struct{}), make(chan struct{})
+	defer close(release)
+	stuck := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		close(entered)
+		<-release
+	})
+	base, cancel, done := hiddenServe(t, stuck, 150*time.Millisecond)
+	go func() {
+		if resp, err := http.Get(base + "/stuck"); err == nil {
+			resp.Body.Close()
+		}
+	}()
+	<-entered
+	start := time.Now()
+	cancel()
+	select {
+	case err := <-done:
+		if err == nil {
+			t.Fatal("expired drain must return an error")
+		}
+		if time.Since(start) < 100*time.Millisecond {
+			t.Fatal("drain window ignored")
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("Serve waited past the drain window")
+	}
+}
+
+func TestHiddenBonusInFlightGauge(t *testing.T) {
+	o, _, _ := hiddenOps(100, 3755)
+	entered, release := make(chan struct{}), make(chan struct{})
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /hold", func(w http.ResponseWriter, r *http.Request) {
+		entered <- struct{}{}
+		<-release
+	})
+	srv := httptest.NewServer(Operate(mux, o))
+	defer srv.Close()
+	var wg sync.WaitGroup
+	for i := 0; i < 2; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if resp, err := srv.Client().Get(srv.URL + "/hold"); err == nil {
+				resp.Body.Close()
+			}
+		}()
+		<-entered
+	}
+	_, _, raw := hiddenCall(t, srv.Client(), srv.URL+"/metrics", nil)
+	close(release)
+	wg.Wait()
+	if !strings.Contains(string(raw), "command_requests_in_flight 2\n") {
+		t.Fatal("in-flight gauge", string(raw))
+	}
+	_, _, raw = hiddenCall(t, srv.Client(), srv.URL+"/metrics", nil)
+	if !strings.Contains(string(raw), "command_requests_in_flight 0\n") {
+		t.Fatal("in-flight gauge after", string(raw))
+	}
+}
+`

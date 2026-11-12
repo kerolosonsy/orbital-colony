@@ -84,6 +84,7 @@ cd workspace/3-1-long-row && go run .
 | 33 | الوسطاء / Intermediaries | عميل بيعيد بأمان، ووكيل عكسي، وموزّع أحمال بفحص صحة، وبوابة API / Safe retrying clients, reverse proxies, health-checked load balancing, and an API gateway | ✅ |
 | 35 | الأنظمة الموزعة / Distributed Systems | طوابير مهام بعقود إيجار وDLQ، ومجدول، وأقفال موزعة، وصندوق الصادر، وKafka، وانتخاب Raft ونسخ السجل / Task queues with leases and a DLQ, a scheduler, distributed locks, the outbox, Kafka, Raft elections, and log replication | ✅ |
 | 37 | مركز القيادة / Command Center (Capstone) | API واحد لأطقم ومهام المستعمرة بيكبر على مراحل: schema وترحيلات وrepository على SQLite وPostgres، وجلسات معتمة بـ bcrypt / One colony crews-and-tasks API grown in stages: schema, migrations, a repository on SQLite and Postgres, and opaque bcrypt-backed sessions | 🚧 |
+| 37 | مركز القيادة / Command Center (Capstone) | API واحد لأطقم ومهام المستعمرة بيكبر على مراحل: schema وترحيلات وrepository على SQLite وPostgres، وجلسات معتمة بـ bcrypt، وأطقم معزولة بأدوار وaudit، ومهام بمفاتيح تكرار ونسخ متفائلة وصفحات cursor، وتشغيل بـ request ID وmetrics وحد طلبات وإغلاق مرتب / One colony crews-and-tasks API grown in stages: schema, migrations, a repository on SQLite and Postgres, opaque bcrypt-backed sessions, isolated crews with roles and audit, idempotent tasks with optimistic versions and cursor pages, and operations with request IDs, metrics, rate limiting, and graceful drain | ✅ |
 
 ## هيكل المشروع
 
