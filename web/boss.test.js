@@ -15,7 +15,7 @@ test("boss badges stay visible for locked and completed missions in both languag
         querySelector() { return null; }
       }
       const list = new Element();
-      const context = vm.createContext({
+      const context = vm.createContext({ store: { blob: {} },
         S: { chapters: [{ n: 9, track: "Basics" }], levels: [{ id: "plain", title: "Plain", chapter: 9 }, { id: "9-boss-evacuation", title: "Evacuation", chapter: 9, boss: true }], cur: null, running: false },
         document: { createElement: () => new Element() }, $: () => list,
         esc: (s) => s || "", T: (ar, en) => lang === "ar" ? ar : en,
@@ -44,7 +44,7 @@ test("only passing a boss shows track completion, including with old save record
         };
         const level = { id: "mission", kind: "lab", boss };
         const record = { stars: 0, best: 0 };
-        const context = vm.createContext({
+        const context = vm.createContext({ store: { blob: {} },
           S: { cur: level, levels: [level] }, $: node, rec: () => record,
           store: { save() {} }, idx: () => 0, sheetCode: () => "9-boss",
           T: (ar, en) => lang === "ar" ? ar : en, esc: (s) => s,

@@ -6,7 +6,7 @@ const vm = require("node:vm");
 const source = fs.readFileSync(__dirname + "/app.js", "utf8");
 function functions(start, end) { return source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start))); }
 function fixture(levels, progress = {}) {
-  const context = vm.createContext({ S: { levels }, rec: (id) => progress[id] || {} });
+  const context = vm.createContext({ store: { blob: {} }, S: { levels }, rec: (id) => progress[id] || {} });
   vm.runInContext(functions("function unlocked(", "function starHTML("), context);
   return context;
 }
@@ -24,7 +24,7 @@ test("saved progress unlocks inserted missions and service levels do not block",
 });
 test("carry-forward respects current saves and read-only non-Go files", () => {
   const progress = { old: { files: { "main.go": "old solution", "schema.sql": "tampered" } }, current: { files: {} } };
-  const context = vm.createContext({ rec: (id) => progress[id] || {}, level: { id: "current", carryFrom: "old", files: [
+  const context = vm.createContext({ store: { blob: {} }, S: {}, rec: (id) => progress[id] || {}, level: { id: "current", carryFrom: "old", files: [
     { name: "main.go", starter: "starter" }, { name: "schema.sql", starter: "SELECT 1" }
   ] } });
   vm.runInContext(functions("function levelFiles(", "function saveFile("), context);
@@ -41,7 +41,7 @@ test("chapters sharing a track stay in one collapsible group", () => {
     querySelector() { return null; }
   }
   const list = new Element("div");
-  const context = vm.createContext({
+  const context = vm.createContext({ store: { blob: {} },
     S: { chapters: [{ n: 1, track: "Foundations" }, { n: 10, track: "Concurrency" }, { n: 14, track: "Craft" }, { n: 24, track: "Concurrency" }], levels: [], cur: null },
     document: { createElement: (tag) => new Element(tag) },
     $: () => list, esc: (s) => s || "", requestAnimationFrame: () => {},

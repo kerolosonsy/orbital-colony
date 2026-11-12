@@ -212,6 +212,7 @@ func (s *server) registerProfiles(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /api/profiles/{id}", s.profileDelete)
 	mux.HandleFunc("GET /api/profiles/{id}/progress", s.profileProgress)
 	mux.HandleFunc("PUT /api/profiles/{id}/progress", s.profileProgress)
+	mux.HandleFunc("POST /api/profiles/{id}/review/{action}", s.profileReview)
 }
 
 func profileError(w http.ResponseWriter, r *http.Request, err error) {
@@ -406,37 +407,51 @@ func (s *server) profileProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	path := filepath.Join(p.dir(pr.ID), "progress.json")
+	old, err := readProgress(path)
+	if err != nil {
+		profileError(w, r, err)
+		return
+	}
 	if r.Method == http.MethodGet {
-		blob, err := os.ReadFile(path)
-		if errors.Is(err, os.ErrNotExist) {
-			blob, err = []byte(`{}`), nil
+		if old["progress"] == nil {
+			blob, err := os.ReadFile(path)
+			if err == nil {
+				writeJSON(w, json.RawMessage(blob))
+				return
+			}
 		}
-		if err != nil {
-			profileError(w, r, err)
-			return
-		}
-		writeJSON(w, json.RawMessage(blob))
+		writeJSON(w, old)
 		return
 	}
 	blob, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 2<<20))
 	if err != nil {
-		var tooLarge *http.MaxBytesError
 		status := 400
+		var tooLarge *http.MaxBytesError
 		if errors.As(err, &tooLarge) {
 			status = 413
 		}
 		profileBadRequest(w, r, "invalid or oversized progress", status)
 		return
 	}
-	if !json.Valid(blob) {
+	var incoming progressSave
+	if json.Unmarshal(blob, &incoming) != nil || incoming == nil {
 		profileBadRequest(w, r, "invalid JSON", 400)
 		return
 	}
-	if err := atomicJSON(path, blob); err != nil {
+	if incoming["progress"] == nil && old["progress"] == nil {
+		if err := atomicJSON(path, blob); err != nil {
+			profileError(w, r, err)
+			return
+		}
+		writeJSON(w, json.RawMessage(blob))
+		return
+	}
+	mergeReview(old, incoming)
+	if err := saveProgress(path, incoming); err != nil {
 		profileError(w, r, err)
 		return
 	}
-	writeJSON(w, json.RawMessage(blob))
+	writeJSON(w, incoming)
 }
 
 func freshProfileID(name string, profiles []profile) string {

@@ -528,3 +528,10 @@ html[dir="ltr"] #btn-next .ico, html[dir="ltr"] #btn-start .ico { transform: sca
 .quiz-option.quiz-wrong { border-color: var(--err); color: var(--err); }
 .quiz-feedback { margin: 12px 0 0; color: var(--paper-2); }
 .quiz-feedback:empty { display: none; }
+
+.review-card { padding: 16px 18px; margin-block-end: 16px; border: 1px solid var(--rule-strong); background: var(--ink-2); }
+.review-card h3 { margin: 0; }
+.review-card p { max-width: 70ch; color: var(--paper-2); }
+.review-card .tool { margin-inline-end: 8px; }
+
+.review-notice { margin: 0; padding: 10px 12px; border-block-end: 1px solid var(--rule); color: var(--paper-2); }

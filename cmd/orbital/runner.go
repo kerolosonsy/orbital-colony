@@ -133,6 +133,9 @@ func (r *runner) goCmd(ctx context.Context, dir string, args ...string) *exec.Cm
 	configureProcess(cmd)
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(), "ORBITAL_LANG="+contextLang(ctx), "GOFLAGS=-mod=mod", "GOWORK=off", "GOTOOLCHAIN=local", "GOPROXY=off")
+	if seed, ok := ctx.Value(reviewSeedKey{}).(int64); ok {
+		cmd.Env = append(cmd.Env, "ORBITAL_SEED="+strconv.FormatInt(seed, 10))
+	}
 	for name := range serviceDefaults {
 		cmd.Env = append(cmd.Env, name+"="+serviceEnv(name))
 	}
@@ -195,6 +198,9 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	configureProcess(prog)
 	prog.Dir = dir
 	prog.Env = append(os.Environ(), "ORBITAL_LANG="+lang, "ORBITAL_LEVEL="+lvl.ID, "ORBITAL_TRACE="+trace)
+	if seed, ok := ctx.Value(reviewSeedKey{}).(int64); ok {
+		prog.Env = append(prog.Env, "ORBITAL_SEED="+strconv.FormatInt(seed, 10))
+	}
 	stdout, stderr := &limitedBuffer{max: 64 << 10, lang: contextLang(ctx)}, &limitedBuffer{max: 64 << 10, lang: contextLang(ctx)}
 	prog.Stdout, prog.Stderr = stdout, stderr
 	runErr := runCommand(prog)

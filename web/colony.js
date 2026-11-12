@@ -40,6 +40,9 @@ const Colony = (() => {
       log(T("مقدرتش أفتح المستعمرة: ", "Couldn't open the colony: ") + e.message, "c-err");
       return exit();
     }
+    S.review = false;
+    $("#review-notice").classList.add("hidden");
+    $("#btn-vscode").disabled = false;
     LEVEL.starter = data.starter;
     S.cur = LEVEL;
     $("#lvl-title").textContent = LEVEL.title;

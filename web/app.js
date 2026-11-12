@@ -29,7 +29,7 @@ const store = {
     if (!online) { try { b = JSON.parse(localStorage.getItem(this.cacheKey)); } catch { b = null; } }
     const legacy = !b?.progress && PROFILE === "default" && online && this.legacy();
     if (legacy) b = legacy;
-    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {} };
+    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {}, review: b?.review || {} };
     if (legacy) {
       await this.push();
       for (const k of ["orbital.progress.v1", "orbital.current", "orbital.welcomed", "orbital.linked"]) localStorage.removeItem(k);
@@ -52,7 +52,12 @@ const store = {
   },
   push() {
     clearTimeout(this.timer); this.timer = null;
-    return fetch(`/api/profiles/${PROFILE}/progress`, { method: "PUT", headers: HEADERS, body: JSON.stringify(this.blob), keepalive: true }).catch(() => {});
+    return fetch(`/api/profiles/${PROFILE}/progress`, { method: "PUT", headers: HEADERS, body: JSON.stringify(this.blob), keepalive: true }).then(async (response) => {
+      if (!response.ok) throw new Error(String(response.status));
+      const saved = await response.json();
+      this.blob.review = saved.review || {};
+      if ($("#missions").open) renderMissions();
+    }).catch(() => {});
   },
   pref(k, v) {
     if (v === undefined) return this.blob.prefs[k];
@@ -143,14 +148,14 @@ function levelFiles(l) {
   return l.files?.length ? l.files.map((f) => ({ ...f, readOnly: f.readOnly || !f.name.endsWith(".go") })) : [{ name: "main.go", starter: l.starter, readOnly: false }];
 }
 function fileCode(l, f) {
-  const r = rec(l.id);
+  const r = S.review && S.cur === l ? S.reviewDraft : rec(l.id);
   if (!l.files?.length) return r.code ?? f.starter;
   if (f.readOnly) return f.starter;
   const carried = l.carryFrom ? rec(l.carryFrom).files?.[f.name] : undefined;
   return r.files?.[f.name] ?? carried ?? f.starter;
 }
 function saveFile(l, name, code) {
-  const r = rec(l.id);
+  const r = S.review && S.cur === l ? S.reviewDraft : rec(l.id);
   if (!l.files?.length) r.code = code;
   else (r.files ||= {})[name] = code;
 }
@@ -183,7 +188,7 @@ function renderTabs() {
 // in VS Code (gopls gives completion and docs); this page polls the files.
 const linked = new Set();
 let lastMtime = 0;
-function isLinked() { return !!S.cur && linked.has(S.cur.id); }
+function isLinked() { return !S.review && !!S.cur && linked.has(S.cur.id); }
 function saveLinked() { store.pref("linked", [...linked]); }
 function linkUI() {
   const on = isLinked();
@@ -1028,19 +1033,20 @@ async function refreshService(level) {
 }
 
 let previewVersion = 0;
-async function loadLevel(id) {
+async function loadLevel(id, review = null) {
   if (S.running) stopRun(true);
   if (S.mode === "colony") Colony.exit();
   const version = ++previewVersion;
   flushSave();
   if (playback) finishPlayback();
-  const l = S.levels[idx(id)];
+  const l = review || S.levels[idx(id)];
+  S.review = !!review; S.reviewDraft = {};
   S.cur = l; S.hintsShown = 0;
   store.pref("current", id);
   const ch = S.chapters.find((c) => c.n === l.chapter);
   $("#lvl-chapter").textContent = `${sheetCode(l)} · ${ch ? ch.title : ""}`;
   $("#lvl-stars").setAttribute("aria-label", T(`${rec(id).stars} من 3 نجوم`, `${rec(id).stars} of 3 stars`));
-  $("#lvl-title").textContent = l.title;
+  $("#lvl-title").textContent = (S.review ? T("مراجعة · ", "Review · ") : "") + l.title;
   $("#lvl-goal").innerHTML = inline(l.goal);
   $("#goal-strip-text").innerHTML = inline(l.goal);
   refreshService(l);
@@ -1055,8 +1061,13 @@ async function loadLevel(id) {
   lastMtime = 0;
   showFile(levelFiles(l)[0].name);
   linkUI();
+  $("#btn-vscode").disabled = S.review;
   if (isLinked()) syncFromWorkspace(true);
   $("#save-state").textContent = "";
+  $("#review-notice").classList.toggle("hidden", !S.review);
+  $("#review-notice").textContent = l.kind === "lab"
+    ? T("مراجعة · المختبر بيبدأ بكود البداية الأصلي، من غير حلك المحفوظ.", "Review · This lab starts with its original starter files, without your saved solution.")
+    : T("مراجعة · كود البداية فاضي عن قصد. اكتب الحل من ذاكرتك.", "Review · The starter is intentionally empty. Write the solution from memory.");
   $("#banner").classList.add("hidden");
   con.innerHTML = "";
   log(T(`ورقة ${sheetCode(l)}: ${l.title}. اكتب الكود ودوس Run.`, `Sheet ${sheetCode(l)}: ${l.title}. Write the code and press Run.`), "c-info");
@@ -1151,6 +1162,28 @@ const CHAPTER_UNITS = ["#d39b55", "#9fd2cb", "#93c45c", "#d75c9f", "#a45f3e", "#
 function renderMissions() {
   const list = $("#chapter-list");
   list.innerHTML = "";
+  if (store.blob.review?.due) {
+    const card = document.createElement("section");
+    card.className = "review-card";
+    const mission = S.levels.find((l) => l.id === store.blob.review.level);
+    card.innerHTML = `<h3>${T("مراجعة", "Review")}</h3><p>${esc(mission?.title || "")} · ${T("جرّب من ذاكرتك ببيانات جديدة. كود البداية فاضي إلا في المختبرات. النجوم والتقدّم زي ما هم.", "Try from memory with a fresh seed. Starters are empty except in labs. Stars and progress stay the same.")}</p>`;
+    for (const [action, label] of [["start", T("ابدأ", "Start")], ["skip", T("تخطّي", "Skip")]]) {
+      const button = document.createElement("button");
+      button.className = "tool"; button.textContent = label; button.disabled = S.running;
+      button.onclick = async () => {
+        button.disabled = true;
+        try {
+          await store.push();
+          const response = await api(`/api/profiles/${PROFILE}/review/${action}`, {});
+          if (action === "start") { closeOverlay($("#missions")); await loadLevel(response.id, response); }
+          else { store.blob.review = response; renderMissions(); }
+        } catch (e) { log(String(e), "c-err"); }
+        finally { button.disabled = false; }
+      };
+      card.appendChild(button);
+    }
+    list.appendChild(card);
+  }
   const groups = new Map();
   for (const ch of S.chapters) {
     let group = groups.get(ch.track);
@@ -1196,7 +1229,7 @@ function renderMissions() {
     row.appendChild(cells);
     group.appendChild(row);
   }
-  requestAnimationFrame(() => list.querySelector(".cell.current")?.scrollIntoView({ block: "center" }));
+  requestAnimationFrame(() => list.querySelector(store.blob.review?.due ? ".review-card" : ".cell.current")?.scrollIntoView({ block: "center" }));
 }
 function showOverlay(selector) {
   const overlay = $(selector);
@@ -1275,7 +1308,7 @@ async function run() {
     store.save();
     if (me !== runId) return;
     const isLab = level.kind === "lab";
-    const payload = { level: level.id };
+    const payload = { level: level.id, review: !!S.review };
     if (isLab) {
       payload.files = {};
       for (const f of levelFiles(level)) if (!f.readOnly) payload.files[f.name] = fileCode(level, f);
@@ -1353,6 +1386,12 @@ function finish(level, res, missing = []) {
     missing.forEach((m) => log("   • " + m, "c-tip"));
     if (!S.failLogged) { log(res.message, "c-err"); Sound.play("error"); }
     if (res.progress) log("   " + res.progress, "c-tip");
+    return;
+  }
+  if (S.review) {
+    store.blob.review = { ...store.blob.review, due: false };
+    banner(T("المراجعة اكتملت! النجوم والتقدّم زي ما هم.", "Review complete! Stars and progress stay the same."), true);
+    Sound.play("goal");
     return;
   }
   const r = rec(level.id);

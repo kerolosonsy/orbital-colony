@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http/httptest"
-	"strings"
+	"reflect"
 	"testing"
 
 	"orbital/colony/levels"
@@ -24,7 +24,16 @@ func TestQuizScoresSurviveSaveReload(t *testing.T) {
 	}
 	s.profiles = reopened
 	got := profileRequest(t, h, "GET", path, "", "")
-	if got.Code != 200 || strings.TrimSpace(got.Body.String()) != body {
+	var want, saved map[string]any
+	if err := json.Unmarshal([]byte(body), &want); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(got.Body.Bytes(), &saved); err != nil {
+		t.Fatal(err)
+	}
+	// Review scheduling adds server-owned metadata alongside the client fields.
+	delete(saved, "review")
+	if got.Code != 200 || !reflect.DeepEqual(saved, want) {
 		t.Fatalf("reload: %d %s", got.Code, got.Body)
 	}
 }

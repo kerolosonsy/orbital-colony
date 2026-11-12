@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/hex"
@@ -215,6 +216,7 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(withLang(r.Context(), requestLang(r)))
 	var req struct {
 		Level, Code string
+		Review      bool
 		Files       map[string]string
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 256<<10)).Decode(&req); err != nil {
@@ -228,6 +230,34 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	var reviewSave progressSave
+	var reviewPath string
+	if req.Review {
+		if s.profiles == nil {
+			requestError(w, r, "bad request", 400)
+			return
+		}
+		s.profiles.mu.Lock()
+		defer s.profiles.mu.Unlock()
+		if !profileID.MatchString(requestProfile(r)) {
+			requestError(w, r, "bad request", 400)
+			return
+		}
+		reviewPath = filepath.Join(s.profiles.dir(requestProfile(r)), "progress.json")
+		var loadErr error
+		reviewSave, loadErr = readProgress(reviewPath)
+		if loadErr != nil {
+			requestError(w, r, loadErr.Error(), 500)
+			return
+		}
+		id, due := reviewCandidate(reviewSave)
+		if !due || id != l.ID {
+			requestError(w, r, "bad request", 409)
+			return
+		}
+		l = reviewLevel(l)
+		r = r.WithContext(context.WithValue(r.Context(), reviewSeedKey{}, time.Now().UnixNano()))
+	}
 	var resp *runResponse
 	var err error
 	if l.Kind == "lab" {
@@ -238,6 +268,16 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		requestError(w, r, err.Error(), 500)
 		return
+	}
+	if req.Review {
+		resp.Result.Stars = 0
+		if resp.Result.Success {
+			finishReview(reviewSave, l.ID, time.Now())
+			if err := saveProgress(reviewPath, reviewSave); err != nil {
+				requestError(w, r, err.Error(), 500)
+				return
+			}
+		}
 	}
 	writeJSON(w, resp)
 }
