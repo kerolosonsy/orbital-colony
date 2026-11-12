@@ -2,7 +2,7 @@ package levels
 
 func init() {
 	add(&Level{ID: "35-1-task-queue", Chapter: 35, Kind: "lab", Title: "طابور المهام", Goal: "وزّع مهام الورش على عمّال بـ Redis: عقد إيجار وإعادة محاولة وطابور للمهام الميتة", Setup: seededLabRoom,
-		Requires: []string{"sel:json.Marshal"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{86}, Race: true, Service: "",
+		Requires: []string{"sel:json.Marshal", "sel:redis.ZRangeBy"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{86}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch351Starter}},
 		Lesson: `# طابور مهام الورش
 
@@ -860,7 +860,7 @@ func TestHiddenSchedulerRandomJumps(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "35-3-redis-lock", Chapter: 35, Kind: "lab", Title: "القفل الموزّع", Goal: "امنع ورشتين يشتغلوا على نفس المفاعل في نفس الوقت بقفل Redis له مالك ومدة، ووضّح حدود أمانه", Setup: seededLabRoom,
-		Requires: []string{"sel:hex.EncodeToString", "sel:io.ReadFull"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{94}, Race: true, Service: "",
+		Requires: []string{"sel:hex.EncodeToString", "sel:io.ReadFull", "sel:redis.NewScript"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{94}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch353Starter}},
 		Lesson: `# قفل المفاعل
 
@@ -1606,7 +1606,7 @@ func TestHiddenConsumerConcurrentDuplicates(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "35-5-kafka", Chapter: 35, Kind: "lab", Title: "الوسيط", Goal: "ابعت قراءات العربات لـ Kafka بمفتاح لكل عربة، واستهلكها بإعادة محاولة و offsets تتأكد بعد النجاح بس وإغلاق مرتب", Setup: seededLabRoom,
-		Requires: []string{"sel:context.WithoutCancel", "sel:strconv.Atoi"}, Deps: []string{"github.com/segmentio/kafka-go"}, Bridge: []int{98}, Race: true, Service: "kafka",
+		Requires: []string{"sel:context.WithoutCancel", "sel:strconv.Atoi", "sel:kafka.Message"}, Deps: []string{"github.com/segmentio/kafka-go"}, Bridge: []int{98}, Race: true, Service: "kafka",
 		Files: []LabFile{{Name: "main.go", Starter: ch355Starter}},
 		Lesson: `# وسيط قراءات العربات
 

@@ -2,7 +2,7 @@ package levels
 
 func init() {
 	add(&Level{ID: "30-1-cache-aside", Chapter: 30, Kind: "lab", Title: "كاش جانبي", Goal: "سرّع قراية المنارات بـ Redis مع صلاحية وإلغاء آمن للكاش", Setup: seededLabRoom,
-		Requires: []string{"iface", "mutex"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{65}, Race: true, Service: "",
+		Requires: []string{"iface", "mutex", "sel:redis.Nil"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{65}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch301Starter}},
 		Lesson: `# منارات بكاش جانبي
 

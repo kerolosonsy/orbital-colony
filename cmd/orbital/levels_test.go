@@ -171,6 +171,11 @@ func main() {
 		}
 		t.Run(id, func(t *testing.T) {
 			resp, err := r.Run(context.Background(), levels.Get(id), c.code)
+			// Worlds are random: a rare layout lets a wrong program finish
+			// before it reaches its mistake, so a success gets two more tries.
+			for try := 0; err == nil && resp.Result.Success && try < 2; try++ {
+				resp, err = r.Run(context.Background(), levels.Get(id), c.code)
+			}
 			if err != nil {
 				t.Fatal(err)
 			}

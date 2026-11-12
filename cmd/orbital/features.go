@@ -190,14 +190,27 @@ func packageName(imports map[string]string, id *ast.Ident) string {
 	return ""
 }
 
-// importName is the default package name of an import path, skipping a
-// major-version suffix: "github.com/golang-jwt/jwt/v5" is package jwt.
+// These pinned dependencies declare package names that differ from their paths.
+var importNames = map[string]string{
+	"github.com/redis/go-redis/v9":  "redis",
+	"github.com/segmentio/kafka-go": "kafka",
+}
+
+// importName infers package names without loading dependencies or using the network.
 func importName(importPath string) string {
+	if name, ok := importNames[importPath]; ok {
+		return name
+	}
 	name := path.Base(importPath)
 	if dir := path.Dir(importPath); dir != "." && len(name) > 1 && name[0] == 'v' && strings.Trim(name[1:], "0123456789") == "" {
-		return path.Base(dir)
+		name = path.Base(dir)
 	}
-	return name
+	if strings.HasPrefix(importPath, "gopkg.in/") {
+		if base, version, ok := strings.Cut(name, ".v"); ok && version != "" && strings.Trim(version, "0123456789") == "" {
+			name = base
+		}
+	}
+	return strings.TrimSuffix(strings.TrimSuffix(strings.TrimPrefix(name, "go-"), "-go"), ".go")
 }
 
 // checkRequirements returns a message for every requirement the code misses.
