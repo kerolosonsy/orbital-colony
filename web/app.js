@@ -16,10 +16,10 @@ async function api(path, body, method, signal) {
 }
 
 // ---------- persistence ----------
-// Each player profile keeps one blob on the server: { progress, prefs }.
+// Each player profile keeps one blob on the server: { progress, prefs, quizScores }.
 // localStorage holds a copy so a failed upload is never lost.
 const store = {
-  blob: { progress: {}, prefs: {} }, timer: null,
+  blob: { progress: {}, prefs: {}, quizScores: {} }, timer: null,
   cacheKey: "orbital.p." + PROFILE,
   async load() {
     let b = null, online = true;
@@ -29,7 +29,7 @@ const store = {
     if (!online) { try { b = JSON.parse(localStorage.getItem(this.cacheKey)); } catch { b = null; } }
     const legacy = !b?.progress && PROFILE === "default" && online && this.legacy();
     if (legacy) b = legacy;
-    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {} };
+    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {} };
     if (legacy) {
       await this.push();
       for (const k of ["orbital.progress.v1", "orbital.current", "orbital.welcomed", "orbital.linked"]) localStorage.removeItem(k);
@@ -1087,6 +1087,66 @@ $("#btn-reset").onclick = () => {
   ed.value = f.starter; onEdit();
 };
 
+let quizAttempt = null;
+function openQuiz(chapter) {
+  quizAttempt = { chapter, answers: new Map() };
+  const panel = $("#quiz-panel");
+  panel.classList.remove("hidden");
+  $("#quiz-title").textContent = `${chapter.title} · ${T("اختبر نفسك", "Check yourself")}`;
+  $("#quiz-score").textContent = T("٥ أسئلة فهم، من غير كتابة كود. الاختبار مش بيقفل أي مهمة.", "5 understanding questions, no code to write. This quiz never locks missions.");
+  const questions = $("#quiz-questions");
+  questions.replaceChildren();
+  chapter.quiz.forEach((question, index) => questions.appendChild(quizQuestion(question, index)));
+  $("#quiz-retry").onclick = () => openQuiz(chapter);
+  panel.scrollIntoView({ block: "start" });
+  $("#quiz-title").focus();
+}
+function quizQuestion(question, index) {
+  const text = LANG === "en" ? question.en : question;
+  const field = document.createElement("fieldset");
+  const legend = document.createElement("legend");
+  legend.textContent = `${index + 1}. ${text.question}`;
+  field.appendChild(legend);
+  const feedback = document.createElement("p");
+  feedback.className = "quiz-feedback";
+  feedback.setAttribute("role", "status");
+  text.options.forEach((option, choice) => {
+    const button = document.createElement("button");
+    button.className = "tool quiz-option";
+    button.textContent = option;
+    button.onclick = () => answerQuiz(field, question, index, choice);
+    field.appendChild(button);
+  });
+  field.appendChild(feedback);
+  return field;
+}
+function answerQuiz(field, question, index, choice) {
+  if (quizAttempt.answers.has(index)) return;
+  const correct = choice === question.answer;
+  quizAttempt.answers.set(index, correct);
+  field.querySelectorAll("button").forEach((button, i) => {
+    button.disabled = true;
+    if (i === question.answer) button.classList.add("quiz-correct");
+    else if (i === choice) button.classList.add("quiz-wrong");
+  });
+  const text = LANG === "en" ? question.en : question;
+  const feedback = field.querySelector(".quiz-feedback");
+  feedback.textContent = `${correct ? T("صح!", "Correct!") : T("مش صح.", "Incorrect.")} ${text.explanation}`;
+  if (quizAttempt.answers.size === quizAttempt.chapter.quiz.length) finishQuiz();
+}
+function finishQuiz() {
+  const score = [...quizAttempt.answers.values()].filter(Boolean).length;
+  const chapter = quizAttempt.chapter.n;
+  store.blob.quizScores[chapter] = Math.max(store.blob.quizScores[chapter] ?? 0, score);
+  store.save();
+  $("#quiz-score").textContent = `${T("نتيجتك", "Your score")}: ${score}/5 · ${T("أفضل نتيجة", "Best score")}: ${store.blob.quizScores[chapter]}/5`;
+  $(`[data-quiz-chapter="${chapter}"]`).innerHTML = quizEntryText(chapter);
+}
+function quizEntryText(chapter) {
+  const best = store.blob.quizScores[chapter];
+  return `<span class="cell-title">${T("اختبر نفسك", "Check yourself")}</span>${best === undefined ? "" : `<span class="quiz-badge">${T("أفضل نتيجة", "Best score")} <bdi>${esc(String(best))}/5</bdi></span>`}`;
+}
+
 const CHAPTER_UNITS = ["#d39b55", "#9fd2cb", "#93c45c", "#d75c9f", "#a45f3e", "#45b3a8", "#f2b33d", "#c7a2ff"];
 function renderMissions() {
   const list = $("#chapter-list");
@@ -1124,6 +1184,14 @@ function renderMissions() {
       b.title = open ? (l.kind === "lab" ? T("مختبر", "Lab") : T("مهمة", "Mission")) : T("مقفولة: خلّص اللي قبلها", "Locked: finish the one before it");
       b.onclick = () => { closeOverlay($("#missions")); loadLevel(l.id); };
       cells.appendChild(b);
+    }
+    if (ch.quiz?.length) {
+      const quiz = document.createElement("button");
+      quiz.className = "cell quiz-entry";
+      quiz.dataset.quizChapter = ch.n;
+      quiz.innerHTML = quizEntryText(ch.n);
+      quiz.onclick = () => openQuiz(ch);
+      cells.appendChild(quiz);
     }
     row.appendChild(cells);
     group.appendChild(row);

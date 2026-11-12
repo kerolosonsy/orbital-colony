@@ -175,6 +175,14 @@ func writeJSON(w http.ResponseWriter, v any) {
 
 func (s *server) levels(w http.ResponseWriter, r *http.Request) {
 	chapters := append([]levels.Chapter(nil), levels.Chapters...)
+	for i := range chapters {
+		chapters[i].Quiz = append([]levels.QuizQuestion(nil), chapters[i].Quiz...)
+		if requestLang(r) == "en" {
+			for j := range chapters[i].Quiz {
+				chapters[i].Quiz[j].QuizText = chapters[i].Quiz[j].En
+			}
+		}
+	}
 	missions := make([]*levels.Level, len(levels.All))
 	for i, l := range levels.All {
 		missions[i] = levelForLang(l, requestLang(r))

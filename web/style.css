@@ -512,3 +512,19 @@ html[dir="ltr"] #btn-next .ico, html[dir="ltr"] #btn-start .ico { transform: sca
 .track-group > summary:hover { background: var(--sheet-2); }
 .service-badge, .bridge-badge { display: inline-block; padding: 4px 8px; margin-block: 6px; border: 1px solid var(--rule); border-radius: 2px; color: var(--paper-2); background: var(--sheet-2); overflow-wrap: anywhere; }
 .service-badge[hidden] { display: none; }
+
+/* Optional chapter self-assessment, on the index sheet. */
+.quiz-entry { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+.quiz-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 7px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--sheet-2); font: 600 15px var(--cond); font-variant-numeric: tabular-nums; color: var(--paper-2); }
+#quiz-panel { padding: 18px; border-top: 1px solid var(--rule-strong); }
+#quiz-panel h2 { font-size: 21px; }
+#quiz-score { color: var(--paper-2); }
+#quiz-questions { max-width: 70ch; }
+#quiz-questions fieldset { min-width: 0; margin: 24px 0; padding: 12px; border: 1px solid var(--rule); }
+#quiz-questions legend { padding: 0 6px; font-weight: 600; }
+.quiz-option { display: block; width: 100%; height: auto; min-height: 44px; margin: 8px 0; padding: 8px 12px; text-align: start; white-space: normal; overflow-wrap: anywhere; }
+.quiz-option:disabled { opacity: 1; cursor: default; }
+.quiz-option.quiz-correct { border-color: var(--moss); color: var(--moss); }
+.quiz-option.quiz-wrong { border-color: var(--err); color: var(--err); }
+.quiz-feedback { margin: 12px 0 0; color: var(--paper-2); }
+.quiz-feedback:empty { display: none; }
