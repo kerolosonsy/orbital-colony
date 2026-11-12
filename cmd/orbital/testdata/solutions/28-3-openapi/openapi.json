@@ -1,0 +1,74 @@
+{
+  "openapi": "3.1.0",
+  "info": {"title": "Relay Registry", "version": "1.0.0"},
+  "paths": {
+    "/relays": {
+      "get": {
+        "operationId": "listRelays",
+        "summary": "All relays in ascending id order.",
+        "responses": {
+          "200": {"description": "The relays.", "content": {"application/json": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/Relay"}}}}}
+        }
+      },
+      "post": {
+        "operationId": "createRelay",
+        "summary": "Register a relay. Bodies over 4096 bytes are rejected.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RelayInput"}}}},
+        "responses": {
+          "201": {"description": "Registered; Location names the new relay.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Relay"}}}},
+          "400": {"description": "Not one valid RelayInput.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+        }
+      }
+    },
+    "/relays/{id}": {
+      "parameters": [{"name": "id", "in": "path", "required": true, "description": "Canonical positive integer.", "schema": {"type": "integer", "minimum": 1}}],
+      "get": {
+        "operationId": "getRelay",
+        "responses": {
+          "200": {"description": "The relay.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Relay"}}}},
+          "404": {"description": "Unknown or malformed id.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+        }
+      },
+      "delete": {
+        "operationId": "deleteRelay",
+        "responses": {
+          "204": {"description": "Removed."},
+          "404": {"description": "Unknown or malformed id.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Band": {"type": "string", "enum": ["S", "X", "Ka"]},
+      "Relay": {
+        "type": "object",
+        "required": ["id", "name", "band", "online", "tags"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "integer", "minimum": 1},
+          "name": {"type": "string", "minLength": 1},
+          "band": {"$ref": "#/components/schemas/Band"},
+          "online": {"type": "boolean"},
+          "tags": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      },
+      "RelayInput": {
+        "type": "object",
+        "required": ["name", "band"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "band": {"$ref": "#/components/schemas/Band"},
+          "tags": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "additionalProperties": false,
+        "properties": {"error": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}
