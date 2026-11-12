@@ -118,6 +118,7 @@ var Chapters = []Chapter{
 	{"الخدمات", "Services", 28, "الإطارات والتشغيل", "Gin وFiber وعقد OpenAPI واختبار العقد وإغلاق مرتب بيصفّي الطلبات الجارية", true, "Frameworks and Operations", "Gin, Fiber, OpenAPI contracts, contract testing, and graceful shutdown that drains in-flight requests"},
 	{"قواعد البيانات", "Databases", 29, "قواعد البيانات", "SQL وSQLite والترحيلات والتحويلات الذرّية وحوض الاتصالات وsqlx وGORM", true, "SQL Databases", "SQL, SQLite, migrations, atomic transfers, connection pools, sqlx, and GORM"},
 	{"قواعد البيانات", "Databases", 30, "التخزين المتقدم", "Redis والكاش الجانبي ومستندات MongoDB وفهارس البحث وفصل القراءة والكتابة", true, "Advanced Storage", "Redis cache-aside, MongoDB documents, search indexes, and read/write splitting"},
+	{"الشبكات", "Networking", 31, "الشبكة الخام", "TCP وحدود السطور وغرفة راديو وUDP وإطارات binary وDNS وفحص منافذ محلي", true, "Raw Networking", "TCP, bounded lines, a radio hub, UDP, binary frames, DNS, and loopback port checks"},
 }
 
 var All []*Level
