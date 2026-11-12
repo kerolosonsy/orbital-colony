@@ -75,6 +75,7 @@ cd workspace/3-1-long-row && go run .
 | 26 | بوابة القاعدة / Base Gateway | سيرفر HTTP، وREST، وراوتر وmiddleware، وظرف أخطاء، وملفات مضمّنة ورفع آمن / HTTP servers, REST, routing and middleware, error envelopes, embedded assets, and safe uploads | ✅ |
 | 27 | التصاريح والحماية / Passes and Protection | تصاريح bcrypt وJWT، وجلسات بكوكيز آمنة وCSRF، وCORS، وحد طلبات لكل عميل، وروابط مختصرة Base62 / bcrypt and JWT passes, secure-cookie sessions with CSRF, CORS, per-client rate limits, and Base62 short links | ✅ |
 | 28 | الإطارات والتشغيل / Frameworks and Operations | نفس عقد REST على Gin وFiber، ومستند OpenAPI واختبار عقد بالمكتبة القياسية، وإغلاق مرتب بيصفّي الطلبات الجارية / The same REST contract on Gin and Fiber, an OpenAPI document with a standard-library contract test, and graceful shutdown that drains in-flight requests | ✅ |
+| 29 | قواعد البيانات / SQL Databases | SQL وSQLite، وترحيلات وتحويل ذرّي وحوض اتصالات وsqlx وGORM / SQL and SQLite, migrations, atomic transfers, connection pools, sqlx, and GORM | ✅ |
 
 ## هيكل المشروع
 
