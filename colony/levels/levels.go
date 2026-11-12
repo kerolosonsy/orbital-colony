@@ -33,6 +33,7 @@ type LevelText struct {
 }
 
 type Level struct {
+	Boss      bool       `json:"boss,omitempty"`
 	Deps      []string   `json:"deps,omitempty"`
 	Service   string     `json:"service,omitempty"`
 	CarryFrom string     `json:"carryFrom,omitempty"`

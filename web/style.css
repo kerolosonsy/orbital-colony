@@ -515,7 +515,7 @@ html[dir="ltr"] #btn-next .ico, html[dir="ltr"] #btn-start .ico { transform: sca
 
 /* Optional chapter self-assessment, on the index sheet. */
 .quiz-entry { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
-.quiz-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 7px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--sheet-2); font: 600 15px var(--cond); font-variant-numeric: tabular-nums; color: var(--paper-2); }
+.boss-badge, .quiz-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 7px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--sheet-2); font: 600 15px var(--cond); font-variant-numeric: tabular-nums; color: var(--paper-2); }
 #quiz-panel { padding: 18px; border-top: 1px solid var(--rule-strong); }
 #quiz-panel h2 { font-size: 21px; }
 #quiz-score { color: var(--paper-2); }

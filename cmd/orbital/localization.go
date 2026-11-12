@@ -92,6 +92,7 @@ func economyShortfall(lang, message string) string {
 
 func mutantDescription(lang, description string) string {
 	for _, pair := range [][2]string{
+		{"خرق عقد المسار", "Route contract violation"},
 		{"إطار بترتيب بايتات غلط", "Wrong byte order"},
 		{"نوع مجهول مقبول", "Unknown kind accepted"},
 		{"محتوى بيشارك المدخل", "Payload aliases input"},

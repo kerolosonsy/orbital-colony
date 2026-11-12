@@ -1180,7 +1180,7 @@ function renderMissions() {
       const r = rec(l.id), open = unlocked(i);
       b.className = "cell" + (r.stars > 0 ? " done" : "") + (S.cur && l.id === S.cur.id ? " current" : "");
       b.disabled = !open || S.running;
-      b.innerHTML = `<span class="cell-top"><span class="cell-code">${sheetCode(l)}</span>${open ? `<span class="stars">${starHTML(r.stars)}</span>` : ""}</span><span class="cell-title">${esc(l.title)}</span>`;
+      b.innerHTML = `<span class="cell-top"><span class="cell-code">${sheetCode(l)}</span>${open ? `<span class="stars">${starHTML(r.stars)}</span>` : ""}</span><span class="cell-title">${esc(l.title)}</span>${l.boss ? `<span class="boss-badge">${T("ختام المسار", "Track Boss")}</span>` : ""}`;
       b.title = open ? (l.kind === "lab" ? T("مختبر", "Lab") : T("مهمة", "Mission")) : T("مقفولة: خلّص اللي قبلها", "Locked: finish the one before it");
       b.onclick = () => { closeOverlay($("#missions")); loadLevel(l.id); };
       cells.appendChild(b);
@@ -1377,6 +1377,7 @@ function finish(level, res, missing = []) {
     else text += T("<br>حل مثالي. مفيش أحسن من كده.", "<br>Perfect solution. It doesn't get better than this.");
   }
   if (improved && r.best === res.ticks && res.ticks > 0) text += T(`<br>أحسن رقم ليك: <b>${r.best}</b>`, `<br>Your best: <b>${r.best}</b>`);
+  if (level.boss) text += `<br><span class="bridge-badge">${T("المسار اكتمل!", "Track complete!")}</span>`;
   for (const project of level.bridge || []) {
     const number = String(project).padStart(3, "0");
     text += `<br><span class="bridge-badge">${esc(T(`جاهز لمشروع ${number}`, `Ready for project ${number}`))}</span>`;
