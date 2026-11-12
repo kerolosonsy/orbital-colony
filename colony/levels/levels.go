@@ -124,6 +124,7 @@ var Chapters = []Chapter{
 	{"الأنظمة", "Systems", 36, "التشغيل والمراقبة", "مقاييس Prometheus وlabels محدودة ومدير حاويات بـ interface وسجلات slog منظّمة وفحوص الجاهزية", true, "Operations and Observability", "Prometheus metrics, bounded labels, an interface-driven container manager, structured slog logs, and readiness probes"},
 	{"الشبكات", "Networking", 33, "الوسطاء", "عميل بيعيد بأمان وbackoff وjitter ووكيل عكسي وموزّع أحمال بفحص صحة وبوابة API", true, "Intermediaries", "Safe retries with backoff and jitter, reverse proxies, health-checked load balancing, and an API gateway"},
 	{"الأنظمة", "Systems", 35, "الأنظمة الموزعة", "طوابير المهام والمجدول والأقفال الموزعة وصندوق الصادر وKafka وانتخاب Raft ونسخ السجل", true, "Distributed Systems", "Task queues, schedulers, distributed locks, the outbox, Kafka, Raft elections, and log replication"},
+	{"Capstone", "Capstone", 37, "مركز القيادة", "مشروع ختامي: schema وترحيلات وجلسات وأطقم معزولة ومهام بمفاتيح تكرار وتشغيل آمن", true, "Command Center (Capstone)", "Capstone: schema, migrations, sessions, isolated crews, idempotent tasks, and safe operations"},
 }
 
 var All []*Level

@@ -83,6 +83,7 @@ cd workspace/3-1-long-row && go run .
 | 36 | التشغيل والمراقبة / Operations and Observability | مقاييس Prometheus وlabels محدودة، ومدير حاويات بـ interface، وسجلات slog منظّمة، وفحوص الجاهزية / Prometheus metrics and bounded labels, an interface-driven container manager, structured slog logs, and readiness probes | ✅ |
 | 33 | الوسطاء / Intermediaries | عميل بيعيد بأمان، ووكيل عكسي، وموزّع أحمال بفحص صحة، وبوابة API / Safe retrying clients, reverse proxies, health-checked load balancing, and an API gateway | ✅ |
 | 35 | الأنظمة الموزعة / Distributed Systems | طوابير مهام بعقود إيجار وDLQ، ومجدول، وأقفال موزعة، وصندوق الصادر، وKafka، وانتخاب Raft ونسخ السجل / Task queues with leases and a DLQ, a scheduler, distributed locks, the outbox, Kafka, Raft elections, and log replication | ✅ |
+| 37 | مركز القيادة / Command Center (Capstone) | API واحد لأطقم ومهام المستعمرة بيكبر على مراحل: schema وترحيلات وrepository على SQLite وPostgres، وجلسات معتمة بـ bcrypt / One colony crews-and-tasks API grown in stages: schema, migrations, a repository on SQLite and Postgres, and opaque bcrypt-backed sessions | 🚧 |
 
 ## هيكل المشروع
 
