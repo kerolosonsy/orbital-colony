@@ -84,6 +84,7 @@ cd workspace/3-1-long-row && go run .
 | 35 | الأنظمة الموزعة / Distributed Systems | طوابير مهام بعقود إيجار وDLQ، ومجدول، وأقفال موزعة، وصندوق الصادر، وKafka، وانتخاب Raft ونسخ السجل / Task queues with leases and a DLQ, a scheduler, distributed locks, the outbox, Kafka, Raft elections, and log replication | ✅ |
 | 36 | التشغيل والمراقبة / Operations and Observability | مقاييس Prometheus وlabels محدودة، ومدير حاويات بـ interface، وسجلات slog منظّمة، وفحوص الجاهزية / Prometheus metrics and bounded labels, an interface-driven container manager, structured slog logs, and readiness probes | ✅ |
 | 37 | مركز القيادة / Command Center (Capstone) | API واحد لأطقم ومهام المستعمرة بيكبر على مراحل: schema وترحيلات وrepository على SQLite وPostgres، وجلسات معتمة بـ bcrypt، وأطقم معزولة بأدوار وaudit، ومهام بمفاتيح تكرار ونسخ متفائلة وصفحات cursor، وتشغيل بـ request ID وmetrics وحد طلبات وإغلاق مرتب / One colony crews-and-tasks API grown in stages: schema, migrations, a repository on SQLite and Postgres, opaque bcrypt-backed sessions, isolated crews with roles and audit, idempotent tasks with optimistic versions and cursor pages, and operations with request IDs, metrics, rate limiting, and graceful drain | ✅ |
+| 38 | Go الحديثة / Modern Go — إضافي / Extras | اختياري بعد فصل 17: iterators وsets وlabels وOnce وerrgroup وReportAllocs وescape analysis وvet وpprof / Optional after chapter 17: iterators, sets, labels, Once, errgroup, ReportAllocs, escape analysis, vet, and pprof | ✅ |
 
 ## هيكل المشروع
 

@@ -980,7 +980,15 @@ function parText(par, gold, dynamic) {
 function idx(id) { return S.levels.findIndex((l) => l.id === id); }
 function unlocked(i) {
   if (i < 0 || i >= S.levels.length) return false;
-  if (i === 0 || S.levels.slice(i).some((l) => rec(l.id).stars > 0)) return true;
+  const level = S.levels[i];
+  if (level.chapter === 38) {
+    if (S.levels.slice(i).some((l) => l.chapter === 38 && rec(l.id).stars > 0)) return true;
+    const previous = S.levels[i - 1];
+    if (previous?.chapter === 38) return rec(previous.id).stars > 0;
+    const chapter17 = S.levels.filter((l) => l.chapter === 17);
+    return chapter17.length > 0 && rec(chapter17[chapter17.length - 1].id).stars > 0;
+  }
+  if (i === 0 || S.levels.slice(i).some((l) => l.chapter !== 38 && rec(l.id).stars > 0)) return true;
   const previous = S.levels[i - 1];
   return !!previous.service || rec(previous.id).stars > 0;
 }

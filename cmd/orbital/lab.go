@@ -51,6 +51,9 @@ func (r *runner) goTest(ctx context.Context, lvl *levels.Level, files map[string
 	defer cancel()
 	out := &limitedBuffer{max: 8000, lang: contextLang(ctx)}
 	testArgs := []string{"test", "-count=1"}
+	if lvl.Lab != nil && lvl.Lab.Vet {
+		testArgs = append(testArgs, "-vet=off")
+	}
 	if lvl.Race {
 		testArgs = append(testArgs, "-race")
 	}
@@ -136,6 +139,17 @@ func (r *runner) RunLab(ctx context.Context, lvl *levels.Level, edited map[strin
 		return resp, nil
 	}
 	allOK := true
+	if lab.Vet {
+		ok, out, err := r.goTest(ctx, lvl, with(nil), "-vet=all", "-run", "^$", "./...")
+		if err != nil {
+			return nil, err
+		}
+		allOK = add(tr(lang, "تفتيش go vet", "go vet inspection"), ok, out)
+		if !ok {
+			resp.Result.Message = tr(lang, "صلّح تحذيرات go vet وبعدين جرّب تاني.", "Fix the go vet diagnostics, then try again.")
+			return resp, nil
+		}
+	}
 	if missing := checkRequirements(files[lab.ReqFile], lvl.Requires, lang); len(missing) > 0 {
 		resp.Missing = missing
 		allOK = false

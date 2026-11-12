@@ -55,3 +55,23 @@ test("chapters sharing a track stay in one collapsible group", () => {
   assert.equal(concurrency.children[0].tag, "summary");
   assert.equal(concurrency.children.length, 3); // summary and chapters 10 and 24
 });
+test("Modern Go unlocks after chapter 17 and follows its own sequence", () => {
+  const levels = [
+    { id: "17-a", chapter: 17 }, { id: "17-b", chapter: 17 },
+    { id: "18-a", chapter: 18 }, { id: "37-a", chapter: 37, service: "postgres" },
+    { id: "38-a", chapter: 38 }, { id: "38-b", chapter: 38 }, { id: "38-c", chapter: 38 },
+  ];
+  for (const [progress, expected] of [
+    [{}, [false, false, false]],
+    [{ "17-a": { stars: 3 } }, [false, false, false]],
+    [{ "17-b": { stars: 2 } }, [true, false, false]],
+    [{ "17-b": { stars: 2 }, "38-a": { stars: 2 } }, [true, true, false]],
+    [{ "38-b": { stars: 3 } }, [true, true, true]],
+  ]) {
+    const context = fixture(levels, progress);
+    for (let i = 0; i < expected.length; i++) assert.equal(vm.runInContext(`unlocked(${i + 4})`, context), expected[i]);
+  }
+  const context = fixture(levels, { "38-c": { stars: 3 } });
+  assert.equal(vm.runInContext("unlocked(2)", context), false);
+  assert.equal(vm.runInContext("unlocked(3)", context), false);
+});

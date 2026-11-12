@@ -71,6 +71,7 @@ type Mutant struct {
 }
 
 type Lab struct {
+	Vet         bool // run all go vet analyzers as a separate check
 	Fuzz        string
 	Bonus       bool
 	HiddenFiles map[string]string
@@ -125,6 +126,7 @@ var Chapters = []Chapter{
 	{"الأنظمة", "Systems", 35, "الأنظمة الموزعة", "طوابير المهام والمجدول والأقفال الموزعة وصندوق الصادر وKafka وانتخاب Raft ونسخ السجل", true, "Distributed Systems", "Task queues, schedulers, distributed locks, the outbox, Kafka, Raft elections, and log replication"},
 	{"الأنظمة", "Systems", 36, "التشغيل والمراقبة", "مقاييس Prometheus وlabels محدودة ومدير حاويات بـ interface وسجلات slog منظّمة وفحوص الجاهزية", true, "Operations and Observability", "Prometheus metrics, bounded labels, an interface-driven container manager, structured slog logs, and readiness probes"},
 	{"Capstone", "Capstone", 37, "مركز القيادة", "مشروع ختامي: schema وترحيلات وجلسات وأطقم معزولة ومهام بمفاتيح تكرار وتشغيل آمن", true, "Command Center (Capstone)", "Capstone: schema, migrations, sessions, isolated crews, idempotent tasks, and safe operations"},
+	{"إضافي", "Extras", 38, "Go الحديثة", "فصل اختياري بعد 17: iterators وsets وOnce وerrgroup والتخصيصات وvet وpprof", true, "Modern Go", "Optional after chapter 17: iterators, sets, Once, errgroup, allocations, vet, and pprof"},
 }
 
 var All []*Level
