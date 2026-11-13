@@ -37,20 +37,10 @@ func (d *Drone) Unload() bool         { return world.Unload(d.id) }
 func (d *Drone) Position() (x, y int) { return world.Position(d.id) }
 
 // StormWarning receives a value when a dust storm is about to hit.
-func StormWarning() <-chan struct{} {
-	if world.Storm == nil {
-		return nil
-	}
-	return world.Storm.Warning
-}
+func StormWarning() <-chan struct{} { return world.StormWarning() }
 
-// StormClear is closed when the storm is over.
-func StormClear() <-chan struct{} {
-	if world.Storm == nil {
-		return nil
-	}
-	return world.Storm.Clear
-}
+// StormClear closes when the warned storm clears. Fetch it after each warning.
+func StormClear() <-chan struct{} { return world.StormClear() }
 
 // Main returns a handle to drone 0, the one the package-level functions
 // control, so it can be passed around like any other *Drone.

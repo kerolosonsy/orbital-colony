@@ -45,11 +45,15 @@ func main() {
 			goTo(p.X, p.Y)
 			if colony.CanHarvest() {
 				colony.Harvest()
+				if colony.CargoFree() < 25 {
+					unload()
+				}
 				colony.Plant(crop)
 			} else if colony.GetEntity() == colony.Empty && colony.Till() {
 				colony.Plant(crop)
 			}
 		}
+		unload()
 		colony.Export(colony.Moss, 0)
 		colony.Export(colony.Glowcap, 0)
 		goTo(0, 0)
@@ -59,15 +63,41 @@ func main() {
 func goTo(x, y int) {
 	cx, cy := colony.Position()
 	for ; cx < x; cx++ {
-		colony.Move(colony.East)
+		for !colony.Move(colony.East) {
+			colony.Repair()
+		}
 	}
 	for ; cx > x; cx-- {
-		colony.Move(colony.West)
+		for !colony.Move(colony.West) {
+			colony.Repair()
+		}
 	}
 	for ; cy < y; cy++ {
-		colony.Move(colony.North)
+		for !colony.Move(colony.North) {
+			colony.Repair()
+		}
 	}
 	for ; cy > y; cy-- {
-		colony.Move(colony.South)
+		for !colony.Move(colony.South) {
+			colony.Repair()
+		}
 	}
+	if colony.Fault() != nil {
+		colony.Repair()
+	}
+}
+
+func unload() {
+	x, y := colony.Position()
+	goTo(0, 0)
+	for !colony.Unload() {
+		if len(colony.Carry()) == 0 {
+			break
+		}
+		colony.Repair()
+	}
+	colony.Export(colony.Moss, 0)
+	colony.Export(colony.Glowcap, 0)
+	colony.Export(colony.Crystal, 0)
+	goTo(x, y)
 }

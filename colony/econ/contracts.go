@@ -67,6 +67,10 @@ type ContractRun struct {
 	Moves    int                `json:"moves,omitempty"`
 	Broke    string             `json:"broke,omitempty"` // a rule the run broke: price, vein, exporter
 
+	Stopping  bool    `json:"stopping,omitempty"`
+	Stopped   bool    `json:"stopped,omitempty"`
+	CargoLost float64 `json:"cargoLost,omitempty"`
+
 	ResearchDay  int64 `json:"researchDay,omitempty"`
 	RepeatsToday int   `json:"repeatsToday,omitempty"`
 }
@@ -137,11 +141,10 @@ var Contracts = []*Contract{
 		Brief:   "سلّم 100 كريستال بـ 3 درونات على الأقل، ودرون واحد بس هو اللي يبيع (Export). الباقيين يبعتوله بالـ channels. الدرس: فصل 11.",
 		BriefEn: "Deliver 100 crystal with at least 3 drones, and only one drone may sell (Export). The others send to it over channels. Lesson: chapter 11.",
 		Goal:    Goal{Deliver: deliver("crystal", 100), MinDrones: 3, Exporters: 1, MaxLost: NoLimit}, Reward: Reward{Grants: []string{"hangar"}}},
-	// TODO(C3.3): c12 must also run clean under the -race toggle.
 	{ID: "c12-one-ledger", Chapter: 12, Requires: []string{"mutex"}, Window: 600,
 		Title: "دفتر واحد", TitleEn: "One Ledger",
-		Brief:   "سلّم 300 طحالب بـ 4 درونات شغالين، وكلهم بيكتبوا في دفتر مشترك محمي بـ sync.Mutex. الدرس: فصل 12.",
-		BriefEn: "Deliver 300 moss with 4 working drones, all writing to one shared ledger guarded by a sync.Mutex. Lesson: chapter 12.",
+		Brief:   "سلّم 300 طحالب بـ 4 درونات شغالين، وكلهم بيكتبوا في دفتر مشترك محمي بـ sync.Mutex. لازم تشغّل فحص السباقات ويعدّي من غير data race. الدرس: فصل 12.",
+		BriefEn: "Deliver 300 moss with 4 working drones, all writing to one shared ledger guarded by a sync.Mutex. Enable race mode and finish without a data race. Lesson: chapter 12.",
 		Goal:    Goal{Deliver: deliver("moss", 300), MinDrones: 4, MaxLost: NoLimit}, Reward: Reward{Grants: []string{"market.logistics"}}},
 	{ID: "c13-reed-clock", Chapter: 13, Requires: []string{"sel:context.WithTimeout"}, Window: 600,
 		Title: "ساعة البوص", TitleEn: "Reed Clock",
@@ -158,6 +161,7 @@ var Contracts = []*Contract{
 		Brief:   "سلّم 80 كريستال وكل الدرونات تتحرك 400 خطوة بس على بعض. رتّب العروق بأقصر مسار (recursion أو heap). الدرس: فصل 15.",
 		BriefEn: "Deliver 80 crystal with all drones moving no more than 400 steps in total. Order the veins by the shortest route (recursion or a heap). Lesson: chapter 15.",
 		Goal:    Goal{Deliver: deliver("crystal", 80), MaxMoves: 400, MaxLost: NoLimit}, Reward: Reward{Grants: []string{"api.swap"}}},
+	testedPlannerContract,
 	{ID: "c17-deep-haul", Chapter: 17, Requires: []string{"for2", "slice"}, Window: 200,
 		Title: "الحمولة العميقة", TitleEn: "Deep Haul",
 		Brief:   "سلّم 20 جيود من الطبقة 2. أوامر الحفر متاحة طول العقد، والحفار لازم يوصل المستوى 2. الدرس: فصل 17.",
@@ -367,6 +371,9 @@ func (s *State) ProgressPair(tick int64) (done, failed bool, why [2]string) {
 		return false, false, why
 	}
 	g := c.Goal
+	if c.ID == CleanStopContract {
+		return r.Stopped && r.CargoLost == 0, r.Stopped && r.CargoLost > 0, [2]string{"مستني إغلاق من غير خسارة حمولة", "Waiting for shutdown without cargo loss"}
+	}
 	switch {
 	case r.Broke == "price":
 		return false, true, [2]string{fmt.Sprintf("بعت تحت %.0f%% من السعر الأساسي", g.MinPrice*100), fmt.Sprintf("You sold below %.0f%% of the base price", g.MinPrice*100)}
@@ -442,6 +449,9 @@ func (s *State) Fraction() float64 {
 		return 0
 	}
 	g := c.Goal
+	if c.ID == CleanStopContract && !r.Stopped {
+		return 0
+	}
 	f := 1.0
 	part := func(have, want float64) {
 		if want > 0 {
@@ -508,7 +518,7 @@ func (s *State) Settle(tick int64) (Reward, error) {
 	for _, id := range c.Reward.Grants {
 		if needsBlueprint(id) {
 			s.Blueprints[id] = true
-		} else if u := Find(id); u != nil && s.Levels[id] < u.Max {
+		} else if u := Find(id); u != nil && (u.Max == 0 || s.Levels[id] < u.Max) {
 			s.Levels[id]++
 			if id == "field" {
 				s.resize(FieldSize(s.Levels[id]))

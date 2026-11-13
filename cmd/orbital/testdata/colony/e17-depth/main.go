@@ -2,20 +2,67 @@ package main
 
 import "orbital/colony"
 
-// Reference for e17-depth. Open a shaft down to layer 2, then tunnel
-// through the whole layer in a snake. Every stone tile dug collects its ore;
-// geodes are sold as they come in.
+var path []colony.Direction
+
+func retry(action func() bool) bool {
+	for {
+		ok := action()
+		if colony.Fault() == nil {
+			return ok
+		}
+		colony.Repair()
+	}
+}
+
+func move(dir colony.Direction) {
+	retry(func() bool { return colony.Move(dir) })
+}
+
+func deliver() {
+	for i := len(path) - 1; i >= 0; i-- {
+		move((path[i] + 2) % 4)
+	}
+	for colony.Layer() > 0 {
+		retry(colony.Ascend)
+	}
+	retry(colony.Unload)
+	for {
+		colony.Export(colony.Geode, 0)
+		if colony.Fault() == nil {
+			break
+		}
+		colony.Repair()
+	}
+	for colony.Layer() < 2 {
+		retry(colony.Descend)
+	}
+	for _, dir := range path {
+		move(dir)
+	}
+}
+
+func step(dir colony.Direction) {
+	if !retry(func() bool { return colony.Dig(dir) }) {
+		deliver()
+		retry(func() bool { return colony.Dig(dir) })
+	}
+	move(dir)
+	path = append(path, dir)
+	if colony.Carry()[colony.Geode] >= 6 {
+		deliver()
+	}
+}
+
 func main() {
 	for colony.Layer() < 2 {
-		colony.DigDown()
-		colony.Descend()
+		retry(colony.DigDown)
+		retry(colony.Descend)
 	}
 	w, h := colony.WorldSize()
 	dug := make([][]bool, w)
 	for x := range dug {
 		dug[x] = make([]bool, h)
 	}
-	dug[0][0] = true
 	for y := 0; y < h; y++ {
 		for i := 1; i < w; i++ {
 			dir := colony.East
@@ -29,20 +76,15 @@ func main() {
 				x--
 			}
 			if !dug[x][y] {
-				colony.Dig(dir)
+				step(dir)
 				dug[x][y] = true
-			}
-			colony.Move(dir)
-			if colony.Count(colony.Geode) >= 6 {
-				colony.Export(colony.Geode, 0)
 			}
 		}
 		if y < h-1 {
-			colony.Dig(colony.North)
-			colony.Move(colony.North)
+			step(colony.North)
 		}
 	}
-	colony.Export(colony.Geode, 0)
+	deliver()
 	for {
 		colony.Wait()
 	}

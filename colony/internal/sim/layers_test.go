@@ -146,6 +146,7 @@ func TestColonyLayerGatesPersistenceAndResize(t *testing.T) {
 	}
 	// Buy through the live command path so resize events and underground drones are exercised.
 	st.Credits = 100000
+	st.Inv["moss"] = 5
 	w.colonyCommands(strings.NewReader(`{"buy":"field"}` + "\n"))
 	if w.Layer(0) != 2 || w.AtZ(0, 0, 1).Ground != Shaft || w.AtZ(0, 0, 2).Ground != Tunnel {
 		t.Fatal("field expansion lost tunnels or drone depth")

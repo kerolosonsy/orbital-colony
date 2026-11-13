@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,7 +26,7 @@ type buildingProgramEvent struct {
 // Uses the contract harness's compiler, saved-state protocol and fast clock.
 func playBuildingProgram(t *testing.T, st *econ.State, code string, accept func(buildingProgramEvent) bool) {
 	t.Helper()
-	prog := buildColonyProgram(t, testRunner(t), code)
+	prog := buildColonyProjectProgram(t, testRunner(t), colonyProject{Files: map[string]string{"main.go": code}, Race: true})
 	save := filepath.Join(t.TempDir(), "colony.json")
 	blob, err := json.Marshal(st)
 	if err != nil {
@@ -51,7 +52,13 @@ func playBuildingProgram(t *testing.T, st *econ.State, code string, accept func(
 		t.Fatal(err)
 	}
 	writer.Close()
-	defer func() { _ = cmd.Process.Kill(); _ = cmd.Wait() }()
+	defer func() {
+		_ = cmd.Process.Kill()
+		_ = cmd.Wait()
+		if strings.Contains(output.String(), "WARNING: DATA RACE") {
+			t.Errorf("reference has a data race:\n%s", output.String())
+		}
+	}()
 	scanner := bufio.NewScanner(events)
 	scanner.Buffer(make([]byte, 4096), 8<<20)
 	for scanner.Scan() {

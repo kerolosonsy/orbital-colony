@@ -10,6 +10,7 @@ import (
 func TestResearchTreeAndShopAgreeOnRPAndLevelParents(t *testing.T) {
 	st := econ.New(1)
 	st.Credits = 1000
+	st.Inv["moss"] = 100
 	id := "research.engine"
 	for _, tc := range []struct {
 		level int
@@ -28,7 +29,7 @@ func TestResearchTreeAndShopAgreeOnRPAndLevelParents(t *testing.T) {
 	}
 	st.Levels["engine"] = 0
 	node := colonyTreeNode(t, treeForLang(st, "en"), id)
-	if !treeChecksPass(node) || len(node.Checks) != 1 || st.RP != 0 {
+	if !treeChecksPass(node) || len(node.Checks) != 2 || st.RP != 0 {
 		t.Fatalf("repeat includes RP or parents: %+v", node)
 	}
 }

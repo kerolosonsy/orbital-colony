@@ -12,6 +12,7 @@ func TestColonyTreeRankCheckAgreesWithShopAndBuy(t *testing.T) {
 		for _, rank := range []int{0, 1, 2} {
 			st := econ.New(1)
 			st.Levels["engine"], st.Credits, st.Rank = 5, 1e6, rank
+			st.Inv["plate"] = 100
 			node := colonyTreeNode(t, treeForLang(st, lang), "engine")
 			var rankCheck *treeCheck
 			for i := range node.Checks {

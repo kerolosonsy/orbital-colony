@@ -6,7 +6,7 @@ const vm = require("node:vm");
 const escapeHTML = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const context = vm.createContext({ module: { exports: {} }, LANG: "ar", T: (ar, en) => context.LANG === "en" ? en : ar, esc: escapeHTML });
 vm.runInContext(fs.readFileSync(__dirname + "/treeview.js", "utf8"), context);
-const { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkLabel, checkMarkup, costMarkup, headerStatsMarkup, branchHue } = context.module.exports;
+const { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, stateLabel, checkLabel, checkMarkup, costMarkup, headerStatsMarkup, branchHue } = context.module.exports;
 
 test("fit centres offset bounds with a screen-space margin and never zooms above 100%", () => {
   for (const [bounds, width, height, margin, expected] of [
@@ -264,4 +264,48 @@ test("tree overlay updates header stats and detail card live from TreeView.updat
   assert.match(detail.innerHTML, /Rank 3 or higher/);
   assert.match(detail.innerHTML, /Research points: 40/);
   assert.match(detail.innerHTML, /25 \/ 40/);
+});
+
+test("max 0 endless tree nodes are never maxed and render plain numeric levels", () => {
+  for (const lang of ["ar", "en"]) {
+    context.LANG = lang;
+    const en = lang === "en";
+    const endlessZero = {
+      id: "endless", max: 0, level: 0, state: "available",
+      checks: [{ kind: "max", ok: false }, { kind: "credits", ok: true }],
+    };
+    assert.equal(buyEnabled(endlessZero), true);
+    assert.equal(buyLabel(endlessZero), en ? "Build" : "ابني");
+    assert.equal(stateLabel(endlessZero), en ? "Available" : "متاحة");
+    assert.equal(missingCount(endlessZero), 0);
+
+    const endlessHigh = {
+      id: "endless", max: 0, level: 7, state: "owned",
+      checks: [{ kind: "max", ok: false }, { kind: "credits", ok: true }],
+    };
+    assert.equal(buyEnabled(endlessHigh), true);
+    assert.equal(buyLabel(endlessHigh), en ? "Upgrade" : "رقّي");
+    assert.equal(stateLabel(endlessHigh), en ? "Level 7" : "مستوى 7");
+
+    const endlessBroke = {
+      id: "endless", max: 0, level: 7, state: "owned",
+      checks: [{ kind: "credits", ok: false }],
+    };
+    assert.equal(buyEnabled(endlessBroke), false);
+    assert.equal(buyLabel(endlessBroke), en ? "Upgrade" : "رقّي");
+  }
+});
+
+test("costMarkup renders colour chips for crafted and raw goods in costs", () => {
+  context.LANG = "en";
+  context.NAME = { plate: "Plate", moss: "Moss" };
+  context.INV_COLOR = { plate: "#c6d0de", moss: "#93c45c" };
+  const html = costMarkup(
+    { cost: { credits: 100, goods: { plate: 5, moss: 10 } } },
+    { credits: 200, rp: 0, inv: { plate: 5, moss: 2 } },
+  );
+  assert.match(html, /tv-good-chip[^>]*background:#c6d0de/);
+  assert.match(html, /tv-good-chip[^>]*background:#93c45c/);
+  assert.match(html, /class="is-ok"><span class="tv-cost-good"><i class="tv-good-chip"[^>]*><\/i>Plate<\/span><b dir="ltr">5 \/ 5<\/b>/);
+  assert.match(html, /class="is-missing"><span class="tv-cost-good"><i class="tv-good-chip"[^>]*><\/i>Moss<\/span><b dir="ltr">2 \/ 10<\/b>/);
 });

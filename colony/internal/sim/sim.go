@@ -153,6 +153,12 @@ type tileView struct {
 // Wire format: tile.b is the building kind, omitted on tiles without a building.
 // Econ snapshots carry rank:{level,kind,target,value,filled}; state.rank is the earned level.
 // filled is running time / econ.Window, capped at 1; kind names the next goal.
+// Full econ snapshots (all events carrying state) include stats:{drones:[{id,work,move,
+// wait,failed,idleMoves}],topFail,ticks}. work counts non-move/non-wait commands;
+// move counts cells traveled, wait counts action ticks, ticks excludes earlier runs.
+// topFail is empty without failures; ties use lexical op order. Idle moves are
+// successful moves followed by another move attempt without successful work.
+// Shop and tree upgrades use max:0 for unlimited levels, never a maxed check.
 // op:"rank" carries ok:true, a localized msg and rank after each promotion.
 // op:"building" carries t, x, y and building:{kind,recipe,in,out,progress,wear,level,
 // powered,enabled,priority,mode}; mode is present only on generators.
@@ -164,7 +170,13 @@ type tileView struct {
 // State includes rp (float); tree nodes include rp (first-purchase cost, omitted
 // at zero), and checks may have kind:"rp". Contracts include repeatable:true
 // and rewardRP (base RP); settlement rewards include rp (actual RP paid).
+// state.weather is {storm:"none"|"warn"|"active",at:nextPhaseTick}.
+// Optional state.rush is {good,amount,left,until,bonus}; state.shock is {good,factor,until}.
+// Fleet entries optionally include fault:true and stunned:ticksRemaining.
+// Live op:"storm" has phase:"warn"|"hit"|"clear" and msg; op:"fault" has d,msg;
+// op:"shock" and op:"rush" have msg.
 type Event struct {
+	Phase        string         `json:"phase,omitempty"`
 	Building     *BuildingView  `json:"building,omitempty"`
 	Translations [][2]string    `json:"translations,omitempty"`
 	Z            int            `json:"z,omitempty"`
@@ -246,6 +258,11 @@ type World struct {
 	start        time.Time
 	mainSave     [4]int
 
+	shutdown       chan struct{}
+	shuttingDown   bool
+	shutdownClosed bool
+	stats          map[int]*droneCounters
+
 	lastRankTick int
 
 	lastProductionTick int
@@ -273,6 +290,8 @@ func New(out io.Writer, seed int64) *World {
 // Drone is one drone's state. Drone 0's position and cargo live in
 // World.X, World.Y, World.Z and World.Cargo; others are swapped in while they act.
 type Drone struct {
+	fault              bool
+	stunnedUntil       int
 	ID, X, Y, Z, Cargo int
 	Battery            int
 	Hold               map[string]float64
@@ -376,7 +395,7 @@ func (w *World) emit(ev Event) {
 	if w.Econ != nil {
 		ev.Translations = pairs
 	}
-	b, _ := json.Marshal(ev)
+	b, _ := json.Marshal(colonyEventWire(ev))
 	w.out.Write(append(b, '\n'))
 	if w.Console != nil {
 		w.printConsole(ev)
@@ -421,7 +440,7 @@ func (w *World) Launch() {
 	w.mu.Lock()
 	w.start = time.Now()
 	w.mu.Unlock()
-	if w.Realtime {
+	if w.Realtime && w.Econ == nil {
 		w.startTimers()
 	}
 }
@@ -469,23 +488,32 @@ func (w *World) after(ev Event) {
 // act spends one tick on an action of drone id. In realtime mode the drone
 // is busy for one tick of wall-clock time, so separate drones overlap.
 func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bool)) bool {
+	ok, _ := w.actErr(id, op, f)
+	return ok
+}
+
+func (w *World) actErr(id int, op string, f func() (ok bool, msg string, changed bool)) (bool, error) {
 	d := w.drone(id)
 	if d == nil {
 		panic(sayf("colony: مفيش درون بالمعرّف %d", "colony: no drone with id %d", id))
 	}
 	d.busy.Lock()
 	defer d.busy.Unlock()
+	// Purchases can change the action duration while other drones are waiting.
+	w.mu.Lock()
 	speed := w.actionSpeed(d)
+	step := w.Unit
+	if w.ActionDur > 0 {
+		step = w.ActionDur
+	}
+	start := w.start
+	w.mu.Unlock()
 	var slot int
 	if w.Realtime {
 		// Each drone works on a fixed beat: its next action ends one Unit
 		// after the previous one, unless it sat idle. Ticks come from that
 		// schedule rather than from noisy sleep wake-ups.
 		base := d.nextAt
-		step := w.Unit
-		if w.ActionDur > 0 {
-			step = w.ActionDur
-		}
 		if now := time.Now(); base.IsZero() || now.Sub(base) > step/2 {
 			base = now
 		}
@@ -493,7 +521,7 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 		target := base.Add(step)
 		time.Sleep(time.Until(target))
 		d.nextAt = target
-		slot = w.TickBase + int((target.Sub(w.start)+w.Unit/2)/w.Unit)
+		slot = w.TickBase + int((target.Sub(start)+w.Unit/2)/w.Unit)
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -513,13 +541,19 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 	if op != "wait" && w.batteryActive() {
 		d.Battery = max(0, d.Battery-1)
 	}
+	blocked := w.droneFailure(d, op)
+	if blocked != nil {
+		blockedMsg := blocked.Error()
+		f = func() (bool, string, bool) { return false, blockedMsg, false }
+	}
+	f = w.trackAction(d, op, f)
 	ok, msg, changed := f()
 	w.actingDrone = nil
 	if w.Econ != nil {
 		w.Econ.RecordCommand(id, op == "move" && ok)
 		w.recordRankCommand()
 	}
-	if w.Storm != nil && w.Storm.active && (Point{w.X, w.Y}) != w.Base {
+	if w.Econ == nil && w.Storm != nil && w.Storm.active && (Point{w.X, w.Y}) != w.Base {
 		msg = say("الدرون كان برّه القاعدة وقت العاصفة!", "The drone was outside base during the storm!")
 		ev := Event{Op: op, T: w.Tick, D: id, OK: false, X: w.X, Y: w.Y, Z: w.Z, Msg: msg}
 		w.store(d)
@@ -539,7 +573,10 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 	if w.Econ != nil {
 		w.checkRank()
 	}
-	return ok
+	if w.Econ != nil {
+		w.saveShutdown(false)
+	}
+	return ok, blocked
 }
 
 func (w *World) Move(id int, d Direction) bool {
@@ -639,7 +676,7 @@ func (w *World) Harvest(id int) bool {
 }
 
 func (w *World) TryHarvest(id int) (n int, err error) {
-	w.act(id, "harvest", func() (bool, string, bool) {
+	_, blocked := w.actErr(id, "harvest", func() (bool, string, bool) {
 		if w.ScoutRoles && id != 0 {
 			err = ErrEmpty
 			return false, say("درون الاستكشاف مبيعرفش يحصد", "Scout drones cannot harvest"), false
@@ -653,6 +690,9 @@ func (w *World) TryHarvest(id int) (n int, err error) {
 		n, err, msg, changed = w.harvest(false)
 		return err == nil, msg, changed
 	})
+	if blocked != nil {
+		err = blocked
+	}
 	return n, err
 }
 

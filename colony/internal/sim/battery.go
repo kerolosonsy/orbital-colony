@@ -13,9 +13,8 @@ func (w *World) batteryActive() bool {
 	return false
 }
 
+// actionSpeed reads battery and building state with World.mu held.
 func (w *World) actionSpeed(d *Drone) int {
-	w.mu.Lock()
-	defer w.mu.Unlock()
 	if w.batteryActive() && d.Battery == 0 {
 		return 2
 	}

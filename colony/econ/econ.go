@@ -36,9 +36,12 @@ type Tile struct {
 
 // State is everything that persists between runs.
 type State struct {
-	Rank       int        `json:"rank"`
-	RankWindow RankWindow `json:"rankWindow"`
-	RP         float64    `json:"rp"`
+	Weather    Weather      `json:"weather"`
+	Rush       *RushOrder   `json:"rush,omitempty"`
+	Shock      *MarketShock `json:"shock,omitempty"`
+	Rank       int          `json:"rank"`
+	RankWindow RankWindow   `json:"rankWindow"`
+	RP         float64      `json:"rp"`
 
 	Depth    int                `json:"depth,omitempty"`
 	Under    [][]Tile           `json:"under,omitempty"`
@@ -110,6 +113,7 @@ func (s *State) Normalize() {
 	if s.Version < 3 {
 		s.migrateV3()
 	}
+	s.normalizeEvents()
 	s.normalizeInfrastructure()
 }
 
@@ -166,11 +170,19 @@ type Upgrade struct {
 	Max      int      `json:"max"`
 	Requires []string `json:"requires,omitempty"` // upgrade ids that must be at level >= 1
 	Lesson   int      `json:"lesson,omitempty"`   // chapter that teaches what this unlocks
+	rule     *CostRule
 	cost     func(level int) Cost
 }
 
 // CostAt is the price of going from level to level+1.
-func (u *Upgrade) CostAt(level int) Cost { return u.cost(level) }
+func (u *Upgrade) CostAt(level int) Cost {
+	if u.rule != nil {
+		cost := u.rule.At(level)
+		cost.Credits = math.Round(cost.Credits)
+		return cost
+	}
+	return u.cost(level)
+}
 
 func geo(base, growth float64) func(int) float64 {
 	return func(l int) float64 { return math.Round(base * math.Pow(growth, float64(l))) }
@@ -200,6 +212,7 @@ func add(u *Upgrade) {
 	case "api.dig":
 		u.NameEn, u.DescEn, u.GroupEn = "Digging License", "Dig, DigDown, Descend, and Ascend.", "The Depths"
 	}
+	configureEndless(u)
 	Catalog = append(Catalog, u)
 }
 
@@ -299,24 +312,26 @@ func (s *State) Has(id string) bool { return s.Levels[id] > 0 }
 
 // ActionMillis is how long one drone action takes in real time.
 func (s *State) ActionMillis() float64 {
-	return 260 * math.Pow(0.92, float64(s.Level("engine"))) / s.EngineResearchMult()
+	return math.Max(20, engineMillis(s.Level("engine"))/s.EngineResearchMult())
 }
 
 // Drones is how many drones the hangar holds, the first one included.
 func (s *State) Drones() int { return 1 + s.Level("hangar") }
 
 func (s *State) YieldMult(g string) float64 {
-	return (1 + 0.35*float64(s.Level("yield."+g))) * s.ResearchYieldMult(g)
+	return linearMult(0.35, s.Level("yield."+g), 12) * s.ResearchYieldMult(g)
 }
 
 func (s *State) GrowTime(g string) int64 {
-	return int64(math.Max(10, float64(GrowTicks[g])*math.Pow(0.9, float64(s.Level("grow."+g)))/s.GrowthResearchMult(g)))
+	return int64(math.Max(10, float64(GrowTicks[g])*timeScale(0.9, s.Level("grow."+g), 8)/s.GrowthResearchMult(g)))
 }
 
 func (s *State) VeinEvery() int64 {
-	return int64(160 * math.Pow(0.8, float64(s.Level("veins.rate"))) / s.VeinResearchMult())
+	return max(1, int64(160*timeScale(0.8, s.Level("veins.rate"), 8)/s.VeinResearchMult()))
 }
-func (s *State) VeinMax() int { return 4 + s.Level("veins.size") + s.Level("research.vein-size") }
+func (s *State) VeinMax() int {
+	return 4 + int(linearMult(1, s.Level("veins.size"), 6)-1) + int(linearMult(1, s.Level("research.vein-size"), 3)-1)
+}
 
 // Price is what one unit of g sells for right now.
 func (s *State) Price(g string) float64 {
@@ -324,7 +339,10 @@ func (s *State) Price(g string) float64 {
 	if d == 0 {
 		d = 1
 	}
-	return PriceV3[g] * (1 + 0.1*float64(s.Level("market.contracts"))) * s.MarketResearchMult(g) * d
+	if s.Shock != nil && s.Shock.Good == g && s.Tick < s.Shock.Until {
+		d = s.Shock.Factor
+	}
+	return PriceV3[g] * linearMult(0.1, s.Level("market.contracts"), 12) * s.MarketResearchMult(g) * d
 }
 
 // Sell turns n units of g into credits, pushing that good's price down a
@@ -337,7 +355,7 @@ func (s *State) Sell(g string, n float64) float64 {
 	earned := 0.0
 	for n > 0 {
 		chunk := math.Min(n, 1)
-		earned += chunk * s.Price(g)
+		earned += s.rushPayment(g, chunk, s.Price(g))
 		d := s.Demand[g]
 		if d == 0 {
 			d = 1
@@ -353,9 +371,9 @@ func (s *State) Sell(g string, n float64) float64 {
 
 // Recover lets every market drift back toward calm. Call once per tick.
 func (s *State) Recover(ticks int64) {
-	rate := 0.0025 * (1 + 0.35*float64(s.Level("market.logistics")))
+	rate := 0.0025 * linearMult(0.35, s.Level("market.logistics"), 8)
 	for g, d := range s.Demand {
-		s.Demand[g] = math.Min(1, d+(1-d)*(1-math.Pow(1-rate*s.RecoveryResearchMult(g), float64(ticks))))
+		s.Demand[g] = math.Min(1, d+(1-d)*(1-math.Pow(1-math.Min(1, rate*s.RecoveryResearchMult(g)), float64(ticks))))
 	}
 }
 
@@ -364,7 +382,7 @@ func (s *State) Recover(ticks int64) {
 // Status says whether an upgrade can be bought and why not.
 func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
 	l := s.Levels[u.ID]
-	if l >= u.Max {
+	if u.Max > 0 && l >= u.Max {
 		return Cost{}, false, i18n.T("خلصت كل المستويات", "All levels completed")
 	}
 	if l == 0 && needsBlueprint(u.ID) && !s.Blueprints[u.ID] {
@@ -456,7 +474,7 @@ func (s *State) Claim(n int) (Reward, error) {
 	s.Claimed[key] = true
 	s.Credits += r.Credits
 	for _, g := range r.Grants {
-		if u := Find(g); u != nil && s.Levels[g] < u.Max {
+		if u := Find(g); u != nil && (u.Max == 0 || s.Levels[g] < u.Max) {
 			s.Levels[g]++
 		}
 	}
@@ -501,11 +519,10 @@ func (s *State) Prices() map[string]float64 {
 	return m
 }
 
-// TotalLevels is how many upgrade levels exist and how many are owned.
+// TotalLevels returns owned levels and total (0 for an unlimited catalog).
 func (s *State) TotalLevels() (owned, total int) {
 	for _, u := range Catalog {
-		total += u.Max
-		owned += min(s.Levels[u.ID], u.Max)
+		owned += s.Levels[u.ID]
 	}
-	return owned, total
+	return owned, 0 // The catalog includes unlimited upgrades.
 }

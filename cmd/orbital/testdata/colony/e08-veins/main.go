@@ -36,15 +36,26 @@ func bigVein(pos *colony.Point) *colony.Point {
 func goTo(x, y int) {
 	cx, cy := colony.Position()
 	for ; cx < x; cx++ {
-		colony.Move(colony.East)
+		for !colony.Move(colony.East) {
+			colony.Repair()
+		}
 	}
 	for ; cx > x; cx-- {
-		colony.Move(colony.West)
+		for !colony.Move(colony.West) {
+			colony.Repair()
+		}
 	}
 	for ; cy < y; cy++ {
-		colony.Move(colony.North)
+		for !colony.Move(colony.North) {
+			colony.Repair()
+		}
 	}
 	for ; cy > y; cy-- {
-		colony.Move(colony.South)
+		for !colony.Move(colony.South) {
+			colony.Repair()
+		}
+	}
+	if colony.Fault() != nil {
+		colony.Repair()
 	}
 }

@@ -48,6 +48,7 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.Tick = w.TickBase
 	w.lastProductionTick = w.TickBase
 	w.loadFleet()
+	w.initColonyEvents()
 	w.lastRankTick = w.TickBase
 	w.loadTiles()
 	w.applyEcon()
@@ -81,7 +82,8 @@ func (w *World) loadTiles() {
 	}
 }
 
-// applyEcon refreshes everything the upgrades control.
+// applyEcon refreshes everything the upgrades control. Caller holds the lock,
+// unless the world is still being set up.
 func (w *World) applyEcon() {
 	w.ActionDur = time.Duration(w.Econ.ActionMillis() * float64(w.Unit) / 100)
 	w.MaxDrones = w.Econ.DroneCap()
@@ -281,6 +283,7 @@ func (w *World) Credits() float64 {
 // ---------- background life of the colony ----------
 
 type econEvent struct {
+	Stats        *runStats          `json:"stats,omitempty"`
 	Rank         econ.RankProgress  `json:"rank"`
 	Translations [][2]string        `json:"translations,omitempty"`
 	Layers       int                `json:"layers,omitempty"`
@@ -306,6 +309,9 @@ type contractView struct {
 }
 
 func (w *World) emitRaw(v econEvent) {
+	if v.State != nil {
+		v.Stats = w.statsSnapshot()
+	}
 	w.advanceRank()
 	v.Rank = w.Econ.RankProgress()
 	v.Translations = takeMessages()
@@ -341,11 +347,7 @@ func (w *World) RunColony(commands io.Reader) {
 	signal.Notify(sig, syscall.SIGTERM, os.Interrupt)
 	go func() {
 		<-sig
-		w.mu.Lock()
-		w.clock()
-		w.econSnapshot("state", say("المستعمرة اتحفظت", "Colony saved"), true, true)
-		w.done = true
-		w.exit(0)
+		w.colonyShutdown()
 	}()
 }
 
@@ -364,6 +366,7 @@ func (w *World) colonyTicker() {
 		w.Econ.Recover(every)
 		w.growVeins()
 		w.checkContract()
+		w.saveShutdown(false)
 		n++
 		w.econSnapshot("econ", "", true, n%3 == 0)
 		w.mu.Unlock()

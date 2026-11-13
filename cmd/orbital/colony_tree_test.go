@@ -34,6 +34,7 @@ func TestColonyTreeFreshVisibilityAndAffordability(t *testing.T) {
 	for _, credits := range []float64{0, 40} {
 		st := econ.New(1)
 		st.Credits = credits
+		st.Inv["moss"] = 5
 		nodes := treeForLang(st, "en")
 		if len(nodes) != len(econ.Tree) {
 			t.Fatalf("got %d nodes, want %d", len(nodes), len(econ.Tree))
@@ -132,13 +133,14 @@ func TestColonyTreeBuildingsUseLiveCostsAndPrerequisiteLevels(t *testing.T) {
 
 func TestColonyTreeOwnedUpgradeCostsAndMax(t *testing.T) {
 	st := econ.New(1)
-	upgrade := econ.Find("engine")
+	upgrade := econ.Find("field")
 	st.Levels[upgrade.ID] = 1
+	st.Inv["moss"] = 100
 	cost, _, _ := st.Status(upgrade)
 	for _, credits := range []float64{cost.Credits - 1, cost.Credits} {
 		st.Credits = credits
 		node := colonyTreeNode(t, treeForLang(st, "en"), upgrade.ID)
-		if node.State != "owned" || len(node.Checks) != 1 || node.Checks[0].Kind != "cost" || treeChecksPass(node) != (credits >= cost.Credits) {
+		if node.State != "owned" || len(node.Checks) != 2 || node.Checks[0].Kind != "cost" || treeChecksPass(node) != (credits >= cost.Credits) {
 			t.Fatalf("repeat upgrade: %+v", node)
 		}
 	}
@@ -172,7 +174,7 @@ func TestColonyTreeLocalization(t *testing.T) {
 		if composter.Checks[2].Label != tr(lang, "100 كريدت", "100 credits") || composter.Checks[3].Label != tr(lang, "5 الطحالب", "5 Moss") {
 			t.Errorf("%s: building cost localization: %+v", lang, composter)
 		}
-		for _, good := range []struct{ id, ar, en string }{{"kiln", "السيليكا", "Silica"}, {"refinery", "الكتلة الحيوية", "Biomass"}, {"lab", "الدائرة الإلكترونية", "Circuit"}} {
+		for _, good := range []struct{ id, ar, en string }{{"kiln", "السيليكا", "Silica"}, {"refinery", "المياه", "Water"}, {"lab", "الكريستال", "Crystal"}} {
 			checks := treeCostChecks(st, econ.Find(good.id).CostAt(0), lang)
 			if got := checks[len(checks)-1].Label; got != "5 "+tr(lang, good.ar, good.en) {
 				t.Errorf("%s: %s cost = %s", lang, good.id, got)
@@ -189,6 +191,7 @@ func TestColonyTreeLocalization(t *testing.T) {
 func TestColonyTreeSummaryAndPurchaseResponse(t *testing.T) {
 	s := testColony(t)
 	s.colony.state.Credits = 100
+	s.colony.state.Inv["moss"] = 100
 	for _, lang := range []string{"ar", "en"} {
 		response := httptest.NewRecorder()
 		request := httptest.NewRequest("GET", "/api/colony", nil)

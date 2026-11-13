@@ -81,6 +81,9 @@ func TestRankBlockedPurchasePreservesPossessionsAndExplainsBothLanguages(t *test
 			t.Fatalf("%s: blocked purchase changed possessions: %+v, %v", lang, s, err)
 		}
 		s.Rank = 2
+		for good, n := range cost.Goods {
+			s.Inv[good] = n
+		}
 		if err := s.Buy(u.ID); err != nil || s.Level(u.ID) != 6 || math.Abs(s.Credits-(1e6-cost.Credits)) > 1e-9 {
 			t.Fatalf("%s: eligible purchase failed: %v", lang, err)
 		}

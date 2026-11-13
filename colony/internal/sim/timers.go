@@ -139,6 +139,12 @@ func (w *World) DeepScan(ctx context.Context, id int) (int, error) {
 		select {}
 	}
 	w.clock()
+	if w.Econ != nil {
+		w.advanceProduction(w.Tick)
+		if blocked := w.droneFailure(d, "scan"); blocked != nil {
+			err = blocked
+		}
+	}
 	ev := Event{Op: "scan", T: w.Tick, D: id, X: p.X, Y: p.Y, Z: w.layer(id), OK: err == nil && ok}
 	purity := 0
 	switch {

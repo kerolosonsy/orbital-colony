@@ -111,7 +111,7 @@ func (w *World) tileChanged(id, x, y, z int) {
 func (w *World) Dig(id int, dir Direction) bool { return w.TryDig(id, dir) == nil }
 
 func (w *World) TryDig(id int, dir Direction) (err error) {
-	w.act(id, "dig", func() (bool, string, bool) {
+	_, blocked := w.actErr(id, "dig", func() (bool, string, bool) {
 		if m := w.gate("api.dig"); m != "" {
 			err = ErrLocked
 			return false, m, false
@@ -138,13 +138,16 @@ func (w *World) TryDig(id int, dir Direction) (err error) {
 		w.tileChanged(id, x, y, w.Z)
 		return true, "", false
 	})
+	if blocked != nil {
+		err = blocked
+	}
 	return err
 }
 
 func (w *World) DigDown(id int) bool { return w.TryDigDown(id) == nil }
 
 func (w *World) TryDigDown(id int) (err error) {
-	w.act(id, "digdown", func() (bool, string, bool) {
+	_, blocked := w.actErr(id, "digdown", func() (bool, string, bool) {
 		if m := w.gate("api.dig"); m != "" {
 			err = ErrLocked
 			return false, m, false
@@ -175,6 +178,9 @@ func (w *World) TryDigDown(id int) (err error) {
 		w.tileChanged(id, w.X, w.Y, w.Z+1)
 		return true, "", true
 	})
+	if blocked != nil {
+		err = blocked
+	}
 	return err
 }
 
