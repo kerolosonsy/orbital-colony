@@ -382,12 +382,12 @@ func (s *State) ProgressPair(tick int64) (done, failed bool, why [2]string) {
 	if IsControlContract(c.ID) {
 		return s.controlProgress()
 	}
+	if s.IsNeighborContract() {
+		return s.NeighborProgressPair(tick)
+	}
 	g := c.Goal
 	if g.Submit != "" {
 		return s.submissionProgress(c, r, tick)
-	}
-	if s.IsNeighborContract() {
-		return s.NeighborProgressPair(tick)
 	}
 	if c.ID == CleanStopContract {
 		return r.Stopped && r.CargoLost == 0, r.Stopped && r.CargoLost > 0, [2]string{"مستني إغلاق من غير خسارة حمولة", "Waiting for shutdown without cargo loss"}

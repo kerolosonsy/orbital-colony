@@ -534,3 +534,32 @@ func TestNewDroneRentDoesNotApplyBeforeItsLaunch(t *testing.T) {
 		t.Fatal("launched drone did not pay a minute of rent")
 	}
 }
+
+func TestPowerNightSnapshotPrecedesGeneratorModeChange(t *testing.T) {
+	w, trace := e2World()
+	generator := powerBuilding(w, "generator", 0)
+	generator.In["fuel"] = 1
+	w.Tick = 599
+	w.advanceProduction(w.Tick)
+	trace.Reset()
+	w.Tick = 600
+	w.advanceProduction(w.Tick)
+	if err := w.BuildingSetMode(0, Point{}, "burner"); err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, line := range bytes.Split(bytes.TrimSpace(trace.Bytes()), []byte{'\n'}) {
+		var event struct {
+			State *econ.State
+		}
+		if err := json.Unmarshal(line, &event); err != nil {
+			t.Fatal(err)
+		}
+		if event.State != nil && event.State.Tick == 600 && !event.State.Power.Day && event.State.Power.Supply == 7 {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("night baseline was lost before the next periodic snapshot", trace.String())
+	}
+}

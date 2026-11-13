@@ -60,6 +60,7 @@ func controlEnv(env []string) []string {
 func (c *colonyGame) startControlProcess(cmd *exec.Cmd) error {
 	cmd.Env = controlEnv(cmd.Env)
 	c.mu.Lock()
+	c.control = nil
 	owned := c.state.Has("sys.control")
 	contract, seed := c.state.Active, c.state.Seed
 	warehouse, metrics := c.state.Has("sys.warehouse"), c.state.Has("sys.metrics")
@@ -119,7 +120,6 @@ func (c *colonyGame) waitControlRun(active *colonyRun, dir string, readers *sync
 		waitErr := current.cmd.Wait()
 		_ = killProcessTree(current.cmd)
 		readers.Wait()
-		current.commands.Close()
 		c.mu.Lock()
 		if control == nil || !control.restart || control.stopping {
 			c.mu.Unlock()
@@ -152,11 +152,11 @@ func (c *colonyGame) restartControlProcess(previous *colonyRun, dir string, read
 	if err := os.WriteFile(filepath.Join(dir, "colony.json"), body, 0o600); err != nil {
 		return nil, err
 	}
-	cmd := exec.Command(previous.cmd.Path)
+	cmd := exec.CommandContext(context.Background(), previous.cmd.Path)
 	configureProcess(cmd)
 	cmd.Dir, cmd.Env = dir, previous.cmd.Env
-	pipes := make([]*os.File, 0, 8)
-	for range 4 {
+	pipes := make([]*os.File, 0, 6)
+	for range 3 {
 		r, w, err := os.Pipe()
 		if err != nil {
 			for _, file := range pipes {
@@ -166,25 +166,25 @@ func (c *colonyGame) restartControlProcess(previous *colonyRun, dir string, read
 		}
 		pipes = append(pipes, r, w)
 	}
-	cmd.ExtraFiles = []*os.File{pipes[1], pipes[2]}
-	cmd.Stdout, cmd.Stderr = pipes[5], pipes[7]
+	cmd.ExtraFiles = []*os.File{pipes[1], previous.commandsReader}
+	cmd.Stdout, cmd.Stderr = pipes[3], pipes[5]
 	if err := cmd.Start(); err != nil {
 		for _, file := range pipes {
 			file.Close()
 		}
 		return nil, err
 	}
-	for _, i := range []int{1, 2, 5, 7} {
+	for _, i := range []int{1, 3, 5} {
 		pipes[i].Close()
 	}
 	for _, stream := range []struct {
 		file *os.File
 		op   string
-	}{{pipes[0], ""}, {pipes[4], "stdout"}, {pipes[6], "stderr"}} {
+	}{{pipes[0], ""}, {pipes[2], "stdout"}, {pipes[4], "stderr"}} {
 		readers.Add(1)
 		go func(file *os.File, op string) { defer readers.Done(); defer file.Close(); c.readLines(file, op) }(stream.file, stream.op)
 	}
-	return &colonyRun{cmd: cmd, commands: pipes[3], done: previous.done, details: previous.details}, nil
+	return &colonyRun{am: previous.am, cmd: cmd, commands: previous.commands, commandsReader: previous.commandsReader, done: previous.done, details: previous.details}, nil
 }
 
 func (c *colonyGame) observeControlEvent(line string) {

@@ -255,6 +255,7 @@ func (w *World) BuildingRepair(id int, p Point) error {
 }
 
 func (w *World) advanceProduction(target int) {
+	dayChanged := econ.Daylight(int64(w.lastProductionTick)) != econ.Daylight(int64(target))
 	for tick := w.lastProductionTick + 1; tick <= target; tick++ {
 		w.archiveTick(tick)
 		w.advanceColonyEvents(tick)
@@ -262,4 +263,8 @@ func (w *World) advanceProduction(target int) {
 	}
 	w.lastProductionTick = target
 	w.restoreIce(target)
+	// A generator mode change can hide a daylight transition between periodic saves.
+	if dayChanged {
+		w.emitEconSnapshot("econ", "", true, true)
+	}
 }

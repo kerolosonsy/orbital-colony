@@ -327,6 +327,10 @@ func (w *World) econSnapshot(op, msg string, ok, full bool) {
 	w.flushArchive()
 	w.advanceProduction(w.Tick)
 	w.checkRank()
+	w.emitEconSnapshot(op, msg, ok, full)
+}
+
+func (w *World) emitEconSnapshot(op, msg string, ok, full bool) {
 	ev := econEvent{Op: op, T: w.Tick, OK: ok, Msg: msg, Credits: w.Econ.Credits, Prices: w.Econ.Prices(), Inv: w.Econ.Inv}
 	if w.Econ.Active != "" {
 		_, _, why := w.Econ.ProgressPair(int64(w.Tick))
@@ -461,7 +465,19 @@ func (w *World) growVeins() {
 func (w *World) colonyCommands(r io.Reader) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
-		if w.controlSystemCommand(sc.Bytes()) || w.neighborCommand(sc.Bytes()) || w.systemCommand(sc.Bytes()) {
+		var fields map[string]json.RawMessage
+		if json.Unmarshal(sc.Bytes(), &fields) != nil {
+			continue
+		}
+		switch {
+		case fields["controlResult"] != nil || fields["controlSnapshot"] != nil:
+			w.controlSystemCommand(sc.Bytes())
+			continue
+		case fields["receipt"] != nil:
+			w.neighborCommand(sc.Bytes())
+			continue
+		case fields["id"] != nil:
+			w.systemCommand(sc.Bytes())
 			continue
 		}
 		var cmd struct{ Buy string }

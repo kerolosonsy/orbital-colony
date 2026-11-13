@@ -325,17 +325,6 @@ func (c *colonyGame) prepareNeighbor(cmd *exec.Cmd, commands *os.File) error {
 	return nil
 }
 
-func (c *colonyGame) startNeighborProcess(cmd *exec.Cmd, commands *os.File) error {
-	if err := c.prepareNeighbor(cmd, commands); err != nil {
-		return err
-	}
-	if err := cmd.Start(); err != nil {
-		c.stopNeighbor()
-		return err
-	}
-	return nil
-}
-
 func (c *colonyGame) stopNeighbor() {
 	c.mu.Lock()
 	n := c.neighbor

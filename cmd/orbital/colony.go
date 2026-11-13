@@ -27,8 +27,10 @@ type colonyRun struct {
 	stopSent bool
 	cmd      *exec.Cmd
 	commands *os.File
-	done     chan struct{}
-	details  *colonyRunDetails
+	// Keep fd 4 open in the parent so sidecar commands survive child restarts.
+	commandsReader *os.File
+	done           chan struct{}
+	details        *colonyRunDetails
 }
 
 type colonyGame struct {
@@ -267,8 +269,12 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		eventsReader.Close()
 		return err
 	}
-	defer commandsReader.Close()
 	cmd := exec.CommandContext(context.Background(), filepath.Join(dir, "prog"))
+	defer func() {
+		if cmd.Process == nil {
+			commandsReader.Close()
+		}
+	}()
 	configureProcess(cmd)
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(), "ORBITAL_LANG="+lang, "ORBITAL_LEVEL=colony", "ORBITAL_COLONY="+savePath, "ORBITAL_EVENTS_FD=3", "ORBITAL_CMD_FD=4")
@@ -313,7 +319,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		stderrReader.Close()
 		return err
 	}
-	active := &colonyRun{am: archiveMarket, cmd: cmd, commands: commandsWriter, done: make(chan struct{}), details: details}
+	active := &colonyRun{am: archiveMarket, cmd: cmd, commands: commandsWriter, commandsReader: commandsReader, done: make(chan struct{}), details: details}
 	c.mu.Lock()
 	c.active = active
 	c.beginRun(details)
@@ -332,9 +338,8 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		waitErr, exitCode := c.waitControlRun(active, dir, &readers)
 		active.am.close()
 		c.stopNeighbor()
-		_ = killProcessTree(cmd) // Descendants must not keep the stream pipes open.
-		readers.Wait()
 		commandsWriter.Close()
+		commandsReader.Close()
 		c.mu.Lock()
 		archiveEvent := c.finishArchiveMarket(active)
 		contractEvent := c.finishColonyEvents(lang)
