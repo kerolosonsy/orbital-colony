@@ -108,6 +108,7 @@ func main() {
 	mux.HandleFunc("POST /api/colony/stop", s.colonyStop)
 	mux.HandleFunc("POST /api/colony/buy", s.colonyBuy)
 	mux.HandleFunc("POST /api/colony/claim", s.colonyClaim)
+	mux.HandleFunc("POST /api/colony/contract", s.colonyContract)
 	mux.HandleFunc("GET /api/colony/stream", s.colonyStream)
 
 	log.Printf("🚀 Orbital Colony: http://%s", *addr)

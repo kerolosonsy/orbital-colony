@@ -83,9 +83,56 @@ func (c *colonyGame) persist() error {
 	return nil
 }
 
-func (c *colonyGame) summary(lang string) map[string]any {
+func (c *colonyGame) summary(lang string, done map[int]bool) map[string]any {
 	owned, total := c.state.TotalLevels()
-	return map[string]any{"running": c.active != nil, "state": c.state, "shop": shopForLang(c.state, lang), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
+	return map[string]any{"running": c.active != nil, "state": c.state, "shop": shopForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
+}
+
+// chaptersDone reads which chapters the profile finished: every mission
+// with at least one star, the same rule the panel uses for lesson rewards.
+func (s *server) chaptersDone(r *http.Request) map[int]bool {
+	done := map[int]bool{}
+	if s.profiles == nil {
+		return done
+	}
+	save, err := readProgress(filepath.Join(s.profiles.dir(requestProfile(r)), "progress.json"))
+	if err != nil {
+		return done
+	}
+	finished := completed(save)
+	for _, ch := range levels.Chapters {
+		n, all := 0, true
+		for _, l := range levels.All {
+			if l.Chapter == ch.N {
+				n++
+				all = all && finished[l.ID]
+			}
+		}
+		done[ch.N] = n > 0 && all
+	}
+	return done
+}
+
+// contractRequirements is checkRequirements with alternatives: "a|b" is met
+// when either key is.
+func contractRequirements(code string, reqs []string, lang string) []string {
+	var missing []string
+	for _, r := range reqs {
+		var first []string
+		met := false
+		for _, alt := range strings.Split(r, "|") {
+			m := checkRequirements(code, []string{alt}, lang)
+			if len(m) == 0 {
+				met = true
+				break
+			}
+			first = append(first, m...)
+		}
+		if !met {
+			missing = append(missing, strings.Join(first, tr(lang, " أو ", " or ")))
+		}
+	}
+	return missing
 }
 
 func (c *colonyGame) subscribe() (chan string, func()) {
@@ -254,7 +301,7 @@ func (s *server) colonyStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	writeJSON(w, c.summary(requestLang(r)))
+	writeJSON(w, c.summary(requestLang(r), s.chaptersDone(r)))
 }
 
 func (s *server) colonyRun(w http.ResponseWriter, r *http.Request) {
@@ -273,6 +320,15 @@ func (s *server) colonyRun(w http.ResponseWriter, r *http.Request) {
 	}
 	c.ops.Lock()
 	defer c.ops.Unlock()
+	c.mu.Lock()
+	contract, _ := c.state.ActiveContract()
+	c.mu.Unlock()
+	if contract != nil {
+		if missing := contractRequirements(req.Code, contract.Requires, requestLang(r)); len(missing) > 0 {
+			writeJSON(w, map[string]any{"phase": "requires", "missing": missing, "contract": contract.ID})
+			return
+		}
+	}
 	s.stopColonies()
 	dir, err := os.MkdirTemp("", "orbital-colony-*")
 	if err != nil {
@@ -412,6 +468,48 @@ func (s *server) colonyClaim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, map[string]any{"ok": err == nil, "error": message, "reward": reward, "state": c.state})
+}
+
+// colonyContract accepts a contract, or cancels the active one when id is
+// empty. Only while the colony is stopped, like claims.
+func (s *server) colonyContract(w http.ResponseWriter, r *http.Request) {
+	lang := requestLang(r)
+	var req struct {
+		ID string `json:"id"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req); err != nil {
+		requestError(w, r, "bad request", 400)
+		return
+	}
+	done := s.chaptersDone(r)
+	s.colonyOps.Lock()
+	defer s.colonyOps.Unlock()
+	c := s.requestGame(w, r)
+	if c == nil {
+		return
+	}
+	c.ops.Lock()
+	defer c.ops.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.active != nil {
+		requestError(w, r, "Stop the colony first", http.StatusConflict)
+		return
+	}
+	var err error
+	if contract := econ.FindContract(req.ID); req.ID != "" && contract != nil && !done[contract.Chapter] {
+		err = errors.New(tr(lang, fmt.Sprintf("خلّص الفصل %d الأول", contract.Chapter), fmt.Sprintf("Finish chapter %d first", contract.Chapter)))
+	} else {
+		err = c.state.Accept(req.ID)
+	}
+	message := ""
+	if err != nil {
+		message = economyText(lang, err.Error())
+	} else if err = c.persist(); err != nil {
+		requestError(w, r, err.Error(), 500)
+		return
+	}
+	writeJSON(w, map[string]any{"ok": err == nil, "error": message, "state": c.state, "contracts": contractsForLang(c.state, lang, done)})
 }
 
 func (s *server) colonyStream(w http.ResponseWriter, r *http.Request) {
