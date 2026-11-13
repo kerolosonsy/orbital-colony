@@ -518,7 +518,7 @@ func (s *State) Settle(tick int64) (Reward, error) {
 	for _, id := range c.Reward.Grants {
 		if needsBlueprint(id) {
 			s.Blueprints[id] = true
-		} else if u := Find(id); u != nil && s.Levels[id] < u.Max {
+		} else if u := Find(id); u != nil && (u.Max == 0 || s.Levels[id] < u.Max) {
 			s.Levels[id]++
 			if id == "field" {
 				s.resize(FieldSize(s.Levels[id]))

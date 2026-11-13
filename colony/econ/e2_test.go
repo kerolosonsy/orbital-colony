@@ -155,7 +155,7 @@ func TestBuildingCatalogPurchasesMatchTree(t *testing.T) {
 		t.Run(node.ID, func(t *testing.T) {
 			s := New(1)
 			u := Find(node.ID)
-			if u == nil || u.GroupEn != "Buildings" || u.Max <= 1 {
+			if u == nil || u.GroupEn != "Buildings" || u.Max != 0 {
 				t.Fatalf("building upgrade missing: %+v", u)
 			}
 			cost := u.CostAt(0)
@@ -188,12 +188,12 @@ func TestBuildingCatalogPurchasesMatchTree(t *testing.T) {
 					t.Fatal("purchase did not spend goods")
 				}
 			}
-			s.Levels[node.ID], s.Credits = u.Max, 1e12
-			for good := range cost.Goods {
+			s.Levels[node.ID], s.Credits, s.Rank = 8, 1e12, 2
+			for good := range u.CostAt(8).Goods {
 				s.Inv[good] = 1e12
 			}
-			if err := s.Buy(node.ID); err == nil {
-				t.Fatal("building ignored its level cap")
+			if err := s.Buy(node.ID); err != nil || s.Level(node.ID) != 9 {
+				t.Fatalf("building stopped at its former level cap: %v", err)
 			}
 		})
 	}

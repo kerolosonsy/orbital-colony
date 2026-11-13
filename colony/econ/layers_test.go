@@ -74,6 +74,7 @@ func TestColonyDrillPurchaseAndOreMarket(t *testing.T) {
 		if s.Prices()[ore] == 0 || s.Sell(ore, 1) <= 0 || s.Inv[ore] != 0 {
 			t.Fatalf("ore %s cannot be sold", ore)
 		}
+		s.Inv[ore] = 5
 		if err := s.Buy("yield." + ore); err != nil || s.YieldMult(ore) <= 1 {
 			t.Fatalf("ore %s yield upgrade failed: %v", ore, err)
 		}

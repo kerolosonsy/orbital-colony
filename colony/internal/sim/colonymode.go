@@ -282,6 +282,7 @@ func (w *World) Credits() float64 {
 // ---------- background life of the colony ----------
 
 type econEvent struct {
+	Stats        *runStats          `json:"stats,omitempty"`
 	Rank         econ.RankProgress  `json:"rank"`
 	Translations [][2]string        `json:"translations,omitempty"`
 	Layers       int                `json:"layers,omitempty"`
@@ -307,6 +308,9 @@ type contractView struct {
 }
 
 func (w *World) emitRaw(v econEvent) {
+	if v.State != nil {
+		v.Stats = w.statsSnapshot()
+	}
 	w.advanceRank()
 	v.Rank = w.Econ.RankProgress()
 	v.Translations = takeMessages()

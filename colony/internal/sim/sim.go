@@ -153,6 +153,12 @@ type tileView struct {
 // Wire format: tile.b is the building kind, omitted on tiles without a building.
 // Econ snapshots carry rank:{level,kind,target,value,filled}; state.rank is the earned level.
 // filled is running time / econ.Window, capped at 1; kind names the next goal.
+// Full econ snapshots (all events carrying state) include stats:{drones:[{id,work,move,
+// wait,failed,idleMoves}],topFail,ticks}. work counts non-move/non-wait commands;
+// move counts cells traveled, wait counts action ticks, ticks excludes earlier runs.
+// topFail is empty without failures; ties use lexical op order. Idle moves are
+// successful moves followed by another move attempt without successful work.
+// Shop and tree upgrades use max:0 for unlimited levels, never a maxed check.
 // op:"rank" carries ok:true, a localized msg and rank after each promotion.
 // op:"building" carries t, x, y and building:{kind,recipe,in,out,progress,wear,level,
 // powered,enabled,priority,mode}; mode is present only on generators.
@@ -255,6 +261,7 @@ type World struct {
 	shutdown       chan struct{}
 	shuttingDown   bool
 	shutdownClosed bool
+	stats          map[int]*droneCounters
 
 	lastRankTick int
 
@@ -531,12 +538,12 @@ func (w *World) actErr(id int, op string, f func() (ok bool, msg string, changed
 		d.Battery = max(0, d.Battery-1)
 	}
 	blocked := w.droneFailure(d, op)
-	ok, msg, changed := false, "", false
-	if blocked == nil {
-		ok, msg, changed = f()
-	} else {
-		msg = blocked.Error()
+	if blocked != nil {
+		blockedMsg := blocked.Error()
+		f = func() (bool, string, bool) { return false, blockedMsg, false }
 	}
+	f = w.trackAction(d, op, f)
+	ok, msg, changed := f()
 	w.actingDrone = nil
 	if w.Econ != nil {
 		w.Econ.RecordCommand(id, op == "move" && ok)

@@ -54,7 +54,10 @@ func addResourceResearch() {
 		case "uranium":
 			parentLevel = 5
 		}
-		addResearchNode(Node{ID: "research.yield." + good, Branch: branch, Name: "إنتاج متقدم: " + cropNames[good], NameEn: "Advanced Yield: " + cropNamesEn[good], Desc: "حصاد المورد ده يزيد 15% لكل مستوى.", DescEn: "This resource's gathered yield increases by 15% per level.", After: []Prereq{{parent, min(parentLevel, Find(parent).Max)}}, Chapter: chapter})
+		if u := Find(parent); u.Max > 0 {
+			parentLevel = min(parentLevel, u.Max)
+		}
+		addResearchNode(Node{ID: "research.yield." + good, Branch: branch, Name: "إنتاج متقدم: " + cropNames[good], NameEn: "Advanced Yield: " + cropNamesEn[good], Desc: "حصاد المورد ده يزيد 15% لكل مستوى.", DescEn: "This resource's gathered yield increases by 15% per level.", After: []Prereq{{parent, parentLevel}}, Chapter: chapter})
 	}
 	for _, good := range []string{"moss", "lichen", "glowcap", "reed"} {
 		addResearchNode(Node{ID: "research.grow." + good, Branch: "الزراعة", Name: "نمو متقدم: " + cropNames[good], NameEn: "Advanced Growth: " + cropNamesEn[good], Desc: "معدل نمو المحصول ده يزيد 10% لكل مستوى.", DescEn: "This crop's growth rate increases by 10% per level.", After: []Prereq{{"grow." + good, 2}}, Chapter: 6})
