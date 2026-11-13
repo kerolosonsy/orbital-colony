@@ -87,8 +87,8 @@ func (w *World) Spawn() int {
 		select {}
 	}
 	if w.Econ != nil {
-		w.MaxDrones = w.Econ.Drones()
-		if !w.Econ.Has("api.spawn") {
+		w.MaxDrones = w.Econ.DroneCap()
+		if !w.Econ.Usable("api.spawn") {
 			w.emit(Event{Op: "spawn", T: w.Tick, OK: false, Msg: say("🔒 colony.Spawn محتاجة «رخصة الهانجر» من المتجر", "🔒 colony.Spawn needs a Hangar License from the shop")})
 			return -1
 		}
