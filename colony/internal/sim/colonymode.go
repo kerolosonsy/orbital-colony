@@ -455,11 +455,13 @@ func (w *World) growVeins() {
 }
 
 // colonyCommands applies purchases the player makes in the game while the
-// program runs. Each line is {"buy": "<upgrade id>"}.
+// program runs. Control lines use controlResult/controlSnapshot; neighbour
+// transfers use receipt; market transfers use id (with take/credit/market).
+// Purchases use {"buy": "<upgrade id>"}.
 func (w *World) colonyCommands(r io.Reader) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
-		if w.neighborCommand(sc.Bytes()) || w.systemCommand(sc.Bytes()) {
+		if w.controlSystemCommand(sc.Bytes()) || w.neighborCommand(sc.Bytes()) || w.systemCommand(sc.Bytes()) {
 			continue
 		}
 		var cmd struct{ Buy string }

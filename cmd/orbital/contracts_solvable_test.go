@@ -112,6 +112,9 @@ func playContract(t *testing.T, r *runner, c *econ.Contract, project colonyProje
 	if c.ID == "n31-trade-route" || c.ID == "n31-bad-line" {
 		return playNeighborContract(t, r, c, project)
 	}
+	if econ.IsControlContract(c.ID) {
+		return playControlContract(t, r, c, project)
+	}
 	t.Helper()
 	if archiveMarketContract(c.ID) {
 		return playArchiveMarketContract(t, r, c, project)

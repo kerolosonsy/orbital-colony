@@ -47,7 +47,7 @@ func (ws *workspace) openColony(level *levels.Level, files map[string]string, la
 
 func (ws *workspace) colonyModule(dir string) error {
 	colonyDir := filepath.Clean(filepath.Join(ws.root, ws.colonyRel))
-	files, err := moduleFiles(colonyDir, levels.Colony)
+	files, err := moduleFiles(colonyDir, colonyControlLevel())
 	if err != nil {
 		return err
 	}

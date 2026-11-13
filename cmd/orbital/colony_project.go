@@ -81,7 +81,7 @@ func readColonyProject(w http.ResponseWriter, r *http.Request) (*colonyProject, 
 	}
 	for _, name := range projectNames(project.Files) {
 		if strings.HasSuffix(name, ".go") {
-			if missing := restrictedImports(project.Files[name], &levels.Level{Kind: "lab"}, requestLang(r)); len(missing) > 0 {
+			if missing := restrictedImports(project.Files[name], &levels.Level{Kind: "lab", Deps: colonyControlLevel().Deps}, requestLang(r)); len(missing) > 0 {
 				writeJSON(w, rejectedImports(missing, requestLang(r)))
 				return nil, false
 			}
@@ -126,7 +126,7 @@ func (s *server) colonyVet(w http.ResponseWriter, r *http.Request) { s.checkColo
 
 func (s *server) checkColonyProject(w http.ResponseWriter, r *http.Request, command string) {
 	project, ok := readColonyProject(w, r)
-	if !ok || s.requestGame(w, r) == nil {
+	if !ok || !s.checkControlImports(w, r, project) {
 		return
 	}
 	ctx := withLang(r.Context(), requestLang(r))
@@ -134,7 +134,7 @@ func (s *server) checkColonyProject(w http.ResponseWriter, r *http.Request, comm
 	var output string
 	var err error
 	if command == "test" {
-		passed, output, err = s.run.goTest(ctx, levels.Colony, project.Files, "./...")
+		passed, output, err = s.run.goTest(ctx, colonyControlLevel(), project.Files, "./...")
 	} else {
 		passed, output, err = s.run.vetColonyProject(ctx, project.Files)
 	}
@@ -165,7 +165,7 @@ func (r *runner) colonyProjectDir(files map[string]string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err = r.writeModule(dir, levels.Colony); err == nil {
+	if err = r.writeModule(dir, colonyControlLevel()); err == nil {
 		err = writeProjectFiles(dir, files)
 	}
 	if err != nil {
@@ -177,7 +177,7 @@ func (r *runner) colonyProjectDir(files map[string]string) (string, error) {
 
 func (s *server) runColonyProject(w http.ResponseWriter, r *http.Request) {
 	project, ok := readColonyProject(w, r)
-	if !ok {
+	if !ok || !s.checkControlImports(w, r, project) {
 		return
 	}
 	s.colonyOps.Lock()
@@ -223,7 +223,7 @@ func (s *server) checkColonyContract(w http.ResponseWriter, r *http.Request, c *
 	c.mu.Unlock()
 	lang := requestLang(r)
 	if contract != nil {
-		missing := projectRequirements(project.Files, contract.Requires, lang)
+		missing := append(projectRequirements(project.Files, contract.Requires, lang), c.controlRequirements(lang)...)
 		if contract.ID == "c12-one-ledger" && !project.Race {
 			missing = append(missing, tr(lang, "شغّل فحص السباقات للعقد ده (race:true).", "Enable race mode for this contract (race:true)."))
 		}
