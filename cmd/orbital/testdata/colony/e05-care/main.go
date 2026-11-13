@@ -33,6 +33,10 @@ func main() {
 // tend harvests a ripe plant and replants; it reports only unexpected errors.
 func tend() error {
 	_, err := colony.TryHarvest()
+	if errors.Is(err, colony.ErrFault) {
+		colony.Repair()
+		return tend()
+	}
 	switch {
 	case errors.Is(err, colony.ErrNotRipe):
 		return err
@@ -48,15 +52,26 @@ func tend() error {
 func goTo(x, y int) {
 	cx, cy := colony.Position()
 	for ; cx < x; cx++ {
-		colony.Move(colony.East)
+		for !colony.Move(colony.East) {
+			colony.Repair()
+		}
 	}
 	for ; cx > x; cx-- {
-		colony.Move(colony.West)
+		for !colony.Move(colony.West) {
+			colony.Repair()
+		}
 	}
 	for ; cy < y; cy++ {
-		colony.Move(colony.North)
+		for !colony.Move(colony.North) {
+			colony.Repair()
+		}
 	}
 	for ; cy > y; cy-- {
-		colony.Move(colony.South)
+		for !colony.Move(colony.South) {
+			colony.Repair()
+		}
+	}
+	if colony.Fault() != nil {
+		colony.Repair()
 	}
 }

@@ -130,18 +130,21 @@ func (w *World) placeBuilding(kind string) error {
 }
 
 func (w *World) Build(id int, kind string) (err error) {
-	w.act(id, "build", func() (bool, string, bool) {
+	_, blocked := w.actErr(id, "build", func() (bool, string, bool) {
 		err = w.placeBuilding(kind)
 		if err != nil {
 			return false, buildingMessage(err), false
 		}
 		return true, "", true
 	})
+	if blocked != nil {
+		err = blocked
+	}
 	return err
 }
 
 func (w *World) buildingAction(id int, p Point, op string, f func(*econ.Building) error) (err error) {
-	w.act(id, op, func() (bool, string, bool) {
+	_, blocked := w.actErr(id, op, func() (bool, string, bool) {
 		b := w.buildingAt(p.X, p.Y)
 		if b == nil {
 			err = econ.ErrNotHere
@@ -154,6 +157,9 @@ func (w *World) buildingAction(id int, p Point, op string, f func(*econ.Building
 		w.syncInv()
 		return true, "", false
 	})
+	if blocked != nil {
+		err = blocked
+	}
 	return err
 }
 
@@ -250,6 +256,7 @@ func (w *World) BuildingRepair(id int, p Point) error {
 
 func (w *World) advanceProduction(target int) {
 	for tick := w.lastProductionTick + 1; tick <= target; tick++ {
+		w.advanceColonyEvents(tick)
 		w.productionStep(tick)
 	}
 	w.lastProductionTick = target

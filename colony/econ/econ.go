@@ -36,9 +36,12 @@ type Tile struct {
 
 // State is everything that persists between runs.
 type State struct {
-	Rank       int        `json:"rank"`
-	RankWindow RankWindow `json:"rankWindow"`
-	RP         float64    `json:"rp"`
+	Weather    Weather      `json:"weather"`
+	Rush       *RushOrder   `json:"rush,omitempty"`
+	Shock      *MarketShock `json:"shock,omitempty"`
+	Rank       int          `json:"rank"`
+	RankWindow RankWindow   `json:"rankWindow"`
+	RP         float64      `json:"rp"`
 
 	Depth    int                `json:"depth,omitempty"`
 	Under    [][]Tile           `json:"under,omitempty"`
@@ -110,6 +113,7 @@ func (s *State) Normalize() {
 	if s.Version < 3 {
 		s.migrateV3()
 	}
+	s.normalizeEvents()
 	s.normalizeInfrastructure()
 }
 
@@ -324,6 +328,9 @@ func (s *State) Price(g string) float64 {
 	if d == 0 {
 		d = 1
 	}
+	if s.Shock != nil && s.Shock.Good == g && s.Tick < s.Shock.Until {
+		d = s.Shock.Factor
+	}
 	return PriceV3[g] * (1 + 0.1*float64(s.Level("market.contracts"))) * s.MarketResearchMult(g) * d
 }
 
@@ -337,7 +344,7 @@ func (s *State) Sell(g string, n float64) float64 {
 	earned := 0.0
 	for n > 0 {
 		chunk := math.Min(n, 1)
-		earned += chunk * s.Price(g)
+		earned += s.rushPayment(g, chunk, s.Price(g))
 		d := s.Demand[g]
 		if d == 0 {
 			d = 1

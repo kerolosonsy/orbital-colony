@@ -8,7 +8,9 @@ import (
 	"orbital/colony/econ"
 )
 
-func (w *World) cargoActive() bool { return w.Econ != nil && len(w.Econ.Buildings) > 0 }
+func (w *World) cargoActive() bool {
+	return w.Econ != nil && (len(w.Econ.Buildings) > 0 || w.Econ.Won("c13-reed-clock"))
+}
 
 func cargoAmount(d *Drone) float64 {
 	total := 0.0
@@ -89,6 +91,7 @@ func (w *World) loadFleet() {
 	w.Drones = nil
 	for _, saved := range w.Econ.Fleet {
 		d := &Drone{ID: len(w.Drones), Battery: saved.Battery, Hold: maps.Clone(saved.Cargo)}
+		d.fault, d.stunnedUntil = saved.Fault, w.Tick+saved.Stunned
 		d.Cargo = cargoUsed(d)
 		w.Drones = append(w.Drones, d)
 	}
@@ -104,7 +107,7 @@ func (w *World) syncInfrastructure() {
 		if hold == nil {
 			hold = map[string]float64{}
 		}
-		st.Fleet = append(st.Fleet, econ.DroneState{ID: d.ID, Battery: d.Battery, Cargo: hold, Cap: st.CargoCapacity()})
+		st.Fleet = append(st.Fleet, econ.DroneState{Fault: d.fault, Stunned: max(0, d.stunnedUntil-w.Tick), ID: d.ID, Battery: d.Battery, Cargo: hold, Cap: st.CargoCapacity()})
 	}
 	st.RefreshStorage()
 	st.Rent = st.RentRate(len(w.Drones))

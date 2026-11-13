@@ -14,6 +14,8 @@ type StorageStatus struct {
 }
 
 type DroneState struct {
+	Fault   bool               `json:"fault,omitempty"`
+	Stunned int                `json:"stunned,omitempty"`
 	ID      int                `json:"id"`
 	Battery int                `json:"battery"`
 	Cargo   map[string]float64 `json:"cargo"`

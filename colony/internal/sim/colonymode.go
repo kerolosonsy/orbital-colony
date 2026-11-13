@@ -48,6 +48,7 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.Tick = w.TickBase
 	w.lastProductionTick = w.TickBase
 	w.loadFleet()
+	w.initColonyEvents()
 	w.lastRankTick = w.TickBase
 	w.loadTiles()
 	w.applyEcon()
@@ -341,11 +342,7 @@ func (w *World) RunColony(commands io.Reader) {
 	signal.Notify(sig, syscall.SIGTERM, os.Interrupt)
 	go func() {
 		<-sig
-		w.mu.Lock()
-		w.clock()
-		w.econSnapshot("state", say("المستعمرة اتحفظت", "Colony saved"), true, true)
-		w.done = true
-		w.exit(0)
+		w.colonyShutdown()
 	}()
 }
 
@@ -364,6 +361,7 @@ func (w *World) colonyTicker() {
 		w.Econ.Recover(every)
 		w.growVeins()
 		w.checkContract()
+		w.saveShutdown(false)
 		n++
 		w.econSnapshot("econ", "", true, n%3 == 0)
 		w.mu.Unlock()

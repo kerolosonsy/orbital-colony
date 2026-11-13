@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -34,7 +35,7 @@ func contractFixture(c *econ.Contract) *econ.State {
 	}
 	st := econ.New(seed)
 	for _, prev := range econ.Contracts {
-		if prev.Chapter >= c.Chapter {
+		if prev.Chapter >= c.Chapter && !(c.ID == econ.CleanStopContract && prev.ID == "c13-reed-clock") {
 			continue
 		}
 		st.Contracts[prev.ID] = &econ.ContractRun{Status: "done", Best: 1, Tries: 1}
@@ -56,9 +57,9 @@ func contractFixture(c *econ.Contract) *econ.State {
 		"c11-dispatch":        {"field": 4, "engine": 7, "veins.rate": 8, "yield.crystal": 4},
 		"c12-one-ledger":      {"field": 5, "engine": 8, "yield.moss": 8, "grow.moss": 3, "hangar": 3},
 		"c13-reed-clock":      {"field": 4, "engine": 8, "yield.reed": 2},
-		"c14-generic-queue":   {"field": 4, "engine": 8, "yield.moss": 6, "yield.glowcap": 4},
-		"c15-shortest-run":    {"field": 4, "engine": 8, "veins.rate": 8, "yield.crystal": 4},
-		"c17-deep-haul":       {"field": 4, "engine": 8, "drill": 2, "yield.geode": 3},
+		"c14-generic-queue":   {"cargo": 8, "field": 4, "engine": 8, "yield.moss": 6, "yield.glowcap": 4},
+		"c15-shortest-run":    {"cargo": 8, "field": 4, "engine": 8, "veins.rate": 8, "yield.crystal": 4},
+		"c17-deep-haul":       {"cargo": 8, "field": 4, "engine": 10, "drill": 2, "yield.geode": 3},
 	}[c.ID]
 	for id, l := range bought {
 		st.Levels[id] = l
@@ -131,6 +132,8 @@ func playContract(t *testing.T, r *runner, c *econ.Contract, code string) contra
 	defer func() { _ = cmd.Process.Kill(); _ = cmd.Wait() }()
 	scanner := bufio.NewScanner(events)
 	scanner.Buffer(make([]byte, 4096), 8<<20)
+	var finalState *econ.State
+	sentStop := false
 	for scanner.Scan() {
 		var ev struct {
 			Op    string
@@ -139,7 +142,19 @@ func playContract(t *testing.T, r *runner, c *econ.Contract, code string) contra
 			Msg   string
 			State *econ.State
 		}
-		if json.Unmarshal(scanner.Bytes(), &ev) != nil || ev.Op != "contract" {
+		if json.Unmarshal(scanner.Bytes(), &ev) != nil {
+			continue
+		}
+		if ev.State != nil {
+			finalState = ev.State
+		}
+		if c.ID == econ.CleanStopContract && !sentStop && ev.T >= econ.CleanStopAt(st.Seed, st.Contracts[c.ID].Start) {
+			sentStop = true
+			if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if ev.Op != "contract" {
 			continue
 		}
 		res := contractResult{OK: ev.OK, Msg: ev.Msg, Ticks: ev.T - st.Contracts[c.ID].Start}
@@ -147,6 +162,12 @@ func playContract(t *testing.T, r *runner, c *econ.Contract, code string) contra
 			res.Ticks = ev.State.Contracts[c.ID].Best
 		}
 		return res
+	}
+	if c.ID == econ.CleanStopContract && finalState != nil {
+		done, settled := finalState.FinishCleanStop()
+		if settled {
+			return contractResult{OK: done, Ticks: finalState.Tick - st.Contracts[c.ID].Start}
+		}
 	}
 	t.Fatalf("%s: no contract event before the process ended or timed out\n%s", c.ID, strings.TrimSpace(output.String()))
 	return contractResult{}

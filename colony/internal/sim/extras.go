@@ -130,6 +130,11 @@ func (w *World) stormEvent(op, msg string) {
 		select {}
 	}
 	w.clock()
+	if w.Econ != nil {
+		phase := map[string]string{"storm-warning": "warn", "storm": "hit", "clear": "clear"}[op]
+		w.colonyStormPhase(phase)
+		return
+	}
 	switch op {
 	case "storm":
 		w.Storm.active = true

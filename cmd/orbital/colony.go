@@ -22,6 +22,7 @@ import (
 )
 
 type colonyRun struct {
+	stopSent bool
 	cmd      *exec.Cmd
 	commands *os.File
 	done     chan struct{}
@@ -157,6 +158,7 @@ func (c *colonyGame) broadcast(line string) {
 func (c *colonyGame) event(line string) {
 	var event struct {
 		State *econ.State `json:"state"`
+		T     int64       `json:"t"`
 	}
 	if json.Unmarshal([]byte(line), &event) == nil && event.State != nil {
 		event.State.Normalize()
@@ -169,6 +171,7 @@ func (c *colonyGame) event(line string) {
 		}
 		c.mu.Unlock()
 	}
+	c.signalCleanStop(event.T)
 	c.broadcast(line)
 }
 
@@ -277,11 +280,15 @@ func (c *colonyGame) start(dir string, lang string) error {
 		readers.Wait()
 		commandsWriter.Close()
 		c.mu.Lock()
+		contractEvent := c.finishColonyEvents(lang)
 		if err := c.persist(); err != nil {
 			log.Printf("colony final save: %v", err)
 		}
 		c.active = nil
 		c.mu.Unlock()
+		if contractEvent != "" {
+			c.broadcast(contractEvent)
+		}
 		reason := tr(lang, "البرنامج خلص", "program exited")
 		if waitErr != nil {
 			reason = waitErr.Error()

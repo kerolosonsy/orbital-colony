@@ -22,7 +22,9 @@ func (b *Building) generatorSupply(tick int64) float64 {
 func (s *State) PowerSupply(tick int64) float64 {
 	supply := 0.0
 	for _, b := range s.Buildings {
-		supply += b.generatorSupply(tick)
+		if s.Weather.Storm != "active" || b.Mode != "solar" {
+			supply += b.generatorSupply(tick)
+		}
 	}
 	return max(BaselinePower, supply)
 }

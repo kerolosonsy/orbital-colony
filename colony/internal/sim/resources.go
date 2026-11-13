@@ -5,7 +5,7 @@ import "orbital/colony/econ"
 func (w *World) Melt(id int) bool { n, _ := w.TryMelt(id); return n > 0 }
 
 func (w *World) TryMelt(id int) (n int, err error) {
-	w.act(id, "melt", func() (bool, string, bool) {
+	_, blocked := w.actErr(id, "melt", func() (bool, string, bool) {
 		if w.Econ == nil || w.Z != 0 || w.here().Ground != Ice {
 			err = econ.ErrNotHere
 			return false, say("التسييح محتاج جليد على سطح المستعمرة", "Melting requires surface ice in the colony"), false
@@ -20,13 +20,16 @@ func (w *World) TryMelt(id int) (n int, err error) {
 		w.syncInv()
 		return true, "", true
 	})
+	if blocked != nil {
+		err = blocked
+	}
 	return n, err
 }
 
 func (w *World) Sift(id int) bool { n, _ := w.TrySift(id); return n > 0 }
 
 func (w *World) TrySift(id int) (n int, err error) {
-	w.act(id, "sift", func() (bool, string, bool) {
+	_, blocked := w.actErr(id, "sift", func() (bool, string, bool) {
 		if w.Econ == nil || w.Z != 0 || w.here().Ground != Regolith {
 			err = econ.ErrNotHere
 			return false, say("الغربلة محتاجة ريجوليث على سطح المستعمرة", "Sifting requires surface regolith in the colony"), false
@@ -53,6 +56,9 @@ func (w *World) TrySift(id int) (n int, err error) {
 		w.syncInv()
 		return true, "", false
 	})
+	if blocked != nil {
+		err = blocked
+	}
 	return n, err
 }
 

@@ -25,6 +25,10 @@ func main() {
 	}
 	pending := 0
 	for {
+		if colony.Fault() != nil {
+			colony.Repair()
+			continue
+		}
 		select {
 		case n := <-found:
 			pending += n
@@ -55,15 +59,26 @@ func patrol(d *colony.Drone, rocks []colony.Point, k int, found chan<- int) {
 func goTo(d *colony.Drone, x, y int) {
 	cx, cy := d.Position()
 	for ; cx < x; cx++ {
-		d.Move(colony.East)
+		for !d.Move(colony.East) {
+			d.Repair()
+		}
 	}
 	for ; cx > x; cx-- {
-		d.Move(colony.West)
+		for !d.Move(colony.West) {
+			d.Repair()
+		}
 	}
 	for ; cy < y; cy++ {
-		d.Move(colony.North)
+		for !d.Move(colony.North) {
+			d.Repair()
+		}
 	}
 	for ; cy > y; cy-- {
-		d.Move(colony.South)
+		for !d.Move(colony.South) {
+			d.Repair()
+		}
+	}
+	if d.Fault() != nil {
+		d.Repair()
 	}
 }
