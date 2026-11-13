@@ -90,11 +90,21 @@ const Sprites = (() => {
     });
   }
 
+  const ORE_PAL = {
+    iron: ["#4a2410", "#9a4d1e", "#d77a33", "#ffc07a"],
+    geode: ["#2a1a55", "#5b3cc4", "#8f74ff", "#d6ccff"],
+    copper: ["#4a1a12", "#9e3b29", "#d45842", "#ffa48e"],
+    sulfur: ["#4d4a10", "#a69e1c", "#e8e443", "#fffb9c"],
+    titanium: ["#223247", "#4f6d8f", "#8db3d9", "#d4e8fa"],
+    uranium: ["#0e3b1f", "#1e8745", "#40de7a", "#a6ffc4"],
+  };
+  const ORE_SEED = { iron: 0, geode: 50, copper: 100, sulfur: 150, titanium: 200, uranium: 250 };
+
   // ore seen in the face of the rock (drawn over stone)
   function ore(kind, v) {
     return sprite(`o:${kind}:${v}`, S, S, (px) => {
-      const r = rng(7000 + v + (kind === "geode" ? 50 : 0));
-      const pal = kind === "geode" ? ["#2a1a55", "#5b3cc4", "#8f74ff", "#d6ccff"] : ["#4a2410", "#9a4d1e", "#d77a33", "#ffc07a"];
+      const r = rng(7000 + v + (ORE_SEED[kind] || 0));
+      const pal = ORE_PAL[kind] || ORE_PAL.iron;
       const n = kind === "geode" ? 2 : 4;
       for (let i = 0; i < n; i++) {
         const cx = 3 + Math.floor(r() * 10), cy = 3 + Math.floor(r() * 10), rad = kind === "geode" ? 3 : 1.6 + r();
