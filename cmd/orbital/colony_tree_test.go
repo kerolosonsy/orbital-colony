@@ -99,26 +99,31 @@ func TestColonyTreeBlueprintChecksAndLiveGoodsCosts(t *testing.T) {
 	}
 }
 
-func TestColonyTreeBuildingPrerequisiteLevelsAndSoon(t *testing.T) {
+func TestColonyTreeBuildingsUseLiveCostsAndPrerequisiteLevels(t *testing.T) {
 	st := econ.New(1)
-	st.Credits = 1e9
 	st.Levels["generator"] = 1
+	cost := econ.Find("assembler").CostAt(0)
+	st.Credits = cost.Credits
+	for good, n := range cost.Goods {
+		st.Inv[good] = n
+	}
 	for _, level := range []int{2, 3} {
 		st.Levels["smelter"] = level
-		nodes := treeForLang(st, "en")
-		node := colonyTreeNode(t, nodes, "assembler")
+		node := colonyTreeNode(t, treeForLang(st, "en"), "assembler")
 		if node.After[0] != (treePrereq{"smelter", 3}) || node.Checks[0].OK != (level >= 3) {
 			t.Fatalf("smelter level %d: %+v", level, node)
 		}
-		if check := node.Checks[len(node.Checks)-1]; check.Kind != "soon" || check.OK || check.Label != "Coming in a later update" {
-			t.Fatalf("building check: %+v", check)
+		if !reflect.DeepEqual(node.Cost, cost) || treeChecksPass(node) != (level >= 3) {
+			t.Fatalf("building availability: %+v", node)
 		}
-		for _, building := range econ.Tree {
-			if building.ID == "base" || econ.Find(building.ID) != nil {
-				continue
-			}
-			if node := colonyTreeNode(t, nodes, building.ID); node.State == "available" || treeChecksPass(node) || len(node.Cost.Goods) != 0 || node.Cost.Credits != 0 {
-				t.Errorf("building exposes a purchase or future cost: %+v", node)
+		if err := st.Buy("assembler"); (err == nil) != (level >= 3) {
+			t.Fatalf("tree and shop disagree at smelter level %d: %v", level, err)
+		}
+	}
+	for _, node := range treeForLang(st, "en") {
+		for _, check := range node.Checks {
+			if check.Kind == "soon" {
+				t.Fatalf("obsolete soon check: %+v", node)
 			}
 		}
 	}
@@ -163,8 +168,14 @@ func TestColonyTreeLocalization(t *testing.T) {
 			t.Errorf("%s: branch/parent localization: %+v", lang, field)
 		}
 		composter := colonyTreeNode(t, nodes, "composter")
-		if composter.Checks[1].Label != tr(lang, "لسه بتتبني في تحديث جاي", "Coming in a later update") {
-			t.Errorf("%s: soon localization: %+v", lang, composter)
+		if composter.Checks[1].Label != tr(lang, "100 كريدت", "100 credits") || composter.Checks[2].Label != tr(lang, "5 الطحالب", "5 Moss") {
+			t.Errorf("%s: building cost localization: %+v", lang, composter)
+		}
+		for _, good := range []struct{ id, ar, en string }{{"kiln", "السيليكا", "Silica"}, {"refinery", "الكتلة الحيوية", "Biomass"}, {"lab", "الدائرة الإلكترونية", "Circuit"}} {
+			checks := treeCostChecks(st, econ.Find(good.id).CostAt(0), lang)
+			if got := checks[len(checks)-1].Label; got != "5 "+tr(lang, good.ar, good.en) {
+				t.Errorf("%s: %s cost = %s", lang, good.id, got)
+			}
 		}
 		scanner := colonyTreeNode(t, nodes, "api.scanner")
 		contract := econ.BlueprintSource(scanner.ID)

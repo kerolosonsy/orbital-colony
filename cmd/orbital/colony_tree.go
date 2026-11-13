@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"orbital/colony/econ"
 )
@@ -81,7 +80,7 @@ func treeChecks(st *econ.State, node econ.Node, upgrade econ.ShopItem, lang stri
 		checks = treeParentChecks(st, node, lang)
 	}
 	if upgrade.Upgrade == nil {
-		return append(checks, treeCheck{Kind: "soon", Label: tr(lang, "لسه بتتبني في تحديث جاي", "Coming in a later update")})
+		return checks
 	}
 	if st.Levels[node.ID] == 0 && upgrade.Blueprint != "" {
 		contract := econ.FindContract(upgrade.Blueprint)
@@ -113,8 +112,7 @@ func treeCostChecks(st *econ.State, cost econ.Cost, lang string) []treeCheck {
 	}
 	sort.Strings(goods)
 	for _, good := range goods {
-		yield := econ.Find("yield." + good)
-		name := tr(lang, strings.TrimPrefix(yield.Name, "حصاد "), strings.TrimPrefix(yield.NameEn, "Harvest "))
+		name := economyName(lang, econ.CropName(good))
 		label := fmt.Sprintf("%.0f %s", cost.Goods[good], name)
 		checks = append(checks, treeCheck{Kind: "cost", Ref: good, Label: label, OK: st.Inv[good] >= cost.Goods[good]})
 	}

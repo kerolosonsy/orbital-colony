@@ -228,7 +228,7 @@ func TestContractMigrationV1(t *testing.T) {
 		t.Fatal(err)
 	}
 	s.Normalize()
-	if s.Version != 2 || s.Levels["yield.moss"] != 12 || s.Levels["api.radar"] != 1 || s.Levels["crop.crystal"] != 1 || s.Credits != 12 || !s.Claimed["chapter-8"] {
+	if s.Version != 3 || s.Levels["yield.moss"] != 12 || s.Levels["api.radar"] != 1 || s.Levels["crop.crystal"] != 1 || s.Credits != 12 || !s.Claimed["chapter-8"] {
 		t.Fatalf("migration lost owned state: %+v", s)
 	}
 	if !s.Blueprints["api.radar"] || !s.Blueprints["crop.crystal"] || s.Blueprints["api.scanner"] || s.Blueprints["yield.moss"] {

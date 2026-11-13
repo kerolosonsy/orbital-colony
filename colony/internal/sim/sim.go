@@ -63,13 +63,34 @@ const (
 	Reed
 	Iron
 	Geode
+	Water
+	Silica
+	Copper
+	Sulfur
+	Titanium
+	Helium
+	Uranium
+	Biomass
+	Plate
+	Wire
+	Glass
+	Fuel
+	Fertilizer
+	Circuit
+	Alloy
+	Battery
+	Coolant
+	Processor
+	Frame
+	Cell
+	Core
 )
 
 func (e Entity) String() string {
-	if e < Empty || e > Geode {
+	if e < Empty || e > Core {
 		return fmt.Sprintf("Entity(%d)", int(e))
 	}
-	return [...]string{"empty", "moss", "lichen", "crystal", "beacon", "glowcap", "reed", "iron", "geode"}[e]
+	return [...]string{"empty", "moss", "lichen", "crystal", "beacon", "glowcap", "reed", "iron", "geode", "water", "silica", "copper", "sulfur", "titanium", "helium", "uranium", "biomass", "plate", "wire", "glass", "fuel", "fertilizer", "circuit", "alloy", "battery", "coolant", "processor", "frame", "cell", "core"}[e]
 }
 
 // GrowTime is how many ticks a plant needs after planting.
@@ -87,7 +108,7 @@ var (
 	ErrNotRipe = errors.New(say("colony: النبات لسه مش ناضج", "colony: plant is not ripe yet"))
 	ErrEmpty   = errors.New(say("colony: مفيش حاجة هنا تتحصد", "colony: nothing to harvest here"))
 	ErrStorm   = errors.New(say("colony: العاصفة الترابية عطّلت الدرون", "colony: dust storm interrupted the drone"))
-	ErrFull    = errors.New(say("colony: مخزن الشحنة مليان", "colony: cargo hold is full"))
+	ErrFull    = econ.ErrFull
 	ErrLocked  = errors.New(say("colony: الأمر ده لسه مقفول", "colony: this command is not unlocked yet"))
 )
 
@@ -107,14 +128,18 @@ func abs(n int) int {
 }
 
 type Tile struct {
-	Ground  Ground
-	Entity  Entity
-	Planted int
-	Ready   int
-	Size    int
+	Ground   Ground
+	Entity   Entity
+	Planted  int
+	Ready    int
+	Size     int
+	MeltAt   int
+	SiftUsed int
+	SiftAt   int
 }
 
 type tileView struct {
+	B string `json:"b,omitempty"`
 	Z int    `json:"z,omitempty"`
 	X int    `json:"x"`
 	Y int    `json:"y"`
@@ -125,7 +150,12 @@ type tileView struct {
 	S int    `json:"s,omitempty"`
 }
 
+// Wire format: tile.b is the building kind, omitted on tiles without a building.
+// op:"building" carries t, x, y and building:{kind,recipe,in,out,progress,wear,level}.
+// Buffers map good IDs to amounts; progress is a fraction in [0,1]. Events are
+// sent on placement, buffer/recipe changes, repair and completed cycles, not each tick.
 type Event struct {
+	Building     *BuildingView  `json:"building,omitempty"`
 	Translations [][2]string    `json:"translations,omitempty"`
 	Z            int            `json:"z,omitempty"`
 	Layers       int            `json:"layers,omitempty"`
@@ -205,6 +235,8 @@ type World struct {
 	ScoutRoles   bool // drone 0 cannot scan; other drones cannot harvest
 	start        time.Time
 	mainSave     [4]int
+
+	lastProductionTick int
 
 	out  io.Writer
 	exit func(code int)
@@ -299,6 +331,11 @@ func (w *World) view(x, y int) tileView {
 func (w *World) viewZ(x, y, z int) tileView {
 	t := w.AtZ(x, y, z)
 	v := tileView{X: x, Y: y, Z: z, G: t.Ground.String()}
+	if z == 0 {
+		if b := w.buildingAt(x, y); b != nil {
+			v.B = b.Kind
+		}
+	}
 	if t.Entity != Empty {
 		v.E = t.Entity.String()
 		v.P, v.R, v.S = t.Planted, t.Ready, t.Size
@@ -451,6 +488,9 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 	} else {
 		w.Tick++
 	}
+	if w.Econ != nil {
+		w.advanceProduction(w.Tick)
+	}
 	w.load(d)
 	ok, msg, changed := f()
 	if w.Econ != nil {
@@ -590,7 +630,7 @@ func (w *World) TryHarvest(id int) (n int, err error) {
 func (w *World) Plant(id int, e Entity) bool {
 	return w.act(id, "plant", func() (bool, string, bool) {
 		t := w.here()
-		if t.Entity != Empty {
+		if t.Entity != Empty || w.Z == 0 && w.buildingAt(w.X, w.Y) != nil {
 			return false, say("الخانة مش فاضية", "The tile is not empty"), false
 		}
 		if w.Econ != nil {
@@ -612,6 +652,9 @@ func (w *World) Plant(id int, e Entity) bool {
 
 func (w *World) Till(id int) bool {
 	return w.act(id, "till", func() (bool, string, bool) {
+		if w.Z == 0 && w.buildingAt(w.X, w.Y) != nil {
+			return false, buildingMessage(econ.ErrTileNotFree), false
+		}
 		t := w.here()
 		switch t.Ground {
 		case Regolith:

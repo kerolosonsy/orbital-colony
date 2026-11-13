@@ -8,29 +8,37 @@ import (
 )
 
 type Building struct {
-	Kind     string
-	X, Y     int
-	Level    int
-	Recipe   string
-	In, Out  map[string]float64
-	Progress int
-	Wear     float64
-	Priority int
-	Enabled  bool
-
-	activeRecipe Recipe
+	Kind         string             `json:"kind"`
+	X            int                `json:"x"`
+	Y            int                `json:"y"`
+	Level        int                `json:"level"`
+	Recipe       string             `json:"recipe"`
+	In           map[string]float64 `json:"in"`
+	Out          map[string]float64 `json:"out"`
+	Progress     int                `json:"progress"`
+	Wear         float64            `json:"wear"`
+	Priority     int                `json:"priority"`
+	Enabled      bool               `json:"enabled"`
+	ActiveRecipe Recipe             `json:"activeRecipe"`
 }
 
-type buildingError struct{ ar, en string }
+type BuildingError struct{ ar, en string }
 
-func (e buildingError) Error() string { return i18n.T(e.ar, e.en) }
+func (e BuildingError) Error() string { return i18n.T(e.ar, e.en) }
+
+// Messages lets the simulation carry both languages to live subscribers.
+func (e BuildingError) Messages() (string, string) { return e.ar, e.en }
 
 var (
-	ErrNoInput   = buildingError{"مفيش مدخلات كفاية", "Not enough inputs"}
-	ErrFull      = buildingError{"المخزن مليان", "Buffer is full"}
-	ErrNoPower   = buildingError{"مفيش طاقة", "No power"}
-	ErrWorn      = buildingError{"المبنى محتاج تصليح", "Building needs repair"}
-	ErrBadRecipe = buildingError{"الوصفة مش صالحة للمبنى دلوقتي", "Recipe is not valid for this building right now"}
+	ErrNotHere           = BuildingError{"الدرون مش واقف على المبنى", "Drone is not standing on the building"}
+	ErrUnknownKind       = BuildingError{"نوع المبنى مش معروف", "Unknown building kind"}
+	ErrTileNotFree       = BuildingError{"الخانة مش متاحة للبناء", "Tile is not free for building"}
+	ErrBlueprintNotOwned = BuildingError{"مخطط المبنى مش مملوك", "Building blueprint is not owned"}
+	ErrNoInput           = BuildingError{"مفيش مدخلات كفاية", "Not enough inputs"}
+	ErrFull              = BuildingError{"المخزن مليان", "Buffer is full"}
+	ErrNoPower           = BuildingError{"مفيش طاقة", "No power"}
+	ErrWorn              = BuildingError{"المبنى محتاج تصليح", "Building needs repair"}
+	ErrBadRecipe         = BuildingError{"الوصفة مش صالحة للمبنى دلوقتي", "Recipe is not valid for this building right now"}
 )
 
 func Capacity(level int) float64 { return 8 * EffectMult(0.25, level) }
@@ -47,8 +55,8 @@ func (b *Building) recipes(out string) []Recipe {
 }
 
 func (b *Building) recipe(out string) (Recipe, error) {
-	if b.Progress > 0 && b.activeRecipe.Out == out {
-		return b.activeRecipe, nil
+	if b.Progress > 0 && b.ActiveRecipe.Out == out {
+		return b.ActiveRecipe, nil
 	}
 	recipes := b.recipes(out)
 	if len(recipes) == 0 {
@@ -179,7 +187,7 @@ func (b *Building) Step(ticks int, powered bool) error {
 
 func (b *Building) advanceCycle(r Recipe, ticks int) int {
 	if b.Progress == 0 {
-		b.activeRecipe = r
+		b.ActiveRecipe = r
 		for good, n := range r.In {
 			b.In[good] -= n
 		}
@@ -193,7 +201,7 @@ func (b *Building) advanceCycle(r Recipe, ticks int) int {
 		}
 		b.Out[r.Out]++
 		b.Progress = 0
-		b.activeRecipe = Recipe{}
+		b.ActiveRecipe = Recipe{}
 		b.Wear = math.Min(100, b.Wear+1)
 	}
 	return elapsed
@@ -206,4 +214,48 @@ func (b *Building) Repair(plates float64) float64 {
 	used := math.Min(plates, b.Wear/20)
 	b.Wear = math.Max(0, b.Wear-20*used)
 	return used
+}
+
+// ProgressFraction is shared by status queries and live building events.
+func (b *Building) ProgressFraction() float64 {
+	if b.Progress == 0 {
+		return 0
+	}
+	r, err := b.recipe(b.Recipe)
+	if err != nil {
+		return 0
+	}
+	return math.Min(1, float64(b.Progress)/float64(b.cycleTicks(r)))
+}
+
+// PlacementCost is independent of the price of upgrading the blueprint.
+func PlacementCost(kind string) *Cost {
+	cost, ok := placementCosts[kind]
+	if !ok {
+		return nil
+	}
+	return &cost
+}
+
+var placementCosts = map[string]Cost{
+	"composter":   {Credits: 25, Goods: map[string]float64{"moss": 4}},
+	"smelter":     {Credits: 50, Goods: map[string]float64{"iron": 2}},
+	"kiln":        {Credits: 40, Goods: map[string]float64{"silica": 3}},
+	"refinery":    {Credits: 75, Goods: map[string]float64{"biomass": 2}},
+	"assembler":   {Credits: 150, Goods: map[string]float64{"plate": 2}},
+	"reactor-lab": {Credits: 500, Goods: map[string]float64{"plate": 4}},
+	"silo":        {Credits: 35, Goods: map[string]float64{"moss": 4}},
+	"generator":   {Credits: 100, Goods: map[string]float64{"glass": 2}},
+	"lab":         {Credits: 200, Goods: map[string]float64{"plate": 2}},
+}
+
+func addBuildingUpgrades() {
+	goods := map[string]string{"composter": "moss", "smelter": "iron", "kiln": "silica", "refinery": "biomass", "assembler": "plate", "reactor-lab": "alloy", "silo": "moss", "generator": "glass", "lab": "circuit"}
+	for _, n := range buildingNodes() {
+		var requires []string
+		for _, p := range n.After {
+			requires = append(requires, p.ID)
+		}
+		add(&Upgrade{ID: n.ID, Group: "المباني", GroupEn: "Buildings", Name: n.Name, NameEn: n.NameEn, Desc: n.Desc, DescEn: n.DescEn, Max: 8, Requires: requires, Lesson: n.Chapter, cost: mixed(n.Cost.Credits, 1.6, goods[n.ID], 5, 1.15)})
+	}
 }

@@ -30,7 +30,9 @@ var Tree []Node
 func init() {
 	Tree = []Node{{ID: "base", Name: "القاعدة", NameEn: "Base", Desc: "بداية المستعمرة.", DescEn: "The colony's starting point.", Chapter: 1}}
 	for _, u := range Catalog {
-		Tree = append(Tree, upgradeNode(u))
+		if PlacementCost(u.ID) == nil {
+			Tree = append(Tree, upgradeNode(u))
+		}
 	}
 	Tree = append(Tree, buildingNodes()...)
 	for i := range Tree {

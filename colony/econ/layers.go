@@ -47,6 +47,14 @@ func undergroundAt(seed int64, x, y, z int) Tile {
 		t.E = "geode"
 	case r < 30:
 		t.E = "iron"
+	case z >= 2 && r < 42:
+		t.E = "copper"
+	case z >= 3 && r >= 42 && r < 52:
+		t.E = "sulfur"
+	case z >= 4 && r >= 52 && r < 60:
+		t.E = "titanium"
+	case z == 5 && r >= 60 && r < 64:
+		t.E = "uranium"
 	}
 	return t
 }
@@ -60,4 +68,16 @@ func addDepthUpgrades() {
 		return c
 	}})
 	add(&Upgrade{ID: "api.dig", Group: "الأعماق", Name: "رخصة الحفر", Desc: "Dig و DigDown و Descend و Ascend.", Max: 1, Lesson: 17, cost: credits(600, 1)})
+}
+
+func (s *State) migrateV3() {
+	for z, layer := range s.Under {
+		for i := range layer {
+			// Revealed ore and excavated tiles belong to the player already.
+			if layer[i] == (Tile{G: "stone"}) {
+				layer[i] = undergroundAt(s.Seed, i%s.Size, i/s.Size, z+1)
+			}
+		}
+	}
+	s.Version = 3
 }

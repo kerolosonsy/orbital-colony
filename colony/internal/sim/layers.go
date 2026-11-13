@@ -1,5 +1,7 @@
 package sim
 
+import "orbital/colony/econ"
+
 // InitLayers preserves the surface and creates solid underground layers. Setup only.
 func (w *World) InitLayers(depth int) {
 	w.Depth = max(1, depth)
@@ -81,7 +83,7 @@ func directionStep(dir Direction) (dx, dy int, valid bool) {
 }
 
 func (w *World) collectOre(t *Tile) {
-	if t.Entity != Iron && t.Entity != Geode {
+	if t.Entity != Iron && t.Entity != Geode && t.Entity != Copper && t.Entity != Sulfur && t.Entity != Titanium && t.Entity != Uranium {
 		return
 	}
 	n := 1
@@ -141,6 +143,9 @@ func (w *World) DigDown(id int) bool {
 		g := w.here().Ground
 		if !(w.Z == 0 && (g == Regolith || g == Soil) || w.Z > 0 && g == Tunnel) {
 			return false, say("مينفعش تحفر لتحت من الخانة دي", "You cannot dig down from this tile"), false
+		}
+		if w.Z == 0 && w.buildingAt(w.X, w.Y) != nil {
+			return false, buildingMessage(econ.ErrTileNotFree), false
 		}
 		w.here().Ground = Shaft
 		t := w.AtZ(w.X, w.Y, w.Z+1)

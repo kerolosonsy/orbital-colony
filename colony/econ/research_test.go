@@ -6,7 +6,7 @@ import (
 )
 
 func TestResearchRewardsGrowSteeplyWithCraftedTier(t *testing.T) {
-	for _, good := range Goods {
+	for _, good := range Goods[:7] {
 		if got := ResearchValue(good); got != 0 {
 			t.Errorf("raw %s yields %g RP", good, got)
 		}

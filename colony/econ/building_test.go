@@ -361,6 +361,10 @@ func TestBuildingErrorsFollowCurrentLanguage(t *testing.T) {
 		ar, en string
 	}{
 		{ErrNoInput, "مفيش مدخلات كفاية", "Not enough inputs"},
+		{ErrNotHere, "الدرون مش واقف على المبنى", "Drone is not standing on the building"},
+		{ErrUnknownKind, "نوع المبنى مش معروف", "Unknown building kind"},
+		{ErrTileNotFree, "الخانة مش متاحة للبناء", "Tile is not free for building"},
+		{ErrBlueprintNotOwned, "مخطط المبنى مش مملوك", "Building blueprint is not owned"},
 		{ErrFull, "المخزن مليان", "Buffer is full"},
 		{ErrNoPower, "مفيش طاقة", "No power"},
 		{ErrWorn, "المبنى محتاج تصليح", "Building needs repair"},
