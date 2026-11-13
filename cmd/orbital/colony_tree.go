@@ -168,5 +168,6 @@ func treeBranchEnglish(branch string) string {
 	return map[string]string{
 		"": "", "الزراعة": "Farming", "الأسطول": "Fleet", "البيانات": "Data",
 		"التعدين": "Mining", "الخدمات": "Services", "التصنيع": "Manufacturing", "الطاقة": "Energy",
+		"الشبكات": "Networks",
 	}[branch]
 }

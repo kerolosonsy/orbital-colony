@@ -106,6 +106,7 @@ func main() {
 	mux.HandleFunc("GET /api/colony", s.colonyStatus)
 	mux.HandleFunc("POST /api/colony/run", s.colonyRun)
 	s.registerColonyProject(mux)
+	s.registerColonySeasons(mux)
 	mux.HandleFunc("POST /api/colony/stop", s.colonyStop)
 	mux.HandleFunc("POST /api/colony/buy", s.colonyBuy)
 	mux.HandleFunc("POST /api/colony/claim", s.colonyClaim)

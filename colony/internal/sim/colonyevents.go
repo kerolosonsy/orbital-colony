@@ -36,6 +36,9 @@ func (w *World) initColonyEvents() {
 
 func (w *World) scheduleStorm(tick int64) {
 	st := w.Econ
+	if w.seasonStorm(tick) {
+		return
+	}
 	if !st.Won("c13-reed-clock") || st.Weather.At != 0 {
 		return
 	}
@@ -51,6 +54,7 @@ func (w *World) advanceColonyEvents(tick int) {
 	st := w.Econ
 	st.Tick = int64(tick)
 	st.ExpireEvents(int64(tick))
+	w.recoverSeasonMarket()
 	w.scheduleStorm(int64(tick))
 	if st.Weather.At > 0 && int64(tick) >= st.Weather.At {
 		switch st.Weather.Storm {
@@ -62,7 +66,7 @@ func (w *World) advanceColonyEvents(tick int) {
 			w.colonyStormPhase("clear")
 		}
 	}
-	if st.Won("c02-price-watch") && int64(tick) == econ.EventAt(st.Seed, int64(tick)/1800, 1800, 2) {
+	if period := st.ShockPeriod(); period > 0 && int64(tick) == econ.EventAt(st.Seed, int64(tick)/period, period, 2) {
 		h := econ.EventHash(st.Seed, int64(tick), 2)
 		factor := 0.4
 		if h&1 != 0 {
