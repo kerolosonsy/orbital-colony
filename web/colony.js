@@ -298,7 +298,7 @@ const Colony = (() => {
       }
       case "systems":
         if (data) {
-          data.systems = ev.systems || null;
+          data.systems = { ...(data.systems || {}), ...(ev.systems || {}) }; // sidecars send only their own keys
           renderSystems();
         }
         return;
@@ -371,7 +371,7 @@ const Colony = (() => {
     if (ev.weather) data.state.weather = ev.weather;
     if ("rush" in ev) data.state.rush = ev.rush;
     if ("shock" in ev) data.state.shock = ev.shock;
-    if ("systems" in ev) data.systems = ev.systems;
+    if ("systems" in ev) data.systems = { ...(data.systems || {}), ...(ev.systems || {}) };
     if (ev.rank && typeof ev.rank === "object") {
       data.rank = ev.rank;
       if (typeof ev.rank.level === "number") data.state.rank = ev.rank.level;
