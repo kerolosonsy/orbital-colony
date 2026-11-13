@@ -369,9 +369,15 @@ func (w *World) colonyTicker() {
 		}
 		w.clock()
 		w.advanceProduction(w.Tick)
-		w.Econ.Recover(every)
+		if !w.seasonClock() {
+			w.Econ.Recover(every)
+		}
 		w.growVeins()
 		w.checkContract()
+		if w.finishSeason() {
+			w.mu.Unlock()
+			return
+		}
 		w.saveShutdown(false)
 		n++
 		w.econSnapshot("econ", "", true, n%3 == 0)
@@ -453,7 +459,7 @@ func (w *World) growVeins() {
 func (w *World) colonyCommands(r io.Reader) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
-		if w.systemCommand(sc.Bytes()) {
+		if w.neighborCommand(sc.Bytes()) || w.systemCommand(sc.Bytes()) {
 			continue
 		}
 		var cmd struct{ Buy string }

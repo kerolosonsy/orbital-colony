@@ -49,10 +49,16 @@ type Goal struct {
 type Limits struct {
 	MaxDrones int      `json:"maxDrones,omitempty"` // 0 = no limit
 	Deny      []string `json:"deny,omitempty"`      // upgrades switched off while the contract runs
+
+	NoBuy        bool  `json:"noBuy,omitempty"`
+	FieldDivisor int   `json:"fieldDivisor,omitempty"`
+	StormPeriod  int64 `json:"stormPeriod,omitempty"`
+	ShockPeriod  int64 `json:"shockPeriod,omitempty"`
 }
 
 // ContractRun is the colony's record of one contract.
 type ContractRun struct {
+	Neighbor NeighborProgress   `json:"neighbor,omitempty"`
 	Status   string             `json:"status"` // "", "active", "done", "failed"
 	Start    int64              `json:"start"`  // tick
 	Sold     map[string]float64 `json:"sold,omitempty"`
@@ -376,6 +382,9 @@ func (s *State) ProgressPair(tick int64) (done, failed bool, why [2]string) {
 	if g.Submit != "" {
 		return s.submissionProgress(c, r, tick)
 	}
+	if s.IsNeighborContract() {
+		return s.NeighborProgressPair(tick)
+	}
 	if c.ID == CleanStopContract {
 		return r.Stopped && r.CargoLost == 0, r.Stopped && r.CargoLost > 0, [2]string{"مستني إغلاق من غير خسارة حمولة", "Waiting for shutdown without cargo loss"}
 	}
@@ -453,6 +462,9 @@ func (s *State) Fraction() float64 {
 	if c == nil {
 		return 0
 	}
+	if s.IsNeighborContract() {
+		return s.NeighborFraction()
+	}
 	g := c.Goal
 	if g.Submit != "" && r.Submission != "correct" {
 		return 0
@@ -529,7 +541,7 @@ func (s *State) Settle(tick int64) (Reward, error) {
 		} else if u := Find(id); u != nil && (u.Max == 0 || s.Levels[id] < u.Max) {
 			s.Levels[id]++
 			if id == "field" {
-				s.resize(FieldSize(s.Levels[id]))
+				s.resize(s.FieldSize())
 			}
 		}
 	}
@@ -539,6 +551,9 @@ func (s *State) Settle(tick int64) (Reward, error) {
 // ---------- what a running contract lends and denies ----------
 
 func (s *State) denied(id string) bool {
+	if s.SeasonDenies(id) {
+		return true
+	}
 	c, _ := s.ActiveContract()
 	return c != nil && slices.Contains(c.Limits.Deny, id)
 }
@@ -565,7 +580,7 @@ func (s *State) DroneCap() int {
 	n := s.Drones()
 	c, _ := s.ActiveContract()
 	if c == nil {
-		return n
+		return s.seasonDroneCap(n)
 	}
 	if s.Lent("api.spawn") || s.Lent("hangar") {
 		n = max(n, c.Goal.MinDrones)
@@ -573,7 +588,7 @@ func (s *State) DroneCap() int {
 	if c.Limits.MaxDrones > 0 {
 		n = min(n, c.Limits.MaxDrones)
 	}
-	return n
+	return s.seasonDroneCap(n)
 }
 
 func sortedKeys[V any](m map[string]V) []string {

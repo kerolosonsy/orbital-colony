@@ -32,6 +32,8 @@ type colonyRun struct {
 }
 
 type colonyGame struct {
+	season      *colonySeason
+	neighbor    *colonyNeighbor
 	ops         sync.Mutex // Serialize run, stop, buy and claim, independently of missions.
 	mu          sync.Mutex
 	state       *econ.State
@@ -105,7 +107,7 @@ func (c *colonyGame) summary(lang string, done map[int]bool) map[string]any {
 		Tiles []surfaceTile `json:"tiles"`
 	}{c.state, tiles}
 	owned, total := c.state.TotalLevels()
-	return map[string]any{"systems": c.archiveMarketSummary(), "running": c.active != nil, "state": state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
+	return c.seasonSummary(c.neighborSummary(map[string]any{"systems": c.archiveMarketSummary(), "running": c.active != nil, "state": state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}))
 }
 
 // chaptersDone reads which chapters the profile finished: every mission
@@ -177,6 +179,7 @@ func (c *colonyGame) broadcast(line string) {
 func (c *colonyGame) event(line string) {
 	line = c.archiveMarketEvent(line)
 	c.observeRunEvent(line)
+	c.observeNeighbor(line)
 	var event struct {
 		State *econ.State `json:"state"`
 		T     int64       `json:"t"`
@@ -270,6 +273,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		return err
 	}
 	defer archiveMarket.closeUnstarted(cmd)
+	cmd.Env = append(cmd.Env, details.env...)
 	cmd.ExtraFiles = []*os.File{eventsWriter, commandsReader}
 	// Owned pipes let Wait reap the child without closing unread output.
 	stdoutReader, stdoutWriter, err := os.Pipe()
@@ -288,7 +292,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 	}
 	defer stderrWriter.Close()
 	cmd.Stdout, cmd.Stderr = stdoutWriter, stderrWriter
-	if err := cmd.Start(); err != nil {
+	if err := c.startNeighborProcess(cmd, commandsWriter); err != nil {
 		eventsReader.Close()
 		commandsWriter.Close()
 		stdoutReader.Close()
@@ -312,6 +316,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 	go func() {
 		waitErr := cmd.Wait()
 		active.am.close()
+		c.stopNeighbor()
 		_ = killProcessTree(cmd) // Descendants must not keep the stream pipes open.
 		readers.Wait()
 		commandsWriter.Close()
@@ -319,6 +324,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		archiveEvent := c.finishArchiveMarket(active)
 		contractEvent := c.finishColonyEvents(lang)
 		finalEvent := c.finishRun(active)
+		seasonEvent := c.finishSeason(lang)
 		if err := c.persist(); err != nil {
 			log.Printf("colony final save: %v", err)
 		}
@@ -327,6 +333,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		if archiveEvent != "" {
 			c.broadcast(archiveEvent)
 		}
+		c.publishSeason(seasonEvent)
 		if contractEvent != "" {
 			c.broadcast(contractEvent)
 		}

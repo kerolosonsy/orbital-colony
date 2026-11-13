@@ -4,6 +4,7 @@ import "fmt"
 
 func addTreeContent() {
 	addArchiveMarketNodes()
+	addNeighborTree()
 	addResourceResearch()
 	addBuildingResearch()
 	for _, n := range []Node{

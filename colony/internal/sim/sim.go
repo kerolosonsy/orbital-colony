@@ -328,6 +328,10 @@ func (w *World) drone(id int) *Drone {
 }
 
 func (w *World) clock() {
+	if w.seasonClock() {
+		return
+	}
+	defer w.clampSeasonTick()
 	if w.Realtime {
 		w.Tick = max(w.Tick, w.TickBase+int(time.Since(w.start)/w.Unit))
 	}
@@ -532,10 +536,15 @@ func (w *World) actErr(id int, op string, f func() (ok bool, msg string, changed
 	if w.done {
 		select {} // mission over; os.Exit is on its way
 	}
-	if w.Realtime {
+	if w.seasonActionClock(speed) {
+	} else if w.Realtime {
 		w.Tick = max(w.Tick, slot)
 	} else {
 		w.Tick += speed
+	}
+	w.clampSeasonTick()
+	if w.finishSeason() {
+		return false, nil
 	}
 	if w.Econ != nil {
 		w.advanceProduction(w.Tick)
