@@ -36,6 +36,8 @@ type Tile struct {
 
 // State is everything that persists between runs.
 type State struct {
+	Systems SystemCounters `json:"systemsCounters,omitempty"`
+
 	Weather    Weather      `json:"weather"`
 	Rush       *RushOrder   `json:"rush,omitempty"`
 	Shock      *MarketShock `json:"shock,omitempty"`
@@ -352,6 +354,7 @@ func (s *State) Sell(g string, n float64) float64 {
 	if n <= 0 {
 		return 0
 	}
+	s.recordSystemSale(g, n)
 	earned := 0.0
 	for n > 0 {
 		chunk := math.Min(n, 1)

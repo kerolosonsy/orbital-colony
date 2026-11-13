@@ -3,6 +3,7 @@ package econ
 import "fmt"
 
 func addTreeContent() {
+	addControlNodes()
 	addResourceResearch()
 	addBuildingResearch()
 	for _, n := range []Node{

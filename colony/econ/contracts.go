@@ -91,6 +91,7 @@ func deliver(kv ...any) map[string]float64 {
 
 // Contracts lists every contract in chapter order.
 var Contracts = []*Contract{
+	controlAPIContract, drainContract, warehouseContract, transferContract, metricsContract,
 	{ID: "c02-price-watch", Chapter: 2, Requires: []string{"if"}, Window: 1500,
 		Title: "مراقبة السعر", TitleEn: "Price Watch",
 		Brief:   "اكسب 50 كريدت، وكل وحدة تتباع بـ 90% من سعرها الأساسي على الأقل. السعر بيقل مع كل وحدة بتبيعها وبيرجع مع الوقت: اقرا colony.Price واستنى. شاشة البورصة متاحة طول العقد. الدرس: فصل 2.",
@@ -370,6 +371,9 @@ func (s *State) ProgressPair(tick int64) (done, failed bool, why [2]string) {
 	if c == nil {
 		return false, false, why
 	}
+	if IsControlContract(c.ID) {
+		return s.controlProgress()
+	}
 	g := c.Goal
 	if c.ID == CleanStopContract {
 		return r.Stopped && r.CargoLost == 0, r.Stopped && r.CargoLost > 0, [2]string{"مستني إغلاق من غير خسارة حمولة", "Waiting for shutdown without cargo loss"}
@@ -447,6 +451,9 @@ func (s *State) Fraction() float64 {
 	c, r := s.ActiveContract()
 	if c == nil {
 		return 0
+	}
+	if IsControlContract(c.ID) {
+		return s.controlFraction()
 	}
 	g := c.Goal
 	if c.ID == CleanStopContract && !r.Stopped {

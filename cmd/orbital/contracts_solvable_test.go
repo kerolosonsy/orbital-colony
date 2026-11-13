@@ -109,6 +109,9 @@ func buildColonyProjectProgram(t *testing.T, r *runner, project colonyProject) s
 // playContract runs code with c active on its fixture until the contract
 // settles or fails, or its window has clearly passed.
 func playContract(t *testing.T, r *runner, c *econ.Contract, project colonyProject) contractResult {
+	if econ.IsControlContract(c.ID) {
+		return playControlContract(t, r, c, project)
+	}
 	t.Helper()
 	if missing := projectRequirements(project.Files, c.Requires, "en"); len(missing) > 0 {
 		return contractResult{Requires: missing}

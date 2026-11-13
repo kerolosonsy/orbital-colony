@@ -447,6 +447,9 @@ func (w *World) growVeins() {
 func (w *World) colonyCommands(r io.Reader) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
+		if w.controlSystemCommand(sc.Bytes()) {
+			continue
+		}
 		var cmd struct{ Buy string }
 		if json.Unmarshal(sc.Bytes(), &cmd) != nil || cmd.Buy == "" {
 			continue

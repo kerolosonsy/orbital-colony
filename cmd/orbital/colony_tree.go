@@ -166,7 +166,8 @@ func treeNearOwned(node econ.Node, levels map[string]int, steps int) bool {
 
 func treeBranchEnglish(branch string) string {
 	return map[string]string{
-		"": "", "الزراعة": "Farming", "الأسطول": "Fleet", "البيانات": "Data",
+		"الأنظمة": "Systems",
+		"":        "", "الزراعة": "Farming", "الأسطول": "Fleet", "البيانات": "Data",
 		"التعدين": "Mining", "الخدمات": "Services", "التصنيع": "Manufacturing", "الطاقة": "Energy",
 	}[branch]
 }

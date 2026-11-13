@@ -30,6 +30,7 @@ type colonyRun struct {
 }
 
 type colonyGame struct {
+	control     *colonyControl
 	ops         sync.Mutex // Serialize run, stop, buy and claim, independently of missions.
 	mu          sync.Mutex
 	state       *econ.State
@@ -103,7 +104,7 @@ func (c *colonyGame) summary(lang string, done map[int]bool) map[string]any {
 		Tiles []surfaceTile `json:"tiles"`
 	}{c.state, tiles}
 	owned, total := c.state.TotalLevels()
-	return map[string]any{"running": c.active != nil, "state": state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
+	return map[string]any{"systems": c.controlSummary(), "running": c.active != nil, "state": state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
 }
 
 // chaptersDone reads which chapters the profile finished: every mission
@@ -189,6 +190,7 @@ func (c *colonyGame) event(line string) {
 		}
 		c.mu.Unlock()
 	}
+	c.observeControlEvent(line)
 	c.signalCleanStop(event.T)
 	if !c.deferLedgerCompletion(line) {
 		c.broadcast(line)
@@ -218,7 +220,7 @@ func (c *colonyGame) readLines(reader io.Reader, op string) {
 // Caller holds ops; the exit goroutine only needs mu and can finish the save.
 func (c *colonyGame) stop() {
 	c.mu.Lock()
-	active := c.active
+	active := c.markControlStop()
 	c.mu.Unlock()
 	if active == nil {
 		return
@@ -278,7 +280,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 	}
 	defer stderrWriter.Close()
 	cmd.Stdout, cmd.Stderr = stdoutWriter, stderrWriter
-	if err := cmd.Start(); err != nil {
+	if err := c.startControlProcess(cmd); err != nil {
 		eventsReader.Close()
 		commandsWriter.Close()
 		stdoutReader.Close()
@@ -290,6 +292,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 	c.active = active
 	c.beginRun(details)
 	c.mu.Unlock()
+	c.startControlProbes()
 	var readers sync.WaitGroup
 	for _, stream := range []struct {
 		file *os.File
@@ -299,18 +302,20 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		go func(f *os.File, op string) { defer readers.Done(); defer f.Close(); c.readLines(f, op) }(stream.file, stream.op)
 	}
 	go func() {
-		waitErr := cmd.Wait()
+		waitErr, exitCode := c.waitControlRun(active, dir, &readers)
 		_ = killProcessTree(cmd) // Descendants must not keep the stream pipes open.
 		readers.Wait()
 		commandsWriter.Close()
 		c.mu.Lock()
 		contractEvent := c.finishColonyEvents(lang)
+		controlEvent := c.finishControlContract(lang)
 		finalEvent := c.finishRun(active)
 		if err := c.persist(); err != nil {
 			log.Printf("colony final save: %v", err)
 		}
 		c.active = nil
 		c.mu.Unlock()
+		c.broadcastControlEvent(controlEvent)
 		if contractEvent != "" {
 			c.broadcast(contractEvent)
 		}
@@ -321,7 +326,7 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		if waitErr != nil {
 			reason = waitErr.Error()
 		}
-		stopped, _ := json.Marshal(map[string]any{"op": "stopped", "msg": reason, "code": cmd.ProcessState.ExitCode()})
+		stopped, _ := json.Marshal(map[string]any{"op": "stopped", "msg": reason, "code": exitCode})
 		c.broadcast(string(stopped))
 		os.RemoveAll(dir)
 		close(active.done)
