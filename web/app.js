@@ -143,19 +143,46 @@ function md(src) {
 }
 
 // ---------- files ----------
-// Missions have one file (main.go); lab levels have several tabs.
+// Missions have one file (main.go); lab levels and colony have several tabs.
 function levelFiles(l) {
+  if (l.kind === "colony") {
+    const r = rec(l.id);
+    const extras = Object.keys(r.files || {}).filter((name) => name !== "main.go");
+    return ["main.go", ...extras].map((name) => ({
+      name,
+      starter: name === "main.go" ? l.starter : "",
+      readOnly: false,
+    }));
+  }
   return l.files?.length ? l.files.map((f) => ({ ...f, readOnly: f.readOnly || !f.name.endsWith(".go") })) : [{ name: "main.go", starter: l.starter, readOnly: false }];
 }
 function fileCode(l, f) {
   const r = S.review && S.cur === l ? S.reviewDraft : rec(l.id);
+  if (l.kind === "colony") {
+    if (f.name === "main.go") return r.files?.["main.go"] ?? r.code ?? f.starter;
+    return r.files?.[f.name] ?? f.starter ?? "";
+  }
   if (!l.files?.length) return r.code ?? f.starter;
   if (f.readOnly) return f.starter;
   const carried = l.carryFrom ? rec(l.carryFrom).files?.[f.name] : undefined;
   return r.files?.[f.name] ?? carried ?? f.starter;
 }
+function migrateColonyRecord(r, starter = "") {
+  if (!r.files) {
+    r.files = { "main.go": r.code ?? starter };
+  } else if (r.files["main.go"] === undefined) {
+    r.files["main.go"] = r.code ?? starter;
+  }
+  return r.files;
+}
 function saveFile(l, name, code) {
   const r = S.review && S.cur === l ? S.reviewDraft : rec(l.id);
+  if (l.kind === "colony") {
+    const files = migrateColonyRecord(r, l.starter);
+    files[name] = code;
+    if (name === "main.go") r.code = code;
+    return;
+  }
   if (!l.files?.length) r.code = code;
   else (r.files ||= {})[name] = code;
 }
@@ -167,20 +194,180 @@ function showFile(name) {
   S.file = f.name;
   ed.value = fileCode(l, f);
   ed.readOnly = !!f.readOnly || isLinked();
-  errLines = new Map(lastErrors.filter((e) => (e.file || "main.go") === f.name).map((e) => [e.line, e.msg]));
+  errLines = new Map(lastErrors.filter((e) => (e.file || "main.go").replace(/^\.\//, "") === f.name).map((e) => [e.line, e.msg]));
   renderTabs();
   renderEditor();
 }
 function renderTabs() {
   const box = $("#file-tabs");
   box.innerHTML = "";
+  const isColony = S.cur?.kind === "colony";
+  const linkedNow = isLinked();
   for (const f of levelFiles(S.cur)) {
-    const b = document.createElement("button");
-    b.className = "tab" + (f.name === S.file ? " active" : "");
-    b.innerHTML = esc(f.name) + (f.readOnly ? '<span class="ro">' + T("قراية بس", "read-only") + '</span>' : "");
-    b.onclick = () => showFile(f.name);
-    box.appendChild(b);
+    if (!isColony || f.name === "main.go") {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "tab" + (f.name === S.file ? " active" : "");
+      b.innerHTML = esc(f.name) + (f.readOnly ? '<span class="ro">' + T("قراية بس", "read-only") + "</span>" : "");
+      b.onclick = () => showFile(f.name);
+      box.appendChild(b);
+      continue;
+    }
+    const wrap = document.createElement("div");
+    wrap.className = "tab" + (f.name === S.file ? " active" : "");
+    const main = document.createElement("button");
+    main.type = "button";
+    main.className = "tab-main";
+    main.textContent = f.name;
+    main.onclick = () => showFile(f.name);
+    const ren = document.createElement("button");
+    ren.type = "button";
+    ren.className = "tab-act";
+    ren.textContent = "✎";
+    ren.title = T("إعادة تسمية", "Rename");
+    ren.setAttribute("aria-label", T(`غيّر اسم ${f.name}`, `Rename ${f.name}`));
+    ren.disabled = linkedNow;
+    ren.onclick = () => promptRenameColonyFile(f.name);
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "tab-act tab-del";
+    del.textContent = "×";
+    del.title = T("حذف", "Delete");
+    del.setAttribute("aria-label", T(`امسح ${f.name}`, `Delete ${f.name}`));
+    del.disabled = linkedNow;
+    del.onclick = () => promptDeleteColonyFile(f.name);
+    wrap.append(main, ren, del);
+    box.appendChild(wrap);
   }
+  if (isColony) {
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "tab tab-add";
+    add.textContent = "+";
+    add.title = T("ملف جديد", "New file");
+    add.setAttribute("aria-label", T("ملف جديد", "New file"));
+    add.disabled = linkedNow;
+    add.onclick = () => promptCreateColonyFile();
+    box.appendChild(add);
+  }
+}
+
+const COLONY_EXTS = [".go", ".sql", ".json", ".yaml", ".txt", ".md", ".html"];
+function validateColonyPath(raw, existing = []) {
+  const path = String(raw ?? "").trim();
+  if (!path) return { ok: false, error: T("اكتب مسار الملف.", "Enter a file path.") };
+  if (path.startsWith("/") || path.includes("\\") || /^[a-zA-Z]:/.test(path)) {
+    return { ok: false, error: T("لازم المسار يكون نسبي (من غير / في الأول أو \\).", "Path must be relative (no leading / or \\).") };
+  }
+  if (path.includes("..")) {
+    return { ok: false, error: T("المسار مينفعش يحتوي على '..'.", "Path cannot contain '..'.") };
+  }
+  if (/[\x00-\x1f<>:"|?*]/.test(path)) {
+    return { ok: false, error: T("المسار فيه رموز مش مسموحة.", "Path contains invalid characters.") };
+  }
+  const parts = path.split("/");
+  if (parts.some((p) => !p || p === "." || p === ".." || p.startsWith(".") || p.trim() !== p)) {
+    return { ok: false, error: T("مسار الملف مش سليم.", "Invalid file path.") };
+  }
+  const last = parts[parts.length - 1];
+  const ext = COLONY_EXTS.find((e) => last.endsWith(e));
+  if (!ext || last.length <= ext.length) {
+    return { ok: false, error: T("الامتدادات المسموحة: " + COLONY_EXTS.join(" "), "Allowed extensions: " + COLONY_EXTS.join(" ")) };
+  }
+  if (existing.includes(path)) {
+    return { ok: false, error: T("فيه ملف بالاسم ده بالفعل.", "A file with that path already exists.") };
+  }
+  if (existing.some((e) => e.startsWith(path + "/") || path.startsWith(e + "/"))) {
+    return { ok: false, error: T("المسار ده بيتعارض مع مجلد أو ملف موجود.", "Path conflicts with an existing file or folder.") };
+  }
+  return { ok: true, path };
+}
+function colonyStarterFor(path) {
+  if (!path.endsWith(".go")) return "";
+  const parts = path.split("/");
+  if (parts.length > 1 && /^[A-Za-z_][A-Za-z0-9_]*$/.test(parts[parts.length - 2])) {
+    return `package ${parts[parts.length - 2]}\n\n`;
+  }
+  return "package main\n\n";
+}
+function colonyFilesPayload(l) {
+  const files = {};
+  for (const f of levelFiles(l)) files[f.name] = fileCode(l, f);
+  return files;
+}
+function createColonyFile(l, rawPath) {
+  const existing = levelFiles(l).map((f) => f.name);
+  const res = validateColonyPath(rawPath, existing);
+  if (!res.ok) return res;
+  const files = migrateColonyRecord(rec(l.id), l.starter);
+  files[res.path] = colonyStarterFor(res.path);
+  return { ok: true, path: res.path };
+}
+function renameColonyFile(l, oldName, rawNewPath) {
+  if (!oldName || oldName === "main.go") {
+    return { ok: false, error: T("مينفعش تغيّر اسم main.go.", "Cannot rename main.go.") };
+  }
+  const trimmed = String(rawNewPath ?? "").trim();
+  if (trimmed === oldName) return { ok: true, path: oldName, unchanged: true };
+  const existing = levelFiles(l).map((f) => f.name).filter((n) => n !== oldName);
+  const res = validateColonyPath(trimmed, existing);
+  if (!res.ok) return res;
+  const r = rec(l.id);
+  const files = migrateColonyRecord(r, l.starter);
+  if (files[oldName] === undefined) return { ok: false, error: T("الملف مش موجود.", "File not found.") };
+  const next = {};
+  for (const [k, v] of Object.entries(files)) next[k === oldName ? res.path : k] = v;
+  r.files = next;
+  return { ok: true, path: res.path };
+}
+function deleteColonyFile(l, name) {
+  if (!name || name === "main.go") {
+    return { ok: false, error: T("مينفعش تمسح main.go.", "Cannot delete main.go.") };
+  }
+  const r = rec(l.id);
+  const files = migrateColonyRecord(r, l.starter);
+  delete files[name];
+  return { ok: true };
+}
+function firstErrorFile(errors, files, fallback = "main.go") {
+  if (!Array.isArray(errors) || !errors.length) return fallback;
+  const raw = (errors[0].file || "main.go").replace(/^\.\//, "");
+  return files.some((f) => f.name === raw) ? raw : fallback;
+}
+function promptCreateColonyFile() {
+  if (isLinked() || S.cur?.kind !== "colony") return;
+  if (!ed.readOnly) saveFile(S.cur, S.file, ed.value);
+  const raw = prompt(T("مسار الملف الجديد (مثال: plan/plan.go):", "New file path (e.g. plan/plan.go):"), "");
+  if (raw === null) return;
+  const res = createColonyFile(S.cur, raw);
+  if (!res.ok) { alert(res.error); return; }
+  store.save();
+  showFile(res.path);
+  $("#save-state").textContent = T("محفوظ", "Saved");
+  ed.focus();
+}
+function promptRenameColonyFile(oldName) {
+  if (isLinked() || S.cur?.kind !== "colony" || oldName === "main.go") return;
+  if (!ed.readOnly) saveFile(S.cur, S.file, ed.value);
+  const raw = prompt(T("المسار الجديد للملف:", "New file path:"), oldName);
+  if (raw === null) return;
+  const res = renameColonyFile(S.cur, oldName, raw);
+  if (!res.ok) { alert(res.error); return; }
+  if (res.unchanged) return;
+  lastErrors = lastErrors.filter((e) => (e.file || "main.go").replace(/^\.\//, "") !== oldName);
+  store.save();
+  showFile(S.file === oldName ? res.path : S.file);
+  $("#save-state").textContent = T("محفوظ", "Saved");
+}
+function promptDeleteColonyFile(name) {
+  if (isLinked() || S.cur?.kind !== "colony" || name === "main.go") return;
+  if (!confirm(T(`تمسح الملف ${name}؟`, `Delete ${name}?`))) return;
+  const res = deleteColonyFile(S.cur, name);
+  if (!res.ok) return;
+  lastErrors = lastErrors.filter((e) => (e.file || "main.go").replace(/^\.\//, "") !== name);
+  store.save();
+  showFile(S.file === name ? "main.go" : S.file);
+  $("#save-state").textContent = T("محفوظ", "Saved");
 }
 
 // ---------- VS Code link ----------
@@ -198,6 +385,7 @@ function linkUI() {
   b.title = on ? T("الكود بيتكتب في VS Code، واللعبة بتشوف كل save", "Your code lives in VS Code; the game sees every save") : T("اكتب في VS Code بالـ autocomplete، واللعبة هتشوف كل save", "Write in VS Code with autocomplete; the game sees every save");
   $("#link-box").classList.toggle("hidden", !on);
   $("#btn-reset").disabled = on;
+  if (S.cur?.kind === "colony") renderTabs();
   if (on) $("#save-state").textContent = T("اكتب في VS Code · المحرر هنا للقراية", "Write in VS Code · this editor is read-only");
 }
 
@@ -1372,8 +1560,7 @@ async function run() {
           log(`${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`, "c-err");
           if (e.tip) log(`   ${e.tip}`, "c-tip");
         }
-        const first = lastErrors[0].file || "main.go";
-        showFile(levelFiles(level).some((f) => f.name === first) ? first : S.file);
+        showFile(firstErrorFile(lastErrors, levelFiles(level), S.file));
       } else log(r.compileOutput, "c-err");
       banner(r.result.message, false);
       return;

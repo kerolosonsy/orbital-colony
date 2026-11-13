@@ -99,7 +99,9 @@
 .treeview .tv-checks button { padding: 4px 0; border: 0; text-align: start; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
 .treeview .tv-checks .is-ok > span:first-child { color: var(--ok); }
 .treeview .tv-checks .is-missing > span:first-child { color: var(--warn); }
-.treeview .tv-cost li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.treeview .tv-cost li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.treeview .tv-cost-good { display: inline-flex; align-items: center; gap: 7px; }
+.treeview .tv-good-chip { width: 10px; height: 10px; display: inline-block; border-radius: var(--r); flex: none; }
 .treeview .tv-cost b { font: 600 16px/1.5 var(--cond); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .treeview .tv-cost .is-missing b { color: var(--warn); }
 .treeview .tv-buy { width: 100%; margin-top: 22px; border-color: var(--regolith); color: var(--paper); }
