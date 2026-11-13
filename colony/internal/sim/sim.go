@@ -499,17 +499,21 @@ func (w *World) actErr(id int, op string, f func() (ok bool, msg string, changed
 	}
 	d.busy.Lock()
 	defer d.busy.Unlock()
+	// Purchases can change the action duration while other drones are waiting.
+	w.mu.Lock()
 	speed := w.actionSpeed(d)
+	step := w.Unit
+	if w.ActionDur > 0 {
+		step = w.ActionDur
+	}
+	start := w.start
+	w.mu.Unlock()
 	var slot int
 	if w.Realtime {
 		// Each drone works on a fixed beat: its next action ends one Unit
 		// after the previous one, unless it sat idle. Ticks come from that
 		// schedule rather than from noisy sleep wake-ups.
 		base := d.nextAt
-		step := w.Unit
-		if w.ActionDur > 0 {
-			step = w.ActionDur
-		}
 		if now := time.Now(); base.IsZero() || now.Sub(base) > step/2 {
 			base = now
 		}
@@ -517,7 +521,7 @@ func (w *World) actErr(id int, op string, f func() (ok bool, msg string, changed
 		target := base.Add(step)
 		time.Sleep(time.Until(target))
 		d.nextAt = target
-		slot = w.TickBase + int((target.Sub(w.start)+w.Unit/2)/w.Unit)
+		slot = w.TickBase + int((target.Sub(start)+w.Unit/2)/w.Unit)
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()

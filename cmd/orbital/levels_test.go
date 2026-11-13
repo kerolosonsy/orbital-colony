@@ -44,12 +44,18 @@ func TestLevelsSolvable(t *testing.T) {
 			if err != nil {
 				t.Fatalf("no reference solution: %v", err)
 			}
+			// Exercise concurrent drone references even when the lesson itself
+			// does not enable the detector. Keep the starter's original mode.
+			reference := *l
+			if l.Chapter >= 10 && l.Chapter <= 13 {
+				reference.Race = true
+			}
 			for i := 0; i < 5; i++ { // levels are randomized; try several seeds
-				resp, err := r.Run(context.Background(), l, string(code))
+				resp, err := r.Run(context.Background(), &reference, string(code))
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !resp.Result.Success {
+				if !resp.Result.Success || strings.Contains(resp.Stderr, "WARNING: DATA RACE") {
 					t.Fatalf("phase=%s msg=%q missing=%v compile=%s stderr=%s", resp.Phase, resp.Result.Message, resp.Missing, resp.CompileOutput, resp.Stderr)
 				}
 				t.Logf("ticks=%d stars=%d (par %d, gold %d)", resp.Result.Ticks, resp.Result.Stars, resp.Result.Par, resp.Result.Gold)

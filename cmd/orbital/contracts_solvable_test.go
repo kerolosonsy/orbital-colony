@@ -138,7 +138,9 @@ func playContract(t *testing.T, r *runner, c *econ.Contract, project colonyProje
 	ctx, cancel := context.WithTimeout(context.Background(), limit)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, prog)
-	cmd.Env = append(os.Environ(), "ORBITAL_LANG=en", "ORBITAL_LEVEL=colony", "ORBITAL_COLONY="+save, "ORBITAL_EVENTS_FD=3", "ORBITAL_COLONY_UNIT="+contractUnit.String())
+	// The detector's default exit delay lets the ticker run after main returns,
+	// changing the clean-stop contract's saved time. Keep diagnostics enabled.
+	cmd.Env = append(os.Environ(), "GORACE=atexit_sleep_ms=0", "ORBITAL_LANG=en", "ORBITAL_LEVEL=colony", "ORBITAL_COLONY="+save, "ORBITAL_EVENTS_FD=3", "ORBITAL_COLONY_UNIT="+contractUnit.String())
 	cmd.ExtraFiles = []*os.File{writer}
 	var output bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &output, &output
@@ -212,7 +214,7 @@ func TestContractsSolvable(t *testing.T) {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 			files := readColonyFixture(t, c.ID)
-			ref := playContract(t, r, c, colonyProject{Files: files, Race: c.ID == "c12-one-ledger"})
+			ref := playContract(t, r, c, colonyProject{Files: files, Race: true})
 			if len(ref.Requires) > 0 || !ref.OK {
 				t.Fatalf("reference did not finish: requires %v, %s", ref.Requires, ref.Msg)
 			}

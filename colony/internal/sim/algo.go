@@ -91,6 +91,12 @@ func (w *World) DroneGrid(id int) [][]Ground {
 
 // Neighbors returns the in-bounds neighbours of p that a drone can enter.
 func (w *World) Neighbors(p Point) []Point {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.neighbors(p)
+}
+
+func (w *World) neighbors(p Point) []Point {
 	var out []Point
 	for _, d := range [][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
 		q := Point{p.X + d[0], p.Y + d[1]}
@@ -107,6 +113,12 @@ func (w *World) Neighbors(p Point) []Point {
 
 // StepCost is the tick cost of entering q.
 func (w *World) StepCost(q Point) int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.stepCost(q)
+}
+
+func (w *World) stepCost(q Point) int {
 	if c := w.MoveCost[w.At(q.X, q.Y).Ground]; c > 0 {
 		return c
 	}
@@ -115,12 +127,14 @@ func (w *World) StepCost(q Point) int {
 
 // BFS returns the fewest-moves distance from a to every reachable tile.
 func (w *World) BFS(a Point) map[Point]int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	dist := map[Point]int{a: 0}
 	q := []Point{a}
 	for len(q) > 0 {
 		p := q[0]
 		q = q[1:]
-		for _, n := range w.Neighbors(p) {
+		for _, n := range w.neighbors(p) {
 			if _, ok := dist[n]; !ok {
 				dist[n] = dist[p] + 1
 				q = append(q, n)
@@ -132,6 +146,8 @@ func (w *World) BFS(a Point) map[Point]int {
 
 // Cheapest returns the minimum tick cost from a to every reachable tile.
 func (w *World) Cheapest(a Point) map[Point]int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	cost := map[Point]int{a: 0}
 	done := map[Point]bool{}
 	for {
@@ -145,8 +161,8 @@ func (w *World) Cheapest(a Point) map[Point]int {
 			return cost
 		}
 		done[best] = true
-		for _, n := range w.Neighbors(best) {
-			c := cost[best] + w.StepCost(n)
+		for _, n := range w.neighbors(best) {
+			c := cost[best] + w.stepCost(n)
 			if old, ok := cost[n]; !ok || c < old {
 				cost[n] = c
 			}

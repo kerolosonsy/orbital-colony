@@ -86,8 +86,24 @@ func (c *colonyGame) persist() error {
 }
 
 func (c *colonyGame) summary(lang string, done map[int]bool) map[string]any {
+	type surfaceTile struct {
+		econ.Tile
+		B string `json:"b,omitempty"`
+	}
+	// Buildings persist separately; the map renderer uses the live tile field.
+	tiles := make([]surfaceTile, len(c.state.Tiles))
+	for i, tile := range c.state.Tiles {
+		tiles[i].Tile = tile
+	}
+	for _, b := range c.state.Buildings {
+		tiles[b.Y*c.state.Size+b.X].B = b.Kind
+	}
+	state := struct {
+		*econ.State
+		Tiles []surfaceTile `json:"tiles"`
+	}{c.state, tiles}
 	owned, total := c.state.TotalLevels()
-	return map[string]any{"running": c.active != nil, "state": c.state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
+	return map[string]any{"running": c.active != nil, "state": state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
 }
 
 // chaptersDone reads which chapters the profile finished: every mission

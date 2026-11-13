@@ -82,7 +82,8 @@ func (w *World) loadTiles() {
 	}
 }
 
-// applyEcon refreshes everything the upgrades control.
+// applyEcon refreshes everything the upgrades control. Caller holds the lock,
+// unless the world is still being set up.
 func (w *World) applyEcon() {
 	w.ActionDur = time.Duration(w.Econ.ActionMillis() * float64(w.Unit) / 100)
 	w.MaxDrones = w.Econ.DroneCap()

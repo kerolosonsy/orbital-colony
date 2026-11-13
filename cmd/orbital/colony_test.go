@@ -48,6 +48,58 @@ func colonySavedState(t *testing.T, path string) *econ.State {
 	return &state
 }
 
+func TestColonyStoppedSummaryDrawsSavedBuildings(t *testing.T) {
+	s := testColony(t)
+	c := s.colony
+	c.state.Buildings = []*econ.Building{
+		{Kind: "composter", X: 2, Y: 1, Level: 1, Enabled: true},
+		{Kind: "generator", X: 0, Y: 2, Level: 1, Enabled: true, Mode: "solar"},
+	}
+	c.state.At(2, 1).G = "soil"
+	if err := c.persist(); err != nil {
+		t.Fatal(err)
+	}
+	reloaded, err := newColonyGame(filepath.Dir(c.path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.colony = reloaded
+	response := httptest.NewRecorder()
+	s.colonyStatus(response, httptest.NewRequest(http.MethodGet, "/api/colony", nil))
+	if response.Code != http.StatusOK {
+		t.Fatalf("HTTP %d: %s", response.Code, response.Body)
+	}
+	var summary struct {
+		Running bool
+		State   struct {
+			Size      int
+			Buildings []*econ.Building
+			Tiles     []struct {
+				econ.Tile
+				B string `json:"b"`
+			}
+		}
+	}
+	if err := json.Unmarshal(response.Body.Bytes(), &summary); err != nil {
+		t.Fatal(err)
+	}
+	if summary.Running || summary.State.Size != 3 || len(summary.State.Tiles) != 9 || len(summary.State.Buildings) != 2 {
+		t.Fatalf("stopped summary lost saved state: %s", response.Body)
+	}
+	for i, tile := range summary.State.Tiles {
+		want := ""
+		switch i {
+		case 1*3 + 2:
+			want = "composter"
+		case 2 * 3:
+			want = "generator"
+		}
+		if tile.B != want || tile.Tile != reloaded.state.Tiles[i] {
+			t.Errorf("tile %d = %+v, want saved tile with b=%q", i, tile, want)
+		}
+	}
+}
+
 func TestColonyStoppedPurchasesAndClaimsPersist(t *testing.T) {
 	s := testColony(t)
 	c := s.colony
