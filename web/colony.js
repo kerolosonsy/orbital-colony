@@ -6,7 +6,7 @@ const Colony = (() => {
   const LEVEL = { id: "colony", kind: "colony", title: T("المستعمرة", "Colony"), goal: T("كبّر المستعمرة: ازرع، احصد، بيع، واشتري ترقيات", "Grow the colony: plant, harvest, sell and buy upgrades"), lesson: "", hints: [], starter: "", par: 0, gold: 0 };
   const GOODS = ["moss", "lichen", "glowcap", "reed", "crystal", "iron", "geode"];
   const BASE = { moss: 1, lichen: 3, glowcap: 2, reed: 14, crystal: 6, iron: 9, geode: 40 };
-  let data = null, es = null, running = false, samples = [], shopDirty = true;
+  let data = null, es = null, running = false, samples = [], shopDirty = true, live = null;
 
   const fmt = (n) => Math.floor(n).toLocaleString("en-US");
   const actionMs = (st) => 260 * Math.pow(0.92, (st.levels && st.levels.engine) || 0);
@@ -48,7 +48,6 @@ const Colony = (() => {
     $("#lvl-title").textContent = LEVEL.title;
     $("#lvl-chapter").textContent = "OPEN COLONY · KEPLER-G";
     $("#lvl-stars").innerHTML = "";
-    $("#goal-strip-text").textContent = LEVEL.goal;
     $("#goal-strip-par").textContent = "";
     lastErrors = []; lastMtime = 0;
     showFile("main.go"); linkUI();
@@ -58,7 +57,7 @@ const Colony = (() => {
     log(T("بيع بـ colony.Export(colony.Moss, 0)، واشتري ترقيات من اللوحة. الأوامر المقفولة بتقولك تشتري إيه.", "Sell with colony.Export(colony.Moss, 0) and buy upgrades from the panel. Locked commands tell you what to buy."), "c-tip");
     liveWorld(stateToInit(data.state));
     running = data.running;
-    samples = [];
+    samples = []; live = null;
     openStream();
     renderAll();
     runUI();
@@ -107,10 +106,17 @@ const Colony = (() => {
           else log(T(`الشراء فشل: ${ev.msg}`, `Purchase failed: ${ev.msg}`), "c-err");
         }
         return;
+      case "contract":
+        econ(ev);
+        live = null;
+        log(ev.msg, ev.ok ? "c-ok" : "c-err");
+        Sound.play(ev.ok ? "goal" : "error");
+        refresh();
+        return;
       case "stdout": log(ev.msg); return;
       case "stderr": log(ev.msg, "c-err"); return;
       case "stopped":
-        running = false; runUI();
+        running = false; live = null; runUI();
         log(T(`المستعمرة وقفت. ${ev.msg || ""}`, `Colony stopped. ${ev.msg || ""}`), "c-info");
         refresh();
         return;
@@ -127,6 +133,7 @@ const Colony = (() => {
       if (W) { W.inv = {}; for (const [k, v] of Object.entries(ev.inv)) if (v >= 1) W.inv[k] = Math.floor(v); hud(); }
     }
     if (typeof ev.t === "number" && W) W.t = Math.max(W.t, ev.t);
+    if (ev.contract && ev.op !== "contract") { live = { id: ev.contract.id, frac: ev.contract.frac, left: ev.contract.left, progress: ev.progress || "" }; renderContracts(); }
     const now = performance.now();
     samples.push([now, data.state.credits]);
     while (samples.length && now - samples[0][0] > 90000) samples.shift();
@@ -158,6 +165,13 @@ const Colony = (() => {
     Sound.play("build");
     try {
       const r = await api("/api/colony/run", { code: fileCode(LEVEL, levelFiles(LEVEL)[0]) });
+      if (r.phase === "requires") {
+        const c = (data.contracts || []).find((x) => x.id === r.contract);
+        log(T(`الكود لسه مش جاهز للعقد «${c ? c.title : r.contract}»:`, `Your code isn't ready for the contract “${c ? c.title : r.contract}”:`), "c-err");
+        for (const m of r.missing || []) log("   " + m, "c-tip");
+        Sound.play("error");
+        return;
+      }
       if (r.phase === "compile") {
         lastErrors = r.compileErrors || [];
         log(T("الكود مااتبناش. صلّح الأخطاء دي:", "The code didn't build. Fix these errors:"), "c-err");
@@ -190,10 +204,73 @@ const Colony = (() => {
     $("#btn-colony").classList.toggle("linked", colony);
     const pill = $("#col-state");
     if (pill) { pill.textContent = running ? T("شغالة", "Running") : T("واقفة", "Stopped"); pill.classList.toggle("on", running); }
+    if (colony && data) renderContracts();
   }
 
   // ---------- panel ----------
-  function renderAll() { renderStatus(); renderMarket(); renderRewards(); shopDirty = true; renderShop(); }
+  function renderAll() { renderStatus(); renderMarket(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); }
+
+  // ---------- contracts: code challenges that unlock blueprints ----------
+  // ticks are 100ms of colony time
+  const clock = (ticks) => { const s = Math.max(0, Math.round(ticks / 10)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+
+  function contractCard(c, now, running) {
+    const run = c.run || {};
+    const best = run.best ? `<span class="ct-best">${T("أحسن وقت", "Best time")} ${clock(run.best)}</span>` : "";
+    const head = `<div class="item-top"><b>${esc(c.title)}</b><span class="lv">${T(`فصل ${c.chapter}`, `Ch. ${c.chapter}`)}</span></div>`;
+    const lesson = `<button class="lesson-link ct-lesson" data-ch="${c.chapter}">${T(`الدرس: فصل ${c.chapter}`, `Lesson: chapter ${c.chapter}`)}</button>`;
+    const stopped = running ? `<span class="why">${T("وقّف المستعمرة الأول", "Stop the colony first")}</span>` : "";
+    switch (c.status) {
+      case "active": {
+        const frac = now ? now.frac : c.frac || 0, left = now ? now.left : c.left, text = now ? now.progress : c.progress || "";
+        return `<div class="item contract active" data-id="${c.id}">${head}<p>${esc(c.brief)}</p>
+          <div class="ct-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(frac * 100)}"><i style="width:${(frac * 100).toFixed(1)}%"></i></div>
+          <div class="item-foot"><span class="ct-progress">${esc(text)}</span>${left >= 0 ? `<span class="ct-left">${T("باقي", "Left")} ${clock(left)}</span>` : ""}</div>
+          <div class="item-foot">${lesson}<button class="ct-act ct-cancel" ${running ? "disabled" : ""}>${T("ألغي", "Cancel")}</button></div>${stopped}</div>`;
+      }
+      case "available":
+      case "done":
+        return `<div class="item contract${c.status === "done" ? " done" : ""}" data-id="${c.id}">${head}<p>${esc(c.brief)}</p>
+          <div class="item-foot">${c.status === "done" ? best : lesson}<button class="ct-act ct-accept" data-id="${c.id}" ${running ? "disabled" : ""}>${c.status === "done" ? T("العبه تاني", "Replay") : T("اقبل", "Accept")}</button></div>${stopped}</div>`;
+      default:
+        return `<div class="item contract locked" data-id="${c.id}">${head}<span class="why">${(c.after || []).length ? esc(T("خلّص العقد الأول: ", "Finish the contract first: ") + c.after.join(T("، ", ", "))) : T(`خلّص الفصل ${c.chapter}`, `Finish chapter ${c.chapter}`)}</span></div>`;
+    }
+  }
+
+  function renderContracts() {
+    const list = data.contracts || [];
+    const box = $("#col-contracts");
+    const active = list.find((c) => c.status === "active");
+    const now = active && live && live.id === active.id ? live : null;
+    $("#goal-strip-text").textContent = active ? `${T("عقد", "Contract")}: ${active.title} — ${(now ? now.progress : active.progress) || ""}` : LEVEL.goal;
+    if (!list.length) { box.innerHTML = ""; return; }
+    const order = { active: 0, available: 1, done: 2, locked: 3 };
+    const shown = [...list].sort((a, b) => order[a.status] - order[b.status] || a.chapter - b.chapter);
+    const lockedAt = shown.findIndex((c) => c.status === "locked");
+    const visible = lockedAt < 0 ? shown : shown.slice(0, lockedAt + 2); // only the next locked contracts, to keep the panel short
+    const done = list.filter((c) => c.status === "done").length;
+    box.innerHTML = `<h3>${T("العقود", "Contracts")} <small>${done}/${list.length}</small></h3>` + visible.map((c) => contractCard(c, c.status === "active" ? now : null, running)).join("");
+    box.querySelectorAll(".ct-accept").forEach((b) => (b.onclick = () => contract(b.dataset.id)));
+    box.querySelectorAll(".ct-cancel").forEach((b) => (b.onclick = () => contract("")));
+    box.querySelectorAll(".ct-lesson").forEach((b) => (b.onclick = () => {
+      const first = S.levels.find((l) => l.chapter === +b.dataset.ch);
+      if (first) loadLevel(first.id);
+    }));
+  }
+
+  async function contract(id) {
+    try {
+      const r = await api("/api/colony/contract", { id });
+      if (r.ok) {
+        const c = (r.contracts || []).find((x) => x.id === id);
+        log(id ? T(`قبلت العقد: ${c ? c.title : id}. دوس Run عشان يبدأ.`, `Contract accepted: ${c ? c.title : id}. Press Run to start.`) : T("العقد اتلغى.", "Contract cancelled."), "c-info");
+      } else log(r.error, "c-err");
+      data.state = r.state; data.contracts = r.contracts; live = null;
+      await refresh();
+    } catch (e) {
+      log(e.message.includes("409") ? T("وقّف المستعمرة الأول.", "Stop the colony first.") : T("مقدرتش أغيّر العقد: ", "Couldn't change the contract: ") + e.message, "c-err");
+    }
+  }
 
   function renderStatus() {
     setDigits($("#col-credits"), fmt(data.state.credits));
@@ -226,6 +303,7 @@ const Colony = (() => {
   function status(u) {
     const lv = (data.state.levels || {})[u.id] || 0;
     if (lv >= u.max) return { maxed: true };
+    if (u.blueprint) return { why: u.reason };
     for (const r of u.requires || []) if (!((data.state.levels || {})[r] > 0)) return { why: T("محتاج الأول: ", "Needs first: ") + shopName(r) };
     if (data.state.credits < u.cost.credits) return { why: T(`ناقصك ${fmt(u.cost.credits - data.state.credits)} كريدت`, `Need ${fmt(u.cost.credits - data.state.credits)} more credits`), money: true };
     for (const [g, n] of Object.entries(u.cost.goods || {})) if ((data.state.inv[g] || 0) < n) return { why: T(`ناقصك ${fmt(n - (data.state.inv[g] || 0))} ${NAME[g] || g}`, `Need ${fmt(n - (data.state.inv[g] || 0))} more ${NAME[g] || g}`), money: true };

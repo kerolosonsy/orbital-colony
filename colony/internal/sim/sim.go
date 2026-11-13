@@ -453,6 +453,9 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 	}
 	w.load(d)
 	ok, msg, changed := f()
+	if w.Econ != nil {
+		w.Econ.RecordCommand(id, op == "move" && ok)
+	}
 	if w.Storm != nil && w.Storm.active && (Point{w.X, w.Y}) != w.Base {
 		msg = say("الدرون كان برّه القاعدة وقت العاصفة!", "The drone was outside base during the storm!")
 		ev := Event{Op: op, T: w.Tick, D: id, OK: false, X: w.X, Y: w.Y, Z: w.Z, Msg: msg}

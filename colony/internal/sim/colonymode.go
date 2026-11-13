@@ -31,6 +31,10 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.Econ = st
 	w.Realtime = true
 	w.Unit = 100 * time.Millisecond
+	// Tests run the colony on a fast clock; everything scales with Unit.
+	if d, err := time.ParseDuration(os.Getenv("ORBITAL_COLONY_UNIT")); err == nil && d > 0 {
+		w.Unit = d
+	}
 	w.MaxTicks = math.MaxInt32
 	w.TickBase = int(st.Tick)
 	w.Tick = w.TickBase
@@ -67,8 +71,8 @@ func (w *World) loadTiles() {
 
 // applyEcon refreshes everything the upgrades control.
 func (w *World) applyEcon() {
-	w.ActionDur = time.Duration(w.Econ.ActionMillis() * float64(time.Millisecond))
-	w.MaxDrones = w.Econ.Drones()
+	w.ActionDur = time.Duration(w.Econ.ActionMillis() * float64(w.Unit) / 100)
+	w.MaxDrones = w.Econ.DroneCap()
 	w.syncInv()
 }
 
@@ -99,10 +103,14 @@ func (w *World) syncEcon() {
 
 // gate returns a refusal message when a command has not been bought yet.
 func (w *World) gate(id string) string {
-	if w.Econ == nil || w.Econ.Has(id) {
+	if w.Econ == nil || w.Econ.Usable(id) {
 		return ""
 	}
-	if u := econ.Find(id); u != nil {
+	u := econ.Find(id)
+	if u != nil && w.Econ.Denied(id) {
+		return say("🔒 العقد النشط قافل «", "🔒 The active contract switches off “") + say(u.Name, u.NameEn) + say("»", "”")
+	}
+	if u != nil {
 		return say("🔒 محتاج تشتري «", "🔒 Buy “") + say(u.Name, u.NameEn) + say("» من المتجر", "” from the shop first")
 	}
 	return say("🔒 مقفول", "🔒 Locked")
@@ -165,10 +173,12 @@ func (w *World) colonyHarvest(destroy bool) (int, error, string, bool) {
 			return 0, ErrNotRipe, say("لسه مش ناضج", "Not ripe yet"), false
 		}
 		*t = Tile{Ground: t.Ground}
+		w.Econ.RecordLost()
 		return 0, ErrNotRipe, say("النبات لسه مش ناضج… واتدمر!", "The plant was not ripe yet… and was destroyed!"), true
 	}
 	if t.Entity == Reed && w.Tick > t.Ready+econ.ReedWindow {
 		*t = Tile{Ground: t.Ground}
+		w.Econ.RecordLost()
 		return 0, ErrNotRipe, say("البوص عفّن! اتأخرت عليه", "The reeds rotted! You waited too long"), true
 	}
 	base := 1.0
@@ -184,6 +194,7 @@ func (w *World) colonyHarvest(destroy bool) (int, error, string, bool) {
 			}
 		})
 	}
+	w.Econ.RecordHarvest(name, base, t.Size)
 	got := base * w.Econ.YieldMult(name)
 	w.Econ.Inv[name] += got
 	w.syncInv()
@@ -212,7 +223,11 @@ func (w *World) Export(id int, e Entity, n int) (earned float64) {
 		if amount <= 0 || w.Econ.Inv[name] < 1 && n > 0 {
 			return false, say("مفيش ", "No ") + name + say(" تتباع", " to sell"), false
 		}
+		sold := math.Min(amount, w.Econ.Inv[name])
 		earned = w.Econ.Sell(name, amount)
+		// Each unit lowers the price, so the last one sold was the cheapest.
+		low := w.Econ.Price(name) / math.Pow(0.996, math.Min(1, sold))
+		w.Econ.RecordSale(id, name, sold, earned, low)
 		w.syncInv()
 		return true, fmt.Sprintf("+%.0f ⌬", earned), false
 	})
@@ -223,7 +238,7 @@ func (w *World) Export(id int, e Entity, n int) (earned float64) {
 func (w *World) Price(e Entity) float64 {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if w.Econ == nil || !w.Econ.Has("api.prices") {
+	if w.Econ == nil || !w.Econ.Usable("api.prices") {
 		return 0
 	}
 	return w.Econ.Price(e.String())
@@ -255,6 +270,14 @@ type econEvent struct {
 	W            int                `json:"w,omitempty"`
 	H            int                `json:"h,omitempty"`
 	Tiles        []tileView         `json:"tiles,omitempty"`
+	Progress     string             `json:"progress,omitempty"` // the active contract
+	Contract     *contractView      `json:"contract,omitempty"`
+}
+
+type contractView struct {
+	ID   string  `json:"id"`
+	Frac float64 `json:"frac"`
+	Left int64   `json:"left"` // ticks; -1 without a window
 }
 
 func (w *World) emitRaw(v econEvent) {
@@ -265,6 +288,11 @@ func (w *World) emitRaw(v econEvent) {
 
 func (w *World) econSnapshot(op, msg string, ok, full bool) {
 	ev := econEvent{Op: op, T: w.Tick, OK: ok, Msg: msg, Credits: w.Econ.Credits, Prices: w.Econ.Prices(), Inv: w.Econ.Inv}
+	if w.Econ.Active != "" {
+		_, _, why := w.Econ.ProgressPair(int64(w.Tick))
+		ev.Progress = say(why[0], why[1])
+		ev.Contract = &contractView{ID: w.Econ.Active, Frac: w.Econ.Fraction(), Left: w.Econ.Left(int64(w.Tick))}
+	}
 	if full {
 		w.syncEcon()
 		ev.State = w.Econ
@@ -305,9 +333,36 @@ func (w *World) colonyTicker() {
 		w.clock()
 		w.Econ.Recover(every)
 		w.growVeins()
+		w.checkContract()
 		n++
 		w.econSnapshot("econ", "", true, n%3 == 0)
 		w.mu.Unlock()
+	}
+}
+
+// checkContract settles or fails the active contract. Caller holds the lock.
+func (w *World) checkContract() {
+	c, _ := w.Econ.ActiveContract()
+	if c == nil {
+		return
+	}
+	done, failed, why := w.Econ.ProgressPair(int64(w.Tick))
+	switch {
+	case done:
+		w.syncEcon()
+		r, _ := w.Econ.Settle(int64(w.Tick))
+		w.applyEcon()
+		msg := say("✅ العقد خلص: ", "✅ Contract complete: ") + say(c.Title, c.TitleEn)
+		if r.Credits > 0 {
+			msg += sayf(" (+%.0f كريدت)", " (+%.0f credits)", r.Credits)
+		}
+		w.emitRaw(econEvent{Op: "contract", T: w.Tick, OK: true, Msg: msg, Credits: w.Econ.Credits, State: w.Econ, Contract: &contractView{ID: c.ID, Frac: 1, Left: -1}})
+	case failed:
+		w.syncEcon()
+		w.Econ.Fail()
+		w.applyEcon()
+		msg := say("✖ العقد فشل: ", "✖ Contract failed: ") + say(c.Title, c.TitleEn) + " — " + say(why[0], why[1])
+		w.emitRaw(econEvent{Op: "contract", T: w.Tick, OK: false, Msg: msg, Credits: w.Econ.Credits, State: w.Econ, Contract: &contractView{ID: c.ID, Left: -1}})
 	}
 }
 

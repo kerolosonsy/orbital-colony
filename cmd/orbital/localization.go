@@ -40,6 +40,10 @@ func economyText(lang, message string) string {
 	for _, pair := range [][2]string{
 		{"خلصت كل المستويات", "All levels completed"},
 		{"المكافأة دي اتصرفت قبل كده", "This reward has already been claimed"},
+		{"مفيش عقد نشط", "No active contract"},
+		{"عندك عقد نشط بالفعل. خلّصه أو ألغيه الأول", "You already have an active contract. Finish or cancel it first"},
+		{"العقد لسه مخلصش", "The contract is not finished yet"},
+		{"محتاج مخطط من عقد", "Needs a contract blueprint"},
 	} {
 		if message == pair[0] || message == pair[1] {
 			return tr(lang, pair[0], pair[1])
@@ -48,6 +52,7 @@ func economyText(lang, message string) string {
 	for _, pair := range [][2]string{
 		{"محتاج الأول: ", "Requires first: "},
 		{"مفيش ترقية اسمها ", "No upgrade named "},
+		{"مفيش عقد اسمه ", "No contract named "},
 	} {
 		for _, prefix := range pair {
 			if tail, ok := strings.CutPrefix(message, prefix); ok {
@@ -55,7 +60,63 @@ func economyText(lang, message string) string {
 			}
 		}
 	}
+	for _, prefix := range []string{"خلّص العقد الأول: ", "Finish the contract first: "} {
+		if tail, ok := strings.CutPrefix(message, prefix); ok {
+			for _, c := range econ.Contracts {
+				if tail == c.Title || tail == c.TitleEn {
+					tail = tr(lang, c.Title, c.TitleEn)
+				}
+			}
+			return tr(lang, "خلّص العقد الأول: ", "Finish the contract first: ") + tail
+		}
+	}
 	return economyShortfall(lang, message)
+}
+
+// contractView is a contract as the panel shows it, in one language.
+type contractView struct {
+	ID       string            `json:"id"`
+	Chapter  int               `json:"chapter"`
+	Title    string            `json:"title"`
+	Brief    string            `json:"brief"`
+	Window   int64             `json:"window"`
+	Status   string            `json:"status"` // locked, available, active, done
+	After    []string          `json:"after,omitempty"`
+	Run      *econ.ContractRun `json:"run,omitempty"`
+	Frac     float64           `json:"frac,omitempty"`
+	Progress string            `json:"progress,omitempty"`
+	Left     int64             `json:"left,omitempty"`
+}
+
+func contractsForLang(st *econ.State, lang string, done map[int]bool) []contractView {
+	open := map[string]bool{}
+	for _, c := range st.Available(done) {
+		open[c.ID] = true
+	}
+	out := make([]contractView, 0, len(econ.Contracts))
+	for _, c := range econ.Contracts {
+		v := contractView{ID: c.ID, Chapter: c.Chapter, Title: tr(lang, c.Title, c.TitleEn), Brief: tr(lang, c.Brief, c.BriefEn), Window: c.Window, Run: st.Contracts[c.ID]}
+		for _, a := range c.After {
+			if !st.Won(a) {
+				p := econ.FindContract(a)
+				v.After = append(v.After, tr(lang, p.Title, p.TitleEn))
+			}
+		}
+		switch {
+		case st.Active == c.ID:
+			v.Status = "active"
+			_, _, why := st.ProgressPair(st.Tick)
+			v.Frac, v.Progress, v.Left = st.Fraction(), tr(lang, why[0], why[1]), st.Left(st.Tick)
+		case st.Won(c.ID):
+			v.Status = "done"
+		case open[c.ID] || st.Active != "" && done[c.Chapter] && len(v.After) == 0:
+			v.Status = "available"
+		default:
+			v.Status = "locked"
+		}
+		out = append(out, v)
+	}
+	return out
 }
 
 func economyName(lang, name string) string {

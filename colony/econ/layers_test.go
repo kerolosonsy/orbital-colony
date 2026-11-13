@@ -54,6 +54,7 @@ func TestLayerSaveNormalizationAndExpansion(t *testing.T) {
 func TestColonyDrillPurchaseAndOreMarket(t *testing.T) {
 	s := New(1)
 	s.Credits = 1000000
+	s.Blueprints["api.dig"] = true
 	if err := s.Buy("api.dig"); err != nil {
 		t.Fatal(err)
 	}
