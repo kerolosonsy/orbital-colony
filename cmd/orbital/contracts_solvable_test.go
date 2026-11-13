@@ -109,7 +109,16 @@ func buildColonyProjectProgram(t *testing.T, r *runner, project colonyProject) s
 // playContract runs code with c active on its fixture until the contract
 // settles or fails, or its window has clearly passed.
 func playContract(t *testing.T, r *runner, c *econ.Contract, project colonyProject) contractResult {
+	if c.ID == "n31-trade-route" || c.ID == "n31-bad-line" {
+		return playNeighborContract(t, r, c, project)
+	}
+	if econ.IsControlContract(c.ID) {
+		return playControlContract(t, r, c, project)
+	}
 	t.Helper()
+	if archiveMarketContract(c.ID) {
+		return playArchiveMarketContract(t, r, c, project)
+	}
 	if missing := projectRequirements(project.Files, c.Requires, "en"); len(missing) > 0 {
 		return contractResult{Requires: missing}
 	}

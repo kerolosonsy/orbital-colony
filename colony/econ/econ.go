@@ -36,6 +36,10 @@ type Tile struct {
 
 // State is everything that persists between runs.
 type State struct {
+	Season           string             `json:"season,omitempty"`
+	NeighborPayments map[string]float64 `json:"neighborPayments,omitempty"`
+	Systems          SystemCounters     `json:"systemsCounters,omitempty"`
+
 	Weather    Weather      `json:"weather"`
 	Rush       *RushOrder   `json:"rush,omitempty"`
 	Shock      *MarketShock `json:"shock,omitempty"`
@@ -106,7 +110,7 @@ func (s *State) Normalize() {
 	if s.Active != "" && FindContract(s.Active) == nil {
 		s.Active = ""
 	}
-	if want := FieldSize(s.Levels["field"]); s.Size != want || len(s.Tiles) != want*want {
+	if want := s.FieldSize(); s.Size != want || len(s.Tiles) != want*want {
 		s.resize(want)
 	}
 	s.normalizeLayers()
@@ -352,6 +356,7 @@ func (s *State) Sell(g string, n float64) float64 {
 	if n <= 0 {
 		return 0
 	}
+	s.recordSystemSale(g, n)
 	earned := 0.0
 	for n > 0 {
 		chunk := math.Min(n, 1)
@@ -381,6 +386,9 @@ func (s *State) Recover(ticks int64) {
 
 // Status says whether an upgrade can be bought and why not.
 func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
+	if reason := s.PurchaseReason(); reason != "" {
+		return u.CostAt(s.Levels[u.ID]), false, reason
+	}
 	l := s.Levels[u.ID]
 	if u.Max > 0 && l >= u.Max {
 		return Cost{}, false, i18n.T("خلصت كل المستويات", "All levels completed")
@@ -445,7 +453,7 @@ func (s *State) Buy(id string) error {
 	s.spendResearch(id)
 	s.Levels[id]++
 	if id == "field" {
-		s.resize(FieldSize(s.Levels["field"]))
+		s.resize(s.FieldSize())
 	}
 	return nil
 }

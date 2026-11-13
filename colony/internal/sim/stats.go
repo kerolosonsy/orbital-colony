@@ -39,6 +39,9 @@ func (w *World) trackAction(d *Drone, op string, f func() (bool, string, bool)) 
 		}
 		c := w.stats[d.ID]
 		c.commands[op]++
+		if w.Econ != nil {
+			w.Econ.Systems.Commands++
+		}
 		if !ok {
 			c.Failed++
 			c.failures[op]++

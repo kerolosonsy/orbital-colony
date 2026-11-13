@@ -205,6 +205,9 @@ type Event struct {
 // World holds the full state of one mission. All exported methods are safe
 // for concurrent use, so later chapters can drive it from goroutines.
 type World struct {
+	archive    *colonyArchive
+	marketKeys map[string]systemReceipt
+
 	mu      sync.Mutex
 	W, H    int
 	tiles   []Tile
@@ -325,6 +328,10 @@ func (w *World) drone(id int) *Drone {
 }
 
 func (w *World) clock() {
+	if w.seasonClock() {
+		return
+	}
+	defer w.clampSeasonTick()
 	if w.Realtime {
 		w.Tick = max(w.Tick, w.TickBase+int(time.Since(w.start)/w.Unit))
 	}
@@ -391,6 +398,7 @@ func (w *World) invView() map[string]int {
 }
 
 func (w *World) emit(ev Event) {
+	w.archiveEvent(ev)
 	pairs := takeMessages()
 	if w.Econ != nil {
 		ev.Translations = pairs
@@ -528,10 +536,15 @@ func (w *World) actErr(id int, op string, f func() (ok bool, msg string, changed
 	if w.done {
 		select {} // mission over; os.Exit is on its way
 	}
-	if w.Realtime {
+	if w.seasonActionClock(speed) {
+	} else if w.Realtime {
 		w.Tick = max(w.Tick, slot)
 	} else {
 		w.Tick += speed
+	}
+	w.clampSeasonTick()
+	if w.finishSeason() {
+		return false, nil
 	}
 	if w.Econ != nil {
 		w.advanceProduction(w.Tick)

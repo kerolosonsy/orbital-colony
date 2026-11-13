@@ -3,6 +3,9 @@ package econ
 import "fmt"
 
 func addTreeContent() {
+	addArchiveMarketNodes()
+	addNeighborTree()
+	addControlNodes()
 	addResourceResearch()
 	addBuildingResearch()
 	for _, n := range []Node{

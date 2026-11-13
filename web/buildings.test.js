@@ -489,3 +489,147 @@ test("Colony live flow updates buildings list, world tiles, legend and redraws w
   assert.equal(elements.get("#col-buildings").classList.contains("hidden"), true);
   assert.equal(elements.get("#col-buildings").innerHTML, "");
 });
+
+test("stopped Colony.enter keeps surface tile b, populates Buildings status, and draws buildings immediately", async () => {
+  const elements = new Map();
+  const makeTestEl = (id = "") => {
+    const el = makeFakeElement(id);
+    const children = new Map();
+    el.setAttribute = () => {};
+    el.getAttribute = () => null;
+    el.querySelector = (q) => {
+      if (!children.has(q)) children.set(q, makeTestEl(q));
+      return children.get(q);
+    };
+    return el;
+  };
+  const getEl = (sel) => {
+    if (!elements.has(sel)) elements.set(sel, makeTestEl(sel));
+    return elements.get(sel);
+  };
+  const drawnBuildings = [];
+  let legendCalls = 0;
+
+  const ctx = vm.createContext({
+    LANG: "en", TOKEN: "tok", PROFILE: "default",
+    T: (_ar, en) => en,
+    esc: (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+    Math, Object, Array, Number, String, Boolean, JSON, Map, Set,
+    document: { ...makeFakeDocument(), title: "Orbital Colony", body: { classList: makeFakeElement().classList } },
+    performance: { now: () => 500 },
+    setTimeout: () => 1,
+    clearTimeout: () => {},
+    EventSource: class { close() {} },
+    $: getEl,
+    $$: () => [],
+    ed: { value: "", readOnly: false },
+    con: getEl("#console"),
+    S: { mode: "mission", file: "main.go", levels: [], chapters: [], failLogged: false },
+    W: null,
+    playback: false,
+    lastErrors: [],
+    lastMtime: 0,
+    TreeView: { isOpen: false, update() {}, close() {}, open() {} },
+    Sound: { play() {} },
+    log() {},
+    hud() {},
+    burst() {},
+    finishPlayback() {},
+    linkUI() {},
+    isLinked: () => false,
+    showFile() {},
+    setDigits: (el, v) => { el.textContent = String(v); },
+    store: { pref: () => false, save() {} },
+    renderLayerBar() {},
+    renderLegend: () => { legendCalls += 1; },
+    setWorld: (init) => {
+      const layers = Array.from({ length: init.layers || 1 }, () => Array.from({ length: init.w }, () => []));
+      for (const t of init.tiles) layers[t.z || 0][t.x][t.y] = t;
+      for (let z = 0; z < (init.layers || 1); z++) {
+        for (let x = 0; x < init.w; x++) {
+          for (let y = 0; y < init.h; y++) {
+            layers[z][x][y] ||= { x, y, z, g: "regolith" };
+          }
+        }
+      }
+      ctx.Buildings.syncState(init.buildings || []);
+      ctx.W = { w: init.w, h: init.h, layers, tiles: layers[0], depth: init.layers || 1, view: 0, follow: true, t: 0, inv: init.inv || {}, storm: 0, drones: new Map() };
+      ctx.renderLegend();
+    },
+    draw: () => {
+      const W = ctx.W;
+      if (!W || !W.layers || !W.layers[0]) return;
+      for (let x = 0; x < W.w; x++) {
+        for (let y = 0; y < W.h; y++) {
+          const t = W.layers[0][x][y];
+          if (t && t.b) drawnBuildings.push({ x, y, kind: t.b, status: ctx.Buildings.at(x, y) });
+        }
+      }
+    },
+    parText() {},
+    lastInv: {},
+    api: async (path) => {
+      if (path === "/api/colony/runs") return { runs: [] };
+      if (path === "/api/colony") {
+        const tiles = Array.from({ length: 16 }, () => ({ g: "regolith" }));
+        // Stopped summary includes `b` directly on the surface tile at (1, 2).
+        tiles[2 * 4 + 1] = { g: "regolith", b: "smelter" };
+        return {
+          running: false,
+          starter: "package main\n",
+          prices: { plate: 29 },
+          contracts: [],
+          shop: [],
+          state: {
+            tick: 80,
+            size: 4,
+            depth: 1,
+            credits: 300,
+            levels: { smelter: 1, silo: 1 },
+            inv: {},
+            tiles,
+            buildings: [
+              { kind: "smelter", x: 1, y: 2, level: 2, recipe: "plate", in: { iron: 2 }, out: { plate: 1 }, progress: 0.65, wear: 18 },
+              { kind: "silo", x: 0, y: 0, level: 1, recipe: "", in: {}, out: {}, progress: 0, wear: 5 },
+            ],
+          },
+        };
+      }
+      return {};
+    },
+  });
+
+  vm.runInContext(
+    appSrc.slice(appSrc.indexOf("const BURST"), appSrc.indexOf("function setWorld"))
+    + "\n;Object.assign(globalThis, { BURST, UNIT, ORES, ENT, NAME, INV_COLOR, DRONE_COLORS, noEmoji });",
+    ctx,
+  );
+  vm.runInContext(buildingsSrc + "\n;globalThis.Buildings = Buildings;", ctx);
+  vm.runInContext(appSrc.slice(appSrc.indexOf("const DRONE_OPS"), appSrc.indexOf("function tick(")), ctx);
+  const testColonySrc = colonySrc
+    .slice(0, colonySrc.indexOf('$("#btn-colony").onclick'))
+    .replace(
+      "return { enter, exit, toggleRun, LEVEL, get running() { return running; } };",
+      "return { enter, exit, toggleRun, LEVEL, get running() { return running; } };",
+    );
+  vm.runInContext(testColonySrc + "\n;globalThis.Colony = Colony;", ctx);
+
+  await ctx.Colony.enter();
+  assert.equal(ctx.Colony.running, false);
+  assert.equal(ctx.W.layers[0][1][2].b, "smelter");
+  assert.equal(ctx.W.layers[0][0][0].b, "silo");
+  assert.equal(ctx.Buildings.at(1, 2).progress, 0.65);
+  assert.equal(ctx.Buildings.at(1, 2).wear, 18);
+  assert.equal(ctx.Buildings.at(0, 0).kind, "silo");
+  assert.ok(legendCalls >= 1);
+  assert.deepEqual(
+    drawnBuildings.map((d) => ({ x: d.x, y: d.y, kind: d.kind, progress: d.status && d.status.progress })),
+    [
+      { x: 0, y: 0, kind: "silo", progress: 0 },
+      { x: 1, y: 2, kind: "smelter", progress: 0.65 },
+    ],
+  );
+  assert.equal(elements.get("#col-buildings").classList.contains("hidden"), false);
+  assert.match(elements.get("#col-buildings").innerHTML, /Smelter/);
+  assert.match(elements.get("#col-buildings").innerHTML, /Silo/);
+});

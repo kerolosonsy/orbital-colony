@@ -25,6 +25,7 @@ type colonyRunRecord struct {
 }
 
 type colonyRunDetails struct {
+	env              []string
 	record           colonyRunRecord
 	lang             string
 	startTick        int64

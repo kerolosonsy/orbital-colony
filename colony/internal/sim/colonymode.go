@@ -52,6 +52,7 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.lastRankTick = w.TickBase
 	w.loadTiles()
 	w.applyEcon()
+	w.initArchive()
 	w.Check = func(w *World) (bool, string) {
 		return false, sayf("كريدت: %.0f", "Credits: %.0f", w.Econ.Credits)
 	}
@@ -221,6 +222,7 @@ func (w *World) colonyHarvest(destroy bool) (int, error, string, bool) {
 	if err := w.collectGood(t.Entity, got); err != nil {
 		return 0, err, buildingMessage(err), false
 	}
+	w.archiveHarvest(name, got)
 	w.Econ.RecordHarvest(name, base, t.Size)
 	w.syncInv()
 	t.Entity, t.Planted, t.Ready, t.Size = Empty, 0, 0, 0
@@ -252,6 +254,7 @@ func (w *World) Export(id int, e Entity, n int) (earned float64) {
 		earned = w.Econ.Sell(name, amount)
 		// Each unit lowers the price, so the last one sold was the cheapest.
 		low := w.Econ.Price(name) / math.Pow(0.996, math.Min(1, sold))
+		w.archiveSale(name, sold, earned)
 		w.Econ.RecordSale(id, name, sold, earned, low)
 		w.recordRankSale(name, sold)
 		w.syncInv()
@@ -283,6 +286,7 @@ func (w *World) Credits() float64 {
 // ---------- background life of the colony ----------
 
 type econEvent struct {
+	Receipt      *systemReceipt     `json:"receipt,omitempty"`
 	Stats        *runStats          `json:"stats,omitempty"`
 	Rank         econ.RankProgress  `json:"rank"`
 	Translations [][2]string        `json:"translations,omitempty"`
@@ -320,8 +324,13 @@ func (w *World) emitRaw(v econEvent) {
 }
 
 func (w *World) econSnapshot(op, msg string, ok, full bool) {
+	w.flushArchive()
 	w.advanceProduction(w.Tick)
 	w.checkRank()
+	w.emitEconSnapshot(op, msg, ok, full)
+}
+
+func (w *World) emitEconSnapshot(op, msg string, ok, full bool) {
 	ev := econEvent{Op: op, T: w.Tick, OK: ok, Msg: msg, Credits: w.Econ.Credits, Prices: w.Econ.Prices(), Inv: w.Econ.Inv}
 	if w.Econ.Active != "" {
 		_, _, why := w.Econ.ProgressPair(int64(w.Tick))
@@ -333,6 +342,7 @@ func (w *World) econSnapshot(op, msg string, ok, full bool) {
 		ev.State = w.Econ
 	}
 	w.emitRaw(ev)
+	w.emitArchiveStatus()
 }
 
 // RunColony starts the colony's background processes: market recovery,
@@ -363,9 +373,15 @@ func (w *World) colonyTicker() {
 		}
 		w.clock()
 		w.advanceProduction(w.Tick)
-		w.Econ.Recover(every)
+		if !w.seasonClock() {
+			w.Econ.Recover(every)
+		}
 		w.growVeins()
 		w.checkContract()
+		if w.finishSeason() {
+			w.mu.Unlock()
+			return
+		}
 		w.saveShutdown(false)
 		n++
 		w.econSnapshot("econ", "", true, n%3 == 0)
@@ -443,10 +459,27 @@ func (w *World) growVeins() {
 }
 
 // colonyCommands applies purchases the player makes in the game while the
-// program runs. Each line is {"buy": "<upgrade id>"}.
+// program runs. Control lines use controlResult/controlSnapshot; neighbour
+// transfers use receipt; market transfers use id (with take/credit/market).
+// Purchases use {"buy": "<upgrade id>"}.
 func (w *World) colonyCommands(r io.Reader) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
+		var fields map[string]json.RawMessage
+		if json.Unmarshal(sc.Bytes(), &fields) != nil {
+			continue
+		}
+		switch {
+		case fields["controlResult"] != nil || fields["controlSnapshot"] != nil:
+			w.controlSystemCommand(sc.Bytes())
+			continue
+		case fields["receipt"] != nil:
+			w.neighborCommand(sc.Bytes())
+			continue
+		case fields["id"] != nil:
+			w.systemCommand(sc.Bytes())
+			continue
+		}
 		var cmd struct{ Buy string }
 		if json.Unmarshal(sc.Bytes(), &cmd) != nil || cmd.Buy == "" {
 			continue
