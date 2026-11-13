@@ -83,6 +83,7 @@
   </section>
 
   <section class="panel lesson-panel colony-panel" id="colony-panel">
+    <div id="col-season" class="col-season hidden"></div>
     <div id="col-weather" class="col-weather hidden" role="status"></div>
     <div id="col-rank" class="col-rank hidden"></div>
     <div class="col-status">
@@ -97,9 +98,13 @@
     <table class="col-market" id="col-market"></table>
     <div id="col-buildings" class="col-buildings hidden"></div>
     <div id="col-fleet" class="col-fleet hidden"></div>
+    <div id="col-systems" class="col-systems hidden"></div>
     <div id="col-rewards" class="col-rewards"></div>
     <div id="col-contracts" class="col-contracts"></div>
-    <button type="button" id="btn-tech-tree" class="tool" data-en="Tech tree">شجرة التقنيات</button>
+    <div class="col-panel-actions">
+      <button type="button" id="btn-tech-tree" class="tool" data-en="Tech tree">شجرة التقنيات</button>
+      <button type="button" id="btn-seasons" class="tool" data-en="Seasons">المواسم</button>
+    </div>
     <div id="col-shop" class="col-shop"></div>
   </section>
 
@@ -199,6 +204,29 @@
       <select id="profile-new-lang" aria-label="اللغة" data-en-aria="Language"><option value="ar">العربية</option><option value="en">English</option></select>
       <button class="run" type="submit"><span data-en="Add player">ضيف لاعب</span></button>
     </form>
+  </div>
+</dialog>
+
+<dialog id="seasons" class="overlay hidden" aria-labelledby="seasons-title">
+  <div class="sheet seasons-sheet">
+    <div class="sheet-head">
+      <h2 id="seasons-title" data-en="Seasons">المواسم</h2>
+      <button class="tool" data-close aria-label="قفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+    </div>
+    <p class="seasons-note" data-en="Fixed-length challenges in a separate colony. Your main colony stays untouched.">تحديات بمدة محددة في مستعمرة منفصلة. مستعمرتك الأساسية بتفضل زي ما هي.</p>
+    <div id="seasons-list" class="seasons-list"></div>
+  </div>
+</dialog>
+
+<dialog id="season-result" class="overlay hidden" aria-labelledby="season-result-title">
+  <div class="sheet result-sheet season-result-sheet">
+    <div class="stamp" aria-hidden="true"><span id="season-stamp">SEASON</span><span id="season-stamp-sub">KEPLER-G</span></div>
+    <h2 class="result-title" id="season-result-title" data-en="Season finished">الموسم خلص</h2>
+    <div id="season-result-body" class="season-result-body"></div>
+    <div class="result-actions">
+      <button class="tool" data-close data-en="Close">تمام</button>
+      <button id="btn-season-again" class="tool" data-en="Seasons">المواسم</button>
+    </div>
   </div>
 </dialog>
 
