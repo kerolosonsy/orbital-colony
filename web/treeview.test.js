@@ -6,7 +6,7 @@ const vm = require("node:vm");
 const escapeHTML = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const context = vm.createContext({ module: { exports: {} }, LANG: "ar", T: (ar, en) => context.LANG === "en" ? en : ar, esc: escapeHTML });
 vm.runInContext(fs.readFileSync(__dirname + "/treeview.js", "utf8"), context);
-const { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkMarkup, branchHue } = context.module.exports;
+const { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkLabel, checkMarkup, costMarkup, headerStatsMarkup, branchHue } = context.module.exports;
 
 test("fit centres offset bounds with a screen-space margin and never zooms above 100%", () => {
   for (const [bounds, width, height, margin, expected] of [
@@ -164,4 +164,104 @@ test("soon and max requirements stay disabled and render localized escaped label
       assert.match(checkMarkup({ ...check, label: "<unsafe>", labelEn: "<unsafe>" }, 0), /&lt;unsafe&gt;/);
     }
   }
+});
+
+test("rp and rank checks render clear localized labels without clickable links", () => {
+  for (const lang of ["ar", "en"]) {
+    context.LANG = lang;
+    const rpWithLabels = checkMarkup({ kind: "rp", ok: true, label: "٤٠ نقطة بحث", labelEn: "40 research points" }, 0);
+    assert.match(rpWithLabels, /is-ok/);
+    assert.doesNotMatch(rpWithLabels, /<button/);
+    assert.ok(rpWithLabels.includes(lang === "en" ? "40 research points" : "٤٠ نقطة بحث"));
+
+    const rpNumericFallback = checkMarkup({ kind: "rp", ok: false }, 1, { rp: 40 });
+    assert.match(rpNumericFallback, /is-missing/);
+    assert.doesNotMatch(rpNumericFallback, /<button/);
+    assert.ok(rpNumericFallback.includes(lang === "en" ? "Research points: 40" : "نقاط البحث: 40"));
+
+    const rpBareFallback = checkMarkup({ kind: "rp", ok: false }, 2);
+    assert.ok(rpBareFallback.includes(lang === "en" ? "Enough research points" : "نقاط بحث كافية"));
+
+    const rankFromRef = checkMarkup({ kind: "rank", ok: false, ref: "3" }, 3);
+    assert.match(rankFromRef, /is-missing/);
+    assert.doesNotMatch(rankFromRef, /<button/);
+    assert.ok(rankFromRef.includes(lang === "en" ? "Rank 3 or higher" : "المرتبة 3 أو أعلى"));
+
+    const rankBareFallback = checkMarkup({ kind: "rank", ok: true }, 4);
+    assert.match(rankBareFallback, /is-ok/);
+    assert.ok(rankBareFallback.includes(lang === "en" ? "Colony rank" : "مرتبة المستعمرة"));
+  }
+});
+
+test("costMarkup places RP cost next to credit cost only when rp > 0 and reflects affordability", () => {
+  for (const lang of ["ar", "en"]) {
+    context.LANG = lang;
+    const nodeNoRp = { cost: { credits: 100, goods: {} } };
+    const noRpHtml = costMarkup(nodeNoRp, { credits: 120, rp: 50, inv: {} });
+    assert.doesNotMatch(noRpHtml, lang === "en" ? />RP</ : />نقاط البحث</);
+
+    const nodeZeroRp = { rp: 0, cost: { credits: 100, goods: {} } };
+    assert.doesNotMatch(costMarkup(nodeZeroRp, { credits: 120, rp: 50, inv: {} }), lang === "en" ? />RP</ : />نقاط البحث</);
+
+    const nodeWithRp = { rp: 40, cost: { credits: 100, goods: { moss: 5 } } };
+    const missingRpHtml = costMarkup(nodeWithRp, { credits: 120, rp: 25, inv: { moss: 5 } });
+    assert.match(missingRpHtml, lang === "en" ? /Credits.*120 \/ 100.*RP.*25 \/ 40/ : /كريدت.*120 \/ 100.*نقاط البحث.*25 \/ 40/);
+    assert.match(missingRpHtml, /class="is-missing"><span>(RP|نقاط البحث)<\/span>/);
+
+    const metRpHtml = costMarkup(nodeWithRp, { credits: 120, rp: 40, inv: { moss: 5 } });
+    assert.match(metRpHtml, /class="is-ok"><span>(RP|نقاط البحث)<\/span>/);
+  }
+});
+
+test("tree header stats render current RP and rank when present and omit absent fields", () => {
+  for (const lang of ["ar", "en"]) {
+    context.LANG = lang;
+    assert.equal(headerStatsMarkup({}), "");
+    assert.equal(headerStatsMarkup({ rp: 0 }), lang === "en" ? '<span class="tv-stat tv-stat-rp"><span>RP</span><b dir="ltr">0</b></span>' : '<span class="tv-stat tv-stat-rp"><span>نقاط البحث</span><b dir="ltr">0</b></span>');
+    const both = headerStatsMarkup({ rank: 3, rp: 45 });
+    assert.match(both, lang === "en" ? /Rank.*3.*RP.*45/ : /المرتبة.*3.*نقاط البحث.*45/);
+  }
+});
+
+test("tree overlay updates header stats and detail card live from TreeView.update", () => {
+  const element = () => ({
+    attributes: new Map(), events: {}, classes: new Set(), innerHTML: "", hidden: false,
+    setAttribute(name, value) { this.attributes.set(name, value); },
+    addEventListener(name, listener) { this.events[name] = listener; },
+    closest() { return null; },
+  });
+  const dialog = element(), canvas = element(), world = element(), stats = element();
+  const centre = element(), input = element(), detail = element(), nav = element(), close = element();
+  const selectors = { ".tv-canvas": canvas, ".tv-world": world, ".tv-detail": detail, ".tv-branches": nav, ".tv-stats": stats, input, '[data-action="centre"]': centre, '[data-action="close"]': close };
+  dialog.querySelector = (selector) => selectors[selector];
+  dialog.querySelectorAll = () => [];
+  dialog.showModal = () => { dialog.open = true; };
+  dialog.classList = { toggle(name, active) { if (active) dialog.classes.add(name); else dialog.classes.delete(name); } };
+  canvas.getBoundingClientRect = () => ({ width: 800, height: 600 });
+  const ui = vm.createContext({
+    document: { activeElement: null, createElement: () => dialog, body: { appendChild() {} } },
+    ResizeObserver: class { observe() {} },
+    LANG: "en", T: (_ar, en) => en, esc: escapeHTML,
+    NAME: { moss: "Moss" },
+  });
+  vm.runInContext(fs.readFileSync(__dirname + "/tree.js", "utf8"), ui);
+  vm.runInContext(fs.readFileSync(__dirname + "/treeview.js", "utf8"), ui);
+  const view = vm.runInContext("TreeView", ui);
+  const nodes = [
+    { id: "root", branch: "", after: [], state: "owned", level: 1, name: "Base", desc: "D", effect: "E", checks: [], cost: { credits: 0, goods: {} } },
+    { id: "tech", branch: "research", after: [{ id: "root", level: 1 }], state: "near", level: 0, name: "Lab Tech", desc: "D", effect: "E", rp: 40, checks: [{ kind: "rank", ok: false, ref: "3" }, { kind: "rp", ok: false }], cost: { credits: 200, goods: {} } },
+  ];
+  view.open({ nodes, credits: 500, inv: {} });
+  assert.equal(stats.hidden, true);
+  assert.equal(stats.innerHTML, "");
+
+  view.update({ nodes, credits: 500, inv: {}, rp: 25, rank: 2 });
+  assert.equal(stats.hidden, false);
+  assert.match(stats.innerHTML, /Rank.*2.*RP.*25/);
+
+  // Selecting node via click renders rank + rp checks and RP cost in detail card
+  canvas.events.click({ detail: 0, target: { closest: () => ({ dataset: { node: "tech" } }) } });
+  assert.match(detail.innerHTML, /Rank 3 or higher/);
+  assert.match(detail.innerHTML, /Research points: 40/);
+  assert.match(detail.innerHTML, /25 \/ 40/);
 });

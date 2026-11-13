@@ -62,6 +62,7 @@ const TreeView = (() => {
     overlay.className = "treeview";
     overlay.setAttribute("aria-labelledby", "tv-title");
     overlay.innerHTML = `<header class="tv-header"><h2 id="tv-title">${esc(T("شجرة التقنيات", "Tech tree"))}</h2>
+      <div class="tv-stats"></div>
       <label class="tv-search"><span>${esc(T("بحث بالاسم", "Search by name"))}</span><input type="search" autocomplete="off"></label>
       <button type="button" data-action="centre">${esc(T("رجّعني للمركز", "Re-centre"))}</button>
       <button type="button" data-action="close">${esc(T("قفل", "Close"))}</button>
@@ -123,8 +124,26 @@ const TreeView = (() => {
     if (!byId[selected]) selected = null;
     if (!branches.includes(filter)) filter = "";
     if (!overlay || !overlay.open) return;
+    const stats = overlay.querySelector(".tv-stats");
+    if (stats) {
+      const html = headerStatsMarkup(tree);
+      stats.innerHTML = html;
+      stats.hidden = !html;
+    }
     renderBranches(); renderGraph(); renderDetail();
     minZoom = Math.min(0.25, fittedView().zoom);
+  }
+
+  function headerStatsMarkup(state = tree) {
+    if (!state) return "";
+    const parts = [];
+    if (typeof state.rank === "number" && Number.isFinite(state.rank)) {
+      parts.push(`<span class="tv-stat tv-stat-rank"><span>${esc(T("المرتبة", "Rank"))}</span><b dir="ltr">${fmt(state.rank)}</b></span>`);
+    }
+    if (typeof state.rp === "number" && Number.isFinite(state.rp)) {
+      parts.push(`<span class="tv-stat tv-stat-rp"><span>${esc(T("نقاط البحث", "RP"))}</span><b dir="ltr">${fmt(state.rp)}</b></span>`);
+    }
+    return parts.join("");
   }
 
   function renderBranches() {
@@ -186,19 +205,46 @@ const TreeView = (() => {
     }
     detail.innerHTML = `<h3>${esc(local(node, "name"))}</h3><p class="tv-detail-state">${esc(stateLabel(node))}</p>
       <p>${esc(local(node, "desc"))}</p><h4>${esc(T(`الأثر في المستوى ${fmt(node.level + 1)}`, `Effect at level ${fmt(node.level + 1)}`))}</h4><p>${esc(local(node, "effect"))}</p>
-      <h4>${esc(T("شروط الترقية", "Upgrade requirements"))}</h4><ul class="tv-checks">${node.checks.map(checkMarkup).join("")}</ul>
+      <h4>${esc(T("شروط الترقية", "Upgrade requirements"))}</h4><ul class="tv-checks">${node.checks.map((c, i) => checkMarkup(c, i, node)).join("")}</ul>
       <h4>${esc(T("التكلفة · معاك / المطلوب", "Cost · held / required"))}</h4><ul class="tv-cost">${costMarkup(node)}</ul>
       <button type="button" class="tv-buy" ${buyEnabled(node) ? "" : "disabled"}>${esc(buyLabel(node))}</button>`;
   }
 
-  function checkMarkup(check, index) {
-    const link = !check.ok && (check.kind === "parent" || check.kind === "contract");
-    const label = esc(local(check, "label")), mark = esc(check.ok ? T("✓", "✓") : T("✗", "✗"));
-    return `<li class="${check.ok ? "is-ok" : "is-missing"}"><span aria-hidden="true">${mark}</span><span class="tv-sr">${esc(check.ok ? T("مكتمل: ", "Met: ") : T("ناقص: ", "Missing: "))}</span>${link ? `<button type="button" data-check="${index}">${label}</button>` : `<span>${label}</span>`}</li>`;
+  function checkLabel(check, node) {
+    const raw = local(check, "label").trim();
+    const num = check.need ?? check.required ?? check.target ?? check.level ?? check.rp ?? check.rank ?? check.value ?? check.ref;
+    if (check.kind === "rp") {
+      if (raw && !/^\d+(?:\.\d+)?$/.test(raw)) return raw;
+      const amt = raw || num || (node && node.rp);
+      return amt !== undefined && amt !== ""
+        ? T(`نقاط البحث: ${fmt(Number(amt) || 0)}`, `Research points: ${fmt(Number(amt) || 0)}`)
+        : T("نقاط بحث كافية", "Enough research points");
+    }
+    if (check.kind === "rank") {
+      if (raw && !/^\d+(?:\.\d+)?$/.test(raw)) return raw;
+      const lvl = raw || num;
+      return lvl !== undefined && lvl !== ""
+        ? T(`المرتبة ${fmt(Number(lvl) || 0)} أو أعلى`, `Rank ${fmt(Number(lvl) || 0)} or higher`)
+        : T("مرتبة المستعمرة", "Colony rank");
+    }
+    return raw;
   }
 
-  function costMarkup(node) {
-    const costs = [[T("كريدت", "Credits"), tree.credits, node.cost.credits], ...Object.entries(node.cost.goods || {}).map(([good, needed]) => [T(NAME[good] || good, NAME[good] || good), tree.inv[good] || 0, needed])];
+  function checkMarkup(check, index, node) {
+    const link = !check.ok && (check.kind === "parent" || check.kind === "contract");
+    const label = esc(checkLabel(check, node)), mark = esc(check.ok ? T("✓", "✓") : T("✗", "✗"));
+    const kindCls = check.kind ? ` tv-check-${attr(check.kind)}` : "";
+    return `<li class="${check.ok ? "is-ok" : "is-missing"}${kindCls}"><span aria-hidden="true">${mark}</span><span class="tv-sr">${esc(check.ok ? T("مكتمل: ", "Met: ") : T("ناقص: ", "Missing: "))}</span>${link ? `<button type="button" data-check="${index}">${label}</button>` : `<span>${label}</span>`}</li>`;
+  }
+
+  function costMarkup(node, state = tree) {
+    const names = typeof NAME !== "undefined" ? NAME : {};
+    const rpCost = Number((node && (node.rp ?? (node.cost && node.cost.rp))) || 0);
+    const costs = [[T("كريدت", "Credits"), (state && state.credits) || 0, (node.cost && node.cost.credits) || 0]];
+    if (rpCost > 0) costs.push([T("نقاط البحث", "RP"), (state && state.rp) || 0, rpCost]);
+    for (const [good, needed] of Object.entries((node.cost && node.cost.goods) || {})) {
+      costs.push([T(names[good] || good, names[good] || good), (state && state.inv && state.inv[good]) || 0, needed]);
+    }
     return costs.map(([name, held, needed]) => `<li class="${held >= needed ? "is-ok" : "is-missing"}"><span>${esc(name)}</span><b dir="ltr">${esc(T(`${fmt(held)} / ${fmt(needed)}`, `${fmt(held)} / ${fmt(needed)}`))}</b></li>`).join("");
   }
 
@@ -293,6 +339,6 @@ const TreeView = (() => {
     pointers.clear(); pressedNode = null;
   }
 
-  if (typeof module !== "undefined" && module.exports) module.exports = { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkMarkup, branchHue };
+  if (typeof module !== "undefined" && module.exports) module.exports = { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkLabel, checkMarkup, costMarkup, headerStatsMarkup, branchHue };
   return { open, close, update, get isOpen() { return !!overlay && overlay.open; } };
 })();

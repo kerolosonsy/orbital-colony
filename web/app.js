@@ -430,14 +430,14 @@ const NAME = LANG === "en"
     biomass: "Biomass", plate: "Plate", wire: "Wire", glass: "Glass", fuel: "Fuel", fertilizer: "Fertilizer", circuit: "Circuit",
     alloy: "Alloy", battery: "Battery", coolant: "Coolant", processor: "Processor", frame: "Frame", cell: "Cell", core: "Core",
     composter: "Composter", smelter: "Smelter", kiln: "Kiln", refinery: "Refinery", assembler: "Assembler",
-    "reactor-lab": "Reactor Lab", silo: "Silo", generator: "Generator", lab: "Lab" }
+    "reactor-lab": "Reactor Lab", silo: "Silo", generator: "Generator", lab: "Lab", collector: "Gas Collector" }
   : { regolith: "ريجوليث", soil: "تربة", ice: "جليد", rock: "صخر", stone: "صخر صلب", tunnel: "نفق", shaft: "بير لتحت",
     moss: "طحالب", lichen: "أشنة", crystal: "كريستال", beacon: "منارة", glowcap: "فطر مضيء", reed: "بوص", iron: "حديد", geode: "جيود", cargo: "شحنة",
     water: "المياه", silica: "السيليكا", copper: "النحاس", sulfur: "الكبريت", titanium: "التيتانيوم", helium: "الهيليوم", uranium: "اليورانيوم",
     biomass: "الكتلة الحيوية", plate: "الصفيحة", wire: "السلك", glass: "الزجاج", fuel: "الوقود", fertilizer: "السماد", circuit: "الدائرة الإلكترونية",
     alloy: "السبيكة", battery: "البطارية", coolant: "سائل التبريد", processor: "المعالج", frame: "الهيكل", cell: "خلية الطاقة", core: "النواة",
     composter: "السمّادة", smelter: "المصهر", kiln: "الفرن", refinery: "المصفاة", assembler: "المجمّع",
-    "reactor-lab": "معمل المفاعل", silo: "الصومعة", generator: "المولّد", lab: "المعمل" };
+    "reactor-lab": "معمل المفاعل", silo: "الصومعة", generator: "المولّد", lab: "المعمل", collector: "جامع الغاز" };
 const INV_COLOR = {
   moss: ENT.moss, lichen: ENT.lichen, crystal: ENT.crystal, glowcap: ENT.glowcap, reed: ENT.reed, iron: ENT.iron, geode: ENT.geode,
   water: "#3a95e8", silica: "#d9cbb0", copper: ENT.copper, sulfur: ENT.sulfur, titanium: ENT.titanium, helium: "#f7bad2", uranium: ENT.uranium,

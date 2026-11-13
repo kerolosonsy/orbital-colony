@@ -2,7 +2,7 @@
 // Building sprites, live status map, and colony panel markup.
 const Buildings = (() => {
   const S = 16;
-  const KINDS = ["composter", "smelter", "kiln", "refinery", "assembler", "reactor-lab", "silo", "generator", "lab"];
+  const KINDS = ["composter", "smelter", "kiln", "refinery", "assembler", "reactor-lab", "silo", "generator", "lab", "collector"];
   const cache = new Map();
   const statusMap = new Map();
 
@@ -11,7 +11,7 @@ const Buildings = (() => {
   function clear() { statusMap.clear(); }
 
   function normalize(b, fx, fy) {
-    return {
+    const entry = {
       kind: b.kind,
       x: Number(b.x !== undefined ? b.x : fx) || 0,
       y: Number(b.y !== undefined ? b.y : fy) || 0,
@@ -22,6 +22,11 @@ const Buildings = (() => {
       progress: Number(b.progress) || 0,
       wear: Number(b.wear) || 0,
     };
+    if (b.powered !== undefined) entry.powered = !!b.powered;
+    if (b.enabled !== undefined) entry.enabled = !!b.enabled;
+    if (b.priority !== undefined) entry.priority = Number(b.priority) || 0;
+    if (b.mode) entry.mode = String(b.mode);
+    return entry;
   }
 
   function syncState(buildings) {
@@ -284,6 +289,28 @@ const Buildings = (() => {
       ],
       pulse: (px) => { px(10, 1, "#8f74ff"); px(11, 0, "#d6ccff"); px(7, 9, "#ffffff"); },
     },
+    collector: {
+      pal: { "#": "#0d0a1c", l: "#b8c1cf", d: "#5a6b82", c: "#45b3a8", C: "#9fd2cb", g: "#f7bad2", G: "#ffdce9" },
+      rows: [
+        "....########....",
+        "...#llllllll#...",
+        "..#llCCCCCCll#..",
+        "...##cccccc##...",
+        ".....#dddd#.....",
+        "..####llll####..",
+        ".#gG#llCCll#Gg#.",
+        ".#gg#lCCCCl#gg#.",
+        ".#gg#lccccl#gg#.",
+        ".#dd#llllll#dd#.",
+        ".#ll########ll#.",
+        ".#dddddddddddd#.",
+        ".#dd#dddddd#dd#.",
+        "..############..",
+        "................",
+        "................",
+      ],
+      pulse: (px) => { px(7, 2, "#ffffff"); px(8, 2, "#ffffff"); px(2, 7, "#ffdce9"); px(13, 7, "#ffdce9"); },
+    },
   };
 
   function sprite(kind, frame = 0) {
@@ -299,12 +326,15 @@ const Buildings = (() => {
     });
   }
 
-  // Draw the building sprite on its tile top face, plus a progress bar when
-  // producing and a warning mark when wear > 80.
+  // Draw the building sprite on its tile top face, dimmed with a small mark
+  // when unpowered or disabled, plus a progress bar and wear warning mark.
   function draw(ctx, X, Y, hw, kind, status, now) {
     if (!kind) return;
     const size = Math.round((hw * 1.3) / 8) * 8 || hw;
-    const producing = !!(status && status.progress > 0);
+    const unpowered = !!(status && status.powered === false);
+    const disabled = !!(status && status.enabled === false);
+    const inactive = unpowered || disabled;
+    const producing = !!(status && status.progress > 0 && !inactive);
     const frame = producing ? Math.floor((now || 0) / 450) % 2 : 0;
     const img = sprite(kind, frame);
 
@@ -315,9 +345,12 @@ const Buildings = (() => {
     ctx.fill();
     ctx.imageSmoothingEnabled = false;
     const topY = Math.round(Y + size * 0.22 - size);
+    const prevAlpha = ctx.globalAlpha ?? 1;
+    if (inactive) ctx.globalAlpha = 0.45;
     ctx.drawImage(img, Math.round(X - size / 2), topY, size, size);
+    if (inactive) ctx.globalAlpha = prevAlpha;
 
-    if (producing) {
+    if (status && status.progress > 0) {
       const p = Math.max(0, Math.min(1, status.progress));
       const barW = Math.max(14, Math.round(hw * 1.1));
       const barH = Math.max(3, Math.round(hw * 0.14));
@@ -329,6 +362,40 @@ const Buildings = (() => {
       ctx.fillRect(bx, by, barW, barH);
       ctx.fillStyle = "#d39b55";
       ctx.fillRect(bx, by, Math.max(1, Math.round(barW * p)), barH);
+    }
+
+    if (inactive) {
+      const r = Math.max(4, Math.round(hw * 0.22));
+      const mx = Math.round(X - size * 0.36);
+      const my = Math.round(topY + r + 1);
+      ctx.fillStyle = "#0d0a1c";
+      ctx.fillRect(mx - r - 1, my - r - 1, r * 2 + 2, r * 2 + 2);
+      ctx.fillStyle = "#17142a";
+      ctx.fillRect(mx - r, my - r, r * 2, r * 2);
+      if (disabled) {
+        const bw = Math.max(1, Math.round(r * 0.35));
+        const bh = Math.max(3, Math.round(r * 1.1));
+        ctx.fillStyle = "#a69dc2";
+        ctx.fillRect(mx - Math.max(2, Math.round(r * 0.5)), my - Math.floor(bh / 2), bw, bh);
+        ctx.fillRect(mx + Math.max(1, Math.round(r * 0.15)), my - Math.floor(bh / 2), bw, bh);
+      } else {
+        ctx.fillStyle = "#f0a14a";
+        ctx.beginPath();
+        ctx.moveTo(mx + 1, my - r + 1);
+        ctx.lineTo(mx - Math.max(2, Math.round(r * 0.55)), my + 1);
+        ctx.lineTo(mx, my + 1);
+        ctx.lineTo(mx - 1, my + r - 1);
+        ctx.lineTo(mx + Math.max(2, Math.round(r * 0.55)), my - 1);
+        ctx.lineTo(mx, my - 1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#ff6b6b";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(mx - r + 1, my - r + 1);
+        ctx.lineTo(mx + r - 1, my + r - 1);
+        ctx.stroke();
+      }
     }
 
     if (status && status.wear > 80) {
@@ -366,6 +433,17 @@ const Buildings = (() => {
     }).join("");
   }
 
+  const MODE_LABELS = {
+    solar: ["شمسي", "Solar"],
+    burner: ["حارق", "Burner"],
+    reactor: ["مفاعل", "Reactor"],
+  };
+
+  function modeLabel(mode, tr = T) {
+    const pair = MODE_LABELS[mode];
+    return pair ? tr(pair[0], pair[1]) : String(mode);
+  }
+
   function listMarkup(buildings, deps = {}) {
     if (!buildings || !buildings.length) return "";
     const tr = deps.T || T;
@@ -378,15 +456,23 @@ const Buildings = (() => {
       const recipeChip = b.recipe && colors[b.recipe] ? `<i style="background:${escAttr(colors[b.recipe], escapeFn)}"></i>` : "";
       const wear = Math.round(Number(b.wear) || 0);
       const worn = wear > 80;
+      const unpowered = b.powered === false;
+      const disabled = b.enabled === false;
       const x = Number(b.x) || 0, y = Number(b.y) || 0;
-      return `<div class="item bld-row${worn ? " bld-worn" : ""}" data-x="${x}" data-y="${y}">`
+      const tags = [
+        b.mode ? `<span class="bld-tag bld-mode">${escapeFn(modeLabel(b.mode, tr))}</span>` : "",
+        unpowered ? `<span class="bld-tag bld-unpowered-tag">${escapeFn(tr("بدون طاقة", "Unpowered"))}</span>` : "",
+        disabled ? `<span class="bld-tag bld-disabled-tag">${escapeFn(tr("معطّل", "Disabled"))}</span>` : "",
+      ].filter(Boolean).join("");
+      return `<div class="item bld-row${worn ? " bld-worn" : ""}${unpowered ? " bld-unpowered" : ""}${disabled ? " bld-disabled" : ""}" data-x="${x}" data-y="${y}">`
         + `<div class="item-top"><b>${name}</b><span class="bld-pos" dir="ltr">(${x}, ${y})</span></div>`
         + `<div class="bld-meta"><span class="bld-recipe">${recipeChip}${recipeName}</span><span class="bld-wear${worn ? " warn" : ""}">${escapeFn(tr("تآكل", "Wear"))} <b dir="ltr">${wear}%</b></span></div>`
+        + (tags ? `<div class="bld-tags">${tags}</div>` : "")
         + `<div class="bld-io"><span class="bld-dir"><span class="bld-lbl">${escapeFn(tr("داخل", "In"))}</span>${chipsMarkup(b.in, names, colors, escapeFn)}</span><span class="bld-dir"><span class="bld-lbl">${escapeFn(tr("خارج", "Out"))}</span>${chipsMarkup(b.out, names, colors, escapeFn)}</span></div>`
         + `</div>`;
     }).join("");
     return `<h3>${escapeFn(tr("المباني", "Buildings"))} <small>${buildings.length}</small></h3>` + rows;
   }
 
-  return { KINDS, clear, syncState, applyEvent, remove, at, list, sprite, draw, listMarkup };
+  return { KINDS, clear, syncState, applyEvent, remove, at, list, sprite, draw, listMarkup, modeLabel };
 })();
