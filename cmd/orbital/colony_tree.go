@@ -86,6 +86,9 @@ func treeChecks(st *econ.State, node econ.Node, upgrade econ.ShopItem, lang stri
 		contract := econ.FindContract(upgrade.Blueprint)
 		checks = append(checks, treeCheck{Kind: "contract", Ref: contract.ID, Label: tr(lang, contract.Title, contract.TitleEn)})
 	}
+	if allowed, need := st.RankAllows(node.ID); need > 0 && upgrade.Level < upgrade.Max {
+		checks = append(checks, treeCheck{Kind: "rank", Ref: "rank", Label: fmt.Sprintf(tr(lang, "محتاج رتبة مستعمرة %d", "Needs colony rank %d"), need), OK: allowed})
+	}
 	checks = append(checks, treeCostChecks(st, upgrade.Cost, lang)...)
 	if upgrade.Level >= upgrade.Max {
 		checks = append(checks, treeCheck{Kind: "max", Label: tr(lang, "مكتمل", "Maxed")})
