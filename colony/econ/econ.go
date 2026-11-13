@@ -47,13 +47,17 @@ type State struct {
 	Claimed  map[string]bool    `json:"claimed"`
 	Earned   float64            `json:"earned"` // lifetime credits
 	RunTicks int64              `json:"runTicks"`
+
+	Contracts  map[string]*ContractRun `json:"contracts,omitempty"`
+	Active     string                  `json:"active,omitempty"` // the running contract's id
+	Blueprints map[string]bool         `json:"blueprints,omitempty"`
 }
 
 func (s *State) At(x, y int) *Tile { return &s.Tiles[y*s.Size+x] }
 
 // New returns a fresh colony: a 3x3 patch of regolith and nothing else.
 func New(seed int64) *State {
-	s := &State{Version: 1, Seed: seed, Inv: map[string]float64{}, Levels: map[string]int{}, Demand: map[string]float64{}, Claimed: map[string]bool{}}
+	s := &State{Version: 2, Seed: seed, Inv: map[string]float64{}, Levels: map[string]int{}, Demand: map[string]float64{}, Claimed: map[string]bool{}}
 	s.resize(FieldSize(0))
 	s.Normalize()
 	return s
@@ -72,6 +76,18 @@ func (s *State) Normalize() {
 	}
 	if s.Claimed == nil {
 		s.Claimed = map[string]bool{}
+	}
+	if s.Contracts == nil {
+		s.Contracts = map[string]*ContractRun{}
+	}
+	if s.Blueprints == nil {
+		s.Blueprints = map[string]bool{}
+	}
+	if s.Version < 2 {
+		s.migrateV2()
+	}
+	if s.Active != "" && FindContract(s.Active) == nil {
+		s.Active = ""
 	}
 	if want := FieldSize(s.Levels["field"]); s.Size != want || len(s.Tiles) != want*want {
 		s.resize(want)
@@ -322,6 +338,13 @@ func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
 	if l >= u.Max {
 		return Cost{}, false, i18n.T("خلصت كل المستويات", "All levels completed")
 	}
+	if needsBlueprint(u.ID) && !s.Blueprints[u.ID] {
+		why := i18n.T("محتاج مخطط من عقد", "Needs a contract blueprint")
+		if c := BlueprintSource(u.ID); c != nil {
+			why = i18n.T("خلّص العقد الأول: ", "Finish the contract first: ") + c.LocalTitle()
+		}
+		return u.CostAt(l), false, why
+	}
 	for _, r := range u.Requires {
 		if !s.Has(r) {
 			if ru := Find(r); ru != nil {
@@ -369,24 +392,10 @@ type Reward struct {
 	Grants  []string `json:"grants,omitempty"` // upgrade ids given for free
 }
 
-// ChapterReward is what finishing every mission of a chapter pays out.
+// ChapterReward is what finishing every mission of a chapter pays out:
+// credits only. Commands and crops come from contracts.
 func ChapterReward(n int) Reward {
-	r := Reward{Credits: math.Round(60 * math.Pow(float64(n), 2.2))}
-	switch n {
-	case 4:
-		r.Grants = []string{"api.scanner"}
-	case 5:
-		r.Grants = []string{"api.try"}
-	case 6:
-		r.Grants = []string{"crop.crystal", "api.measure"}
-	case 8:
-		r.Grants = []string{"api.radar"}
-	case 10:
-		r.Grants = []string{"api.spawn", "hangar"}
-	case 15:
-		r.Grants = []string{"api.swap"}
-	}
-	return r
+	return Reward{Credits: math.Round(60 * math.Pow(float64(n), 2.2))}
 }
 
 // Claim pays a chapter's reward once.
@@ -414,6 +423,9 @@ type ShopItem struct {
 	Cost   Cost   `json:"cost"`
 	Can    bool   `json:"can"`
 	Reason string `json:"reason,omitempty"`
+	// Blueprint names the contract that unlocks this upgrade while its
+	// blueprint is missing.
+	Blueprint string `json:"blueprint,omitempty"`
 }
 
 // Shop lists every upgrade with its current level and price.
@@ -421,7 +433,13 @@ func (s *State) Shop() []ShopItem {
 	out := make([]ShopItem, 0, len(Catalog))
 	for _, u := range Catalog {
 		c, ok, why := s.Status(u)
-		out = append(out, ShopItem{Upgrade: u, Level: s.Levels[u.ID], Cost: c, Can: ok, Reason: why})
+		item := ShopItem{Upgrade: u, Level: s.Levels[u.ID], Cost: c, Can: ok, Reason: why}
+		if needsBlueprint(u.ID) && !s.Blueprints[u.ID] {
+			if src := BlueprintSource(u.ID); src != nil {
+				item.Blueprint = src.ID
+			}
+		}
+		out = append(out, item)
 	}
 	return out
 }

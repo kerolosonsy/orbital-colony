@@ -26,9 +26,11 @@ func TestEnglishEconomyFeedback(t *testing.T) {
 		{"missing goods", func(s *State) string {
 			s.Credits = 1000
 			s.Levels["crop.lichen"] = 1
+			s.Blueprints["crop.glowcap"] = true
 			_, _, why := s.Status(Find("crop.glowcap"))
 			return why
 		}, "You need 40 more Lichen"},
+		{"missing blueprint", func(s *State) string { _, _, why := s.Status(Find("api.try")); return why }, "Finish the contract first: Careful Harvest"},
 		{"claimed reward", func(s *State) string { s.Claimed["chapter-1"] = true; _, err := s.Claim(1); return err.Error() }, "This reward has already been claimed"},
 	}
 	for _, tc := range cases {
