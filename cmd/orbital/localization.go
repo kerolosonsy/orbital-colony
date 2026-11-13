@@ -120,6 +120,13 @@ func contractsForLang(st *econ.State, lang string, done map[int]bool) []contract
 }
 
 func economyName(lang, name string) string {
+	for _, resources := range [][]econ.Resource{econ.RawV3, econ.Crafted} {
+		for _, g := range resources {
+			if name == g.Name || name == g.NameEn {
+				return tr(lang, g.Name, g.NameEn)
+			}
+		}
+	}
 	for _, u := range econ.Catalog {
 		if name == u.Name || name == u.NameEn {
 			return tr(lang, u.Name, u.NameEn)

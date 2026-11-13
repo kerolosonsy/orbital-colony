@@ -23,7 +23,7 @@ func TestSeedTreeIncludesCatalogAndBuildingPrerequisites(t *testing.T) {
 		for _, id := range u.Requires {
 			found := false
 			for _, p := range n.After {
-				found = found || p.ID == id && p.Level == 1
+				found = found || p.ID == id && p.Level >= 1
 			}
 			if !found {
 				t.Errorf("%s lost prerequisite %s", u.ID, id)

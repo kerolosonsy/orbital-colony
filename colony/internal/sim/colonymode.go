@@ -18,7 +18,15 @@ import (
 // economy. Ticks are 100ms of real time; drone actions take ActionDur.
 
 var groundByName = map[string]Ground{"regolith": Regolith, "soil": Soil, "ice": Ice, "rock": Rock, "stone": Stone, "tunnel": Tunnel, "shaft": Shaft}
-var entityByName = map[string]Entity{"moss": Moss, "lichen": Lichen, "crystal": Crystal, "glowcap": Glowcap, "reed": Reed, "iron": Iron, "geode": Geode}
+var entityByName = func() map[string]Entity {
+	entities := map[string]Entity{}
+	for e := Moss; e <= Core; e++ {
+		if e != Beacon {
+			entities[e.String()] = e
+		}
+	}
+	return entities
+}()
 
 // cropUnlock names the upgrade that a crop needs before it can be planted
 // or harvested. Moss is free.
@@ -38,6 +46,7 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.MaxTicks = math.MaxInt32
 	w.TickBase = int(st.Tick)
 	w.Tick = w.TickBase
+	w.lastProductionTick = w.TickBase
 	w.loadTiles()
 	w.applyEcon()
 	w.Check = func(w *World) (bool, string) {
@@ -58,6 +67,7 @@ func (w *World) loadTiles() {
 				t.Ground = groundByName[et.G]
 				t.Entity = entityByName[et.E]
 				t.Planted, t.Ready, t.Size = int(et.P), int(et.R), et.S
+				t.MeltAt, t.SiftUsed, t.SiftAt = int(et.MeltAt), et.SiftUsed, int(et.SiftAt)
 			}
 		}
 	}
@@ -73,6 +83,9 @@ func (w *World) loadTiles() {
 func (w *World) applyEcon() {
 	w.ActionDur = time.Duration(w.Econ.ActionMillis() * float64(w.Unit) / 100)
 	w.MaxDrones = w.Econ.DroneCap()
+	for _, b := range w.Econ.Buildings {
+		b.Level = w.Econ.Level(b.Kind)
+	}
 	w.syncInv()
 }
 
@@ -91,7 +104,7 @@ func (w *World) syncEcon() {
 		for y := 0; y < w.H; y++ {
 			for x := 0; x < w.W; x++ {
 				t := w.AtZ(x, y, z)
-				et := econ.Tile{G: t.Ground.String(), P: int64(t.Planted), R: int64(t.Ready), S: t.Size}
+				et := econ.Tile{G: t.Ground.String(), P: int64(t.Planted), R: int64(t.Ready), S: t.Size, MeltAt: int64(t.MeltAt), SiftUsed: t.SiftUsed, SiftAt: int64(t.SiftAt)}
 				if t.Entity != Empty {
 					et.E = t.Entity.String()
 				}
@@ -172,12 +185,12 @@ func (w *World) colonyHarvest(destroy bool) (int, error, string, bool) {
 		if !destroy {
 			return 0, ErrNotRipe, say("لسه مش ناضج", "Not ripe yet"), false
 		}
-		*t = Tile{Ground: t.Ground}
+		t.Entity, t.Planted, t.Ready, t.Size = Empty, 0, 0, 0
 		w.Econ.RecordLost()
 		return 0, ErrNotRipe, say("النبات لسه مش ناضج… واتدمر!", "The plant was not ripe yet… and was destroyed!"), true
 	}
 	if t.Entity == Reed && w.Tick > t.Ready+econ.ReedWindow {
-		*t = Tile{Ground: t.Ground}
+		t.Entity, t.Planted, t.Ready, t.Size = Empty, 0, 0, 0
 		w.Econ.RecordLost()
 		return 0, ErrNotRipe, say("البوص عفّن! اتأخرت عليه", "The reeds rotted! You waited too long"), true
 	}
@@ -198,7 +211,7 @@ func (w *World) colonyHarvest(destroy bool) (int, error, string, bool) {
 	got := base * w.Econ.YieldMult(name)
 	w.Econ.Inv[name] += got
 	w.syncInv()
-	*t = Tile{Ground: t.Ground}
+	t.Entity, t.Planted, t.Ready, t.Size = Empty, 0, 0, 0
 	return int(got), nil, fmt.Sprintf("+%s %s", trimFloat(got), name), true
 }
 
@@ -287,6 +300,7 @@ func (w *World) emitRaw(v econEvent) {
 }
 
 func (w *World) econSnapshot(op, msg string, ok, full bool) {
+	w.advanceProduction(w.Tick)
 	ev := econEvent{Op: op, T: w.Tick, OK: ok, Msg: msg, Credits: w.Econ.Credits, Prices: w.Econ.Prices(), Inv: w.Econ.Inv}
 	if w.Econ.Active != "" {
 		_, _, why := w.Econ.ProgressPair(int64(w.Tick))
@@ -331,6 +345,7 @@ func (w *World) colonyTicker() {
 			return
 		}
 		w.clock()
+		w.advanceProduction(w.Tick)
 		w.Econ.Recover(every)
 		w.growVeins()
 		w.checkContract()
@@ -417,6 +432,7 @@ func (w *World) colonyCommands(r io.Reader) {
 		}
 		w.mu.Lock()
 		w.clock()
+		w.advanceProduction(w.Tick)
 		w.syncEcon()
 		oldSize := w.Econ.Size
 		err := w.Econ.Buy(cmd.Buy)

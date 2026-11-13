@@ -32,15 +32,36 @@ const (
 type Entity = sim.Entity
 
 const (
-	Empty   = sim.Empty
-	Moss    = sim.Moss
-	Lichen  = sim.Lichen
-	Crystal = sim.Crystal
-	Beacon  = sim.Beacon
-	Glowcap = sim.Glowcap
-	Reed    = sim.Reed
-	Iron    = sim.Iron
-	Geode   = sim.Geode
+	Empty      = sim.Empty
+	Moss       = sim.Moss
+	Lichen     = sim.Lichen
+	Crystal    = sim.Crystal
+	Beacon     = sim.Beacon
+	Glowcap    = sim.Glowcap
+	Reed       = sim.Reed
+	Iron       = sim.Iron
+	Geode      = sim.Geode
+	Water      = sim.Water
+	Silica     = sim.Silica
+	Copper     = sim.Copper
+	Sulfur     = sim.Sulfur
+	Titanium   = sim.Titanium
+	Helium     = sim.Helium
+	Uranium    = sim.Uranium
+	Biomass    = sim.Biomass
+	Plate      = sim.Plate
+	Wire       = sim.Wire
+	Glass      = sim.Glass
+	Fuel       = sim.Fuel
+	Fertilizer = sim.Fertilizer
+	Circuit    = sim.Circuit
+	Alloy      = sim.Alloy
+	Battery    = sim.Battery
+	Coolant    = sim.Coolant
+	Processor  = sim.Processor
+	Frame      = sim.Frame
+	Cell       = sim.Cell
+	Core       = sim.Core
 )
 
 // Ground is the surface of a tile.

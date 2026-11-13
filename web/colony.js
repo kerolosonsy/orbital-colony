@@ -4,8 +4,16 @@
 // lesson rewards) and switches the shared editor and map into colony mode.
 const Colony = (() => {
   const LEVEL = { id: "colony", kind: "colony", title: T("المستعمرة", "Colony"), goal: T("كبّر المستعمرة: ازرع، احصد، بيع، واشتري ترقيات", "Grow the colony: plant, harvest, sell and buy upgrades"), lesson: "", hints: [], starter: "", par: 0, gold: 0 };
-  const GOODS = ["moss", "lichen", "glowcap", "reed", "crystal", "iron", "geode"];
-  const BASE = { moss: 1, lichen: 3, glowcap: 2, reed: 14, crystal: 6, iron: 9, geode: 40 };
+  const OLD_GOODS = new Set(["moss", "lichen", "glowcap", "reed", "crystal", "iron", "geode"]);
+  const RAW_GOODS = ["moss", "lichen", "glowcap", "reed", "crystal", "iron", "geode", "water", "silica", "copper", "sulfur", "titanium", "helium", "uranium"];
+  const CRAFTED_GOODS = ["biomass", "plate", "wire", "glass", "fuel", "fertilizer", "circuit", "alloy", "battery", "coolant", "processor", "frame", "cell", "core"];
+  const GOODS = [...RAW_GOODS, ...CRAFTED_GOODS];
+  const BASE = {
+    moss: 1, lichen: 3, glowcap: 2, reed: 14, crystal: 6, iron: 9, geode: 40,
+    water: 2, silica: 5, copper: 12, sulfur: 18, titanium: 30, helium: 45, uranium: 90,
+    biomass: 6, plate: 29, wire: 38, glass: 24, fuel: 22, fertilizer: 48, circuit: 170,
+    alloy: 141, battery: 136, coolant: 78, processor: 880, frame: 941, cell: 619, core: 6818,
+  };
   let data = null, es = null, running = false, samples = [], shopDirty = true, live = null;
 
   let contractTarget = "", contractHighlightUntil = 0, contractHighlightTimer = null;
@@ -20,7 +28,7 @@ const Colony = (() => {
     (st.under || []).forEach((layer, z) => layer.forEach((t, i) => tiles.push({ ...t, x: i % n, y: Math.floor(i / n), z: z + 1 })));
     const inv = {};
     for (const [k, v] of Object.entries(st.inv || {})) if (v >= 1) inv[k] = Math.floor(v);
-    return { w: n, h: n, tiles, layers: 1 + (st.under || []).length, x: 0, y: 0, z: 0, maxTicks: 0, inv };
+    return { w: n, h: n, tiles, layers: 1 + (st.under || []).length, x: 0, y: 0, z: 0, maxTicks: 0, inv, buildings: st.buildings || [] };
   }
 
   function liveWorld(init) {
@@ -72,6 +80,7 @@ const Colony = (() => {
     S.mode = "mission";
     document.body.classList.remove("colony");
     if (es) { es.close(); es = null; }
+    if (typeof Buildings !== "undefined") Buildings.clear();
     if (W) { W.live = false; W.colony = false; }
     runUI();
   }
@@ -92,16 +101,25 @@ const Colony = (() => {
     switch (ev.op) {
       case "init":
         data.state.tick = ev.t || data.state.tick;
-        liveWorld(ev);
+        liveWorld({ ...ev, buildings: ev.buildings || data.state.buildings || [] });
         W.colony = true;
+        renderBuildings();
         return;
       case "resize": {
         const drones = W.drones;
-        liveWorld({ ...ev, x: 0, y: 0, maxTicks: 0, inv: W.inv });
+        liveWorld({ ...ev, x: 0, y: 0, maxTicks: 0, inv: W.inv, buildings: ev.buildings || data.state.buildings || [] });
         W.drones = drones;
+        renderBuildings();
         log(T(`الأرض كبرت: ${ev.w}×${ev.h}`, `Field expanded: ${ev.w}×${ev.h}`), "c-ok");
         return;
       }
+      case "building":
+        if (W && W.colony) apply(ev);
+        else if (typeof Buildings !== "undefined") Buildings.applyEvent(ev, W);
+        if (data && data.state && typeof Buildings !== "undefined") data.state.buildings = Buildings.list();
+        renderBuildings();
+        if (typeof draw === "function") draw(performance.now());
+        return;
       case "econ":
       case "state":
       case "bought":
@@ -129,8 +147,34 @@ const Colony = (() => {
     if (W && W.colony) apply(ev);
   }
 
+  function syncStateToWorld(st) {
+    if (typeof Buildings !== "undefined" && Array.isArray(st.buildings)) Buildings.syncState(st.buildings);
+    if (!W || !W.colony) return;
+    if (st.size && st.size !== W.w) { liveWorld(stateToInit(st)); return; }
+    let legendDirty = false;
+    if (Array.isArray(st.tiles) && W.layers && W.layers[0]) {
+      const n = st.size || W.w;
+      st.tiles.forEach((t, i) => {
+        const tile = W.layers[0][i % n] && W.layers[0][i % n][Math.floor(i / n)];
+        if (!tile) return;
+        if (t.b) { if (tile.b !== t.b) legendDirty = true; tile.b = t.b; }
+        else if (tile.b) { delete tile.b; legendDirty = true; }
+      });
+    }
+    for (const b of st.buildings || []) {
+      const tile = W.layers && W.layers[0] && W.layers[0][b.x] && W.layers[0][b.x][b.y];
+      if (tile && b.kind && tile.b !== b.kind) { tile.b = b.kind; legendDirty = true; }
+    }
+    if (legendDirty && typeof renderLegend === "function") renderLegend();
+  }
+
   function econ(ev) {
-    if (ev.state) { data.state = ev.state; W && (W.liveStep = actionMs(data.state)); shopDirty = true; }
+    if (ev.state) {
+      data.state = ev.state;
+      W && (W.liveStep = actionMs(data.state));
+      shopDirty = true;
+      syncStateToWorld(ev.state);
+    }
     if (typeof ev.credits === "number") data.state.credits = ev.credits;
     if (ev.prices) data.prices = ev.prices;
     if (ev.inv) {
@@ -142,8 +186,9 @@ const Colony = (() => {
     const now = performance.now();
     samples.push([now, data.state.credits]);
     while (samples.length && now - samples[0][0] > 90000) samples.shift();
-    renderStatus(); renderMarket();
+    renderStatus(); renderMarket(); renderBuildings();
     renderShop();
+    if (ev.state && typeof draw === "function") draw(now);
     if (ev.tree) { data.tree = ev.tree; updateTree(); }
     else if (TreeView.isOpen && (ev.state || typeof ev.credits === "number" || ev.inv)) refresh();
   }
@@ -154,6 +199,7 @@ const Colony = (() => {
       if (S.mode !== "colony") return;
       data = { ...data, ...fresh };
     } catch { return; }
+    if (data && data.state) syncStateToWorld(data.state);
     shopDirty = true;
     renderAll();
   }
@@ -219,7 +265,7 @@ const Colony = (() => {
   }
 
   // ---------- panel ----------
-  function renderAll() { renderStatus(); renderMarket(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
+  function renderAll() { renderStatus(); renderMarket(); renderBuildings(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
 
   // ---------- contracts: code challenges that unlock blueprints ----------
   // ticks are 100ms of colony time
@@ -330,13 +376,46 @@ const Colony = (() => {
     $("#col-size").textContent = `${data.state.size}×${data.state.size}${data.state.depth > 1 ? ` · ${data.state.depth} ${T("طبقات", "layers")}` : ""}`;
   }
 
-  function renderMarket() {
-    const inv = data.state.inv || {}, prices = data.prices || {};
-    const rows = GOODS.filter((g) => (inv[g] || 0) >= 1 || g === "moss" || (data.state.levels || {})["crop." + g] || (g === "iron" || g === "geode") && (data.state.levels || {})["api.dig"]);
-    $("#col-market").innerHTML = `<tr><td></td><td>${T("مخزون", "Stock")}</td><td>${T("السعر", "Price")}</td></tr>` + rows.map((g) => {
+  function marketRowVisible(g, inv, levels) {
+    if ((inv[g] || 0) >= 1) return true;
+    if (!OLD_GOODS.has(g)) return false;
+    return g === "moss" || !!levels["crop." + g] || ((g === "iron" || g === "geode") && !!levels["api.dig"]);
+  }
+
+  function marketRows(list, inv, prices) {
+    return list.map((g) => {
       const p = prices[g] ?? BASE[g], low = p < BASE[g] * 0.97;
-      return `<tr><td><i style="background:${INV_COLOR[g] || "#ccc"}"></i>${NAME[g] || g}</td><td class="num">${fmt(inv[g] || 0)}</td><td class="num${low ? " low" : ""}">${p.toFixed(2)}</td></tr>`;
+      return `<tr><td><i style="background:${INV_COLOR[g] || "#ccc"}"></i>${esc(NAME[g] || g)}</td><td class="num">${fmt(inv[g] || 0)}</td><td class="num${low ? " low" : ""}">${p.toFixed(2)}</td></tr>`;
     }).join("");
+  }
+
+  function marketTable(raw, crafted, inv, prices) {
+    const group = (label, list) => (list.length ? `<tr class="market-group"><td colspan="3">${esc(label)}</td></tr>` + marketRows(list, inv, prices || {}) : "");
+    return `<tr><td></td><td>${T("مخزون", "Stock")}</td><td>${T("السعر", "Price")}</td></tr>`
+      + group(T("خامات", "Raw"), raw)
+      + group(T("منتجات مصنّعة", "Crafted"), crafted);
+  }
+
+  function marketMarkup(state, prices) {
+    const inv = state.inv || {}, levels = state.levels || {};
+    return marketTable(
+      RAW_GOODS.filter((g) => marketRowVisible(g, inv, levels)),
+      CRAFTED_GOODS.filter((g) => marketRowVisible(g, inv, levels)),
+      inv,
+      prices,
+    );
+  }
+
+  function renderMarket() {
+    $("#col-market").innerHTML = marketMarkup(data.state, data.prices);
+  }
+
+  function renderBuildings() {
+    const box = $("#col-buildings");
+    if (!box) return;
+    const list = typeof Buildings !== "undefined" ? Buildings.list() : [];
+    box.classList.toggle("hidden", !list.length);
+    box.innerHTML = list.length ? Buildings.listMarkup(list) : "";
   }
 
   function shopName(id) { const u = (data.shop || []).find((x) => x.id === id); return u ? uName(u) : id; }

@@ -29,7 +29,7 @@ func TestRecipesUseKnownInputsAtOrBelowTheirTier(t *testing.T) {
 			}
 		}
 	}
-	for _, good := range Goods {
+	for _, good := range Goods[:7] {
 		if PriceV3[good] != BasePrice[good] {
 			t.Errorf("old price changed for %s", good)
 		}
@@ -42,7 +42,7 @@ func TestRecipesUseKnownInputsAtOrBelowTheirTier(t *testing.T) {
 
 func TestCraftedGoodsAreAcyclicAndReachableFromRaw(t *testing.T) {
 	visiting, reached := map[string]bool{}, map[string]bool{}
-	for _, good := range Goods {
+	for _, good := range Goods[:7] {
 		reached[good] = true
 	}
 	for _, good := range RawV3 {

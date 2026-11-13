@@ -457,9 +457,27 @@ body.colony .goal-strip .par, body.colony #lvl-stars { display: none; }
 .col-market { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-bottom: 12px; }
 .col-market td { padding: 5px 6px; border-bottom: 1px solid var(--rule); }
 .col-market tr:first-child td { color: var(--muted); font-size: 12px; }
+.col-market tr.market-group td { padding: 8px 6px 3px; font: 700 11.5px/1 var(--cond); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--rule); }
 .col-market td i { display: inline-block; width: 10px; height: 10px; margin-inline-end: 7px; vertical-align: middle; }
 .col-market .num { font: 600 14px/1 var(--cond); text-align: left; direction: ltr; font-variant-numeric: tabular-nums; }
 .col-market .num.low { color: var(--warn); }
+.col-buildings { margin-bottom: 12px; }
+.col-buildings h3 { font-size: 14px; margin: 14px 0 6px; display: flex; justify-content: space-between; color: var(--paper); }
+.col-buildings h3 small { font: 600 13px/1 var(--cond); color: var(--muted); }
+.bld-row.bld-worn { border-color: var(--warn); }
+.bld-pos { font: 600 13px/1 var(--cond); color: var(--muted); font-variant-numeric: tabular-nums; }
+.bld-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; font-size: 12.5px; color: var(--paper-2); }
+.bld-recipe { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.bld-recipe i { width: 9px; height: 9px; flex: none; }
+.bld-wear { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.bld-wear b { font: 600 13px/1 var(--cond); font-variant-numeric: tabular-nums; color: var(--paper); }
+.bld-wear.warn, .bld-wear.warn b { color: var(--warn); }
+.bld-io { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 10px; margin-top: 6px; padding-top: 5px; border-top: 1px solid var(--rule); font: 600 13px/1 var(--cond); font-variant-numeric: tabular-nums; }
+.bld-dir { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.bld-lbl { font: 600 11.5px/1 var(--sans); color: var(--muted); }
+.bld-chip { display: inline-flex; align-items: center; gap: 4px; }
+.bld-chip i { width: 9px; height: 9px; display: inline-block; }
+.bld-none { color: var(--faint); }
 .col-rewards h3, .col-shop h3 { font-size: 14px; margin: 14px 0 6px; display: flex; justify-content: space-between; color: var(--paper); }
 #btn-tech-tree { width: 100%; margin-block: 12px 6px; justify-content: center; }
 .contract.tree-contract-highlight { border-color: var(--regolith); outline: 2px solid var(--regolith); outline-offset: 2px; }

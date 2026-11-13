@@ -10,7 +10,7 @@ import (
 	"orbital/colony/i18n"
 )
 
-// Crops (and the crystal veins) that can be harvested and sold.
+// Goods that can be gathered, produced and sold.
 var Goods = []string{"moss", "lichen", "glowcap", "reed", "crystal", "iron", "geode"}
 
 // BasePrice is what one unit sells for when the market is calm.
@@ -24,11 +24,14 @@ var GrowTicks = map[string]int{"moss": 80, "lichen": 120, "glowcap": 140, "reed"
 const ReedWindow = 90
 
 type Tile struct {
-	G string `json:"g"`
-	E string `json:"e,omitempty"`
-	P int64  `json:"p,omitempty"` // planted tick
-	R int64  `json:"r,omitempty"` // ripe tick
-	S int    `json:"s,omitempty"` // crystal size
+	G        string `json:"g"`
+	E        string `json:"e,omitempty"`
+	P        int64  `json:"p,omitempty"` // planted tick
+	R        int64  `json:"r,omitempty"` // ripe tick
+	S        int    `json:"s,omitempty"` // crystal size
+	MeltAt   int64  `json:"meltAt,omitempty"`
+	SiftUsed int    `json:"siftUsed,omitempty"`
+	SiftAt   int64  `json:"siftAt,omitempty"`
 }
 
 // State is everything that persists between runs.
@@ -48,6 +51,8 @@ type State struct {
 	Earned   float64            `json:"earned"` // lifetime credits
 	RunTicks int64              `json:"runTicks"`
 
+	Buildings []*Building `json:"buildings,omitempty"`
+
 	Contracts  map[string]*ContractRun `json:"contracts,omitempty"`
 	Active     string                  `json:"active,omitempty"` // the running contract's id
 	Blueprints map[string]bool         `json:"blueprints,omitempty"`
@@ -57,7 +62,7 @@ func (s *State) At(x, y int) *Tile { return &s.Tiles[y*s.Size+x] }
 
 // New returns a fresh colony: a 3x3 patch of regolith and nothing else.
 func New(seed int64) *State {
-	s := &State{Version: 2, Seed: seed, Inv: map[string]float64{}, Levels: map[string]int{}, Demand: map[string]float64{}, Claimed: map[string]bool{}}
+	s := &State{Version: 3, Seed: seed, Inv: map[string]float64{}, Levels: map[string]int{}, Demand: map[string]float64{}, Claimed: map[string]bool{}}
 	s.resize(FieldSize(0))
 	s.Normalize()
 	return s
@@ -93,6 +98,9 @@ func (s *State) Normalize() {
 		s.resize(want)
 	}
 	s.normalizeLayers()
+	if s.Version < 3 {
+		s.migrateV3()
+	}
 }
 
 // groundAt is the terrain the colony finds when the field grows onto (x, y).
@@ -260,6 +268,10 @@ func init() {
 		}
 	}
 
+	addBuildingUpgrades()
+	// New goods do not inherit crop yield and growth upgrades in this phase.
+	registerGoods()
+
 	// crystals and the market
 	add(&Upgrade{ID: "veins.rate", Group: "الكريستال", GroupEn: "Crystal", Name: "عروق أكتر", NameEn: "More Veins", Desc: "عروق الكريستال بتطلع أسرع 20%.", DescEn: "Crystal veins appear 20% faster.", Max: 8, Requires: []string{"crop.crystal"}, cost: credits(400, 1.9)})
 	add(&Upgrade{ID: "veins.size", Group: "الكريستال", GroupEn: "Crystal", Name: "عروق أعمق", NameEn: "Deeper Veins", Desc: "العرق يقدر يكبر لحجم أكبر بـ 1.", DescEn: "Increases the maximum vein size by 1.", Max: 6, Requires: []string{"crop.crystal"}, cost: mixed(700, 2.1, "crystal", 20, 1.7)})
@@ -295,7 +307,7 @@ func (s *State) Price(g string) float64 {
 	if d == 0 {
 		d = 1
 	}
-	return BasePrice[g] * (1 + 0.1*float64(s.Level("market.contracts"))) * d
+	return PriceV3[g] * (1 + 0.1*float64(s.Level("market.contracts"))) * d
 }
 
 // Sell turns n units of g into credits, pushing that good's price down a
@@ -346,7 +358,15 @@ func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
 		return u.CostAt(l), false, why
 	}
 	for _, r := range u.Requires {
-		if !s.Has(r) {
+		required := 1
+		if PlacementCost(u.ID) != nil {
+			for _, p := range FindNode(u.ID).After {
+				if p.ID == r {
+					required = p.Level
+				}
+			}
+		}
+		if s.Level(r) < required {
 			if ru := Find(r); ru != nil {
 				return u.CostAt(l), false, i18n.T("محتاج الأول: ", "Requires first: ") + i18n.T(ru.Name, ru.NameEn)
 			}
