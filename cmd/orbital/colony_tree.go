@@ -20,6 +20,7 @@ type treeCheck struct {
 }
 
 type treeNodeView struct {
+	RP       float64      `json:"rp,omitempty"`
 	ID       string       `json:"id"`
 	Branch   string       `json:"branch"`
 	BranchEn string       `json:"branchEn"`
@@ -59,7 +60,7 @@ func treeForLang(st *econ.State, lang string) []treeNodeView {
 func treeNodeForLang(node econ.Node, lang string) treeNodeView {
 	branchEn := treeBranchEnglish(node.Branch)
 	view := treeNodeView{
-		ID: node.ID, Branch: tr(lang, node.Branch, branchEn), BranchEn: branchEn,
+		RP: node.RP, ID: node.ID, Branch: tr(lang, node.Branch, branchEn), BranchEn: branchEn,
 		Name: tr(lang, node.Name, node.NameEn), NameEn: node.NameEn,
 		Desc: tr(lang, node.Desc, node.DescEn), DescEn: node.DescEn,
 		Effect: tr(lang, node.Desc, node.DescEn), EffectEn: node.DescEn,
@@ -85,6 +86,9 @@ func treeChecks(st *econ.State, node econ.Node, upgrade econ.ShopItem, lang stri
 	if st.Levels[node.ID] == 0 && upgrade.Blueprint != "" {
 		contract := econ.FindContract(upgrade.Blueprint)
 		checks = append(checks, treeCheck{Kind: "contract", Ref: contract.ID, Label: tr(lang, contract.Title, contract.TitleEn)})
+	}
+	if st.Level(node.ID) == 0 && node.RP > 0 {
+		checks = append(checks, treeCheck{Kind: "rp", Ref: "rp", Label: fmt.Sprintf(tr(lang, "%.0f نقط بحث", "%.0f RP"), node.RP), OK: st.RP >= node.RP})
 	}
 	checks = append(checks, treeCostChecks(st, upgrade.Cost, lang)...)
 	if upgrade.Level >= upgrade.Max {

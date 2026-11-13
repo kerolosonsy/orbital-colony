@@ -160,6 +160,7 @@ func TestBuildingCatalogPurchasesMatchTree(t *testing.T) {
 			if cost.Credits <= 0 || len(cost.Goods) == 0 {
 				t.Fatal("building needs both credits and goods")
 			}
+			s.RP = FindNode(node.ID).RP
 			s.Credits = cost.Credits
 			for good, n := range cost.Goods {
 				s.Inv[good] = n
