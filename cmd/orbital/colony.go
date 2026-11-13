@@ -22,6 +22,8 @@ import (
 )
 
 type colonyRun struct {
+	am *archiveMarketRun
+
 	stopSent bool
 	cmd      *exec.Cmd
 	commands *os.File
@@ -103,7 +105,7 @@ func (c *colonyGame) summary(lang string, done map[int]bool) map[string]any {
 		Tiles []surfaceTile `json:"tiles"`
 	}{c.state, tiles}
 	owned, total := c.state.TotalLevels()
-	return map[string]any{"running": c.active != nil, "state": state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
+	return map[string]any{"systems": c.archiveMarketSummary(), "running": c.active != nil, "state": state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
 }
 
 // chaptersDone reads which chapters the profile finished: every mission
@@ -173,6 +175,7 @@ func (c *colonyGame) broadcast(line string) {
 }
 
 func (c *colonyGame) event(line string) {
+	line = c.archiveMarketEvent(line)
 	c.observeRunEvent(line)
 	var event struct {
 		State *econ.State `json:"state"`
@@ -260,6 +263,13 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 	configureProcess(cmd)
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(), "ORBITAL_LANG="+lang, "ORBITAL_LEVEL=colony", "ORBITAL_COLONY="+savePath, "ORBITAL_EVENTS_FD=3", "ORBITAL_CMD_FD=4")
+	archiveMarket, err := c.startArchiveMarket(cmd, commandsWriter, lang)
+	if err != nil {
+		eventsReader.Close()
+		commandsWriter.Close()
+		return err
+	}
+	defer archiveMarket.closeUnstarted(cmd)
 	cmd.ExtraFiles = []*os.File{eventsWriter, commandsReader}
 	// Owned pipes let Wait reap the child without closing unread output.
 	stdoutReader, stdoutWriter, err := os.Pipe()
@@ -285,11 +295,12 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		stderrReader.Close()
 		return err
 	}
-	active := &colonyRun{cmd: cmd, commands: commandsWriter, done: make(chan struct{}), details: details}
+	active := &colonyRun{am: archiveMarket, cmd: cmd, commands: commandsWriter, done: make(chan struct{}), details: details}
 	c.mu.Lock()
 	c.active = active
 	c.beginRun(details)
 	c.mu.Unlock()
+	archiveMarket.publish()
 	var readers sync.WaitGroup
 	for _, stream := range []struct {
 		file *os.File
@@ -300,10 +311,12 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 	}
 	go func() {
 		waitErr := cmd.Wait()
+		active.am.close()
 		_ = killProcessTree(cmd) // Descendants must not keep the stream pipes open.
 		readers.Wait()
 		commandsWriter.Close()
 		c.mu.Lock()
+		archiveEvent := c.finishArchiveMarket(active)
 		contractEvent := c.finishColonyEvents(lang)
 		finalEvent := c.finishRun(active)
 		if err := c.persist(); err != nil {
@@ -311,6 +324,9 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		}
 		c.active = nil
 		c.mu.Unlock()
+		if archiveEvent != "" {
+			c.broadcast(archiveEvent)
+		}
 		if contractEvent != "" {
 			c.broadcast(contractEvent)
 		}

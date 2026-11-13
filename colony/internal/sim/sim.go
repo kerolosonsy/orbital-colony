@@ -205,6 +205,9 @@ type Event struct {
 // World holds the full state of one mission. All exported methods are safe
 // for concurrent use, so later chapters can drive it from goroutines.
 type World struct {
+	archive    *colonyArchive
+	marketKeys map[string]systemReceipt
+
 	mu      sync.Mutex
 	W, H    int
 	tiles   []Tile
@@ -391,6 +394,7 @@ func (w *World) invView() map[string]int {
 }
 
 func (w *World) emit(ev Event) {
+	w.archiveEvent(ev)
 	pairs := takeMessages()
 	if w.Econ != nil {
 		ev.Translations = pairs

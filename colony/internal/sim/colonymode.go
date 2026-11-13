@@ -52,6 +52,7 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.lastRankTick = w.TickBase
 	w.loadTiles()
 	w.applyEcon()
+	w.initArchive()
 	w.Check = func(w *World) (bool, string) {
 		return false, sayf("كريدت: %.0f", "Credits: %.0f", w.Econ.Credits)
 	}
@@ -221,6 +222,7 @@ func (w *World) colonyHarvest(destroy bool) (int, error, string, bool) {
 	if err := w.collectGood(t.Entity, got); err != nil {
 		return 0, err, buildingMessage(err), false
 	}
+	w.archiveHarvest(name, got)
 	w.Econ.RecordHarvest(name, base, t.Size)
 	w.syncInv()
 	t.Entity, t.Planted, t.Ready, t.Size = Empty, 0, 0, 0
@@ -252,6 +254,7 @@ func (w *World) Export(id int, e Entity, n int) (earned float64) {
 		earned = w.Econ.Sell(name, amount)
 		// Each unit lowers the price, so the last one sold was the cheapest.
 		low := w.Econ.Price(name) / math.Pow(0.996, math.Min(1, sold))
+		w.archiveSale(name, sold, earned)
 		w.Econ.RecordSale(id, name, sold, earned, low)
 		w.recordRankSale(name, sold)
 		w.syncInv()
@@ -283,6 +286,7 @@ func (w *World) Credits() float64 {
 // ---------- background life of the colony ----------
 
 type econEvent struct {
+	Receipt      *systemReceipt     `json:"receipt,omitempty"`
 	Stats        *runStats          `json:"stats,omitempty"`
 	Rank         econ.RankProgress  `json:"rank"`
 	Translations [][2]string        `json:"translations,omitempty"`
@@ -320,6 +324,7 @@ func (w *World) emitRaw(v econEvent) {
 }
 
 func (w *World) econSnapshot(op, msg string, ok, full bool) {
+	w.flushArchive()
 	w.advanceProduction(w.Tick)
 	w.checkRank()
 	ev := econEvent{Op: op, T: w.Tick, OK: ok, Msg: msg, Credits: w.Econ.Credits, Prices: w.Econ.Prices(), Inv: w.Econ.Inv}
@@ -333,6 +338,7 @@ func (w *World) econSnapshot(op, msg string, ok, full bool) {
 		ev.State = w.Econ
 	}
 	w.emitRaw(ev)
+	w.emitArchiveStatus()
 }
 
 // RunColony starts the colony's background processes: market recovery,
@@ -447,6 +453,9 @@ func (w *World) growVeins() {
 func (w *World) colonyCommands(r io.Reader) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
+		if w.systemCommand(sc.Bytes()) {
+			continue
+		}
 		var cmd struct{ Buy string }
 		if json.Unmarshal(sc.Bytes(), &cmd) != nil || cmd.Buy == "" {
 			continue

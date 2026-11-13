@@ -67,6 +67,8 @@ type ContractRun struct {
 	Moves    int                `json:"moves,omitempty"`
 	Broke    string             `json:"broke,omitempty"` // a rule the run broke: price, vein, exporter
 
+	Submission string `json:"submission,omitempty"`
+
 	Stopping  bool    `json:"stopping,omitempty"`
 	Stopped   bool    `json:"stopped,omitempty"`
 	CargoLost float64 `json:"cargoLost,omitempty"`
@@ -371,6 +373,9 @@ func (s *State) ProgressPair(tick int64) (done, failed bool, why [2]string) {
 		return false, false, why
 	}
 	g := c.Goal
+	if g.Submit != "" {
+		return s.submissionProgress(c, r, tick)
+	}
 	if c.ID == CleanStopContract {
 		return r.Stopped && r.CargoLost == 0, r.Stopped && r.CargoLost > 0, [2]string{"مستني إغلاق من غير خسارة حمولة", "Waiting for shutdown without cargo loss"}
 	}
@@ -449,6 +454,9 @@ func (s *State) Fraction() float64 {
 		return 0
 	}
 	g := c.Goal
+	if g.Submit != "" && r.Submission != "correct" {
+		return 0
+	}
 	if c.ID == CleanStopContract && !r.Stopped {
 		return 0
 	}

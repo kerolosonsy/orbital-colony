@@ -14,6 +14,7 @@ func (w *World) TryMelt(id int) (n int, err error) {
 		if err != nil {
 			return false, buildingMessage(err), false
 		}
+		w.archiveHarvest("water", w.Econ.YieldMult("water"))
 		n = 1
 		t := w.here()
 		t.Ground, t.MeltAt = Regolith, w.Tick+w.Econ.MeltRegrowthTicks()
@@ -51,6 +52,7 @@ func (w *World) TrySift(id int) (n int, err error) {
 		if err != nil {
 			return false, buildingMessage(err), false
 		}
+		w.archiveHarvest("silica", w.Econ.YieldMult("silica"))
 		n = 1
 		t.SiftUsed++
 		w.syncInv()

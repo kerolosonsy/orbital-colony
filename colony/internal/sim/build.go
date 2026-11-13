@@ -256,6 +256,7 @@ func (w *World) BuildingRepair(id int, p Point) error {
 
 func (w *World) advanceProduction(target int) {
 	for tick := w.lastProductionTick + 1; tick <= target; tick++ {
+		w.archiveTick(tick)
 		w.advanceColonyEvents(tick)
 		w.productionStep(tick)
 	}

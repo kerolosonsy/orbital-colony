@@ -110,6 +110,9 @@ func buildColonyProjectProgram(t *testing.T, r *runner, project colonyProject) s
 // settles or fails, or its window has clearly passed.
 func playContract(t *testing.T, r *runner, c *econ.Contract, project colonyProject) contractResult {
 	t.Helper()
+	if archiveMarketContract(c.ID) {
+		return playArchiveMarketContract(t, r, c, project)
+	}
 	if missing := projectRequirements(project.Files, c.Requires, "en"); len(missing) > 0 {
 		return contractResult{Requires: missing}
 	}

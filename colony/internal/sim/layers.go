@@ -95,6 +95,7 @@ func (w *World) collectOre(t *Tile) error {
 		if err := w.collectGood(t.Entity, float64(n)*w.Econ.YieldMult(name)); err != nil {
 			return err
 		}
+		w.archiveHarvest(name, float64(n)*w.Econ.YieldMult(name))
 		w.syncInv()
 	} else {
 		w.Inv[t.Entity] += n
