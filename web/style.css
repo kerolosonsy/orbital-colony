@@ -461,6 +461,8 @@ body.colony .goal-strip .par, body.colony #lvl-stars { display: none; }
 .col-market .num { font: 600 14px/1 var(--cond); text-align: left; direction: ltr; font-variant-numeric: tabular-nums; }
 .col-market .num.low { color: var(--warn); }
 .col-rewards h3, .col-shop h3 { font-size: 14px; margin: 14px 0 6px; display: flex; justify-content: space-between; color: var(--paper); }
+#btn-tech-tree { width: 100%; margin-block: 12px 6px; justify-content: center; }
+.contract.tree-contract-highlight { border-color: var(--regolith); outline: 2px solid var(--regolith); outline-offset: 2px; }
 .col-shop h3 small { font: 600 13px/1 var(--cond); color: var(--muted); }
 .claim { width: 100%; margin-bottom: 6px; padding: 9px 10px; text-align: start; border: 1px solid var(--star); background: color-mix(in oklab, var(--star) 14%, var(--sheet)); color: var(--paper); font-weight: 600; border-radius: 2px; }
 .item { position: relative; padding: 9px 10px; margin-bottom: 6px; border: 1px solid var(--rule); background: var(--sheet-2); }

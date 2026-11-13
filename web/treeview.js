@@ -32,6 +32,11 @@ const TreeView = (() => {
     return node.state === "available" || node.state === "owned" && node.checks.every((check) => check.ok);
   }
 
+  function buyLabel(node) {
+    if (node.checks.some((check) => check.kind === "max")) return T("مكتمل", "Maxed");
+    return node.level === 0 ? T("ابني", "Build") : T("رقّي", "Upgrade");
+  }
+
   function branchHue(branch, branches) {
     const ordered = [...new Set(branches.filter(Boolean))].sort();
     return 25 + Math.max(0, ordered.indexOf(branch)) % 9 * 40;
@@ -177,7 +182,7 @@ const TreeView = (() => {
       <p>${esc(local(node, "desc"))}</p><h4>${esc(T(`الأثر في المستوى ${fmt(node.level + 1)}`, `Effect at level ${fmt(node.level + 1)}`))}</h4><p>${esc(local(node, "effect"))}</p>
       <h4>${esc(T("شروط الترقية", "Upgrade requirements"))}</h4><ul class="tv-checks">${node.checks.map(checkMarkup).join("")}</ul>
       <h4>${esc(T("التكلفة · معاك / المطلوب", "Cost · held / required"))}</h4><ul class="tv-cost">${costMarkup(node)}</ul>
-      <button type="button" class="tv-buy" ${buyEnabled(node) ? "" : "disabled"}>${esc(node.level === 0 ? T("ابني", "Build") : T("رقّي", "Upgrade"))}</button>`;
+      <button type="button" class="tv-buy" ${buyEnabled(node) ? "" : "disabled"}>${esc(buyLabel(node))}</button>`;
   }
 
   function checkMarkup(check, index) {
@@ -270,6 +275,6 @@ const TreeView = (() => {
     pointers.clear(); pressedNode = null;
   }
 
-  if (typeof module !== "undefined" && module.exports) module.exports = { edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, branchHue };
-  return { open, close, update };
+  if (typeof module !== "undefined" && module.exports) module.exports = { edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkMarkup, branchHue };
+  return { open, close, update, get isOpen() { return !!overlay && overlay.open; } };
 })();

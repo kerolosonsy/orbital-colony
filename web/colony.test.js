@@ -6,7 +6,7 @@ const vm = require("node:vm");
 const source = fs.readFileSync(__dirname + "/colony.js", "utf8");
 
 function contracts(lang) {
-  const context = vm.createContext({ T: (ar, en) => (lang === "en" ? en : ar), esc: (s) => String(s) });
+  const context = vm.createContext({ T: (ar, en) => (lang === "en" ? en : ar), esc: (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") });
   vm.runInContext(source.slice(source.indexOf("const clock"), source.indexOf("function renderContracts(")), context);
   return context;
 }
@@ -30,5 +30,39 @@ test("contract cards show every state in both languages", () => {
     // live progress from the stream wins over the last summary
     assert.match(card({ status: "active", frac: 0.25, left: 900 }, { frac: 0.5, left: 300, progress: "Moss 60/120" }), /width:50\.0%[\s\S]*Moss 60\/120[\s\S]*0:30/);
     assert.doesNotMatch(card({ status: "active", left: -1 }), en ? /Left/ : /باقي/);
+  }
+});
+
+const visibilityContext = vm.createContext({});
+vm.runInContext(source.slice(source.indexOf("function visibleContracts("), source.indexOf("function treeSnapshot(")), visibilityContext);
+
+test("contract links reveal a hidden target without expanding every locked contract", () => {
+  const list = [
+    { id: "late", chapter: 20, status: "locked" },
+    { id: "next", chapter: 4, status: "locked" },
+    { id: "done", chapter: 1, status: "done" },
+    { id: "active", chapter: 3, status: "active" },
+    { id: "other", chapter: 10, status: "locked" },
+    { id: "second", chapter: 5, status: "locked" },
+    { id: "open", chapter: 2, status: "available" },
+  ];
+  const ids = (target) => Array.from(visibilityContext.visibleContracts(list, target), (c) => c.id);
+  assert.deepEqual(ids(""), ["active", "open", "done", "next", "second"]);
+  assert.deepEqual(ids("late"), ["active", "open", "done", "next", "second", "late"]);
+  assert.deepEqual(ids("next"), ids(""));
+  assert.deepEqual(ids("missing"), ids(""));
+  assert.deepEqual(list.map((c) => c.id), ["late", "next", "done", "active", "other", "second", "open"]);
+  assert.equal(visibilityContext.visibleContracts([], "late").length, 0);
+  assert.deepEqual(Array.from(visibilityContext.visibleContracts(list.slice(2, 4), ""), (c) => c.id), ["active", "done"]);
+});
+
+
+test("contract cards escape contract links and visible text", () => {
+  const ctx = contracts("en");
+  for (const status of ["active", "available", "done", "locked"]) {
+    const markup = ctx.contractCard({ id: 'c" onclick="bad', chapter: 3, title: "<script>", brief: "<b>brief</b>", status }, null, false);
+    assert.match(markup, /data-id="c&quot; onclick=&quot;bad"/);
+    assert.match(markup, /&lt;script&gt;/);
+    assert.doesNotMatch(markup, /<script>|<b>brief<\/b>|data-id="c" onclick=/);
   }
 });
