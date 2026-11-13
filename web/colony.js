@@ -8,6 +8,8 @@ const Colony = (() => {
   const BASE = { moss: 1, lichen: 3, glowcap: 2, reed: 14, crystal: 6, iron: 9, geode: 40 };
   let data = null, es = null, running = false, samples = [], shopDirty = true, live = null;
 
+  let contractTarget = "", contractHighlightUntil = 0, contractHighlightTimer = null;
+
   const fmt = (n) => Math.floor(n).toLocaleString("en-US");
   const actionMs = (st) => 260 * Math.pow(0.92, (st.levels && st.levels.engine) || 0);
 
@@ -64,6 +66,9 @@ const Colony = (() => {
   }
 
   function exit() {
+    TreeView.close();
+    clearTimeout(contractHighlightTimer);
+    contractTarget = ""; contractHighlightUntil = 0;
     S.mode = "mission";
     document.body.classList.remove("colony");
     if (es) { es.close(); es = null; }
@@ -139,10 +144,16 @@ const Colony = (() => {
     while (samples.length && now - samples[0][0] > 90000) samples.shift();
     renderStatus(); renderMarket();
     renderShop();
+    if (ev.tree) { data.tree = ev.tree; updateTree(); }
+    else if (TreeView.isOpen && (ev.state || typeof ev.credits === "number" || ev.inv)) refresh();
   }
 
   async function refresh() {
-    try { data = { ...data, ...(await api("/api/colony")) }; } catch { return; }
+    try {
+      const fresh = await api("/api/colony");
+      if (S.mode !== "colony") return;
+      data = { ...data, ...fresh };
+    } catch { return; }
     shopDirty = true;
     renderAll();
   }
@@ -208,7 +219,7 @@ const Colony = (() => {
   }
 
   // ---------- panel ----------
-  function renderAll() { renderStatus(); renderMarket(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); }
+  function renderAll() { renderStatus(); renderMarket(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
 
   // ---------- contracts: code challenges that unlock blueprints ----------
   // ticks are 100ms of colony time
@@ -216,6 +227,7 @@ const Colony = (() => {
 
   function contractCard(c, now, running) {
     const run = c.run || {};
+    const id = esc(c.id).replace(/"/g, "&quot;");
     const best = run.best ? `<span class="ct-best">${T("أحسن وقت", "Best time")} ${clock(run.best)}</span>` : "";
     const head = `<div class="item-top"><b>${esc(c.title)}</b><span class="lv">${T(`فصل ${c.chapter}`, `Ch. ${c.chapter}`)}</span></div>`;
     const lesson = `<button class="lesson-link ct-lesson" data-ch="${c.chapter}">${T(`الدرس: فصل ${c.chapter}`, `Lesson: chapter ${c.chapter}`)}</button>`;
@@ -223,17 +235,17 @@ const Colony = (() => {
     switch (c.status) {
       case "active": {
         const frac = now ? now.frac : c.frac || 0, left = now ? now.left : c.left, text = now ? now.progress : c.progress || "";
-        return `<div class="item contract active" data-id="${c.id}">${head}<p>${esc(c.brief)}</p>
+        return `<div class="item contract active" data-id="${id}">${head}<p>${esc(c.brief)}</p>
           <div class="ct-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(frac * 100)}"><i style="width:${(frac * 100).toFixed(1)}%"></i></div>
           <div class="item-foot"><span class="ct-progress">${esc(text)}</span>${left >= 0 ? `<span class="ct-left">${T("باقي", "Left")} ${clock(left)}</span>` : ""}</div>
           <div class="item-foot">${lesson}<button class="ct-act ct-cancel" ${running ? "disabled" : ""}>${T("ألغي", "Cancel")}</button></div>${stopped}</div>`;
       }
       case "available":
       case "done":
-        return `<div class="item contract${c.status === "done" ? " done" : ""}" data-id="${c.id}">${head}<p>${esc(c.brief)}</p>
-          <div class="item-foot">${c.status === "done" ? best : lesson}<button class="ct-act ct-accept" data-id="${c.id}" ${running ? "disabled" : ""}>${c.status === "done" ? T("العبه تاني", "Replay") : T("اقبل", "Accept")}</button></div>${stopped}</div>`;
+        return `<div class="item contract${c.status === "done" ? " done" : ""}" data-id="${id}">${head}<p>${esc(c.brief)}</p>
+          <div class="item-foot">${c.status === "done" ? best : lesson}<button class="ct-act ct-accept" data-id="${id}" ${running ? "disabled" : ""}>${c.status === "done" ? T("العبه تاني", "Replay") : T("اقبل", "Accept")}</button></div>${stopped}</div>`;
       default:
-        return `<div class="item contract locked" data-id="${c.id}">${head}<span class="why">${(c.after || []).length ? esc(T("خلّص العقد الأول: ", "Finish the contract first: ") + c.after.join(T("، ", ", "))) : T(`خلّص الفصل ${c.chapter}`, `Finish chapter ${c.chapter}`)}</span></div>`;
+        return `<div class="item contract locked" data-id="${id}">${head}<span class="why">${(c.after || []).length ? esc(T("خلّص العقد الأول: ", "Finish the contract first: ") + c.after.join(T("، ", ", "))) : T(`خلّص الفصل ${c.chapter}`, `Finish chapter ${c.chapter}`)}</span></div>`;
     }
   }
 
@@ -244,18 +256,51 @@ const Colony = (() => {
     const now = active && live && live.id === active.id ? live : null;
     $("#goal-strip-text").textContent = active ? `${T("عقد", "Contract")}: ${active.title} — ${(now ? now.progress : active.progress) || ""}` : LEVEL.goal;
     if (!list.length) { box.innerHTML = ""; return; }
-    const order = { active: 0, available: 1, done: 2, locked: 3 };
-    const shown = [...list].sort((a, b) => order[a.status] - order[b.status] || a.chapter - b.chapter);
-    const lockedAt = shown.findIndex((c) => c.status === "locked");
-    const visible = lockedAt < 0 ? shown : shown.slice(0, lockedAt + 2); // only the next locked contracts, to keep the panel short
+    const visible = visibleContracts(list, contractTarget);
     const done = list.filter((c) => c.status === "done").length;
     box.innerHTML = `<h3>${T("العقود", "Contracts")} <small>${done}/${list.length}</small></h3>` + visible.map((c) => contractCard(c, c.status === "active" ? now : null, running)).join("");
+    if (performance.now() < contractHighlightUntil) {
+      [...box.querySelectorAll(".contract")].find((card) => card.dataset.id === contractTarget)?.classList.add("tree-contract-highlight");
+    }
     box.querySelectorAll(".ct-accept").forEach((b) => (b.onclick = () => contract(b.dataset.id)));
     box.querySelectorAll(".ct-cancel").forEach((b) => (b.onclick = () => contract("")));
     box.querySelectorAll(".ct-lesson").forEach((b) => (b.onclick = () => {
       const first = S.levels.find((l) => l.chapter === +b.dataset.ch);
       if (first) loadLevel(first.id);
     }));
+  }
+
+  function visibleContracts(list, targetId) {
+    const order = { active: 0, available: 1, done: 2, locked: 3 };
+    const shown = [...list].sort((a, b) => order[a.status] - order[b.status] || a.chapter - b.chapter);
+    const lockedAt = shown.findIndex((c) => c.status === "locked");
+    return lockedAt < 0 ? shown : shown.filter((c, i) => i < lockedAt + 2 || c.id === targetId);
+  }
+
+  function treeSnapshot() { return { nodes: data.tree, inv: data.state.inv, credits: data.state.credits }; }
+
+  function updateTree() {
+    if (TreeView.isOpen) TreeView.update(treeSnapshot());
+  }
+
+  async function openTree() {
+    await refresh();
+    if (S.mode !== "colony") return;
+    TreeView.open(treeSnapshot(), {
+      onBuy: (id) => buy(id, document.querySelector(".treeview .tv-buy")),
+      onOpenContract: openTreeContract,
+    });
+  }
+
+  function openTreeContract(ref) {
+    TreeView.close();
+    contractTarget = ref; contractHighlightUntil = performance.now() + 1800;
+    clearTimeout(contractHighlightTimer);
+    renderContracts();
+    $("#col-contracts").querySelector(".tree-contract-highlight")?.scrollIntoView({ block: "center", behavior: "smooth" });
+    contractHighlightTimer = setTimeout(() => {
+      $("#col-contracts").querySelector(".tree-contract-highlight")?.classList.remove("tree-contract-highlight");
+    }, 1800);
   }
 
   async function contract(id) {
@@ -344,12 +389,12 @@ const Colony = (() => {
       if (r.pending) return; // the running program applies it and reports "bought"
       if (r.ok) { log(T(`اتشترت: ${shopName(id)}`, `Bought: ${shopName(id)}`), "c-ok"); Sound.play("goal"); }
       else log(T(`الشراء فشل: ${r.error}`, `Purchase failed: ${r.error}`), "c-err");
-      data.state = r.state; data.shop = r.shop; shopDirty = true;
+      data.state = r.state; data.shop = r.shop; data.tree = r.tree; shopDirty = true;
       liveWorld(stateToInit(data.state));
       renderAll();
     } catch (e) {
       log(T("الشراء فشل: ", "Purchase failed: ") + e.message, "c-err");
-      shopDirty = true; renderShop();
+      shopDirty = true; renderShop(); updateTree();
     }
   }
 
@@ -377,6 +422,8 @@ const Colony = (() => {
       log(e.message.includes("409") ? T("وقّف المستعمرة الأول، وبعدين استلم المكافأة.", "Stop the colony first, then claim the reward.") : T("مقدرتش أستلم: ", "Couldn't claim: ") + e.message, "c-err");
     }
   }
+
+  $("#btn-tech-tree").onclick = openTree;
 
   return { enter, exit, toggleRun, LEVEL, get running() { return running; } };
 })();

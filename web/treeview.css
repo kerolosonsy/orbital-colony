@@ -74,6 +74,8 @@
 .treeview .tv-lock { fill: none; stroke: var(--paper-2); stroke-width: 1; }
 .treeview .tv-node.is-unknown rect { fill: var(--ink-2); stroke: var(--rule-strong); }
 .treeview .tv-node.is-unknown .tv-name { fill: var(--muted); font-size: 24px; }
+.treeview.is-overview .tv-state, .treeview.is-overview .tv-lock { display: none; }
+.treeview.is-overview .tv-node:not(.is-unknown) .tv-name { font-size: 18px; font-weight: 600; transform: translateY(10px); }
 .treeview .is-dim { opacity: .2; }
 .treeview .tv-node.is-dim { opacity: .2; }
 .treeview .tv-node.is-match, .treeview .tv-node.is-selected, .treeview .tv-node.is-path { opacity: 1; }

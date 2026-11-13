@@ -85,7 +85,7 @@ func (c *colonyGame) persist() error {
 
 func (c *colonyGame) summary(lang string, done map[int]bool) map[string]any {
 	owned, total := c.state.TotalLevels()
-	return map[string]any{"running": c.active != nil, "state": c.state, "shop": shopForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
+	return map[string]any{"running": c.active != nil, "state": c.state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang), "contracts": contractsForLang(c.state, lang, done), "prices": c.state.Prices(), "levels": map[string]int{"owned": owned, "total": total}, "starter": levelForLang(levels.Colony, lang).Starter}
 }
 
 // chaptersDone reads which chapters the profile finished: every mission
@@ -430,7 +430,7 @@ func (s *server) colonyBuy(w http.ResponseWriter, r *http.Request) {
 		requestError(w, r, err.Error(), 500)
 		return
 	}
-	writeJSON(w, map[string]any{"ok": err == nil, "error": message, "state": c.state, "shop": shopForLang(c.state, lang)})
+	writeJSON(w, map[string]any{"ok": err == nil, "error": message, "state": c.state, "shop": shopForLang(c.state, lang), "tree": treeForLang(c.state, lang)})
 }
 
 func (s *server) colonyClaim(w http.ResponseWriter, r *http.Request) {
