@@ -14,6 +14,7 @@ const (
 	Silo       BuildingKind = "silo"
 	Generator  BuildingKind = "generator"
 	Lab        BuildingKind = "lab"
+	Collector  BuildingKind = "collector"
 )
 
 type BuildingError = econ.BuildingError
@@ -42,6 +43,9 @@ type BuildingStatus struct {
 	Level    int
 	Recipe   Entity
 	Powered  bool
+	Enabled  bool
+	Priority int
+	Mode     string
 }
 
 func Build(kind BuildingKind) error            { return world.Build(0, string(kind)) }
@@ -76,7 +80,7 @@ func (b *Building) Repair() error { return world.BuildingRepair(b.drone, b.pos) 
 
 func (b *Building) Status() BuildingStatus {
 	v := world.BuildingStatus(b.pos)
-	s := BuildingStatus{In: map[Entity]float64{}, Out: map[Entity]float64{}, Progress: v.Progress, Wear: v.Wear, Level: v.Level, Powered: true}
+	s := BuildingStatus{In: map[Entity]float64{}, Out: map[Entity]float64{}, Progress: v.Progress, Wear: v.Wear, Level: v.Level, Powered: v.Powered, Enabled: v.Enabled, Priority: v.Priority, Mode: v.Mode}
 	for e := Moss; e <= Core; e++ {
 		if n, ok := v.In[e.String()]; ok {
 			s.In[e] = n

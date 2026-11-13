@@ -25,6 +25,9 @@ const contractUnit = 2 * time.Millisecond
 // might have it: earlier contracts won and their unlocks bought, plus a few
 // upgrades bought with credits.
 func contractFixture(c *econ.Contract) *econ.State {
+	if c.Repeatable {
+		return experimentFixture(c)
+	}
 	seed := int64(11)
 	if c.ID == "c17-deep-haul" {
 		seed = 7 // more geodes on layer 2

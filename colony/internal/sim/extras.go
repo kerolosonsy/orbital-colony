@@ -24,8 +24,11 @@ func (Noise) isSignal()    {}
 // Unload moves the cargo into storage. It only works at the base.
 func (w *World) Unload(id int) bool {
 	return w.act(id, "unload", func() (bool, string, bool) {
-		if (Point{w.X, w.Y}) != w.Base {
+		if (Point{w.X, w.Y}) != w.Base || w.Econ != nil && w.Z != 0 {
 			return false, sayf("التفريغ في القاعدة بس %v", "Unload only at base %v", w.Base), false
+		}
+		if w.Econ != nil {
+			return w.unloadColony()
 		}
 		if w.Cargo == 0 {
 			return false, say("الشحنة فاضية", "Cargo is empty"), false
@@ -97,8 +100,14 @@ func (w *World) Spawn() int {
 		return -1
 	}
 	w.clock()
-	d := &Drone{ID: len(w.Drones), X: w.Base.X, Y: w.Base.Y}
+	if w.Econ != nil {
+		w.advanceProduction(w.Tick)
+	}
+	d := &Drone{ID: len(w.Drones), X: w.Base.X, Y: w.Base.Y, Battery: 100, Hold: map[string]float64{}}
 	w.Drones = append(w.Drones, d)
+	if w.Econ != nil {
+		w.syncInfrastructure()
+	}
 	w.emit(Event{Op: "spawn", T: w.Tick, D: d.ID, OK: true, X: d.X, Y: d.Y, Msg: sayf("🚁 درون %d انطلق", "🚁 Drone %d launched", d.ID)})
 	return d.ID
 }

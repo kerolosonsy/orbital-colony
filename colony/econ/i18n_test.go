@@ -24,7 +24,7 @@ func TestEnglishEconomyFeedback(t *testing.T) {
 		{"missing prerequisite", func(s *State) string { _, _, why := s.Status(Find("hangar")); return why }, "Requires first: Hangar License"},
 		{"missing credits", func(s *State) string { _, _, why := s.Status(Find("field")); return why }, "You need 30 more credits"},
 		{"missing goods", func(s *State) string {
-			s.Credits = 1000
+			s.Credits, s.RP = 1000, 1000
 			s.Levels["crop.lichen"] = 1
 			s.Blueprints["crop.glowcap"] = true
 			_, _, why := s.Status(Find("crop.glowcap"))

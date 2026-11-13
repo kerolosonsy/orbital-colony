@@ -35,7 +35,7 @@ var cropUnlock = map[Entity]string{Lichen: "crop.lichen", Glowcap: "crop.glowcap
 // NewColony builds a running colony world from saved state.
 func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	st.Normalize()
-	w := New(out, seed)
+	w := New(out, researchSeed(st, seed))
 	w.Econ = st
 	w.Realtime = true
 	w.Unit = 100 * time.Millisecond
@@ -47,6 +47,8 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.TickBase = int(st.Tick)
 	w.Tick = w.TickBase
 	w.lastProductionTick = w.TickBase
+	w.loadFleet()
+	w.lastRankTick = w.TickBase
 	w.loadTiles()
 	w.applyEcon()
 	w.Check = func(w *World) (bool, string) {
@@ -85,7 +87,12 @@ func (w *World) applyEcon() {
 	w.MaxDrones = w.Econ.DroneCap()
 	for _, b := range w.Econ.Buildings {
 		b.Level = w.Econ.Level(b.Kind)
+		w.Econ.ConfigureBuilding(b)
 	}
+	if w.cargoActive() {
+		w.Capacity = w.Econ.CargoCapacity()
+	}
+	w.syncInfrastructure()
 	w.syncInv()
 }
 
@@ -97,6 +104,7 @@ func (w *World) syncInv() {
 
 // syncEcon writes the live world back into the saved state. Caller holds the lock.
 func (w *World) syncEcon() {
+	w.syncInfrastructure()
 	st := w.Econ
 	st.Tick = int64(w.Tick)
 	st.Depth = w.Depth
@@ -207,9 +215,11 @@ func (w *World) colonyHarvest(destroy bool) (int, error, string, bool) {
 			}
 		})
 	}
-	w.Econ.RecordHarvest(name, base, t.Size)
 	got := base * w.Econ.YieldMult(name)
-	w.Econ.Inv[name] += got
+	if err := w.collectGood(t.Entity, got); err != nil {
+		return 0, err, buildingMessage(err), false
+	}
+	w.Econ.RecordHarvest(name, base, t.Size)
 	w.syncInv()
 	t.Entity, t.Planted, t.Ready, t.Size = Empty, 0, 0, 0
 	return int(got), nil, fmt.Sprintf("+%s %s", trimFloat(got), name), true
@@ -241,6 +251,7 @@ func (w *World) Export(id int, e Entity, n int) (earned float64) {
 		// Each unit lowers the price, so the last one sold was the cheapest.
 		low := w.Econ.Price(name) / math.Pow(0.996, math.Min(1, sold))
 		w.Econ.RecordSale(id, name, sold, earned, low)
+		w.recordRankSale(name, sold)
 		w.syncInv()
 		return true, fmt.Sprintf("+%.0f ⌬", earned), false
 	})
@@ -270,6 +281,7 @@ func (w *World) Credits() float64 {
 // ---------- background life of the colony ----------
 
 type econEvent struct {
+	Rank         econ.RankProgress  `json:"rank"`
 	Translations [][2]string        `json:"translations,omitempty"`
 	Layers       int                `json:"layers,omitempty"`
 	Op           string             `json:"op"`
@@ -294,6 +306,8 @@ type contractView struct {
 }
 
 func (w *World) emitRaw(v econEvent) {
+	w.advanceRank()
+	v.Rank = w.Econ.RankProgress()
 	v.Translations = takeMessages()
 	b, _ := json.Marshal(v)
 	w.out.Write(append(b, '\n'))
@@ -301,6 +315,7 @@ func (w *World) emitRaw(v econEvent) {
 
 func (w *World) econSnapshot(op, msg string, ok, full bool) {
 	w.advanceProduction(w.Tick)
+	w.checkRank()
 	ev := econEvent{Op: op, T: w.Tick, OK: ok, Msg: msg, Credits: w.Econ.Credits, Prices: w.Econ.Prices(), Inv: w.Econ.Inv}
 	if w.Econ.Active != "" {
 		_, _, why := w.Econ.ProgressPair(int64(w.Tick))
@@ -368,6 +383,9 @@ func (w *World) checkContract() {
 		r, _ := w.Econ.Settle(int64(w.Tick))
 		w.applyEcon()
 		msg := say("✅ العقد خلص: ", "✅ Contract complete: ") + say(c.Title, c.TitleEn)
+		if r.RP > 0 {
+			msg += sayf(" (+%.1f نقط بحث)", " (+%.1f RP)", r.RP)
+		}
 		if r.Credits > 0 {
 			msg += sayf(" (+%.0f كريدت)", " (+%.0f credits)", r.Credits)
 		}

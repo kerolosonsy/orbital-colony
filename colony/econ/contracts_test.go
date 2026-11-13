@@ -112,7 +112,8 @@ func TestContractProgressSettleAndReplay(t *testing.T) {
 	if _, ok, _ := s.Status(Find("api.scanner")); ok {
 		t.Fatal("blueprint should not make the purchase free")
 	}
-	s.Credits = 1000
+	s.Credits, s.RP = 1000, 1000
+	s.Levels["field"] = 1
 	if err := s.Buy("api.scanner"); err != nil {
 		t.Fatal(err)
 	}

@@ -35,8 +35,12 @@ func init() {
 		}
 	}
 	Tree = append(Tree, buildingNodes()...)
+	addTreeContent()
 	for i := range Tree {
 		Tree[i].Chapter = nodeChapter(Tree[i])
+		if Tree[i].ID != "base" && (len(Tree[i].After) != 1 || Tree[i].After[0].ID != "base") {
+			Tree[i].RP = float64(max(8, Tree[i].Chapter*2))
+		}
 	}
 }
 
@@ -73,7 +77,7 @@ func upgradeNode(u *Upgrade) Node {
 
 func upgradeBranch(id string) string {
 	switch {
-	case id == "engine", id == "hangar", id == "api.spawn":
+	case id == "engine", id == "hangar", id == "api.spawn", id == "cargo":
 		return "الأسطول"
 	case id == "api.scanner":
 		return "البيانات"
@@ -92,6 +96,7 @@ func nodeCost(credits, growth float64) CostRule {
 
 func buildingNodes() []Node {
 	return []Node{
+		collectorNode(),
 		{ID: "composter", Branch: "التصنيع", Name: "السمّادة", NameEn: "Composter", Desc: "تحوّل المحاصيل لكتلة حيوية.", DescEn: "Turns crops into biomass.", After: []Prereq{{"yield.moss", 1}}, Chapter: 7, Cost: nodeCost(100, 1.6)},
 		{ID: "smelter", Branch: "التصنيع", Name: "المصهر", NameEn: "Smelter", Desc: "يصنع الصفائح والأسلاك والسبائك.", DescEn: "Makes plates, wire, and alloy.", After: []Prereq{{"drill", 1}}, Chapter: 17, Cost: nodeCost(200, 1.6)},
 		{ID: "kiln", Branch: "التصنيع", Name: "الفرن", NameEn: "Kiln", Desc: "يحوّل السيليكا لزجاج.", DescEn: "Turns silica into glass.", After: []Prereq{{"crop.crystal", 1}}, Chapter: 7, Cost: nodeCost(180, 1.6)},

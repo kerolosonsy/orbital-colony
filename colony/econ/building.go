@@ -8,6 +8,10 @@ import (
 )
 
 type Building struct {
+	Powered      bool   `json:"powered"`
+	Mode         string `json:"mode,omitempty"`
+	speedBonus   float64
+	bufferBonus  float64
 	Kind         string             `json:"kind"`
 	X            int                `json:"x"`
 	Y            int                `json:"y"`
@@ -45,6 +49,9 @@ func Capacity(level int) float64 { return 8 * EffectMult(0.25, level) }
 
 func (b *Building) recipes(out string) []Recipe {
 	var recipes []Recipe
+	if b.Kind == "collector" && out == "helium" {
+		return []Recipe{{Out: "helium", Building: "collector", Ticks: 100}}
+	}
 	for _, r := range RecipeFor(out) {
 		if r.Building == b.Kind {
 			recipes = append(recipes, r)
@@ -80,6 +87,12 @@ func (b *Building) hasInputs(r Recipe) bool {
 }
 
 func (b *Building) accepts(good string) bool {
+	if b.Kind == "generator" {
+		return good == "fuel" || good == "cell"
+	}
+	if b.Kind == "lab" {
+		return ResearchValue(good) > 0
+	}
 	for _, r := range b.recipes(b.Recipe) {
 		if _, ok := r.In[good]; ok {
 			return true
@@ -107,7 +120,7 @@ func (b *Building) Put(good string, n float64) (float64, error) {
 	if n <= 0 {
 		return 0, nil
 	}
-	accepted := math.Min(n, Capacity(b.Level)-b.In[good])
+	accepted := math.Min(n, b.capacity()-b.In[good])
 	if accepted <= 0 {
 		return 0, ErrFull
 	}
@@ -151,7 +164,7 @@ func (b *Building) ready(r Recipe, powered bool) error {
 	if !powered {
 		return ErrNoPower
 	}
-	if Capacity(b.Level)-bufferAmount(b.Out) < 1 {
+	if b.capacity()-bufferAmount(b.Out) < 1 {
 		return ErrFull
 	}
 	if b.Progress == 0 && !b.hasInputs(r) {
@@ -161,7 +174,7 @@ func (b *Building) ready(r Recipe, powered bool) error {
 }
 
 func (b *Building) cycleTicks(r Recipe) int {
-	ticks := max(1, int(math.Ceil(float64(r.Ticks)/EffectMult(0.25, b.Level))))
+	ticks := max(1, int(math.Ceil(float64(r.Ticks)/(EffectMult(0.25, b.Level)*(1+b.speedBonus)))))
 	if b.Wear > 80 {
 		ticks *= 2
 	}
@@ -221,6 +234,9 @@ func (b *Building) ProgressFraction() float64 {
 	if b.Progress == 0 {
 		return 0
 	}
+	if b.Kind == "lab" {
+		return math.Min(1, float64(b.Progress)/float64(b.cycleTicks(Recipe{Ticks: ResearchTicks})))
+	}
 	r, err := b.recipe(b.Recipe)
 	if err != nil {
 		return 0
@@ -246,11 +262,12 @@ var placementCosts = map[string]Cost{
 	"reactor-lab": {Credits: 500, Goods: map[string]float64{"plate": 4}},
 	"silo":        {Credits: 35, Goods: map[string]float64{"moss": 4}},
 	"generator":   {Credits: 100, Goods: map[string]float64{"glass": 2}},
+	"collector":   {Credits: 125, Goods: map[string]float64{"glass": 2}},
 	"lab":         {Credits: 200, Goods: map[string]float64{"plate": 2}},
 }
 
 func addBuildingUpgrades() {
-	goods := map[string]string{"composter": "moss", "smelter": "iron", "kiln": "silica", "refinery": "biomass", "assembler": "plate", "reactor-lab": "alloy", "silo": "moss", "generator": "glass", "lab": "circuit"}
+	goods := map[string]string{"composter": "moss", "smelter": "iron", "kiln": "silica", "refinery": "biomass", "assembler": "plate", "reactor-lab": "alloy", "silo": "moss", "generator": "glass", "lab": "circuit", "collector": "glass"}
 	for _, n := range buildingNodes() {
 		var requires []string
 		for _, p := range n.After {

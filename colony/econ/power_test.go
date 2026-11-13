@@ -75,12 +75,12 @@ func TestPowerAllocationUsesPrioritySkipsLargeLoadsAndCountsDemand(t *testing.T)
 			{Kind: "silo", Enabled: true},
 			{Kind: "generator", Enabled: true},
 			{Kind: "lab", Enabled: true},
-		}, map[int]bool{0: true, 1: true}, 10},
+		}, map[int]bool{0: true, 1: true}, 6},
 		{"all consumers", 53, []*Building{
 			{Kind: "composter", Enabled: true}, {Kind: "smelter", Enabled: true},
 			{Kind: "kiln", Enabled: true}, {Kind: "refinery", Enabled: true},
 			{Kind: "assembler", Enabled: true}, {Kind: "reactor-lab", Enabled: true}, {Kind: "lab", Enabled: true},
-		}, map[int]bool{0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true}, 53},
+		}, map[int]bool{0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true}, 49},
 		{"empty", 10, nil, map[int]bool{}, 0},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

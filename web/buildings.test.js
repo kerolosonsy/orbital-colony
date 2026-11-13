@@ -11,7 +11,7 @@ const colonySrc = fs.readFileSync(__dirname + "/colony.js", "utf8");
 
 const BUILDING_KINDS = [
   "composter", "smelter", "kiln", "refinery", "assembler",
-  "reactor-lab", "silo", "generator", "lab",
+  "reactor-lab", "silo", "generator", "lab", "collector",
 ];
 
 function makeFakeDocument() {
@@ -216,6 +216,30 @@ test("Buildings status map tracks syncState, live building events, removal, and 
   assert.equal(Buildings.at(2, 1), null);
   assert.equal("b" in world.layers[0][2][1], false);
 
+  // Optional power/enable/priority/mode fields are preserved when present
+  Buildings.applyEvent({
+    op: "building",
+    t: 124,
+    x: 0,
+    y: 1,
+    building: { kind: "generator", mode: "solar", powered: false, enabled: false, priority: 3, wear: 0, progress: 0 },
+  }, world);
+  assert.deepEqual(JSON.parse(JSON.stringify(Buildings.at(0, 1))), {
+    kind: "generator",
+    x: 0,
+    y: 1,
+    level: 1,
+    recipe: "",
+    in: {},
+    out: {},
+    progress: 0,
+    wear: 0,
+    powered: false,
+    enabled: false,
+    priority: 3,
+    mode: "solar",
+  });
+
   Buildings.clear();
   assert.deepEqual(Array.from(Buildings.list()), []);
 });
@@ -259,6 +283,24 @@ test("Buildings.listMarkup renders localized names, positions, I/O chips, wear >
     assert.doesNotMatch(html, /<script>/);
     assert.match(html, /&lt;img src=x onerror=1&gt;/);
     assert.match(html, /&lt;script&gt;/);
+
+    // Unpowered, disabled, generator mode, and collector kind render localized & escaped.
+    const sysHtml = Buildings.listMarkup([
+      { kind: "generator", x: 0, y: 0, mode: "solar", powered: true, enabled: true, wear: 0 },
+      { kind: "collector", x: 1, y: 0, powered: false, enabled: true, wear: 0 },
+      { kind: "smelter", x: 2, y: 0, powered: false, enabled: false, wear: 0 },
+      { kind: "generator", x: 3, y: 0, mode: "<bad>", wear: 0 },
+    ]);
+    assert.match(sysHtml, new RegExp(NAME.collector));
+    assert.match(sysHtml, lang === "en" ? /Solar/ : /شمسي/);
+    assert.match(sysHtml, lang === "en" ? /Unpowered/ : /بدون طاقة/);
+    assert.match(sysHtml, lang === "en" ? /Disabled/ : /معطّل/);
+    assert.match(sysHtml, /&lt;bad&gt;/);
+    const sysRows = sysHtml.split('<div class="item bld-row').slice(1);
+    assert.doesNotMatch(sysRows[0], /bld-unpowered|bld-disabled/);
+    assert.match(sysRows[1], /bld-unpowered/);
+    assert.doesNotMatch(sysRows[1], /bld-disabled/);
+    assert.match(sysRows[2], /bld-unpowered bld-disabled/);
   }
 });
 
@@ -277,7 +319,7 @@ test("Sprites.ore and Buildings.sprite produce distinct procedural pixel art and
   }
   assert.equal(new Set(orePalettes.values()).size, 6, "each ore must have its own colour palette");
 
-  // All 9 buildings draw non-empty 16x16 grids with unique silhouettes.
+  // All 10 buildings draw non-empty 16x16 grids with unique silhouettes.
   const signatures = new Set();
   for (const kind of BUILDING_KINDS) {
     const idle = Buildings.sprite(kind, 0);
@@ -301,6 +343,7 @@ test("Sprites.ore and Buildings.sprite produce distinct procedural pixel art and
       fillStyle: "",
       strokeStyle: "",
       lineWidth: 1,
+      globalAlpha: 1,
       imageSmoothingEnabled: true,
       save() {},
       restore() {},
@@ -311,7 +354,7 @@ test("Sprites.ore and Buildings.sprite produce distinct procedural pixel art and
       ellipse(...a) { ops.push(["ellipse", ...a]); },
       fill() { ops.push(["fill", this.fillStyle]); },
       stroke() { ops.push(["stroke", this.strokeStyle]); },
-      drawImage(img, x, y, w, h) { ops.push(["drawImage", img, x, y, w, h]); },
+      drawImage(img, x, y, w, h) { ops.push(["drawImage", img, x, y, w, h, this.globalAlpha]); },
       fillRect(x, y, w, h) { ops.push(["fillRect", x, y, w, h, this.fillStyle]); },
     };
   };
@@ -320,6 +363,7 @@ test("Sprites.ore and Buildings.sprite produce distinct procedural pixel art and
   Buildings.draw(idleCtx, 100, 100, 24, "composter", { progress: 0, wear: 80 }, 0);
   assert.equal(idleCtx.ops.some((op) => op[0] === "fillRect" && op[5] === "#d39b55"), false);
   assert.equal(idleCtx.ops.some((op) => op[0] === "fill" && (op[1] === "#f0a14a" || op[1] === "#ff6b6b")), false);
+  assert.equal(idleCtx.ops.find((op) => op[0] === "drawImage")[6], 1);
 
   const activeCtx = makeDrawCtx();
   Buildings.draw(activeCtx, 100, 100, 24, "composter", { progress: 0.4, wear: 81 }, 500);
@@ -329,6 +373,21 @@ test("Sprites.ore and Buildings.sprite produce distinct procedural pixel art and
   const brokenCtx = makeDrawCtx();
   Buildings.draw(brokenCtx, 100, 100, 24, "smelter", { progress: 0.9, wear: 100 }, 500);
   assert.equal(brokenCtx.ops.some((op) => op[0] === "fill" && op[1] === "#ff6b6b"), true);
+
+  // Unpowered and disabled buildings draw dimmed (and restore alpha) with a small mark.
+  const unpoweredCtx = makeDrawCtx();
+  Buildings.draw(unpoweredCtx, 100, 100, 24, "collector", { progress: 0.5, wear: 0, powered: false, enabled: true }, 450);
+  assert.ok(unpoweredCtx.ops.find((op) => op[0] === "drawImage")[6] < 1);
+  assert.equal(unpoweredCtx.globalAlpha, 1);
+  assert.equal(unpoweredCtx.ops.find((op) => op[0] === "drawImage")[1], Buildings.sprite("collector", 0));
+  assert.equal(unpoweredCtx.ops.some((op) => op[0] === "fill" && op[1] === "#f0a14a"), true);
+  assert.equal(unpoweredCtx.ops.some((op) => op[0] === "stroke" && op[1] === "#ff6b6b"), true);
+
+  const disabledCtx = makeDrawCtx();
+  Buildings.draw(disabledCtx, 100, 100, 24, "collector", { progress: 0.5, wear: 0, powered: true, enabled: false }, 450);
+  assert.ok(disabledCtx.ops.find((op) => op[0] === "drawImage")[6] < 1);
+  assert.equal(disabledCtx.globalAlpha, 1);
+  assert.equal(disabledCtx.ops.some((op) => op[0] === "fillRect" && op[5] === "#a69dc2"), true);
 });
 
 test("Colony live flow updates buildings list, world tiles, legend and redraws without errors", () => {

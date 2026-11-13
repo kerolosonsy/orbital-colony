@@ -25,6 +25,9 @@ type Contract struct {
 	Goal     Goal     `json:"goal"`
 	Limits   Limits   `json:"limits"`
 	Reward   Reward   `json:"reward"`
+
+	Repeatable bool    `json:"repeatable,omitempty"`
+	RewardRP   float64 `json:"rewardRP,omitempty"`
 }
 
 type Goal struct {
@@ -63,6 +66,9 @@ type ContractRun struct {
 	Sellers  map[int]bool       `json:"sellers,omitempty"`  // drones that exported
 	Moves    int                `json:"moves,omitempty"`
 	Broke    string             `json:"broke,omitempty"` // a rule the run broke: price, vein, exporter
+
+	ResearchDay  int64 `json:"researchDay,omitempty"`
+	RepeatsToday int   `json:"repeatsToday,omitempty"`
 }
 
 // NoLimit marks a goal without a loss limit.
@@ -244,7 +250,7 @@ func (s *State) Accept(id string) error {
 		}
 	}
 	old := s.run(id)
-	s.Contracts[id] = &ContractRun{Status: "active", Start: s.Tick, Best: old.Best, Tries: old.Tries + 1}
+	s.Contracts[id] = &ContractRun{Status: "active", Start: s.Tick, Best: old.Best, Tries: old.Tries + 1, ResearchDay: old.ResearchDay, RepeatsToday: old.RepeatsToday}
 	s.Active = id
 	return nil
 }
@@ -492,6 +498,9 @@ func (s *State) Settle(tick int64) (Reward, error) {
 		r.Best = took
 	}
 	s.end("done")
+	if c.Repeatable {
+		return s.settleExperiment(c, r, tick), nil
+	}
 	if !first {
 		return Reward{}, nil
 	}

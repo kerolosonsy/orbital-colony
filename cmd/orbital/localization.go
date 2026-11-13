@@ -51,6 +51,7 @@ func economyText(lang, message string) string {
 	}
 	for _, pair := range [][2]string{
 		{"محتاج الأول: ", "Requires first: "},
+		{"محتاج رتبة مستعمرة ", "Needs colony rank "},
 		{"مفيش ترقية اسمها ", "No upgrade named "},
 		{"مفيش عقد اسمه ", "No contract named "},
 	} {
@@ -86,6 +87,9 @@ type contractView struct {
 	Frac     float64           `json:"frac,omitempty"`
 	Progress string            `json:"progress,omitempty"`
 	Left     int64             `json:"left,omitempty"`
+
+	Repeatable bool    `json:"repeatable,omitempty"`
+	RewardRP   float64 `json:"rewardRP,omitempty"`
 }
 
 func contractsForLang(st *econ.State, lang string, done map[int]bool) []contractView {
@@ -95,7 +99,7 @@ func contractsForLang(st *econ.State, lang string, done map[int]bool) []contract
 	}
 	out := make([]contractView, 0, len(econ.Contracts))
 	for _, c := range econ.Contracts {
-		v := contractView{ID: c.ID, Chapter: c.Chapter, Title: tr(lang, c.Title, c.TitleEn), Brief: tr(lang, c.Brief, c.BriefEn), Window: c.Window, Run: st.Contracts[c.ID]}
+		v := contractView{Repeatable: c.Repeatable, RewardRP: c.RewardRP, ID: c.ID, Chapter: c.Chapter, Title: tr(lang, c.Title, c.TitleEn), Brief: tr(lang, c.Brief, c.BriefEn), Window: c.Window, Run: st.Contracts[c.ID]}
 		for _, a := range c.After {
 			if !st.Won(a) {
 				p := econ.FindContract(a)
@@ -107,7 +111,7 @@ func contractsForLang(st *econ.State, lang string, done map[int]bool) []contract
 			v.Status = "active"
 			_, _, why := st.ProgressPair(st.Tick)
 			v.Frac, v.Progress, v.Left = st.Fraction(), tr(lang, why[0], why[1]), st.Left(st.Tick)
-		case st.Won(c.ID):
+		case st.Won(c.ID) && !c.Repeatable:
 			v.Status = "done"
 		case open[c.ID] || st.Active != "" && done[c.Chapter] && len(v.After) == 0:
 			v.Status = "available"
