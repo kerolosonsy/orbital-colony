@@ -89,7 +89,7 @@ func (s *State) Store(goods map[string]float64) error {
 	return nil
 }
 
-func (s *State) CargoCapacity() int { return 10 + 5*s.Level("cargo") }
+func (s *State) CargoCapacity() int { return 10 + int(linearMult(5, s.Level("cargo"), 8)-1) }
 
 func (s *State) RentRate(drones int) float64 {
 	return float64(len(s.Buildings))*BuildingRent + float64(max(0, drones-1))*DroneRent

@@ -42,35 +42,35 @@ func (s *State) settleExperiment(c *Contract, r *ContractRun, tick int64) Reward
 }
 
 func (s *State) ResearchYieldMult(good string) float64 {
-	return 1 + 0.15*float64(s.Level("research.yield."+good))
+	return linearMult(0.15, s.Level("research.yield."+good), 3)
 }
 
 func (s *State) GrowthResearchMult(good string) float64 {
-	return 1 + 0.1*float64(s.Level("research.grow."+good))
+	return linearMult(0.1, s.Level("research.grow."+good), 3)
 }
 
 func (s *State) EngineResearchMult() float64 {
-	return 1 + 0.08*float64(s.Level("research.engine"))
+	return linearMult(0.08, s.Level("research.engine"), 3)
 }
 
 func (s *State) VeinResearchMult() float64 {
-	return 1 + 0.2*float64(s.Level("research.vein-rate"))
+	return linearMult(0.2, s.Level("research.vein-rate"), 3)
 }
 
 func (s *State) MarketResearchMult(good string) float64 {
-	return 1 + 0.1*float64(s.Level("research.price."+good))
+	return linearMult(0.1, s.Level("research.price."+good), 3)
 }
 
 func (s *State) RecoveryResearchMult(good string) float64 {
-	return 1 + 0.25*float64(s.Level("research.recovery."+good))
+	return linearMult(0.25, s.Level("research.recovery."+good), 3)
 }
 
 func (s *State) BuildingSpeedMult(kind string) float64 {
-	return 1 + 0.2*float64(s.Level("research.speed."+kind))
+	return linearMult(0.2, s.Level("research.speed."+kind), 3)
 }
 
 func (s *State) BuildingCapacity(kind string, level int) float64 {
-	return Capacity(level) + 4*float64(s.Level("research.buffer."+kind))
+	return Capacity(level) + (linearMult(4, s.Level("research.buffer."+kind), 3) - 1)
 }
 
 func (s *State) ConfigureBuilding(b *Building) {
@@ -85,7 +85,7 @@ func (s *State) BuildingPlacementCost(kind string) *Cost {
 	if base == nil {
 		return nil
 	}
-	mult := 1 - 0.1*float64(s.Level("research.placement"))
+	mult := placementMult(s.Level("research.placement"))
 	cost := &Cost{Credits: base.Credits * mult, Goods: map[string]float64{}}
 	for good, n := range base.Goods {
 		cost.Goods[good] = n * mult
@@ -93,13 +93,13 @@ func (s *State) BuildingPlacementCost(kind string) *Cost {
 	return cost
 }
 
-func (s *State) SiftStock() int { return 3 + s.Level("research.sift-stock") }
+func (s *State) SiftStock() int { return 3 + int(linearMult(1, s.Level("research.sift-stock"), 3)-1) }
 func (s *State) SiftRefillTicks() int {
-	return int(math.Ceil(100 / (1 + 0.2*float64(s.Level("research.sift-refill")))))
+	return int(math.Ceil(100 / linearMult(0.2, s.Level("research.sift-refill"), 3)))
 }
 func (s *State) MeltRegrowthTicks() int {
-	return int(math.Ceil(600 / (1 + 0.2*float64(s.Level("research.melt")))))
+	return int(math.Ceil(600 / linearMult(0.2, s.Level("research.melt"), 3)))
 }
 func (s *State) ResearchGainMult() float64 {
-	return 1 + 0.2*float64(s.Level("research.gain"))
+	return linearMult(0.2, s.Level("research.gain"), 3)
 }

@@ -56,6 +56,7 @@ func TestColonyStoppedPurchasesAndClaimsPersist(t *testing.T) {
 		t.Fatalf("unexpected fresh save: %+v", fresh)
 	}
 	c.state.Credits = 100
+	c.state.Inv["moss"] = 5
 	response := colonyRequest(t, s.colonyBuy, `{"id":"engine"}`)
 	var purchase struct {
 		OK bool `json:"ok"`
@@ -101,6 +102,7 @@ func TestColonyRealRunStreamsAndSavesOnStop(t *testing.T) {
 	s := testColony(t)
 	c := s.colony
 	c.state.Credits = 100
+	c.state.Inv["moss"] = 5
 	startingTick := c.state.Tick
 	ch, unsubscribe := c.subscribe()
 	defer unsubscribe()

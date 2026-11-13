@@ -37,6 +37,10 @@ func init() {
 	Tree = append(Tree, buildingNodes()...)
 	addTreeContent()
 	for i := range Tree {
+		if u := Find(Tree[i].ID); u != nil && u.rule != nil {
+			Tree[i].Cost = *u.rule
+			Tree[i].Desc, Tree[i].DescEn = u.Desc, u.DescEn
+		}
 		Tree[i].Chapter = nodeChapter(Tree[i])
 		if Tree[i].ID != "base" && (len(Tree[i].After) != 1 || Tree[i].After[0].ID != "base") {
 			Tree[i].RP = float64(max(8, Tree[i].Chapter*2))

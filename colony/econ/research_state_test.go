@@ -13,6 +13,7 @@ func TestResearchPurchaseSpendsOnceAndPreservesFundsOnFailure(t *testing.T) {
 	n := FindNode("research.engine")
 	s.Credits, s.RP = 1000, n.RP-0.5
 	s.Levels["engine"] = 3
+	s.Inv["moss"] = 100
 	if err := s.Buy(n.ID); err == nil || !strings.Contains(err.Error(), "RP") || s.Credits != 1000 || s.RP != n.RP-0.5 || s.Level(n.ID) != 0 {
 		t.Fatalf("RP shortage spent funds or lacked reason: %v", err)
 	}
@@ -107,7 +108,7 @@ func TestResearchFullTreeContentHasReachableAffordablePrerequisites(t *testing.T
 			}
 		}
 		for _, p := range n.After {
-			if p.ID != "base" && p.Level > Find(p.ID).Max {
+			if p.ID != "base" && Find(p.ID).Max > 0 && p.Level > Find(p.ID).Max {
 				t.Errorf("%s impossible parent %+v", n.ID, p)
 			}
 		}
