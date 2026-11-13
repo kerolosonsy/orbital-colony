@@ -140,7 +140,7 @@ func TestProcessColonyServerSignalsCleanStopAndDiscardsExitCargo(t *testing.T) {
 				t.Fatal(err)
 			}
 			c.state.Fleet[0].Cargo["moss"] = 3
-			if err := c.start(filepath.Dir(prog), "en"); err != nil {
+			if err := c.start(filepath.Dir(prog), "en", &colonyRunDetails{lang: "en"}); err != nil {
 				t.Fatal(err)
 			}
 			defer c.stop()

@@ -53,7 +53,10 @@ func editorFiles(l *levels.Level) []levels.LabFile {
 
 // open writes the mission folder (never overwriting files the player
 // already edited there) and returns the main file's path.
-func (ws *workspace) open(l *levels.Level, current map[string]string) (string, error) {
+func (ws *workspace) open(l *levels.Level, current map[string]string, languages ...string) (string, error) {
+	if l.ID == "colony" {
+		return ws.openColony(l, current, workspaceLang(languages))
+	}
 	if err := ws.ensureModule(l); err != nil {
 		return "", err
 	}
@@ -87,7 +90,10 @@ func (ws *workspace) open(l *levels.Level, current map[string]string) (string, e
 	return first, nil
 }
 
-func (ws *workspace) read(l *levels.Level) (map[string]string, time.Time, error) {
+func (ws *workspace) read(l *levels.Level, languages ...string) (map[string]string, time.Time, error) {
+	if l.ID == "colony" {
+		return ws.readColony(workspaceLang(languages))
+	}
 	dir := filepath.Join(ws.root, l.ID)
 	files := map[string]string{}
 	var newest time.Time
@@ -119,7 +125,7 @@ func (s *server) workspaceOpen(w http.ResponseWriter, r *http.Request) {
 		Level string
 		Files map[string]string
 	}
-	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 512<<10)).Decode(&req); err != nil {
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 6*colonyProjectLimit+64<<10)).Decode(&req); err != nil {
 		requestError(w, r, "bad request", http.StatusBadRequest)
 		return
 	}
@@ -128,7 +134,7 @@ func (s *server) workspaceOpen(w http.ResponseWriter, r *http.Request) {
 		requestError(w, r, "unknown level", http.StatusNotFound)
 		return
 	}
-	path, err := ws.open(l, req.Files)
+	path, err := ws.open(l, req.Files, requestLang(r))
 	if err != nil {
 		requestError(w, r, err.Error(), 500)
 		return
@@ -153,7 +159,7 @@ func (s *server) workspaceFiles(w http.ResponseWriter, r *http.Request) {
 		requestError(w, r, "unknown level", http.StatusNotFound)
 		return
 	}
-	files, mtime, err := ws.read(l)
+	files, mtime, err := ws.read(l, requestLang(r))
 	if errors.Is(err, os.ErrNotExist) {
 		requestError(w, r, "not in workspace", http.StatusNotFound)
 		return

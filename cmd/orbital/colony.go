@@ -26,6 +26,7 @@ type colonyRun struct {
 	cmd      *exec.Cmd
 	commands *os.File
 	done     chan struct{}
+	details  *colonyRunDetails
 }
 
 type colonyGame struct {
@@ -156,6 +157,7 @@ func (c *colonyGame) broadcast(line string) {
 }
 
 func (c *colonyGame) event(line string) {
+	c.observeRunEvent(line)
 	var event struct {
 		State *econ.State `json:"state"`
 		T     int64       `json:"t"`
@@ -172,7 +174,9 @@ func (c *colonyGame) event(line string) {
 		c.mu.Unlock()
 	}
 	c.signalCleanStop(event.T)
-	c.broadcast(line)
+	if !c.deferLedgerCompletion(line) {
+		c.broadcast(line)
+	}
 }
 
 func (c *colonyGame) readLines(reader io.Reader, op string) {
@@ -180,6 +184,9 @@ func (c *colonyGame) readLines(reader io.Reader, op string) {
 	scanner.Buffer(make([]byte, 4096), 8<<20)
 	for scanner.Scan() {
 		line := scanner.Text()
+		if op == "stderr" {
+			c.detectRace(line)
+		}
 		if op == "" {
 			c.event(line)
 		} else {
@@ -211,7 +218,7 @@ func (c *colonyGame) stop() {
 	}
 }
 
-func (c *colonyGame) start(dir string, lang string) error {
+func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) error {
 	savePath := filepath.Join(dir, "colony.json")
 	c.mu.Lock()
 	body, err := json.Marshal(c.state)
@@ -262,9 +269,10 @@ func (c *colonyGame) start(dir string, lang string) error {
 		stderrReader.Close()
 		return err
 	}
-	active := &colonyRun{cmd: cmd, commands: commandsWriter, done: make(chan struct{})}
+	active := &colonyRun{cmd: cmd, commands: commandsWriter, done: make(chan struct{}), details: details}
 	c.mu.Lock()
 	c.active = active
+	c.beginRun(details)
 	c.mu.Unlock()
 	var readers sync.WaitGroup
 	for _, stream := range []struct {
@@ -281,6 +289,7 @@ func (c *colonyGame) start(dir string, lang string) error {
 		commandsWriter.Close()
 		c.mu.Lock()
 		contractEvent := c.finishColonyEvents(lang)
+		finalEvent := c.finishRun(active)
 		if err := c.persist(); err != nil {
 			log.Printf("colony final save: %v", err)
 		}
@@ -288,6 +297,9 @@ func (c *colonyGame) start(dir string, lang string) error {
 		c.mu.Unlock()
 		if contractEvent != "" {
 			c.broadcast(contractEvent)
+		}
+		if finalEvent != "" {
+			c.broadcast(finalEvent)
 		}
 		reason := tr(lang, "البرنامج خلص", "program exited")
 		if waitErr != nil {
@@ -312,73 +324,7 @@ func (s *server) colonyStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) colonyRun(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Code string `json:"code"`
-	}
-	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 256<<10)).Decode(&req); err != nil {
-		requestError(w, r, "bad request", 400)
-		return
-	}
-	s.colonyOps.Lock()
-	defer s.colonyOps.Unlock()
-	c := s.requestGame(w, r)
-	if c == nil {
-		return
-	}
-	c.ops.Lock()
-	defer c.ops.Unlock()
-	c.mu.Lock()
-	contract, _ := c.state.ActiveContract()
-	c.mu.Unlock()
-	if contract != nil {
-		if missing := contractRequirements(req.Code, contract.Requires, requestLang(r)); len(missing) > 0 {
-			writeJSON(w, map[string]any{"phase": "requires", "missing": missing, "contract": contract.ID})
-			return
-		}
-	}
-	s.stopColonies()
-	dir, err := os.MkdirTemp("", "orbital-colony-*")
-	if err != nil {
-		requestError(w, r, err.Error(), 500)
-		return
-	}
-	started := false
-	defer func() {
-		if !started {
-			os.RemoveAll(dir)
-		}
-	}()
-	gomod := fmt.Sprintf("module player\n\ngo 1.24\n\nrequire orbital/colony v0.0.0\n\nreplace orbital/colony => %s\n", s.run.colonyDir)
-	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(gomod), 0o644); err != nil {
-		requestError(w, r, err.Error(), 500)
-		return
-	}
-	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(req.Code), 0o644); err != nil {
-		requestError(w, r, err.Error(), 500)
-		return
-	}
-	ctx, cancel := context.WithTimeout(r.Context(), 90*time.Second)
-	defer cancel()
-	output := &limitedBuffer{max: 64 << 10, lang: requestLang(r)}
-	build := s.run.goCmd(ctx, dir, "build", "-o", "prog", ".")
-	build.Stdout, build.Stderr = output, output
-	if err := runCommand(build); err != nil {
-		out := strings.ReplaceAll(output.String(), dir+string(os.PathSeparator), "")
-		compileErrors := []compileError{}
-		for _, line := range strings.Split(out, "\n") {
-			if ce, ok := parseCompileLine(line, requestLang(r)); ok {
-				compileErrors = append(compileErrors, ce)
-			}
-		}
-		writeJSON(w, map[string]any{"phase": "compile", "compileErrors": compileErrors, "compileOutput": out})
-		return
-	}
-	if err := c.start(dir, requestLang(r)); err != nil {
-		requestError(w, r, err.Error(), 500)
-		return
-	}
-	started = true
-	writeJSON(w, map[string]any{"phase": "run", "running": true})
+	s.runColonyProject(w, r)
 }
 
 func (s *server) colonyStop(w http.ResponseWriter, r *http.Request) {

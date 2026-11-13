@@ -60,6 +60,7 @@ func requirementTexts(lang string) map[string]string {
 }
 
 type features struct {
+	pkg                                    string
 	loops, ifs, switches, errChecks        int
 	ranges, slices, maps, structs, methods int
 	ptrParams, addrOf, ptrRecv, stringers  int
@@ -76,7 +77,7 @@ func scan(code string) (*features, error) {
 	if err != nil {
 		return nil, err
 	}
-	ft := &features{userFuncs: map[string]int{}, calls: map[string]int{}, sels: map[string]int{}}
+	ft := &features{pkg: f.Name.Name, userFuncs: map[string]int{}, calls: map[string]int{}, sels: map[string]int{}}
 	imports := map[string]string{}
 	for _, spec := range f.Imports {
 		importPath, err := strconv.Unquote(spec.Path.Value)
@@ -155,6 +156,7 @@ func scan(code string) (*features, error) {
 		case *ast.CallExpr:
 			switch fn := n.Fun.(type) {
 			case *ast.Ident:
+				ft.calls[fn.Name]++
 				if fn.Name == "append" || fn.Name == "make" && len(n.Args) > 0 && isSlice(n.Args[0]) {
 					ft.slices++
 				}
@@ -219,7 +221,6 @@ func checkRequirements(code string, reqs []string, languages ...string) []string
 	if len(languages) > 0 {
 		lang = normalizeLang(languages[0])
 	}
-	requirementText := requirementTexts(lang)
 	if len(reqs) == 0 {
 		return nil
 	}
@@ -227,6 +228,11 @@ func checkRequirements(code string, reqs []string, languages ...string) []string
 	if err != nil {
 		return nil // the compiler already accepted it; don't block on parser quirks
 	}
+	return checkFeatureRequirements(ft, reqs, lang)
+}
+
+func checkFeatureRequirements(ft *features, reqs []string, lang string) []string {
+	requirementText := requirementTexts(lang)
 	var missing []string
 	for _, r := range reqs {
 		ok := true
