@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -31,18 +30,15 @@ func (r *runner) goTest(ctx context.Context, lvl *levels.Level, files map[string
 	if err := r.writeModule(dir, lvl); err != nil {
 		return false, "", err
 	}
-	for name, body := range files {
+	for name := range files {
 		if !validLabName(name) {
 			return false, "", fmt.Errorf("bad file name %q", name)
 		}
-		path := filepath.Join(dir, name)
-		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-			return false, "", err
-		}
-		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
-			return false, "", err
-		}
 	}
+	if err := writeProjectFiles(dir, files); err != nil {
+		return false, "", err
+	}
+
 	timeout := 90 * time.Second
 	if len(lvl.Deps) > 0 {
 		timeout = 240 * time.Second
@@ -167,7 +163,7 @@ func (r *runner) RunLab(ctx context.Context, lvl *levels.Level, edited map[strin
 	// 3. Mutation testing: every broken variant must be caught.
 	killed := 0
 	for i, m := range lab.Mutants {
-		ok, out, err := r.goTest(ctx, lvl, with(map[string]string{"main.go": m.Code}), "./...")
+		ok, out, err := r.goTest(ctx, lvl, with(map[string]string{labMutantFile(lab): m.Code}), "./...")
 		if err != nil {
 			return nil, err
 		}

@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -58,6 +57,7 @@ func contractFixture(c *econ.Contract) *econ.State {
 		"c13-reed-clock":      {"field": 4, "engine": 8, "yield.reed": 2},
 		"c14-generic-queue":   {"field": 4, "engine": 8, "yield.moss": 6, "yield.glowcap": 4},
 		"c15-shortest-run":    {"field": 4, "engine": 8, "veins.rate": 8, "yield.crystal": 4},
+		"c16-tested-planner":  {"engine": 8, "yield.moss": 10, "grow.moss": 3},
 		"c17-deep-haul":       {"field": 4, "engine": 8, "drill": 2, "yield.geode": 3},
 	}[c.ID]
 	for id, l := range bought {
@@ -80,17 +80,25 @@ type contractResult struct {
 // buildColonyProgram compiles code against the colony module, like colonyRun.
 func buildColonyProgram(t *testing.T, r *runner, code string) string {
 	t.Helper()
+	return buildColonyProjectProgram(t, r, colonyProject{Files: map[string]string{"main.go": code}})
+}
+
+func buildColonyProjectProgram(t *testing.T, r *runner, project colonyProject) string {
+	t.Helper()
 	dir := t.TempDir()
-	gomod := fmt.Sprintf("module player\n\ngo 1.24\n\nrequire orbital/colony v0.0.0\n\nreplace orbital/colony => %s\n", r.colonyDir)
-	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(gomod), 0o644); err != nil {
+	if err := r.writeModule(dir, levels.Colony); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(code), 0o644); err != nil {
+	if err := writeProjectFiles(dir, project.Files); err != nil {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
-	build := r.goCmd(ctx, dir, "build", "-o", "prog", ".")
+	args := []string{"build", "-o", "prog"}
+	if project.Race {
+		args = append(args, "-race")
+	}
+	build := r.goCmd(ctx, dir, append(args, ".")...)
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
@@ -99,12 +107,21 @@ func buildColonyProgram(t *testing.T, r *runner, code string) string {
 
 // playContract runs code with c active on its fixture until the contract
 // settles or fails, or its window has clearly passed.
-func playContract(t *testing.T, r *runner, c *econ.Contract, code string) contractResult {
+func playContract(t *testing.T, r *runner, c *econ.Contract, project colonyProject) contractResult {
 	t.Helper()
-	if missing := contractRequirements(code, c.Requires, "en"); len(missing) > 0 {
+	if missing := projectRequirements(project.Files, c.Requires, "en"); len(missing) > 0 {
 		return contractResult{Requires: missing}
 	}
-	prog := buildColonyProgram(t, r, code)
+	if c.ID == "c16-tested-planner" {
+		response, err := r.checkColonyPlanner(withLang(context.Background(), "en"), project.Files)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !response.Result.Success {
+			return contractResult{Requires: []string{response.Result.Message}}
+		}
+	}
+	prog := buildColonyProjectProgram(t, r, project)
 	st := contractFixture(c)
 	save := filepath.Join(t.TempDir(), "colony.json")
 	blob, _ := json.Marshal(st)
@@ -128,7 +145,13 @@ func playContract(t *testing.T, r *runner, c *econ.Contract, code string) contra
 		t.Fatal(err)
 	}
 	writer.Close()
-	defer func() { _ = cmd.Process.Kill(); _ = cmd.Wait() }()
+	defer func() {
+		_ = cmd.Process.Kill()
+		_ = cmd.Wait()
+		if strings.Contains(output.String(), "WARNING: DATA RACE") {
+			t.Errorf("reference has a data race:\n%s", output.String())
+		}
+	}()
 	scanner := bufio.NewScanner(events)
 	scanner.Buffer(make([]byte, 4096), 8<<20)
 	for scanner.Scan() {
@@ -167,11 +190,8 @@ func TestContractsSolvable(t *testing.T) {
 			t.Parallel()
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			code, err := os.ReadFile(filepath.Join("testdata", "colony", c.ID, "main.go"))
-			if err != nil {
-				t.Fatal(err)
-			}
-			ref := playContract(t, r, c, string(code))
+			files := readColonyFixture(t, c.ID)
+			ref := playContract(t, r, c, colonyProject{Files: files, Race: c.ID == "c12-one-ledger"})
 			if len(ref.Requires) > 0 || !ref.OK {
 				t.Fatalf("reference did not finish: requires %v, %s", ref.Requires, ref.Msg)
 			}
@@ -180,7 +200,7 @@ func TestContractsSolvable(t *testing.T) {
 			if share > 0.85 {
 				t.Errorf("reference used %.0f%% of the window; keep it within 40-70%%", share*100)
 			}
-			starter := playContract(t, r, c, levels.Colony.Starter)
+			starter := playContract(t, r, c, colonyProject{Files: map[string]string{"main.go": levels.Colony.Starter}, Race: c.ID == "c12-one-ledger"})
 			if starter.OK {
 				t.Errorf("the colony starter finished the contract in %d ticks", starter.Ticks)
 			}

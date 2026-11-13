@@ -82,6 +82,8 @@ type Lab struct {
 	Buggy       string   // original main.go the player's tests must fail on
 	Hidden      string   // extra test file run against the player's main.go
 	Bench       *Bench
+
+	MutantFile string // defaults to main.go; colony planners use a sub-package
 }
 
 // Bench compares BenchmarkHiddenNaive with BenchmarkHiddenTheirs from the

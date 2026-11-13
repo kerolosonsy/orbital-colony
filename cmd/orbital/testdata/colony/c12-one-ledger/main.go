@@ -6,9 +6,8 @@ import (
 	"orbital/colony"
 )
 
-// Reference for c12-one-ledger. Four drones farm interleaved rows and record
-// every harvest in one ledger guarded by a mutex; whoever pushes the ledger
-// past a batch sells it.
+// The workers finish before the final export so the ledger has one complete
+// batch, and main waits for contract settlement without issuing more commands.
 type ledger struct {
 	mu      sync.Mutex
 	pending int
@@ -18,11 +17,13 @@ func (l *ledger) add(n int) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.pending += n
-	if l.pending >= 20 {
-		l.pending = 0
-		return true
-	}
-	return false
+	return l.pending >= 300
+}
+
+func (l *ledger) full() bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.pending >= 300
 }
 
 func main() {
@@ -44,6 +45,8 @@ func main() {
 		}()
 	}
 	wg.Wait()
+	colony.Export(colony.Moss, 0)
+	select {}
 }
 
 func farm(d *colony.Drone, k, n int, book *ledger) {
@@ -51,6 +54,9 @@ func farm(d *colony.Drone, k, n int, book *ledger) {
 	for {
 		for y := k; y < h; y += n {
 			for i := 0; i < w; i++ {
+				if book.full() {
+					return
+				}
 				x := i
 				if (y/n)%2 == 1 {
 					x = w - 1 - i
@@ -60,7 +66,7 @@ func farm(d *colony.Drone, k, n int, book *ledger) {
 					got, err := d.TryHarvest()
 					d.Plant(colony.Moss)
 					if err == nil && book.add(got) {
-						d.Export(colony.Moss, 0)
+						return
 					}
 				} else if d.GetEntity() == colony.Empty && d.Till() {
 					d.Plant(colony.Moss)
