@@ -151,6 +151,9 @@ type tileView struct {
 }
 
 // Wire format: tile.b is the building kind, omitted on tiles without a building.
+// Econ snapshots carry rank:{level,kind,target,value,filled}; state.rank is the earned level.
+// filled is running time / econ.Window, capped at 1; kind names the next goal.
+// op:"rank" carries ok:true, a localized msg and rank after each promotion.
 // op:"building" carries t, x, y and building:{kind,recipe,in,out,progress,wear,level,
 // powered,enabled,priority,mode}; mode is present only on generators.
 // state includes power:{supply,demand,day}, storage:{crops,raw,crafted}, where
@@ -238,6 +241,8 @@ type World struct {
 	ScoutRoles   bool // drone 0 cannot scan; other drones cannot harvest
 	start        time.Time
 	mainSave     [4]int
+
+	lastRankTick int
 
 	lastProductionTick int
 	actingDrone        *Drone
@@ -508,6 +513,7 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 	w.actingDrone = nil
 	if w.Econ != nil {
 		w.Econ.RecordCommand(id, op == "move" && ok)
+		w.recordRankCommand()
 	}
 	if w.Storm != nil && w.Storm.active && (Point{w.X, w.Y}) != w.Base {
 		msg = say("الدرون كان برّه القاعدة وقت العاصفة!", "The drone was outside base during the storm!")
@@ -526,6 +532,9 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 		w.syncInfrastructure()
 	}
 	w.after(ev)
+	if w.Econ != nil {
+		w.checkRank()
+	}
 	return ok
 }
 

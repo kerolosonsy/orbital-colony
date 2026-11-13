@@ -36,6 +36,9 @@ type Tile struct {
 
 // State is everything that persists between runs.
 type State struct {
+	Rank       int        `json:"rank"`
+	RankWindow RankWindow `json:"rankWindow"`
+
 	Depth    int                `json:"depth,omitempty"`
 	Under    [][]Tile           `json:"under,omitempty"`
 	Version  int                `json:"version"`
@@ -380,6 +383,9 @@ func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
 		}
 	}
 	cost = u.CostAt(l)
+	if allowed, need := s.RankAllows(u.ID); !allowed {
+		return cost, false, fmt.Sprintf(i18n.T("محتاج رتبة مستعمرة %d", "Needs colony rank %d"), need)
+	}
 	if s.Credits < cost.Credits {
 		return cost, false, fmt.Sprintf(i18n.T("ناقصك %.0f كريدت", "You need %.0f more credits"), cost.Credits-s.Credits)
 	}

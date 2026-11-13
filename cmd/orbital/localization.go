@@ -51,6 +51,7 @@ func economyText(lang, message string) string {
 	}
 	for _, pair := range [][2]string{
 		{"محتاج الأول: ", "Requires first: "},
+		{"محتاج رتبة مستعمرة ", "Needs colony rank "},
 		{"مفيش ترقية اسمها ", "No upgrade named "},
 		{"مفيش عقد اسمه ", "No contract named "},
 	} {

@@ -48,6 +48,7 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.Tick = w.TickBase
 	w.lastProductionTick = w.TickBase
 	w.loadFleet()
+	w.lastRankTick = w.TickBase
 	w.loadTiles()
 	w.applyEcon()
 	w.Check = func(w *World) (bool, string) {
@@ -249,6 +250,7 @@ func (w *World) Export(id int, e Entity, n int) (earned float64) {
 		// Each unit lowers the price, so the last one sold was the cheapest.
 		low := w.Econ.Price(name) / math.Pow(0.996, math.Min(1, sold))
 		w.Econ.RecordSale(id, name, sold, earned, low)
+		w.recordRankSale(name, sold)
 		w.syncInv()
 		return true, fmt.Sprintf("+%.0f ⌬", earned), false
 	})
@@ -278,6 +280,7 @@ func (w *World) Credits() float64 {
 // ---------- background life of the colony ----------
 
 type econEvent struct {
+	Rank         econ.RankProgress  `json:"rank"`
 	Translations [][2]string        `json:"translations,omitempty"`
 	Layers       int                `json:"layers,omitempty"`
 	Op           string             `json:"op"`
@@ -302,6 +305,8 @@ type contractView struct {
 }
 
 func (w *World) emitRaw(v econEvent) {
+	w.advanceRank()
+	v.Rank = w.Econ.RankProgress()
 	v.Translations = takeMessages()
 	b, _ := json.Marshal(v)
 	w.out.Write(append(b, '\n'))
@@ -309,6 +314,7 @@ func (w *World) emitRaw(v econEvent) {
 
 func (w *World) econSnapshot(op, msg string, ok, full bool) {
 	w.advanceProduction(w.Tick)
+	w.checkRank()
 	ev := econEvent{Op: op, T: w.Tick, OK: ok, Msg: msg, Credits: w.Econ.Credits, Prices: w.Econ.Prices(), Inv: w.Econ.Inv}
 	if w.Econ.Active != "" {
 		_, _, why := w.Econ.ProgressPair(int64(w.Tick))
