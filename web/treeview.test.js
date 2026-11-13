@@ -6,7 +6,79 @@ const vm = require("node:vm");
 const escapeHTML = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const context = vm.createContext({ module: { exports: {} }, LANG: "ar", T: (ar, en) => context.LANG === "en" ? en : ar, esc: escapeHTML });
 vm.runInContext(fs.readFileSync(__dirname + "/treeview.js", "utf8"), context);
-const { edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkMarkup, branchHue } = context.module.exports;
+const { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkMarkup, branchHue } = context.module.exports;
+
+test("fit centres offset bounds with a screen-space margin and never zooms above 100%", () => {
+  for (const [bounds, width, height, margin, expected] of [
+    [{ minX: -200, minY: -100, maxX: 600, maxY: 300 }, 500, 400, 50, { zoom: 0.5, x: 150, y: 150 }],
+    [{ minX: -100, minY: -400, maxX: 100, maxY: 400 }, 500, 400, 40, { zoom: 0.4, x: 250, y: 200 }],
+    [{ minX: 100, minY: -20, maxX: 232, maxY: 24 }, 1000, 800, 32, { zoom: 1, x: 334, y: 398 }],
+    [{ minX: -2000, minY: -2000, maxX: 2000, maxY: 2000 }, 500, 400, 40, { zoom: 0.08, x: 250, y: 200 }],
+    [{ minX: 0, minY: 0, maxX: 0, maxY: 0 }, 500, 400, 32, { zoom: 1, x: 250, y: 200 }],
+  ]) {
+    const fit = fitView(bounds, width, height, margin);
+    assert.equal(JSON.stringify(fit), JSON.stringify(expected));
+    assert.ok(bounds.minX * fit.zoom + fit.x >= margin);
+    assert.ok(bounds.maxX * fit.zoom + fit.x <= width - margin);
+    assert.ok(bounds.minY * fit.zoom + fit.y >= margin);
+    assert.ok(bounds.maxY * fit.zoom + fit.y <= height - margin);
+  }
+});
+
+test("opening and re-centring fit known cards, with a lower zoom floor and overview names", () => {
+  const element = () => ({
+    attributes: new Map(), events: {}, classes: new Set(),
+    setAttribute(name, value) { this.attributes.set(name, value); },
+    addEventListener(name, listener) { this.events[name] = listener; },
+    closest() { return null; },
+  });
+  const dialog = element(), canvas = element(), world = element();
+  const centre = element(), input = element(), detail = element(), nav = element(), close = element();
+  const selectors = { ".tv-canvas": canvas, ".tv-world": world, ".tv-detail": detail, ".tv-branches": nav, input, '[data-action="centre"]': centre, '[data-action="close"]': close };
+  dialog.querySelector = (selector) => selectors[selector];
+  dialog.querySelectorAll = () => [];
+  dialog.showModal = () => { dialog.open = true; };
+  dialog.classList = { toggle(name, active) { if (active) dialog.classes.add(name); else dialog.classes.delete(name); } };
+  canvas.getBoundingClientRect = () => ({ width: 800, height: 600 });
+  const ui = vm.createContext({
+    document: { activeElement: null, createElement: () => dialog, body: { appendChild() {} } },
+    ResizeObserver: class { observe() {} },
+    LANG: "en", T: (_ar, en) => en, esc: escapeHTML,
+  });
+  vm.runInContext(fs.readFileSync(__dirname + "/tree.js", "utf8"), ui);
+  vm.runInContext(fs.readFileSync(__dirname + "/treeview.js", "utf8"), ui);
+  const view = vm.runInContext("TreeView", ui);
+  const nodes = Array.from({ length: 41 }, (_, i) => ({
+    id: "n" + i, branch: i ? "x" : "", after: i ? [{ id: "n" + (i - 1), level: 1 }] : [],
+    state: i ? "unknown" : "owned", level: 1, name: "Node " + i, checks: [],
+  }));
+  const transform = () => {
+    const [, x, y, zoom] = world.attributes.get("transform").match(/translate\(([^ ]+) ([^)]+)\) scale\(([^)]+)\)/);
+    return { x: Number(x), y: Number(y), zoom: Number(zoom) };
+  };
+  const key = (key) => canvas.events.keydown({ key, target: canvas, preventDefault() {} });
+  view.open({ nodes });
+  assert.deepEqual(transform(), { x: 400, y: 300, zoom: 1 });
+  for (let i = 0; i < 20; i++) key("-");
+  assert.equal(transform().zoom, 0.25);
+  assert.ok(dialog.classes.has("is-overview"));
+  const known = nodes.map((node) => ({ ...node, state: "owned" }));
+  view.update({ nodes: known }); centre.onclick();
+  const fit = transform(), positions = ui.layoutTree(known);
+  assert.ok(fit.zoom < 0.25);
+  for (const point of Object.values(positions)) {
+    assert.ok((point.x - 66) * fit.zoom + fit.x >= 32 - 1e-8);
+    assert.ok((point.x + 66) * fit.zoom + fit.x <= 768 + 1e-8);
+    assert.ok((point.y - 22) * fit.zoom + fit.y >= 32 - 1e-8);
+    assert.ok((point.y + 22) * fit.zoom + fit.y <= 568 + 1e-8);
+  }
+  for (let i = 0; i < 20; i++) key("-");
+  assert.equal(transform().zoom, fit.zoom);
+  for (let i = 0; i < 20; i++) key("+");
+  assert.ok(!dialog.classes.has("is-overview"));
+  centre.onclick();
+  assert.deepEqual(transform(), fit);
+});
 
 test("edges require the parent's exact prerequisite level or higher", () => {
   const node = { after: [{ id: "smelter", level: 3 }] };

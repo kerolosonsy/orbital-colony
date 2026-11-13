@@ -1,5 +1,10 @@
 "use strict";
 
+function fitView(bounds, width, height, margin) {
+  const zoom = Math.min(1, Math.max(1, width - 2 * margin) / Math.max(1, bounds.maxX - bounds.minX), Math.max(1, height - 2 * margin) / Math.max(1, bounds.maxY - bounds.minY));
+  return { zoom, x: width / 2 - (bounds.minX + bounds.maxX) / 2 * zoom, y: height / 2 - (bounds.minY + bounds.maxY) / 2 * zoom };
+}
+
 const TreeView = (() => {
   function edgeSatisfied(_node, prereq, byId) {
     const parent = byId[prereq.id];
@@ -44,7 +49,7 @@ const TreeView = (() => {
 
   let tree = null, handlers = {}, overlay = null, svg = null, world = null, detail = null;
   let byId = {}, positions = {}, branches = [], selected = null, filter = "", query = "";
-  let pan = { x: 0, y: 0 }, zoom = 1, width = 0, height = 0, returnFocus = null;
+  let pan = { x: 0, y: 0 }, zoom = 1, minZoom = 0.25, width = 0, height = 0, returnFocus = null;
   const pointers = new Map();
   let moved = false, pressedNode = null;
   const local = (node, key) => T(node[key] || "", (LANG === "en" && node[key + "En"]) || node[key] || "");
@@ -101,7 +106,7 @@ const TreeView = (() => {
       pan = { x: 0, y: 0 }; zoom = 1; selected = null; filter = ""; query = "";
       overlay.querySelector("input").value = "";
     }
-    update(nextTree); resize();
+    update(nextTree); resize(); centre();
   }
 
   function close() {
@@ -119,6 +124,7 @@ const TreeView = (() => {
     if (!branches.includes(filter)) filter = "";
     if (!overlay || !overlay.open) return;
     renderBranches(); renderGraph(); renderDetail();
+    minZoom = Math.min(0.25, fittedView().zoom);
   }
 
   function renderBranches() {
@@ -159,10 +165,10 @@ const TreeView = (() => {
     const point = positions[node.id], unknown = node.state === "unknown";
     const name = unknown ? T("؟", "؟") : local(node, "name");
     const classes = `tv-node is-${node.state}${selected === node.id ? " is-selected" : ""}${chain.includes(node.id) ? " is-path" : ""}${filter && node.branch !== filter ? " is-dim" : ""}${matchesSearch(node, query) ? " is-match" : ""}`;
-    const lock = node.state === "locked" ? '<path class="tv-lock" d="M 28 8 v-3 a3 3 0 0 1 6 0 v3 m-8 0 h10 v9 h-10 z"/>' : "";
+    const lock = node.state === "locked" ? '<path class="tv-lock" d="M 54 8 v-3 a3 3 0 0 1 6 0 v3 m-8 0 h10 v9 h-10 z"/>' : "";
     return `<g class="${attr(classes)}" data-node="${attr(node.id)}" style="--branch:${color(node.branch)}" transform="translate(${point.x} ${point.y})" role="button" tabindex="0" aria-pressed="${selected === node.id}" aria-label="${attr(name + (unknown ? "" : ": " + stateLabel(node)))}">
-      <title>${esc(name)}</title><rect x="-40" y="-22" width="80" height="44" rx="2"/>
-      <svg x="-36" y="-18" width="72" height="${unknown ? 36 : 22}"><text x="36" y="${unknown ? 26 : 15}" class="tv-name" text-anchor="middle" direction="${LANG === "en" ? "ltr" : "rtl"}">${esc(name)}</text></svg>
+      <title>${esc(name)}</title><rect x="-66" y="-22" width="132" height="44" rx="2"/>
+      <svg x="-62" y="-18" width="124" height="36"><text x="62" y="${unknown ? 26 : 15}" class="tv-name" text-anchor="middle" direction="${LANG === "en" ? "ltr" : "rtl"}">${esc(name)}</text></svg>
       ${unknown ? "" : `<text class="tv-state" x="0" y="15" text-anchor="middle">${esc(stateLabel(node))}</text>${lock}`}</g>`;
   }
 
@@ -210,15 +216,27 @@ const TreeView = (() => {
     if (!overlay.open) return;
     const rect = svg.getBoundingClientRect();
     width = rect.width; height = rect.height;
+    minZoom = Math.min(0.25, fittedView().zoom);
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`); transform();
   }
 
-  function transform() { world.setAttribute("transform", `translate(${width / 2 + pan.x} ${height / 2 + pan.y}) scale(${zoom})`); }
-  function centre() { pan = { x: 0, y: 0 }; zoom = 1; transform(); }
+  function transform() {
+    world.setAttribute("transform", `translate(${width / 2 + pan.x} ${height / 2 + pan.y}) scale(${zoom})`);
+    overlay.classList.toggle("is-overview", zoom < 0.55);
+  }
+  function fittedView() {
+    const known = Object.fromEntries(tree.nodes.filter((node) => node.state !== "unknown").map((node) => [node.id, positions[node.id]]));
+    return fitView(layoutBounds(known), width, height, 32);
+  }
+  function centre() {
+    const fit = fittedView();
+    zoom = fit.zoom; minZoom = Math.min(0.25, zoom);
+    pan = { x: fit.x - width / 2, y: fit.y - height / 2 }; transform();
+  }
   function canvasPoint(ev) { const rect = svg.getBoundingClientRect(); return { x: ev.clientX - rect.left, y: ev.clientY - rect.top }; }
 
   function zoomAt(factor, before, after) {
-    const next = Math.max(0.25, Math.min(3, zoom * factor)), ratio = next / zoom;
+    const next = Math.max(minZoom, Math.min(3, zoom * factor)), ratio = next / zoom;
     pan.x = after.x - width / 2 - (before.x - width / 2 - pan.x) * ratio;
     pan.y = after.y - height / 2 - (before.y - height / 2 - pan.y) * ratio;
     zoom = next; transform();
@@ -275,6 +293,6 @@ const TreeView = (() => {
     pointers.clear(); pressedNode = null;
   }
 
-  if (typeof module !== "undefined" && module.exports) module.exports = { edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkMarkup, branchHue };
+  if (typeof module !== "undefined" && module.exports) module.exports = { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkMarkup, branchHue };
   return { open, close, update, get isOpen() { return !!overlay && overlay.open; } };
 })();
