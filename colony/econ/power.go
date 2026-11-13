@@ -44,7 +44,7 @@ func Draw(kind string) float64 {
 	case "reactor-lab":
 		return 20
 	case "lab":
-		return 10
+		return 6 // fits the generator-less baseline, so a first lab can run
 	}
 	return 0
 }

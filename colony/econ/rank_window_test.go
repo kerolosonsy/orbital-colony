@@ -93,6 +93,7 @@ func TestRankSaveRoundTripAndLegacyOwnership(t *testing.T) {
 	s.RankWindow.Advance(2400)
 	s.RankWindow.RecordSale("plate", 7)
 	s.RankWindow.RecordCommand()
+	s.Normalize() // power's day flag follows the tick set above
 	blob, err := json.Marshal(s)
 	if err != nil {
 		t.Fatal(err)

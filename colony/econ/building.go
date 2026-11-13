@@ -8,8 +8,10 @@ import (
 )
 
 type Building struct {
-	Powered      bool               `json:"powered"`
-	Mode         string             `json:"mode,omitempty"`
+	Powered      bool   `json:"powered"`
+	Mode         string `json:"mode,omitempty"`
+	speedBonus   float64
+	bufferBonus  float64
 	Kind         string             `json:"kind"`
 	X            int                `json:"x"`
 	Y            int                `json:"y"`
@@ -88,6 +90,9 @@ func (b *Building) accepts(good string) bool {
 	if b.Kind == "generator" {
 		return good == "fuel" || good == "cell"
 	}
+	if b.Kind == "lab" {
+		return ResearchValue(good) > 0
+	}
 	for _, r := range b.recipes(b.Recipe) {
 		if _, ok := r.In[good]; ok {
 			return true
@@ -115,7 +120,7 @@ func (b *Building) Put(good string, n float64) (float64, error) {
 	if n <= 0 {
 		return 0, nil
 	}
-	accepted := math.Min(n, Capacity(b.Level)-b.In[good])
+	accepted := math.Min(n, b.capacity()-b.In[good])
 	if accepted <= 0 {
 		return 0, ErrFull
 	}
@@ -159,7 +164,7 @@ func (b *Building) ready(r Recipe, powered bool) error {
 	if !powered {
 		return ErrNoPower
 	}
-	if Capacity(b.Level)-bufferAmount(b.Out) < 1 {
+	if b.capacity()-bufferAmount(b.Out) < 1 {
 		return ErrFull
 	}
 	if b.Progress == 0 && !b.hasInputs(r) {
@@ -169,7 +174,7 @@ func (b *Building) ready(r Recipe, powered bool) error {
 }
 
 func (b *Building) cycleTicks(r Recipe) int {
-	ticks := max(1, int(math.Ceil(float64(r.Ticks)/EffectMult(0.25, b.Level))))
+	ticks := max(1, int(math.Ceil(float64(r.Ticks)/(EffectMult(0.25, b.Level)*(1+b.speedBonus)))))
 	if b.Wear > 80 {
 		ticks *= 2
 	}
@@ -228,6 +233,9 @@ func (b *Building) Repair(plates float64) float64 {
 func (b *Building) ProgressFraction() float64 {
 	if b.Progress == 0 {
 		return 0
+	}
+	if b.Kind == "lab" {
+		return math.Min(1, float64(b.Progress)/float64(b.cycleTicks(Recipe{Ticks: ResearchTicks})))
 	}
 	r, err := b.recipe(b.Recipe)
 	if err != nil {

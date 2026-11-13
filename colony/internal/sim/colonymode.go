@@ -35,7 +35,7 @@ var cropUnlock = map[Entity]string{Lichen: "crop.lichen", Glowcap: "crop.glowcap
 // NewColony builds a running colony world from saved state.
 func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	st.Normalize()
-	w := New(out, seed)
+	w := New(out, researchSeed(st, seed))
 	w.Econ = st
 	w.Realtime = true
 	w.Unit = 100 * time.Millisecond
@@ -87,6 +87,7 @@ func (w *World) applyEcon() {
 	w.MaxDrones = w.Econ.DroneCap()
 	for _, b := range w.Econ.Buildings {
 		b.Level = w.Econ.Level(b.Kind)
+		w.Econ.ConfigureBuilding(b)
 	}
 	if w.cargoActive() {
 		w.Capacity = w.Econ.CargoCapacity()
@@ -382,6 +383,9 @@ func (w *World) checkContract() {
 		r, _ := w.Econ.Settle(int64(w.Tick))
 		w.applyEcon()
 		msg := say("✅ العقد خلص: ", "✅ Contract complete: ") + say(c.Title, c.TitleEn)
+		if r.RP > 0 {
+			msg += sayf(" (+%.1f نقط بحث)", " (+%.1f RP)", r.RP)
+		}
 		if r.Credits > 0 {
 			msg += sayf(" (+%.0f كريدت)", " (+%.0f credits)", r.Credits)
 		}

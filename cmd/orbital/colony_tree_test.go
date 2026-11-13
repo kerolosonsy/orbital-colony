@@ -69,7 +69,7 @@ func TestColonyTreeFreshVisibilityAndAffordability(t *testing.T) {
 func TestColonyTreeBlueprintChecksAndLiveGoodsCosts(t *testing.T) {
 	st := econ.New(1)
 	st.Levels["crop.lichen"] = 1
-	st.Credits = 450
+	st.Credits, st.RP = 450, econ.FindNode("crop.glowcap").RP
 	st.Inv["lichen"] = 39
 	node := colonyTreeNode(t, treeForLang(st, "en"), "crop.glowcap")
 	wantCost, _, _ := st.Status(econ.Find(node.ID))
@@ -80,7 +80,7 @@ func TestColonyTreeBlueprintChecksAndLiveGoodsCosts(t *testing.T) {
 	for _, check := range node.Checks {
 		kinds = append(kinds, check.Kind)
 	}
-	if !reflect.DeepEqual(kinds, []string{"parent", "contract", "cost", "cost"}) {
+	if !reflect.DeepEqual(kinds, []string{"parent", "contract", "rp", "cost", "cost"}) {
 		t.Fatalf("check order: %v", kinds)
 	}
 	contract := econ.BlueprintSource(node.ID)
@@ -102,6 +102,7 @@ func TestColonyTreeBlueprintChecksAndLiveGoodsCosts(t *testing.T) {
 func TestColonyTreeBuildingsUseLiveCostsAndPrerequisiteLevels(t *testing.T) {
 	st := econ.New(1)
 	st.Levels["generator"] = 1
+	st.RP = econ.FindNode("assembler").RP
 	cost := econ.Find("assembler").CostAt(0)
 	st.Credits = cost.Credits
 	for good, n := range cost.Goods {
@@ -168,7 +169,7 @@ func TestColonyTreeLocalization(t *testing.T) {
 			t.Errorf("%s: branch/parent localization: %+v", lang, field)
 		}
 		composter := colonyTreeNode(t, nodes, "composter")
-		if composter.Checks[1].Label != tr(lang, "100 كريدت", "100 credits") || composter.Checks[2].Label != tr(lang, "5 الطحالب", "5 Moss") {
+		if composter.Checks[2].Label != tr(lang, "100 كريدت", "100 credits") || composter.Checks[3].Label != tr(lang, "5 الطحالب", "5 Moss") {
 			t.Errorf("%s: building cost localization: %+v", lang, composter)
 		}
 		for _, good := range []struct{ id, ar, en string }{{"kiln", "السيليكا", "Silica"}, {"refinery", "الكتلة الحيوية", "Biomass"}, {"lab", "الدائرة الإلكترونية", "Circuit"}} {

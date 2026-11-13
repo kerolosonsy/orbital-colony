@@ -38,6 +38,7 @@ type Tile struct {
 type State struct {
 	Rank       int        `json:"rank"`
 	RankWindow RankWindow `json:"rankWindow"`
+	RP         float64    `json:"rp"`
 
 	Depth    int                `json:"depth,omitempty"`
 	Under    [][]Tile           `json:"under,omitempty"`
@@ -297,19 +298,25 @@ func (s *State) Level(id string) int { return s.Levels[id] }
 func (s *State) Has(id string) bool { return s.Levels[id] > 0 }
 
 // ActionMillis is how long one drone action takes in real time.
-func (s *State) ActionMillis() float64 { return 260 * math.Pow(0.92, float64(s.Level("engine"))) }
+func (s *State) ActionMillis() float64 {
+	return 260 * math.Pow(0.92, float64(s.Level("engine"))) / s.EngineResearchMult()
+}
 
 // Drones is how many drones the hangar holds, the first one included.
 func (s *State) Drones() int { return 1 + s.Level("hangar") }
 
-func (s *State) YieldMult(g string) float64 { return 1 + 0.35*float64(s.Level("yield."+g)) }
-
-func (s *State) GrowTime(g string) int64 {
-	return int64(math.Max(10, float64(GrowTicks[g])*math.Pow(0.9, float64(s.Level("grow."+g)))))
+func (s *State) YieldMult(g string) float64 {
+	return (1 + 0.35*float64(s.Level("yield."+g))) * s.ResearchYieldMult(g)
 }
 
-func (s *State) VeinEvery() int64 { return int64(160 * math.Pow(0.8, float64(s.Level("veins.rate")))) }
-func (s *State) VeinMax() int     { return 4 + s.Level("veins.size") }
+func (s *State) GrowTime(g string) int64 {
+	return int64(math.Max(10, float64(GrowTicks[g])*math.Pow(0.9, float64(s.Level("grow."+g)))/s.GrowthResearchMult(g)))
+}
+
+func (s *State) VeinEvery() int64 {
+	return int64(160 * math.Pow(0.8, float64(s.Level("veins.rate"))) / s.VeinResearchMult())
+}
+func (s *State) VeinMax() int { return 4 + s.Level("veins.size") + s.Level("research.vein-size") }
 
 // Price is what one unit of g sells for right now.
 func (s *State) Price(g string) float64 {
@@ -317,7 +324,7 @@ func (s *State) Price(g string) float64 {
 	if d == 0 {
 		d = 1
 	}
-	return PriceV3[g] * (1 + 0.1*float64(s.Level("market.contracts"))) * d
+	return PriceV3[g] * (1 + 0.1*float64(s.Level("market.contracts"))) * s.MarketResearchMult(g) * d
 }
 
 // Sell turns n units of g into credits, pushing that good's price down a
@@ -348,7 +355,7 @@ func (s *State) Sell(g string, n float64) float64 {
 func (s *State) Recover(ticks int64) {
 	rate := 0.0025 * (1 + 0.35*float64(s.Level("market.logistics")))
 	for g, d := range s.Demand {
-		s.Demand[g] = math.Min(1, d+(1-d)*(1-math.Pow(1-rate, float64(ticks))))
+		s.Demand[g] = math.Min(1, d+(1-d)*(1-math.Pow(1-rate*s.RecoveryResearchMult(g), float64(ticks))))
 	}
 }
 
@@ -360,7 +367,7 @@ func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
 	if l >= u.Max {
 		return Cost{}, false, i18n.T("خلصت كل المستويات", "All levels completed")
 	}
-	if needsBlueprint(u.ID) && !s.Blueprints[u.ID] {
+	if l == 0 && needsBlueprint(u.ID) && !s.Blueprints[u.ID] {
 		why := i18n.T("محتاج مخطط من عقد", "Needs a contract blueprint")
 		if c := BlueprintSource(u.ID); c != nil {
 			why = i18n.T("خلّص العقد الأول: ", "Finish the contract first: ") + c.LocalTitle()
@@ -368,6 +375,9 @@ func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
 		return u.CostAt(l), false, why
 	}
 	for _, r := range u.Requires {
+		if l > 0 {
+			break
+		}
 		required := 1
 		if PlacementCost(u.ID) != nil {
 			for _, p := range FindNode(u.ID).After {
@@ -385,6 +395,9 @@ func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
 	cost = u.CostAt(l)
 	if allowed, need := s.RankAllows(u.ID); !allowed {
 		return cost, false, fmt.Sprintf(i18n.T("محتاج رتبة مستعمرة %d", "Needs colony rank %d"), need)
+	}
+	if reason := s.researchPurchaseReason(u.ID); reason != "" {
+		return cost, false, reason
 	}
 	if s.Credits < cost.Credits {
 		return cost, false, fmt.Sprintf(i18n.T("ناقصك %.0f كريدت", "You need %.0f more credits"), cost.Credits-s.Credits)
@@ -411,6 +424,7 @@ func (s *State) Buy(id string) error {
 	for g, n := range cost.Goods {
 		s.Inv[g] -= n
 	}
+	s.spendResearch(id)
 	s.Levels[id]++
 	if id == "field" {
 		s.resize(FieldSize(s.Levels["field"]))
@@ -421,6 +435,7 @@ func (s *State) Buy(id string) error {
 // ---------- lessons feed the colony ----------
 
 type Reward struct {
+	RP      float64  `json:"rp,omitempty"`
 	Credits float64  `json:"credits"`
 	Grants  []string `json:"grants,omitempty"` // upgrade ids given for free
 }
@@ -467,7 +482,7 @@ func (s *State) Shop() []ShopItem {
 	for _, u := range Catalog {
 		c, ok, why := s.Status(u)
 		item := ShopItem{Upgrade: u, Level: s.Levels[u.ID], Cost: c, Can: ok, Reason: why}
-		if needsBlueprint(u.ID) && !s.Blueprints[u.ID] {
+		if s.Level(u.ID) == 0 && needsBlueprint(u.ID) && !s.Blueprints[u.ID] {
 			if src := BlueprintSource(u.ID); src != nil {
 				item.Blueprint = src.ID
 			}

@@ -160,6 +160,10 @@ type tileView struct {
 // each group is {used,cap}, fleet:[{id,battery,cargo,cap}], and rent (credits/minute).
 // Buffers map good IDs to amounts; progress is a fraction in [0,1]. Events are
 // sent on placement, buffer/recipe changes, repair and completed cycles, not each tick.
+// Lab consumption also emits op:"building" and never adds output goods.
+// State includes rp (float); tree nodes include rp (first-purchase cost, omitted
+// at zero), and checks may have kind:"rp". Contracts include repeatable:true
+// and rewardRP (base RP); settlement rewards include rp (actual RP paid).
 type Event struct {
 	Building     *BuildingView  `json:"building,omitempty"`
 	Translations [][2]string    `json:"translations,omitempty"`

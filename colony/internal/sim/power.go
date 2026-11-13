@@ -58,6 +58,16 @@ func (w *World) productionStep(tick int) {
 		b.Level = w.Econ.Level(b.Kind)
 		before, wear, wasPowered := b.Progress, b.Wear, b.Powered
 		b.Powered = paid && powered[i]
+		w.Econ.ConfigureBuilding(b)
+		if b.Kind == "lab" {
+			if b.Powered {
+				w.advanceResearch(b, tick)
+			}
+			if wasPowered != b.Powered {
+				w.emitBuilding(b, tick)
+			}
+			continue
+		}
 		if b.Kind != "collector" || !w.Econ.Power.Day {
 			_ = b.Step(1, b.Powered)
 		}

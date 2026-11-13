@@ -94,6 +94,7 @@ func (w *World) placeBuilding(kind string) error {
 	if w.Econ == nil {
 		return ErrLocked
 	}
+	cost = w.Econ.BuildingPlacementCost(kind)
 	if !w.Econ.Has(kind) {
 		return econ.ErrBlueprintNotOwned
 	}
@@ -187,7 +188,8 @@ func (w *World) BuildingPut(id int, p Point, e Entity, n int) (int, error) {
 			return econ.ErrNoInput
 		}
 		// The player API moves whole goods; fractional capacity stays available for later levels.
-		space := math.Floor(econ.Capacity(b.Level) - b.In[e.String()])
+		w.Econ.ConfigureBuilding(b)
+		space := math.Floor(w.Econ.BuildingCapacity(b.Kind, b.Level) - b.In[e.String()])
 		if space <= 0 {
 			return econ.ErrFull
 		}
