@@ -70,6 +70,77 @@ func TestPowerBaselineAndDayNightPriorityBrownout(t *testing.T) {
 	}
 }
 
+func TestDaytimeSolarPlacementKeepsBaselineBuildingsPowered(t *testing.T) {
+	w, trace := e2World()
+	w.Tick, w.lastProductionTick = 60, 60
+	w.Econ.Credits = 1000
+	w.Econ.Inv = map[string]float64{"moss": 4, "biomass": 2, "glass": 2}
+	for x, kind := range []string{"composter", "refinery"} {
+		w.Econ.Levels[kind] = 1
+		if x > 0 {
+			w.Move(0, East)
+		}
+		if err := w.Build(0, kind); err != nil {
+			t.Fatal(err)
+		}
+	}
+	composter, refinery := w.Econ.Buildings[0], w.Econ.Buildings[1]
+	composter.Recipe, composter.In["moss"] = "biomass", 8
+	refinery.Recipe, refinery.In["biomass"], refinery.In["water"] = "fuel", 4, 2
+	w.Econ.Credits, w.Econ.Levels["generator"] = 699, 1
+	w.Wait(0)
+	if supply, demand := w.Power(); supply != 7 || demand != 7 || !composter.Powered || !refinery.Powered || composter.Progress != 1 || refinery.Progress != 1 {
+		t.Fatalf("baseline power=%g/%g, composter=%+v, refinery=%+v", supply, demand, composter, refinery)
+	}
+	w.Move(0, East)
+	trace.Reset()
+	if err := w.Build(0, "generator"); err != nil {
+		t.Fatal(err)
+	}
+	for tick := 0; tick <= 100; tick++ {
+		if tick > 0 {
+			w.Wait(0)
+		}
+		if supply, demand := w.Power(); supply != 10 || demand != 7 || !w.Daylight() {
+			t.Fatalf("tick %d: power=%g/%g, day=%v", w.Tick, supply, demand, w.Daylight())
+		}
+		for x := 0; x < 3; x++ {
+			if view := w.BuildingStatus(Point{x, 0}); !view.Powered {
+				t.Fatalf("tick %d: building at (%d,0) is unpowered: %+v", w.Tick, x, view)
+			}
+		}
+		w.econSnapshot("state", "", true, true)
+		lines := bytes.Split(bytes.TrimSpace(trace.Bytes()), []byte{'\n'})
+		var ev struct {
+			State econ.State
+		}
+		if err := json.Unmarshal(lines[len(lines)-1], &ev); err != nil {
+			t.Fatal(err)
+		}
+		if ev.State.Power != (econ.PowerStatus{Supply: 10, Demand: 7, Day: true}) || len(ev.State.Buildings) != 3 {
+			t.Fatalf("tick %d: state wire: %s", w.Tick, lines[len(lines)-1])
+		}
+		for _, b := range ev.State.Buildings {
+			if !b.Powered {
+				t.Fatalf("tick %d: state serialized unpowered %s: %s", w.Tick, b.Kind, lines[len(lines)-1])
+			}
+		}
+	}
+	if composter.Out["biomass"] != 2 || refinery.Out["fuel"] != 1 {
+		t.Fatalf("production stalled: composter=%+v, refinery=%+v", composter, refinery)
+	}
+	seen := map[string]bool{}
+	for _, ev := range buildingEvents(t, trace) {
+		if !ev.Building.Powered {
+			t.Fatalf("unpowered building event: %+v", ev)
+		}
+		seen[ev.Building.Kind] = true
+	}
+	if len(seen) != 3 {
+		t.Fatalf("missing powered building events: %v", seen)
+	}
+}
+
 func TestCargoActivatesWithFirstBuildingAndRemainsDroneScoped(t *testing.T) {
 	w, _ := e2World()
 	w.PlantAt(0, 0, Moss, 0)
@@ -153,17 +224,17 @@ func TestDroneBatteryDrainHalfSpeedChargeAndPersistence(t *testing.T) {
 		t.Fatal("battery active before refinery")
 	}
 	powerBuilding(w, "refinery", 0)
-	w.Wait(0)
+	w.Move(0, East)
 	if w.Battery(0) != 99 {
 		t.Fatal("action did not drain battery")
 	}
 	w.Drones[0].Battery = 1
 	before := w.Tick
-	w.Wait(0)
+	w.Move(0, West)
 	if w.Tick-before != 1 || w.Battery(0) != 0 {
 		t.Fatal("last charged action slowed early")
 	}
-	w.Wait(0)
+	w.Till(0)
 	if w.Tick-before != 3 {
 		t.Fatal("empty battery did not halve speed")
 	}
@@ -179,10 +250,36 @@ func TestDroneBatteryDrainHalfSpeedChargeAndPersistence(t *testing.T) {
 	if !w.Charge(0) || w.Econ.Inv["fuel"] != 1 || w.Battery(0) != 100 {
 		t.Fatal("charge did not spend one fuel and refill")
 	}
-	w.Wait(0)
+	w.Till(0)
 	w = reloadColony(t, w)
 	if w.Battery(0) != 99 {
 		t.Fatal("reload refilled battery")
+	}
+}
+
+func TestDroneOnlyWaitingKeepsBattery(t *testing.T) {
+	w, _ := e2World()
+	powerBuilding(w, "refinery", 0)
+	for tick := 0; tick < 120; tick++ {
+		w.Wait(0)
+	}
+	if w.Battery(0) != econ.BatteryCapacity {
+		t.Fatalf("waiting drained battery to %d", w.Battery(0))
+	}
+	w = reloadColony(t, w)
+	if w.Battery(0) != econ.BatteryCapacity {
+		t.Fatalf("saved waiting drone has battery %d", w.Battery(0))
+	}
+}
+
+func TestLegacySaveWithoutFleetStartsDroneFullyCharged(t *testing.T) {
+	var st econ.State
+	if err := json.Unmarshal([]byte(`{"version":2,"credits":699,"buildings":[{"kind":"refinery","enabled":true}]}`), &st); err != nil {
+		t.Fatal(err)
+	}
+	w := NewColony(&bytes.Buffer{}, &st, 11)
+	if w.Battery(0) != econ.BatteryCapacity {
+		t.Fatalf("legacy drone starts with battery %d", w.Battery(0))
 	}
 }
 

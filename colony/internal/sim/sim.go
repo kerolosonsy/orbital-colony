@@ -510,7 +510,7 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 	}
 	w.load(d)
 	w.actingDrone = d
-	if w.batteryActive() {
+	if op != "wait" && w.batteryActive() {
 		d.Battery = max(0, d.Battery-1)
 	}
 	ok, msg, changed := f()

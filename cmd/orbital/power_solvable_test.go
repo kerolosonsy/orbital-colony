@@ -40,3 +40,43 @@ func TestPowerReferenceProducesAcrossDayAndNight(t *testing.T) {
 		return false
 	})
 }
+
+func TestPowerSolarPlacementWhileWaitingKeepsProductionRunning(t *testing.T) {
+	st := econ.New(11)
+	st.Tick, st.Credits = 60, 699
+	st.Levels["composter"], st.Levels["refinery"], st.Levels["generator"] = 1, 1, 1
+	st.Inv["glass"] = 2
+	st.Buildings = []*econ.Building{
+		{Kind: "composter", X: 0, Level: 1, Enabled: true, Recipe: "biomass", In: map[string]float64{"moss": 8}, Out: map[string]float64{}},
+		{Kind: "refinery", X: 1, Level: 1, Enabled: true, Recipe: "fuel", In: map[string]float64{"biomass": 4, "water": 2}, Out: map[string]float64{}},
+	}
+	code := `package main
+import "orbital/colony"
+func main() {
+ colony.Move(colony.East)
+ colony.Move(colony.East)
+ if err := colony.Build(colony.Generator); err != nil { panic(err) }
+ for { colony.Wait() }
+}`
+	playBuildingProgram(t, st, code, func(ev buildingProgramEvent) bool {
+		if ev.State == nil || len(ev.State.Buildings) < 3 {
+			return false
+		}
+		s := ev.State
+		if s.Power != (econ.PowerStatus{Supply: 10, Demand: 7, Day: true}) {
+			t.Fatalf("tick %d: power=%+v", s.Tick, s.Power)
+		}
+		for _, b := range s.Buildings {
+			if !b.Powered {
+				t.Fatalf("tick %d: unpowered building: %+v", s.Tick, b)
+			}
+		}
+		if s.Tick < 200 {
+			return false
+		}
+		if s.Buildings[0].Out["biomass"] < 2 || s.Buildings[1].Out["fuel"] < 1 {
+			t.Fatalf("tick %d: production stalled: %+v", s.Tick, s.Buildings)
+		}
+		return true
+	})
+}
