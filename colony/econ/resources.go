@@ -53,7 +53,6 @@ var Recipes = []Recipe{
 	{Out: "circuit", In: map[string]float64{"wire": 2, "glass": 1, "crystal": 1}, Building: "assembler", Ticks: 200},
 	{Out: "alloy", In: map[string]float64{"plate": 2, "titanium": 1}, Building: "smelter", Ticks: 180},
 	{Out: "battery", In: map[string]float64{"wire": 1, "sulfur": 1, "plate": 1}, Building: "assembler", Ticks: 200},
-	// Helium gathering waits for the day/night power phase; dependent recipes remain unavailable until then.
 	{Out: "coolant", In: map[string]float64{"water": 2, "helium": 1}, Building: "refinery", Ticks: 160},
 	{Out: "processor", In: map[string]float64{"circuit": 3, "geode": 1}, Building: "assembler", Ticks: 500},
 	{Out: "frame", In: map[string]float64{"alloy": 2, "circuit": 1, "battery": 1}, Building: "assembler", Ticks: 500},

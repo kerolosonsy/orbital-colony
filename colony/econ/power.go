@@ -31,6 +31,8 @@ func GeneratorFuel(kind string, ticks int) (good string, amount float64) {
 
 func Draw(kind string) float64 {
 	switch kind {
+	case "collector":
+		return 2
 	case "composter":
 		return 1
 	case "smelter", "kiln":

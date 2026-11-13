@@ -82,9 +82,9 @@ func directionStep(dir Direction) (dx, dy int, valid bool) {
 	return 0, 0, false
 }
 
-func (w *World) collectOre(t *Tile) {
+func (w *World) collectOre(t *Tile) error {
 	if t.Entity != Iron && t.Entity != Geode && t.Entity != Copper && t.Entity != Sulfur && t.Entity != Titanium && t.Entity != Uranium {
-		return
+		return nil
 	}
 	n := 1
 	if t.Entity == Geode {
@@ -92,12 +92,15 @@ func (w *World) collectOre(t *Tile) {
 	}
 	if w.Econ != nil {
 		name := t.Entity.String()
-		w.Econ.Inv[name] += float64(n) * w.Econ.YieldMult(name)
+		if err := w.collectGood(t.Entity, float64(n)*w.Econ.YieldMult(name)); err != nil {
+			return err
+		}
 		w.syncInv()
 	} else {
 		w.Inv[t.Entity] += n
 	}
 	t.Entity, t.Planted, t.Ready, t.Size = Empty, 0, 0, 0
+	return nil
 }
 
 func (w *World) tileChanged(id, x, y, z int) {
@@ -105,55 +108,74 @@ func (w *World) tileChanged(id, x, y, z int) {
 	w.emit(Event{Op: "tile", T: w.Tick, D: id, OK: true, X: w.X, Y: w.Y, Z: w.Z, Tile: &v})
 }
 
-func (w *World) Dig(id int, dir Direction) bool {
-	return w.act(id, "dig", func() (bool, string, bool) {
+func (w *World) Dig(id int, dir Direction) bool { return w.TryDig(id, dir) == nil }
+
+func (w *World) TryDig(id int, dir Direction) (err error) {
+	w.act(id, "dig", func() (bool, string, bool) {
 		if m := w.gate("api.dig"); m != "" {
+			err = ErrLocked
 			return false, m, false
 		}
 		if w.Z == 0 {
+			err = econ.ErrNotHere
 			return false, say("على السطح استخدم DigDown", "Use DigDown on the surface"), false
 		}
 		dx, dy, valid := directionStep(dir)
 		x, y := w.X+dx, w.Y+dy
 		if !valid || x < 0 || y < 0 || x >= w.W || y >= w.H {
+			err = econ.ErrNotHere
 			return false, say("مفيش خانة في الاتجاه ده", "No tile in that direction"), false
 		}
 		t := w.AtZ(x, y, w.Z)
 		if t.Ground != Stone {
+			err = econ.ErrTileNotFree
 			return false, say("الحفر محتاج صخر صلب", "Digging requires solid rock"), false
 		}
-		w.collectOre(t)
+		if err = w.collectOre(t); err != nil {
+			return false, buildingMessage(err), false
+		}
 		t.Ground = Tunnel
 		w.tileChanged(id, x, y, w.Z)
 		return true, "", false
 	})
+	return err
 }
 
-func (w *World) DigDown(id int) bool {
-	return w.act(id, "digdown", func() (bool, string, bool) {
+func (w *World) DigDown(id int) bool { return w.TryDigDown(id) == nil }
+
+func (w *World) TryDigDown(id int) (err error) {
+	w.act(id, "digdown", func() (bool, string, bool) {
 		if m := w.gate("api.dig"); m != "" {
+			err = ErrLocked
 			return false, m, false
 		}
 		if w.Z+1 >= w.Depth {
+			err = econ.ErrNotHere
 			return false, say("وصلت لأعمق طبقة", "You reached the deepest layer"), false
 		}
 		if w.Econ != nil && w.Econ.Level("drill") < w.Z+1 {
+			err = ErrLocked
 			return false, say("🔒 محتاج ترقية الحفار للعمق ده", "🔒 Upgrade the drill to reach this depth"), false
 		}
 		g := w.here().Ground
 		if !(w.Z == 0 && (g == Regolith || g == Soil) || w.Z > 0 && g == Tunnel) {
+			err = econ.ErrNotHere
 			return false, say("مينفعش تحفر لتحت من الخانة دي", "You cannot dig down from this tile"), false
 		}
 		if w.Z == 0 && w.buildingAt(w.X, w.Y) != nil {
+			err = econ.ErrTileNotFree
 			return false, buildingMessage(econ.ErrTileNotFree), false
 		}
-		w.here().Ground = Shaft
 		t := w.AtZ(w.X, w.Y, w.Z+1)
-		w.collectOre(t)
+		if err = w.collectOre(t); err != nil {
+			return false, buildingMessage(err), false
+		}
+		w.here().Ground = Shaft
 		t.Ground = Tunnel
 		w.tileChanged(id, w.X, w.Y, w.Z+1)
 		return true, "", true
 	})
+	return err
 }
 
 func (w *World) Descend(id int) bool {

@@ -185,7 +185,7 @@ func TestColonyBuildPreconditionsLeavePossessionsUntouched(t *testing.T) {
 			if err := w.Build(0, tc.kind); !errors.Is(err, tc.want) {
 				t.Fatalf("Build = %v, want %v", err, tc.want)
 			}
-			if w.Tick != 1 || w.Econ.Credits != credits || w.Econ.Inv["moss"] != moss || len(w.Econ.Buildings) != buildings || len(buildingEvents(t, trace)) != 0 {
+			if w.Tick != 1 || math.Abs(w.Econ.Credits-(credits-w.Econ.Rent/600)) > 1e-9 || w.Econ.Inv["moss"] != moss || len(w.Econ.Buildings) != buildings || len(buildingEvents(t, trace)) != 0 {
 				t.Fatal("failed build spent possessions or emitted placement")
 			}
 		})
@@ -230,7 +230,7 @@ func TestColonyBuildingTransfersRequireActingDroneOnSurfaceTile(t *testing.T) {
 	if id != 1 {
 		t.Fatal("could not spawn second drone")
 	}
-	w.Econ.Levels["composter"], w.Econ.Credits, w.Econ.Inv["moss"] = 1, 25, 20
+	w.Econ.Levels["composter"], w.Econ.Credits, w.Econ.Inv["moss"] = 1, 100, 20
 	if err := w.Build(id, "composter"); err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func TestColonyBuildingTransfersRequireActingDroneOnSurfaceTile(t *testing.T) {
 		t.Fatalf("Put capacity/inventory: %d, %v", n, err)
 	}
 	b.Enabled = false
-	if n, err := w.BuildingTake(id, Point{}, Biomass, 100); n != 2 || err != nil || w.Count(Biomass) != 2 {
+	if n, err := w.BuildingTake(id, Point{}, Biomass, 100); n != 2 || err != nil || w.Count(Biomass) != 0 || w.Carry(id)[Biomass] != 2 {
 		t.Fatalf("Take output/inventory: %d, %v", n, err)
 	}
 	v := w.BuildingStatus(Point{})
@@ -324,7 +324,7 @@ func TestColonyBuildingTransferErrorsAndRepair(t *testing.T) {
 
 func TestColonyBuildingProducesOnClockAndEmitsOnlyChanges(t *testing.T) {
 	w, trace := e2World()
-	w.Econ.Levels["composter"], w.Econ.Credits, w.Econ.Inv["moss"] = 1, 25, 12
+	w.Econ.Levels["composter"], w.Econ.Credits, w.Econ.Inv["moss"] = 1, 100, 12
 	if err := w.Build(0, "composter"); err != nil {
 		t.Fatal(err)
 	}
@@ -393,7 +393,7 @@ func TestColonyBuildingWireFormat(t *testing.T) {
 		t.Fatal(err)
 	}
 	var want map[string]any
-	if err := json.Unmarshal([]byte(`{"kind":"composter","recipe":"","in":{},"out":{},"progress":0,"wear":0,"level":1}`), &want); err != nil {
+	if err := json.Unmarshal([]byte(`{"kind":"composter","recipe":"","in":{},"out":{},"progress":0,"wear":0,"level":1,"powered":false,"enabled":true,"priority":0}`), &want); err != nil {
 		t.Fatal(err)
 	}
 	if event["op"] != "building" || event["t"] != float64(1) || event["x"] != float64(0) || event["y"] != float64(0) || !reflect.DeepEqual(event["building"], want) {

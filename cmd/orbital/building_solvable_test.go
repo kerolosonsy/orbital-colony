@@ -78,7 +78,7 @@ func TestBuildingReferenceProducesAndExportsFuel(t *testing.T) {
 	}
 	st := econ.New(11)
 	st.Levels["composter"], st.Levels["refinery"] = 1, 1
-	st.Credits, st.Inv["moss"] = 100, 20
+	st.Credits, st.Inv["moss"] = 110, 20
 	st.At(1, 0).G = "ice"
 	fuelCollected, fuelSold, melted, buildings := false, false, false, 0
 	playBuildingProgram(t, st, string(code), func(ev buildingProgramEvent) bool {
@@ -88,7 +88,7 @@ func TestBuildingReferenceProducesAndExportsFuel(t *testing.T) {
 		if ev.Op == "melt" && ev.OK {
 			melted = true
 		}
-		if ev.Op == "take" && ev.OK && ev.Inv["fuel"] >= 1 {
+		if ev.Op == "unload" && ev.OK && ev.Inv["fuel"] >= 1 {
 			fuelCollected = true
 		}
 		if ev.Op == "export" && ev.OK && fuelCollected && ev.Inv["fuel"] == 0 {

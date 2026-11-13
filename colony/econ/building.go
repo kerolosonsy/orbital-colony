@@ -8,6 +8,8 @@ import (
 )
 
 type Building struct {
+	Powered      bool               `json:"powered"`
+	Mode         string             `json:"mode,omitempty"`
 	Kind         string             `json:"kind"`
 	X            int                `json:"x"`
 	Y            int                `json:"y"`
@@ -45,6 +47,9 @@ func Capacity(level int) float64 { return 8 * EffectMult(0.25, level) }
 
 func (b *Building) recipes(out string) []Recipe {
 	var recipes []Recipe
+	if b.Kind == "collector" && out == "helium" {
+		return []Recipe{{Out: "helium", Building: "collector", Ticks: 100}}
+	}
 	for _, r := range RecipeFor(out) {
 		if r.Building == b.Kind {
 			recipes = append(recipes, r)
@@ -80,6 +85,9 @@ func (b *Building) hasInputs(r Recipe) bool {
 }
 
 func (b *Building) accepts(good string) bool {
+	if b.Kind == "generator" {
+		return good == "fuel" || good == "cell"
+	}
 	for _, r := range b.recipes(b.Recipe) {
 		if _, ok := r.In[good]; ok {
 			return true
@@ -246,11 +254,12 @@ var placementCosts = map[string]Cost{
 	"reactor-lab": {Credits: 500, Goods: map[string]float64{"plate": 4}},
 	"silo":        {Credits: 35, Goods: map[string]float64{"moss": 4}},
 	"generator":   {Credits: 100, Goods: map[string]float64{"glass": 2}},
+	"collector":   {Credits: 125, Goods: map[string]float64{"glass": 2}},
 	"lab":         {Credits: 200, Goods: map[string]float64{"plate": 2}},
 }
 
 func addBuildingUpgrades() {
-	goods := map[string]string{"composter": "moss", "smelter": "iron", "kiln": "silica", "refinery": "biomass", "assembler": "plate", "reactor-lab": "alloy", "silo": "moss", "generator": "glass", "lab": "circuit"}
+	goods := map[string]string{"composter": "moss", "smelter": "iron", "kiln": "silica", "refinery": "biomass", "assembler": "plate", "reactor-lab": "alloy", "silo": "moss", "generator": "glass", "lab": "circuit", "collector": "glass"}
 	for _, n := range buildingNodes() {
 		var requires []string
 		for _, p := range n.After {

@@ -31,6 +31,9 @@ func main() {
 			panic(i18n.T("جمع الكتلة الحيوية ناقص", "incomplete biomass collection"))
 		}
 	}
+	if !drone.Unload() {
+		panic(i18n.T("تفريغ الكتلة الحيوية فشل", "biomass was not unloaded"))
+	}
 	if !drone.Move(colony.East) || !drone.Melt() {
 		panic(i18n.T("تسييح المياه فشل", "could not melt water"))
 	}
@@ -46,6 +49,9 @@ func main() {
 	}
 	_, err = refinery.Take(colony.Fuel, 1)
 	must(err)
+	if !drone.Move(colony.West) || !drone.Unload() {
+		panic(i18n.T("تفريغ الوقود فشل", "fuel was not unloaded"))
+	}
 	if colony.Export(colony.Fuel, 1) <= 0 {
 		panic(i18n.T("بيع الوقود فشل", "fuel was not sold"))
 	}

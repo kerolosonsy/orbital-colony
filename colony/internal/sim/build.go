@@ -9,6 +9,10 @@ import (
 )
 
 type BuildingView struct {
+	Powered  bool               `json:"powered"`
+	Enabled  bool               `json:"enabled"`
+	Priority int                `json:"priority"`
+	Mode     string             `json:"mode,omitempty"`
 	Kind     string             `json:"kind"`
 	Recipe   string             `json:"recipe"`
 	In       map[string]float64 `json:"in"`
@@ -30,7 +34,7 @@ func (w *World) buildingAt(x, y int) *econ.Building {
 }
 
 func buildingView(b *econ.Building) BuildingView {
-	return BuildingView{Kind: b.Kind, Recipe: b.Recipe, In: maps.Clone(b.In), Out: maps.Clone(b.Out), Progress: b.ProgressFraction(), Wear: b.Wear, Level: b.Level}
+	return BuildingView{Powered: b.Powered, Enabled: b.Enabled, Priority: b.Priority, Mode: b.Mode, Kind: b.Kind, Recipe: b.Recipe, In: maps.Clone(b.In), Out: maps.Clone(b.Out), Progress: b.ProgressFraction(), Wear: b.Wear, Level: b.Level}
 }
 
 func (w *World) emitBuilding(b *econ.Building, tick int) {
@@ -110,7 +114,15 @@ func (w *World) placeBuilding(kind string) error {
 		w.Econ.Inv[good] -= n
 	}
 	b := &econ.Building{Kind: kind, X: w.X, Y: w.Y, Level: w.Econ.Level(kind), Enabled: true, In: map[string]float64{}, Out: map[string]float64{}}
+	if kind == "generator" {
+		b.Mode = "solar"
+	}
+	if kind == "collector" {
+		b.Recipe = "helium"
+	}
 	w.Econ.Buildings = append(w.Econ.Buildings, b)
+	w.Capacity = w.Econ.CargoCapacity()
+	w.refreshPower(b)
 	w.syncInv()
 	w.emitBuilding(b, w.Tick)
 	return nil
@@ -170,7 +182,7 @@ func (w *World) BuildingPut(id int, p Point, e Entity, n int) (int, error) {
 		if n <= 0 {
 			return nil
 		}
-		amount := math.Min(float64(n), math.Floor(w.Econ.Inv[e.String()]))
+		amount := math.Min(float64(n), math.Floor(w.Econ.Inv[e.String()]+w.actingDrone.Hold[e.String()]))
 		if amount <= 0 {
 			return econ.ErrNoInput
 		}
@@ -182,7 +194,10 @@ func (w *World) BuildingPut(id int, p Point, e Entity, n int) (int, error) {
 		moved, err := b.Put(e.String(), math.Min(amount, space))
 		if err == nil && moved > 0 {
 			accepted = int(moved)
-			w.Econ.Inv[e.String()] -= moved
+			cargo := math.Min(moved, w.actingDrone.Hold[e.String()])
+			w.actingDrone.Hold[e.String()] -= cargo
+			w.Cargo = cargoUsed(w.actingDrone)
+			w.Econ.Inv[e.String()] -= moved - cargo
 			w.emitBuilding(b, w.Tick)
 		}
 		return err
@@ -203,10 +218,12 @@ func (w *World) BuildingTake(id int, p Point, e Entity, n int) (int, error) {
 		if amount <= 0 {
 			return econ.ErrNoInput
 		}
+		if err := w.collectGood(e, amount); err != nil {
+			return err
+		}
 		moved, err := b.Take(e.String(), amount)
 		if err == nil {
 			taken = int(moved)
-			w.Econ.Inv[e.String()] += moved
 			w.emitBuilding(b, w.Tick)
 		}
 		return err
@@ -231,15 +248,7 @@ func (w *World) BuildingRepair(id int, p Point) error {
 
 func (w *World) advanceProduction(target int) {
 	for tick := w.lastProductionTick + 1; tick <= target; tick++ {
-		for _, b := range w.Econ.Buildings {
-			b.Level = w.Econ.Level(b.Kind)
-			before, wear := b.Progress, b.Wear
-			// Stalls are normal; power allocation belongs to the next phase.
-			_ = b.Step(1, true)
-			if before == 0 && b.Progress > 0 || b.Wear != wear {
-				w.emitBuilding(b, tick)
-			}
-		}
+		w.productionStep(tick)
 	}
 	w.lastProductionTick = target
 	w.restoreIce(target)

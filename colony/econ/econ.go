@@ -51,7 +51,12 @@ type State struct {
 	Earned   float64            `json:"earned"` // lifetime credits
 	RunTicks int64              `json:"runTicks"`
 
-	Buildings []*Building `json:"buildings,omitempty"`
+	Buildings   []*Building              `json:"buildings,omitempty"`
+	Power       PowerStatus              `json:"power"`
+	Storage     map[string]StorageStatus `json:"storage"`
+	StorageBase map[string]int           `json:"storageBase,omitempty"`
+	Fleet       []DroneState             `json:"fleet"`
+	Rent        float64                  `json:"rent"`
 
 	Contracts  map[string]*ContractRun `json:"contracts,omitempty"`
 	Active     string                  `json:"active,omitempty"` // the running contract's id
@@ -101,6 +106,7 @@ func (s *State) Normalize() {
 	if s.Version < 3 {
 		s.migrateV3()
 	}
+	s.normalizeInfrastructure()
 }
 
 // groundAt is the terrain the colony finds when the field grows onto (x, y).
@@ -269,6 +275,7 @@ func init() {
 	}
 
 	addBuildingUpgrades()
+	addInfrastructureUpgrades()
 	// New goods do not inherit crop yield and growth upgrades in this phase.
 	registerGoods()
 

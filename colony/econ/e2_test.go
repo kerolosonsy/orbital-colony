@@ -32,6 +32,7 @@ func TestV3MigrationOnlyRerollsUntouchedEmptyStoneOnce(t *testing.T) {
 	s.Blueprints["api.dig"] = true
 	s.Claimed["chapter-1"] = true
 	s.Contracts["c17-deep-haul"] = &ContractRun{Status: "done", Best: 22}
+	s.normalizeInfrastructure()
 	blob, err := json.Marshal(s)
 	if err != nil {
 		t.Fatal(err)
@@ -127,6 +128,7 @@ func TestBuildingSaveResumesSpentAlternativeRecipe(t *testing.T) {
 	if _, err := b.Put("moss", 4); err != nil {
 		t.Fatal(err)
 	}
+	s.normalizeInfrastructure()
 	blob, err := json.Marshal(s)
 	if err != nil {
 		t.Fatal(err)

@@ -151,7 +151,10 @@ type tileView struct {
 }
 
 // Wire format: tile.b is the building kind, omitted on tiles without a building.
-// op:"building" carries t, x, y and building:{kind,recipe,in,out,progress,wear,level}.
+// op:"building" carries t, x, y and building:{kind,recipe,in,out,progress,wear,level,
+// powered,enabled,priority,mode}; mode is present only on generators.
+// state includes power:{supply,demand,day}, storage:{crops,raw,crafted}, where
+// each group is {used,cap}, fleet:[{id,battery,cargo,cap}], and rent (credits/minute).
 // Buffers map good IDs to amounts; progress is a fraction in [0,1]. Events are
 // sent on placement, buffer/recipe changes, repair and completed cycles, not each tick.
 type Event struct {
@@ -237,6 +240,7 @@ type World struct {
 	mainSave     [4]int
 
 	lastProductionTick int
+	actingDrone        *Drone
 
 	out  io.Writer
 	exit func(code int)
@@ -253,7 +257,7 @@ func New(out io.Writer, seed int64) *World {
 		MaxTicks: 1000,
 		Check:    func(*World) (bool, string) { return false, "" },
 		Unit:     4 * time.Millisecond,
-		Drones:   []*Drone{{}},
+		Drones:   []*Drone{{Battery: econ.BatteryCapacity}},
 	}
 }
 
@@ -261,6 +265,8 @@ func New(out io.Writer, seed int64) *World {
 // World.X, World.Y, World.Z and World.Cargo; others are swapped in while they act.
 type Drone struct {
 	ID, X, Y, Z, Cargo int
+	Battery            int
+	Hold               map[string]float64
 	busy               sync.Mutex
 	nextAt             time.Time // when this drone's previous action finished
 }
@@ -458,13 +464,14 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 	if d == nil {
 		panic(sayf("colony: مفيش درون بالمعرّف %d", "colony: no drone with id %d", id))
 	}
+	d.busy.Lock()
+	defer d.busy.Unlock()
+	speed := w.actionSpeed(d)
 	var slot int
 	if w.Realtime {
 		// Each drone works on a fixed beat: its next action ends one Unit
 		// after the previous one, unless it sat idle. Ticks come from that
 		// schedule rather than from noisy sleep wake-ups.
-		d.busy.Lock()
-		defer d.busy.Unlock()
 		base := d.nextAt
 		step := w.Unit
 		if w.ActionDur > 0 {
@@ -473,6 +480,7 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 		if now := time.Now(); base.IsZero() || now.Sub(base) > step/2 {
 			base = now
 		}
+		step *= time.Duration(speed)
 		target := base.Add(step)
 		time.Sleep(time.Until(target))
 		d.nextAt = target
@@ -486,13 +494,18 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 	if w.Realtime {
 		w.Tick = max(w.Tick, slot)
 	} else {
-		w.Tick++
+		w.Tick += speed
 	}
 	if w.Econ != nil {
 		w.advanceProduction(w.Tick)
 	}
 	w.load(d)
+	w.actingDrone = d
+	if w.batteryActive() {
+		d.Battery = max(0, d.Battery-1)
+	}
 	ok, msg, changed := f()
+	w.actingDrone = nil
 	if w.Econ != nil {
 		w.Econ.RecordCommand(id, op == "move" && ok)
 	}
@@ -509,6 +522,9 @@ func (w *World) act(id int, op string, f func() (ok bool, msg string, changed bo
 		ev.Tile = &v
 	}
 	w.store(d)
+	if w.Econ != nil {
+		w.syncInfrastructure()
+	}
 	w.after(ev)
 	return ok
 }

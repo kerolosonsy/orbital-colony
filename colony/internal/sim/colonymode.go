@@ -47,6 +47,7 @@ func NewColony(out io.Writer, st *econ.State, seed int64) *World {
 	w.TickBase = int(st.Tick)
 	w.Tick = w.TickBase
 	w.lastProductionTick = w.TickBase
+	w.loadFleet()
 	w.loadTiles()
 	w.applyEcon()
 	w.Check = func(w *World) (bool, string) {
@@ -86,6 +87,10 @@ func (w *World) applyEcon() {
 	for _, b := range w.Econ.Buildings {
 		b.Level = w.Econ.Level(b.Kind)
 	}
+	if w.cargoActive() {
+		w.Capacity = w.Econ.CargoCapacity()
+	}
+	w.syncInfrastructure()
 	w.syncInv()
 }
 
@@ -97,6 +102,7 @@ func (w *World) syncInv() {
 
 // syncEcon writes the live world back into the saved state. Caller holds the lock.
 func (w *World) syncEcon() {
+	w.syncInfrastructure()
 	st := w.Econ
 	st.Tick = int64(w.Tick)
 	st.Depth = w.Depth
@@ -207,9 +213,11 @@ func (w *World) colonyHarvest(destroy bool) (int, error, string, bool) {
 			}
 		})
 	}
-	w.Econ.RecordHarvest(name, base, t.Size)
 	got := base * w.Econ.YieldMult(name)
-	w.Econ.Inv[name] += got
+	if err := w.collectGood(t.Entity, got); err != nil {
+		return 0, err, buildingMessage(err), false
+	}
+	w.Econ.RecordHarvest(name, base, t.Size)
 	w.syncInv()
 	t.Entity, t.Planted, t.Ready, t.Size = Empty, 0, 0, 0
 	return int(got), nil, fmt.Sprintf("+%s %s", trimFloat(got), name), true
