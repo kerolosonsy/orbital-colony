@@ -11,7 +11,7 @@ const TreeView = (() => {
     return !!parent && parent.level >= prereq.level;
   }
 
-  function missingCount(node) { return node.checks.filter((check) => !check.ok).length; }
+  function missingCount(node) { return node.checks.filter((check) => !check.ok && !(node.max === 0 && check.kind === "max")).length; }
 
   function pathToNearestOwned(id, byId) {
     if (!byId[id] || byId[id].state === "owned") return [];
@@ -34,11 +34,12 @@ const TreeView = (() => {
   }
 
   function buyEnabled(node) {
-    return node.state === "available" || node.state === "owned" && node.checks.every((check) => check.ok);
+    const checks = node.max === 0 ? node.checks.filter((check) => check.kind !== "max") : node.checks;
+    return node.state === "available" || node.state === "owned" && checks.every((check) => check.ok);
   }
 
   function buyLabel(node) {
-    if (node.checks.some((check) => check.kind === "max")) return T("مكتمل", "Maxed");
+    if (node.max !== 0 && node.checks.some((check) => check.kind === "max")) return T("مكتمل", "Maxed");
     return node.level === 0 ? T("ابني", "Build") : T("رقّي", "Upgrade");
   }
 
@@ -205,7 +206,7 @@ const TreeView = (() => {
     }
     detail.innerHTML = `<h3>${esc(local(node, "name"))}</h3><p class="tv-detail-state">${esc(stateLabel(node))}</p>
       <p>${esc(local(node, "desc"))}</p><h4>${esc(T(`الأثر في المستوى ${fmt(node.level + 1)}`, `Effect at level ${fmt(node.level + 1)}`))}</h4><p>${esc(local(node, "effect"))}</p>
-      <h4>${esc(T("شروط الترقية", "Upgrade requirements"))}</h4><ul class="tv-checks">${node.checks.map((c, i) => checkMarkup(c, i, node)).join("")}</ul>
+      <h4>${esc(T("شروط الترقية", "Upgrade requirements"))}</h4><ul class="tv-checks">${node.checks.map((c, i) => (node.max === 0 && c.kind === "max" ? "" : checkMarkup(c, i, node))).join("")}</ul>
       <h4>${esc(T("التكلفة · معاك / المطلوب", "Cost · held / required"))}</h4><ul class="tv-cost">${costMarkup(node)}</ul>
       <button type="button" class="tv-buy" ${buyEnabled(node) ? "" : "disabled"}>${esc(buyLabel(node))}</button>`;
   }
@@ -237,15 +238,21 @@ const TreeView = (() => {
     return `<li class="${check.ok ? "is-ok" : "is-missing"}${kindCls}"><span aria-hidden="true">${mark}</span><span class="tv-sr">${esc(check.ok ? T("مكتمل: ", "Met: ") : T("ناقص: ", "Missing: "))}</span>${link ? `<button type="button" data-check="${index}">${label}</button>` : `<span>${label}</span>`}</li>`;
   }
 
-  function costMarkup(node, state = tree) {
+  function costMarkup(node, state = tree, colors) {
     const names = typeof NAME !== "undefined" ? NAME : {};
+    const palette = colors || (state && state.colors) || (typeof INV_COLOR !== "undefined" ? INV_COLOR : {});
     const rpCost = Number((node && (node.rp ?? (node.cost && node.cost.rp))) || 0);
-    const costs = [[T("كريدت", "Credits"), (state && state.credits) || 0, (node.cost && node.cost.credits) || 0]];
-    if (rpCost > 0) costs.push([T("نقاط البحث", "RP"), (state && state.rp) || 0, rpCost]);
+    const costs = [[T("كريدت", "Credits"), (state && state.credits) || 0, (node.cost && node.cost.credits) || 0, ""]];
+    if (rpCost > 0) costs.push([T("نقاط البحث", "RP"), (state && state.rp) || 0, rpCost, ""]);
     for (const [good, needed] of Object.entries((node.cost && node.cost.goods) || {})) {
-      costs.push([T(names[good] || good, names[good] || good), (state && state.inv && state.inv[good]) || 0, needed]);
+      costs.push([T(names[good] || good, names[good] || good), (state && state.inv && state.inv[good]) || 0, needed, palette[good] || "#ccc"]);
     }
-    return costs.map(([name, held, needed]) => `<li class="${held >= needed ? "is-ok" : "is-missing"}"><span>${esc(name)}</span><b dir="ltr">${esc(T(`${fmt(held)} / ${fmt(needed)}`, `${fmt(held)} / ${fmt(needed)}`))}</b></li>`).join("");
+    return costs.map(([name, held, needed, chipColor]) => {
+      const label = chipColor
+        ? `<span class="tv-cost-good"><i class="tv-good-chip" style="background:${attr(chipColor)}"></i>${esc(name)}</span>`
+        : `<span>${esc(name)}</span>`;
+      return `<li class="${held >= needed ? "is-ok" : "is-missing"}">${label}<b dir="ltr">${esc(T(`${fmt(held)} / ${fmt(needed)}`, `${fmt(held)} / ${fmt(needed)}`))}</b></li>`;
+    }).join("");
   }
 
   function detailClick(ev) {
@@ -339,6 +346,6 @@ const TreeView = (() => {
     pointers.clear(); pressedNode = null;
   }
 
-  if (typeof module !== "undefined" && module.exports) module.exports = { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, checkLabel, checkMarkup, costMarkup, headerStatsMarkup, branchHue };
+  if (typeof module !== "undefined" && module.exports) module.exports = { fitView, edgeSatisfied, missingCount, pathToNearestOwned, matchesSearch, buyEnabled, buyLabel, stateLabel, checkLabel, checkMarkup, costMarkup, headerStatsMarkup, branchHue };
   return { open, close, update, get isOpen() { return !!overlay && overlay.open; } };
 })();

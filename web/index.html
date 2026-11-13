@@ -57,6 +57,11 @@
   <button id="btn-lang" class="tool" title="English" data-en-title="العربية"><span class="lang-label" data-en="ع">EN</span></button>
   <button id="btn-profile" class="tool" title="اللاعبين" data-en-title="Players"><svg class="ico"><use href="#i-user"/></svg><span class="tool-label" id="profile-name"></span></button>
   <button id="btn-reset" class="tool" title="ارجع لكود البداية" data-en-title="Back to starter code"><svg class="ico"><use href="#i-reset"/></svg></button>
+  <div id="colony-actions" class="colony-actions">
+    <button id="btn-race" type="button" class="tool small" aria-pressed="false" title="شغّل الكود بفحص سباقات البيانات (-race)" data-en-title="Run with Go race detector (-race)"><span class="race-dot" aria-hidden="true"></span><span data-en="Check for races">افحص السباقات</span></button>
+    <button id="btn-test" type="button" class="tool small" title="شغّل اختبارات go test" data-en-title="Run go test"><span data-en="Test">اختبر</span></button>
+    <button id="btn-vet" type="button" class="tool small" title="افحص الكود بـ go vet" data-en-title="Run go vet"><span data-en="Vet">افحص</span></button>
+  </div>
   <button id="btn-run" class="run" title="Ctrl/⌘ + Enter"><svg class="ico"><use href="#i-play"/></svg><span>Run</span></button>
 </header>
 
@@ -78,6 +83,7 @@
   </section>
 
   <section class="panel lesson-panel colony-panel" id="colony-panel">
+    <div id="col-weather" class="col-weather hidden" role="status"></div>
     <div id="col-rank" class="col-rank hidden"></div>
     <div class="col-status">
       <div class="credits"><span class="cr-sym">CR</span><span id="col-credits">0</span></div>
@@ -85,6 +91,9 @@
       <div class="col-meta muted-row"><span id="col-size"></span><span id="col-levels"></span></div>
       <div id="col-sys" class="col-sys hidden"></div>
     </div>
+    <div id="col-lastrun" class="col-lastrun hidden"></div>
+    <div id="col-live-stats" class="col-live-stats hidden"></div>
+    <div id="col-rush" class="col-rush hidden"></div>
     <table class="col-market" id="col-market"></table>
     <div id="col-buildings" class="col-buildings hidden"></div>
     <div id="col-fleet" class="col-fleet hidden"></div>

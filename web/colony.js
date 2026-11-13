@@ -15,6 +15,7 @@ const Colony = (() => {
     alloy: 141, battery: 136, coolant: 78, processor: 880, frame: 941, cell: 619, core: 6818,
   };
   let data = null, es = null, running = false, samples = [], shopDirty = true, live = null;
+  let runs = [], raced = false, raceEnabled = false, checking = false;
 
   let contractTarget = "", contractHighlightUntil = 0, contractHighlightTimer = null;
   let rankHighlightUntil = 0, rankHighlightTimer = null;
@@ -36,8 +37,44 @@ const Colony = (() => {
     const keepView = W && W.colony ? { view: W.view, follow: W.follow } : null;
     setWorld(init);
     W.colony = true; W.live = true; W.liveStep = actionMs(data.state); W.t = data.state.tick || 0;
+    syncWeatherToWorld(data.state.weather);
     if (keepView) { W.view = Math.min(keepView.view, W.depth - 1); W.follow = keepView.follow; renderLayerBar(); renderLegend(); }
     hud("");
+  }
+
+  function syncWeatherToWorld(weather) {
+    if (!W || !W.colony) return;
+    W.storm = weather && weather.storm === "active" ? 2 : weather && weather.storm === "warn" ? 1 : 0;
+  }
+
+  function getRacePref() {
+    return typeof store !== "undefined" && typeof store.pref === "function" ? !!store.pref("colonyRace") : false;
+  }
+  function setRacePref(on) {
+    if (typeof store !== "undefined" && typeof store.pref === "function") store.pref("colonyRace", !!on);
+  }
+  function getFilesForRun(level) {
+    if (typeof colonyFilesPayload === "function") return colonyFilesPayload(level);
+    const list = typeof levelFiles === "function" ? levelFiles(level) : ["main.go"];
+    const first = Array.isArray(list) && list.length ? list[0] : "main.go";
+    const name = typeof first === "string" ? first : (first && first.name) || "main.go";
+    return { [name]: typeof fileCode === "function" ? fileCode(level, first) : "" };
+  }
+  function resolveErrorFile(errs, files, fallback) {
+    if (typeof firstErrorFile === "function") return firstErrorFile(errs, files, fallback);
+    return (errs && errs[0] && errs[0].file) || fallback || "main.go";
+  }
+  function buildRunPayload(level, race) {
+    return { files: getFilesForRun(level), race: !!race };
+  }
+  function raceUI() {
+    const b = $("#btn-race");
+    if (b) b.setAttribute("aria-pressed", String(!!raceEnabled));
+  }
+  function toggleRace() {
+    raceEnabled = !raceEnabled;
+    setRacePref(raceEnabled);
+    raceUI();
   }
 
   // ---------- entering and leaving ----------
@@ -68,11 +105,15 @@ const Colony = (() => {
     log(T("بيع بـ colony.Export(colony.Moss, 0)، واشتري ترقيات من اللوحة. الأوامر المقفولة بتقولك تشتري إيه.", "Sell with colony.Export(colony.Moss, 0) and buy upgrades from the panel. Locked commands tell you what to buy."), "c-tip");
     liveWorld(stateToInit(data.state));
     running = data.running;
+    raced = !!data.raced;
+    raceEnabled = getRacePref();
+    runs = [];
     samples = []; live = null;
     clearTimeout(rankHighlightTimer); rankHighlightUntil = 0;
     openStream();
     renderAll();
     runUI();
+    fetchRuns();
   }
 
   function exit() {
@@ -81,6 +122,7 @@ const Colony = (() => {
     contractTarget = ""; contractHighlightUntil = 0;
     clearTimeout(rankHighlightTimer);
     rankHighlightUntil = 0;
+    running = false; raced = false; runs = [];
     S.mode = "mission";
     document.body.classList.remove("colony");
     if (es) { es.close(); es = null; }
@@ -146,19 +188,107 @@ const Colony = (() => {
         if (ev.ok !== false) { Sound.play("goal"); highlightRank(); }
         if (!ev.tree && !TreeView.isOpen) refresh();
         return;
+      case "race":
+        log(ev.msg || T("اتكشف تعارض سباق (Data race).", "Data race detected."), "c-err");
+        if (!raced) {
+          raced = true;
+          Sound.play("error");
+          runUI();
+        }
+        return;
+      case "storm": {
+        const phase = ev.phase === "hit" || ev.phase === "clear" ? ev.phase : "warn";
+        const cls = phase === "hit" ? "c-err" : phase === "clear" ? "c-ok" : "c-warn";
+        const snd = phase === "hit" ? "storm" : phase === "clear" ? "report" : "fail";
+        const fallback = phase === "hit"
+          ? T("عاصفة ضربت المستعمرة!", "Storm hit the colony!")
+          : phase === "clear"
+            ? T("العاصفة هديت.", "Storm cleared.")
+            : T("تحذير: عاصفة جاية!", "Warning: incoming storm!");
+        log(ev.msg || fallback, cls);
+        Sound.play(snd);
+        if (ev.state) {
+          econ(ev);
+        } else if (data && data.state) {
+          if (typeof ev.t === "number") data.state.tick = Math.max(data.state.tick || 0, ev.t);
+          if (ev.weather) data.state.weather = ev.weather;
+          else {
+            const nextStorm = phase === "hit" ? "active" : phase === "clear" ? "none" : "warn";
+            data.state.weather = { ...(data.state.weather || {}), storm: nextStorm, ...(typeof ev.at === "number" ? { at: ev.at } : {}) };
+          }
+          syncWeatherToWorld(data.state.weather);
+          renderWeather();
+          if (typeof draw === "function") draw(performance.now());
+        }
+        return;
+      }
+      case "fault": {
+        const id = typeof ev.d === "number" ? ev.d : 0;
+        log(ev.msg || T(`عطل في الدرون ${id}.`, `Drone ${id} faulted.`), "c-err");
+        Sound.play("error");
+        if (ev.state) {
+          econ(ev);
+        } else if (data && data.state && Array.isArray(data.state.fleet) && typeof ev.d === "number") {
+          const drone = data.state.fleet.find((x) => Number(x.id) === ev.d);
+          if (drone) {
+            drone.fault = true;
+            if (typeof ev.stunned === "number") drone.stunned = ev.stunned;
+          }
+          renderFleet();
+        }
+        return;
+      }
+      case "shock":
+        log(ev.msg || T("صدمة في السوق!", "Market shock!"), "c-warn");
+        Sound.play("fail");
+        if (ev.state || ev.prices) {
+          econ(ev);
+        } else if (data && data.state) {
+          if (typeof ev.t === "number") data.state.tick = Math.max(data.state.tick || 0, ev.t);
+          if ("shock" in ev) data.state.shock = ev.shock;
+          else if (ev.good) data.state.shock = { good: ev.good, factor: ev.factor, until: ev.until };
+          renderMarket();
+        }
+        return;
+      case "rush": {
+        const ok = ev.ok !== false;
+        log(ev.msg || T("طلب عاجل في السوق!", "Rush order in the market!"), ok ? "c-ok" : "c-err");
+        Sound.play(ok ? "report" : "fail");
+        if (ev.state) {
+          econ(ev);
+        } else if (data && data.state) {
+          if (typeof ev.t === "number") data.state.tick = Math.max(data.state.tick || 0, ev.t);
+          if ("rush" in ev) data.state.rush = ev.rush;
+          else if (ev.good) data.state.rush = { good: ev.good, amount: ev.amount, left: ev.left ?? ev.amount, until: ev.until, bonus: ev.bonus };
+          renderRush();
+        }
+        return;
+      }
       case "stdout": log(ev.msg); return;
       case "stderr": log(ev.msg, "c-err"); return;
       case "stopped":
         running = false; live = null; runUI();
         log(T(`المستعمرة وقفت. ${ev.msg || ""}`, `Colony stopped. ${ev.msg || ""}`), "c-info");
         refresh();
+        fetchRuns();
         return;
     }
-    if (W && W.colony) apply(ev);
+    if (W && W.colony) {
+      apply(ev);
+      if (data && data.state && typeof ev.t === "number" && ev.t > (data.state.tick || 0)) {
+        const prevSec = Math.floor((data.state.tick || 0) / 10);
+        data.state.tick = ev.t;
+        if (Math.floor(ev.t / 10) !== prevSec) {
+          if (data.state.weather && data.state.weather.storm && data.state.weather.storm !== "none") renderWeather();
+          if (data.state.rush) renderRush();
+        }
+      }
+    }
   }
 
   function syncStateToWorld(st) {
     if (typeof Buildings !== "undefined" && Array.isArray(st.buildings)) Buildings.syncState(st.buildings);
+    syncWeatherToWorld(st.weather);
     if (!W || !W.colony) return;
     if (st.size && st.size !== W.w) { liveWorld(stateToInit(st)); return; }
     let legendDirty = false;
@@ -186,6 +316,10 @@ const Colony = (() => {
       shopDirty = true;
       syncStateToWorld(ev.state);
     }
+    if (ev.stats) data.state.stats = ev.stats;
+    if (ev.weather) data.state.weather = ev.weather;
+    if ("rush" in ev) data.state.rush = ev.rush;
+    if ("shock" in ev) data.state.shock = ev.shock;
     if (ev.rank && typeof ev.rank === "object") {
       data.rank = ev.rank;
       if (typeof ev.rank.level === "number") data.state.rank = ev.rank.level;
@@ -197,12 +331,16 @@ const Colony = (() => {
       data.state.inv = ev.inv;
       if (W) { W.inv = {}; for (const [k, v] of Object.entries(ev.inv)) if (v >= 1) W.inv[k] = Math.floor(v); hud(); }
     }
-    if (typeof ev.t === "number" && W) W.t = Math.max(W.t, ev.t);
+    if (typeof ev.t === "number") {
+      data.state.tick = Math.max(data.state.tick || 0, ev.t);
+      if (W) W.t = Math.max(W.t, ev.t);
+    }
+    syncWeatherToWorld(data.state.weather);
     if (ev.contract && ev.op !== "contract") { live = { id: ev.contract.id, frac: ev.contract.frac, left: ev.contract.left, progress: ev.progress || "" }; renderContracts(); }
     const now = performance.now();
     samples.push([now, data.state.credits]);
     while (samples.length && now - samples[0][0] > 90000) samples.shift();
-    renderRank(); renderStatus(); renderMarket(); renderBuildings(); renderFleet();
+    renderWeather(); renderRank(); renderStatus(); renderLiveStats(); renderRush(); renderMarket(); renderBuildings(); renderFleet();
     renderShop();
     if (ev.state && typeof draw === "function") draw(now);
     if (ev.tree) { data.tree = ev.tree; updateTree(); }
@@ -220,24 +358,87 @@ const Colony = (() => {
     renderAll();
   }
 
+  async function fetchRuns() {
+    try {
+      const res = await api("/api/colony/runs");
+      if (S.mode !== "colony") return;
+      runs = Array.isArray(res && res.runs) ? res.runs : [];
+      renderLastRun();
+    } catch {
+      // Older or offline backends may not expose run history yet.
+    }
+  }
+
+  function applyCheckResult(kind, r) {
+    const ok = !!(r && r.ok);
+    const cls = ok ? "c-ok" : "c-err";
+    const head = kind === "test"
+      ? (ok ? T("الاختبارات نجحت.", "Tests passed.") : T("الاختبارات فشلت.", "Tests failed."))
+      : (ok ? T("فحص vet تمام.", "Vet passed.") : T("فحص vet لقى ملاحظات.", "Vet failed."));
+    log(head, cls);
+    if (r && r.output) {
+      const out = String(r.output).trimEnd();
+      if (out) out.split("\n").forEach((line) => log(line, cls));
+    }
+    const errs = Array.isArray(r && r.compileErrors) ? r.compileErrors : [];
+    lastErrors = errs;
+    const active = (typeof S !== "undefined" && S.file) || "main.go";
+    if (errs.length) {
+      for (const e of errs) {
+        log(`${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`, "c-err");
+        if (e.tip) log(`   ${e.tip}`, "c-tip");
+      }
+      showFile(resolveErrorFile(errs, levelFiles(LEVEL), active));
+    } else {
+      showFile(active);
+    }
+    Sound.play(ok ? "goal" : "error");
+  }
+
+  async function runCheck(kind) {
+    if (checking) return;
+    const active = (typeof S !== "undefined" && S.file) || "main.go";
+    if (isLinked()) await syncFromWorkspace(true);
+    else if (!ed.readOnly) saveFile(LEVEL, active, ed.value);
+    store.save();
+    checking = true;
+    runUI();
+    con.innerHTML = "";
+    Sound.play("build");
+    log(kind === "test" ? T("بشغّل الاختبارات…", "Running tests…") : T("بفحص الكود بـ go vet…", "Running go vet…"), "c-info");
+    try {
+      const r = await api(kind === "test" ? "/api/colony/test" : "/api/colony/vet", { files: getFilesForRun(LEVEL) });
+      applyCheckResult(kind, r);
+    } catch (e) {
+      log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
+      Sound.play("error");
+    } finally {
+      checking = false;
+      runUI();
+    }
+  }
+
   // ---------- running ----------
   async function toggleRun() {
     const btn = $("#btn-run");
+    const active = (typeof S !== "undefined" && S.file) || "main.go";
     if (running) {
       btn.disabled = true;
       try { await api("/api/colony/stop", {}); } catch (e) { log(T("مقدرتش أوقفها: ", "Couldn't stop it: ") + e.message, "c-err"); }
       btn.disabled = false;
-      running = false; runUI(); refresh();
+      running = false; runUI(); refresh(); fetchRuns();
       return;
     }
     if (isLinked()) await syncFromWorkspace(true);
-    else if (!ed.readOnly) saveFile(LEVEL, "main.go", ed.value);
+    else if (!ed.readOnly) saveFile(LEVEL, active, ed.value);
     store.save();
+    raced = false;
+    runUI();
     btn.classList.add("busy"); btn.querySelector("span").textContent = "Build…";
     con.innerHTML = "";
     Sound.play("build");
     try {
-      const r = await api("/api/colony/run", { code: fileCode(LEVEL, levelFiles(LEVEL)[0]) });
+      const r = await api("/api/colony/run", buildRunPayload(LEVEL, raceEnabled));
       if (r.phase === "requires") {
         const c = (data.contracts || []).find((x) => x.id === r.contract);
         log(T(`الكود لسه مش جاهز للعقد «${c ? c.title : r.contract}»:`, `Your code isn't ready for the contract “${c ? c.title : r.contract}”:`), "c-err");
@@ -245,19 +446,28 @@ const Colony = (() => {
         Sound.play("error");
         return;
       }
+      if (r.phase === "require") {
+        const msg = (r.result && r.result.message) || r.message || T("الاستيراد ده مش مسموح.", "That import is not allowed.");
+        log(msg, "c-err");
+        for (const m of r.missing || []) log("   • " + m, "c-tip");
+        if (r.result && r.result.progress) log("   " + r.result.progress, "c-tip");
+        Sound.play("error");
+        return;
+      }
       if (r.phase === "compile") {
         lastErrors = r.compileErrors || [];
-        log(T("الكود مااتبناش. صلّح الأخطاء دي:", "The code didn't build. Fix these errors:"), "c-err");
+        const msg = (r.result && r.result.message) || T("الكود مااتبناش. صلّح الأخطاء دي:", "The code didn't build. Fix these errors:");
+        log(msg, "c-err");
         for (const e of lastErrors) {
           log(`${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`, "c-err");
           if (e.tip) log(`   ${e.tip}`, "c-tip");
         }
-        if (!lastErrors.length) log(r.compileOutput, "c-err");
-        showFile("main.go");
+        if (!lastErrors.length && r.compileOutput) log(r.compileOutput, "c-err");
+        showFile(resolveErrorFile(lastErrors, levelFiles(LEVEL), active));
         Sound.play("error");
         return;
       }
-      lastErrors = []; showFile("main.go");
+      lastErrors = []; showFile(active);
       running = true;
       log(T("المستعمرة شغالة.", "Colony running."), "c-ok");
     } catch (e) {
@@ -276,12 +486,26 @@ const Colony = (() => {
     btn.querySelector("use").setAttribute("href", colony && running ? "#i-stop" : "#i-play");
     $("#btn-colony").classList.toggle("linked", colony);
     const pill = $("#col-state");
-    if (pill) { pill.textContent = running ? T("شغالة", "Running") : T("واقفة", "Stopped"); pill.classList.toggle("on", running); }
-    if (colony && data) renderContracts();
+    if (pill) {
+      const base = running ? T("شغالة", "Running") : T("واقفة", "Stopped");
+      pill.textContent = raced ? `${base} · ${T("سباق", "Raced")}` : base;
+      pill.classList.toggle("on", running);
+      pill.classList.toggle("raced", !!raced);
+    }
+    const testBtn = $("#btn-test");
+    const vetBtn = $("#btn-vet");
+    if (testBtn) testBtn.disabled = checking;
+    if (vetBtn) vetBtn.disabled = checking;
+    raceUI();
+    if (colony) {
+      renderLastRun();
+      renderLiveStats();
+      if (data) renderContracts();
+    }
   }
 
   // ---------- panel ----------
-  function renderAll() { renderRank(); renderStatus(); renderMarket(); renderBuildings(); renderFleet(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
+  function renderAll() { renderWeather(); renderRank(); renderStatus(); renderLastRun(); renderLiveStats(); renderRush(); renderMarket(); renderBuildings(); renderFleet(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
 
   // ---------- contracts: code challenges that unlock blueprints ----------
   // ticks are 100ms of colony time
@@ -393,7 +617,9 @@ const Colony = (() => {
     }
     $("#col-rate").textContent = rate;
     const owned = Object.values(data.state.levels || {}).reduce((a, b) => a + b, 0);
-    $("#col-levels").textContent = data.levels ? `${owned} / ${data.levels.total} ${T("ترقية", "upgrades")}` : "";
+    $("#col-levels").textContent = data.levels
+      ? (data.levels.total > 0 ? `${owned} / ${data.levels.total} ${T("ترقية", "upgrades")}` : `${owned} ${T("ترقية", "upgrades")}`)
+      : "";
     $("#col-size").textContent = `${data.state.size}×${data.state.size}${data.state.depth > 1 ? ` · ${data.state.depth} ${T("طبقات", "layers")}` : ""}`;
     const sys = $("#col-sys");
     if (sys) {
@@ -403,33 +629,48 @@ const Colony = (() => {
     }
   }
 
-  function marketRowVisible(g, inv, levels) {
+  function marketRowVisible(g, inv, levels, shock) {
+    if (shock && shock.good === g) return true;
     if ((inv[g] || 0) >= 1) return true;
     if (!OLD_GOODS.has(g)) return false;
     return g === "moss" || !!levels["crop." + g] || ((g === "iron" || g === "geode") && !!levels["api.dig"]);
   }
 
-  function marketRows(list, inv, prices) {
+  function marketRows(list, inv, prices, shock, tick) {
     return list.map((g) => {
       const p = prices[g] ?? BASE[g], low = p < BASE[g] * 0.97;
-      return `<tr><td><i style="background:${INV_COLOR[g] || "#ccc"}"></i>${esc(NAME[g] || g)}</td><td class="num">${fmt(inv[g] || 0)}</td><td class="num${low ? " low" : ""}">${p.toFixed(2)}</td></tr>`;
+      const shocked = !!(shock && shock.good === g);
+      const factorText = shocked && typeof shock.factor === "number" ? ` ×${Number(shock.factor.toFixed(2))}` : "";
+      const secLeft = shocked && typeof shock.until === "number" && typeof tick === "number" && shock.until > tick
+        ? Math.max(0, Math.round((shock.until - tick) / 10))
+        : null;
+      const shockTitle = secLeft !== null
+        ? ` title="${esc(T("باقي", "Left") + " " + Math.floor(secLeft / 60) + ":" + String(secLeft % 60).padStart(2, "0")).replace(/"/g, "&quot;")}"`
+        : "";
+      const shockMark = shocked
+        ? ` <span class="shock-badge"${shockTitle}>${esc(T("صدمة", "Shock") + factorText)}</span>`
+        : "";
+      return `<tr${shocked ? ' class="market-shock"' : ""}><td><i style="background:${INV_COLOR[g] || "#ccc"}"></i>${esc(NAME[g] || g)}${shockMark}</td><td class="num">${fmt(inv[g] || 0)}</td><td class="num${low ? " low" : ""}">${p.toFixed(2)}</td></tr>`;
     }).join("");
   }
 
-  function marketTable(raw, crafted, inv, prices) {
-    const group = (label, list) => (list.length ? `<tr class="market-group"><td colspan="3">${esc(label)}</td></tr>` + marketRows(list, inv, prices || {}) : "");
+  function marketTable(raw, crafted, inv, prices, shock, tick) {
+    const group = (label, list) => (list.length ? `<tr class="market-group"><td colspan="3">${esc(label)}</td></tr>` + marketRows(list, inv, prices || {}, shock, tick) : "");
     return `<tr><td></td><td>${T("مخزون", "Stock")}</td><td>${T("السعر", "Price")}</td></tr>`
       + group(T("خامات", "Raw"), raw)
       + group(T("منتجات مصنّعة", "Crafted"), crafted);
   }
 
   function marketMarkup(state, prices) {
-    const inv = state.inv || {}, levels = state.levels || {};
+    const inv = state.inv || {}, levels = state.levels || {}, shock = state.shock || null;
+    const tick = typeof state.tick === "number" ? state.tick : undefined;
     return marketTable(
-      RAW_GOODS.filter((g) => marketRowVisible(g, inv, levels)),
-      CRAFTED_GOODS.filter((g) => marketRowVisible(g, inv, levels)),
+      RAW_GOODS.filter((g) => marketRowVisible(g, inv, levels, shock)),
+      CRAFTED_GOODS.filter((g) => marketRowVisible(g, inv, levels, shock)),
       inv,
       prices,
+      shock,
+      tick,
     );
   }
 
@@ -526,10 +767,162 @@ const Colony = (() => {
     return Object.values(drone.cargo || {}).some((n) => Number(n) > 0);
   }
 
+  function hasFleetAlert(drone) {
+    return !!(drone && (drone.fault || Number(drone.stunned) > 0));
+  }
+
   function fleetVisible(fleet) {
     if (!Array.isArray(fleet) || !fleet.length) return false;
-    if (fleet.length === 1 && !hasCargoData(fleet[0])) return false;
+    if (fleet.length === 1 && !hasCargoData(fleet[0]) && !hasFleetAlert(fleet[0])) return false;
     return true;
+  }
+
+  const clockFmt = (ticks) => {
+    const s = Math.max(0, Math.round((Number(ticks) || 0) / 10));
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  };
+
+  function runComparison(last, prev) {
+    if (!last || !prev) return null;
+    const prevRate = Number(prev.perMin);
+    const lastRate = Number(last.perMin);
+    if (!Number.isFinite(prevRate) || prevRate <= 0 || !Number.isFinite(lastRate)) return null;
+    const raw = Math.round(((lastRate - prevRate) / prevRate) * 100);
+    const pct = Object.is(raw, -0) ? 0 : raw;
+    return {
+      pct,
+      text: `${pct > 0 ? "+" : ""}${pct}%`,
+      cls: pct > 0 ? "up" : pct < 0 ? "down" : "flat",
+    };
+  }
+
+  function droneShares(d) {
+    const raw = [
+      Math.max(0, Number(d && d.work) || 0),
+      Math.max(0, Number(d && d.move) || 0),
+      Math.max(0, Number(d && d.wait) || 0),
+      Math.max(0, Number(d && d.failed) || 0),
+    ];
+    const total = raw[0] + raw[1] + raw[2] + raw[3];
+    if (!(total > 0)) return { work: 0, move: 0, wait: 0, failed: 0, total: 0 };
+    const exact = raw.map((v) => (v / total) * 100);
+    const ints = exact.map((x) => Math.floor(x));
+    let rem = 100 - (ints[0] + ints[1] + ints[2] + ints[3]);
+    const order = [0, 1, 2, 3]
+      .filter((i) => raw[i] > 0)
+      .sort((a, b) => (exact[b] - ints[b]) - (exact[a] - ints[a]) || a - b);
+    for (let k = 0; rem > 0 && k < order.length; k++) {
+      ints[order[k]] += 1;
+      rem -= 1;
+    }
+    return { work: ints[0], move: ints[1], wait: ints[2], failed: ints[3], total };
+  }
+
+  function droneBarsMarkup(stats, deps = {}) {
+    if (!stats || !Array.isArray(stats.drones) || !stats.drones.length) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const droneColors = deps.DRONE_COLORS || (typeof DRONE_COLORS !== "undefined" ? DRONE_COLORS : ["#ff7a52"]);
+    const compact = !!deps.compact;
+    const keys = [
+      ["work", tr("عمل", "Work")],
+      ["move", tr("حركة", "Move")],
+      ["wait", tr("انتظار", "Wait")],
+      ["failed", tr("فشل", "Failed")],
+    ];
+    const sorted = [...stats.drones].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+    const rows = sorted.map((d) => {
+      const id = Number(d.id) || 0;
+      const col = escAttr(droneColors[Math.abs(id) % droneColors.length], escapeFn);
+      const s = droneShares(d);
+      const segs = keys
+        .filter(([k]) => s[k] > 0)
+        .map(([k, label]) => `<i class="lr-seg lr-seg-${k}" style="width:${s[k]}%" data-share="${s[k]}" title="${escAttr(`${label}: ${s[k]}%`, escapeFn)}"></i>`)
+        .join("");
+      const ariaParts = keys.map(([k, label]) => `${label} ${s[k]}%`).join(", ");
+      const pctSummary = compact
+        ? `${s.work}%`
+        : `${s.work}% / ${s.move}% / ${s.wait}% / ${s.failed}%`;
+      return `<div class="lr-drone" data-drone="${id}"><span class="lr-drone-id"><i class="flt-dot" style="background:${col}"></i>${escapeFn(tr(`د${id}`, `D${id}`))}</span><div class="lr-bar" role="img" aria-label="${escAttr(ariaParts, escapeFn)}">${segs}</div><span class="lr-drone-pct" dir="ltr">${pctSummary}</span></div>`;
+    }).join("");
+    const legend = `<div class="lr-legend">${keys.map(([k, label]) => `<span class="lr-leg-item"><i class="lr-seg-${k}"></i>${escapeFn(label)}</span>`).join("")}</div>`;
+    return `<div class="lr-drones${compact ? " compact" : ""}">${rows}</div>${legend}`;
+  }
+
+  function lastRunMarkup(runsList, deps = {}) {
+    if (!Array.isArray(runsList) || !runsList.length) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const last = runsList[0];
+    if (!last || typeof last !== "object") return "";
+    const prev = runsList.length > 1 ? runsList[1] : null;
+    const cmp = runComparison(last, prev);
+    const cmpHtml = cmp ? `<span class="lr-delta ${cmp.cls}" dir="ltr">${escapeFn(cmp.text)}</span>` : "";
+    const raceBadge = last.race ? `<span class="lr-race-tag">-race</span>` : "";
+    const stats = last.stats && typeof last.stats === "object" ? last.stats : null;
+    const barsHtml = stats ? droneBarsMarkup(stats, { ...deps, compact: false }) : "";
+    const totalIdle = stats
+      ? (typeof stats.idleMoves === "number"
+        ? stats.idleMoves
+        : (Array.isArray(stats.drones) ? stats.drones.reduce((sum, d) => sum + (Number(d.idleMoves) || 0), 0) : 0))
+      : 0;
+    const topFail = stats && stats.topFail ? String(stats.topFail) : "";
+    const footHtml = stats
+      ? `<div class="lr-meta"><span>${escapeFn(tr("أكتر أمر فشل", "Top failed"))}: <code dir="ltr">${escapeFn(topFail || tr("مفيش", "None"))}</code></span><span>${escapeFn(tr("حركات فاضية", "Idle moves"))}: <b dir="ltr">${fmtNum(totalIdle)}</b></span></div>`
+      : "";
+    return `<h3>${escapeFn(tr("آخر تشغيل", "Last run"))}${raceBadge}</h3>`
+      + `<div class="lr-metrics">`
+      + `<div class="lr-metric"><span class="lr-k">${escapeFn(tr("كريدت / دقيقة", "CR / min"))}</span><span class="lr-v"><b dir="ltr">${fmtNum(last.perMin || 0)}</b>${cmpHtml}</span></div>`
+      + `<div class="lr-metric"><span class="lr-k">${escapeFn(tr("التكات", "Ticks"))}</span><span class="lr-v"><b dir="ltr">${fmtNum(last.ticks || 0)}</b></span></div>`
+      + `<div class="lr-metric"><span class="lr-k">${escapeFn(tr("المكسب", "Earned"))}</span><span class="lr-v"><b dir="ltr">${fmtNum(last.earned || 0)}</b></span></div>`
+      + `</div>`
+      + barsHtml
+      + footHtml;
+  }
+
+  function liveStatsMarkup(stats, deps = {}) {
+    if (!stats || !Array.isArray(stats.drones) || !stats.drones.length) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    return `<h3>${escapeFn(tr("إحصائيات الدرونز", "Drone stats"))}</h3>${droneBarsMarkup(stats, { ...deps, compact: true })}`;
+  }
+
+  function weatherMarkup(weather, tick, deps = {}) {
+    if (!weather || !weather.storm || weather.storm === "none") return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const phase = weather.storm === "active" || weather.storm === "hit" ? "active" : "warn";
+    const hasAt = typeof weather.at === "number";
+    const rem = hasAt ? Math.max(0, weather.at - (Number(tick) || 0)) : 0;
+    const text = phase === "active"
+      ? (hasAt ? tr(`عاصفة شغالة — تنتهي خلال ${clockFmt(rem)}`, `Storm active — clears in ${clockFmt(rem)}`) : tr("عاصفة شغالة", "Storm active"))
+      : (hasAt ? tr(`تحذير عاصفة خلال ${clockFmt(rem)}`, `Storm incoming in ${clockFmt(rem)}`) : tr("تحذير: عاصفة جاية", "Storm warning"));
+    return `<div class="col-storm is-${phase}"><span class="col-storm-dot" aria-hidden="true"></span><span>${escapeFn(text)}</span></div>`;
+  }
+
+  function rushMarkup(rush, tick, deps = {}) {
+    if (!rush || !rush.good) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const names = deps.NAME || NAME;
+    const colors = deps.INV_COLOR || INV_COLOR;
+    const goodName = names[rush.good] || rush.good;
+    const chipColor = escAttr(colors[rush.good] || "#ccc", escapeFn);
+    const total = Number(rush.amount) || 0;
+    const left = Math.max(0, Number(rush.left ?? total) || 0);
+    const done = total > 0 ? Math.max(0, total - left) : 0;
+    const pct = total > 0 ? Math.max(0, Math.min(100, (done / total) * 100)) : 0;
+    const bonus = Number(rush.bonus) || 0;
+    const rem = typeof rush.until === "number" ? Math.max(0, rush.until - (Number(tick) || 0)) : null;
+    const bar = total > 0
+      ? `<div class="ct-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct.toFixed(1)}%"></i></div>`
+      : "";
+    return `<div class="item rush-card">`
+      + `<div class="item-top"><b>${escapeFn(tr("طلب عاجل", "Rush order"))}</b><span class="rush-bonus" dir="ltr">${escapeFn(tr("مكافأة", "Bonus"))}: <b>${fmtNum(bonus)}</b></span></div>`
+      + `<div class="rush-row"><span class="rush-good"><i style="background:${chipColor}"></i>${escapeFn(goodName)}</span><span class="rush-amt" dir="ltr">${escapeFn(tr("متبقي", "Left"))} <b>${fmtNum(left)}</b>${total > 0 ? ` / ${fmtNum(total)}` : ""}</span></div>`
+      + bar
+      + (rem !== null ? `<div class="item-foot"><span class="rush-time">${escapeFn(tr("الوقت المتبقي", "Time left"))}</span><b dir="ltr">${clockFmt(rem)}</b></div>` : "")
+      + `</div>`;
   }
 
   function fleetMarkup(fleet, deps = {}) {
@@ -543,6 +936,14 @@ const Colony = (() => {
     const rows = sorted.map((d) => {
       const id = Number(d.id) || 0;
       const col = escAttr(droneColors[Math.abs(id) % droneColors.length], escapeFn);
+      const isFault = !!d.fault;
+      const stunnedTicks = Number(d.stunned) || 0;
+      const isStunned = stunnedTicks > 0;
+      const tags = [
+        isFault ? `<span class="flt-tag fault">${escapeFn(tr("عطل", "Fault"))}</span>` : "",
+        isStunned ? `<span class="flt-tag stunned">${escapeFn(tr("مصاب", "Stunned"))} <b dir="ltr">${clockFmt(stunnedTicks)}</b></span>` : "",
+      ].filter(Boolean).join("");
+      const tagsHtml = tags ? `<span class="flt-tags">${tags}</span>` : "";
       const bat = typeof d.battery === "number" ? Math.max(0, Math.min(100, d.battery)) : null;
       const batLow = bat !== null && bat < 20;
       const batMarkup = bat !== null
@@ -557,7 +958,7 @@ const Colony = (() => {
       const cargoMarkup = cap > 0 || used > 0
         ? `<div class="flt-cargo"><div class="flt-cargo-head"><span class="flt-lbl">${escapeFn(tr("الحمولة", "Cargo"))}</span><span class="flt-num" dir="ltr">${fmtNum(used)} / ${fmtNum(cap)}</span></div><div class="flt-chips">${chips}</div></div>`
         : "";
-      return `<div class="item flt-row" data-drone="${id}"><div class="item-top"><b><i class="flt-dot" style="background:${col}"></i>${escapeFn(tr(`درون ${id}`, `Drone ${id}`))}</b></div>${batMarkup}${cargoMarkup}</div>`;
+      return `<div class="item flt-row${isFault ? " flt-fault" : ""}${isStunned ? " flt-stunned" : ""}" data-drone="${id}"><div class="item-top"><b><i class="flt-dot" style="background:${col}"></i>${escapeFn(tr(`درون ${id}`, `Drone ${id}`))}</b>${tagsHtml}</div>${batMarkup}${cargoMarkup}</div>`;
     }).join("");
     return `<h3>${escapeFn(tr("الأسطول", "Fleet"))} <small>${sorted.length}</small></h3>` + rows;
   }
@@ -590,6 +991,40 @@ const Colony = (() => {
     box.innerHTML = html;
   }
 
+  const currentTick = () => Math.max(Number(data && data.state && data.state.tick) || 0, Number(typeof W !== "undefined" && W && W.colony ? W.t : 0) || 0);
+
+  function renderWeather() {
+    const box = $("#col-weather");
+    if (!box) return;
+    const html = weatherMarkup(data && data.state && data.state.weather, currentTick());
+    box.classList.toggle("hidden", !html);
+    box.innerHTML = html;
+  }
+
+  function renderLastRun() {
+    const box = $("#col-lastrun");
+    if (!box) return;
+    const html = !running && runs.length ? lastRunMarkup(runs) : "";
+    box.classList.toggle("hidden", !html);
+    box.innerHTML = html;
+  }
+
+  function renderLiveStats() {
+    const box = $("#col-live-stats");
+    if (!box) return;
+    const html = running && data && data.state ? liveStatsMarkup(data.state.stats) : "";
+    box.classList.toggle("hidden", !html);
+    box.innerHTML = html;
+  }
+
+  function renderRush() {
+    const box = $("#col-rush");
+    if (!box) return;
+    const html = data && data.state ? rushMarkup(data.state.rush, currentTick()) : "";
+    box.classList.toggle("hidden", !html);
+    box.innerHTML = html;
+  }
+
   function shopName(id) { const u = (data.shop || []).find((x) => x.id === id); return u ? uName(u) : id; }
   const uName = (u) => (LANG === "en" && u.nameEn) || u.name;
   const uDesc = (u) => (LANG === "en" && u.descEn) || u.desc;
@@ -598,7 +1033,7 @@ const Colony = (() => {
   // affordability is checked live against current credits and goods
   function status(u) {
     const lv = (data.state.levels || {})[u.id] || 0;
-    if (lv >= u.max) return { maxed: true };
+    if (u.max > 0 && lv >= u.max) return { maxed: true };
     if (u.blueprint) return { why: u.reason };
     for (const r of u.requires || []) if (!((data.state.levels || {})[r] > 0)) return { why: T("محتاج الأول: ", "Needs first: ") + shopName(r) };
     if (data.state.credits < u.cost.credits) return { why: T(`ناقصك ${fmt(u.cost.credits - data.state.credits)} كريدت`, `Need ${fmt(u.cost.credits - data.state.credits)} more credits`), money: true };
@@ -616,14 +1051,18 @@ const Colony = (() => {
     for (const u of data.shop) { const gk = uGroup(u); if (!groups.has(gk)) groups.set(gk, []); groups.get(gk).push(u); }
     const box = $("#col-shop");
     box.innerHTML = [...groups].map(([g, items]) => {
-      const owned = items.reduce((a, u) => a + Math.min(u.level, u.max), 0), total = items.reduce((a, u) => a + u.max, 0);
-      return `<h3>${esc(g)} <small>${owned}/${total}</small></h3>` + items.map((u) => {
+      const hasEndless = items.some((u) => u.max === 0);
+      const owned = items.reduce((a, u) => a + (u.max === 0 ? (u.level || 0) : Math.min(u.level, u.max)), 0);
+      const total = items.reduce((a, u) => a + (u.max || 0), 0);
+      const groupCount = hasEndless ? `${owned}` : `${owned}/${total}`;
+      return `<h3>${esc(g)} <small>${groupCount}</small></h3>` + items.map((u) => {
         const s = status(u);
-        const goods = Object.entries(u.cost.goods || {}).map(([k, n]) => `<span class="cg"><i style="background:${INV_COLOR[k] || "#ccc"}"></i>${fmt(n)}</span>`).join("");
+        const goods = Object.entries(u.cost.goods || {}).map(([k, n]) => `<span class="cg" title="${esc(NAME[k] || k).replace(/"/g, "&quot;")}"><i style="background:${INV_COLOR[k] || "#ccc"}"></i>${fmt(n)}</span>`).join("");
         const cost = s.maxed ? `<span class="maxed">${T("مكتمل", "Maxed")}</span>` : `<span class="cc">${fmt(u.cost.credits)}</span>${goods}`;
         const lesson = u.lesson && !s.maxed && !s.can ? `<span class="lesson-link">${T(`بتتعلمها في الفصل ${u.lesson}`, `Taught in chapter ${u.lesson}`)}</span>` : "";
+        const lvText = u.max === 0 ? String(u.level || 0) : (u.max > 1 ? `${u.level}/${u.max}` : u.level ? "✓" : "");
         return `<div class="item${s.can ? " can" : ""}${s.maxed ? " done" : ""}">
-          <div class="item-top"><b>${esc(uName(u))}</b><span class="lv">${u.max > 1 ? `${u.level}/${u.max}` : u.level ? "✓" : ""}</span></div>
+          <div class="item-top"><b>${esc(uName(u))}</b><span class="lv">${lvText}</span></div>
           <p>${esc(uDesc(u))}</p>
           <div class="item-foot"><span class="cost">${cost}</span>${s.maxed ? "" : `<button class="buy" data-id="${u.id}" ${s.can ? "" : "disabled"}>${T("اشتري", "Buy")}</button>`}</div>
           ${!s.can && !s.maxed && !s.money ? `<span class="why">${esc(s.why)}</span>` : ""}${lesson}
@@ -675,6 +1114,9 @@ const Colony = (() => {
   }
 
   $("#btn-tech-tree").onclick = openTree;
+  const raceBtn = $("#btn-race"); if (raceBtn) raceBtn.onclick = toggleRace;
+  const testBtn = $("#btn-test"); if (testBtn) testBtn.onclick = () => runCheck("test");
+  const vetBtn = $("#btn-vet"); if (vetBtn) vetBtn.onclick = () => runCheck("vet");
 
   return { enter, exit, toggleRun, LEVEL, get running() { return running; } };
 })();

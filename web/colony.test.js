@@ -206,7 +206,7 @@ function systemCtx(lang) {
   const fmtCode = source.slice(source.indexOf("const fmt ="), source.indexOf("const actionMs"));
   const sysCode = source.slice(source.indexOf("// ---------- system readouts"), source.indexOf("function highlightRank("));
   return vm.runInContext(
-    fmtCode + "\n" + sysCode + "\n;({ fmtNum, escAttr, rankGoalLabel, rankMarkup, statusExtraMarkup, hasCargoData, fleetVisible, fleetMarkup });",
+    fmtCode + "\n" + sysCode + "\n;({ fmtNum, escAttr, clockFmt, runComparison, droneShares, droneBarsMarkup, lastRunMarkup, liveStatsMarkup, weatherMarkup, rushMarkup, rankGoalLabel, rankMarkup, statusExtraMarkup, hasCargoData, hasFleetAlert, fleetVisible, fleetMarkup });",
     ctx,
   );
 }
@@ -448,4 +448,326 @@ test("Colony live events update rank, status extras, fleet, tree header and hand
   assert.equal(getEl("#col-rank").classList.contains("rank-up"), false);
   await Promise.resolve();
   assert.ok(refreshCount >= 1);
+});
+
+test("runComparison handles increase, decrease, flat, zero previous run, and missing previous run", () => {
+  const ctx = systemCtx("en");
+  assert.equal(ctx.runComparison({ perMin: 30 }, null), null);
+  assert.equal(ctx.runComparison({ perMin: 30 }, undefined), null);
+  assert.equal(ctx.runComparison({ perMin: 30 }, { perMin: 0 }), null);
+  assert.equal(ctx.runComparison({ perMin: 30 }, { perMin: -5 }), null);
+  assert.equal(ctx.runComparison(null, { perMin: 20 }), null);
+
+  assert.equal(JSON.stringify(ctx.runComparison({ perMin: 30 }, { perMin: 24 })), JSON.stringify({ pct: 25, text: "+25%", cls: "up" }));
+  assert.equal(JSON.stringify(ctx.runComparison({ perMin: 16 }, { perMin: 20 })), JSON.stringify({ pct: -20, text: "-20%", cls: "down" }));
+  assert.equal(JSON.stringify(ctx.runComparison({ perMin: 19.999 }, { perMin: 20 })), JSON.stringify({ pct: 0, text: "0%", cls: "flat" }));
+});
+
+test("droneShares sums to 100 for any positive distribution and keeps zero shares at zero", () => {
+  const ctx = systemCtx("en");
+  for (const d of [
+    { work: 120, move: 40, wait: 300, failed: 3 },
+    { work: 1, move: 1, wait: 1, failed: 0 },
+    { work: 1, move: 2, wait: 3, failed: 4 },
+    { work: 7, move: 7, wait: 7, failed: 0 },
+    { work: 500, move: 0, wait: 0, failed: 1 },
+  ]) {
+    const s = ctx.droneShares(d);
+    assert.equal(s.work + s.move + s.wait + s.failed, 100);
+    if (!d.failed) assert.equal(s.failed, 0);
+    if (!d.move) assert.equal(s.move, 0);
+    if (!d.wait) assert.equal(s.wait, 0);
+  }
+  const zero = ctx.droneShares({ work: 0, move: 0, wait: 0, failed: 0 });
+  assert.equal(JSON.stringify({ work: zero.work, move: zero.move, wait: zero.wait, failed: zero.failed, total: zero.total }), JSON.stringify({ work: 0, move: 0, wait: 0, failed: 0, total: 0 }));
+});
+
+test("lastRunMarkup and liveStatsMarkup render comparison, bars summing to 100%, legend, topFail, and idleMoves", () => {
+  for (const lang of ["ar", "en"]) {
+    const ctx = systemCtx(lang);
+    const en = lang === "en";
+    assert.equal(ctx.lastRunMarkup([]), "");
+    assert.equal(ctx.liveStatsMarkup(null), "");
+
+    const runs = [
+      {
+        ticks: 1234, earned: 560.5, perMin: 27.2, race: true,
+        stats: {
+          drones: [
+            { id: 0, work: 120, move: 40, wait: 300, failed: 3, idleMoves: 5 },
+            { id: 1, work: 10, move: 10, wait: 10, failed: 0, idleMoves: 2 },
+          ],
+          topFail: "<harvest>",
+        },
+      },
+      { ticks: 1000, earned: 400, perMin: 20 },
+    ];
+    const html = ctx.lastRunMarkup(runs);
+    assert.match(html, en ? /Last run/ : /آخر تشغيل/);
+    assert.match(html, /27\.2/);
+    assert.match(html, /\+36%/);
+    assert.match(html, /1,234/);
+    assert.match(html, /560\.5/);
+    assert.match(html, /-race/);
+    assert.match(html, /&lt;harvest&gt;/);
+    assert.doesNotMatch(html, /<harvest>/);
+    assert.match(html, /7/); // summed idleMoves 5 + 2
+    assert.match(html, en ? /Work.*Move.*Wait.*Failed/ : /عمل.*حركة.*انتظار.*فشل/);
+
+    // Segments in each stacked bar sum to 100%
+    for (const bar of html.match(/class="lr-bar"[\s\S]*?<\/div>/g) || []) {
+      const shares = [...bar.matchAll(/data-share="(\d+)"/g)].map((m) => Number(m[1]));
+      assert.equal(shares.reduce((a, b) => a + b, 0), 100);
+    }
+
+    const liveHtml = ctx.liveStatsMarkup(runs[0].stats);
+    assert.match(liveHtml, en ? /Drone stats/ : /إحصائيات الدرونز/);
+    assert.match(liveHtml, /lr-drones compact/);
+  }
+});
+
+test("weatherMarkup renders storm warning and active countdowns and hides when none or absent", () => {
+  for (const lang of ["ar", "en"]) {
+    const ctx = systemCtx(lang);
+    const en = lang === "en";
+    assert.equal(ctx.weatherMarkup(null, 100), "");
+    assert.equal(ctx.weatherMarkup({ storm: "none", at: 1234 }, 100), "");
+
+    const warn = ctx.weatherMarkup({ storm: "warn", at: 1234 }, 1000);
+    assert.match(warn, /col-storm is-warn/);
+    assert.match(warn, en ? /Storm incoming in 0:23/ : /تحذير عاصفة خلال 0:23/);
+
+    const active = ctx.weatherMarkup({ storm: "active", at: 1500 }, 1200);
+    assert.match(active, /col-storm is-active/);
+    assert.match(active, en ? /Storm active — clears in 0:30/ : /عاصفة شغالة — تنتهي خلال 0:30/);
+  }
+});
+
+test("rushMarkup, marketMarkup shock, and fleet faults/stuns render when present and stay clean when absent", () => {
+  for (const lang of ["ar", "en"]) {
+    const sys = systemCtx(lang);
+    const { ctx: mkt } = marketCtx(lang);
+    const { NAME, INV_COLOR } = appConstants(lang);
+    const en = lang === "en";
+
+    // Rush order rendering and absence
+    assert.equal(sys.rushMarkup(null, 100), "");
+    const rush = sys.rushMarkup({ good: "moss", amount: 40, left: 25, until: 1600, bonus: 2 }, 1300);
+    assert.match(rush, /rush-card/);
+    assert.ok(rush.includes(NAME.moss));
+    assert.match(rush, new RegExp(INV_COLOR.moss, "i"));
+    assert.match(rush, /<b>25<\/b> \/ 40/);
+    assert.match(rush, /0:30/);
+    assert.match(rush, en ? /Bonus.*2/ : /مكافأة.*2/);
+
+    // Shock in market table rendering and absence
+    const plainMkt = mkt.marketMarkup({ inv: { crystal: 5 }, levels: { "crop.crystal": 1 } }, { crystal: 6 });
+    assert.doesNotMatch(plainMkt, /market-shock|shock-badge/);
+    const shockMkt = mkt.marketMarkup({ inv: {}, levels: {}, tick: 1200, shock: { good: "crystal", factor: 0.4, until: 1500 } }, { crystal: 2.4 });
+    assert.match(shockMkt, /class="market-shock"/);
+    assert.ok(shockMkt.includes(NAME.crystal));
+    assert.match(shockMkt, /×0\.4/);
+    assert.match(shockMkt, /0:30/);
+
+    // Single drone with fault or stunned stays visible and displays tags
+    assert.equal(sys.fleetVisible([{ id: 0, cap: 0, cargo: {} }]), false);
+    assert.equal(sys.fleetVisible([{ id: 0, cap: 0, cargo: {}, fault: true }]), true);
+    assert.equal(sys.fleetVisible([{ id: 0, cap: 0, cargo: {}, stunned: 150 }]), true);
+    const flt = sys.fleetMarkup([{ id: 1, battery: 75, fault: true, stunned: 150, cap: 10, cargo: {} }]);
+    assert.match(flt, /flt-row flt-fault flt-stunned/);
+    assert.match(flt, en ? /Fault/ : /عطل/);
+    assert.match(flt, en ? /Stunned.*0:15/ : /مصاب.*0:15/);
+  }
+});
+
+test("Colony handles race toggle persistence, test/vet endpoints, compile-error routing, runs history, world events, and max:0 shop items", async () => {
+  const els = new Map();
+  const makeEl = () => ({
+    innerHTML: "", textContent: "", disabled: false, value: "", readOnly: false,
+    attrs: new Map(),
+    setAttribute(k, v) { this.attrs.set(k, String(v)); },
+    getAttribute(k) { return this.attrs.get(k); },
+    querySelector(sel) {
+      if (sel === "span") return (this._span ||= { textContent: "" });
+      if (sel === "use") return (this._use ||= { attrs: new Map(), setAttribute(k, v) { this.attrs.set(k, String(v)); } });
+      return null;
+    },
+    querySelectorAll() { return []; },
+    classList: {
+      set: new Set(["hidden"]),
+      add(...c) { c.forEach((x) => this.set.add(x)); },
+      remove(...c) { c.forEach((x) => this.set.delete(x)); },
+      toggle(c, f) { const on = f === undefined ? !this.set.has(c) : !!f; if (on) this.set.add(c); else this.set.delete(c); return on; },
+      contains(c) { return this.set.has(c); },
+    },
+  });
+  const getEl = (sel) => { if (!els.has(sel)) els.set(sel, makeEl()); return els.get(sel); };
+  const logs = [], sounds = [], prefs = { colonyRace: true }, apiCalls = [];
+  let shownFiles = [], lastErrors = [], runResponse = { ok: true }, runsResponses = [[
+    { ticks: 900, earned: 300, perMin: 30, race: false, stats: { drones: [{ id: 0, work: 50, move: 25, wait: 25, failed: 0, idleMoves: 2 }], topFail: "" } },
+    { ticks: 800, earned: 200, perMin: 20, race: false },
+  ]];
+  let testResponse = { ok: true, output: "ok colony\n" }, vetResponse = { ok: false, output: "vet failed\n", compileErrors: [{ file: "plan/plan.go", line: 4, col: 2, msg: "unreachable", tip: "remove dead code" }] };
+
+  const colonyFiles = { "main.go": "package main\n", "plan/plan.go": "package plan\n" };
+  const ctx = vm.createContext({
+    LANG: "en", TOKEN: "tok", PROFILE: "default",
+    T: (_ar, en) => en,
+    esc: (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+    setTimeout: () => 1, clearTimeout: () => {},
+    performance: { now: () => 1000 },
+    Math, Object, Array, Number, String, Boolean, JSON, Map, Set,
+    EventSource: class { close() {} },
+    document: { body: makeEl(), querySelector: () => null },
+    $: getEl,
+    ed: { value: colonyFiles["plan/plan.go"], readOnly: false },
+    con: getEl("#console"),
+    S: { mode: "mission", file: "plan/plan.go", levels: [], chapters: [] },
+    playback: false,
+    lastErrors: [],
+    lastMtime: 0,
+    finishPlayback() {},
+    renderLayerBar() {},
+    W: { w: 4, h: 4, depth: 1, view: 0, follow: true, colony: true, live: true, t: 0, inv: {}, layers: [[]], drones: new Map() },
+    TreeView: { isOpen: false, update() {}, close() {}, open() {} },
+    Sound: { play: (name) => sounds.push(name) },
+    log: (msg, cls) => logs.push({ msg, cls }),
+    hud() {}, setWorld() {}, renderLegend() {}, draw() {}, linkUI() {},
+    isLinked: () => false,
+    syncFromWorkspace: async () => {},
+    levelFiles: () => [{ name: "main.go" }, { name: "plan/plan.go" }],
+    fileCode: (_l, f) => colonyFiles[typeof f === "string" ? f : f.name] || "",
+    saveFile: (_l, name, code) => { colonyFiles[name] = code; },
+    colonyFilesPayload: () => ({ ...colonyFiles }),
+    firstErrorFile: (errs, files, fb) => {
+      const raw = errs && errs[0] ? (errs[0].file || "main.go").replace(/^\.\//, "") : "";
+      return files.some((f) => f.name === raw) ? raw : fb;
+    },
+    showFile: (f) => { shownFiles.push(f); ctx.S.file = f; },
+    rec: () => ({}),
+    setDigits: (el, v) => { el.textContent = String(v); },
+    store: {
+      pref: (k, v) => (v === undefined ? prefs[k] : (prefs[k] = v)),
+      save() {},
+    },
+    api: async (path, body) => {
+      apiCalls.push({ path, body });
+      if (path === "/api/colony") {
+        return {
+          running: false, starter: "package main\n", prices: {}, contracts: [],
+          levels: { total: 0 },
+          shop: [
+            {
+              id: "endless.drone", name: "Drone+", nameEn: "Drone+", desc: "More", descEn: "More",
+              group: "Fleet", groupEn: "Fleet", max: 0, level: 4,
+              cost: { credits: 100, goods: { plate: 2 } },
+            },
+          ],
+          state: {
+            tick: 100, size: 4, depth: 1, credits: 500, levels: { "endless.drone": 4 },
+            inv: { plate: 5 }, tiles: [], buildings: [],
+          },
+        };
+      }
+      if (path === "/api/colony/runs") return { runs: runsResponses[0] || [] };
+      if (path === "/api/colony/run") return runResponse;
+      if (path === "/api/colony/test") return testResponse;
+      if (path === "/api/colony/vet") return vetResponse;
+      if (path === "/api/colony/stop") return { ok: true };
+      return {};
+    },
+  });
+  vm.runInContext(
+    appSource.slice(appSource.indexOf("const BURST"), appSource.indexOf("function setWorld"))
+    + "\n;Object.assign(globalThis, { BURST, UNIT, ORES, ENT, NAME, INV_COLOR, DRONE_COLORS });",
+    ctx,
+  );
+  const testColonySrc = source
+    .slice(0, source.indexOf('$("#btn-colony").onclick'))
+    .replace(
+      "return { enter, exit, toggleRun, LEVEL, get running() { return running; } };",
+      "return { enter, exit, toggleRun, toggleRace, runCheck, onEvent, status, renderShop, getData: () => data, LEVEL, get running() { return running; }, get raced() { return raced; }, get raceEnabled() { return raceEnabled; } };",
+    );
+  vm.runInContext(testColonySrc + "\n;globalThis.Colony = Colony;", ctx);
+
+  await ctx.Colony.enter();
+  await Promise.resolve();
+  // Enter restored persisted raceEnabled and fetched /api/colony/runs -> showing last run card
+  assert.equal(ctx.Colony.raceEnabled, true);
+  assert.equal(getEl("#btn-race").getAttribute("aria-pressed"), "true");
+  assert.equal(getEl("#col-lastrun").classList.contains("hidden"), false);
+  assert.match(getEl("#col-lastrun").innerHTML, /\+50%/);
+
+  // Endless shop item (max: 0) is never maxed, shows plain level, omits /total, keeps buy button + colour chip
+  assert.equal(ctx.Colony.status(ctx.Colony.getData().shop[0]).can, true);
+  const shopHtml = getEl("#col-shop").innerHTML;
+  assert.match(shopHtml, /<small>4<\/small>/);
+  assert.match(shopHtml, /class="lv">4</);
+  assert.match(shopHtml, /<button class="buy" data-id="endless\.drone" >/);
+  assert.match(shopHtml, new RegExp(appConstants("en").INV_COLOR.plate, "i"));
+  assert.doesNotMatch(shopHtml, /Maxed/);
+
+  // Clicking Run sends { files, race: true } and clears any prior raced mark
+  await ctx.Colony.toggleRun();
+  const runCall = apiCalls.findLast((c) => c.path === "/api/colony/run");
+  assert.deepEqual(Object.keys(runCall.body.files).sort(), ["main.go", "plan/plan.go"]);
+  assert.equal(runCall.body.race, true);
+  assert.equal(ctx.Colony.running, true);
+  assert.equal(getEl("#col-lastrun").classList.contains("hidden"), true);
+
+  // Race live events play error sound ONCE per run and mark state pill raced
+  sounds.length = 0;
+  ctx.Colony.onEvent({ op: "race", msg: "WARNING: DATA RACE" });
+  ctx.Colony.onEvent({ op: "race", msg: "WARNING: DATA RACE 2" });
+  assert.equal(sounds.filter((s) => s === "error").length, 1);
+  assert.equal(ctx.Colony.raced, true);
+  assert.match(getEl("#col-state").textContent, /Raced/);
+
+  // Storm, fault, shock, rush events log and update UI
+  ctx.Colony.onEvent({ op: "storm", phase: "warn", msg: "Storm coming", t: 110, at: 310 });
+  assert.deepEqual(logs.at(-1), { msg: "Storm coming", cls: "c-warn" });
+  assert.equal(ctx.W.storm, 1);
+  assert.match(getEl("#col-weather").innerHTML, /0:20/);
+
+  ctx.Colony.onEvent({ op: "fault", d: 0, stunned: 120, msg: "Drone 0 faulted", state: { ...ctx.Colony.getData().state, fleet: [{ id: 0, battery: 50, fault: true, stunned: 120 }] } });
+  assert.deepEqual(logs.at(-1), { msg: "Drone 0 faulted", cls: "c-err" });
+  assert.match(getEl("#col-fleet").innerHTML, /Fault.*Stunned.*0:12/);
+
+  ctx.Colony.onEvent({ op: "shock", msg: "Crystal market shock!", shock: { good: "crystal", factor: 0.4, until: 400 }, prices: { crystal: 2.4 } });
+  assert.deepEqual(logs.at(-1), { msg: "Crystal market shock!", cls: "c-warn" });
+  assert.equal(sounds.at(-1), "fail");
+  assert.match(getEl("#col-market").innerHTML, /Shock ×0\.4/);
+
+  ctx.Colony.onEvent({ op: "rush", msg: "Urgent moss order!", rush: { good: "moss", amount: 40, left: 25, until: 500, bonus: 2 } });
+  assert.deepEqual(logs.at(-1), { msg: "Urgent moss order!", cls: "c-ok" });
+  assert.equal(sounds.at(-1), "report");
+  assert.equal(getEl("#col-rush").classList.contains("hidden"), false);
+  assert.match(getEl("#col-rush").innerHTML, /Rush order[\s\S]*<b>25<\/b> \/ 40/);
+
+  // Stopped event updates runs history and unhides last-run card
+  runsResponses[0] = [{ ticks: 500, earned: 400, perMin: 40, race: true, stats: { drones: [{ id: 0, work: 80, move: 20, wait: 0, failed: 0, idleMoves: 0 }], topFail: "harvest" } }];
+  ctx.Colony.onEvent({ op: "stopped", msg: "done" });
+  await Promise.resolve();
+  assert.equal(ctx.Colony.running, false);
+  assert.equal(getEl("#col-lastrun").classList.contains("hidden"), false);
+
+  // Test & Vet endpoints route compile errors to the failing file
+  await ctx.Colony.runCheck("test");
+  assert.equal(logs.at(-1).cls, "c-ok");
+  await ctx.Colony.runCheck("vet");
+  assert.equal(shownFiles.at(-1), "plan/plan.go");
+  assert.equal(logs.some((l) => l.msg.includes("plan/plan.go:4:2") && l.cls === "c-err"), true);
+  assert.equal(logs.some((l) => l.msg.includes("remove dead code") && l.cls === "c-tip"), true);
+
+  // Toggling race off persists preference and updates payload
+  ctx.Colony.toggleRace();
+  assert.equal(prefs.colonyRace, false);
+  assert.equal(getEl("#btn-race").getAttribute("aria-pressed"), "false");
+  runResponse = { phase: "compile", result: { message: "Import disallowed" }, compileErrors: [{ file: "plan/plan.go", line: 2, col: 1, msg: "bad import" }] };
+  shownFiles.length = 0;
+  await ctx.Colony.toggleRun();
+  assert.equal(apiCalls.findLast((c) => c.path === "/api/colony/run").body.race, false);
+  assert.equal(ctx.Colony.raced, false);
+  assert.equal(shownFiles.at(-1), "plan/plan.go");
+  assert.equal(logs.some((l) => l.msg === "Import disallowed" && l.cls === "c-err"), true);
 });
