@@ -416,15 +416,35 @@ function burst(tx, ty, colors, n, { up = 1.6, spread = 1.2, size = 1 } = {}) {
   }
 }
 const BURST = { moss: ["#74bd47", "#b2e57a", "#f6f39a"], lichen: ["#57c2b4", "#9be8d9"], crystal: ["#ff9ad5", "#ffd6ee", "#e45aa6"],
-  glowcap: ["#9b6bff", "#8ff7ff"], reed: ["#ffcf5a", "#6fae4a"], iron: ["#d77a33", "#ffc07a", "#5c5566"], geode: ["#8f74ff", "#d6ccff"] };
+  glowcap: ["#9b6bff", "#8ff7ff"], reed: ["#ffcf5a", "#6fae4a"], iron: ["#d77a33", "#ffc07a", "#5c5566"], geode: ["#8f74ff", "#d6ccff"],
+  copper: ["#d45842", "#ffa48e", "#5c5566"], sulfur: ["#e8e443", "#fffb9c", "#5c5566"],
+  titanium: ["#8db3d9", "#d4e8fa", "#5c5566"], uranium: ["#40de7a", "#a6ffc4", "#5c5566"] };
 const UNIT = { regolith: "#d39b55", soil: "#a45f3e", ice: "#9fd2cb", rock: "#77709a", stone: "#3a3542", tunnel: "#26202d", shaft: "#120f17" };
-const ENT = { moss: "#93c45c", lichen: "#45b3a8", crystal: "#d75c9f", beacon: "#ef5a40", glowcap: "#9b6bff", reed: "#ffcf5a", iron: "#d77a33", geode: "#8f74ff" };
+const ORES = new Set(["iron", "geode", "copper", "sulfur", "titanium", "uranium"]);
+const ENT = { moss: "#93c45c", lichen: "#45b3a8", crystal: "#d75c9f", beacon: "#ef5a40", glowcap: "#9b6bff", reed: "#ffcf5a", iron: "#d77a33", geode: "#8f74ff",
+  copper: "#d45842", sulfur: "#e8e443", titanium: "#8db3d9", uranium: "#40de7a" };
 const NAME = LANG === "en"
   ? { regolith: "Regolith", soil: "Soil", ice: "Ice", rock: "Rock", stone: "Bedrock", tunnel: "Tunnel", shaft: "Shaft",
-    moss: "Moss", lichen: "Lichen", crystal: "Crystal", beacon: "Beacon", glowcap: "Glowcap", reed: "Reed", iron: "Iron", geode: "Geode", cargo: "Cargo" }
+    moss: "Moss", lichen: "Lichen", crystal: "Crystal", beacon: "Beacon", glowcap: "Glowcap", reed: "Reed", iron: "Iron", geode: "Geode", cargo: "Cargo",
+    water: "Water", silica: "Silica", copper: "Copper", sulfur: "Sulfur", titanium: "Titanium", helium: "Helium", uranium: "Uranium",
+    biomass: "Biomass", plate: "Plate", wire: "Wire", glass: "Glass", fuel: "Fuel", fertilizer: "Fertilizer", circuit: "Circuit",
+    alloy: "Alloy", battery: "Battery", coolant: "Coolant", processor: "Processor", frame: "Frame", cell: "Cell", core: "Core",
+    composter: "Composter", smelter: "Smelter", kiln: "Kiln", refinery: "Refinery", assembler: "Assembler",
+    "reactor-lab": "Reactor Lab", silo: "Silo", generator: "Generator", lab: "Lab" }
   : { regolith: "ريجوليث", soil: "تربة", ice: "جليد", rock: "صخر", stone: "صخر صلب", tunnel: "نفق", shaft: "بير لتحت",
-    moss: "طحالب", lichen: "أشنة", crystal: "كريستال", beacon: "منارة", glowcap: "فطر مضيء", reed: "بوص", iron: "حديد", geode: "جيود", cargo: "شحنة" };
-const INV_COLOR = { moss: ENT.moss, lichen: ENT.lichen, crystal: ENT.crystal, glowcap: ENT.glowcap, reed: ENT.reed, iron: ENT.iron, geode: ENT.geode, cargo: "#efe7d6" };
+    moss: "طحالب", lichen: "أشنة", crystal: "كريستال", beacon: "منارة", glowcap: "فطر مضيء", reed: "بوص", iron: "حديد", geode: "جيود", cargo: "شحنة",
+    water: "المياه", silica: "السيليكا", copper: "النحاس", sulfur: "الكبريت", titanium: "التيتانيوم", helium: "الهيليوم", uranium: "اليورانيوم",
+    biomass: "الكتلة الحيوية", plate: "الصفيحة", wire: "السلك", glass: "الزجاج", fuel: "الوقود", fertilizer: "السماد", circuit: "الدائرة الإلكترونية",
+    alloy: "السبيكة", battery: "البطارية", coolant: "سائل التبريد", processor: "المعالج", frame: "الهيكل", cell: "خلية الطاقة", core: "النواة",
+    composter: "السمّادة", smelter: "المصهر", kiln: "الفرن", refinery: "المصفاة", assembler: "المجمّع",
+    "reactor-lab": "معمل المفاعل", silo: "الصومعة", generator: "المولّد", lab: "المعمل" };
+const INV_COLOR = {
+  moss: ENT.moss, lichen: ENT.lichen, crystal: ENT.crystal, glowcap: ENT.glowcap, reed: ENT.reed, iron: ENT.iron, geode: ENT.geode,
+  water: "#3a95e8", silica: "#d9cbb0", copper: ENT.copper, sulfur: ENT.sulfur, titanium: ENT.titanium, helium: "#f7bad2", uranium: ENT.uranium,
+  biomass: "#58993e", plate: "#c6d0de", wire: "#f2a07e", glass: "#b0f2f5", fuel: "#e04665", fertilizer: "#9e7d47", circuit: "#2ab572",
+  alloy: "#6e7ba3", battery: "#4e80f0", coolant: "#5ecdf5", processor: "#d166eb", frame: "#969689", cell: "#baf54e", core: "#6bf2c5",
+  cargo: "#efe7d6",
+};
 const DRONE_COLORS = ["#ff7a52", "#f2d16b", "#8fd3ff", "#c7a2ff", "#efe7d6", "#93c45c"];
 const INK = "#17142a", CONTACT = "#0d0a1c";
 const COND = '"Barlow Condensed", "Readex Pro", sans-serif';
@@ -438,6 +458,7 @@ function setWorld(init) {
     layers[z][x][y] ||= { x, y, z, g: z ? "stone" : "regolith" };
   }
   if (init.gold) parText(init.par, init.gold, true);
+  if (typeof Buildings !== "undefined") Buildings.syncState(init.buildings || []);
   W = { w: init.w, h: init.h, layers, tiles: layers[0], depth, view: 0, follow: true, t: 0, maxTicks: init.maxTicks, inv: init.inv || {}, storm: 0,
         drones: new Map([[0, { x: init.x, y: init.y, z: init.z || 0, px: init.x, py: init.y, bump: 0 }]]) };
   lastInv = { ...W.inv };
@@ -466,15 +487,19 @@ function renderLayerBar() {
 }
 
 function renderLegend() {
-  const g = new Set(), e = new Set();
-  for (const col of W.layers[W.view]) for (const t of col) { g.add(t.g); if (t.e) e.add(t.e); }
+  const g = new Set(), e = new Set(), b = new Set();
+  for (const col of W.layers[W.view]) for (const t of col) { g.add(t.g); if (t.e) e.add(t.e); if (t.b) b.add(t.b); }
+  const bKinds = typeof Buildings !== "undefined" ? Buildings.KINDS.filter((k) => b.has(k)) : [];
   const items = [
     ...["regolith", "soil", "ice", "rock", "stone", "tunnel", "shaft"].filter((k) => g.has(k)),
-    ...["moss", "lichen", "glowcap", "reed", "crystal", "iron", "geode", "beacon"].filter((k) => e.has(k)),
+    ...["moss", "lichen", "glowcap", "reed", "crystal", "iron", "geode", "copper", "sulfur", "titanium", "uranium", "beacon"].filter((k) => e.has(k)),
+    ...bKinds,
   ];
   const thumb = (k) => UNIT[k] ? Sprites.ground(k, 1)
-    : k === "iron" || k === "geode" ? Sprites.ore(k, 1) : Sprites.entity({ e: k, p: 0, r: 0, s: 6 }, 0, 1);
-  $("#legend").innerHTML = items.map((k) => `<span><i style="background:${UNIT[k] ? "" : "#2a2447 "}url(${Sprites.dataURL(thumb(k))})"></i>${NAME[k]}</span>`).join("")
+    : ORES.has(k) ? Sprites.ore(k, 1)
+    : typeof Buildings !== "undefined" && b.has(k) ? Buildings.sprite(k, 0)
+    : Sprites.entity({ e: k, p: 0, r: 0, s: 6 }, 0, 1);
+  $("#legend").innerHTML = items.map((k) => `<span><i style="background:${UNIT[k] ? "" : "#2a2447 "}url(${Sprites.dataURL(thumb(k))})"></i>${NAME[k] || k}</span>`).join("")
     + `<span><i style="background:#2a2447 url(${Sprites.dataURL(Sprites.drone(DRONE_COLORS[0], 0))})"></i>${T("الدرون", "Drone")}</span>`;
 }
 
@@ -602,7 +627,7 @@ function drawBlock(G, t, x, y, now) {
     poly([p(T), p(R), [p(R)[0], p(R)[1] + G.hh * 0.5], [p(T)[0], p(T)[1] + G.hh * 0.5]], "rgba(70,60,90,0.55)");
     poly([p(L), p(T), [p(T)[0], p(T)[1] + G.hh * 0.5], [p(L)[0], p(L)[1] + G.hh * 0.5]], "rgba(110,98,130,0.45)");
   }
-  if ((t.e === "iron" || t.e === "geode") && t.g === "stone") { // ore showing in the rock
+  if (ORES.has(t.e) && t.g === "stone") { // ore showing in the rock
     texQuad(Sprites.ore(t.e, v), T, [R[0] - T[0], R[1] - T[1]], [L[0] - T[0], L[1] - T[1]]);
     texQuad(Sprites.ore(t.e, v + 1), B, [R[0] - B[0], R[1] - B[1]], [0, h]);
   }
@@ -662,7 +687,11 @@ function draw(now) {
     const t = grid[x][y];
     const h = drawBlock(G, t, x, y, now);
     lifts[x + "," + y] = h;
-    if (t.e && !(t.g === "stone" && (t.e === "iron" || t.e === "geode"))) drawEntity(G, t, x, y, h, now);
+    if (t.e && !(t.g === "stone" && ORES.has(t.e))) drawEntity(G, t, x, y, h, now);
+    if (t.b && typeof Buildings !== "undefined") {
+      const [bx, by] = G.toScreen(x + 0.5, W.h - 1 - y + 0.5, h);
+      Buildings.draw(ctx, bx, by, G.hw, t.b, W.view === 0 ? Buildings.at(x, y) : null, now);
+    }
   }
 
   // underground: darkness, with the drones' lamps lighting the rock around them
@@ -695,7 +724,7 @@ function draw(now) {
     ctx.strokeStyle = "#efe7d6"; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
     ctx.beginPath(); ctx.moveTo(X, Y); ctx.lineTo(X + G.hw, Y + G.hh); ctx.lineTo(X, Y + 2 * G.hh); ctx.lineTo(X - G.hw, Y + G.hh); ctx.closePath(); ctx.stroke();
     ctx.setLineDash([]);
-    const label = `(${hover.x}, ${hover.y}${W.depth > 1 ? `, z ${W.view}` : ""}) ${t.g}${t.e ? " · " + t.e + (t.s ? " " + t.s : "") : ""}`;
+    const label = `(${hover.x}, ${hover.y}${W.depth > 1 ? `, z ${W.view}` : ""}) ${t.g}${t.e ? " · " + t.e + (t.s ? " " + t.s : "") : ""}${t.b ? " · " + t.b : ""}`;
     ctx.font = `600 12.5px ${COND}`;
     const tw = ctx.measureText(label).width + 14;
     const lx = Math.min(Math.max(X - tw / 2, 4), cw - tw - 4), ly = Math.max(Y - 30, 4);
@@ -892,10 +921,25 @@ function apply(ev) {
     W.drones.set(id, d);
     if (id === 0 && W.follow && d.z !== W.view) { W.view = d.z; renderLayerBar(); renderLegend(); }
   }
+  if (ev.op === "building") {
+    if (typeof Buildings !== "undefined") {
+      const prev = W.layers?.[ev.z || 0]?.[ev.x]?.[ev.y]?.b;
+      Buildings.applyEvent(ev, W);
+      if (prev !== ev.building?.kind) renderLegend();
+    }
+    hud(ev.progress);
+    return;
+  }
   if (ev.op === "storm-warning") { W.storm = 1; log(`t=${ev.t} ${noEmoji(ev.msg)}`, "c-warn"); Sound.play("fail"); }
   else if (ev.op === "storm") { W.storm = 2; log(`t=${ev.t} ${noEmoji(ev.msg)}`, "c-err"); Sound.play("storm"); }
   else if (ev.op === "clear") { W.storm = 0; log(`t=${ev.t} ${noEmoji(ev.msg)}`, "c-ok"); Sound.play("report"); }
-  if (ev.tile) (W.layers[ev.tile.z || 0] || W.layers[0])[ev.tile.x][ev.tile.y] = ev.tile;
+  if (ev.tile) {
+    const z = ev.tile.z || 0;
+    const prev = (W.layers[z] || W.layers[0])[ev.tile.x]?.[ev.tile.y];
+    (W.layers[z] || W.layers[0])[ev.tile.x][ev.tile.y] = ev.tile;
+    if (z === 0 && !ev.tile.b && typeof Buildings !== "undefined") Buildings.remove(ev.tile.x, ev.tile.y);
+    if (prev?.b !== ev.tile.b) renderLegend();
+  }
   if (ev.ok && (ev.op === "dig" || ev.op === "digdown") && ev.tile) burst(ev.tile.x, ev.tile.y, ["#5c5566", "#3a3542", "#736b7d"], 10, { up: 1.2, spread: 1.6 });
   if (ev.inv) W.inv = ev.inv;
   if (ev.op === "report") {
@@ -928,7 +972,7 @@ function apply(ev) {
   } else if (ev.ok && ev.op === "plant") {
     burst(ev.x, ev.y, ["#87613f", "#6e4b2e", "#a8692f"], 7, { up: 0.9, spread: 1.4 });
     Sound.play("plant");
-  } else if (!ev.ok) {
+  } else if (!ev.ok && !(ev.op === "tile" && ev.ok === undefined)) {
     if (ev.op === "move") (W.drones.get(id) || {}).bump = 1;
     log(`t=${ev.t}${id ? T(` [درون ${id}]`, ` [drone ${id}]`) : ""} ${ev.op}: ${noEmoji(ev.msg || T("فشل", "failed"))}`, "c-warn");
     if (ev.tile) fx.push({ x: ev.x, y: ev.y, text: "×", color: "#ff6b6b", age: 0 });
