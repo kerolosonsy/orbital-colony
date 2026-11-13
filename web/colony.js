@@ -16,6 +16,7 @@ const Colony = (() => {
   };
   let data = null, es = null, running = false, samples = [], shopDirty = true, live = null;
   let runs = [], raced = false, raceEnabled = false, checking = false;
+  let seasonsList = [], lastSeasonsRes = null, seasonSyncTick = 0, baseDocTitle = "";
 
   let contractTarget = "", contractHighlightUntil = 0, contractHighlightTimer = null;
   let rankHighlightUntil = 0, rankHighlightTimer = null;
@@ -26,8 +27,16 @@ const Colony = (() => {
   function stateToInit(st) {
     const tiles = [];
     const n = st.size;
-    st.tiles.forEach((t, i) => tiles.push({ ...t, x: i % n, y: Math.floor(i / n), z: 0 }));
+    (st.tiles || []).forEach((t, i) => tiles.push({ ...t, x: i % n, y: Math.floor(i / n), z: 0 }));
     (st.under || []).forEach((layer, z) => layer.forEach((t, i) => tiles.push({ ...t, x: i % n, y: Math.floor(i / n), z: z + 1 })));
+    // Surface tiles in stopped summaries include `b`; fill from state.buildings as fallback.
+    for (const b of st.buildings || []) {
+      if (!b || !b.kind) continue;
+      const idx = (Number(b.y) || 0) * n + (Number(b.x) || 0);
+      if (idx >= 0 && idx < tiles.length && tiles[idx] && tiles[idx].z === 0 && !tiles[idx].b) {
+        tiles[idx].b = b.kind;
+      }
+    }
     const inv = {};
     for (const [k, v] of Object.entries(st.inv || {})) if (v >= 1) inv[k] = Math.floor(v);
     return { w: n, h: n, tiles, layers: 1 + (st.under || []).length, x: 0, y: 0, z: 0, maxTicks: 0, inv, buildings: st.buildings || [] };
@@ -36,10 +45,21 @@ const Colony = (() => {
   function liveWorld(init) {
     const keepView = W && W.colony ? { view: W.view, follow: W.follow } : null;
     setWorld(init);
-    W.colony = true; W.live = true; W.liveStep = actionMs(data.state); W.t = data.state.tick || 0;
-    syncWeatherToWorld(data.state.weather);
-    if (keepView) { W.view = Math.min(keepView.view, W.depth - 1); W.follow = keepView.follow; renderLayerBar(); renderLegend(); }
+    if (typeof Buildings !== "undefined") Buildings.syncState(init.buildings || []);
+    const st = data && data.state;
+    if (W) {
+      W.colony = true; W.live = true; W.liveStep = st ? actionMs(st) : 260; W.t = (st && st.tick) || 0;
+      syncWeatherToWorld(st && st.weather);
+      let legendDirty = false;
+      for (const b of init.buildings || []) {
+        const tile = W.layers && W.layers[0] && W.layers[0][b.x] && W.layers[0][b.x][b.y];
+        if (tile && b.kind && !tile.b) { tile.b = b.kind; legendDirty = true; }
+      }
+      if (keepView) { W.view = Math.min(keepView.view, W.depth - 1); W.follow = keepView.follow; renderLayerBar(); }
+      if ((keepView || legendDirty) && typeof renderLegend === "function") renderLegend();
+    }
     hud("");
+    if (typeof draw === "function") draw(performance.now());
   }
 
   function syncWeatherToWorld(weather) {
@@ -78,8 +98,14 @@ const Colony = (() => {
   }
 
   // ---------- entering and leaving ----------
+  function closeColonyDialog(sel) {
+    const dlg = $(sel);
+    if (dlg && dlg.open && typeof closeOverlay === "function") closeOverlay(dlg);
+  }
+
   async function enter() {
     if (playback) finishPlayback();
+    if (!baseDocTitle && typeof document !== "undefined" && typeof document.title === "string") baseDocTitle = document.title;
     S.mode = "colony";
     document.body.classList.add("colony");
     try {
@@ -93,8 +119,8 @@ const Colony = (() => {
     $("#btn-vscode").disabled = false;
     LEVEL.starter = data.starter;
     S.cur = LEVEL;
-    $("#lvl-title").textContent = LEVEL.title;
-    $("#lvl-chapter").textContent = "OPEN COLONY · KEPLER-G";
+    seasonSyncTick = (data.state && data.state.tick) || 0;
+    updateSeasonTitle();
     $("#lvl-stars").innerHTML = "";
     $("#goal-strip-par").textContent = "";
     lastErrors = []; lastMtime = 0;
@@ -114,17 +140,23 @@ const Colony = (() => {
     renderAll();
     runUI();
     fetchRuns();
+    if (data.season && data.season.id) fetchSeasons();
   }
 
   function exit() {
     TreeView.close();
+    closeColonyDialog("#seasons");
+    closeColonyDialog("#season-result");
     clearTimeout(contractHighlightTimer);
     contractTarget = ""; contractHighlightUntil = 0;
     clearTimeout(rankHighlightTimer);
     rankHighlightUntil = 0;
     running = false; raced = false; runs = [];
+    seasonSyncTick = 0;
     S.mode = "mission";
     document.body.classList.remove("colony");
+    document.body.classList.remove("colony-season");
+    if (baseDocTitle && typeof document !== "undefined") document.title = baseDocTitle;
     if (es) { es.close(); es = null; }
     if (typeof Buildings !== "undefined") Buildings.clear();
     if (W) { W.live = false; W.colony = false; }
@@ -264,6 +296,24 @@ const Colony = (() => {
         }
         return;
       }
+      case "systems":
+        if (data) {
+          data.systems = ev.systems || null;
+          renderSystems();
+        }
+        return;
+      case "season": {
+        const activeId = (data && data.season && data.season.id) || ev.id || "";
+        const meta = findSeasonMeta(activeId);
+        const info = seasonResultInfo(ev, meta);
+        if (meta && typeof ev.best === "number") meta.best = Math.max(Number(meta.best) || 0, ev.best);
+        if (ev.msg) log(ev.msg, ev.ok === false ? "c-err" : "c-ok");
+        Sound.play(info.newBest ? "goal" : (ev.ok === false ? "error" : "report"));
+        showSeasonResult(ev, meta, info);
+        fetchSeasons();
+        refresh();
+        return;
+      }
       case "stdout": log(ev.msg); return;
       case "stderr": log(ev.msg, "c-err"); return;
       case "stopped":
@@ -279,6 +329,7 @@ const Colony = (() => {
         const prevSec = Math.floor((data.state.tick || 0) / 10);
         data.state.tick = ev.t;
         if (Math.floor(ev.t / 10) !== prevSec) {
+          if (data.season) renderSeason();
           if (data.state.weather && data.state.weather.storm && data.state.weather.storm !== "none") renderWeather();
           if (data.state.rush) renderRush();
         }
@@ -320,6 +371,7 @@ const Colony = (() => {
     if (ev.weather) data.state.weather = ev.weather;
     if ("rush" in ev) data.state.rush = ev.rush;
     if ("shock" in ev) data.state.shock = ev.shock;
+    if ("systems" in ev) data.systems = ev.systems;
     if (ev.rank && typeof ev.rank === "object") {
       data.rank = ev.rank;
       if (typeof ev.rank.level === "number") data.state.rank = ev.rank.level;
@@ -335,12 +387,18 @@ const Colony = (() => {
       data.state.tick = Math.max(data.state.tick || 0, ev.t);
       if (W) W.t = Math.max(W.t, ev.t);
     }
+    if ("season" in ev) {
+      data.season = ev.season;
+      seasonSyncTick = typeof ev.t === "number" ? ev.t : currentTick();
+      updateSeasonTitle();
+    }
     syncWeatherToWorld(data.state.weather);
     if (ev.contract && ev.op !== "contract") { live = { id: ev.contract.id, frac: ev.contract.frac, left: ev.contract.left, progress: ev.progress || "" }; renderContracts(); }
     const now = performance.now();
     samples.push([now, data.state.credits]);
     while (samples.length && now - samples[0][0] > 90000) samples.shift();
-    renderWeather(); renderRank(); renderStatus(); renderLiveStats(); renderRush(); renderMarket(); renderBuildings(); renderFleet();
+    renderSeason(); renderWeather(); renderRank(); renderStatus(); renderLiveStats(); renderRush(); renderMarket(); renderBuildings(); renderFleet();
+    if ("systems" in ev) renderSystems();
     renderShop();
     if (ev.state && typeof draw === "function") draw(now);
     if (ev.tree) { data.tree = ev.tree; updateTree(); }
@@ -351,9 +409,24 @@ const Colony = (() => {
     try {
       const fresh = await api("/api/colony");
       if (S.mode !== "colony") return;
-      data = { ...data, ...fresh };
+      const hadSeason = !!(data && data.season && data.season.id);
+      data = {
+        ...data,
+        ...fresh,
+        systems: fresh && "systems" in fresh ? fresh.systems : null,
+        season: fresh && "season" in fresh ? fresh.season : null,
+      };
+      if (typeof fresh.running === "boolean" && fresh.running !== running) {
+        running = fresh.running;
+        runUI();
+      }
+      if (data.season) {
+        seasonSyncTick = (data.state && data.state.tick) || currentTick();
+        if (!hadSeason) fetchSeasons();
+      }
     } catch { return; }
     if (data && data.state) syncStateToWorld(data.state);
+    updateSeasonTitle();
     shopDirty = true;
     renderAll();
   }
@@ -498,14 +571,17 @@ const Colony = (() => {
     if (vetBtn) vetBtn.disabled = checking;
     raceUI();
     if (colony) {
+      renderSeason();
       renderLastRun();
       renderLiveStats();
       if (data) renderContracts();
+      const dlg = $("#seasons");
+      if (dlg && dlg.open) renderSeasonsDialog();
     }
   }
 
   // ---------- panel ----------
-  function renderAll() { renderWeather(); renderRank(); renderStatus(); renderLastRun(); renderLiveStats(); renderRush(); renderMarket(); renderBuildings(); renderFleet(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
+  function renderAll() { updateSeasonTitle(); renderSeason(); renderWeather(); renderRank(); renderStatus(); renderLastRun(); renderLiveStats(); renderRush(); renderMarket(); renderBuildings(); renderFleet(); renderSystems(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
 
   // ---------- contracts: code challenges that unlock blueprints ----------
   // ticks are 100ms of colony time
@@ -963,6 +1039,301 @@ const Colony = (() => {
     return `<h3>${escapeFn(tr("الأسطول", "Fleet"))} <small>${sorted.length}</small></h3>` + rows;
   }
 
+  const SYSTEM_ORDER = ["archive", "market", "control", "warehouse", "metrics", "neighbor"];
+
+  function systemsVisible(systems) {
+    if (!systems || typeof systems !== "object") return false;
+    return SYSTEM_ORDER.some((k) => !!(systems[k] && systems[k].on));
+  }
+
+  function sysStatMarkup(label, valHtml, escapeFn = esc, extraClass = "") {
+    return `<span class="sys-stat${extraClass ? ` ${extraClass}` : ""}"><span class="sys-stat-lbl">${escapeFn(label)}</span>${valHtml}</span>`;
+  }
+
+  function addrChipMarkup(addr, deps = {}) {
+    if (!addr) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const val = String(addr);
+    return `<div class="sys-addr-row"><code class="sys-addr" dir="ltr">${escapeFn(val)}</code><button type="button" class="sys-copy" data-copy="${escAttr(val, escapeFn)}" title="${escAttr(tr("نسخ", "Copy"), escapeFn)}" aria-label="${escAttr(tr("نسخ العنوان", "Copy address"), escapeFn)}">${escapeFn(tr("نسخ", "Copy"))}</button></div>`;
+  }
+
+  function normalizeSeriesPoints(rawPoints, maxPoints = 60) {
+    if (!Array.isArray(rawPoints)) return [];
+    const out = [];
+    for (const pt of rawPoints) {
+      if (!Array.isArray(pt) || pt.length < 2) continue;
+      const tick = Number(pt[0]);
+      const val = Number(pt[1]);
+      if (Number.isFinite(tick) && Number.isFinite(val)) out.push([tick, val]);
+    }
+    return out.length > maxPoints ? out.slice(-maxPoints) : out;
+  }
+
+  function sparklinePoints(rawPoints, width = 120, height = 28, pad = 2) {
+    const pts = normalizeSeriesPoints(rawPoints, 60);
+    if (pts.length < 2) return [];
+    let minT = pts[0][0], maxT = pts[0][0];
+    let minV = pts[0][1], maxV = pts[0][1];
+    for (let i = 1; i < pts.length; i++) {
+      const [t, v] = pts[i];
+      if (t < minT) minT = t;
+      if (t > maxT) maxT = t;
+      if (v < minV) minV = v;
+      if (v > maxV) maxV = v;
+    }
+    const innerW = Math.max(1, width - pad * 2);
+    const innerH = Math.max(1, height - pad * 2);
+    const spanT = maxT - minT;
+    const spanV = maxV - minV;
+    const midY = Number((height / 2).toFixed(2));
+    return pts.map(([t, v], idx) => {
+      const x = spanT > 0 ? pad + ((t - minT) / spanT) * innerW : pad + (idx / (pts.length - 1)) * innerW;
+      const y = spanV > 0 ? pad + (1 - (v - minV) / spanV) * innerH : midY;
+      return { x: Number(x.toFixed(2)), y: Number(y.toFixed(2)), t, v };
+    });
+  }
+
+  function sparklinePath(rawPoints, width = 120, height = 28, pad = 2) {
+    const coords = sparklinePoints(rawPoints, width, height, pad);
+    if (coords.length < 2) return "";
+    return "M" + coords.map((p) => `${p.x} ${p.y}`).join(" L");
+  }
+
+  function metricCardMarkup(name, rawPoints, deps = {}) {
+    const escapeFn = deps.esc || esc;
+    const pts = normalizeSeriesPoints(rawPoints, 60);
+    const latest = pts.length ? fmtNum(pts[pts.length - 1][1]) : "—";
+    const coords = sparklinePoints(pts, 120, 28, 2);
+    let sparkHtml = "";
+    if (coords.length >= 2) {
+      const d = "M" + coords.map((p) => `${p.x} ${p.y}`).join(" L");
+      const last = coords[coords.length - 1];
+      sparkHtml = `<svg class="sys-spark" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true"><path d="${d}"/><circle cx="${last.x}" cy="${last.y}" r="2"/></svg>`;
+    }
+    return `<div class="sys-metric${coords.length < 2 ? " is-single" : ""}" data-metric="${escAttr(name, escapeFn)}">`
+      + `<div class="sys-metric-head"><span class="sys-metric-name" dir="ltr">${escapeFn(name)}</span><b class="sys-metric-val" dir="ltr">${escapeFn(latest)}</b></div>`
+      + sparkHtml
+      + `</div>`;
+  }
+
+  function metricsGridMarkup(series, deps = {}) {
+    if (!series || typeof series !== "object") return "";
+    const entries = Object.entries(series).slice(0, 8);
+    if (!entries.length) return "";
+    return `<div class="sys-metrics-grid">${entries.map(([name, pts]) => metricCardMarkup(name, pts, deps)).join("")}</div>`;
+  }
+
+  function systemRowMarkup(key, sys, deps = {}) {
+    if (!sys || typeof sys !== "object" || !sys.on) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const num = (v) => `<b dir="ltr">${fmtNum(v)}</b>`;
+    switch (key) {
+      case "archive": {
+        const stats = sysStatMarkup(tr("الصفوف", "Rows"), num(sys.rows || 0), escapeFn);
+        return `<div class="item sys-row" data-sys="archive"><div class="item-top"><b>${escapeFn(tr("الأرشيف", "Archive"))}</b></div><div class="sys-stats">${stats}</div></div>`;
+      }
+      case "market": {
+        const stats = [
+          sysStatMarkup(tr("الطلبات", "Orders"), num(sys.orders || 0), escapeFn),
+          sysStatMarkup(tr("المرفوضة", "Rejected"), num(sys.rejected || 0), escapeFn, (Number(sys.rejected) || 0) > 0 ? "is-warn" : ""),
+        ].join("");
+        return `<div class="item sys-row" data-sys="market"><div class="item-top"><b>${escapeFn(tr("السوق", "Market"))}</b></div><div class="sys-stats">${stats}</div>${addrChipMarkup(sys.url, deps)}</div>`;
+      }
+      case "control": {
+        const hasHealth = typeof sys.healthy === "boolean";
+        const healthCls = !hasHealth ? "is-unknown" : (sys.healthy ? "is-ok" : "is-bad");
+        const healthMark = !hasHealth
+          ? `— ${tr("غير معروف", "Unknown")}`
+          : (sys.healthy ? `✓ ${tr("سليم", "Healthy")}` : `✕ ${tr("عطلان", "Unhealthy")}`);
+        const badge = `<span class="sys-health ${healthCls}">${escapeFn(healthMark)}</span>`;
+        const lat = typeof sys.lastMs === "number" && Number.isFinite(sys.lastMs)
+          ? `<b dir="ltr">${fmtNum(sys.lastMs)} ms</b>`
+          : `<b dir="ltr">—</b>`;
+        const stats = [
+          sysStatMarkup(tr("الاستجابة", "Latency"), lat, escapeFn),
+          sysStatMarkup(tr("الفحوصات", "Probes"), num(sys.probes || 0), escapeFn),
+          sysStatMarkup(tr("الفاشلة", "Failed"), num(sys.failed || 0), escapeFn, (Number(sys.failed) || 0) > 0 ? "is-warn" : ""),
+        ].join("");
+        return `<div class="item sys-row" data-sys="control"><div class="item-top"><b>${escapeFn(tr("مركز القيادة", "Control Centre"))}</b>${badge}</div><div class="sys-stats">${stats}</div>${addrChipMarkup(sys.addr, deps)}</div>`;
+      }
+      case "warehouse": {
+        const stats = sysStatMarkup(tr("إعادات التشغيل", "Restarts"), num(sys.restarts || 0), escapeFn);
+        return `<div class="item sys-row" data-sys="warehouse"><div class="item-top"><b>${escapeFn(tr("المخزن", "Warehouse"))}</b></div><div class="sys-stats">${stats}</div></div>`;
+      }
+      case "metrics": {
+        const grid = metricsGridMarkup(sys.series, deps)
+          || `<div class="sys-empty">${escapeFn(tr("مفيش قراءات لسه", "No samples yet"))}</div>`;
+        return `<div class="item sys-row sys-row-metrics" data-sys="metrics"><div class="item-top"><b>${escapeFn(tr("المراقبة", "Metrics"))}</b></div>${grid}</div>`;
+      }
+      case "neighbor": {
+        const stats = [
+          sysStatMarkup(tr("الصفقات", "Trades"), num(sys.trades || 0), escapeFn),
+          sysStatMarkup(tr("المفقودة", "Drops"), num(sys.drops || 0), escapeFn, (Number(sys.drops) || 0) > 0 ? "is-warn" : ""),
+        ].join("");
+        return `<div class="item sys-row" data-sys="neighbor"><div class="item-top"><b>${escapeFn(tr("الجيران", "Neighbour"))}</b></div><div class="sys-stats">${stats}</div>${addrChipMarkup(sys.addr, deps)}</div>`;
+      }
+      default:
+        return "";
+    }
+  }
+
+  function systemsMarkup(systems, deps = {}) {
+    if (!systemsVisible(systems)) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const rows = SYSTEM_ORDER.map((k) => systemRowMarkup(k, systems[k], deps)).filter(Boolean);
+    if (!rows.length) return "";
+    return `<h3>${escapeFn(tr("الأنظمة", "Systems"))} <small>${rows.length}</small></h3>` + rows.join("");
+  }
+
+  function copyText(text, btn, deps = {}) {
+    const val = text == null ? "" : String(text);
+    const tr = deps.T || T;
+    const clip = deps.clipboard !== undefined ? deps.clipboard : (typeof navigator !== "undefined" ? navigator.clipboard : null);
+    if (!val || !clip || typeof clip.writeText !== "function") return Promise.resolve(false);
+    try {
+      return Promise.resolve(clip.writeText(val)).then(() => {
+        if (btn) {
+          if (!btn.dataset.copyLabel) btn.dataset.copyLabel = btn.textContent || tr("نسخ", "Copy");
+          btn.textContent = tr("اتنسخ", "Copied");
+          btn.classList.add("is-copied");
+          clearTimeout(btn._copyTimer);
+          btn._copyTimer = setTimeout(() => {
+            btn.textContent = btn.dataset.copyLabel || tr("نسخ", "Copy");
+            btn.classList.remove("is-copied");
+          }, 1200);
+        }
+        return true;
+      }).catch(() => false);
+    } catch {
+      return Promise.resolve(false);
+    }
+  }
+
+  function seasonComparison(val, reference, allowZero = false) {
+    const num = val == null || val === "" ? NaN : Number(val);
+    const hasScore = Number.isFinite(num) && (allowZero ? num >= 0 : num > 0);
+    const refNum = reference == null || reference === "" ? NaN : Number(reference);
+    const hasRef = Number.isFinite(refNum) && refNum > 0;
+    const pct = hasScore && hasRef
+      ? Math.max(0, Math.min(100, (num / refNum) * 100))
+      : (hasScore && !hasRef && num > 0 ? 100 : 0);
+    return {
+      hasScore,
+      hasRef,
+      score: hasScore ? num : null,
+      ref: hasRef ? refNum : null,
+      scoreText: hasScore ? fmtNum(num) : "—",
+      refText: hasRef ? fmtNum(refNum) : "—",
+      pct: Number(pct.toFixed(1)),
+      met: hasScore && hasRef && num >= refNum,
+    };
+  }
+
+  const seasonCountdownText = (leftTicks) => clockFmt(leftTicks);
+
+  function seasonBannerMarkup(season, meta, _running, deps = {}) {
+    if (!season || !season.id) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const title = (meta && meta.title) || season.title || season.id;
+    const left = Math.max(0, Number(season.left) || 0);
+    const score = Number(season.score) || 0;
+    const countdown = seasonCountdownText(left);
+    return `<div class="season-banner" data-season="${escAttr(season.id, escapeFn)}">`
+      + `<div class="season-banner-top"><span class="season-tag">${escapeFn(tr("موسم نشط", "Active season"))}</span><b>${escapeFn(title)}</b></div>`
+      + `<div class="season-banner-stats">`
+      + `<div><span>${escapeFn(tr("الوقت المتبقي", "Time left"))}</span><b class="season-countdown" dir="ltr">${escapeFn(countdown)}</b></div>`
+      + `<div><span>${escapeFn(tr("النتيجة", "Score"))}</span><b dir="ltr">${fmtNum(score)}</b></div>`
+      + `</div>`
+      + `<div class="season-banner-foot"><button type="button" class="tool season-leave" id="btn-leave-season">${escapeFn(tr("سيب الموسم", "Leave season"))}</button></div>`
+      + `</div>`;
+  }
+
+  function seasonsListMarkup(res, running, deps = {}) {
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const seasons = Array.isArray(res) ? res : (res && Array.isArray(res.seasons) ? res.seasons : []);
+    const activeId = (res && !Array.isArray(res) && res.active) || "";
+    const runWarn = running
+      ? `<div class="season-run-warn">${escapeFn(tr("المستعمرة شغالة دلوقتي — وقّفها الأول عشان تقدر تبدأ موسم.", "The colony is running right now — stop it first to start a season."))}</div>`
+      : "";
+    if (!seasons.length) {
+      return runWarn + `<p class="season-empty">${escapeFn(tr("مفيش مواسم متاحة دلوقتي.", "No seasons available yet."))}</p>`;
+    }
+    const cards = seasons.map((s) => {
+      const id = String(s.id || "");
+      const title = s.title || id;
+      const desc = s.desc || "";
+      const ticks = Number(s.ticks) || 0;
+      const lenText = ticks > 0
+        ? tr(`${clockFmt(ticks)} (${fmtNum(ticks)} خطوة)`, `${clockFmt(ticks)} (${fmtNum(ticks)} ticks)`)
+        : "—";
+      const cmp = seasonComparison(s.best, s.reference, false);
+      const isActive = !!(activeId && activeId === id);
+      const disabled = !!running || isActive;
+      const btnLabel = isActive ? tr("الموسم الحالي", "Active") : tr("ابدأ الموسم", "Start season");
+      const why = running
+        ? `<span class="season-why">${escapeFn(tr("وقّف المستعمرة الأول", "Stop the colony first"))}</span>`
+        : "";
+      return `<div class="item season-card${isActive ? " is-active" : ""}" data-season="${escAttr(id, escapeFn)}">`
+        + `<div class="item-top"><b>${escapeFn(title)}</b><span class="season-len" dir="ltr">${escapeFn(lenText)}</span></div>`
+        + (desc ? `<p class="season-desc">${escapeFn(desc)}</p>` : "")
+        + `<div class="season-scores">`
+        + `<div class="season-fig"><span>${escapeFn(tr("أفضل نتيجة", "Your best"))}</span><b dir="ltr">${escapeFn(cmp.scoreText)}</b></div>`
+        + `<div class="season-fig"><span>${escapeFn(tr("المرجع", "Reference"))}</span><b dir="ltr">${escapeFn(cmp.refText)}</b></div>`
+        + `</div>`
+        + `<div class="season-bar${cmp.met ? " is-met" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(cmp.pct)}"><i style="width:${cmp.pct.toFixed(1)}%"></i></div>`
+        + `<div class="season-foot">${why}<button type="button" class="run season-start" data-season-start="${escAttr(id, escapeFn)}"${disabled ? " disabled" : ""}>${escapeFn(btnLabel)}</button></div>`
+        + `</div>`;
+    }).join("");
+    return runWarn + cards;
+  }
+
+  function seasonResultInfo(ev, meta, prevBest) {
+    const score = Number(ev && ev.score) || 0;
+    const prevRaw = prevBest !== undefined ? prevBest : (meta && meta.best);
+    const prev = prevRaw == null || prevRaw === "" ? NaN : Number(prevRaw);
+    const evBest = ev && typeof ev.best === "number" && Number.isFinite(ev.best) ? ev.best : NaN;
+    const best = Number.isFinite(evBest) ? evBest : (Number.isFinite(prev) ? Math.max(prev, score) : score);
+    let newBest;
+    if (ev && typeof ev.newBest === "boolean") newBest = ev.newBest;
+    else if (ev && ev.ok === false) newBest = false;
+    else if (Number.isFinite(prev) && prev > 0) newBest = score > prev || best > prev;
+    else newBest = Number.isFinite(best) && best > 0 && score >= best;
+    const reference = ev && typeof ev.reference === "number" ? ev.reference : (meta && meta.reference);
+    const cmp = seasonComparison(score, reference, true);
+    return { ok: !(ev && ev.ok === false), score, best, newBest, cmp };
+  }
+
+  function seasonResultMarkup(ev, meta, deps = {}, infoOverride = null) {
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const info = infoOverride || seasonResultInfo(ev, meta);
+    const title = (meta && meta.title) || (ev && ev.title) || "";
+    const badge = info.newBest
+      ? `<div class="season-new-best">${escapeFn(tr("رقم قياسي جديد!", "New best!"))}</div>`
+      : "";
+    const vsRow = info.cmp.hasRef
+      ? `<div class="season-ref-block">`
+        + `<div class="season-ref-head"><span>${escapeFn(tr("مقارنة بالمرجع", "vs Reference"))}</span><b dir="ltr">${fmtNum(info.score)} / ${escapeFn(info.cmp.refText)} (${Math.round(info.cmp.pct)}%)</b></div>`
+        + `<div class="season-bar${info.cmp.met ? " is-met" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(info.cmp.pct)}"><i style="width:${info.cmp.pct.toFixed(1)}%"></i></div>`
+        + `</div>`
+      : "";
+    const msgHtml = ev && ev.msg ? `<p class="season-result-msg">${escapeFn(ev.msg)}</p>` : "";
+    return (title ? `<div class="season-result-name">${escapeFn(title)}</div>` : "")
+      + badge
+      + `<div class="season-result-grid">`
+      + `<div class="season-res-cell"><span>${escapeFn(tr("النتيجة", "Score"))}</span><b dir="ltr">${fmtNum(info.score)}</b></div>`
+      + `<div class="season-res-cell"><span>${escapeFn(tr("أفضل نتيجة", "Best"))}</span><b dir="ltr">${fmtNum(info.best)}</b></div>`
+      + `<div class="season-res-cell"><span>${escapeFn(tr("المرجع", "Reference"))}</span><b dir="ltr">${escapeFn(info.cmp.refText)}</b></div>`
+      + `</div>`
+      + vsRow
+      + msgHtml;
+  }
+
   function highlightRank() {
     rankHighlightUntil = performance.now() + 1800;
     clearTimeout(rankHighlightTimer);
@@ -1023,6 +1394,163 @@ const Colony = (() => {
     const html = data && data.state ? rushMarkup(data.state.rush, currentTick()) : "";
     box.classList.toggle("hidden", !html);
     box.innerHTML = html;
+  }
+
+  function findSeasonMeta(id) {
+    if (!id) return null;
+    return seasonsList.find((s) => s && s.id === id) || null;
+  }
+
+  function currentSeasonLeft() {
+    if (!data || !data.season) return 0;
+    const base = Math.max(0, Number(data.season.left) || 0);
+    if (!running) return base;
+    const elapsed = Math.max(0, currentTick() - seasonSyncTick);
+    return Math.max(0, base - elapsed);
+  }
+
+  function updateSeasonTitle() {
+    if (S.mode !== "colony") return;
+    const season = data && data.season && data.season.id ? data.season : null;
+    if (typeof document !== "undefined" && document.body && document.body.classList) {
+      document.body.classList.toggle("colony-season", !!season);
+    }
+    const titleEl = $("#lvl-title");
+    const chapEl = $("#lvl-chapter");
+    if (season) {
+      const meta = findSeasonMeta(season.id);
+      const sTitle = (meta && meta.title) || season.title || season.id;
+      const fullTitle = T(`موسم: ${sTitle}`, `Season: ${sTitle}`);
+      if (titleEl) titleEl.textContent = fullTitle;
+      if (chapEl) chapEl.textContent = T(`موسم · ${String(season.id).toUpperCase()}`, `SEASON · ${String(season.id).toUpperCase()}`);
+      if (typeof document !== "undefined" && typeof document.title === "string") document.title = `${fullTitle} — Orbital Colony`;
+    } else {
+      if (titleEl) titleEl.textContent = LEVEL.title;
+      if (chapEl) chapEl.textContent = T("مستعمرة حرة", "OPEN COLONY");
+      if (baseDocTitle && typeof document !== "undefined") document.title = baseDocTitle;
+    }
+  }
+
+  function renderSeason() {
+    const box = $("#col-season");
+    if (!box) return;
+    const season = data && data.season && data.season.id ? data.season : null;
+    if (!season) {
+      box.classList.add("hidden");
+      box.innerHTML = "";
+      return;
+    }
+    const meta = findSeasonMeta(season.id);
+    box.classList.remove("hidden");
+    box.innerHTML = seasonBannerMarkup({ ...season, left: currentSeasonLeft() }, meta, running);
+    const leaveBtn = $("#btn-leave-season");
+    if (leaveBtn) leaveBtn.onclick = () => leaveSeason();
+  }
+
+  function renderSystems() {
+    const box = $("#col-systems");
+    if (!box) return;
+    const html = data ? systemsMarkup(data.systems) : "";
+    box.classList.toggle("hidden", !html);
+    box.innerHTML = html;
+    if (html && typeof box.querySelectorAll === "function") {
+      box.querySelectorAll(".sys-copy").forEach((b) => {
+        b.onclick = () => copyText(b.dataset.copy, b);
+      });
+    }
+  }
+
+  async function fetchSeasons() {
+    try {
+      const res = await api("/api/colony/seasons");
+      if (S.mode !== "colony") return null;
+      lastSeasonsRes = res || null;
+      seasonsList = Array.isArray(res && res.seasons) ? res.seasons : [];
+      updateSeasonTitle();
+      renderSeason();
+      const dlg = $("#seasons");
+      if (dlg && dlg.open) renderSeasonsDialog();
+      return res;
+    } catch {
+      return null;
+    }
+  }
+
+  function renderSeasonsDialog() {
+    const list = $("#seasons-list");
+    if (!list) return;
+    const res = lastSeasonsRes || { seasons: seasonsList, active: null };
+    const activeId = (data && data.season && data.season.id) || res.active || null;
+    list.innerHTML = seasonsListMarkup({ seasons: res.seasons || seasonsList, active: activeId }, running);
+    if (typeof list.querySelectorAll === "function") {
+      list.querySelectorAll("[data-season-start]").forEach((b) => {
+        b.onclick = () => switchSeason(b.dataset.seasonStart, b);
+      });
+    }
+  }
+
+  async function openSeasons() {
+    if (typeof showOverlay === "function") showOverlay("#seasons");
+    renderSeasonsDialog();
+    await fetchSeasons();
+  }
+
+  async function switchSeason(id, btn) {
+    if (!id) return;
+    if (running) {
+      log(T("وقّف المستعمرة الأول عشان تبدأ موسم.", "Stop the colony first to start a season."), "c-err");
+      renderSeasonsDialog();
+      return;
+    }
+    if (btn) btn.disabled = true;
+    try {
+      await api("/api/colony/season", { id });
+      closeColonyDialog("#seasons");
+      await refresh();
+      if (data && data.state) liveWorld(stateToInit(data.state));
+      renderAll();
+      const meta = findSeasonMeta(id);
+      const name = (meta && meta.title) || id;
+      log(T(`بدأت الموسم: ${name}`, `Started season: ${name}`), "c-ok");
+    } catch (e) {
+      log(e.message && e.message.includes("409")
+        ? T("وقّف المستعمرة الأول عشان تبدأ موسم.", "Stop the colony first to start a season.")
+        : T("مقدرتش أبدأ الموسم: ", "Couldn't start season: ") + e.message, "c-err");
+      renderSeasonsDialog();
+    }
+  }
+
+  async function leaveSeason(confirmFn) {
+    const ask = typeof confirmFn === "function" ? confirmFn : (typeof confirm === "function" ? confirm : null);
+    if (ask && !ask(T("تسيب الموسم وترجع للمستعمرة الرئيسية؟", "Leave this season and return to the main colony?"))) return false;
+    try {
+      await api("/api/colony/season", { id: "" });
+      await refresh();
+      if (data && data.state) liveWorld(stateToInit(data.state));
+      renderAll();
+      log(T("رجعت للمستعمرة الرئيسية.", "Returned to the main colony."), "c-info");
+      return true;
+    } catch (e) {
+      log(e.message && e.message.includes("409")
+        ? T("وقّف المستعمرة الأول، وبعدين سيب الموسم.", "Stop the colony first, then leave the season.")
+        : T("مقدرتش أسيب الموسم: ", "Couldn't leave season: ") + e.message, "c-err");
+      return false;
+    }
+  }
+
+  function showSeasonResult(ev, meta, infoOverride) {
+    const info = infoOverride || seasonResultInfo(ev, meta);
+    const stamp = $("#season-stamp");
+    const sub = $("#season-stamp-sub");
+    const title = $("#season-result-title");
+    const body = $("#season-result-body");
+    const card = $("#season-result");
+    if (stamp) stamp.textContent = info.newBest ? T("رقم قياسي", "NEW BEST") : (info.ok ? T("خلص", "DONE") : T("وقف", "ENDED"));
+    if (sub) sub.textContent = String((ev && ev.id) || (meta && meta.id) || "SEASON").toUpperCase();
+    if (title) title.textContent = info.ok ? T("الموسم خلص", "Season complete") : T("الموسم وقف", "Season ended");
+    if (body) body.innerHTML = seasonResultMarkup(ev, meta, {}, info);
+    if (card && card.classList) card.classList.toggle("is-new-best", !!info.newBest);
+    if (typeof showOverlay === "function") showOverlay("#season-result");
   }
 
   function shopName(id) { const u = (data.shop || []).find((x) => x.id === id); return u ? uName(u) : id; }
@@ -1114,6 +1642,8 @@ const Colony = (() => {
   }
 
   $("#btn-tech-tree").onclick = openTree;
+  const seasonsBtn = $("#btn-seasons"); if (seasonsBtn) seasonsBtn.onclick = openSeasons;
+  const seasonAgainBtn = $("#btn-season-again"); if (seasonAgainBtn) seasonAgainBtn.onclick = () => { closeColonyDialog("#season-result"); openSeasons(); };
   const raceBtn = $("#btn-race"); if (raceBtn) raceBtn.onclick = toggleRace;
   const testBtn = $("#btn-test"); if (testBtn) testBtn.onclick = () => runCheck("test");
   const vetBtn = $("#btn-vet"); if (vetBtn) vetBtn.onclick = () => runCheck("vet");

@@ -199,6 +199,8 @@ function systemCtx(lang) {
     LANG: lang,
     T: (ar, en) => (lang === "en" ? en : ar),
     esc: (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+    setTimeout: () => 1,
+    clearTimeout: () => {},
     NAME,
     INV_COLOR,
     DRONE_COLORS: fullApp.DRONE_COLORS,
@@ -206,7 +208,7 @@ function systemCtx(lang) {
   const fmtCode = source.slice(source.indexOf("const fmt ="), source.indexOf("const actionMs"));
   const sysCode = source.slice(source.indexOf("// ---------- system readouts"), source.indexOf("function highlightRank("));
   return vm.runInContext(
-    fmtCode + "\n" + sysCode + "\n;({ fmtNum, escAttr, clockFmt, runComparison, droneShares, droneBarsMarkup, lastRunMarkup, liveStatsMarkup, weatherMarkup, rushMarkup, rankGoalLabel, rankMarkup, statusExtraMarkup, hasCargoData, hasFleetAlert, fleetVisible, fleetMarkup });",
+    fmtCode + "\n" + sysCode + "\n;({ fmtNum, escAttr, clockFmt, runComparison, droneShares, droneBarsMarkup, lastRunMarkup, liveStatsMarkup, weatherMarkup, rushMarkup, rankGoalLabel, rankMarkup, statusExtraMarkup, hasCargoData, hasFleetAlert, fleetVisible, fleetMarkup, SYSTEM_ORDER, systemsVisible, addrChipMarkup, normalizeSeriesPoints, sparklinePoints, sparklinePath, metricCardMarkup, metricsGridMarkup, systemRowMarkup, systemsMarkup, copyText, seasonComparison, seasonCountdownText, seasonBannerMarkup, seasonsListMarkup, seasonResultInfo, seasonResultMarkup });",
     ctx,
   );
 }
@@ -770,4 +772,372 @@ test("Colony handles race toggle persistence, test/vet endpoints, compile-error 
   assert.equal(ctx.Colony.raced, false);
   assert.equal(shownFiles.at(-1), "plan/plan.go");
   assert.equal(logs.some((l) => l.msg === "Import disallowed" && l.cls === "c-err"), true);
+});
+
+test("systemsVisible and systemsMarkup stay hidden when off and render every system cleanly in both languages", async () => {
+  for (const lang of ["ar", "en"]) {
+    const ctx = systemCtx(lang);
+    const en = lang === "en";
+    assert.equal(ctx.systemsVisible(null), false);
+    assert.equal(ctx.systemsVisible(undefined), false);
+    assert.equal(ctx.systemsVisible({}), false);
+    assert.equal(ctx.systemsVisible({ archive: { on: false, rows: 10 }, market: { on: false } }), false);
+    assert.equal(ctx.systemsMarkup({ archive: { on: false } }), "");
+
+    const html = ctx.systemsMarkup({
+      archive: { on: true, rows: 120 },
+      market: { on: true, url: "http://127.0.0.1:41233?a=1&b=<2>", orders: 12, rejected: 3 },
+      control: { on: true, addr: "127.0.0.1:41240", healthy: true, lastMs: 12, probes: 40, failed: 1 },
+      warehouse: { on: true, restarts: 2 },
+      metrics: { on: true, series: { colony_credits: [[1200, 698.5], [1250, 701]] } },
+      neighbor: { on: true, addr: "127.0.0.1:41250", trades: 4, drops: 2 },
+    });
+
+    assert.match(html, en ? /Systems/ : /الأنظمة/);
+    assert.match(html, en ? /Archive/ : /الأرشيف/);
+    assert.match(html, en ? /Rows/ : /الصفوف/);
+    assert.match(html, /120/);
+
+    assert.match(html, en ? /Market/ : /السوق/);
+    assert.match(html, en ? /Orders/ : /الطلبات/);
+    assert.match(html, /12/);
+    assert.match(html, /3/);
+    assert.ok(html.includes("http://127.0.0.1:41233?a=1&amp;b=&lt;2&gt;"));
+    assert.match(html, /class="sys-copy"/);
+
+    assert.match(html, en ? /Control Centre/ : /مركز القيادة/);
+    assert.match(html, en ? /Healthy/ : /سليم/);
+    assert.match(html, /12 ms/);
+    assert.match(html, /40/);
+    assert.match(html, /1/);
+    assert.ok(html.includes("127.0.0.1:41240"));
+
+    assert.match(html, en ? /Warehouse/ : /المخزن/);
+    assert.match(html, /2/);
+
+    assert.match(html, en ? /Metrics/ : /المراقبة/);
+    assert.match(html, /colony_credits/);
+    assert.match(html, /701/);
+
+    assert.match(html, en ? /Neighbour/ : /الجيران/);
+    assert.match(html, /127\.0\.0\.1:41250/);
+    assert.match(html, /4/);
+
+    const badCtrl = ctx.systemRowMarkup("control", { on: true, healthy: false, probes: 5, failed: 5 });
+    assert.match(badCtrl, /sys-health is-bad/);
+    assert.match(badCtrl, en ? /Unhealthy/ : /عطلان/);
+
+    const unkCtrl = ctx.systemRowMarkup("control", { on: true });
+    assert.match(unkCtrl, /sys-health is-unknown/);
+    assert.match(unkCtrl, en ? /Unknown/ : /غير معروف/);
+  }
+
+  // copyText handles Clipboard API success and missing/rejected fallback silently
+  const ctx = systemCtx("en");
+  let copied = "";
+  const btn = { textContent: "Copy", dataset: {}, classList: { add() {}, remove() {} } };
+  assert.equal(await ctx.copyText("127.0.0.1:41240", btn, { clipboard: { writeText: async (v) => { copied = v; } } }), true);
+  assert.equal(copied, "127.0.0.1:41240");
+  assert.equal(btn.textContent, "Copied");
+  assert.equal(await ctx.copyText("127.0.0.1:41240", null, { clipboard: null }), false);
+  assert.equal(await ctx.copyText("127.0.0.1:41240", null, { clipboard: { writeText: () => Promise.reject(new Error("denied")) } }), false);
+});
+
+test("sparklinePath, point/series limits, and under-two-points metrics rendering", () => {
+  const ctx = systemCtx("en");
+  assert.equal(ctx.sparklinePath([]), "");
+  assert.equal(ctx.sparklinePath([[10, 50]]), "");
+  assert.equal(ctx.sparklinePath([[0, 0], [10, 100]], 120, 28, 2), "M2 26 L118 2");
+  assert.equal(ctx.sparklinePath([[0, 50], [5, 100], [10, 0]], 120, 28, 2), "M2 14 L60 2 L118 26");
+  // Flat series stays along vertical midline; duplicate ticks spread evenly in X
+  assert.equal(ctx.sparklinePath([[10, 42], [20, 42]], 120, 28, 2), "M2 14 L118 14");
+  assert.equal(ctx.sparklinePath([[10, 0], [10, 100]], 120, 28, 2), "M2 26 L118 2");
+
+  // Fewer than two points shows value (or dash) without an inline SVG
+  const single = ctx.metricCardMarkup("solar_w", [[1200, 48.5]]);
+  assert.ok(!single.includes("<svg"));
+  assert.match(single, /solar_w/);
+  assert.match(single, /48\.5/);
+  const empty = ctx.metricCardMarkup("empty_metric", []);
+  assert.ok(!empty.includes("<svg"));
+  assert.match(empty, /—/);
+
+  // Latest 60 points limit and max 8 series limit are enforced
+  const manyPts = Array.from({ length: 75 }, (_, i) => [i * 10, i + 1]);
+  const norm = ctx.normalizeSeriesPoints(manyPts);
+  assert.equal(norm.length, 60);
+  assert.deepEqual(Array.from(norm[0]), [150, 16]);
+  assert.deepEqual(Array.from(norm[59]), [740, 75]);
+
+  const tenSeries = {};
+  for (let i = 0; i < 10; i++) tenSeries[`m_${i}<tag>`] = [[10, i], [20, i + 1]];
+  const grid = ctx.metricsGridMarkup(tenSeries);
+  assert.equal((grid.match(/data-metric="/g) || []).length, 8);
+  assert.ok(!grid.includes("m_8"));
+  assert.ok(grid.includes("m_0&lt;tag&gt;"));
+});
+
+test("seasons markup covers list comparison, missing best, countdown, running disable, and result card", () => {
+  for (const lang of ["ar", "en"]) {
+    const ctx = systemCtx(lang);
+    const en = lang === "en";
+
+    assert.equal(ctx.seasonCountdownText(6000), "10:00");
+    assert.equal(ctx.seasonCountdownText(4200), "7:00");
+    assert.equal(ctx.seasonCountdownText(-5), "0:00");
+
+    const listStopped = ctx.seasonsListMarkup({
+      seasons: [
+        { id: "one-drone", title: "One Drone <1>", desc: "Run & grow", ticks: 6000, best: 1234, reference: 2000 },
+        { id: "night-rush", title: "Night Rush", desc: "Survive storms", ticks: 3600, best: null, reference: 1500 },
+      ],
+      active: null,
+    }, false);
+
+    assert.ok(listStopped.includes("One Drone &lt;1&gt;"));
+    assert.ok(listStopped.includes("Run &amp; grow"));
+    assert.match(listStopped, /10:00/);
+    assert.match(listStopped, /1,234/);
+    assert.match(listStopped, /2,000/);
+    assert.match(listStopped, /width:61\.7%/);
+    assert.match(listStopped, />—</);
+    assert.match(listStopped, /width:0\.0%/);
+    assert.ok(!/data-season-start="one-drone"[^>]*disabled/.test(listStopped));
+
+    const listRunning = ctx.seasonsListMarkup({
+      seasons: [{ id: "one-drone", title: "One Drone", desc: "Desc", ticks: 6000, best: 2100, reference: 2000 }],
+      active: null,
+    }, true);
+    assert.match(listRunning, /season-run-warn/);
+    assert.match(listRunning, /season-why/);
+    assert.match(listRunning, /is-met/);
+    assert.match(listRunning, /width:100\.0%/);
+    assert.match(listRunning, /data-season-start="one-drone"\s*disabled/);
+
+    const banner = ctx.seasonBannerMarkup({ id: "one-drone", left: 4200, score: 310 }, { title: "One Drone" }, false);
+    assert.match(banner, /One Drone/);
+    assert.match(banner, /7:00/);
+    assert.match(banner, /310/);
+    assert.match(banner, /btn-leave-season/);
+
+    const newBestInfo = ctx.seasonResultInfo({ op: "season", ok: true, score: 1234, best: 1234, msg: "Nice!" }, { title: "One Drone", best: 900, reference: 2000 });
+    assert.equal(newBestInfo.newBest, true);
+    const newBestHtml = ctx.seasonResultMarkup({ op: "season", ok: true, score: 1234, best: 1234, msg: "Nice <1>!" }, { title: "One Drone", best: 900, reference: 2000 }, {}, newBestInfo);
+    assert.match(newBestHtml, en ? /New best!/ : /رقم قياسي جديد!/);
+    assert.match(newBestHtml, /1,234 \/ 2,000 \(62%\)/);
+    assert.ok(newBestHtml.includes("Nice &lt;1&gt;!"));
+
+    const notBestInfo = ctx.seasonResultInfo({ op: "season", ok: true, score: 900, best: 1500, msg: "Done" }, { title: "One Drone", best: 1500, reference: 2000 });
+    assert.equal(notBestInfo.newBest, false);
+    const notBestHtml = ctx.seasonResultMarkup({ op: "season", ok: true, score: 900, best: 1500, msg: "Done" }, { title: "One Drone", best: 1500, reference: 2000 }, {}, notBestInfo);
+    assert.ok(!notBestHtml.includes("season-new-best"));
+    assert.match(notBestHtml, /1,500/);
+  }
+});
+
+test("Colony seasons and systems end-to-end: title distinction, running disable, countdown, leave confirm, and season result sound", async () => {
+  const elements = new Map();
+  const makeEl = (id = "") => {
+    const classes = new Set();
+    const attrs = new Map();
+    return {
+      id,
+      innerHTML: "",
+      textContent: "",
+      value: "",
+      open: false,
+      disabled: false,
+      dataset: {},
+      classList: {
+        add: (...cs) => cs.forEach((c) => classes.add(c)),
+        remove: (...cs) => cs.forEach((c) => classes.delete(c)),
+        toggle: (c, force) => {
+          const next = force === undefined ? !classes.has(c) : !!force;
+          if (next) classes.add(c);
+          else classes.delete(c);
+          return next;
+        },
+        contains: (c) => classes.has(c),
+      },
+      setAttribute: (k, v) => attrs.set(k, String(v)),
+      getAttribute: (k) => (attrs.has(k) ? attrs.get(k) : null),
+      querySelector: () => makeEl(),
+      querySelectorAll: () => [],
+      showModal() { this.open = true; classes.delete("hidden"); },
+      close() { this.open = false; classes.add("hidden"); },
+    };
+  };
+  const getEl = (sel) => {
+    if (!elements.has(sel)) elements.set(sel, makeEl(sel));
+    return elements.get(sel);
+  };
+
+  const apiCalls = [];
+  const logs = [];
+  const sounds = [];
+  const confirmCalls = [];
+  let confirmReply = false;
+  let colonyState = {
+    running: false,
+    starter: "package main\n",
+    prices: {},
+    contracts: [],
+    shop: [],
+    systems: { archive: { on: true, rows: 55 } },
+    season: null,
+    state: { tick: 100, size: 4, depth: 1, credits: 500, levels: {}, inv: {}, tiles: [], buildings: [] },
+  };
+  const seasonsData = {
+    seasons: [
+      { id: "one-drone", title: "One Drone Challenge", desc: "Build with one drone", ticks: 6000, best: 1000, reference: 2000 },
+    ],
+    active: null,
+  };
+
+  const doc = { title: "Orbital Colony", body: makeEl("body"), querySelector: () => null };
+  const ctx = vm.createContext({
+    LANG: "en", TOKEN: "tok", PROFILE: "default",
+    T: (_ar, en) => en,
+    esc: (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+    setTimeout: () => 1,
+    clearTimeout: () => {},
+    performance: { now: () => 1000 },
+    Math, Object, Array, Number, String, Boolean, JSON, Map, Set,
+    EventSource: class { close() {} },
+    document: doc,
+    confirm: (msg) => { confirmCalls.push(msg); return confirmReply; },
+    $: getEl,
+    ed: { value: "", readOnly: false },
+    con: getEl("#console"),
+    S: { mode: "mission", file: "main.go", levels: [], chapters: [] },
+    playback: false,
+    lastErrors: [],
+    lastMtime: 0,
+    finishPlayback() {},
+    renderLayerBar() {},
+    apply() {},
+    showOverlay: (sel) => getEl(sel).showModal(),
+    closeOverlay: (el) => el && el.close(),
+    W: { w: 4, h: 4, depth: 1, view: 0, follow: true, colony: true, live: true, t: 0, inv: {}, layers: [[]], drones: new Map() },
+    TreeView: { isOpen: false, update() {}, close() {}, open() {} },
+    Sound: { play: (name) => sounds.push(name) },
+    log: (msg, cls) => logs.push({ msg, cls }),
+    hud() {}, setWorld() {}, renderLegend() {}, draw() {}, linkUI() {},
+    isLinked: () => false,
+    levelFiles: () => [{ name: "main.go" }],
+    fileCode: () => "package main\n",
+    saveFile() {},
+    showFile() {},
+    rec: () => ({}),
+    setDigits: (el, v) => { el.textContent = String(v); },
+    store: { pref: () => false, save() {} },
+    api: async (path, body) => {
+      apiCalls.push({ path, body });
+      if (path === "/api/colony") return JSON.parse(JSON.stringify(colonyState));
+      if (path === "/api/colony/runs") return { runs: [] };
+      if (path === "/api/colony/seasons") return JSON.parse(JSON.stringify(seasonsData));
+      if (path === "/api/colony/season") {
+        if (colonyState.running) throw new Error("409 colony running");
+        const nextId = body && body.id ? body.id : "";
+        seasonsData.active = nextId || null;
+        colonyState = {
+          ...colonyState,
+          season: nextId ? { id: nextId, left: 4200, score: 310 } : null,
+          state: { ...colonyState.state, tick: 200 },
+        };
+        return { ok: true };
+      }
+      if (path === "/api/colony/run") {
+        colonyState.running = true;
+        return { started: true };
+      }
+      if (path === "/api/colony/stop") {
+        colonyState.running = false;
+        return { ok: true };
+      }
+      return {};
+    },
+  });
+
+  vm.runInContext(
+    appSource.slice(appSource.indexOf("const BURST"), appSource.indexOf("function setWorld"))
+    + "\n;Object.assign(globalThis, { BURST, UNIT, ORES, ENT, NAME, INV_COLOR, DRONE_COLORS });",
+    ctx,
+  );
+  const testColonySrc = source
+    .slice(0, source.indexOf('$("#btn-colony").onclick'))
+    .replace(
+      "return { enter, exit, toggleRun, LEVEL, get running() { return running; } };",
+      "return { enter, exit, toggleRun, onEvent, openSeasons, switchSeason, leaveSeason, LEVEL, get running() { return running; } };",
+    );
+  vm.runInContext(testColonySrc + "\n;globalThis.Colony = Colony;", ctx);
+
+  await ctx.Colony.enter();
+  assert.equal(getEl("#col-systems").classList.contains("hidden"), false);
+  assert.match(getEl("#col-systems").innerHTML, /Archive[\s\S]*55/);
+  assert.equal(getEl("#col-season").classList.contains("hidden"), true);
+  assert.equal(doc.body.classList.contains("colony-season"), false);
+  assert.equal(getEl("#lvl-title").textContent, "Colony");
+
+  // Live systems event turning all systems off hides #col-systems
+  ctx.Colony.onEvent({ op: "systems", systems: { archive: { on: false } } });
+  assert.equal(getEl("#col-systems").classList.contains("hidden"), true);
+
+  // Starting a season while running is rejected cleanly and seasons dialog marks buttons disabled
+  await ctx.Colony.toggleRun();
+  assert.equal(ctx.Colony.running, true);
+  await ctx.Colony.openSeasons();
+  assert.match(getEl("#seasons-list").innerHTML, /data-season-start="one-drone"\s*disabled/);
+  await ctx.Colony.switchSeason("one-drone");
+  assert.equal(apiCalls.some((c) => c.path === "/api/colony/season"), false);
+
+  // Stop, start season -> banner appears and header title area distinguishes season mode
+  await ctx.Colony.toggleRun();
+  await ctx.Colony.switchSeason("one-drone");
+  assert.deepEqual(JSON.parse(JSON.stringify(apiCalls.findLast((c) => c.path === "/api/colony/season").body)), { id: "one-drone" });
+  assert.equal(doc.body.classList.contains("colony-season"), true);
+  assert.match(getEl("#lvl-title").textContent, /Season: One Drone Challenge/);
+  assert.match(getEl("#lvl-chapter").textContent, /ONE-DRONE/);
+  assert.match(doc.title, /Season: One Drone Challenge/);
+  assert.equal(getEl("#col-season").classList.contains("hidden"), false);
+  assert.match(getEl("#col-season").innerHTML, /One Drone Challenge/);
+  assert.match(getEl("#col-season").innerHTML, /7:00/);
+  assert.match(getEl("#col-season").innerHTML, /310/);
+
+  // Running live tick decrements countdown in #col-season
+  await ctx.Colony.toggleRun();
+  ctx.Colony.onEvent({ op: "tick", t: 250 });
+  assert.match(getEl("#col-season").innerHTML, /6:55/);
+
+  // Cancelling leave confirmation aborts without API call; confirming leaves season when stopped
+  confirmReply = false;
+  assert.equal(await ctx.Colony.leaveSeason(), false);
+  assert.equal(confirmCalls.length, 1);
+  assert.equal(apiCalls.filter((c) => c.path === "/api/colony/season").length, 1);
+
+  await ctx.Colony.toggleRun();
+  confirmReply = true;
+  assert.equal(await ctx.Colony.leaveSeason(), true);
+  assert.deepEqual(JSON.parse(JSON.stringify(apiCalls.findLast((c) => c.path === "/api/colony/season").body)), { id: "" });
+  assert.equal(doc.body.classList.contains("colony-season"), false);
+  assert.equal(doc.title, "Orbital Colony");
+  assert.equal(getEl("#lvl-title").textContent, "Colony");
+  assert.equal(getEl("#col-season").classList.contains("hidden"), true);
+
+  // Season-end event: new best plays goal sound and renders new-best result card; non-new-best plays report
+  seasonsData.seasons[0].best = 1000;
+  await ctx.Colony.openSeasons();
+  sounds.length = 0;
+  ctx.Colony.onEvent({ op: "season", id: "one-drone", ok: true, score: 1500, best: 1500, msg: "Season finished!" });
+  await Promise.resolve();
+  assert.equal(sounds.includes("goal"), true);
+  assert.match(getEl("#season-result-body").innerHTML, /New best!/);
+  assert.match(getEl("#season-result-body").innerHTML, /1,500 \/ 2,000 \(75%\)/);
+
+  sounds.length = 0;
+  ctx.Colony.onEvent({ op: "season", id: "one-drone", ok: true, score: 900, best: 1500, msg: "Finished" });
+  await Promise.resolve();
+  assert.equal(sounds.includes("goal"), false);
+  assert.equal(sounds.includes("report"), true);
+  assert.ok(!getEl("#season-result-body").innerHTML.includes("season-new-best"));
 });
