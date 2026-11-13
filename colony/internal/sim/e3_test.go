@@ -53,20 +53,20 @@ func TestPowerBaselineAndDayNightPriorityBrownout(t *testing.T) {
 	w.Tick = 599
 	w.Wait(0)
 	before := c.Progress
-	if supply, demand := w.Power(); supply != 0 || demand != 11 || w.Daylight() || c.Powered {
+	if supply, demand := w.Power(); supply != 7 || demand != 11 || w.Daylight() || !b.Powered || !a.Powered || c.Powered {
 		t.Fatalf("night power=%g demand=%g", supply, demand)
 	}
 	w.Wait(0)
 	if c.Progress != before {
-		t.Fatal("solar building progressed at night")
+		t.Fatal("load without enough baseline power progressed at night")
 	}
 	if err := w.BuildingEnable(0, Point{1, 0}, false); err != nil {
 		t.Fatal(err)
 	}
 	w.Tick = 1199
 	w.Wait(0)
-	if supply, _ := w.Power(); supply != 0 || g.Enabled {
-		t.Fatal("disabled generator supplied baseline or solar")
+	if supply, _ := w.Power(); supply != 7 || g.Enabled || !b.Powered || !a.Powered || c.Powered {
+		t.Fatal("disabled generator changed baseline power allocation")
 	}
 }
 
@@ -474,9 +474,18 @@ func TestCollectorPausesDuringDayAndNeedsPowerAtNight(t *testing.T) {
 		t.Fatal("collector did not begin at night")
 	}
 	powerBuilding(w, "generator", 1)
+	r := powerBuilding(w, "refinery", 2)
+	r.Priority = 1
 	w.Wait(0)
-	if b.Powered || b.Progress != 1 {
-		t.Fatal("night solar powered collector")
+	if supply, demand := w.Power(); supply != 7 || demand != 8 || !r.Powered || b.Powered || b.Progress != 1 {
+		t.Fatalf("night power=%g demand=%g collector=%+v refinery=%+v", supply, demand, b, r)
+	}
+	if err := w.BuildingSetPriority(0, Point{}, 2); err != nil {
+		t.Fatal(err)
+	}
+	w.Wait(0)
+	if !b.Powered || r.Powered || b.Progress != 2 {
+		t.Fatal("collector did not resume with priority for baseline power")
 	}
 }
 

@@ -73,8 +73,8 @@ func main() {
 	for colony.Daylight() {
 		colony.Wait()
 	}
-	if supply, _ := colony.Power(); supply != 0 {
-		panic(i18n.T("الشمس بتنتج بالليل", "solar generated at night"))
+	if supply, _ := colony.Power(); supply != 7 {
+		panic(i18n.T("الحد الأدنى للطاقة بالليل اتغيّر", "night baseline power changed"))
 	}
 	must(generator.SetMode("burner"))
 	must(refinery.Enable(true))

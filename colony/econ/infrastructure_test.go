@@ -75,7 +75,7 @@ func TestGeneratorFuelExhaustionAndModeChangesKeepBuffers(t *testing.T) {
 		}
 		good, fuel := GeneratorFuel(mode, 1)
 		if fuel > 0 {
-			if s.ConsumePower(600) != 0 {
+			if s.ConsumePower(600) != BaselinePower || b.generatorSupply(600) != 0 {
 				t.Fatal("unfueled generator produced")
 			}
 			b.In[good] = fuel * 3
@@ -84,12 +84,15 @@ func TestGeneratorFuelExhaustionAndModeChangesKeepBuffers(t *testing.T) {
 					t.Fatal("fuel exhausted too soon")
 				}
 			}
-			if s.ConsumePower(600) != 0 || math.Abs(b.In[good]) > 1e-9 {
+			if s.ConsumePower(600) != BaselinePower || b.generatorSupply(600) != 0 || math.Abs(b.In[good]) > 1e-9 {
 				t.Fatal("fuel exhausted too late")
 			}
 		}
 		b.Enabled = false
-		if s.ConsumePower(0) != 0 {
+		if fuel > 0 {
+			b.In[good] = 1
+		}
+		if s.ConsumePower(0) != BaselinePower || b.generatorSupply(0) != 0 || fuel > 0 && b.In[good] != 1 {
 			t.Fatal("disabled generator produced")
 		}
 		b.In["fuel"] = 1

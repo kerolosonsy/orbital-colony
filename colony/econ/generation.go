@@ -20,17 +20,11 @@ func (b *Building) generatorSupply(tick int64) float64 {
 }
 
 func (s *State) PowerSupply(tick int64) float64 {
-	supply, generators := 0.0, 0
+	supply := 0.0
 	for _, b := range s.Buildings {
-		if b.Kind == "generator" {
-			generators++
-		}
 		supply += b.generatorSupply(tick)
 	}
-	if generators == 0 {
-		return BaselinePower
-	}
-	return supply
+	return max(BaselinePower, supply)
 }
 
 func (s *State) ConsumePower(tick int64) float64 {

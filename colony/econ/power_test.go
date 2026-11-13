@@ -2,6 +2,36 @@ package econ
 
 import "testing"
 
+func TestPowerSupplyKeepsBaselineAsFloor(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		generators []*Building
+		tick       int64
+		supply     float64
+	}{
+		{"no generator", nil, 0, 7},
+		{"solar day", []*Building{{Kind: "generator", Mode: "solar", Enabled: true}}, 0, 10},
+		{"solar night", []*Building{{Kind: "generator", Mode: "solar", Enabled: true}}, 600, 7},
+		{"burner night", []*Building{{Kind: "generator", Mode: "burner", Enabled: true, In: map[string]float64{"fuel": 1}}}, 600, 25},
+		{"two solar day", []*Building{{Kind: "generator", Mode: "solar", Enabled: true}, {Kind: "generator", Mode: "solar", Enabled: true}}, 0, 20},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s := New(1)
+			s.Buildings = tc.generators
+			if got := s.PowerSupply(tc.tick); got != tc.supply {
+				t.Errorf("PowerSupply(%d) = %g, want %g", tc.tick, got, tc.supply)
+			}
+			s.RefreshPower(tc.tick)
+			if s.Power.Supply != tc.supply {
+				t.Errorf("refreshed supply = %g, want %g", s.Power.Supply, tc.supply)
+			}
+			if got := s.ConsumePower(tc.tick); got != tc.supply {
+				t.Errorf("ConsumePower(%d) = %g, want %g", tc.tick, got, tc.supply)
+			}
+		})
+	}
+}
+
 func TestSolarFollowsDaylightCycle(t *testing.T) {
 	for _, tc := range []struct {
 		tick int64
