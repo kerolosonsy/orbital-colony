@@ -99,7 +99,7 @@ func TestContractProgressSettleAndReplay(t *testing.T) {
 	if f := s.Fraction(); f != 0 {
 		t.Fatalf("fraction = %v, want 0 (lichen is the slowest goal)", f)
 	}
-	s.RecordSale(0, "lichen", 30, 90, 3)
+	s.RecordSale(0, "lichen", 20, 60, 3)
 	if s.Left(100) != 1400 {
 		t.Fatalf("left = %d", s.Left(100))
 	}
@@ -131,7 +131,7 @@ func TestContractProgressSettleAndReplay(t *testing.T) {
 	}
 	s.Accept("c04-right-ground")
 	s.RecordSale(0, "moss", 30, 30, 1)
-	s.RecordSale(0, "lichen", 30, 90, 3)
+	s.RecordSale(0, "lichen", 20, 60, 3)
 	credits := s.Credits
 	if r, err := s.Settle(1030); err != nil || r.Credits != 0 || s.Credits != credits || s.Contracts["c04-right-ground"].Best != 30 {
 		t.Fatalf("replay settle: %v %+v", err, s.Contracts["c04-right-ground"])
@@ -161,7 +161,7 @@ func TestContractRules(t *testing.T) {
 		tc.play(s)
 		tick := int64(10)
 		if tc.id == "c03-full-sweep" {
-			tick = 901
+			tick = 1751
 		}
 		if _, failed, why := s.Progress(tick); failed != tc.failed {
 			t.Errorf("%s: failed = %v (%s)", tc.id, failed, why)
@@ -256,8 +256,8 @@ func TestContractTextsBothLanguages(t *testing.T) {
 		s.RecordSale(0, "moss", 12, 12, 1)
 		_, _, why := s.Progress(5)
 		_, _, pair := s.ProgressPair(5)
-		want := map[string]string{"ar": "الطحالب 12/60", "en": "Moss 12/60"}[lang]
-		if why != want || pair != [2]string{"الطحالب 12/60", "Moss 12/60"} {
+		want := map[string]string{"ar": "الطحالب 12/120", "en": "Moss 12/120"}[lang]
+		if why != want || pair != [2]string{"الطحالب 12/120", "Moss 12/120"} {
 			t.Errorf("%s: progress = %q, pair = %q", lang, why, pair)
 		}
 		_, _, why = New(1).Status(Find("crop.lichen"))

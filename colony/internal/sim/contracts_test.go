@@ -73,7 +73,7 @@ func TestColonyContractCountsDenyAndFail(t *testing.T) {
 func TestColonyContractSettlesFromSales(t *testing.T) {
 	t.Setenv("ORBITAL_COLONY_UNIT", "1ms")
 	st := econ.New(3)
-	st.Inv["moss"] = 60
+	st.Inv["moss"] = 120
 	if err := st.Accept("c03-full-sweep"); err != nil {
 		t.Fatal(err)
 	}
