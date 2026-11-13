@@ -17,6 +17,7 @@ const Colony = (() => {
   let data = null, es = null, running = false, samples = [], shopDirty = true, live = null;
 
   let contractTarget = "", contractHighlightUntil = 0, contractHighlightTimer = null;
+  let rankHighlightUntil = 0, rankHighlightTimer = null;
 
   const fmt = (n) => Math.floor(n).toLocaleString("en-US");
   const actionMs = (st) => 260 * Math.pow(0.92, (st.levels && st.levels.engine) || 0);
@@ -68,6 +69,7 @@ const Colony = (() => {
     liveWorld(stateToInit(data.state));
     running = data.running;
     samples = []; live = null;
+    clearTimeout(rankHighlightTimer); rankHighlightUntil = 0;
     openStream();
     renderAll();
     runUI();
@@ -77,6 +79,8 @@ const Colony = (() => {
     TreeView.close();
     clearTimeout(contractHighlightTimer);
     contractTarget = ""; contractHighlightUntil = 0;
+    clearTimeout(rankHighlightTimer);
+    rankHighlightUntil = 0;
     S.mode = "mission";
     document.body.classList.remove("colony");
     if (es) { es.close(); es = null; }
@@ -136,6 +140,12 @@ const Colony = (() => {
         Sound.play(ev.ok ? "goal" : "error");
         refresh();
         return;
+      case "rank":
+        econ(ev);
+        if (ev.msg) log(ev.msg, ev.ok === false ? "c-err" : "c-ok");
+        if (ev.ok !== false) { Sound.play("goal"); highlightRank(); }
+        if (!ev.tree && !TreeView.isOpen) refresh();
+        return;
       case "stdout": log(ev.msg); return;
       case "stderr": log(ev.msg, "c-err"); return;
       case "stopped":
@@ -169,12 +179,18 @@ const Colony = (() => {
   }
 
   function econ(ev) {
+    if (!data || !data.state) return;
     if (ev.state) {
       data.state = ev.state;
       W && (W.liveStep = actionMs(data.state));
       shopDirty = true;
       syncStateToWorld(ev.state);
     }
+    if (ev.rank && typeof ev.rank === "object") {
+      data.rank = ev.rank;
+      if (typeof ev.rank.level === "number") data.state.rank = ev.rank.level;
+    }
+    if (typeof ev.rp === "number") data.state.rp = ev.rp;
     if (typeof ev.credits === "number") data.state.credits = ev.credits;
     if (ev.prices) data.prices = ev.prices;
     if (ev.inv) {
@@ -186,11 +202,11 @@ const Colony = (() => {
     const now = performance.now();
     samples.push([now, data.state.credits]);
     while (samples.length && now - samples[0][0] > 90000) samples.shift();
-    renderStatus(); renderMarket(); renderBuildings();
+    renderRank(); renderStatus(); renderMarket(); renderBuildings(); renderFleet();
     renderShop();
     if (ev.state && typeof draw === "function") draw(now);
     if (ev.tree) { data.tree = ev.tree; updateTree(); }
-    else if (TreeView.isOpen && (ev.state || typeof ev.credits === "number" || ev.inv)) refresh();
+    else if (TreeView.isOpen && (ev.state || typeof ev.credits === "number" || ev.inv || ev.rank || typeof ev.rp === "number")) { updateTree(); refresh(); }
   }
 
   async function refresh() {
@@ -265,7 +281,7 @@ const Colony = (() => {
   }
 
   // ---------- panel ----------
-  function renderAll() { renderStatus(); renderMarket(); renderBuildings(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
+  function renderAll() { renderRank(); renderStatus(); renderMarket(); renderBuildings(); renderFleet(); renderRewards(); renderContracts(); shopDirty = true; renderShop(); updateTree(); }
 
   // ---------- contracts: code challenges that unlock blueprints ----------
   // ticks are 100ms of colony time
@@ -276,22 +292,27 @@ const Colony = (() => {
     const id = esc(c.id).replace(/"/g, "&quot;");
     const best = run.best ? `<span class="ct-best">${T("أحسن وقت", "Best time")} ${clock(run.best)}</span>` : "";
     const head = `<div class="item-top"><b>${esc(c.title)}</b><span class="lv">${T(`فصل ${c.chapter}`, `Ch. ${c.chapter}`)}</span></div>`;
+    const badges = [
+      c.repeatable ? `<span class="ct-repeat" title="${esc(T("عقد متكرر", "Repeatable")).replace(/"/g, "&quot;")}">↻ ${esc(T("متكرر", "Repeatable"))}</span>` : "",
+      c.rewardRP > 0 ? `<span class="ct-rp"><b dir="ltr">+${Math.floor(c.rewardRP).toLocaleString("en-US")}</b> ${esc(T("نقطة بحث", "RP"))}</span>` : "",
+    ].filter(Boolean).join("");
+    const meta = badges ? `<div class="ct-badges">${badges}</div>` : "";
     const lesson = `<button class="lesson-link ct-lesson" data-ch="${c.chapter}">${T(`الدرس: فصل ${c.chapter}`, `Lesson: chapter ${c.chapter}`)}</button>`;
     const stopped = running ? `<span class="why">${T("وقّف المستعمرة الأول", "Stop the colony first")}</span>` : "";
     switch (c.status) {
       case "active": {
         const frac = now ? now.frac : c.frac || 0, left = now ? now.left : c.left, text = now ? now.progress : c.progress || "";
-        return `<div class="item contract active" data-id="${id}">${head}<p>${esc(c.brief)}</p>
+        return `<div class="item contract active" data-id="${id}">${head}${meta}<p>${esc(c.brief)}</p>
           <div class="ct-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(frac * 100)}"><i style="width:${(frac * 100).toFixed(1)}%"></i></div>
           <div class="item-foot"><span class="ct-progress">${esc(text)}</span>${left >= 0 ? `<span class="ct-left">${T("باقي", "Left")} ${clock(left)}</span>` : ""}</div>
           <div class="item-foot">${lesson}<button class="ct-act ct-cancel" ${running ? "disabled" : ""}>${T("ألغي", "Cancel")}</button></div>${stopped}</div>`;
       }
       case "available":
       case "done":
-        return `<div class="item contract${c.status === "done" ? " done" : ""}" data-id="${id}">${head}<p>${esc(c.brief)}</p>
+        return `<div class="item contract${c.status === "done" ? " done" : ""}" data-id="${id}">${head}${meta}<p>${esc(c.brief)}</p>
           <div class="item-foot">${c.status === "done" ? best : lesson}<button class="ct-act ct-accept" data-id="${id}" ${running ? "disabled" : ""}>${c.status === "done" ? T("العبه تاني", "Replay") : T("اقبل", "Accept")}</button></div>${stopped}</div>`;
       default:
-        return `<div class="item contract locked" data-id="${id}">${head}<span class="why">${(c.after || []).length ? esc(T("خلّص العقد الأول: ", "Finish the contract first: ") + c.after.join(T("، ", ", "))) : T(`خلّص الفصل ${c.chapter}`, `Finish chapter ${c.chapter}`)}</span></div>`;
+        return `<div class="item contract locked" data-id="${id}">${head}${meta}<span class="why">${(c.after || []).length ? esc(T("خلّص العقد الأول: ", "Finish the contract first: ") + c.after.join(T("، ", ", "))) : T(`خلّص الفصل ${c.chapter}`, `Finish chapter ${c.chapter}`)}</span></div>`;
     }
   }
 
@@ -323,7 +344,7 @@ const Colony = (() => {
     return lockedAt < 0 ? shown : shown.filter((c, i) => i < lockedAt + 2 || c.id === targetId);
   }
 
-  function treeSnapshot() { return { nodes: data.tree, inv: data.state.inv, credits: data.state.credits }; }
+  function treeSnapshot() { return { nodes: data.tree, inv: data.state.inv, credits: data.state.credits, rp: data.state.rp, rank: data.state.rank }; }
 
   function updateTree() {
     if (TreeView.isOpen) TreeView.update(treeSnapshot());
@@ -374,6 +395,12 @@ const Colony = (() => {
     const owned = Object.values(data.state.levels || {}).reduce((a, b) => a + b, 0);
     $("#col-levels").textContent = data.levels ? `${owned} / ${data.levels.total} ${T("ترقية", "upgrades")}` : "";
     $("#col-size").textContent = `${data.state.size}×${data.state.size}${data.state.depth > 1 ? ` · ${data.state.depth} ${T("طبقات", "layers")}` : ""}`;
+    const sys = $("#col-sys");
+    if (sys) {
+      const extra = statusExtraMarkup(data.state);
+      sys.classList.toggle("hidden", !extra);
+      sys.innerHTML = extra;
+    }
   }
 
   function marketRowVisible(g, inv, levels) {
@@ -416,6 +443,151 @@ const Colony = (() => {
     const list = typeof Buildings !== "undefined" ? Buildings.list() : [];
     box.classList.toggle("hidden", !list.length);
     box.innerHTML = list.length ? Buildings.listMarkup(list) : "";
+  }
+
+  // ---------- system readouts ----------
+  const fmtNum = (n) => {
+    const v = Number(n) || 0;
+    return Number.isInteger(v) ? v.toLocaleString("en-US") : Number(v.toFixed(2)).toLocaleString("en-US");
+  };
+  const escAttr = (s, escapeFn = esc) => escapeFn(String(s)).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+  function rankGoalLabel(kind, tr = T) {
+    if (kind === "output") return tr("إنتاج في الدقيقة", "Output per minute");
+    if (kind === "efficiency") return tr("قيمة لكل أمر", "Value per command");
+    return kind ? String(kind) : "";
+  }
+
+  function rankMarkup(rank, deps = {}) {
+    if (!rank || typeof rank !== "object") return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const level = Number(rank.level) || 0;
+    const value = Number(rank.value) || 0;
+    const target = Number(rank.target) || 0;
+    const pct = target > 0 ? Math.max(0, Math.min(100, (value / target) * 100)) : (value > 0 ? 100 : 0);
+    const kindText = rankGoalLabel(rank.kind, tr);
+    const filling = typeof rank.filled === "number" && rank.filled < 1;
+    const fillPct = filling ? Math.max(0, Math.round(rank.filled * 100)) : 100;
+    const note = filling
+      ? `<div class="rank-note">${escapeFn(tr(`نافذة القياس بتتملي (${fillPct}%)`, `Measuring window filling (${fillPct}%)`))}</div>`
+      : "";
+    return `<div class="rank-top"><span class="rank-lv">${escapeFn(tr(`المرتبة ${fmt(level)}`, `Rank ${fmt(level)}`))}</span><span class="rank-kind">${escapeFn(kindText)}</span><span class="rank-val" dir="ltr">${fmtNum(value)} / ${fmtNum(target)}</span></div>`
+      + `<div class="rank-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct.toFixed(1)}%"></i></div>`
+      + note;
+  }
+
+  function statusExtraMarkup(state, deps = {}) {
+    if (!state || typeof state !== "object") return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const parts = [];
+
+    if (state.power && typeof state.power === "object" && (typeof state.power.supply === "number" || typeof state.power.demand === "number")) {
+      const supply = Number(state.power.supply) || 0;
+      const demand = Number(state.power.demand) || 0;
+      const warn = demand > supply;
+      const dayMark = typeof state.power.day === "boolean"
+        ? `<span class="col-day ${state.power.day ? "is-day" : "is-night"}">${escapeFn(state.power.day ? tr("نهار", "Day") : tr("ليل", "Night"))}</span>`
+        : "";
+      parts.push(`<div class="col-stat col-power${warn ? " warn" : ""}" title="${escAttr(tr("إمداد / طلب", "Supply / Demand"), escapeFn)}"><span class="col-stat-lbl">${escapeFn(tr("الطاقة", "Power"))}${dayMark}</span><span class="col-stat-val" dir="ltr">${fmtNum(supply)} / ${fmtNum(demand)}</span></div>`);
+    }
+
+    if (typeof state.rp === "number" && Number.isFinite(state.rp)) {
+      parts.push(`<div class="col-stat col-rp"><span class="col-stat-lbl">${escapeFn(tr("نقاط البحث", "Research"))}</span><span class="col-stat-val"><b dir="ltr">${fmt(state.rp)}</b> ${escapeFn(tr("نقطة", "RP"))}</span></div>`);
+    }
+
+    if (typeof state.rent === "number" && Number.isFinite(state.rent)) {
+      parts.push(`<div class="col-stat col-rent"><span class="col-stat-lbl">${escapeFn(tr("الإيجار", "Rent"))}</span><span class="col-stat-val"><b dir="ltr">${fmtNum(state.rent)} CR</b> ${escapeFn(tr("/ دقيقة", "/ min"))}</span></div>`);
+    }
+
+    if (state.storage && typeof state.storage === "object") {
+      const cats = [
+        ["crops", tr("محاصيل", "Crops")],
+        ["raw", tr("خامات", "Raw")],
+        ["crafted", tr("مصنّع", "Crafted")],
+      ];
+      const bars = cats.filter(([k]) => state.storage[k] && typeof state.storage[k] === "object").map(([k, label]) => {
+        const used = Number(state.storage[k].used) || 0;
+        const cap = Number(state.storage[k].cap) || 0;
+        const pct = cap > 0 ? Math.max(0, Math.min(100, (used / cap) * 100)) : (used > 0 ? 100 : 0);
+        const warn = cap > 0 ? used * 10 > cap * 9 : used > 0;
+        return `<div class="col-bar-row${warn ? " warn" : ""}" data-storage="${k}"><div class="col-bar-head"><span>${escapeFn(label)}</span><span class="col-bar-num" dir="ltr">${fmtNum(used)} / ${fmtNum(cap)}</span></div><div class="col-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct.toFixed(1)}%"></i></div></div>`;
+      }).join("");
+      if (bars) parts.push(`<div class="col-storage">${bars}</div>`);
+    }
+
+    return parts.join("");
+  }
+
+  function hasCargoData(drone) {
+    if (!drone || typeof drone !== "object") return false;
+    if (Number(drone.cap) > 0) return true;
+    return Object.values(drone.cargo || {}).some((n) => Number(n) > 0);
+  }
+
+  function fleetVisible(fleet) {
+    if (!Array.isArray(fleet) || !fleet.length) return false;
+    if (fleet.length === 1 && !hasCargoData(fleet[0])) return false;
+    return true;
+  }
+
+  function fleetMarkup(fleet, deps = {}) {
+    if (!fleetVisible(fleet)) return "";
+    const tr = deps.T || T;
+    const escapeFn = deps.esc || esc;
+    const names = deps.NAME || NAME;
+    const colors = deps.INV_COLOR || INV_COLOR;
+    const droneColors = deps.DRONE_COLORS || (typeof DRONE_COLORS !== "undefined" ? DRONE_COLORS : ["#ff7a52"]);
+    const sorted = [...fleet].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+    const rows = sorted.map((d) => {
+      const id = Number(d.id) || 0;
+      const col = escAttr(droneColors[Math.abs(id) % droneColors.length], escapeFn);
+      const bat = typeof d.battery === "number" ? Math.max(0, Math.min(100, d.battery)) : null;
+      const batLow = bat !== null && bat < 20;
+      const batMarkup = bat !== null
+        ? `<div class="flt-bat${batLow ? " warn" : ""}"><span class="flt-lbl">${escapeFn(tr("البطارية", "Battery"))}</span><div class="flt-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(bat)}"><i style="width:${bat.toFixed(1)}%"></i></div><span class="flt-num" dir="ltr">${Math.round(bat)}%</span></div>`
+        : "";
+      const entries = Object.entries(d.cargo || {}).filter(([, n]) => Number(n) > 0).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+      const used = entries.reduce((sum, [, n]) => sum + Number(n), 0);
+      const cap = Number(d.cap) || 0;
+      const chips = entries.length
+        ? entries.map(([g, n]) => `<span class="cg bld-chip" title="${escAttr(names[g] || g, escapeFn)}"><i style="background:${escAttr(colors[g] || "#ccc", escapeFn)}"></i>${fmtNum(n)}</span>`).join("")
+        : '<span class="bld-none">—</span>';
+      const cargoMarkup = cap > 0 || used > 0
+        ? `<div class="flt-cargo"><div class="flt-cargo-head"><span class="flt-lbl">${escapeFn(tr("الحمولة", "Cargo"))}</span><span class="flt-num" dir="ltr">${fmtNum(used)} / ${fmtNum(cap)}</span></div><div class="flt-chips">${chips}</div></div>`
+        : "";
+      return `<div class="item flt-row" data-drone="${id}"><div class="item-top"><b><i class="flt-dot" style="background:${col}"></i>${escapeFn(tr(`درون ${id}`, `Drone ${id}`))}</b></div>${batMarkup}${cargoMarkup}</div>`;
+    }).join("");
+    return `<h3>${escapeFn(tr("الأسطول", "Fleet"))} <small>${sorted.length}</small></h3>` + rows;
+  }
+
+  function highlightRank() {
+    rankHighlightUntil = performance.now() + 1800;
+    clearTimeout(rankHighlightTimer);
+    const box = $("#col-rank");
+    if (box) box.classList.add("rank-up");
+    rankHighlightTimer = setTimeout(() => {
+      const el = $("#col-rank");
+      if (el) el.classList.remove("rank-up");
+    }, 1800);
+  }
+
+  function renderRank() {
+    const box = $("#col-rank");
+    if (!box) return;
+    const html = data && data.rank ? rankMarkup(data.rank) : "";
+    box.classList.toggle("hidden", !html);
+    box.classList.toggle("rank-up", !!html && performance.now() < rankHighlightUntil);
+    box.innerHTML = html;
+  }
+
+  function renderFleet() {
+    const box = $("#col-fleet");
+    if (!box) return;
+    const html = data && data.state ? fleetMarkup(data.state.fleet) : "";
+    box.classList.toggle("hidden", !html);
+    box.innerHTML = html;
   }
 
   function shopName(id) { const u = (data.shop || []).find((x) => x.id === id); return u ? uName(u) : id; }
