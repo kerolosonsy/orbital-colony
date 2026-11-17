@@ -89,9 +89,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: A lucky correct result does not prove shared writes are safe.",
-				"Structure: Separate the total update from movement, harvesting, and waiting.",
-				"Specific: Inspect the ~total += n~ line inside the goroutine.",
+				"A lucky correct result does not prove shared writes are safe.",
+				"Separate the total update from movement, harvesting, and waiting.",
+				"Inspect the ~total += n~ line inside the goroutine.",
 			},
 		},
 		LessonRevision: 1, Steps: ch12Lesson121Arabic,
@@ -152,9 +152,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الفكرة: نتيجة سليمة مرة مش إثبات إن الكتابة المشتركة آمنة.",
-			"الترتيب: افصل تحديث الإجمالي عن الحركة والحصاد وانتظار العمال.",
-			"السطر: راجع ~total += n~ جوه الـgoroutine.",
+			"نتيجة سليمة مرة مش إثبات إن الكتابة المشتركة آمنة.",
+			"افصل تحديث الإجمالي عن الحركة والحصاد وانتظار العمال.",
+			"راجع ~total += n~ جوه الـgoroutine.",
 		},
 		Lesson: `# Data race: لما الكل يكتب في نفس الوقت 🏁
 
@@ -282,9 +282,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: Concurrent writers to one map need one shared mutex.",
-				"Structure: Let Registry own the map and lock; separate recording from reading.",
-				"Specific: Inspect ~Record~ and the ~r.sizes[p] = size~ line.",
+				"Concurrent writers to one map need one shared mutex.",
+				"Let Registry own the map and lock; separate recording from reading.",
+				"Inspect ~Record~ and the ~r.sizes[p] = size~ line.",
 			},
 		},
 		LessonRevision: 1, Steps: ch12Lesson122Arabic,
@@ -357,9 +357,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الفكرة: الكتّاب المتزامنين في map واحدة محتاجين mutex مشتركة.",
-			"الترتيب: خلّي Registry تملك الـmap والقفل، وافصل التسجيل عن القراءة.",
-			"السطر: راجع ~Record~ وسطر ~r.sizes[p] = size~.",
+			"الكتّاب المتزامنين في map واحدة محتاجين mutex مشتركة.",
+			"خلّي Registry تملك الـmap والقفل، وافصل التسجيل عن القراءة.",
+			"راجع ~Record~ وسطر ~r.sizes[p] = size~.",
 		},
 		Lesson: `# Mutex جوه struct: النمط الاحترافي 🗃️
 
@@ -475,9 +475,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: A deadlock can form when each worker holds one resource and waits for another.",
-				"Structure: Compare the two lock orders on every path before tracing Wait.",
-				"Specific: Inspect the arguments to ~harvestWith~ in both ~work~ calls inside ~main~.",
+				"A deadlock can form when each worker holds one resource and waits for another.",
+				"Compare the two lock orders on every path before tracing Wait.",
+				"Inspect the arguments to ~harvestWith~ in both ~work~ calls inside ~main~.",
 			},
 		},
 		LessonRevision: 1, Steps: ch12Lesson123Arabic,
@@ -535,9 +535,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الفكرة: الـdeadlock ممكن يحصل لما كل عامل ماسك مورد ومستني التاني.",
-			"الترتيب: قارن ترتيب القفلين في كل مسار قبل تتبّع Wait.",
-			"السطر: راجع arguments بتوع ~harvestWith~ في استدعاءي ~work~ جوه ~main~.",
+			"الـdeadlock ممكن يحصل لما كل عامل ماسك مورد ومستني التاني.",
+			"قارن ترتيب القفلين في كل مسار قبل تتبّع Wait.",
+			"راجع arguments بتوع ~harvestWith~ في استدعاءي ~work~ جوه ~main~.",
 		},
 		Lesson: `# Deadlock: كل واحد مستني التاني 🔒🔒
 

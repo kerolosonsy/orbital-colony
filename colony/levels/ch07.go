@@ -141,9 +141,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: a point groups coordinates, and the list keeps visit order.",
-				"Structure: separate travel to one point from visiting the list.",
-				"Location: finish ~goTo~ after ~colony.Position()~ and check coordinate updates.",
+				"A point groups coordinates, and the list keeps visit order.",
+				"Separate travel to one point from visiting the list.",
+				"Finish ~goTo~ after ~colony.Position()~ and check coordinate updates.",
 			},
 		},
 		LessonRevision: 1, Steps: ch07WaypointsArabic,
@@ -192,9 +192,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"المفهوم: النقطة تجمع الإحداثيين، والقائمة تحفظ ترتيب المرور.",
-			"الهيكل: افصل الوصول لنقطة عن تكرار المرور على النقاط.",
-			"الموضع: كمّل ~goTo~ بعد ~colony.Position()~ وراجع تحديث الإحداثيات.",
+			"النقطة تجمع الإحداثيين، والقائمة تحفظ ترتيب المرور.",
+			"افصل الوصول لنقطة عن تكرار المرور على النقاط.",
+			"كمّل ~goTo~ بعد ~colony.Position()~ وراجع تحديث الإحداثيات.",
 		},
 		Lesson: `# Structs: حاجات ليها أجزاء 🧱
 
@@ -312,9 +312,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: keep navigation state with the movement behavior.",
-				"Structure: separate travel from handling each target.",
-				"Location: inspect ~colony.Targets()~ and the code after ~nav.GoTo(t)~.",
+				"Keep navigation state with the movement behavior.",
+				"Separate travel from handling each target.",
+				"Inspect ~colony.Targets()~ and the code after ~nav.GoTo(t)~.",
 			},
 		},
 		LessonRevision: 1, Steps: ch07NavigationArabic,
@@ -368,9 +368,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"المفهوم: خَلّي حالة الملاحة مع سلوك الحركة.",
-			"الهيكل: افصل الوصول عن التعامل مع كل هدف.",
-			"الموضع: راجع ~colony.Targets()~ والكود بعد ~nav.GoTo(t)~.",
+			"خَلّي حالة الملاحة مع سلوك الحركة.",
+			"افصل الوصول عن التعامل مع كل هدف.",
+			"راجع ~colony.Targets()~ والكود بعد ~nav.GoTo(t)~.",
 		},
 		Lesson: `# Methods: دوال بتاعة نوع معيّن ⚙️
 
@@ -493,9 +493,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: compare target distances from your current position.",
-				"Structure: track remaining targets and refresh your current point.",
-				"Location: inspect the ~Dist~ method and the distance print in ~main~.",
+				"Compare target distances from your current position.",
+				"Track remaining targets and refresh your current point.",
+				"Inspect the ~Dist~ method and the distance print in ~main~.",
 			},
 		},
 		LessonRevision: 1, Steps: ch07ShortestRouteArabic,
@@ -547,9 +547,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"المفهوم: قارن مسافات الأهداف من مكانك الحالي.",
-			"الهيكل: تابع الأهداف الباقية وحدّث موضعك الحالي.",
-			"الموضع: راجع method ~Dist~ وسطر طباعة المسافة في ~main~.",
+			"قارن مسافات الأهداف من مكانك الحالي.",
+			"تابع الأهداف الباقية وحدّث موضعك الحالي.",
+			"راجع method ~Dist~ وسطر طباعة المسافة في ~main~.",
 		},
 		Lesson: `# خوارزمية بسيطة: روح للأقرب 🧭
 
@@ -610,9 +610,9 @@ func main() {
 		Requires: []string{"embed", "method"}, Bridge: []int{12},
 		Par: 0, Gold: 0, MaxTicks: 100,
 		Starter: compositeUnitsStarter, Hints: []string{
-			"المفهوم: embedding يرقّي fields النوع الداخلي.",
-			"الهيكل: افصل بيانات الفاتورة عن method الأنصبة.",
-			"الموضع: استخدم قيم Invoice وراجع الـreceiver والـfields.",
+			"Embedding يرقّي fields النوع الداخلي.",
+			"افصل بيانات الفاتورة عن method الأنصبة.",
+			"استخدم قيم Invoice وراجع الـreceiver والـfields.",
 		}, Lesson: `# وحدة جوّا وحدة 🧩
 
 عرفنا structs في نقاط الطريق وmethods في نظام الملاحة. دلوقتي هنجمع نوعين مع بعض بـ embedding، ونستخدمهم لتقسيم فاتورة الطاقم من غير ما نخلق أو نضيّع cent.
@@ -676,9 +676,9 @@ fmt.Println(p.Name) // الحقل ده مش مترقّي
 
 ابني الوحدة من Invoice، وابعت slice الأنصبة بتقرير واحد. ترتيبها هو ترتيب أفراد الطاقم: أول ~total%people~ أفراد بياخدوا cent زيادة، والباقي النصيب الأساسي. المجموع لازم يساوي الإجمالي بالظبط، حتى مع صفر أو فرد واحد.`,
 		En: &LevelText{LessonRevision: 1, Steps: ch07CompositeEnglish, Title: "Composite Units", Goal: "Use embedding and a method to allocate crew invoice cents", Starter: compositeUnitsStarter, Hints: []string{
-			"Concept: embedding promotes inner type fields.",
-			"Structure: separate invoice data from the shares method.",
-			"Location: use Invoice values and inspect the receiver and fields.",
+			"Embedding promotes inner type fields.",
+			"Separate invoice data from the shares method.",
+			"Use Invoice values and inspect the receiver and fields.",
 		}, Lesson: `# One Unit Inside Another 🧩
 
 Waypoints introduced structs and Navigation System introduced methods. Now combine types with embedding and split a crew invoice without inventing or losing a cent.
@@ -785,9 +785,9 @@ func main() {
 		Requires: []string{"struct", "range"}, Bridge: []int{5},
 		Par: 0, Gold: 0, MaxTicks: 100,
 		Starter: crewExamStarter, Hints: []string{
-			"المفهوم: كل سؤال يجمع بياناته في struct واحدة.",
-			"الهيكل: افحص السؤال، اختياراته، ثم النتيجة.",
-			"الموضع: احتفظ بـindex range عند استدعاء ~colony.Answer~.",
+			"كل سؤال يجمع بياناته في struct واحدة.",
+			"افحص السؤال، اختياراته، ثم النتيجة.",
+			"احتفظ بـindex range عند استدعاء ~colony.Answer~.",
 		}, Lesson: `# سؤال كامل بدل متغيرات متفرّقة 🧑‍🚀
 
 الطاقم محتاج يراجع أرض كل محصول. بنك الأسئلة بيتغيّر وترتيب الاختيارات بيتبدّل، لكن كل سؤال بيجمع بياناته في struct واحدة زي ما نقاط الطريق جمعت X وY.
@@ -852,9 +852,9 @@ for i := range questions {
 
 احسب ~correct*100/attempted~ كعدد صحيح، وابعت النسبة في تقرير واحد. المطلوب إجابات صحيحة لكل الأسئلة الصالحة، فالنتيجة النهائية100؛ التحقق بيراجع الإجابات المسجّلة نفسها كمان، مش التقرير بس.`,
 		En: &LevelText{LessonRevision: 1, Steps: ch07CrewExamEnglish, Title: "Crew Exam", Goal: "Answer the crop-ground exam and score usable questions", Starter: crewExamStarter, Hints: []string{
-			"Concept: each question groups its data in one struct.",
-			"Structure: inspect the question, its choices, then the result.",
-			"Location: keep range's index when calling ~colony.Answer~.",
+			"Each question groups its data in one struct.",
+			"Inspect the question, its choices, then the result.",
+			"Keep range's index when calling ~colony.Answer~.",
 		}, Lesson: `# A Whole Question Instead of Scattered Variables 🧑‍🚀
 
 The crew is reviewing crop terrain. The bank and choice order vary, but every question groups its data in one struct, just as waypoints group X and Y.

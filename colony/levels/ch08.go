@@ -85,9 +85,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: an ordinary parameter receives a value copy; a pointer refers to an address.",
-				"Structure: inspect the function, its call site, then compare the printed value with storage.",
-				"Specific: check the ~addHarvest~ declaration and its call in the starter.",
+				"An ordinary parameter receives a value copy; a pointer refers to an address.",
+				"Inspect the function, its call site, then compare the printed value with storage.",
+				"Check the ~addHarvest~ declaration and its call in the starter.",
 			},
 		},
 		LessonRevision: 1, Steps: ch08CopyArabic,
@@ -140,9 +140,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الفكرة: الـparameter العادي بياخد نسخة من القيمة، والـpointer بيشاور على عنوان.",
-			"الترتيب: راجع الدالة، مكان استدعائها، وبعدها قارن الرقم المطبوع بالمخزون.",
-			"المكان: افحص تعريف ~addHarvest~ وسطر استدعائها في الـstarter.",
+			"الـparameter العادي بياخد نسخة من القيمة، والـpointer بيشاور على عنوان.",
+			"راجع الدالة، مكان استدعائها، وبعدها قارن الرقم المطبوع بالمخزون.",
+			"افحص تعريف ~addHarvest~ وسطر استدعائها في الـstarter.",
 		},
 		Lesson: `# Go بينسخ كل حاجة 📋
 
@@ -274,9 +274,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: a value receiver changes its copy; a pointer receiver can change the original struct.",
-				"Structure: inspect Cargo updates, the capacity check, and the unload timing as separate phases.",
-				"Specific: compare the receiver on ~Load~ with the one on ~GoTo~ in the starter.",
+				"A value receiver changes its copy; a pointer receiver can change the original struct.",
+				"Inspect Cargo updates, the capacity check, and the unload timing as separate phases.",
+				"Compare the receiver on ~Load~ with the one on ~GoTo~ in the starter.",
 			},
 		},
 		LessonRevision: 1, Steps: ch08CargoArabic,
@@ -352,9 +352,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الفكرة: value receiver بتغيّر نسختها؛ pointer receiver يقدر يغيّر الـstruct الأصلية.",
-			"الترتيب: راجع تحديث Cargo، وفحص السعة، ووقت التفريغ كخطوات منفصلة.",
-			"المكان: قارن receiver بتاعة ~Load~ باللي على ~GoTo~ في الـstarter.",
+			"Value receiver بتغيّر نسختها؛ pointer receiver يقدر يغيّر الـstruct الأصلية.",
+			"راجع تحديث Cargo، وفحص السعة، ووقت التفريغ كخطوات منفصلة.",
+			"قارن receiver بتاعة ~Load~ باللي على ~GoTo~ في الـstarter.",
 		},
 		Lesson: `# Pointer receivers: الحالة اللي بتفضل ⚓
 
@@ -448,9 +448,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: a nil pointer means the radar found no remaining target; check before reading it.",
-				"Structure: plan a scan phase, a safe-result phase, and a visit phase; repeat after a harvest.",
-				"Specific: inspect the ~Nearest~ call and the ~*p~ print in the starter.",
+				"A nil pointer means the radar found no remaining target; check before reading it.",
+				"Plan a scan phase, a safe-result phase, and a visit phase; repeat after a harvest.",
+				"Inspect the ~Nearest~ call and the ~*p~ print in the starter.",
 			},
 		},
 		LessonRevision: 1, Steps: ch08RadarArabic,
@@ -485,9 +485,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الفكرة: المؤشر nil معناه إن الرادار ملاقاش هدف فاضل؛ افحصه قبل قراءته.",
-			"الترتيب: خطط لمرحلة مسح، وفحص النتيجة، وزيارة؛ وكرر بعد الحصاد.",
-			"المكان: راجع نداء ~Nearest~ وسطر طباعة ~*p~ في الـstarter.",
+			"المؤشر nil معناه إن الرادار ملاقاش هدف فاضل؛ افحصه قبل قراءته.",
+			"خطط لمرحلة مسح، وفحص النتيجة، وزيارة؛ وكرر بعد الحصاد.",
+			"راجع نداء ~Nearest~ وسطر طباعة ~*p~ في الـstarter.",
 		},
 		Lesson: `# nil: الـ pointer اللي مبيشاورش على حاجة 📡
 
@@ -532,9 +532,9 @@ nil بيعبّر عن "مفيش قيمة" من غير ما تحتاج قيمة �
 		LessonRevision: 1, Steps: ch08CartArabic,
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: cartChainStarter, ReadOnly: false}},
 		Hints: []string{
-			"الفكرة: كل node بتوصل للي بعدها بعنوان، و~nil~ بتحدد نهاية السلسلة.",
-			"الترتيب: افحص الحالة الفاضية، وبعدها التوصيل والفصل والبحث كل واحدة لوحدها.",
-			"المكان: تابع حقلي ~Head~ و~Next~ في struct قبل تعديل أي وصلة.",
+			"كل node بتوصل للي بعدها بعنوان، و~nil~ بتحدد نهاية السلسلة.",
+			"افحص الحالة الفاضية، وبعدها التوصيل والفصل والبحث كل واحدة لوحدها.",
+			"تابع حقلي ~Head~ و~Next~ في struct قبل تعديل أي وصلة.",
 		},
 		Lesson: `# عربات ماسكة في بعض
 
@@ -602,9 +602,9 @@ fmt.Println(last.Next.Label)      // nil: panic
 ~Release(tag) bool~ تحذف أول تطابق فقط؛ false لو مفيش. ~Locate(tag) int~ ترجع موقع أول تطابق من صفر، أو -1. ~Tags() []string~ ترجع نسخة مستقلة بالترتيب، وفاضية لو القطر فاضي. مثال: بعد Couple(0,"a") وCouple(1,"b")، Tags نتيجتها [a b]. مفيش Report في المختبر؛ التستات بتراجع العقد مباشرة.
 `,
 		En: &LevelText{LessonRevision: 1, Steps: ch08CartEnglish, Title: "Cart Chain", Goal: "Couple and release carts without losing the rest of the convoy", Files: []LabFile{{Name: "main.go", Starter: cartChainStarter, ReadOnly: false}}, Hints: []string{
-			"Concept: each node links to the next by address, and ~nil~ marks the end.",
-			"Structure: inspect the empty case, then linking, release, and search as separate phases.",
-			"Specific: follow the ~Head~ and ~Next~ fields before changing any link.",
+			"Each node links to the next by address, and ~nil~ marks the end.",
+			"Inspect the empty case, then linking, release, and search as separate phases.",
+			"Follow the ~Head~ and ~Next~ fields before changing any link.",
 		}, Lesson: `# Carts Linked Together
 
 Each cart stores its tag and the address of the next cart. No generics or recursion are needed: follow pointers with an ordinary loop, using this chapter's pointer tools.

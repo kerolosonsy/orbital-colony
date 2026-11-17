@@ -103,9 +103,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: Channels pass values; ~close~ marks the end.",
-				"Structure: Send places, receive them, harvest, then await closure.",
-				"Specific: Check ~x := <-found~; what should happen after the first receive?",
+				"Channels pass values; ~close~ marks the end.",
+				"Send places, receive them, harvest, then await closure.",
+				"Check ~x := <-found~; what should happen after the first receive?",
 			},
 		},
 		LessonRevision: 1, Steps: ch11ScoutLessonArabic,
@@ -170,9 +170,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"مفهوم: الـchannel بتنقل قيمة من goroutine للتانية؛ و~close~ بيعلن النهاية.",
-			"الترتيب: جهّز إرسال الأماكن، واستقبلها، واحصد، واستنى القناة تخلص.",
-			"سطر محدد: راجع ~x := <-found~؛ إيه اللي يحصل بعد أول استقبال؟",
+			"الـchannel بتنقل قيمة من goroutine للتانية؛ و~close~ بيعلن النهاية.",
+			"جهّز إرسال الأماكن، واستقبلها، واحصد، واستنى القناة تخلص.",
+			"راجع ~x := <-found~؛ إيه اللي يحصل بعد أول استقبال؟",
 		},
 		Lesson: `# Channels: goroutines بتكلّم بعض 📨
 
@@ -305,9 +305,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: Each worker can take the next job from one shared channel.",
-				"Structure: Start workers, send targets, collect results, and close channels at the right time.",
-				"Specific: Check the ~worker~ signature; channel arrows show which side receives or sends.",
+				"Each worker can take the next job from one shared channel.",
+				"Start workers, send targets, collect results, and close channels at the right time.",
+				"Check the ~worker~ signature; channel arrows show which side receives or sends.",
 			},
 		},
 		LessonRevision: 1, Steps: ch11PoolLessonArabic,
@@ -383,9 +383,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"مفهوم: كل worker يقدر يسحب الشغل التالي من channel مشتركة.",
-			"الترتيب: شغّل العمال، وابعت الأهداف، واجمع النتائج، واقفل القنوات في وقتها.",
-			"سطر محدد: راجع توقيع ~worker~؛ أسهم القنوات بتوضح مين يستقبل ومين يبعت.",
+			"كل worker يقدر يسحب الشغل التالي من channel مشتركة.",
+			"شغّل العمال، وابعت الأهداف، واجمع النتائج، واقفل القنوات في وقتها.",
+			"راجع توقيع ~worker~؛ أسهم القنوات بتوضح مين يستقبل ومين يبعت.",
 		},
 		Lesson: `# Worker pool: الطابور الذكي 🏗️
 
@@ -507,9 +507,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: ~select~ handles ready channel cases, while ~default~ lets the loop continue now.",
-				"Structure: Work between warnings, return, wait for calm, then resume.",
-				"Specific: Check ~colony.StormWarning()~ and ~colony.StormClear()~ for the warning and all-clear signals.",
+				"~select~ handles ready channel cases, while ~default~ lets the loop continue now.",
+				"Work between warnings, return, wait for calm, then resume.",
+				"Check ~colony.StormWarning()~ and ~colony.StormClear()~ for the warning and all-clear signals.",
 			},
 		},
 		LessonRevision: 1, Steps: ch11StormLessonArabic,
@@ -562,9 +562,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"مفهوم: ~select~ تتعامل مع حالة channel الجاهزة، و~default~ تكمّل فورًا.",
-			"الترتيب: اشتغل بين الإنذارات، ارجع، استنى الهدوء، وبعدها استأنف.",
-			"سطر محدد: راجع ~colony.StormWarning()~ و~colony.StormClear()~ لإشارات التحذير والهدوء.",
+			"~select~ تتعامل مع حالة channel الجاهزة، و~default~ تكمّل فورًا.",
+			"اشتغل بين الإنذارات، ارجع، استنى الهدوء، وبعدها استأنف.",
+			"راجع ~colony.StormWarning()~ و~colony.StormClear()~ لإشارات التحذير والهدوء.",
 		},
 		Lesson: `# select: استنى أكتر من حاجة 🌪️
 

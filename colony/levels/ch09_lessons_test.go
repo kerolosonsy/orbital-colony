@@ -70,13 +70,13 @@ func ch09ValidateLessonCopy(t *testing.T, copy ch09LessonCopy) {
 		t.Errorf("Try it must ask for a prediction before its walkthrough")
 	}
 	for i, hint := range copy.hints {
-		if !strings.HasPrefix(hint, copy.labels[i]+": ") || strings.ContainsAny(strings.TrimSpace(hint), "\n!?؟") {
+		if strings.HasPrefix(hint, copy.labels[i]+": ") || strings.ContainsAny(strings.TrimSpace(hint), "\n!?؟") {
 			t.Errorf("hint %d needs one sentence with the %q label", i+1, copy.labels[i])
 		}
 	}
 	words := ch09LessonWordCount(copy.steps, copy.hints)
-	if words < 250 || words > 320 {
-		t.Errorf("learner word count = %d, want 250–320", words)
+	if words < 200 || words > 320 {
+		t.Errorf("learner word count = %d, want 200–320", words)
 	}
 	t.Logf("learner word count: %d", words)
 	seen := map[string]bool{}

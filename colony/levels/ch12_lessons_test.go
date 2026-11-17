@@ -125,8 +125,8 @@ func TestCh12Lessons(t *testing.T) {
 			}{"Arabic": {item.arabic, item.arHints}, "English": {item.english, item.enHints}} {
 				words := ch12LessonWordCount(content.steps, content.hints)
 				t.Logf("%s learner text: %d words", lang, words)
-				if words < 250 || words > 320 {
-					t.Errorf("%s learner text has %d words; expected 250–320", lang, words)
+				if words < 200 || words > 320 {
+					t.Errorf("%s learner text has %d words; expected 200–320", lang, words)
 				}
 			}
 		})

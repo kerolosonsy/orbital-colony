@@ -73,9 +73,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: a type satisfies `fmt.Stringer` by providing its required method.",
-				"Structure: let `Status` provide its text behavior; keep reporting in `main`.",
-				"Specific: inspect `colony.Report(s)` and the `Status` fields in the starter.",
+				"A type satisfies `fmt.Stringer` by providing its required method.",
+				"Let `Status` provide its text behavior; keep reporting in `main`.",
+				"Inspect `colony.Report(s)` and the `Status` fields in the starter.",
 			},
 			LessonRevision: 1,
 			Steps:          ch09StringerEnglish,
@@ -121,9 +121,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"مفهوم: النوع يحقق `fmt.Stringer` لما يوفّر الـmethod المطلوبة.",
-			"ترتيب: خلّي `Status` يوفّر عرضه؛ وسيب الإرسال في `main`.",
-			"محدد: راجع `colony.Report(s)` وحقول `Status` في الـstarter.",
+			"النوع يحقق `fmt.Stringer` لما يوفّر الـmethod المطلوبة.",
+			"خلّي `Status` يوفّر عرضه؛ وسيب الإرسال في `main`.",
+			"راجع `colony.Report(s)` وحقول `Status` في الـstarter.",
 		},
 		Lesson: `# Interfaces: اتفاق من غير توقيع 🤝
 
@@ -229,9 +229,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: any type with the `Planner` method contract can guide the autopilot.",
-				"Structure: decide per tile, then return its actions in execution order.",
-				"Specific: inspect `Plan(t colony.Tile)` and its `Ground`, `Entity`, and `Ripe` fields.",
+				"Any type with the `Planner` method contract can guide the autopilot.",
+				"Decide per tile, then return its actions in execution order.",
+				"Inspect `Plan(t colony.Tile)` and its `Ground`, `Entity`, and `Ripe` fields.",
 			},
 			LessonRevision: 1,
 			Steps:          ch09AutopilotEnglish,
@@ -298,9 +298,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"مفهوم: أي نوع عليه عقد `Planner` يقدر يوجّه الطيار الآلي.",
-			"ترتيب: قرر لكل خانة، وبعدها رجّع actions بترتيب تنفيذها.",
-			"محدد: راجع `Plan(t colony.Tile)` وحقول `Ground` و`Entity` و`Ripe`.",
+			"أي نوع عليه عقد `Planner` يقدر يوجّه الطيار الآلي.",
+			"قرر لكل خانة، وبعدها رجّع actions بترتيب تنفيذها.",
+			"راجع `Plan(t colony.Tile)` وحقول `Ground` و`Entity` و`Ripe`.",
 		},
 		Lesson: `# إنت بتكتب، والمكتبة بتنادي 🛩️
 
@@ -399,9 +399,9 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Concept: a type switch reveals the concrete type held by each `Signal`.",
-				"Structure: separate collecting signal data from visiting sites and reporting.",
-				"Specific: inspect the `colony.Signals()` loop and the `At` and `Amount` fields.",
+				"A type switch reveals the concrete type held by each `Signal`.",
+				"Separate collecting signal data from visiting sites and reporting.",
+				"Inspect the `colony.Signals()` loop and the `At` and `Amount` fields.",
 			},
 			LessonRevision: 1,
 			Steps:          ch09SignalsEnglish,
@@ -460,9 +460,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"مفهوم: الـtype switch بيكشف النوع الحقيقي اللي شايله كل `Signal`.",
-			"ترتيب: افصل جمع بيانات الرسائل عن زيارة المواقع وإرسال التقرير.",
-			"محدد: راجع loop `colony.Signals()` وحقلي `At` و`Amount`.",
+			"الـtype switch بيكشف النوع الحقيقي اللي شايله كل `Signal`.",
+			"افصل جمع بيانات الرسائل عن زيارة المواقع وإرسال التقرير.",
+			"راجع loop `colony.Signals()` وحقلي `At` و`Amount`.",
 		},
 		Lesson: `# Type switch: إيه اللي جوه الـ interface؟ 📻
 
@@ -558,14 +558,14 @@ for scanner.Scan() {} // نسي scanner.Err(): بلع فشل القراية
 
 المفتاح ~end~ يكتب ~closed~ ويرجع فوراً من غير lookup ولا قراية اللي بعده. EOF العادي يكتب ~exhausted~. كل سطر ناتج ينتهي بـ newline. رجّع أخطاء القراية والكتابة من غير بلعها؛ استخدم Scanner بحدّه الافتراضي، ورجّع خطأه لو السطر طويل. دليل فاضي شغال. مفيش Report ولا وصول للـ stdin/stdout هنا.
 `, Hints: []string{
-			"مفهوم: الـinterfaces الصغيرة بتطلب السلوك اللي محتاجاه الدالة بس.",
-			"ترتيب: افصل قراءة السطر عن تفسير الأمر والكتابة.",
-			"محدد: راجع `scanner.Scan()` و`scanner.Err()` في درس القراية.",
+			"الـinterfaces الصغيرة بتطلب السلوك اللي محتاجاه الدالة بس.",
+			"افصل قراءة السطر عن تفسير الأمر والكتابة.",
+			"راجع `scanner.Scan()` و`scanner.Err()` في درس القراية.",
 		},
 		En: &LevelText{Title: "Small Plugs", Goal: "Separate beacon commands from the terminal with small interfaces", LessonRevision: 1, Steps: ch09PlugsEnglish, Hints: []string{
-			"Concept: small interfaces ask only for behavior the function needs.",
-			"Structure: separate line reading from command handling and writing.",
-			"Specific: review `scanner.Scan()` and `scanner.Err()` in the reading example.",
+			"Small interfaces ask only for behavior the function needs.",
+			"Separate line reading from command handling and writing.",
+			"Review `scanner.Scan()` and `scanner.Err()` in the reading example.",
 		}, Files: []LabFile{{Name: "main.go", Starter: smallPlugsStarter, ReadOnly: false}}, Lesson: `# Logic That Works With Any Wire
 
 Beacons have an address directory, but command handling need not know where it is stored. Use small interfaces instead of binding logic to a terminal.

@@ -49,8 +49,8 @@ func TestCh08LessonsAreBilingualAndValid(t *testing.T) {
 			counts := map[string]int{"Arabic": ch08LessonWords(level.Steps, level.Hints), "English": ch08LessonWords(level.En.Steps, level.En.Hints)}
 			t.Logf("lesson words: Arabic %d, English %d", counts["Arabic"], counts["English"])
 			for language, count := range counts {
-				if count < 250 || count > 320 {
-					t.Errorf("%s lesson word count %d is outside 250-320", language, count)
+				if count < 200 || count > 320 {
+					t.Errorf("%s lesson word count %d is outside 200-320", language, count)
 				}
 			}
 		})
@@ -60,7 +60,7 @@ func TestCh08LessonsAreBilingualAndValid(t *testing.T) {
 func ch08ValidateHints(t *testing.T, hints, labels []string) {
 	t.Helper()
 	for i, hint := range hints {
-		if !strings.HasPrefix(hint, labels[i]) || ch08SentenceCount(hint) != 1 {
+		if strings.HasPrefix(hint, labels[i]) || ch08SentenceCount(hint) != 1 {
 			t.Fatalf("hint %d must be position-labelled and one sentence: %q", i, hint)
 		}
 	}

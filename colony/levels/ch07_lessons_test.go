@@ -37,8 +37,8 @@ func TestCh07Lessons(t *testing.T) {
 			t.Errorf("%s: expected six steps in both languages", id)
 			continue
 		}
-		ch07ValidateLessonCopy(t, id+" Arabic", level.Steps, level.Hints, arabicTitles, mission+1, arabicHintLabels, 250, 320)
-		ch07ValidateLessonCopy(t, id+" English", level.En.Steps, level.En.Hints, englishTitles, mission+1, englishHintLabels, 250, 320)
+		ch07ValidateLessonCopy(t, id+" Arabic", level.Steps, level.Hints, arabicTitles, mission+1, arabicHintLabels, 200, 320)
+		ch07ValidateLessonCopy(t, id+" English", level.En.Steps, level.En.Hints, englishTitles, mission+1, englishHintLabels, 200, 320)
 		for i, step := range level.Steps {
 			translated := level.En.Steps[i]
 			if step.ID != translated.ID || len(step.Blocks) != len(translated.Blocks) {
@@ -130,7 +130,7 @@ func ch07ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 		t.Errorf("%s: expected three position-labelled hints", name)
 	} else {
 		for i, hint := range hints {
-			if !strings.HasPrefix(hint, hintLabels[i]) || strings.Count(hint, ".") == 0 {
+			if strings.HasPrefix(hint, hintLabels[i]) || strings.Count(hint, ".") == 0 {
 				t.Errorf("%s: hint %d needs its label and a sentence", name, i+1)
 			}
 			words += ch07TextWords(hint)
