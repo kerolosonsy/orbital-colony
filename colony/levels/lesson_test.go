@@ -132,12 +132,31 @@ func validateLessonFrames(t *testing.T, block LessonBlock) {
 			if slice.Name == "" || slice.Length != len(slice.Values) || (slice.Capacity != nil && *slice.Capacity < slice.Length) || (slice.Nil && (slice.Length != 0 || slice.Capacity == nil || *slice.Capacity != 0)) {
 				t.Fatalf("%s frame %d: impossible slice state", block.ID, i)
 			}
+			if slice.ElementsOnly && (slice.Capacity != nil || slice.Store != "" || slice.Nil) {
+				t.Fatalf("%s frame %d: introductory view contains storage details", block.ID, i)
+			}
 		}
 	}
 }
 
 func validateLessonSandbox(t *testing.T, sandbox *LessonSandbox, claimID func(string)) {
 	t.Helper()
+	if sandbox.Kind == "slice-append-sequence" {
+		if len(sandbox.Sequence) != 8 || len(sandbox.Presets) != 0 || sandbox.Limit != 0 || sandbox.AppendValue != 0 || sandbox.GrowthLabel != "" || sandbox.ReservedLabel != "" || sandbox.LimitLabel != "" || sandbox.AppendText != "" || sandbox.ResetText != "" {
+			t.Fatal("sequence sandbox must contain eight sizes and no make/storage controls")
+		}
+		for _, size := range sandbox.Sequence {
+			if size < 1 || size > 9 {
+				t.Fatal("invalid illustrative crystal size")
+			}
+		}
+		for _, label := range []string{sandbox.SourceLabel, sandbox.AppendLabel, sandbox.ResetLabel, sandbox.DoneText} {
+			if strings.TrimSpace(label) == "" {
+				t.Fatal("sequence sandbox missing a label")
+			}
+		}
+		return
+	}
 	if sandbox.Kind != "slice-make" || len(sandbox.Presets) != 3 || sandbox.Limit != 6 || sandbox.AppendValue != 7 {
 		t.Fatal("sandbox must implement the approved bounded make playground")
 	}
@@ -178,7 +197,7 @@ func assertLessonParity(t *testing.T, arabic, english LessonBlock) {
 	}
 	if arabic.Sandbox != nil {
 		translated := english.Sandbox
-		if translated == nil || len(arabic.Sandbox.Presets) != len(translated.Presets) || arabic.Sandbox.Kind != translated.Kind || arabic.Sandbox.Limit != translated.Limit || arabic.Sandbox.AppendValue != translated.AppendValue {
+		if translated == nil || len(arabic.Sandbox.Presets) != len(translated.Presets) || arabic.Sandbox.Kind != translated.Kind || arabic.Sandbox.Limit != translated.Limit || arabic.Sandbox.AppendValue != translated.AppendValue || !reflect.DeepEqual(arabic.Sandbox.Sequence, translated.Sequence) {
 			t.Fatalf("%s: sandbox behaviour differs", arabic.ID)
 		}
 		for i, preset := range arabic.Sandbox.Presets {
@@ -188,6 +207,59 @@ func assertLessonParity(t *testing.T, arabic, english LessonBlock) {
 				t.Fatalf("%s: translated preset state differs", arabic.ID)
 			}
 		}
+	}
+}
+
+func TestSurveyLessonStaysShortAndVisual(t *testing.T) {
+	l := Get("6-1-survey")
+	if l.LessonRevision != 2 {
+		t.Fatal("survey must invalidate revision-1 practice")
+	}
+	for _, copy := range []struct {
+		steps []LessonStep
+		hints []string
+	}{{l.Steps, l.Hints}, {l.En.Steps, l.En.Hints}} {
+		words, questions, traces, sandboxes := len(strings.Fields(strings.Join(copy.hints, " "))), 0, 0, 0
+		if len(copy.steps) != 6 {
+			t.Fatal("survey must have six short steps")
+		}
+		for i, step := range copy.steps {
+			words += len(strings.Fields(step.Title))
+			for _, block := range step.Blocks {
+				words += len(strings.Fields(block.Text))
+				if block.Note != "" || block.Optional {
+					t.Fatal("short lesson must not hide extra reading")
+				}
+				if i == 0 && len(strings.Fields(block.Text)) > 45 {
+					t.Fatal("mission exceeds 45 words")
+				}
+				if block.Walkthrough != nil {
+					traces++
+					for _, frame := range block.Walkthrough.Frames {
+						count := len(strings.Fields(frame.Caption))
+						words += count
+						if count > 8 || frame.Slice != nil && !frame.Slice.ElementsOnly {
+							t.Fatal("trace must use short captions and element-only views")
+						}
+					}
+				}
+				if block.Question != nil {
+					questions++
+					words += len(strings.Fields(strings.Join(block.Question.Options, " ") + " " + strings.Join(block.Question.Feedback, " ")))
+				}
+				if b := block.Sandbox; b != nil {
+					sandboxes++
+					if b.Kind != "slice-append-sequence" {
+						t.Fatal("survey must use the growing log playground")
+					}
+					words += len(strings.Fields(b.SourceLabel + " " + b.AppendLabel + " " + b.ResetLabel + " " + b.DoneText))
+				}
+			}
+		}
+		if words < 250 || words > 300 || questions != 3 || traces != 1 || sandboxes != 1 {
+			t.Fatalf("words=%d questions=%d walkthroughs=%d sandboxes=%d", words, questions, traces, sandboxes)
+		}
+		t.Logf("learner-authored words, including all feedback and hints: %d", words)
 	}
 }
 

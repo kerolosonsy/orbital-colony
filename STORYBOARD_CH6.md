@@ -2,6 +2,15 @@
 
 Content contract, 2026-11-17. Branch: `lessons-ch6`. This document proposes lesson content only; it changes no mission, starter, check, threshold, or API. Arabic is ready for correctness/leakage review. English is supplied for 6-1 only; translation of 6-2–6-5 waits for Arabic approval.
 
+## Style rules
+
+- Pilot revision 2 follows playtest feedback: about 250–300 words per language, counting learner-authored titles, frame captions, all question options/feedback, sandbox labels, and hints; exclude code and repeated application controls.
+- Mission: three numbered points, at most about 45 words; distinguish the 15-tick gold target from the unchanged run limit. Name what the starter already did.
+- One short analogy, then show code and let the player manipulate data. One idea per visual. No paragraph should exceed three lines at 290px; split sentences into short paragraphs where needed. Frame captions: at most about eight words.
+- Mission → Idea → Try it → Watch out → Think & check → Your turn. At most two one-line warnings, a short prose plan, three mission questions, one next action. Wrong picks reveal only their feedback until the correct pick or two wrong picks on that question.
+- Egyptian Arabic first, short sentences, English technical terms. English has the same meaning and depth. Label invented values as illustrative. No free-form interpreter, complete mission loop, or last-move condition supplied as code.
+- These rules guide the later 6-2–6-5 rewrite; their existing storyboards below remain unchanged and are not claims that their current word counts comply. Their old references to the retired make playground/capacity lesson are historical and will be resolved in those rewrites.
+
 ## Reading and implementation conventions
 
 - Four block kinds only: **markdown**, **walkthrough**, **question**, **sandbox**. Every block below has a stable ID, purpose, and complete Arabic learner text. Step IDs are stable too. Concept IDs have one teaching owner; later references are retrieval/application, not another introduction.
@@ -33,7 +42,7 @@ Sources read: Arabic lessons in `colony/levels/ch01.go` through `ch05.go`; all c
 
 | Owner | Stable concepts |
 |---|---|
-| 6-1 | `slice.basics`, `slice.len-cap`, `slice.make-append`, `slice.bounds`, `ticks.actions` |
+| 6-1 revision 2 | `slice.basics`, `slice.append`, `slice.bounds`, `ticks.actions`; len only, no capacity lesson |
 | 6-2 | `range.slice`, `slice.sharing`, `slice.sort`, `slice.search-max`, `ticks.route-order` |
 | 6-3 | `map.counts`, `map.presence`, `map.nil`, `map.order` |
 | 6-4 | `sort.comparator`, `sort.identity-ties` |
@@ -41,193 +50,121 @@ Sources read: Arabic lessons in `colony/levels/ch01.go` through `ch05.go`; all c
 
 `slice.sharing` includes subslices and shallow copying; 6-5 applies that model to row slices. `ticks.actions` is explained once in 6-1; later tick notes apply it rather than redefine it. No struct/pointer syntax, generics syntax, concurrency, or new dependencies are prerequisites.
 
-## 6-1 — سجل الكريستال (`6-1-survey`)
+## 6-1 — سجل الكريستال (`6-1-survey`) · revision 2
 
-**Teaching objective:** keep ordered observations in a slice; distinguish elements from reserved room; use the returned append value; reason about valid indices. Owns the five 6-1 concepts above. Links back to `2-1-inventory`, `2-3-callsigns`, `3-1-long-row`, `3-2-full-field`.
+**Word count:** Arabic 275; English 291, including titles, frame captions, every option/feedback, playground labels, and hints; excluding code and shared application controls.
 
-**Starter audit:** creates nil `sizes`, measures the starting crystal once, appends that measurement, and prints the slice and its length. It does not move or report. Do not ask for another initial measurement or another append of the same observation.
+**Objective:** ordered observations, append's returned value, len, zero-based indexes, and the mission's action count. Capacity, nil, storage sharing, make presets, and compile-error questions have been removed from this lesson.
 
-### Step `c61.mission-step` — Mission
+**Starter audit:** already records the first crystal and prints the partial slice; it neither moves nor reports. Starter, setup, checks, Requires, Par=Gold=15, and MaxTicks=60 are unchanged. Revision-1 practice falls back to the new Mission step and does not restore retired answers.
 
-#### `c61.mission` · markdown
-**Purpose:** state the contract and orient the player to the existing starter.
-**Links (author metadata; render natural titles):** `2-1-inventory`.
+### Step `c61.v2.mission-step` — المهمة
 
-**AR:** بص، القاعدة عايزة سجل فيه أحجام الـ8 كريستالات، بنفس ترتيبهم من الشمال لليمين. الرقم لوحده مش كفاية؛ ترتيب الأرقام جزء من المعلومة.
+`c61.v2.mission` · markdown
 
-الكود الموجود قاس أول كريستالة وحفظها فعلًا، ولسه الدرون في مكان البداية. السطر اللي فيه `fmt.Println` بيعرضلك السجل في الـConsole؛ مش بيبعته للقاعدة. الفرق ده عرفناه في درس جرد المخزن (2-1).
+1. قيس الـ8 كريستالات من الشمال لليمين.
+2. احفظ أحجامهم بالترتيب في slice واحدة.
+3. ابعت الـslice كلها مرة واحدة بـ~colony.Report~.
 
-المطلوب سجل كامل في slice وتقرير للقاعدة بـ`colony.Report`. مش محتاج تحصد. إنت اللي هتحدد تكمّل الملاحظة والحركة إزاي.
+الـstarter قاس أول كريستالة وحفظها فعلًا.
 
-### Step `c61.idea-step` — Idea
+الذهب: **15 ticks أو أقل**.
 
-#### `c61.idea` · markdown
-**Purpose:** analogy before syntax; introduce `slice.basics` and `slice.len-cap`.
-**Links (author metadata; render natural titles):** `2-3-callsigns`.
+### Step `c61.v2.idea-step` — الفكرة
 
-**AR:** تخيل درج فيه خانات مترقّمة، ومعاه بطاقة بتقول مستخدم كام خانة. الـ**slice** هي وصف لجزء من مخزن عناصر: نوع واحد، وعناصر ليها ترتيب. `[]int` يعني slice عناصرها أعداد صحيحة.
+`c61.v2.trace` · walkthrough
 
-الـ**index** رقم العنصر: أول واحد 0، وبعده 1. `len(s)` عدد العناصر الموجودة، و`cap(s)` المساحة المتاحة من بداية الـslice في الـbacking array، يعني مخزن العناصر اللي وراها.
+تخيل الـslice صندوق، وكل حجم جديد بيتحط في آخره بـ~append~.
 
-`append` بتضيف في الآخر وبترجّع وصف slice محدث. احتفظ بالناتج؛ الوصف القديم مش بيطوّل لوحده. مش شرط يتعمل مخزن جديد مع كل إضافة.
-
-**Optional AR:** `len` مع slice بتعد عناصر، مش bytes زي النص في درس أسماء النداء (2-3). و`var s []int` بتبدأ nil: طولها وسعتها صفر، وينفع تعملها append. رسم المخزن هنا نموذج للفهم، مش خريطة عناوين ذاكرة حقيقية.
-
-### Step `c61.example-step` — Example + experiment
-
-#### `c61.basic-trace` · walkthrough
-**Purpose:** one growing list, actual output after reveal; introduce no mission loop.
-
-**AR:** خلينا نجرّب تذكرتين لمكتبة المحطة، بعيد عن الكريستال. قبل كل زر «التالي»، توقّع السطر هيغيّر إيه. بعدين بص على العناصر والعدد، مش شكل الأقواس بس.
-
-<!-- go-example id=e61-basic imports=fmt outcome=ok -->
+<!-- go-example id=e61-crystal-log-v2 imports=fmt outcome=ok -->
 ```go
-var tickets []int
-fmt.Println(len(tickets), cap(tickets))
-tickets = append(tickets, 7)
-fmt.Println(tickets, len(tickets))
-tickets = append(tickets, 4)
-fmt.Println(tickets[0], len(tickets))
+sizes := []int{}
+sizes = append(sizes, 5)
+sizes = append(sizes, 2)
+sizes = append(sizes, 8)
+fmt.Println(sizes, len(sizes), sizes[0])
 ```
 
-| Frame | Highlight | Variables / slice view | Output | AR caption |
-|---|---|---|---|---|
-| 0 | before 1 | — | — | «لسه مفيش متغير.» |
-| 1 | 1 | tickets=nil, len=0, cap=0; no cells | — | «وصف فاضي، ومفيش عناصر.» |
-| 2 | 2 | unchanged | `0 0` | «صفر عناصر وصفر سعة.» |
-| 3 | 3 | tickets=[7], index 0, len=1; cap not asserted | `0 0` | «حفظنا وصف الإضافة؛ أول index هو 0.» |
-| 4 | 4 | unchanged | `0 0\n[7] 1` | «بقت تذكرة واحدة.» |
-| 5 | 5 | tickets=[7 4], indices 0,1, len=2; cap not asserted | previous | «الإضافة في الآخر، مش بدل أول عنصر.» |
-| 6 terminal | 6 | unchanged | `0 0\n[7] 1\n7 2` | «العنصر الأول 7، والطول 2.» |
+| Frame / line | Slice (indexed from 0) | Output | Caption |
+|---|---|---|---|
+| 0 / before 1 | — | — | قبل التشغيل. |
+| 1 / 1 | [] | — | سجل فاضي؛ len=0. |
+| 2 / 2 | [5] | — | 5 عند index 0. |
+| 3 / 3 | [5, 2] | — | 2 بعدها، مش بدلها. |
+| 4 / 4 | [5, 2, 8] | — | 8 بقت آخر عنصر. |
+| 5 / 5 | [5, 2, 8] | [5 2 8] 3 5 | السجل، طوله، وأول حجم. |
 
-#### `c61.make-playground` · sandbox
-**Purpose:** directly manipulate length vs capacity and the make-then-append pitfall.
+Frames show `sizes`, `len`, and index cells only; no capacity, nil, or store labels. Frame 5 is terminal.
 
-**AR:** جرب بنفسك: اختار بداية، وبعدها اضغط «ضيف 7». هل فيه عناصر موجودة من الأول؟ تابع `len` جنب `cap`.
+### Step `c61.v2.try-step` — جرّب
 
-**Presets (buttons display exactly these Go expressions):** `make([]int, 3)` → len=3, cap=3, cells `[0 0 0]`; `make([]int, 0, 3)` → len=0, cap=3, three reserved cells outside length; `[]int{}` → len=0, cap=0, non-nil empty slice.
+`c61.v2.sequence` · sandbox · `slice-append-sequence`
 
-**Fixed menu:** «ضيف 7» (`s = append(s, 7)`); «ابدأ من الأول»; the three preset buttons. At six elements disable Append with «وصلنا لـ6 عناصر في التجربة؛ ابدأ من الأول عشان تجرّب بداية تانية.» Preset changes reset all state.
+ضيف الأحجام بالترتيب؛ راقب ~len~ والـindex وهما بيتغيروا.
 
-**What operations show:** Append preserves existing cells, adds one final 7, increments len, and marks the returned descriptor. If new len ≤ cap, reuse store A and preserve cap. Otherwise allocate a distinct store label, copy the existing elements, then append; this illustration chooses new cap=max(new len, max(1, 2×old cap)). Show unused cells dashed, labelled «مساحة محجوزة؛ مش عناصر تقدر تفهرسها دلوقتي». This is a display policy, never an assertion about Go's allocator.
+Source row, indexes 0–7: `[5, 2, 8, 4, 1, 7, 3, 6]`. Label: «أحجام للتوضيح، مش بيانات المهمة.».
+Fixed operations: «ضيف الحجم الجاي», «من الأول». Initially empty, len=0, counter `0 / 8`. Each Add appends the next source size; only the newly added cell appears. Live len and counter advance together. At 8, disable Add and show «اكتمل السجل: 8 أحجام بالترتيب.». Reset restores the empty slice, counter, and enabled Add; source values stay visible. This sandbox does not move the drone or edit code.
 
-**Always-visible AR label:** «نمو السعة هنا مثال توضيحي؛ Go ممكن تختار سعة مختلفة. مفيش سؤال هيطلب منك تتوقع سعة النمو بالظبط.»
+### Step `c61.v2.watch-step` — خد بالك
 
-**Preset feedback AR:** length-three: «دول 3 عناصر قيمتهم صفر فعلًا. append هتضيف بعدها، مش هتملا مكانها.» Reserved-three: «عندك مكان لـ3 عناصر، بس لسه عدد العناصر صفر.» Empty literal: «بداية فاضية من غير مساحة محجوزة. أول إضافة محتاجة مخزن يساعها.»
+`c61.v2.watch` · markdown
 
-**After Append AR:** «عنصر جديد في الآخر. الطول زاد واحد؛ راجع هل المخزن اتغير ولا اتستخدم تاني.» Reset: «رجعنا للبداية اللي اخترتها، ومسحنا إضافات التجربة بس.» No exact-capacity question uses this illustration. Go fixtures `e61-presets` and `e61-many-appends` below verify element/length semantics; allocator choice is not an expected output.
+- احتفظ بنتيجة ~append~: ~sizes = append(...)~.
+- أرقام الـindex من 0 لحد ~len(sizes)-1~؛ براها يحصل panic.
 
-### Step `c61.watch-step` — Watch out
+### Step `c61.v2.check-step` — فكّر واختبر
 
-#### `c61.mistakes` · markdown
-**Purpose:** explicit misconception/fact/reason/fix-thinking pattern.
+`c61.v2.plan` · markdown
 
-**AR:** **الافتراض:** «make بطول 3 بتحجز أماكن فاضية، فهعمل append عشان أملاها.» → **Go بتعمل إيه؟** بتنشئ 3 عناصر صفر، والإضافة تيجي بعدهم. → **ليه؟** الطول بيعد عناصر موجودة، والسعة بتعد المكان المتاح. → **تفكر إزاي؟** قرر: عندك عناصر هتكتب فيها بالـindex، ولا سجل بيبدأ بطول صفر ويكبر؟
+التكرار محتاج loop.
 
-**الافتراض:** «append بتزوّد طول المتغير من غير ما أحتفظ بالناتج.» → **Go بتعمل إيه؟** بترجّع وصف محدث؛ ونداء append لوحده من غير استخدام نتيجته مش بيتقبل كسطر مستقل. → **ليه؟** فيه ناتج لازم تستخدمه. → **تفكر إزاي؟** احتفظ بالوصف اللي راجع، في نفس المتغير أو متغير تاني مناسب.
+لكل كريستالة: قيس، ضيف، واتجه للي بعدها.
 
-#### `c61.bounds-trace` · walkthrough
-**Purpose:** show terminal out-of-range panic, including capacity not making an index valid.
+التقرير مرة واحدة بعد الـloop؛ أول قراءة موجودة فعلًا.
 
-**AR:** خد بالك: رقم العنصر لازم يكون من صفر لحد قبل `len`. وجود مساحة زيادة مش معناه وجود عنصر زيادة. بص ليه الطباعة التانية هنا مش هتتعمل.
+`c61.v2.q-create` · question
 
-<!-- go-example id=e61-bounds imports=fmt outcome=panic -->
-```go
-s := make([]int, 0, 3)
-fmt.Println(len(s), cap(s))
-i := 0
-fmt.Println(s[i])
-fmt.Println("after")
-```
+عشان السجل يتجمع، تنشئ الـslice فين؟
 
-| Frame | Highlight | Variables / slice view | Output | AR caption |
-|---|---|---|---|---|
-| 0 | before 1 | — | — | «قبل البداية.» |
-| 1 | 1 | s=[], len=0, cap=3; three reserved cells | — | «مفيش عنصر موجود رغم السعة.» |
-| 2 | 2 | unchanged | `0 3` | «الطول صفر.» |
-| 3 | 3 | i=0 | `0 3` | «الـindex المطلوب صفر.» |
-| 4 terminal panic | 4 | s unchanged; index 0 marked invalid | stdout `0 3`; panic `runtime error: index out of range [0] with length 0` | «البرنامج وقف هنا؛ after مش هتتطبع. الإصلاح يبدأ بفهم الطول، مش إخفاء الـpanic.» |
+1. قبل الـloop → سجل واحد قبل الـloop يحتفظ بكل القراءات. **Correct.**
+2. جوه كل لفة → إنشاءها كل لفة يبدأ سجل فاضي تاني.
+3. بعد الـloop → السجل لازم يبقى موجود قبل تجميع القراءات.
 
-#### `c61.ticks` · markdown · Optional
-**Purpose:** own `ticks.actions`, correct earlier overgeneralization, show a toy estimate.
+`c61.v2.q-append` · question
 
-**AR:** **تقدير لتجربة منفصلة:** ممر تدريب فيه 4 علامات، الدرون عند أول واحدة، وهنقرأ كل علامة مرة ونتحرك بس بين العلامات. قراءة `Measure` واحدة = tick، و`Move` واحدة = tick؛ يبقى 4 قراءات + 3 حركات = **7 ticks**. الإضافة والحساب والطباعة العادية مش بيزوّدوا عدّاد أوامر اللعبة، و`Report` و`WorldSize` من غير tick في المهمات دي.
+أنهي أداة تضيف حجم من غير مسح الموجود؟
 
-لو حاولت تتحرك برّه الممر هتدفع tick حتى لو الحركة فشلت. التقدير بيفترض مفيش أوامر زيادة، وإن البرنامج بيقف بعد التقرير الصحيح. الرقم المقاس من التشغيل الأخير بيتعرض بعنوان «مقاس: آخر تشغيل»، مش على إنه نفس خريطة المعاينة أو أفضل رقم محفوظ.
+1. len → len بتعد الموجود؛ مش بتضيف قراءة.
+2. append → append بتضيف في الآخر؛ احتفظ بالناتج. **Correct.**
+3. make → make بتنشىء slice، مش بتضيف للسجل الحالي.
 
-**Author tick audit:** live 6-1 has 8 measurements + 7 moves =15; Par=Gold=15, MaxTicks=60. This verifies the lesson assumptions; the UI should show the existing mission target without adding a solved route. Source: `ch06.go:64–85`, `sim.go:503–544,771–822`.
+`c61.v2.q-moves` · question
 
-### Step `c61.check-step` — Check
+واقف عند أول كريستالة؛ كام حركة توصّلك للتامنة؟
 
-#### `c61.q-make` · question
-**Purpose:** assess `slice.make-append` with fresh toy data.
+1. 8 → 8 حركات تحاول تعدّي آخر كريستالة.
+2. 6 → 6 حركات تسيبك قبل الأخيرة بمسافة.
+3. 7 → 8 قياسات + 7 حركات = 15 ticks؛ Report=0 وبافتراض مفيش تكلفة تانية. **Correct.**
 
-**AR prompt:** إيه اللي هيتطبع؟ توقّع قبل ما تشوف النتيجة.
+### Step `c61.v2.turn-step` — دورك
 
-<!-- go-example id=e61-make-question imports=fmt outcome=ok -->
-```go
-cards := make([]int, 2)
-cards = append(cards, 9)
-fmt.Println(cards, len(cards))
-```
+`c61.v2.turn` · markdown
 
-Options: A «`[9] 1`»; B «`[0 0 9] 3`»; C «`[9 0] 2`». **Correct: B.**
+اكتب أول محاولة بنفسك، شغّلها، وراجع السجل اللي طلع.
 
-Feedback A: «make هنا بدأت بعنصرين فعلًا؛ الإضافة مش بتمسحهم. ارجع لبداية الطول في التجربة.»
+Existing Return-to-code action follows this block.
 
-Feedback B: «كده بصّيت للطول صح: صفرين موجودين، وبعدهم عنصر جديد قيمته 9، فبقوا 3.»
+### Three position-labelled hints
 
-Feedback C: «ده كان محتاج كتابة في index موجود. append بتضيف في الآخر، مش بتختار أول صفر.»
+1. **Concept:** الـslice سجل بيكبر مع append، مع الاحتفاظ بالأحجام اللي اتسجلت قبله.
+2. **Structure:** رتّب loop للكريستالات وابعت تقرير واحد بعده؛ افتكر أول قراءة في الـstarter.
+3. **Specific:** راجع سطر ~append~ اللي فيه ~colony.Measure()~ وشرط الحركة: بتسجل مرة وتتحرك لكريستالة تالية؟
 
-#### `c61.q-append-result` · question
-**Purpose:** spot an intentional compile error without giving mission code.
+**Tick assumptions:** Measure and Move cost one action tick each; Report costs zero. The 7-move question assumes eight total measurements and no other tick costs. Fifteen is the gold target, not the run limit.
 
-**AR prompt:** طالب نسي يحتفظ بنتيجة append. أي وصف صح للكود؟
+**Solution boundary:** this revision deliberately supplies the prose plan and movement-count question requested after playtesting. The player still writes iteration bounds, reconciles the existing first measurement, chooses movement conditions, and places the report; no complete mission loop or move guard is supplied.
 
-<!-- go-example id=e61-unused-append imports=fmt outcome=compile-error -->
-```go
-s := []int{6}
-append(s, 2)
-fmt.Println(s)
-```
-
-Options: A «هيطبع `[6 2]`»; B «هيطبع `[6]` عادي»; C «مش هيتبني؛ نتيجة append مش مستخدمة». **Correct: C.**
-
-Feedback A: «الإضافة ليها ناتج لازم تستخدمه؛ النداء ده مش بيغيّر طول s تلقائيًا.»
-
-Feedback B: «Go هنا مش بتكتفي بتجاهل النتيجة؛ السطر نفسه مرفوض وقت البناء.»
-
-Feedback C: «بالظبط: ده compile error، قبل أي طباعة. فكّر هتحتفظ بوصف الإضافة فين.»
-
-#### `c61.q-index` · question
-**Purpose:** assess `slice.bounds`, without repeating the already revealed panic example.
-
-**AR prompt:** slice فيها 4 عناصر. أنهي index بيختار آخر عنصر؟
-
-Options: A «4»; B «3»; C «-1». **Correct: B.**
-
-Feedback A: «4 هو عدد العناصر، مش رقم آخر عنصر. رقم 4 هيبقى برّه الحدود.»
-
-Feedback B: «أيوه: الأرقام 0 و1 و2 و3. افتكر فرق العدد عن الرقم.»
-
-Feedback C: «Go مش بتستخدم -1 كاختصار لآخر عنصر؛ ده index غير صالح.»
-
-### Step `c61.turn-step` — Your turn
-
-#### `c61.turn` · markdown
-**Purpose:** one concrete next action without constructing the traversal.
-
-**AR:** ارجع للكود وشغّل الـstarter زي ما هو. بص على طول `sizes` في الـConsole: أول قراءة اتحفظت فعلًا. حدد في تعليق عندك إيه أول ملاحظة لسه ناقصة، قبل ما تزود أوامر. زر «ارجع للكود» هيفتحلك المحرر.
-
-### Three hints (position labels, not new hint schema)
-
-1. **Concept / الفكرة — `c61.h1`:** «السجل بيحفظ ملاحظات مرتبة؛ مش مجموع الأحجام. افتكر الفرق بين طباعة السجل وإرساله للقاعدة.»
-2. **Structure / التنظيم — `c61.h2`:** «قبل ما تكرر أي خطوة، راجع إيه اللي اتسجل بالفعل في الـstarter. خلي لكل ملاحظة مكان واحد في السجل.»
-3. **Specific / ركّز هنا — `c61.h3`:** «راجع السطر اللي بيستخدم append: هل محتفظ بالناتج؟ وراجع قيمة التقرير: هل هي السجل نفسه بدل طوله أو آخر قراءة؟»
-
-**Leakage review:** player still constructs traversal, iteration bounds, coordination of observation/storage/movement, and reporting placement. No complete loop, move condition, or mission data is supplied. Starter inspection is a concrete first action, not additional scan code. The toy cost equation is separate from live dimensions.
-
-**Fallback corrections:** replace “append makes a new slice, so it must go in the same variable” with “updated slice value; may reuse storage; use its result.” Add length-versus-capacity and the make-then-append warning. State the full index bound. Keep nil slice append valid. Replace the old solved-loop hint; preserve the starter and correct `Println`/`Report` distinction. Move subslice sharing depth to its owner `slice.sharing` in 6-2; 6-1 fallback can link there instead of introducing an unexplained `nums[1:3]`.
+**Fallback:** same short mission, illustrative analogy/trace, two warnings, tick assumptions, prose plan, and next action; no capacity/nil material.
 
 ## 6-2 — أغلى 3 (`6-2-top-three`)
 
@@ -1036,170 +973,108 @@ OverlayHeat محتاجة نفس عدد الصفوف والأعمدة في الم
 
 **Fallback corrections:** remove the solved general nested-loop allocation/doubling example and loop-role hint. Keep the complete public function/error contract and all shape cases. Explicitly qualify shallow outer Clone and independent output rows; distinguish transpose from row reversal and matrix multiplication from elementwise multiplication. Do not present calls to unimplemented functions as verified outputs. Preserve first-lab guidance, tolerance, and absence of Report/ticks.
 
-## English learner copy — 6-1 only
+## English learner copy — 6-1 only · revision 2
 
-The IDs, kinds, purposes, code fragments, frame state data, option keys, and correct answers are identical to 6-1 above. This section translates every learner-facing block, optional note, frame caption, sandbox message, and hint; it does not add examples. Common controls use the EN strings in the opening conventions. Step titles: Mission / Idea / Example / Watch out / Check / Your turn. Hint labels by position: Concept / Structure / Specific.
+### Step `c61.v2.mission-step` — Mission
 
-### EN `c61.mission` — markdown
+`c61.v2.mission` · markdown
 
-Base needs a log of all eight crystal sizes, in their left-to-right order. Each number matters, and so does its position in the log.
+1. Measure the 8 crystals from left to right.
+2. Keep their sizes in order in one slice.
+3. Report the whole slice once with ~colony.Report~.
 
-The starter has already measured and stored the first crystal. The drone is still at the starting tile. `fmt.Println` shows you the log in the Console; it does not send it to base. You met that distinction in Inventory (2-1).
+The starter already saved the first measurement.
 
-Build a complete log in a slice and send it with `colony.Report`. No harvesting is needed. You decide how to continue observing and moving.
+Gold: **15 ticks or fewer**.
 
-### EN `c61.idea` — markdown
+### Step `c61.v2.idea-step` — Idea
 
-Imagine a drawer with numbered compartments and a card saying how many are in use. A **slice** describes part of an element store: one element type, with elements in order. `[]int` means a slice of integers.
+`c61.v2.trace` · walkthrough
 
-An **index** is an element's number: the first is 0, then 1. `len(s)` counts existing elements. `cap(s)` is the room available from the slice's start in its **backing array**, the underlying element store.
+A slice is a box: ~append~ adds each size at its end.
 
-`append` adds at the end and returns an updated slice descriptor. Keep that result; the old descriptor does not gain length by itself. Adding an element does not always create a new store.
+Code: canonical `e61-crystal-log-v2` above.
 
-**Optional:** For a slice, `len` counts elements, rather than bytes as it did for a string in Callsigns (2-3). `var s []int` starts nil, with zero length and capacity, and you can append to it. The store drawing is a model for understanding, not a map of real memory addresses.
+| Frame / line | Slice (indexed from 0) | Output | Caption |
+|---|---|---|---|
+| 0 / before 1 | — | — | Before execution. |
+| 1 / 1 | [] | — | Empty slice; len=0. |
+| 2 / 2 | [5] | — | 5 at index 0. |
+| 3 / 3 | [5, 2] | — | 2 follows 5. |
+| 4 / 4 | [5, 2, 8] | — | 8 comes last. |
+| 5 / 5 | [5, 2, 8] | [5 2 8] 3 5 | Log, length, first size. |
 
-### EN `c61.basic-trace` — walkthrough
+Frames show `sizes`, `len`, and index cells only; no capacity, nil, or store labels. Frame 5 is terminal.
 
-Let's try two library tickets, away from the crystals. Before each Next, predict what the line will change. Then watch the elements and their count, rather than just the brackets.
+### Step `c61.v2.try-step` — Try it
 
-Code and frame states: `e61-basic`, unchanged. Frame captions:
+`c61.v2.sequence` · sandbox · `slice-append-sequence`
 
-| Frame | English caption |
-|---|---|
-| 0 | “No variable yet.” |
-| 1 | “An empty descriptor, with no elements.” |
-| 2 | “Zero elements and zero capacity.” |
-| 3 | “We kept the returned descriptor. The first index is 0.” |
-| 4 | “There is now one ticket.” |
-| 5 | “Append adds at the end; it does not replace the first element.” |
-| 6 | “The first element is 7, and the length is 2.” |
+Add sizes in order; watch ~len~ grow and indexes advance.
 
-### EN `c61.make-playground` — sandbox
+Source row, indexes 0–7: `[5, 2, 8, 4, 1, 7, 3, 6]`. Label: «Illustrative sizes, not mission data.».
+Fixed operations: «Add next size», «Reset». Initially empty, len=0, counter `0 / 8`. Each Add appends the next source size; only the newly added cell appears. Live len and counter advance together. At 8, disable Add and show «Complete: 8 sizes in order.». Reset restores the empty slice, counter, and enabled Add; source values stay visible. This sandbox does not move the drone or edit code.
 
-Try it yourself: choose a starting preset, then press Append 7. Are any elements already present? Watch `len` beside `cap`.
+### Step `c61.v2.watch-step` — Watch out
 
-Preset buttons retain their Go expression labels. `make([]int, 3)` starts with three existing zeros and length/capacity 3. `make([]int, 0, 3)` starts with zero elements and capacity 3. `[]int{}` is a non-nil empty slice with length/capacity 0.
+`c61.v2.watch` · markdown
 
-Operation buttons: “Append 7”, “Reset”, and the three presets. At six elements, disable Append with “This experiment stops at 6 elements; reset to try another starting point.” Changing presets clears the experiment.
+- Keep append's result: ~sizes = append(...)~.
+- Indexes: 0 through ~len(sizes)-1~; outside means panic.
 
-Reserve-cell label: “Reserved room; not elements you can index yet.” The fixed operation effects and store-label changes are the same as the Arabic version. Append keeps the old elements and adds one final 7, using the returned descriptor. With room it reuses storage; without room the illustration allocates a distinct store and copies the elements. The demonstration's growth policy is identical in both languages.
+### Step `c61.v2.check-step` — Think & check
 
-Always-visible growth label: “Capacity growth here is an illustration; Go may choose a different capacity. No question will ask you to predict the exact growth capacity.”
+`c61.v2.plan` · markdown
 
-Length-three preset feedback: “These are three real elements whose values are zero. Append adds after them; it does not fill them.”
+Use a loop for repeated work.
 
-Reserved-three feedback: “There is room for three elements, but the current element count is zero.”
+For each crystal: measure, append, move toward the next.
 
-Empty-literal feedback: “An empty start with no reserved room. The first append needs storage that can hold it.”
+Report once afterward; the starter saved the first reading.
 
-After Append: “A new element at the end. Length increased by one; check whether storage changed or was reused.”
+`c61.v2.q-create` · question
 
-After Reset: “Back to your chosen starting preset. Only this experiment's additions were cleared.”
+Where should this mission's slice be created?
 
-### EN `c61.mistakes` — markdown
+1. Before the loop → One shared log keeps all readings. **Correct.**
+2. Inside each round → Each round would restart the log.
+3. After the loop → The log must exist before collecting readings.
 
-**Assumption:** “make with length 3 reserves empty places; I will use append to fill them.” → **What Go does:** creates three zero-valued elements, and appends after them. → **Why:** length counts existing elements; capacity counts available room. → **How to think about a fix:** decide whether you already have elements to write by index, or want a log that starts at length zero and grows.
+`c61.v2.q-append` · question
 
-**Assumption:** “append increases the variable's length without my keeping its result.” → **What Go does:** returns an updated descriptor; a standalone append call that does not use its result is rejected. → **Why:** its returned value must be used. → **How to think about a fix:** keep the returned descriptor in the same variable or another suitable variable.
+What adds a size without erasing earlier ones?
 
-### EN `c61.bounds-trace` — walkthrough
+1. len → len counts; it adds nothing.
+2. append → append extends the log; save its result. **Correct.**
+3. make → make creates a slice, rather than appending.
 
-An element's index must be at least zero and less than `len`. Extra room does not create extra elements. Watch why the second print never completes here.
+`c61.v2.q-moves` · question
 
-Code and states: `e61-bounds`, unchanged. Frame captions: 0 “Before we start.”; 1 “There are no elements, despite the capacity.”; 2 “Length is zero.”; 3 “The requested index is zero.”; 4 “Execution stopped here; after is never printed. Start fixing this by understanding length, rather than hiding the panic.” The terminal panic text is the same real Go message in both languages.
+Starting on crystal 1, how many moves reach crystal 8?
 
-### EN `c61.ticks` — markdown, optional
+1. 8 → Eight moves go past the last crystal.
+2. 6 → Six moves stop one crystal too soon.
+3. 7 → 8 measures + 7 moves = 15 ticks; Report=0, assuming no other tick costs. **Correct.**
 
-**Estimate for a separate exercise:** a training corridor has four markers. Start at its first marker, read each marker once, and move only between markers. One `Measure` costs one tick, and one `Move` costs one tick: four reads plus three moves gives **7 ticks**. Appending, arithmetic, and ordinary printing do not add game-action ticks; `Report` and `WorldSize` also cost no tick in these missions.
+### Step `c61.v2.turn-step` — Your turn
 
-A move outside the corridor still costs a tick even when it fails. This estimate assumes no extra commands and that the program stops after its correct report. Display the last run's scored result as “Measured: last run”; it is neither necessarily the preview's world nor the saved historical best.
+`c61.v2.turn` · markdown
 
-### EN `c61.q-make` — question
+Write your first attempt, then run it.
 
-Prompt: “What will this print? Predict before revealing the result.” Code: `e61-make-question`, unchanged.
+Existing Return-to-code action follows this block.
 
-Options: A `[9] 1`; B `[0 0 9] 3`; C `[9 0] 2`. Correct: B.
+### Three position-labelled hints
 
-Feedback A: “make started with two real elements. Append does not erase them. Check the starting length in the playground.”
-
-Feedback B: “You tracked length correctly: two existing zeros, then a new element with value 9, making three elements.”
-
-Feedback C: “That would require writing an existing index. Append adds at the end, rather than choosing the first zero.”
-
-### EN `c61.q-append-result` — question
-
-Prompt: “A learner forgot to keep append's result. Which description fits this code?” Code: `e61-unused-append`, unchanged.
-
-Options: A “It prints [6 2].”; B “It simply prints [6].”; C “It does not compile: append's result is unused.” Correct: C.
-
-Feedback A: “Append has a result you must use; this call does not automatically update s's length.”
-
-Feedback B: “Go does not merely ignore the result here; it rejects the statement during compilation.”
-
-Feedback C: “Exactly: this is a compile error, before any printing. Think about where the returned descriptor should go.”
-
-### EN `c61.q-index` — question
-
-Prompt: “A slice contains four elements. Which index selects the last one?”
-
-Options: A `4`; B `3`; C `-1`. Correct: B.
-
-Feedback A: “Four is the number of elements, rather than the last element's index. Index 4 is out of bounds.”
-
-Feedback B: “Yes: the indices are 0, 1, 2, and 3. Keep the count distinct from the index.”
-
-Feedback C: “Go does not use -1 as shorthand for the last element; it is an invalid index.”
-
-### EN `c61.turn` — markdown
-
-Return to the editor and run the starter unchanged. Look at `sizes`' length in the Console: the first observation is already stored. Write yourself a comment identifying the first observation still missing before adding commands. Return to code opens the editor for you.
-
-### English hints
-
-1. **Concept — `c61.h1`:** “The log stores ordered observations, rather than their sum. Remember the difference between printing the log and sending it to base.”
-2. **Structure — `c61.h2`:** “Before repeating a step, check what the starter has already recorded. Give each observation exactly one place in the log.”
-3. **Specific — `c61.h3`:** “Check the append statement: are you keeping its result? Check the report value too: is it the log itself, rather than its length or its last reading?”
+1. **Concept:** append grows the slice while keeping existing sizes.
+2. **Structure:** Loop over the crystals; report once afterward, remembering the first saved reading.
+3. **Specific:** Check the ~append~ / ~colony.Measure()~ line and move guard: save once; move toward another crystal.
 
 ## Verification appendix — sources, fixtures, and real outputs
 
 The following are author-only executable fixtures for sandbox actions and prose examples. They are not extra lesson blocks or suggested mission code. Every fenced Go fragment in this document is registered by a `go-example` marker. The repeated English and transpose views reference canonical snippets rather than creating unverified variants.
 
 ### Sandbox/prose fixtures
-
-**`e61-presets`:** all three requested presets, before/after one append; print starting capacity, but not an implementation-dependent grown capacity.
-
-<!-- go-example id=e61-presets imports=fmt outcome=ok -->
-```go
-a := make([]int, 3)
-fmt.Println(a, len(a), cap(a))
-a = append(a, 7)
-fmt.Println(a, len(a))
-b := make([]int, 0, 3)
-fmt.Println(b, len(b), cap(b))
-b = append(b, 7)
-fmt.Println(b, len(b), cap(b))
-c := []int{}
-fmt.Println(c, len(c), cap(c), c == nil)
-c = append(c, 7)
-fmt.Println(c, len(c))
-```
-
-**`e61-many-appends`:** reach the six-element UI limit from each preset; assert reuse when there was room and adequate capacity after growth, without fixing Go's growth policy.
-
-<!-- go-example id=e61-many-appends imports=fmt outcome=ok -->
-```go
-presets := [][]int{make([]int, 3), make([]int, 0, 3), {}}
-for id, s := range presets {
-    valid := true
-    for len(s) < 6 {
-        oldLen, oldCap := len(s), cap(s)
-        s = append(s, 7)
-        valid = valid && len(s) == oldLen+1 && cap(s) >= len(s)
-        if oldLen < oldCap { valid = valid && cap(s) == oldCap }
-    }
-    fmt.Println(id, s, len(s), valid)
-}
-```
 
 **`e62-sharing`:** the two sharing presets and Clone, including append before mutation. All operations reset between scenarios.
 
@@ -1281,7 +1156,7 @@ for turn := 0; turn < 4; turn++ {
 
 ### Verification method and transcripts
 
-Executed all **28** registered fragments/fixtures outside the worktree in `/private/tmp/orbital-ch6-examples-3torsswg`. Final verification: **23 successful runs, 3 intentional panics, 2 intentional compile errors**, all matching their expectations. No game runs or repository test suites were invoked for this content task.
+Historical verification of revision 1 executed **28** fragments/fixtures (six retired 6-1 fixtures/transcripts are removed in revision 2) outside the worktree in `/private/tmp/orbital-ch6-examples-3torsswg`. Final verification: **23 successful runs, 3 intentional panics, 2 intentional compile errors**, all matching their expectations. No game runs or repository test suites were invoked for this content task.
 
 Compiler: `go version go1.25.7 darwin/arm64`, with matching `GOROOT=/usr/local/go`. Each example has its own temporary module declaring `go 1.24.0` and an explicit `fmt`/`slices` import wrapper. Build command: `/usr/local/go/bin/go build -trimpath -gcflags=-lang=go1.24 -o prog .`; execution uses that built binary, not `go run`. Cache, GOPATH, and TMPDIR are inside the same external temporary root. Network resolution is disabled (GOPROXY/GOSUMDB off, GOTOOLCHAIN local).
 
@@ -1292,63 +1167,6 @@ Displayed fragment line numbers differ from compiler wrapper line numbers. Succe
 **Map-order expectation:** `e63-range-orders` must first print the sorted map, then four legal key/value permutations. Its transcript below is the exact observed output, not a claim that another run will repeat it. This run happened to repeat the same iteration order four times, which is legal.
 
 **Sandbox limit:** fixtures verify Go's element/length/sharing/map semantics; they do not execute a future JavaScript implementation or certify its UI. The illustration's chosen capacity policy remains explicitly labelled and needs implementation tests later.
-
-#### Verified `e61-basic` — ok
-
-Build exit 0; program exit 0.
-
-Real stdout:
-
-```text
-0 0
-[7] 1
-7 2
-```
-
-Real stderr: empty.
-
-#### Verified `e61-bounds` — panic
-
-Build exit 0; program exit 2.
-
-Real stdout:
-
-```text
-0 3
-```
-
-Real stderr (intentional panic):
-
-```text
-panic: runtime error: index out of range [0] with length 0
-
-goroutine 1 [running]:
-main.main()
-	storyboard/e61-bounds/main.go:9 +0x74
-```
-
-#### Verified `e61-make-question` — ok
-
-Build exit 0; program exit 0.
-
-Real stdout:
-
-```text
-[0 0 9] 3
-```
-
-Real stderr: empty.
-
-#### Verified `e61-unused-append` — compile-error
-
-Build exit 1. Intentional compile error; binary not run. Build stdout: empty.
-
-Real compiler stderr:
-
-```text
-# storyboard/e61-unused-append
-./main.go:7:1: append(s, 2) (value of type []int) is not used
-```
 
 #### Verified `e62-range-copy` — ok
 
@@ -1579,37 +1397,6 @@ Real stdout:
 
 Real stderr: empty.
 
-#### Verified `e61-presets` — ok
-
-Build exit 0; program exit 0.
-
-Real stdout:
-
-```text
-[0 0 0] 3 3
-[0 0 0 7] 4
-[] 0 3
-[7] 1 3
-[] 0 0 false
-[7] 1
-```
-
-Real stderr: empty.
-
-#### Verified `e61-many-appends` — ok
-
-Build exit 0; program exit 0.
-
-Real stdout:
-
-```text
-0 [0 0 0 7 7 7] 6 true
-1 [7 7 7 7 7 7] 6 true
-2 [7 7 7 7 7 7] 6 true
-```
-
-Real stderr: empty.
-
 #### Verified `e62-sharing` — ok
 
 Build exit 0; program exit 0.
@@ -1676,6 +1463,53 @@ water=2;air=5;
 water=2;air=5;
 water=2;air=5;
 water=2;air=5;
+```
+
+Real stderr: empty.
+
+
+### Revision-2 sequence fixture and verification
+
+The next author-only fixture verifies the eight Add operations; it is not extra learner code. New 6-1 fixtures are verified by `TestSurveyStoryboardExamplesMatchRealGo` in temporary directories outside the worktree.
+
+<!-- go-example id=e61-sequence-v2 imports=fmt outcome=ok -->
+```go
+sizes := []int{}
+for _, size := range []int{5, 2, 8, 4, 1, 7, 3, 6} {
+    sizes = append(sizes, size)
+    fmt.Println(sizes, len(sizes))
+}
+```
+
+Compiler for revision 2: `go version go1.27.1 darwin/arm64`; module language `go 1.24.0`, built with `-gcflags=-lang=go1.24`, network dependency resolution disabled. Both examples actually ran outside the worktree under `/private/tmp/orbital-ch61-v2/examples`.
+
+#### Verified `e61-crystal-log-v2` — ok
+
+Build exit 0; program exit 0.
+
+Real stdout:
+
+```text
+[5 2 8] 3 5
+```
+
+Real stderr: empty.
+
+#### Verified `e61-sequence-v2` — ok
+
+Build exit 0; program exit 0.
+
+Real stdout:
+
+```text
+[5] 1
+[5 2] 2
+[5 2 8] 3
+[5 2 8 4] 4
+[5 2 8 4 1] 5
+[5 2 8 4 1 7] 6
+[5 2 8 4 1 7 3] 7
+[5 2 8 4 1 7 3 6] 8
 ```
 
 Real stderr: empty.

@@ -24,10 +24,15 @@ func TestSurveyStoryboardExamplesMatchRealGo(t *testing.T) {
 	storyboard := string(body)
 	pattern := regexp.MustCompile("(?s)<!-- go-example id=(e61-[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\\n```go\\n(.*?)\\n```")
 	examples := pattern.FindAllStringSubmatch(storyboard, -1)
-	if len(examples) != 6 {
-		t.Fatalf("expected all six approved survey examples, found %d", len(examples))
+	if len(examples) != 2 {
+		t.Fatalf("expected both revision-2 survey examples, found %d", len(examples))
 	}
+	seen := map[string]bool{}
 	for _, example := range examples {
+		if seen[example[1]] {
+			t.Fatal("duplicate survey example ID")
+		}
+		seen[example[1]] = true
 		t.Run(example[1], func(t *testing.T) {
 			verifySurveyExample(t, goBin, storyboard, example)
 		})
@@ -37,11 +42,20 @@ func TestSurveyStoryboardExamplesMatchRealGo(t *testing.T) {
 func verifySurveyExample(t *testing.T, goBin, storyboard string, example []string) {
 	t.Helper()
 	id, imports, outcome, code := example[1], example[2], example[3], example[4]
+	if (id != "e61-crystal-log-v2" && id != "e61-sequence-v2") || outcome != "ok" {
+		t.Fatal("unexpected revision-2 example")
+	}
 	for _, steps := range [][]LessonStep{surveyLessonArabic, surveyLessonEnglish} {
 		for _, step := range steps {
 			for _, block := range step.Blocks {
 				if block.ExampleID == id && block.Code != code {
 					t.Fatal("encoded example differs from approved storyboard")
+				}
+				if id == "e61-sequence-v2" && block.Sandbox != nil && block.Sandbox.Kind == "slice-append-sequence" {
+					literal := strings.ReplaceAll(fmt.Sprintf("%#v", block.Sandbox.Sequence), " ", "")
+					if !strings.Contains(strings.ReplaceAll(code, " ", ""), literal) {
+						t.Fatal("sequence fixture differs from playground data")
+					}
 				}
 			}
 		}
@@ -84,14 +98,6 @@ func verifySurveyExample(t *testing.T, goBin, storyboard string, example []strin
 	build.Dir = dir
 	build.Env = append(os.Environ(), "GOWORK=off", "GOTOOLCHAIN=local", "GOPROXY=off")
 	diagnostics, buildErr := build.CombinedOutput()
-	if outcome == "compile-error" {
-		message := regexp.MustCompile(`(?m)^\./main.go:\d+:\d+: (.+)$`)
-		want, actual := message.FindStringSubmatch(transcript), message.FindStringSubmatch(string(diagnostics))
-		if buildErr == nil || len(want) != 2 || len(actual) != 2 || want[1] != actual[1] {
-			t.Fatalf("compile error differs from storyboard: %v\n%s", buildErr, diagnostics)
-		}
-		return
-	}
 	if buildErr != nil {
 		t.Fatalf("build: %v\n%s", buildErr, diagnostics)
 	}
@@ -103,13 +109,7 @@ func verifySurveyExample(t *testing.T, goBin, storyboard string, example []strin
 	if stdout.String() != wantOutput {
 		t.Fatalf("stdout = %q, documented %q", stdout.String(), wantOutput)
 	}
-	if outcome == "panic" {
-		panicPattern := regexp.MustCompile("(?m)^panic: (.+)$")
-		wantPanic := panicPattern.FindString(transcript)
-		if runErr == nil || wantPanic == "" || !strings.HasPrefix(stderr.String(), wantPanic+"\n") {
-			t.Fatalf("expected %q, got %v\n%s", wantPanic, runErr, stderr)
-		}
-	} else if runErr != nil || stderr.Len() != 0 {
+	if runErr != nil || stderr.Len() != 0 {
 		t.Fatalf("unexpected failure: %v\n%s", runErr, stderr)
 	}
 }

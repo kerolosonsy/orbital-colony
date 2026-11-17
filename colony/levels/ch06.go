@@ -11,38 +11,47 @@ import (
 func init() {
 	add(&Level{
 		En: &LevelText{
-			LessonRevision: 1, Steps: surveyLessonEnglish,
+			LessonRevision: 2, Steps: surveyLessonEnglish,
 			Title: "Crystal Log",
 			Goal:  "Measure every crystal and report their sizes in order in one slice",
-			Lesson: `# Slices: A List That Grows 📋
+			Lesson: `# Mission
 
-So far each variable has held one value. What if you want to remember 8 sizes? Or 1000? Use a **slice**.
+1. Measure the 8 crystals from left to right.
+2. Keep their sizes in order in one slice.
+3. Report the whole slice once with ~colony.Report~.
+
+The starter already saved the first measurement.
+
+Gold: **15 ticks or fewer**.
+
+8 measures + 7 moves = 15 ticks; Report=0, assuming no other tick costs.
+
+## Idea
+
+A slice is a box: ~append~ adds each size at its end.
+
+Illustrative sizes:
 
 ~~~go
-var sizes []int            // An empty int slice (length 0)
-sizes = append(sizes, 5)   // [5]
-sizes = append(sizes, 2)   // [5 2]
-fmt.Println(len(sizes))    // 2
-fmt.Println(sizes[0])      // 5  ← Counting starts at 0
+sizes := []int{}
+sizes = append(sizes, 5)
+sizes = append(sizes, 2)
+sizes = append(sizes, 8)
+fmt.Println(sizes, len(sizes), sizes[0])
 ~~~
 
-- ~[]int~ means "a slice of int."
-- ~append~ returns an **updated slice value**, which may reuse its backing array. Keep its result, for example: ~sizes = append(sizes, x)~.
-- ~len(s)~ tells you how many elements it holds.
-- ~s[i]~ retrieves element i. The index must satisfy 0 <= i < len(s). Outside those bounds, the program **panics** (panic: index out of range).
+## Watch out
 
-## Other ways to create a slice
+- Keep append's result: ~sizes = append(...)~.
+- Indexes: 0 through ~len(sizes)-1~; outside means panic.
 
-~~~go
-nums := []int{4, 8, 15}     // With initial values
-grid := make([]int, 10)     // 10 zeros, ready to use: grid[3] = 7
-room := make([]int, 0, 10) // Length 0, capacity 10; append adds real elements
-~~~
+Use a loop for repeated work.
 
-cap is available room, not the number of elements. Appending after make([]int, 10) adds after the ten zeros; it does not fill them. A nil slice can be appended to. Slice sharing is explained in 6-2. The starter already stores the first observation.
+For each crystal: measure, append, move toward the next.
 
-## Your mission
-Measure the 8 crystals from left to right, store their sizes in a slice, and report it to base.`,
+Report once afterward; the starter saved the first reading.
+
+Write your first attempt, then run it.`,
 			Starter: `package main
 
 import (
@@ -59,9 +68,9 @@ func main() {
 	// Continue to the end of the row, then send all of sizes with colony.Report
 }
 `,
-			Hints: []string{"The log stores ordered observations, rather than their sum. Remember the difference between printing the log and sending it to base.", "Before repeating a step, check what the starter has already recorded. Give each observation exactly one place in the log.", "Check the append statement: are you keeping its result? Check the report value too: is it the log itself, rather than its length or its last reading?"},
+			Hints: []string{"append grows the slice while keeping existing sizes.", "Loop over the crystals; report once afterward, remembering the first saved reading.", "Check the ~append~ / ~colony.Measure()~ line and move guard: save once; move toward another crystal."},
 		},
-		LessonRevision: 1, Steps: surveyLessonArabic,
+		LessonRevision: 2, Steps: surveyLessonArabic,
 		ID: "6-1-survey", Chapter: 6, Title: "سجل الكريستال",
 		Goal: "قيس كل الكريستال وابعت أحجامهم بالترتيب في slice واحدة",
 		Par:  15, Gold: 15, MaxTicks: 60,
@@ -101,36 +110,45 @@ func main() {
 	// كمّل لحد آخر الصف، وبعدين ابعت sizes كلها بـ colony.Report
 }
 `,
-		Hints: []string{"السجل بيحفظ ملاحظات مرتبة؛ مش مجموع الأحجام. افتكر الفرق بين طباعة السجل وإرساله للقاعدة.", "قبل ما تكرر أي خطوة، راجع إيه اللي اتسجل بالفعل في الـstarter. خلي لكل ملاحظة مكان واحد في السجل.", "راجع السطر اللي بيستخدم append: هل محتفظ بالناتج؟ وراجع قيمة التقرير: هل هي السجل نفسه بدل طوله أو آخر قراءة؟"},
-		Lesson: `# Slices: قايمة بتكبر 📋
+		Hints: []string{"الـslice سجل بيكبر مع append، مع الاحتفاظ بالأحجام اللي اتسجلت قبله.", "رتّب loop للكريستالات وابعت تقرير واحد بعده؛ افتكر أول قراءة في الـstarter.", "راجع سطر ~append~ اللي فيه ~colony.Measure()~ وشرط الحركة: بتسجل مرة وتتحرك لكريستالة تالية؟"},
+		Lesson: `# المهمة
 
-لحد دلوقتي كل متغير كان فيه قيمة واحدة. بس لو عايز تفتكر 8 أحجام؟ أو 1000؟ هنا بنستخدم **slice**.
+1. قيس الـ8 كريستالات من الشمال لليمين.
+2. احفظ أحجامهم بالترتيب في slice واحدة.
+3. ابعت الـslice كلها مرة واحدة بـ~colony.Report~.
+
+الـstarter قاس أول كريستالة وحفظها فعلًا.
+
+الذهب: **15 ticks أو أقل**.
+
+8 قياسات + 7 حركات = 15 ticks؛ Report=0 وبافتراض مفيش تكلفة تانية.
+
+## الفكرة
+
+تخيل الـslice صندوق، وكل حجم جديد بيتحط في آخره بـ~append~.
+
+أحجام للتوضيح:
 
 ~~~go
-var sizes []int            // slice من int، فاضية (طولها 0)
-sizes = append(sizes, 5)   // [5]
-sizes = append(sizes, 2)   // [5 2]
-fmt.Println(len(sizes))    // 2
-fmt.Println(sizes[0])      // 5  ← العدّ من 0
+sizes := []int{}
+sizes = append(sizes, 5)
+sizes = append(sizes, 2)
+sizes = append(sizes, 8)
+fmt.Println(sizes, len(sizes), sizes[0])
 ~~~
 
-- ~[]int~ معناها "slice من int".
-- ~append~ بترجّع **وصف slice محدث**، وممكن تستخدم نفس مخزن العناصر. احتفظ بالناتج، مثلاً: ~sizes = append(sizes, x)~.
-- ~len(s)~ بيقولك فيها كام عنصر.
-- ~s[i]~ بيجيبلك العنصر رقم i. ولازم 0 <= i < len(s). لو i برا الحدود، البرنامج **بيقع** (panic: index out of range).
+## خد بالك
 
-## طرق تانية تعمل بيها slice
+- احتفظ بنتيجة ~append~: ~sizes = append(...)~.
+- أرقام الـindex من 0 لحد ~len(sizes)-1~؛ براها يحصل panic.
 
-~~~go
-nums := []int{4, 8, 15}     // بقيم جاهزة
-grid := make([]int, 10)     // 10 أصفار جاهزين: grid[3] = 7
-room := make([]int, 0, 10) // الطول صفر والسعة 10؛ append بتضيف عناصر
-~~~
+التكرار محتاج loop.
 
-cap هي المساحة المتاحة، مش عدد العناصر. لو عملت append بعد make([]int, 10)، الإضافة تيجي بعد العشرة أصفار، مش مكانهم. ينفع تعمل append لـslice nil. مشاركة المخزن هنتكلم عنها في 6-2. الـstarter سجل أول قراءة بالفعل.
+لكل كريستالة: قيس، ضيف، واتجه للي بعدها.
 
-## المهمة
-قيس الكريستال الـ 8 بالترتيب من الشمال لليمين، واحفظهم في slice، وابعتها للقاعدة.`,
+التقرير مرة واحدة بعد الـloop؛ أول قراءة موجودة فعلًا.
+
+اكتب أول محاولة بنفسك، شغّلها، وراجع السجل اللي طلع.`,
 	})
 
 	add(&Level{

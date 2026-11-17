@@ -40,12 +40,13 @@ type LessonVariable struct {
 }
 
 type LessonSlice struct {
-	Name     string `json:"name"`
-	Store    string `json:"store,omitempty"`
-	Values   []int  `json:"values"`
-	Length   int    `json:"length"`
-	Capacity *int   `json:"capacity,omitempty"` // absent when no exact capacity is asserted
-	Nil      bool   `json:"nil,omitempty"`
+	ElementsOnly bool   `json:"elementsOnly,omitempty"` // omit storage details in introductory lessons
+	Name         string `json:"name"`
+	Store        string `json:"store,omitempty"`
+	Values       []int  `json:"values"`
+	Length       int    `json:"length"`
+	Capacity     *int   `json:"capacity,omitempty"` // absent when no exact capacity is asserted
+	Nil          bool   `json:"nil,omitempty"`
 }
 
 type LessonQuestion struct {
@@ -56,14 +57,19 @@ type LessonQuestion struct {
 
 type LessonSandbox struct {
 	Kind          string              `json:"kind"`
-	Presets       []LessonSlicePreset `json:"presets"`
-	AppendValue   int                 `json:"appendValue"`
-	Limit         int                 `json:"limit"`
-	GrowthLabel   string              `json:"growthLabel"`
-	ReservedLabel string              `json:"reservedLabel"`
-	LimitLabel    string              `json:"limitLabel"`
-	AppendText    string              `json:"appendText"`
-	ResetText     string              `json:"resetText"`
+	Presets       []LessonSlicePreset `json:"presets,omitempty"`
+	AppendValue   int                 `json:"appendValue,omitempty"`
+	Limit         int                 `json:"limit,omitempty"`
+	GrowthLabel   string              `json:"growthLabel,omitempty"`
+	ReservedLabel string              `json:"reservedLabel,omitempty"`
+	LimitLabel    string              `json:"limitLabel,omitempty"`
+	AppendText    string              `json:"appendText,omitempty"`
+	ResetText     string              `json:"resetText,omitempty"`
+	Sequence      []int               `json:"sequence,omitempty"`
+	SourceLabel   string              `json:"sourceLabel,omitempty"`
+	AppendLabel   string              `json:"appendLabel,omitempty"`
+	ResetLabel    string              `json:"resetLabel,omitempty"`
+	DoneText      string              `json:"doneText,omitempty"`
 }
 
 type LessonSlicePreset struct {

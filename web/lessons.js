@@ -1,7 +1,7 @@
 "use strict";
 
 const Lessons = (() => {
-  let currentLevel = null, measuredTicks = null, navigationObserver = null;
+  let navigationObserver = null;
   function element(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -70,7 +70,7 @@ const Lessons = (() => {
   }
 
   function codeContext(block) {
-    return element("p", "lesson-model-label", T("مثال جوه func main؛ import: ", "Example inside func main; import: ") + block.imports.join(", "));
+    return element("p", "lesson-model-label", T("جوه main؛ import: ", "Inside main; import: ") + block.imports.join(", "));
   }
 
   function isolated(text, direction, className) {
@@ -82,6 +82,7 @@ const Lessons = (() => {
   function sliceSummary(slice) {
     const caption = element("figcaption");
     caption.append(isolated(`${slice.name}:`, "ltr", "lesson-summary-go"), isolated(`len=${slice.length}`, "ltr", "lesson-summary-go"));
+    if (slice.elementsOnly) return caption;
     if (slice.capacity === undefined) {
       const capacity = element("span", "lesson-summary-part");
       capacity.dir = "ltr";
@@ -153,7 +154,7 @@ const Lessons = (() => {
     controls.setAttribute("role", "group");
     controls.setAttribute("aria-label", T("شرح الكود خطوة بخطوة", "Code walkthrough"));
     controls.append(previous, count, next, reset);
-    panel.append(element("p", "lesson-model-label", T("شرح مُعدّ مسبقًا؛ مش تشغيل للكود بتاعك.", "Authored walkthrough; this does not run your code.")), codeContext(block), code, controls, state);
+    panel.append(element("p", "lesson-model-label", T("شرح توضيحي خطوة بخطوة.", "Illustrated walkthrough.")), codeContext(block), code, controls, state);
     update();
     return panel;
   }
@@ -242,6 +243,7 @@ const Lessons = (() => {
 
   function sandbox(block) {
     const spec = block.sandbox;
+    if (spec.kind === "slice-append-sequence") return sequenceSandbox(spec);
     const model = createSandbox(spec);
     const panel = element("section", "lesson-sandbox");
     const presets = element("div", "lesson-presets");
@@ -265,17 +267,48 @@ const Lessons = (() => {
     return panel;
   }
 
+  function sequenceSource(spec) {
+    const source = element("figure", "lesson-sequence-source");
+    source.appendChild(element("figcaption", "", spec.sourceLabel));
+    const row = element("ol", "lesson-crystals");
+    spec.sequence.forEach((size, index) => {
+      const cell = element("li", "lesson-crystal");
+      cell.append(element("b", "", String(size)), element("span", "lesson-index", String(index)));
+      cell.setAttribute("aria-label", T(`index ${index}، حجم ${size}`, `index ${index}, size ${size}`));
+      row.appendChild(cell);
+    });
+    source.appendChild(row);
+    return source;
+  }
+
+  function sequenceSandbox(spec) {
+    const panel = element("section", "lesson-sandbox lesson-sequence");
+    const source = sequenceSource(spec);
+    const view = element("div"), counter = element("span", "lesson-position");
+    const done = element("p", "lesson-caption", spec.doneText);
+    done.setAttribute("role", "status");
+    counter.setAttribute("role", "status");
+    const values = [];
+    const add = button(spec.appendLabel, () => { if (values.length < spec.sequence.length) values.push(spec.sequence[values.length]); update(); });
+    const reset = button(spec.resetLabel, () => { values.length = 0; update(); });
+    function update() {
+      view.replaceChildren(sliceView({ name: "sizes", values, length: values.length, elementsOnly: true }));
+      counter.textContent = `${values.length} / ${spec.sequence.length}`;
+      add.disabled = values.length === spec.sequence.length;
+      done.hidden = !add.disabled;
+    }
+    const controls = element("div", "lesson-controls");
+    controls.append(add, counter, reset);
+    panel.append(source, view, controls, done);
+    update();
+    return panel;
+  }
+
   function blockView(block, session) {
     const wrapper = element(block.optional ? "details" : "section", "lesson-block");
     wrapper.dataset.block = block.id;
     if (block.optional) wrapper.appendChild(element("summary", "", T("تفاصيل أكتر: تقدير ticks", "More detail: tick estimate")));
     wrapper.appendChild(prose(block.text));
-    if (block.id === "c61.ticks") {
-      const measured = element("p", "lesson-measured", measuredText());
-      measured.dataset.lessonMeasured = "";
-      measured.setAttribute("role", "status");
-      wrapper.appendChild(measured);
-    }
     if (block.note) {
       const detail = element("details", "lesson-note");
       detail.append(element("summary", "", T("تفاصيل أكتر", "More detail")), prose(block.note));
@@ -321,7 +354,6 @@ const Lessons = (() => {
   }
 
   function open(level) {
-    currentLevel = level; measuredTicks = null;
     navigationObserver?.disconnect();
     const lessonPanel = $("#lesson-panel");
     lessonPanel.style.removeProperty("--lesson-nav-offset");
@@ -359,18 +391,5 @@ const Lessons = (() => {
     return observer;
   }
 
-  function measuredText() {
-    return measuredTicks === null
-      ? T("مقاس: آخر تشغيل — مفيش تشغيل لسه.", "Measured: last run — no run yet.")
-      : T(`مقاس: آخر تشغيل — ${measuredTicks} ticks.`, `Measured: last run — ${measuredTicks} ticks.`);
-  }
-
-  function recordRun(level, runResult) {
-    if (level !== currentLevel) return;
-    measuredTicks = runResult.ticks;
-    const label = document.querySelector("[data-lesson-measured]");
-    if (label) label.textContent = measuredText();
-  }
-
-  return { open, createSession, recordRun };
+  return { open, createSession };
 })();

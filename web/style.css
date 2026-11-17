@@ -248,6 +248,13 @@ input[type="checkbox"] { accent-color: var(--regolith); }
 .lesson-presets { display: flex; flex-direction: column; gap: 6px; }
 .lesson-presets .tool { font: 12px/1.6 var(--mono); direction: ltr; unicode-bidi: isolate; justify-content: center; }
 .lesson-presets [aria-pressed="true"] { border-color: var(--regolith); background: var(--ink-2); }
+.lesson-sequence-source { margin: 12px 0; }
+.lesson-sequence-source figcaption { font-size: 13px; margin-block-end: 8px; }
+.lesson .lesson-crystals { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; direction: ltr; list-style: none; padding: 0; margin: 0; }
+.lesson-crystal { display: flex; flex-direction: column; align-items: center; min-width: 0; text-align: center; }
+.lesson-crystal::before { content: ""; display: block; width: 14px; height: 20px; background: var(--crystal); clip-path: polygon(50% 0, 100% 30%, 75% 100%, 25% 100%, 0 30%); }
+.lesson-crystal b { font: 14px/1.6 var(--mono); }
+.lesson-crystal .lesson-index { font: 11px/1.4 var(--mono); color: var(--paper-2); }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
 
 /* ---------- editor ---------- */

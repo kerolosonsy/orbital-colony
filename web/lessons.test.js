@@ -33,7 +33,7 @@ function fixture({ blob, review = false, lang = "en" } = {}) {
     setAttribute(name, text) { this.attributes[name] = text; }
     focus() { focused = this; }
     querySelectorAll(selector) {
-      const matches = (node) => selector.startsWith(".") ? node.className.split(" ").includes(selector.slice(1)) : selector === "[data-lesson-measured]" ? node.dataset.lessonMeasured !== undefined : node.tagName === selector;
+      const matches = (node) => selector.startsWith(".") ? node.className.split(" ").includes(selector.slice(1)) : node.tagName === selector;
       return this.children.flatMap((child) => [...(matches(child) ? [child] : []), ...child.querySelectorAll(selector)]);
     }
     querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
@@ -76,7 +76,6 @@ function lesson() {
           { id: "empty", label: "[]int{}", values: [], capacity: 0, text: "Empty slice." },
         ],
       } },
-      { id: "c61.ticks", kind: "markdown", optional: true, text: "This is an estimate." },
     ] },
   ] };
 }
@@ -85,6 +84,80 @@ function click(node) { assert.ok(node, "control exists"); assert.ok(!node.disabl
 function namedButton(root, label) { return root.querySelectorAll("button").find((b) => b.textContent === label); }
 function practice(view, level = lesson()) { view.ui.open(level); click(namedButton(view.article.querySelector("nav"), view.lang === "ar" ? "التالي" : "Next")); }
 function summaryParts(root) { return root.querySelector("figcaption").querySelectorAll("bdi").map((part) => part.textContent); }
+
+function sequenceLesson(lang = "en") {
+  return { id: "survey", lessonRevision: 2, steps: [
+    { id: "c61.v2.mission-step", title: "Mission", blocks: [{ id: "c61.v2.mission", kind: "markdown", text: "The starter saved the first reading." }] },
+    { id: "c61.v2.try-step", title: "Try it", blocks: [{ id: "c61.v2.sequence", kind: "sandbox", text: "Watch len grow.", sandbox: {
+      kind: "slice-append-sequence", sequence: [5, 2, 8, 4, 1, 7, 3, 6],
+      sourceLabel: lang === "ar" ? "أحجام للتوضيح، مش بيانات المهمة." : "Illustrative sizes, not mission data.",
+      appendLabel: lang === "ar" ? "ضيف الحجم الجاي" : "Add next size", resetLabel: lang === "ar" ? "من الأول" : "Reset",
+      doneText: lang === "ar" ? "اكتمل السجل: 8 أحجام بالترتيب." : "Complete: 8 sizes in order.",
+    } }] },
+  ] };
+}
+
+test("sequence playground grows one indexed cell per click, stops at eight, and resets in both languages", () => {
+  for (const lang of ["ar", "en"]) {
+    const view = fixture({ lang }), level = sequenceLesson(lang);
+    const spec = level.steps[1].blocks[0].sandbox;
+    practice(view, level);
+    const box = view.article.querySelector(".lesson-sequence"), row = box.querySelector(".lesson-crystals");
+    const add = namedButton(box, spec.appendLabel);
+    assert.equal(row.querySelectorAll("li").length, 8);
+    assert.deepEqual(row.querySelectorAll("b").map((cell) => cell.textContent), spec.sequence.map(String));
+    assert.deepEqual(row.querySelectorAll(".lesson-index").map((cell) => cell.textContent), ["0", "1", "2", "3", "4", "5", "6", "7"]);
+    assert.match(row.querySelectorAll("li")[0].attributes["aria-label"], /index 0/);
+    assert.equal(box.querySelector(".lesson-position").textContent, "0 / 8");
+    assert.equal(box.querySelector(".lesson-caption").hidden, true);
+    assert.equal(box.querySelectorAll(".lesson-cell").length, 0);
+    assert.deepEqual(summaryParts(box.querySelector(".lesson-slice")), ["sizes:", "len=0"]);
+    assert.doesNotMatch(box.textContent, /cap=|Store|nil|مخزن/);
+    for (let n = 1; n <= 8; n++) {
+      click(add);
+      const slice = box.querySelector(".lesson-slice");
+      assert.deepEqual(slice.querySelectorAll("b").map((cell) => cell.textContent), spec.sequence.slice(0, n).map(String));
+      assert.deepEqual(slice.querySelectorAll(".lesson-index").map((cell) => cell.textContent), Array.from({ length: n }, (_, i) => String(i)));
+      assert.deepEqual(summaryParts(slice), ["sizes:", `len=${n}`]);
+      assert.equal(box.querySelector(".lesson-position").textContent, `${n} / 8`);
+    }
+    assert.equal(add.disabled, true);
+    assert.equal(box.querySelector(".lesson-caption").hidden, false);
+    assert.equal(box.querySelector(".lesson-caption").textContent, spec.doneText);
+    click(namedButton(box, spec.resetLabel));
+    assert.equal(add.disabled, false);
+    assert.equal(box.querySelector(".lesson-caption").hidden, true);
+    assert.equal(box.querySelector(".lesson-position").textContent, "0 / 8");
+    assert.equal(box.querySelectorAll(".lesson-cell").length, 0);
+    assert.deepEqual(spec.sequence, [5, 2, 8, 4, 1, 7, 3, 6]);
+    click(add);
+    assert.deepEqual(summaryParts(box.querySelector(".lesson-slice")), ["sizes:", "len=1"]);
+  }
+});
+
+test("revision-1 practice opens the new Mission and cannot restore retired answers or wrong-pick counts", () => {
+  const blob = { lessons: { survey: { revision: 1, step: "c61.check-step", answers: { "c61.q-index": 1 }, wrongAttempts: { "c61.q-index": 2 } } } };
+  const view = fixture({ blob }), level = sequenceLesson(); view.ui.open(level);
+  assert.match(view.article.textContent, /Step 1 of 2/);
+  assert.match(view.article.textContent, /starter saved the first reading/);
+  assert.equal(view.article.querySelector(".lesson-sequence"), null);
+  click(namedButton(view.article.querySelector("nav"), "Next"));
+  assert.equal(view.store.blob.lessons.survey.revision, 2);
+  assert.equal(view.store.blob.lessons.survey.step, "c61.v2.try-step");
+  assert.equal(Object.keys(view.store.blob.lessons.survey.answers).length, 0);
+  assert.equal(Object.keys(view.store.blob.lessons.survey.wrongAttempts).length, 0);
+});
+
+test("introductory walkthrough frames show only elements and length", () => {
+  const level = lesson();
+  level.steps[1].blocks[0].walkthrough.frames[1].slice = { name: "sizes", values: [5], length: 1, elementsOnly: true };
+  const view = fixture(); practice(view, level);
+  const walk = view.article.querySelector(".lesson-walkthrough");
+  click(namedButton(walk, "Next line"));
+  assert.deepEqual(summaryParts(walk), ["sizes:", "len=1"]);
+  assert.equal(walk.querySelectorAll(".reserved").length, 0);
+  assert.doesNotMatch(walk.querySelector("figcaption").textContent, /cap|Store|nil/);
+});
 
 test("walkthrough starts before execution, advances to terminal panic, goes back and resets", () => {
   const view = fixture(); practice(view);
@@ -302,17 +375,6 @@ test("legacy levels use exactly the old markdown renderer and Return to code clo
   assert.ok(!view.body.className.includes("lesson-open"));
   assert.equal(view.roots["#btn-lesson"].attributes["aria-expanded"], "false");
   assert.equal(view.focused, view.editor);
-});
-
-test("measured ticks are last-run observations rather than saved best or preview values", () => {
-  const view = fixture(); const level = lesson(); practice(view, level);
-  assert.match(view.article.querySelector(".lesson-measured").textContent, /no run yet/);
-  view.ui.recordRun(level, { ticks: 17 });
-  assert.match(view.article.querySelector(".lesson-measured").textContent, /17 ticks/);
-  view.ui.recordRun({ id: "other" }, { ticks: 1 });
-  assert.match(view.article.querySelector(".lesson-measured").textContent, /17 ticks/);
-  view.ui.open(level);
-  assert.match(view.article.querySelector(".lesson-measured").textContent, /no run yet/);
 });
 
 test("profile loading retains lesson records, defaults legacy saves, and rejects malformed lesson roots", async () => {

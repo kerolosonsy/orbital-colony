@@ -1579,7 +1579,6 @@ async function run() {
       finish(level, r.result, r.missing || []);
       return;
     }
-    if (level.steps?.length) Lessons.recordRun(level, r.result);
     if (r.stdout) { log("fmt output:", "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => log(l)); }
     if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => log(l, "c-err"));
     if (r.runtimeTip) log(r.runtimeTip, "c-tip");
