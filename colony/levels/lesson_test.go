@@ -141,6 +141,28 @@ func validateLessonFrames(t *testing.T, block LessonBlock) {
 
 func validateLessonSandbox(t *testing.T, sandbox *LessonSandbox, claimID func(string)) {
 	t.Helper()
+	if sandbox.Kind == "sort-compare" {
+		if len(sandbox.Sequence) != 5 || len(sandbox.Grid) != 0 || len(sandbox.Presets) != 0 {
+			t.Fatal("sort sandbox must have five illustrative sizes")
+		}
+		for _, label := range []string{sandbox.SourceLabel, sandbox.SortDirectionLabel, sandbox.SortTieLabel, sandbox.AscendingLabel, sandbox.DescendingLabel, sandbox.TieOnLabel, sandbox.TieOffLabel, sandbox.ResetLabel} {
+			if strings.TrimSpace(label) == "" {
+				t.Fatal("sort sandbox missing a translated label")
+			}
+		}
+		return
+	}
+	if sandbox.Kind == "grid-index" {
+		if len(sandbox.Grid) != 2 || len(sandbox.Grid[0]) != 3 || len(sandbox.Grid[1]) != 3 || len(sandbox.Sequence) != 0 || len(sandbox.Presets) != 0 {
+			t.Fatal("grid sandbox must have an illustrative 2-by-3 grid")
+		}
+		for _, label := range []string{sandbox.SourceLabel, sandbox.GridOuterCloneLabel, sandbox.GridRowCloneLabel, sandbox.GridEditCopyLabel, sandbox.ResetLabel} {
+			if strings.TrimSpace(label) == "" {
+				t.Fatal("grid sandbox missing a translated label")
+			}
+		}
+		return
+	}
 	if sandbox.Kind == "slice-append-sequence" {
 		if len(sandbox.Sequence) != 8 || len(sandbox.Presets) != 0 || sandbox.Limit != 0 || sandbox.AppendValue != 0 || sandbox.GrowthLabel != "" || sandbox.ReservedLabel != "" || sandbox.LimitLabel != "" || sandbox.AppendText != "" || sandbox.ResetText != "" {
 			t.Fatal("sequence sandbox must contain eight sizes and no make/storage controls")
@@ -197,7 +219,7 @@ func assertLessonParity(t *testing.T, arabic, english LessonBlock) {
 	}
 	if arabic.Sandbox != nil {
 		translated := english.Sandbox
-		if translated == nil || len(arabic.Sandbox.Presets) != len(translated.Presets) || arabic.Sandbox.Kind != translated.Kind || arabic.Sandbox.Limit != translated.Limit || arabic.Sandbox.AppendValue != translated.AppendValue || !reflect.DeepEqual(arabic.Sandbox.Sequence, translated.Sequence) {
+		if translated == nil || len(arabic.Sandbox.Presets) != len(translated.Presets) || arabic.Sandbox.Kind != translated.Kind || arabic.Sandbox.Limit != translated.Limit || arabic.Sandbox.AppendValue != translated.AppendValue || !reflect.DeepEqual(arabic.Sandbox.Sequence, translated.Sequence) || !reflect.DeepEqual(arabic.Sandbox.Grid, translated.Grid) {
 			t.Fatalf("%s: sandbox behaviour differs", arabic.ID)
 		}
 		for i, preset := range arabic.Sandbox.Presets {

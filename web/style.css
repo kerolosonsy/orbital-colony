@@ -827,3 +827,30 @@ html[dir="ltr"] #btn-next .ico, html[dir="ltr"] #btn-start .ico { transform: sca
 .review-card .tool { margin-inline-end: 8px; }
 
 .review-notice { margin: 0; padding: 10px 12px; border-block-end: 1px solid var(--rule); color: var(--paper-2); }
+
+/* lessons 6-4/6-5 */
+.lesson-sort-source, .lesson-grid-source { margin: 0; padding: 10px; border: 1px solid var(--rule); background: var(--ink-2); }
+.lesson-sort-row { display: flex; gap: 7px; margin: 10px 0 0; padding: 2px; overflow-x: auto; list-style: none; }
+.lesson-sort-card { display: grid; flex: 0 0 58px; min-height: 68px; place-content: center; gap: 4px; border: 1px solid var(--rule-strong); background: var(--sheet-2); text-align: center; }
+.lesson-sort-card.same-size { border-color: var(--star); box-shadow: inset 0 -3px var(--star); }
+.lesson-sort-size { color: var(--paper); font: 700 20px/1 var(--cond); }
+.lesson-sort-position { color: var(--muted); font: 12px/1.2 var(--mono); direction: ltr; }
+.lesson-sort-controls { margin-top: 8px; }
+.lesson-grid-expression { width: fit-content; margin: 9px auto; padding: 4px 8px; border: 1px solid var(--rule); color: var(--info); font: 13px/1.4 var(--mono); }
+.lesson-grid-views { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.lesson-grid-view { min-width: 0; padding: 7px; border: 1px solid var(--rule); background: var(--sheet); }
+.lesson-grid-view h4 { margin: 0 0 5px; color: var(--paper-2); font-size: 12px; font-weight: 600; }
+.lesson-grid-table-wrap { overflow-x: auto; }
+.lesson-grid-table { margin: 0 auto; border-collapse: separate; border-spacing: 3px; direction: ltr; }
+.lesson-grid-table th { min-width: 26px; color: var(--muted); font: 12px/1.2 var(--mono); text-align: center; }
+.lesson-grid-table th.selected-axis { color: var(--star); background: color-mix(in oklab, var(--star) 13%, transparent); }
+.lesson-grid-cell { padding: 0; border: 1px solid var(--rule); background: var(--ink-2); text-align: center; }
+.lesson-grid-cell.selected-cell { border-color: var(--info); background: color-mix(in oklab, var(--info) 16%, var(--ink-2)); }
+.lesson-grid-cell-button, .lesson-grid-value { display: grid; width: 32px; height: 32px; place-items: center; padding: 0; border: 0; background: transparent; color: var(--paper); font: 13px/1 var(--mono); }
+.lesson-grid-cell-button:hover:not(:disabled) { background: var(--sheet-3); }
+.lesson-grid-cell-button[aria-pressed="true"] { color: var(--info); }
+.lesson-grid-modes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.lesson-grid-controls { margin-top: 8px; }
+@media (max-width: 360px) {
+  .lesson-grid-views { grid-template-columns: 1fr; }
+}

@@ -2,6 +2,7 @@
 
 const Lessons = (() => {
   let navigationObserver = null;
+  const sandboxExtensions = new Map();
   function element(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -243,6 +244,8 @@ const Lessons = (() => {
 
   function sandbox(block) {
     const spec = block.sandbox;
+    const extension = sandboxExtensions.get(spec.kind);
+    if (extension) return extension(block, { element, button, T });
     if (spec.kind === "slice-append-sequence") return sequenceSandbox(spec);
     const model = createSandbox(spec);
     const panel = element("section", "lesson-sandbox");
@@ -391,5 +394,5 @@ const Lessons = (() => {
     return observer;
   }
 
-  return { open, createSession };
+  return { open, createSession, registerSandbox(kind, render) { sandboxExtensions.set(kind, render); } };
 })();

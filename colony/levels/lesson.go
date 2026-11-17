@@ -56,20 +56,30 @@ type LessonQuestion struct {
 }
 
 type LessonSandbox struct {
-	Kind          string              `json:"kind"`
-	Presets       []LessonSlicePreset `json:"presets,omitempty"`
-	AppendValue   int                 `json:"appendValue,omitempty"`
-	Limit         int                 `json:"limit,omitempty"`
-	GrowthLabel   string              `json:"growthLabel,omitempty"`
-	ReservedLabel string              `json:"reservedLabel,omitempty"`
-	LimitLabel    string              `json:"limitLabel,omitempty"`
-	AppendText    string              `json:"appendText,omitempty"`
-	ResetText     string              `json:"resetText,omitempty"`
-	Sequence      []int               `json:"sequence,omitempty"`
-	SourceLabel   string              `json:"sourceLabel,omitempty"`
-	AppendLabel   string              `json:"appendLabel,omitempty"`
-	ResetLabel    string              `json:"resetLabel,omitempty"`
-	DoneText      string              `json:"doneText,omitempty"`
+	Kind                string              `json:"kind"`
+	Presets             []LessonSlicePreset `json:"presets,omitempty"`
+	Grid                [][]int             `json:"grid,omitempty"`
+	AppendValue         int                 `json:"appendValue,omitempty"`
+	Limit               int                 `json:"limit,omitempty"`
+	GrowthLabel         string              `json:"growthLabel,omitempty"`
+	ReservedLabel       string              `json:"reservedLabel,omitempty"`
+	LimitLabel          string              `json:"limitLabel,omitempty"`
+	AppendText          string              `json:"appendText,omitempty"`
+	ResetText           string              `json:"resetText,omitempty"`
+	Sequence            []int               `json:"sequence,omitempty"`
+	SourceLabel         string              `json:"sourceLabel,omitempty"`
+	AppendLabel         string              `json:"appendLabel,omitempty"`
+	ResetLabel          string              `json:"resetLabel,omitempty"`
+	DoneText            string              `json:"doneText,omitempty"`
+	SortDirectionLabel  string              `json:"sortDirectionLabel,omitempty"`
+	SortTieLabel        string              `json:"sortTieLabel,omitempty"`
+	AscendingLabel      string              `json:"ascendingLabel,omitempty"`
+	DescendingLabel     string              `json:"descendingLabel,omitempty"`
+	TieOnLabel          string              `json:"tieOnLabel,omitempty"`
+	TieOffLabel         string              `json:"tieOffLabel,omitempty"`
+	GridOuterCloneLabel string              `json:"gridOuterCloneLabel,omitempty"`
+	GridRowCloneLabel   string              `json:"gridRowCloneLabel,omitempty"`
+	GridEditCopyLabel   string              `json:"gridEditCopyLabel,omitempty"`
 }
 
 type LessonSlicePreset struct {
