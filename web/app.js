@@ -101,6 +101,7 @@ function highlight(code) {
 function inline(s) {
   return esc(s)
     .replace(/~([^~]+)~/g, (_, c) => `<code>${c.replace(/\\\|/g, "|")}</code>`)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
 }
 
