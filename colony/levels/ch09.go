@@ -73,11 +73,14 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Add a method named exactly ~String~ with no arguments and a ~string~ return value.",
-				"Inside it: ~return fmt.Sprintf(\"moss=%d crystal=%d\", s.Moss, s.Crystal)~.",
-				"Keep main as it is: ~colony.Report(s)~. Your String method will be called automatically.",
+				"Concept: a type satisfies `fmt.Stringer` by providing its required method.",
+				"Structure: let `Status` provide its text behavior; keep reporting in `main`.",
+				"Specific: inspect `colony.Report(s)` and the `Status` fields in the starter.",
 			},
+			LessonRevision: 1,
+			Steps:          ch09StringerEnglish,
 		},
+		LessonRevision: 1, Steps: ch09StringerArabic,
 		ID: "9-1-stringer", Chapter: 9, Title: "تقرير بشكل محترم",
 		Goal: "خلّي Report(s) يطلع بالشكل ده بالظبط: moss=12 crystal=7",
 		Par:  0, Gold: 0, MaxTicks: 20,
@@ -118,9 +121,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"ضيف method اسمها ~String~ بالظبط، مبتاخدش حاجة وبترجّع ~string~.",
-			"جوّاها: ~return fmt.Sprintf(\"moss=%d crystal=%d\", s.Moss, s.Crystal)~.",
-			"خلّي main زي ما هي: ~colony.Report(s)~. الـ String بتاعتك هي اللي هتشتغل لوحدها.",
+			"مفهوم: النوع يحقق `fmt.Stringer` لما يوفّر الـmethod المطلوبة.",
+			"ترتيب: خلّي `Status` يوفّر عرضه؛ وسيب الإرسال في `main`.",
+			"محدد: راجع `colony.Report(s)` وحقول `Status` في الـstarter.",
 		},
 		Lesson: `# Interfaces: اتفاق من غير توقيع 🤝
 
@@ -226,11 +229,14 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Regolith needs ~[]colony.Action{colony.DoTill, colony.PlantMoss}~.",
-				"On soil: if ~t.Entity == colony.Moss && t.Ripe~, return Harvest then PlantMoss. If empty, return only PlantMoss.",
-				"The autopilot makes one pass. A wrong action wastes a tick.",
+				"Concept: any type with the `Planner` method contract can guide the autopilot.",
+				"Structure: decide per tile, then return its actions in execution order.",
+				"Specific: inspect `Plan(t colony.Tile)` and its `Ground`, `Entity`, and `Ripe` fields.",
 			},
+			LessonRevision: 1,
+			Steps:          ch09AutopilotEnglish,
 		},
+		LessonRevision: 1, Steps: ch09AutopilotArabic,
 		ID: "9-2-autopilot", Chapter: 9, Title: "الطيار الآلي",
 		Goal: "اكتب Planner لـ colony.Autopilot: احصد الناضج، وازرع كل خانة باللي يناسبها",
 		Par:  80, Gold: 60, MaxTicks: 400,
@@ -292,9 +298,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الـ regolith محتاج ~[]colony.Action{colony.DoTill, colony.PlantMoss}~.",
-			"على soil: لو ~t.Entity == colony.Moss && t.Ripe~ ارجّع Harvest ثم PlantMoss. ولو فاضية PlantMoss بس.",
-			"الطيار الآلي بيلف مرة واحدة. لو رجّعت action غلط، هيضيّع tick.",
+			"مفهوم: أي نوع عليه عقد `Planner` يقدر يوجّه الطيار الآلي.",
+			"ترتيب: قرر لكل خانة، وبعدها رجّع actions بترتيب تنفيذها.",
+			"محدد: راجع `Plan(t colony.Tile)` وحقول `Ground` و`Entity` و`Ripe`.",
 		},
 		Lesson: `# إنت بتكتب، والمكتبة بتنادي 🛩️
 
@@ -393,11 +399,14 @@ func main() {
 }
 `,
 			Hints: []string{
-				"~switch v := s.(type) { case colony.Distress: ... case colony.Supply: ... }~. Inside each case, ~v~ has that case's type.",
-				"Add ~v.Amount~ to a variable and save ~v.At~ in a slice. After the loop, visit the points and report the total.",
-				"For more stars, visit distress calls nearest first (greedy), rather than in signal order.",
+				"Concept: a type switch reveals the concrete type held by each `Signal`.",
+				"Structure: separate collecting signal data from visiting sites and reporting.",
+				"Specific: inspect the `colony.Signals()` loop and the `At` and `Amount` fields.",
 			},
+			LessonRevision: 1,
+			Steps:          ch09SignalsEnglish,
 		},
+		LessonRevision: 1, Steps: ch09SignalsArabic,
 		ID: "9-3-signals", Chapter: 9, Title: "إشارات الراديو",
 		Goal: "رد على كل Distress بإنك تروح مكانها، واجمع قيم الـ Supply وابعت المجموع",
 		Par:  60, Gold: 40, MaxTicks: 400,
@@ -451,9 +460,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"~switch v := s.(type) { case colony.Distress: ... case colony.Supply: ... }~. جوه كل case، ~v~ نوعها هو نوع الحالة دي.",
-			"اجمع ~v.Amount~ في متغير، واحفظ ~v.At~ في slice. وبعد الحلقة روح للنقط وابعت المجموع.",
-			"للنجوم: روح للاستغاثات بترتيب الأقرب فالأقرب (greedy)، مش بترتيب الإشارات.",
+			"مفهوم: الـtype switch بيكشف النوع الحقيقي اللي شايله كل `Signal`.",
+			"ترتيب: افصل جمع بيانات الرسائل عن زيارة المواقع وإرسال التقرير.",
+			"محدد: راجع loop `colony.Signals()` وحقلي `At` و`Amount`.",
 		},
 		Lesson: `# Type switch: إيه اللي جوه الـ interface؟ 📻
 
@@ -496,6 +505,7 @@ if ok {
 ~any~ هو ~interface{}~: interface مفيهوش ولا method، فأي قيمة في Go بتحققه. عشان كده ~colony.Report(v any)~ بتقبل أي حاجة. بس كل مرة تستخدم ~any~، بتخسر مساعدة الـ compiler في الأنواع، فاستخدمه بحساب.`,
 	})
 	add(&Level{ID: "9-4-small-plugs", Chapter: 9, Kind: "lab", Title: "مقابس صغيرة", Goal: "افصل أوامر المنارات عن التيرمنال بمقابس صغيرة", Requires: []string{"iface", "sel:io.Reader"}, Bridge: []int{11, 22},
+		LessonRevision: 1, Steps: ch09PlugsArabic,
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: smallPlugsStarter, ReadOnly: false}},
 		Lesson: `# منطق يشتغل بأي سلك
 
@@ -547,8 +557,16 @@ for scanner.Scan() {} // نسي scanner.Err(): بلع فشل القراية
 عرّف ~BeaconLookup~ فيه ~Beacon(string) (string, bool)~. نفّذ ~RelayOrders(in io.Reader, out io.Writer, beacons BeaconLookup) error~. كل سطر بعد TrimSpace مفتاح: لو موجود اطبع عنوانه بسطر، غير كده اطبع ~unknown~، بما فيه السطر الفاضي. المفاتيح حساسة لحالة الحروف، والتكرار مسموح.
 
 المفتاح ~end~ يكتب ~closed~ ويرجع فوراً من غير lookup ولا قراية اللي بعده. EOF العادي يكتب ~exhausted~. كل سطر ناتج ينتهي بـ newline. رجّع أخطاء القراية والكتابة من غير بلعها؛ استخدم Scanner بحدّه الافتراضي، ورجّع خطأه لو السطر طويل. دليل فاضي شغال. مفيش Report ولا وصول للـ stdin/stdout هنا.
-`, Hints: []string{"استقبل المصدر والوجهة كـ parameters، مش متغيرات عامة.", "افحص end قبل استدعاء Beacon؛ false معناها unknown.", "بعد كل Fprintln افحص الخطأ؛ بعد حلقة Scan افحص Err قبل exhausted."},
-		En: &LevelText{Title: "Small Plugs", Goal: "Separate beacon commands from the terminal with small interfaces", Files: []LabFile{{Name: "main.go", Starter: smallPlugsStarter, ReadOnly: false}}, Lesson: `# Logic That Works With Any Wire
+`, Hints: []string{
+			"مفهوم: الـinterfaces الصغيرة بتطلب السلوك اللي محتاجاه الدالة بس.",
+			"ترتيب: افصل قراءة السطر عن تفسير الأمر والكتابة.",
+			"محدد: راجع `scanner.Scan()` و`scanner.Err()` في درس القراية.",
+		},
+		En: &LevelText{Title: "Small Plugs", Goal: "Separate beacon commands from the terminal with small interfaces", LessonRevision: 1, Steps: ch09PlugsEnglish, Hints: []string{
+			"Concept: small interfaces ask only for behavior the function needs.",
+			"Structure: separate line reading from command handling and writing.",
+			"Specific: review `scanner.Scan()` and `scanner.Err()` in the reading example.",
+		}, Files: []LabFile{{Name: "main.go", Starter: smallPlugsStarter, ReadOnly: false}}, Lesson: `# Logic That Works With Any Wire
 
 Beacons have an address directory, but command handling need not know where it is stored. Use small interfaces instead of binding logic to a terminal.
 
@@ -598,7 +616,7 @@ Exhausted text is different from an explicit close command. Stop on a write erro
 Define ~BeaconLookup~ with ~Beacon(string) (string, bool)~. Implement ~RelayOrders(in io.Reader, out io.Writer, beacons BeaconLookup) error~. Each trimmed line is a key. Write its address on a line when found; otherwise write ~unknown~, including for a blank line. Keys are case sensitive and repeats are allowed.
 
 The key ~end~ writes ~closed~ and returns immediately without lookup or processing later lines. Normal EOF writes ~exhausted~. Every output line ends in a newline. Propagate read and write errors; use Scanner's default limit and return its error for an oversized line. Empty directories work. Do not use Report or stdin/stdout in this lab.
-`, Hints: []string{"Receive input and output as parameters, not globals.", "Check end before calling Beacon; false means unknown.", "Check every Fprintln error; after Scan, check Err before writing exhausted."}},
+`},
 		Lab: &Lab{ReqFile: "main.go", Hidden: smallPlugsHidden},
 	})
 }
