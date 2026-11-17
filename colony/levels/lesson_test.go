@@ -157,6 +157,47 @@ func validateLessonSandbox(t *testing.T, sandbox *LessonSandbox, claimID func(st
 		}
 		return
 	}
+	if sandbox.Kind == "slice-sort-clone" {
+		if len(sandbox.Sequence) != 8 || len(sandbox.Kinds) != 0 || sandbox.Limit != 0 || sandbox.AppendValue != 0 {
+			t.Fatal("sort-copy sandbox must show eight illustrative sizes")
+		}
+		seen := map[int]bool{}
+		for _, size := range sandbox.Sequence {
+			if size < 1 || size > 9 || seen[size] {
+				t.Fatal("sort-copy sizes must be distinct illustrative values")
+			}
+			seen[size] = true
+		}
+		for _, label := range []string{sandbox.SourceLabel, sandbox.CloneSortLabel, sandbox.OriginalSortLabel, sandbox.ResetLabel, sandbox.CloneSortText, sandbox.OriginalSortText, sandbox.ResetText} {
+			if strings.TrimSpace(label) == "" {
+				t.Fatal("sort-copy sandbox missing an operation label or explanation")
+			}
+		}
+		return
+	}
+	if sandbox.Kind == "map-count" {
+		if len(sandbox.Kinds) != 3 || len(sandbox.Sequence) != 0 || sandbox.MissingKey == "" {
+			t.Fatal("map-count sandbox must use three kinds and an absent key")
+		}
+		kinds := map[string]bool{}
+		for _, kind := range sandbox.Kinds {
+			if kind == "" || kinds[kind] {
+				t.Fatal("map-count kinds must be non-empty and distinct")
+			}
+			kinds[kind] = true
+		}
+		for _, kind := range []string{"moss", "lichen", "crystal"} {
+			if !kinds[kind] {
+				t.Fatalf("map-count sandbox is missing %q", kind)
+			}
+		}
+		for _, label := range []string{sandbox.SourceLabel, sandbox.MissingReadLabel, sandbox.ResetLabel, sandbox.MapOrderLabel} {
+			if strings.TrimSpace(label) == "" {
+				t.Fatal("map-count sandbox missing a label")
+			}
+		}
+		return
+	}
 	if sandbox.Kind != "slice-make" || len(sandbox.Presets) != 3 || sandbox.Limit != 6 || sandbox.AppendValue != 7 {
 		t.Fatal("sandbox must implement the approved bounded make playground")
 	}
@@ -197,8 +238,11 @@ func assertLessonParity(t *testing.T, arabic, english LessonBlock) {
 	}
 	if arabic.Sandbox != nil {
 		translated := english.Sandbox
-		if translated == nil || len(arabic.Sandbox.Presets) != len(translated.Presets) || arabic.Sandbox.Kind != translated.Kind || arabic.Sandbox.Limit != translated.Limit || arabic.Sandbox.AppendValue != translated.AppendValue || !reflect.DeepEqual(arabic.Sandbox.Sequence, translated.Sequence) {
+		if translated == nil || len(arabic.Sandbox.Presets) != len(translated.Presets) || arabic.Sandbox.Kind != translated.Kind || arabic.Sandbox.Limit != translated.Limit || arabic.Sandbox.AppendValue != translated.AppendValue || !reflect.DeepEqual(arabic.Sandbox.Sequence, translated.Sequence) || !reflect.DeepEqual(arabic.Sandbox.Kinds, translated.Kinds) || arabic.Sandbox.MissingKey != translated.MissingKey {
 			t.Fatalf("%s: sandbox behaviour differs", arabic.ID)
+		}
+		if (arabic.Sandbox.SourceLabel == "") != (translated.SourceLabel == "") || (arabic.Sandbox.ResetLabel == "") != (translated.ResetLabel == "") || (arabic.Sandbox.ResetText == "") != (translated.ResetText == "") || (arabic.Sandbox.CloneSortLabel == "") != (translated.CloneSortLabel == "") || (arabic.Sandbox.OriginalSortLabel == "") != (translated.OriginalSortLabel == "") || (arabic.Sandbox.CloneSortText == "") != (translated.CloneSortText == "") || (arabic.Sandbox.OriginalSortText == "") != (translated.OriginalSortText == "") || (arabic.Sandbox.MissingReadLabel == "") != (translated.MissingReadLabel == "") || (arabic.Sandbox.MapOrderLabel == "") != (translated.MapOrderLabel == "") {
+			t.Fatalf("%s: translated sandbox controls differ", arabic.ID)
 		}
 		for i, preset := range arabic.Sandbox.Presets {
 			other := translated.Presets[i]
@@ -260,6 +304,61 @@ func TestSurveyLessonStaysShortAndVisual(t *testing.T) {
 			t.Fatalf("words=%d questions=%d walkthroughs=%d sandboxes=%d", words, questions, traces, sandboxes)
 		}
 		t.Logf("learner-authored words, including all feedback and hints: %d", words)
+	}
+}
+
+func TestTopThreeAndCensusLessonsStayShortAndVisual(t *testing.T) {
+	for _, id := range []string{"6-2-top-three", "6-3-census"} {
+		level := Get(id)
+		if level.LessonRevision != 1 || level.En.LessonRevision != 1 || len(level.Steps) != 6 || len(level.En.Steps) != 6 || len(level.Hints) != 3 || len(level.En.Hints) != 3 {
+			t.Fatalf("%s: expected revision 1, six bilingual steps, and three hints", id)
+		}
+		for _, hint := range level.En.Hints {
+			if strings.ContainsFunc(hint, func(r rune) bool { return unicode.Is(unicode.Arabic, r) }) {
+				t.Fatalf("%s: Arabic text in English hint", id)
+			}
+		}
+		arabicTitles := []string{"المهمة", "الفكرة", "جرّب", "خد بالك", "فكّر واختبر", "دورك"}
+		englishTitles := []string{"Mission", "Idea", "Try it", "Watch out", "Think & check", "Your turn"}
+		for i := range arabicTitles {
+			if level.Steps[i].Title != arabicTitles[i] || level.En.Steps[i].Title != englishTitles[i] {
+				t.Fatalf("%s: step %d does not follow the six-step lesson shape", id, i+1)
+			}
+		}
+		for _, copy := range []struct {
+			steps []LessonStep
+			hints []string
+		}{{level.Steps, level.Hints}, {level.En.Steps, level.En.Hints}} {
+			words, questions, traces, sandboxes := len(strings.Fields(strings.Join(copy.hints, " "))), 0, 0, 0
+			for _, step := range copy.steps {
+				words += len(strings.Fields(step.Title))
+				for _, block := range step.Blocks {
+					words += len(strings.Fields(block.Text))
+					if block.Walkthrough != nil {
+						traces++
+						for _, frame := range block.Walkthrough.Frames {
+							captionWords := len(strings.Fields(frame.Caption))
+							words += captionWords
+							if captionWords > 8 {
+								t.Fatalf("%s: walkthrough caption exceeds eight words", id)
+							}
+						}
+					}
+					if block.Question != nil {
+						questions++
+						words += len(strings.Fields(strings.Join(block.Question.Options, " ") + " " + strings.Join(block.Question.Feedback, " ")))
+					}
+					if sandbox := block.Sandbox; sandbox != nil {
+						sandboxes++
+						words += len(strings.Fields(strings.Join([]string{sandbox.SourceLabel, sandbox.AppendLabel, sandbox.ResetLabel, sandbox.ResetText, sandbox.DoneText, sandbox.CloneSortLabel, sandbox.OriginalSortLabel, sandbox.CloneSortText, sandbox.OriginalSortText, sandbox.MissingReadLabel, sandbox.MapOrderLabel, strings.Join(sandbox.Kinds, " "), sandbox.MissingKey}, " ")))
+					}
+				}
+			}
+			if words < 250 || words > 320 || questions != 3 || traces != 1 || sandboxes != 1 {
+				t.Fatalf("%s: words=%d questions=%d walkthroughs=%d sandboxes=%d", id, words, questions, traces, sandboxes)
+			}
+			t.Logf("%s learner-authored words, including feedback and hints: %d", id, words)
+		}
 	}
 }
 

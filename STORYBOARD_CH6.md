@@ -1,15 +1,15 @@
 # Chapter 6 lesson storyboards — review draft
 
-Content contract, 2026-11-17. Branch: `lessons-ch6`. This document proposes lesson content only; it changes no mission, starter, check, threshold, or API. Arabic is ready for correctness/leakage review. English is supplied for 6-1 only; translation of 6-2–6-5 waits for Arabic approval.
+Short bilingual lesson content for branch `lessons-ch6`. Mission setups, starters, checks, thresholds, and APIs stay unchanged. 6-1 revision 2 is approved; 6-2 and 6-3 now use the same short six-step format.
 
 ## Style rules
 
-- Pilot revision 2 follows playtest feedback: about 250–300 words per language, counting learner-authored titles, frame captions, all question options/feedback, sandbox labels, and hints; exclude code and repeated application controls.
-- Mission: three numbered points, at most about 45 words; distinguish the 15-tick gold target from the unchanged run limit. Name what the starter already did.
+- Short lessons target about 250–320 words per language, counting titles, frame captions, question options/feedback, sandbox labels, and hints; exclude code and repeated application controls.
+- Mission: three numbered points, at most about 45 words; name the gold target and what the starter already did.
 - One short analogy, then show code and let the player manipulate data. One idea per visual. No paragraph should exceed three lines at 290px; split sentences into short paragraphs where needed. Frame captions: at most about eight words.
 - Mission → Idea → Try it → Watch out → Think & check → Your turn. At most two one-line warnings, a short prose plan, three mission questions, one next action. Wrong picks reveal only their feedback until the correct pick or two wrong picks on that question.
 - Egyptian Arabic first, short sentences, English technical terms. English has the same meaning and depth. Label invented values as illustrative. No free-form interpreter, complete mission loop, or last-move condition supplied as code.
-- These rules guide the later 6-2–6-5 rewrite; their existing storyboards below remain unchanged and are not claims that their current word counts comply. Their old references to the retired make playground/capacity lesson are historical and will be resolved in those rewrites.
+- 6-2 and 6-3 below follow these rules. The older 6-4 and 6-5 storyboards remain unchanged.
 
 ## Reading and implementation conventions
 
@@ -166,435 +166,259 @@ Existing Return-to-code action follows this block.
 
 **Fallback:** same short mission, illustrative analogy/trace, two warnings, tick assumptions, prose plan, and next action; no capacity/nil material.
 
-## 6-2 — أغلى 3 (`6-2-top-three`)
+## 6-2 — أغلى 3 (`6-2-top-three`) · revision 1
 
-**Teaching objective:** inspect stored observations without losing their identity; distinguish a copied value from shared elements; distinguish selecting valuable items from planning travel. Owns `range.slice`, `slice.sharing`, `slice.sort`, `slice.search-max`, `ticks.route-order`. Prerequisites link to 6-1 concepts, counted loops from `3-1-long-row`, `_` from `2-2-survey`, conditions from `4-1-ripe-only`.
+**Source check:** the mission is a 10-crystal row. The setup, starter, and check all use 10; this follows `ch06.go` rather than the brief's “8”. The starter measured each crystal into its matching index, moved east nine times, and leaves the drone at x=9. Sizes are distinct. The drone may harvest three. Gold and Par change with the selected positions; the run limit is 200. No mission code or grading value changed.
 
-**Starter audit:** allocates ten existing elements, measures each crystal once into its matching index, moves East nine times, and prints the sizes. It finishes at x=9, with no harvests. The mission permits three successful harvests and generates distinct sizes from a permutation of 1–20. `range` is required; no particular selection algorithm or `slices` call is required. Do not redo the supplied survey.
+**Teaching objective:** read an index/value pair from `range`; see that sorting a copied slice keeps the original position order; reason about choosing before harvesting. Existing fallback markdown does not contradict this lesson and remains unchanged.
 
-### Step `c62.mission-step` — Mission
+**Word count:** Arabic 287; English 312, including titles, captions, options, feedback, sandbox labels, and hints; code is excluded.
 
-#### `c62.mission` · markdown
-**Purpose:** specify the challenge without a threshold or collection loop.
+### المهمة / Mission · `c62.v1.mission-step`
 
-**AR:** معاك فرصة تشيل 3 كريستالات بس، والمطلوب الأكبر في الصف. الكود قاس الصف كله بالفعل، وحفظ كل حجم عند نفس index بتاع موقعه، والدرون واقف عند x=9. متبدأش المسح من الأول.
+**AR — `c62.v1.mission`:**
 
-فكّر في سؤالين منفصلين: إيه اللي يستاهل يتاخد؟ وإزاي تزور اللي اخترته؟ استخدام `range` جزء من تدريب المهمة. إنت اللي هتبني قرار الاختيار وطريقة الوصول.
+1. الـstarter قاس العشرة وسجل الحجم حسب index؛ الدرون عند x=9.
+2. اختار أكبر 3؛ حمولة الدرون 3، وبعدها احصدهم.
+3. هدف الذهب بيتغير حسب المواقع؛ شوف المعروض.
 
-### Step `c62.idea-step` — Idea
+**EN:**
 
-#### `c62.idea` · markdown
-**Purpose:** introduce range and ownership analogy, referencing rather than reteaching 6-1.
-**Links (author metadata; render natural titles):** `2-2-survey`.
+1. The starter measured 10 crystals and saved each size by index; drone at x=9.
+2. Pick the largest 3; carry limit is 3, then harvest.
+3. Gold varies by location; see the shown target.
 
-**AR:** تخيل دفتر تذاكر: على كل سطر رقم مكان وقيمة مكتوبة. `range` بتعدّي على السطور وتديك الـindex والقيمة: الشكل هو `for i, value := range list`. لو مش محتاج الـindex، استخدم `_` اللي عرفناه في درس مسح المنطقة (2-2).
+### الفكرة / Idea · `c62.v1.idea-step`
 
-القيمة اللي في متغير اللفة **نسخة من العنصر**، مش اسم تاني لنفس خانته. أما إسناد slice لمتغير تاني فبينسخ وصف الـslice، والعناصر نفسها بتفضل مشتركة. دول مستويين مختلفين من النسخ.
+`c62.v1.trace` · walkthrough · `e62-range-clone-sort`
 
-**Optional AR:** في `range` على slice، Go بتحدد مجال الـindices من قيمة الـslice عند بداية الحلقة؛ الإضافات مش بتمد اللفة. ده مش تصوير لكل العناصر مقدمًا: تغيير عنصر لسه دوره مجاش في نفس المخزن ممكن يظهر وقت قراءته. ملحوظة دي عن slice، مش قاعدة مختصرة لكل أشكال range.
+**AR:** في slice تدريب، range بتدي index وقيمة؛ Clone تنسخ، وSort ترتب.
 
-### Step `c62.example-step` — Example
+**EN:** In a sample slice, range gives index and value; Clone copies, Sort orders.
 
-#### `c62.q-range-copy` · question
-**Purpose:** predict before the range trace; assess `range.slice`.
-
-**AR prompt:** ده دفتر أرقام تدريب. بعد الحلقة، أنهي slice هتتطبع في السطر الأخير؟
-
-<!-- go-example id=e62-range-copy imports=fmt outcome=ok -->
+<!-- go-example id=e62-range-clone-sort imports=fmt,slices outcome=ok -->
 ```go
-pages := []int{3, 8}
-for i, value := range pages {
-    value *= 2
-    fmt.Println(i, value)
+sizes := []int{4, 1, 3}
+for i, size := range sizes {
+	fmt.Println(i, size)
 }
-fmt.Println(pages)
+sorted := slices.Clone(sizes)
+slices.Sort(sorted)
+fmt.Println(sizes)
+fmt.Println(sorted)
 ```
 
-Options: A «`[6 16]`»; B «`[3 8]`»; C «`[0 1]`». **Correct: B.**
-
-Feedback A: «الضرب غيّر value اللي اتنسخت، مش عنصر pages. شوف خانة العنصر وهي ثابتة في التنفيذ.»
-
-Feedback B: «صح: اللي اتغير نسخة القيمة؛ عناصر الدفتر فضلت زي ما هي.»
-
-Feedback C: «0 و1 أرقام الأماكن اللي range بترجعها في i، مش القيم الموجودة في الدفتر.»
-
-#### `c62.range-trace` · walkthrough
-**Purpose:** trace `e62-range-copy`; optional second trace establishes fixed bounds without a value snapshot.
-
-**AR:** خلينا نفصل اللي جوه الدفتر عن الورقة اللي في إيد اللفة. «التالي» يبيّن نسخة value وهي بتتغيّر، والدفتر نفسه ثابت.
-
-**Code:** `e62-range-copy` above; no alternate snippet.
-
-| Frame | Highlight | Variables / slice view | Cumulative output | AR caption |
+| Frame / line | State | Cumulative output | AR caption | EN caption |
 |---|---|---|---|---|
-| 0 | before 1 | — | — | «قبل الدفتر.» |
-| 1 | 1 | pages=[3 8], indices 0,1 | — | «قيمتين في المخزن A.» |
-| 2 | 2 first iteration | i=0, value=3; pages unchanged | — | «استلمنا نسخة أول قيمة.» |
-| 3 | 3 | i=0, value=6; pages=[3 8] | — | «نسخة value اتضاعفت بس.» |
-| 4 | 4 | unchanged | `0 6` | «ده رقم المكان والنسخة المعدلة.» |
-| 5 | 2 second iteration | i=1, value=8 | `0 6` | «نسخة تانية من العنصر التاني.» |
-| 6 | 3 | i=1, value=16; pages unchanged | `0 6` | «الدفتر لسه زي ما هو.» |
-| 7 | 4 | unchanged | `0 6\n1 16` | «انتهت آخر لفة.» |
-| 8 terminal | 6 | i/value out of scope; pages=[3 8] | `0 6\n1 16\n[3 8]` | «الطباعة دي للـslice الأصلية.» |
+| 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
+| 1 / 1 | sizes=[4 1 3] | — | أحجام للتوضيح؛ كل index ثابت. | Illustrative sizes; fixed indexes. |
+| 2 / 2 | i=0,size=4 | — | range أعطت أول index وقيمة. | First range index and value. |
+| 3 / 3 | unchanged | `0 4` | طبعناهم مع بعض. | Printed pair. |
+| 4 / 2 | i=1,size=1 | `0 4` | index التالي وقيمته. | Next index/value. |
+| 5 / 3 | unchanged | `0 4\n1 1` | آخر عنصر في range. | Last range item. |
+| 6 / 2 | i=2,size=3 | `0 4\n1 1` | طبعنا آخر زوج. | Printed last pair. |
+| 7 / 3 | unchanged | `0 4\n1 1\n2 3` | اللفة خلصت. | Loop finished. |
+| 8 / 5 | sorted=[4 1 3]; sizes unchanged | previous | Clone عملت slice جديدة. | Clone copied the slice. |
+| 9 / 6 | sorted=[1 3 4]; sizes unchanged | previous | Sort رتبت النسخة بس. | Sort changed the copy. |
+| 10 / 7 | sizes=[4 1 3] | previous + `[4 1 3]` | ترتيب الأصل فضل زي ما هو. | Original order stayed. |
+| 11 / 8 | sorted=[1 3 4] | `0 4\n1 1\n2 3\n[4 1 3]\n[1 3 4]` | النسخة المرتبة اتطبعت. | Printed the copy. |
 
-**Optional AR:** «إيه اللي هيحصل لو زوّدنا عنصر وإحنا بنلف؟ هنا محجوز مكان كفاية من الأول، فالإضافة مش هتغيّر المخزن. تابع حدود اللفة والقيمة اللي لسه دورها مجاش.»
+`range` returns each slice index and a copy of its element value. `slices.Clone` copies the integer elements to a separate slice; `slices.Sort` changes that copy in ascending order. The walkthrough shows one loop iteration at a time; it does not describe Go's internal sort calls.
 
-<!-- go-example id=e62-range-bounds imports=fmt outcome=ok -->
-```go
-s := make([]int, 2, 3)
-s[0], s[1] = 2, 5
-for i, value := range s {
-    if i == 0 {
-        s = append(s, 9)
-        s[1] = 6
-    }
-    fmt.Println(i, value)
-}
-fmt.Println(s)
+### جرّب / Try it · `c62.v1.try-step`
+
+`c62.v1.sort-playground` · sandbox · `slice-sort-clone`
+
+**AR:** رتّب الأصل أو نسخة؛ راقب الأحجام والـindex.
+
+**EN:** Sort original or copy; watch sizes and indexes.
+
+Illustrative source sizes at indexes 0–7: `[5, 2, 8, 4, 1, 7, 3, 6]`. Source label: AR «أحجام للتوضيح، مش بيانات المهمة.» / EN “Illustrative sizes, not mission data.” Buttons: AR «رتّب نسخة (Clone ثم Sort)»، «رتّب الأصل»، «من الأول» / EN “Sort copy (Clone then Sort)”, “Sort original”, “Reset”. Clone+Sort keeps the source row and shows an ascending copy below. Sort original reorders the source values while the index labels remain 0–7; status says those indexes no longer identify the source crystals. Reset restores the initial row and hides the copy.
+
+### خد بالك / Watch out · `c62.v1.watch-step`
+
+**AR:**
+
+- `b := a` بيشارك العناصر؛ Sort على b يغيّر a.
+- Sort تغيّر القيم، مش أماكن الكريستالات.
+- Measure وMove وHarvest: tick لكل أمر؛ Report والحساب: صفر.
+
+**EN:**
+
+- `b := a` shares elements; sorting b changes a.
+- Sort changes values, not crystal positions.
+- Measure, Move, Harvest: 1 tick each; Report and computation: 0.
+
+### فكّر واختبر / Think & check · `c62.v1.check-step`
+
+`c62.v1.plan`: «القياسات جاهزة. اختار الثلاثة، وخطط الزيارة.» / “Measurements are ready. Choose three and plan visits.”
+
+`c62.v1.q-index`: في `[6, 1, 9, 3]`، أنهي index فيه أكبر قيمة؟ / In `[6, 1, 9, 3]`, which index holds the largest value?
+
+- 0 → index 0 فيه 6، مش الأكبر. / Index 0 holds 6.
+- 2 → صح، القيمة 9 عند index 2. / Correct: 9 is at index 2. **Correct.**
+- 3 → index 3 فيه 3. / Index 3 holds 3.
+
+`c62.v1.q-clone`: ليه Clone قبل Sort لو المواقع مهمة؟ / Why clone before sorting when positions matter?
+
+- عشان ترتيب الأحجام الأصلي يفضل محفوظ. / To preserve the original size order. **Correct.**
+- عشان ننقل الكريستالات لمواقع جديدة. / To move crystals to new locations.
+- عشان نزود سعة الـslice. / To increase the slice capacity.
+
+Feedback: «صح؛ النسخة تسيب ترتيب الأصل زي ما هو.» / “Correct; a copy preserves the original order.” «Sort تغيّر القيم، مش العالم.» / “Sort changes values, not the world.” «Clone مش بتضمن سعة أكبر.» / “Clone does not guarantee more capacity.”
+
+`c62.v1.q-scan`: إمتى تختار أكبر 3؟ / When choose the largest 3?
+
+- قبل ما تعرف الأحجام. / Before you know the sizes.
+- بعد ما تعرف أحجام العشرة. / After you know all ten sizes. **Correct.**
+- بعد أول 3 قياسات. / After the first three measurements.
+
+Feedback: «قارن العشرة عشان تعرف الأكبر.» / “Compare all ten sizes to know the largest.” «صح؛ قارن العشرة قبل القرار.» / “Correct: compare all ten before deciding.” «أول 3 مش بالضرورة الأكبر.» / “The first three may not be largest.”
+
+### دورك / Your turn · `c62.v1.turn-step`
+
+`c62.v1.turn`: شغّل الـstarter؛ اكتب خطتك بنفسك. / Run the starter; write your plan.
+
+**Three hints (Concept / Structure / Specific):**
+
+1. «الحجم قيمة، والـindex مكان.» / “Size is value; index is position.”
+2. «قارن الأحجام، ثم خطط الزيارة والحصاد.» / “Compare all sizes, then plan visits.”
+3. «راجع `slices.Clone` و`slices.Sort`؛ أي ترتيب يفضل مربوط بالمواقع؟» / “Review `slices.Clone` and `slices.Sort`; which order must stay linked to positions?”
+
+**Ticks:** the starter scan uses ten `Measure` calls and nine `Move` calls; each costs one tick. Three `Harvest` calls also cost one tick each. Route cost varies with the chosen locations, so the displayed Gold target is dynamic. `Report` and in-memory comparisons cost zero.
+
+#### Verified `e62-range-clone-sort`
+
+Toolchain: Go 1.24.0; `imports=fmt,slices`; `outcome=ok`.
+
+Real stdout:
+
+```text
+0 4
+1 1
+2 3
+[4 1 3]
+[1 3 4]
 ```
 
-| Frame | Highlight | Variables / slice view | Cumulative output | AR caption |
-|---|---|---|---|---|
-| 0 | before 1 | — | — | «تجربة مستقلة.» |
-| 1 | 1 | s=[0 0], len=2 cap=3; A[2] reserved | — | «عنصرين ومكان زيادة.» |
-| 2 | 2 | A=[2 5 reserved] | — | «كتبنا قيمتين.» |
-| 3 | 3 | i=0,value=2; initial range length=2 | — | «اللفة هتزور 0 و1.» |
-| 4 | 4 true | unchanged | — | «الشرط صحيح لأول لفة.» |
-| 5 | 5 | s=[2 5 9], len=3 cap=3; range still length=2 | — | «الإضافة جوه نفس المخزن.» |
-| 6 | 6 | s=[2 6 9] | — | «غيرنا قيمة لسه دورها مجاش.» |
-| 7 | 8 | i=0,value=2 | `0 2` | «النسخة الحالية لسه 2.» |
-| 8 | 3 next | i=1,value=6 | `0 2` | «اتقرت القيمة الحالية من نفس المخزن.» |
-| 9 | 4 false | unchanged; branch skipped | `0 2` | «مفيش تعديل في اللفة دي.» |
-| 10 | 8 | unchanged | `0 2\n1 6` | «مفيش لفة للـindex 2.» |
-| 11 terminal | 10 | i/value out of scope; s=[2 6 9] | `0 2\n1 6\n[2 6 9]` | «حدود ثابتة مش معناها نسخة مجمدة من القيم.» |
+## 6-3 — تعداد الحياة (`6-3-census`) · revision 1
 
-#### `c62.sharing-playground` · sandbox
-**Purpose:** own `slice.sharing`; show aliasing, descriptor length, Clone, and reallocation with actual user operations.
-**Links (author metadata; render natural titles):** `slice.len-cap`.
+**Source check:** the field is 6×4. The starter initializes `map[colony.Entity]int`, reads and counts the starting tile, and prints the map. The check accepts counts with or without `empty`. Gold is 47 ticks, Par is 60, and the run limit is 300. No mission code or grading value changed.
 
-**AR:** تخيل بطاقتين بيوصفوا نفس درج الأرقام. اختار «b = a»، وبعدها غيّر أول عنصر من b. جرّب «Clone إلى b» وقارن. راجع نموذج الطول والسعة في «الطول والسعة» لو محتاج.
+**Teaching objective:** count repeated keys; distinguish a missing key from a stored zero with comma-ok; use `len` for key count; avoid nil-map writes and assumptions about iteration order. Existing fallback markdown does not contradict this lesson and remains unchanged.
 
-**Presets:** «مكان زيادة» → a=[5 1], len=2 cap=3, store A; «مخزن مليان» → a=[5 1], len=2 cap=2, store A. In both, b is not created yet. Fixed menu: «b = a»; «Clone إلى b» (`b = slices.Clone(a)`); «خلّي b[0] = 9»; «ضيف 7 إلى a»; preset buttons; Reset. No sort operation in this sandbox.
+**Word count:** Arabic 283; English 302, including titles, captions, options, feedback, sandbox labels, and hints; code is excluded.
 
-**Operation effects:** `b=a` creates a separate descriptor with a's current length/capacity and the same store/offset. Clone creates independent integer elements in a new store, preserving order; its displayed cap is marked “not specified” rather than asserting len=cap. `b[0]=9` writes to b's store; any alias covering that cell visibly changes. Disable this button before b exists with «اعمل b الأول». Append changes a's descriptor only; with room, a/b may still share elements while b keeps its old length. Without room, a gets a new store, copying elements; b keeps its previous store. Limit a to four elements; show «حد التجربة 4 عناصر؛ ابدأ من الأول عشان تجرّب تاني». Growth is illustrative under the same policy/label as `c61.make-playground`.
+### المهمة / Mission · `c63.v1.mission-step`
 
-**AR status text:** alias: «وصفين منفصلين، نفس مخزن العناصر.» Clone: «الأرقام اتنسخت في مخزن مستقل؛ ده كفاية هنا لأن العناصر int.» Write: «غيّرنا عنصر في المخزن اللي b بتشوفه؛ تابع أي بطاقة تانية بتشوف نفس العنصر.» Append reuse: «a طولها زاد؛ b طولها زي ما هو، والمخزن لسه مشترك.» Append allocation: «a انتقلت لمخزن جديد؛ b لسه بتشوف المخزن القديم.» Reset: «بطاقة a رجعت للبداية، وb اتشالت من التجربة.»
+**AR — `c63.v1.mission`:**
 
-**Optional subslice AR:** «الجزء a[0:1] بيشوف أول عنصر من نفس المخزن؛ الحد الأخير 1 مش داخل الجزء. متفترضش إن اختيار جزء عمل نسخة.» The tiny separate Go fixture `e62-subslice` verifies this; no additional sandbox operations or arbitrary slices.
+1. عدّ moss وlichen وcrystal في خريطة 6×4 وابعت map الأعداد.
+2. عدّ empty اختياري؛ الـstarter سجّل خانة البداية بالفعل.
+3. الذهب 47 ticks؛ والـpar هو 60.
 
-#### `c62.sort-trace` · walkthrough
-**Purpose:** own `slice.sort`; show in-place sorting, without a top-N selection implementation.
+**EN:**
 
-**AR:** ترتيب أرقام التذاكر مش بيحرّك أصحابها في الطابور. `slices.Sort` بترتّب العناصر تصاعدي **جوه نفس الـslice**. لازم تضيف `"slices"` للـimports. جرّب تتوقع ترتيب الأرقام دي، وبعدها شوف النتيجة.
+1. Count moss, lichen, and crystal on the 6×4 map; report the counts map.
+2. Counting empty is optional; the starter already counted its starting tile.
+3. Gold is 47 ticks; Par is 60.
 
-<!-- go-example id=e62-sort imports=fmt,slices outcome=ok -->
+### الفكرة / Idea · `c63.v1.idea-step`
+
+`c63.v1.trace` · walkthrough · `e63-map-count`
+
+**AR:** الـmap بتربط key بعدد؛ القراية الغايبة ترجع صفر، وcomma-ok توضّح وجود المفتاح.
+
+**EN:** A map connects keys to counts; a missing read returns zero, and comma-ok shows whether the key exists.
+
+<!-- go-example id=e63-map-count imports=fmt outcome=ok -->
 ```go
-codes := []int{14, 6, 11}
-other := codes
-slices.Sort(other)
-fmt.Println(codes, other)
-```
-
-| Frame | Highlight | Variables / slice view | Output | AR caption |
-|---|---|---|---|---|
-| 0 | before 1 | — | — | «قبل التذاكر.» |
-| 1 | 1 | codes→A=[14 6 11] | — | «ده ترتيب البداية.» |
-| 2 | 2 | codes/other→A | — | «الإسناد مش نسخ عناصر.» |
-| 3 | 3 after library call | A=[6 11 14], both descriptors unchanged | — | «النداء كله خطوة واحدة؛ مش بنحاكي خوارزمية Go الداخلية.» |
-| 4 terminal | 4 | unchanged | `[6 11 14] [6 11 14]` | «الاتنين بيشوفوا الترتيب الجديد.» |
-
-#### `c62.library-notes` · markdown
-**Purpose:** introduce `slice.search-max` and connect value identity to the mission.
-
-**AR:** لو الدفتر رابط الـindex بموقع حقيقي، ترتيب قيمه في نفس المخزن بيغيّر الربط ده. العالم نفسه متحركش. نسخة مستقلة ممكن تحافظ على دفتر المواقع الأصلي؛ اختيار التصميم مسؤوليتك.
-
-`slices.Max` بترجع أكبر قيمة، ومحتاجة slice غير فاضية. `slices.Index` بترجع مكان **أول** قيمة مطابقة، أو -1 لو مش موجودة. متستخدمش -1 كـindex. قراءة أكبر قيمة مش هي نفسها تحديد كل المواقع اللي عايزها.
-
-**Optional AR:** الأحجام في مهمة أغلى 3 مختلفة عن بعض. بس في برامج تانية ممكن تتكرر؛ Index مش بتدور على «المطابقة اللي بعدها» لو ناديتها بنفس المدخلات. كمان استبدال قيمة برقم خاص عشان تعتبرها مستخدمة محتاج ضمان إن الرقم ده مستحيل يكون قيمة صحيحة. مفيش sentinel عام صالح لكل البيانات.
-
-#### `c62.max-index-trace` · walkthrough
-**Purpose:** observe first match and absence on non-mission data.
-
-**AR:** ده سجل أرقام أبواب؛ الباب 4 مكتوب مرتين. توقّع Max وIndex، وشوف ليه تكرار السؤال عن نفس الرقم مش بيختار باب تاني.
-
-<!-- go-example id=e62-max-index imports=fmt,slices outcome=ok -->
-```go
-doors := []int{4, 9, 4}
-fmt.Println(slices.Max(doors))
-fmt.Println(slices.Index(doors, 4))
-fmt.Println(slices.Index(doors, 8))
-```
-
-| Frame | Highlight | Variables / slice view | Cumulative output | AR caption |
-|---|---|---|---|---|
-| 0 | before 1 | — | — | «قبل السجل.» |
-| 1 | 1 | doors=[4 9 4], indices 0,1,2 | — | «قيمتين 4 في مكانين.» |
-| 2 | 2 | unchanged; highlight value 9 | `9` | «دي أكبر قيمة، مش رقم موقعها.» |
-| 3 | 3 | unchanged; highlight index 0 | `9\n0` | «أول مطابقة بس.» |
-| 4 terminal | 4 | unchanged; no matching cell | `9\n0\n-1` | «8 مش موجودة؛ -1 إشارة غياب.» |
-
-#### `c62.empty-max-trace` · walkthrough · Optional
-**Purpose:** complete the Max precondition with a terminal panic, not an invented zero result.
-
-**AR:** خد بالك: سجل فاضي مفيهوش أكبر قيمة. ده خطأ تشغيل، مش إجابة صفر.
-
-<!-- go-example id=e62-empty-max imports=fmt,slices outcome=panic -->
-```go
-doors := []int{}
-fmt.Println(slices.Max(doors))
-fmt.Println("after")
-```
-
-Frames: 0 before line 1, all absent, output none, caption «قبل البداية». 1 after line 1, doors=[] len=0, view empty, output none, caption «مفيش عناصر نقارنها». 2 terminal at line 2, variables unchanged, no stdout, panic `slices.Max: empty list`, caption «Max وقفت التنفيذ؛ الطباعة نفسها ماكملتش، وafter مش هتتطبع». No line-3 frame.
-
-### Step `c62.watch-step` — Watch out
-
-#### `c62.mistakes` · markdown
-**Purpose:** consolidate misconceptions without a mission recipe.
-
-**AR:** **الافتراض:** «b = a عملت قايمة جديدة بعناصر مستقلة.» → **الواقع:** الوصف اتنسخ والعناصر لسه مشتركة. → **ليه؟** slice وصف للمخزن. → **فكّر في الإصلاح:** حدد مين مسموحله يغيّر نفس العناصر، ومين محتاج نسخة مستقلة.
-
-**الافتراض:** «بعد Sort، الـindex لسه هو موقع الحاجة قبل الترتيب.» → **الواقع:** القيم غيرت أماكنها في السجل، مش في العالم. → **ليه؟** الترتيب عدّل العناصر. → **فكّر في الإصلاح:** حافظ على هوية العنصر بدل ما تستنتجها من ترتيب جديد.
-
-**الافتراض:** «range صورت كل القيم أول الحلقة.» → **الواقع:** حدود اللفة ثابتة هنا، لكن عناصر المخزن المشترك ممكن تتغير قبل دور قراءتها. → **ليه؟** الوصف مش نسخة من كل عنصر. → **فكّر في الإصلاح:** اسأل أي مخزن بتقرأه الحلقة، مش بس طول المتغير دلوقتي.
-
-#### `c62.ticks` · markdown · Optional
-**Purpose:** apply `ticks.actions`, own route-order reasoning using two preselected toy destinations.
-
-**AR:** تجربة توصيل مستقلة: ممر من 5 خانات x=0..4. افترض المسح اتعمل مرة من أول خانة لآخر واحدة: 5 قراءات و4 حركات = **9 ticks**. الحساب والبحث والترتيب في الذاكرة مش قراءات درون جديدة.
-
-افترض حد اختارلك وجهتين بالفعل، x=1 وx=3، وإنت عند x=4، ومفيش رجوع للقاعدة مطلوب. ترتيب الزيارة 4→3→1 فيه 3 حركات؛ ترتيب 4→1→3 فيه 5. لو كل وجهة محتاجة Harvest واحدة، زوّد 2 في الحالتين. قيمة الوجهة ساعدتك تختارها؛ مكانها بيساعدك تخطط السفر. دي تجربة بوجهتين، مش اختيار أكبر 3 في خريطتك.
-
-**Author tick audit:** real starter scan=19; the implemented Gold is `19+(9-minX)+3` for a westward visit ending at the leftmost selected crystal; Par=Gold+14. Static 31/45 defaults are not every generated run's targets. Do not reveal live minX, selected positions, or this formula as a solved mission route. Show the existing result's dynamic target and measured ticks, labelled with the run; preview can have a different seed. Sources: `ch06.go:214–242`, `runner.go:243–274`.
-
-### Step `c62.check-step` — Check
-
-#### `c62.q-first-match` · question
-**Purpose:** assess `slice.search-max` with repeated identity and no selection implementation.
-
-**AR prompt:** في دفتر `[2 6 2]`، ناديت Index للقيمة 2 مرتين، من غير أي تعديل للدفتر. هيرجع إيه بالترتيب؟
-
-Options: A «0 وبعدها 2»; B «0 وبعدها 0»; C «2 وبعدها -1». **Correct: B.**
-
-Feedback A: «Index مبتفتكرش النداء اللي قبله. نفس المدخلات بتبدأ البحث من الأول تاني.»
-
-Feedback B: «صح؛ أول مطابقة عند 0 كل مرة. لو الهوية مهمة، لازم تصميمك يحتفظ بيها.»
-
-Feedback C: «دي مش عملية استهلاك أو مسح عنصر. أول 2 موجودة عند 0 في النداءين.»
-
-#### `c62.q-route` · question
-**Purpose:** assess `ticks.route-order`, separate movement from arithmetic.
-
-**AR prompt:** في تجربة التوصيل وإنت عند x=4، الوجهتين معروفين: 3 و1. كام tick للحركة والحصاد في الزيارة 4→3→1، من غير حساب المسح اللي خلص؟
-
-Options: A «3»; B «5»; C «7». **Correct: B.**
-
-Feedback A: «حسبت الحركة بس؛ عندنا كمان عمليتي Harvest، واحدة لكل وجهة.»
-
-Feedback B: «أيوه: حركة واحدة وبعدين حركتين، ومعاهم حصادين؛ الإجمالي 5.»
-
-Feedback C: «7 تناسب السفر الأطول 4→1→3 مع حصادين. ارسم المسافات بدل ما تعد أسماء الوجهات.»
-
-### Step `c62.turn-step` — Your turn
-
-#### `c62.turn` · markdown
-**Purpose:** concrete inspection of identity without a selection algorithm.
-
-**AR:** ارجع لنتيجة مسح الـstarter، واختار index واحد في الـConsole. اكتب تعليق عندك يوضح القيمة دي مرتبطة بأنهي x قبل أي ترتيب. بعد كده ابني قرارك؛ الدرس مش هيختار الكريستالات بدل منك.
-
-### Three hints
-
-1. **Concept — `c62.h1`:** «افصل قيمة الحاجة عن مكانها. اختيار الحاجة وخطة الوصول ليها سؤالين مختلفين.»
-2. **Structure — `c62.h2`:** «قبل ما تغيّر ترتيب أي سجل، حدد أي معلومات لازم تفضل ثابتة عشان تعرف ترجع للمواقع.»
-3. **Specific — `c62.h3`:** «راجع السطر اللي بيغيّر ترتيب البيانات: تقدر تحتفظ بنسخة مستقلة بـ slices.Clone قبل الترتيب، أو تحتفظ بكل قيمة مرتبطة بموقعها في تصميمك. اختار اللي يحافظ على هوية العنصر؛ ترتيب القيم لوحده مش بيحرّك مواقع العالم.»
-
-**Leakage review:** player constructs selection of exactly three distinct crystals, preservation/recovery of positions, actual range use, travel and harvest control, and stopping. There is no threshold index, repeated-max implementation, selected-position list from the real world, or harvesting predicate. Route teaching starts from two already-selected toy destinations; it teaches a cost comparison rather than supplying top-three selection plus travel code.
-
-**Fallback corrections:** add range value-copy and slice-bound semantics; distinguish fixed bounds from frozen values. Qualify Clone as shallow; explain first-match/-1 and empty Max. State Sort changes elements, not world positions. State actual 6-2 sizes are distinct; defer forced-duplicate tie handling to 6-4. Keep dynamic-star wording, clarify preview versus last run, and remove the threshold/copy/sort/west-harvest recipe from all three old hints.
-
-## 6-3 — تعداد الحياة (`6-3-census`)
-
-**Teaching objective:** represent category counts with a map; distinguish absence, stored zero, entry count, and count total; avoid dependence on map iteration order. Owns `map.counts`, `map.presence`, `map.nil`, `map.order`. Links to `2-4-units` for named integer types, `3-2-full-field` for traversal, `slice.basics` for contrast, `range.slice` for the already-known range form.
-
-**Starter audit:** creates a writable `map[colony.Entity]int`, reads the starting tile once, increments its entity count, and prints the map. No movement or report. The world is 6×4. Checks accept entity-keyed or name-keyed maps, with or without empty tiles; moss, lichen, and crystal are guaranteed present. Entity **counts**, not summed crystal sizes, are wanted. Do not restart counting the first tile without accounting for that existing increment.
-
-### Step `c63.mission-step` — Mission
-
-#### `c63.mission` · markdown
-**Purpose:** state exactly what is counted and what the starter already recorded.
-**Links (author metadata; render natural titles):** `2-4-units`.
-
-**AR:** القاعدة عايزة تعرف **كام خانة** فيها كل نوع: moss وlichen وcrystal. حجم الكريستالة مش عدد الكريستالات؛ هنا بنعدّ وجود النوع.
-
-الخريطة 6×4، والكود سجل نوع خانة البداية مرة فعلًا. `colony.GetEntity` بترجع النوع اللي تحت الدرون دلوقتي. `counts` مفاتيحها من نوع `colony.Entity`، زي فكرة النوع اللي له اسم في درس وحدات القياس (2-4).
-
-ابعت map بالأعداد بـ`colony.Report`؛ الطباعة لوحدها مش تقرير. ينفع تعدّ empty أو تسيبها، والاتنين مقبولين. مش محتاج تحصد حاجة. تخطيط زيارة الخانات من غير تكرار مسؤوليتك.
-
-### Step `c63.idea-step` — Idea
-
-#### `c63.idea` · markdown
-**Purpose:** own map construction and key/value model through a cabinet analogy.
-
-**AR:** تخيل دولاب، وعلى كل درج اسم مورد. بدل ما تسأل «العنصر رقم كام؟» زي slice، بتسأل «الدرج اللي مفتاحه water فيه كام؟». الـ**map** بتربط **key**، يعني مفتاح، بـ**value**، يعني قيمة.
-
-`map[string]int{}` بتعمل map جاهزة للكتابة: أسماء مفاتيح وأعداد قيم. `make(map[string]int)` طريقة تانية. القراية لمفتاح مش موجود بترجع صفر هنا لأن نوع القيمة int. الزيادة بـ`++` بتقرا القيمة وتكتبها بعد زيادتها؛ لو المفتاح غايب، بتبدأ من صفر وتضيفه.
-
-**Optional AR:** نوع المفتاح لازم ينفع تقارنه بـ`==`؛ string وint مناسبين، لكن slice وmap مش مفاتيح صالحة. `len` هنا عدد المفاتيح الموجودة، مش مجموع القيم. تشابه اسم len مش معناه إن كل أنواع البيانات بتعد نفس الحاجة.
-
-### Step `c63.example-step` — Example + experiment
-
-#### `c63.counts-playground` · sandbox
-**Purpose:** resource buttons that genuinely mutate a bounded map and distinguish len/total/presence.
-
-**AR:** جرب بنفسك: زوّد water كذا مرة. هل عدد المفاتيح زاد كل مرة؟ جرّب تخلي air موجودة بقيمة صفر، وبعدها اقرا مفتاح مش موجود.
-
-**Presets:** «دولاب فاضي» → writable empty map, len=0,total=0; «موجود بصفر» → water=2,air=0, len=2,total=2. Display rows in alphabetical UI order labelled «ترتيب عرض للتوضيح؛ مش ترتيب range».
-
-**Fixed menu:** «زوّد water»; «زوّد air»; «امسح air»; «اقرا air»; «اقرا spare»; preset buttons; Reset. Each increment changes only the chosen value by one, inserting its key if absent. Each resource is capped at 9 only for the demonstration; disable its increment at 9 with «حد التجربة 9؛ ابدأ من الأول عشان تجرّب تاني». No nil preset here; nil is a separate terminal walkthrough.
-
-**Visible state:** key/value table; «عدد المفاتيح len»; «إجمالي الوحدات»; read-result card `(value, ok)`; latest operation. Recompute total from all existing values. Deleting air removes its entry and units; deleting an absent key is harmless. Reads never mutate the map, len, or total. Missing spare always returns (0,false). A stored air=0 reads (0,true). Reset clears result cards and restores the chosen preset.
-
-**AR status:** first increment: «المفتاح اتضاف، وقيمته بقت 1.» Existing increment: «نفس المفتاح، قيمة أعلى؛ len زي ما هي.» Delete existing: «شيلنا المفتاح نفسه؛ len قلت واحد.» Delete absent: «المفتاح مش موجود؛ مفيش تغيير.» Read stored zero: «القيمة صفر، لكن ok=true: المفتاح موجود.» Read absent: «القيمة الصفرية وok=false: المفتاح غايب، والقراية مضافتوش.» Read positive: «دي القيمة الموجودة؛ القراية مش زيادة.» Reset: «رجعنا لحالة الدولاب اللي اخترتها.» Fixture: `e63-sandbox`.
-
-#### `c63.q-presence` · question
-**Purpose:** predict before the comma-ok explanation; assess absence versus zero.
-
-**AR prompt:** قريت `counts["lamp"]` ورجعت 0. إيه اللي تقدر تجزم بيه من الرقم لوحده؟
-
-Options: A «lamp أكيد مش موجودة»; B «lamp أكيد موجودة وصفر»; C «محتاج ok عشان أفرق بين الحالتين». **Correct: C.**
-
-Feedback A: «المفتاح الغايب بيرجع صفر، بس المفتاح الموجود ينفع تكون قيمته صفر برضه.»
-
-Feedback B: «الصفر ممكن يكون القيمة الافتراضية للقراية، مش بالضرورة قيمة مخزنة.»
-
-Feedback C: «صح. القراية بنتيجتين بترجع القيمة ومعاها هل المفتاح موجود فعلًا.»
-
-#### `c63.presence-trace` · walkthrough
-**Purpose:** observe increment, absence, stored zero, delete, and deterministic fmt output as separate small transitions.
-**Links (author metadata; render natural titles):** `2-2-survey`.
-
-**AR:** خلينا نشوف دولاب تدريب. `n, ok := counts["air"]` اسمها **comma-ok**: نتيجتين من قراية واحدة، شبه فكرة النتائج المتعددة في درس مسح المنطقة (2-2). هنا مش بنعمل لفة على خريطة المهمة.
-
-<!-- go-example id=e63-presence imports=fmt outcome=ok -->
-```go
-counts := map[string]int{"water": 2}
-counts["water"]++
-fmt.Println(counts["air"], len(counts))
-counts["air"] = 0
-n, ok := counts["air"]
+counts := map[string]int{}
+counts["moss"]++
+counts["moss"]++
+counts["lichen"]++
+fmt.Println(counts["crystal"])
+n, ok := counts["crystal"]
 fmt.Println(n, ok, len(counts))
-delete(counts, "water")
-fmt.Println(counts)
 ```
 
-| Frame | Highlight | Variables / map view | Cumulative output | AR caption |
+| Frame / line | Map summary (displayed alphabetically) | Cumulative output | AR caption | EN caption |
 |---|---|---|---|---|
-| 0 | before 1 | — | — | «قبل الدولاب.» |
-| 1 | 1 | water=2, len=1,total=2 | — | «مفتاح واحد.» |
-| 2 | 2 | water=3,len=1,total=3 | — | «الوحدات زادت؛ المفاتيح لأ.» |
-| 3 | 3 | unchanged; absent air not inserted | `0 1` | «قراية الغايب مش إضافة.» |
-| 4 | 4 | water=3,air=0,len=2,total=3 | `0 1` | «المفتاح موجود بصفر.» |
-| 5 | 5 | n=0,ok=true; map unchanged | `0 1` | «ok بتفصل الوجود عن القيمة.» |
-| 6 | 6 | unchanged | `0 1\n0 true 2` | «عدد المفاتيح 2.» |
-| 7 | 7 | air=0,len=1,total=0 | previous | «delete شالت مدخل water.» |
-| 8 terminal | 8 | unchanged | `0 1\n0 true 2\nmap[air:0]` | «المفتاح بصفر لسه بيتطبع.» |
+| 0 / before 1 | — | — | قبل التنفيذ. | Before execution. |
+| 1 / 1 | `{}`; len=0 | — | map فاضية؛ len=0. | Empty map; len=0. |
+| 2 / 2 | `{moss: 1}`; len=1 | — | أول عدّ لـmoss بقى 1. | First moss count is 1. |
+| 3 / 3 | `{moss: 2}`; len=1 | — | نفس المفتاح؛ len زي ما هي. | Same key; len stays 1. |
+| 4 / 4 | `{lichen: 1, moss: 2}`; len=2 | — | مفتاح جديد؛ len بقت 2. | New key; len is 2. |
+| 5 / 5 | unchanged | `0` | قراية المفتاح الغايب رجعت صفر. | Missing key reads as zero. |
+| 6 / 6 | `n=0`, `ok=false`; map unchanged | `0` | ok بتقول إن المفتاح غايب. | ok says the key is absent. |
+| 7 / 7 | len=2 | `0\n0 false 2` | الخرج بيعرض مفتاحين. | Output includes two keys. |
 
-### Step `c63.watch-step` — Watch out
+Map summaries in the walkthrough are ordered alphabetically for display. That display choice does not promise a `range` order.
 
-#### `c63.nil-trace` · walkthrough
-**Purpose:** demonstrate readable nil map versus forbidden writes, stopping at the actual panic.
+### جرّب / Try it · `c63.v1.try-step`
 
-**AR:** توقّع الأول: هل القراية والزيادة هينجحوا الاتنين؟ تخيل معاك اسم دولاب، لكن الدولاب نفسه لسه متعملش. `var m map[string]int` بتبدأ nil. القراية ممكنة، لكن الزيادة محتاجة كتابة، فمش هتنفع.
+`c63.v1.map-playground` · sandbox · `map-count`
 
-<!-- go-example id=e63-nil-map imports=fmt outcome=panic -->
-```go
-var m map[string]int
-n, ok := m["water"]
-fmt.Println(n, ok, len(m))
-m["water"]++
-fmt.Println("after")
+**AR:** اضغط نوعًا؛ عدّاده يزيد. جرّب قراءة مفتاح مش موجود.
+
+**EN:** Click a kind to increment it; try reading an absent key.
+
+Illustrative chips: `moss`, `lichen`, `crystal`; not mission data. Each click increments that key and updates the key/count table and `len`. “Read absent key: spore” shows `0, false` without inserting `spore`. Reset clears the table and read result. The table is sorted for display only; map iteration order is unspecified and may vary.
+
+### خد بالك / Watch out · `c63.v1.watch-step`
+
+**AR:**
+
+- الكتابة على map nil تعمل panic؛ جهّزها الأول، وrange ترتيبها مش مضمون.
+- GetEntity وMove وHarvest كل واحد 1 tick، حتى Move الفاشلة؛ Report وWorldSize والحساب 0.
+
+**EN:**
+
+- A nil map write panics; initialize first; map range order is unspecified.
+- GetEntity, Move, Harvest: 1 tick each, even failed Move; Report, WorldSize, computation: 0.
+
+### فكّر واختبر / Think & check · `c63.v1.check-step`
+
+`c63.v1.plan`: «جهّز map، وزُر الخانات وعدّ الأنواع، وبعدها ابعت التقرير.» / “Prepare a map, visit and count the tiles, then report.”
+
+`c63.v1.q-missing`: لو المفتاح `crystal` مش موجود، إيه نتيجة comma-ok؟ / If `crystal` is absent, what is comma-ok?
+
+- `0, false` → صح؛ القيمة صفر وok=false لأن المفتاح غايب. / Correct: a missing read is 0, false. **Correct.**
+- `0, true` → ok=true معناها إن المفتاح موجود. / ok=true means the key exists.
+- `nil, false` → قيمة int الافتراضية هي صفر، مش nil. / int's zero value is 0.
+
+`c63.v1.q-len`: لو moss=4 وlichen=2، كام `len(counts)`؟ / If moss=4 and lichen=2, what is `len(counts)`?
+
+- 6 → 6 هو مجموع القيم؛ len مش بتجمعها. / 6 is the sum, not len.
+- 2 → صح؛ len بتعد المفتاحين. / Correct: len counts two keys. **Correct.**
+- 4 → 4 قيمة moss، مش عدد المفاتيح. / 4 is a value, not a key count.
+
+`c63.v1.q-ticks`: بافتراض GetEntity مرة لكل 24 خانة و23 حركة بلا تكلفة أخرى، كام tick؟ / One GetEntity per 24 tiles, 23 moves, no other costs: ticks?
+
+- 47 → صح؛ 24 قراءة + 23 حركة = 47، وReport والحساب مجانيان. / Correct: 24 + 23 = 47; Report and computation are free. **Correct.**
+- 48 → في زيارة 24 خانة، فيه 23 حركة بس. / A 24-tile visit needs 23 moves.
+- 60 → 60 هو par، مش تقدير المسار المذكور. / 60 is Par, not this estimate.
+
+### دورك / Your turn · `c63.v1.turn-step`
+
+`c63.v1.turn`: راجع طباعة الـstarter وحدد نوع خانة البداية اللي اتعدّت. / Check the starter output and identify the starting tile's counted kind.
+
+**Three hints (Concept / Structure / Specific):**
+
+1. «الـmap بتعد كل نوع؛ `len` بتعد المفاتيح.» / “A map counts each kind; len counts keys.”
+2. «ابدأ بعدّ الـstarter، وزُر باقي الخانات مرة.» / “Start from the starter’s count; visit other tiles once.”
+3. «راجع الـmap وسطر `colony.GetEntity()`؛ هل المفتاح متوافق؟» / “Check the map and `colony.GetEntity()` line: do key types match?”
+
+#### Verified `e63-map-count`
+
+Toolchain: Go 1.24.0; `imports=fmt`; `outcome=ok`.
+
+Real stdout:
+
+```text
+0
+0 false 2
 ```
-
-Frames: 0 before line 1, absent variables/view/output, caption «قبل التعريف». 1 line 1, m=nil,len=0,total=0,no cabinet, output none, caption «اسم من غير map جاهزة للكتابة». 2 line 2, n=0,ok=false,m unchanged, output none, caption «قراية الغايب مسموحة حتى هنا». 3 line 3, output `0 false 0`, same variables, caption «صفر مش دليل إن الكتابة آمنة». 4 terminal line 4, map still nil, no inserted entry, same stdout, panic `assignment to entry in nil map`, caption «الزيادة محتاجة كتابة؛ وقفنا هنا وafter مش هتتطبع». No recovery or initialization frame after the panic.
-
-#### `c63.mistakes` · markdown
-**Purpose:** express misconceptions and order guarantees accurately.
-
-**AR:** **الافتراض:** «len هي إجمالي الموارد.» → **الواقع:** هي عدد المفاتيح. → **ليه؟** المورد الواحد ممكن يكون له قيمة كبيرة في مدخل واحد. → **فكّر في الإصلاح:** حدد هل محتاج عدد الفئات ولا جمع الكميات.
-
-**الافتراض:** «map nil زي slice nil، أقدر أزوّدها عادي.» → **الواقع:** الكتابة للـmap nil بتعمل panic. → **ليه؟** مفيش map جاهزة تخزّن المدخل. → **فكّر في الإصلاح:** راجع إنشاء الـmap قبل أي كتابة، مش أول قراية بس.
-
-**الافتراض:** «الطباعة طلعت مرتبة، يبقى range ماشية بنفس الترتيب.» → **الواقع:** ترتيب map مع range مش مضمون؛ ممكن يتكرر، وممكن يختلف. `fmt.Println` للـmap نفسها بتعرض المفاتيح بترتيب ثابت حسب قيمها. → **ليه؟** طريقة العرض مش عقد التكرار. → **فكّر في الإصلاح:** متخليش صحة العدّ معتمدة على مين ييجي الأول.
-
-**Optional AR:** range على map بترجع key وvalue، مش index وvalue. متستخدمش أول ناتج على إنه رقم خانة. في map مفاتيحها Entity، الطباعة بترتب بالقيم الصحيحة اللي تحت أسماء الأنواع، مش أبجديًا حسب كلمة moss أو crystal.
-
-#### `c63.print-trace` · walkthrough · Optional
-**Purpose:** verify sorted fmt display without simulating a guaranteed random iteration sequence.
-
-**AR:** توقّع الطباعة دي، لكن متستخدمهاش عشان تتوقع ترتيب range. إحنا بنطبع الـmap نفسها، مش سطور حلقة.
-
-<!-- go-example id=e63-print imports=fmt outcome=ok -->
-```go
-stock := map[string]int{"water": 2, "air": 5}
-fmt.Println(stock)
-```
-
-Frames: 0 before line 1, absent state/output, caption «قبل المخزن». 1 line 1, water=2,air=5,len=2,total=7, output none, caption «ده محتوى، مش ترتيب زيارة». 2 terminal line 2, unchanged state, stdout `map[air:5 water:2]`, caption «fmt رتبت مفاتيح string للعرض». A separate fixture `e63-range-orders` runs a real range repeatedly and records the actual observed sequences; none is presented as the mandatory next sequence.
-
-#### `c63.ticks` · markdown · Optional
-**Purpose:** apply action-cost ownership using a 3×2 toy field.
-**Links (author metadata; render natural titles):** `ticks.actions`.
-
-**AR:** تقدير لحقل تدريب 3×2: ست خانات، قراية GetEntity واحدة لكل خانة، وخمس حركات تزورهم من غير تكرار؛ يبقى **11 ticks**. زيادة عدّاد map من قيمة قريتها مش scan جديد. لو قريت نفس الخانة تاني فدي قراءة درون زيادة بتكلفة tick؛ ده غير تعديل العدد في الذاكرة.
-
-الافتراض: البداية عند أول خانة، مفيش حصاد أو فحص إضافي أو رجوع، والتقرير نفسه مجاني. راجع «تكلفة أوامر الدرون» في 6-1 للتفاصيل. خليك فاكر إن الـstarter عندك عدّ خانة البداية فعلًا.
-
-**Author tick audit:** live 6×4 minimal one-read-per-tile traversal=24+23=47 (Gold), Par=60, MaxTicks=300. No active field traversal code is supplied. Source: `ch06.go:388–462`.
-
-### Step `c63.check-step` — Check
-
-#### `c63.q-nil` · question
-**Purpose:** assess map initialization before writing.
-
-**AR prompt:** إنت محتاج map جديدة عشان تزود عداد water. أنهي بداية جاهزة للكتابة فورًا؟
-
-Options: A «`var m map[string]int`»; B «`m := make(map[string]int)`»; C «اقرا مفتاح من m الأول، ده هيجهزها». **Correct: B.**
-
-Feedback A: «دي nil؛ التعريف لوحده مش إنشاء map قابلة للكتابة.»
-
-Feedback B: «صح؛ make أنشأت map، فتقدر تكتب فيها. الـliteral الفاضي ينفع برضه.»
-
-Feedback C: «القراية مش بتهيّئ map ومش بتضيف مفتاح. راجع الفرق في التجربة.»
-
-#### `c63.q-order` · question
-**Purpose:** assess unspecified iteration, without asserting randomness every run.
-
-**AR prompt:** range على map طبعت air وبعدها water. أنهي توقع آمن للفة جديدة على نفس المحتوى؟
-
-Options: A «لازم نفس الترتيب»; B «لازم عكسه»; C «الاتنين ممكنين؛ مفيش ترتيب مضمون». **Correct: C.**
-
-Feedback A: «التكرار ممكن يحصل، لكن مش ضمان تعتمد عليه في برنامجك.»
-
-Feedback B: «Go مش بتتعهد تغيّر الترتيب في كل لفة.»
-
-Feedback C: «أيوه؛ صحة الحساب لازم تفضل واحدة لأي ترتيب مسموح.»
-
-### Step `c63.turn-step` — Your turn
-
-#### `c63.turn` · markdown
-**Purpose:** one small inspection action before implementing traversal.
-
-**AR:** شغّل الـstarter مرة، وحدد في الطباعة أنهي مفتاح اتعدّ لخانة البداية. اكتب تعليق يوضح إن الخانة دي متسجلة بالفعل؛ بعدين صمّم زيارتك لباقي الخريطة من غير ما تضيفها بالغلط مرة تانية.
-
-### Three hints
-
-1. **Concept — `c63.h1`:** «المطلوب عدد الخانات لكل نوع، مش حجم المورد ولا مجموع كل الأنواع في رقم واحد.»
-2. **Structure — `c63.h2`:** «راجع زيارتك للخانات من الفصل 3: هل كل خانة بتساهم مرة واحدة، بما فيها اللي الـstarter سجلها؟»
-3. **Specific — `c63.h3`:** «بص على المفتاح اللي بتزود قيمته: هل هو نوع الخانة الحالية؟ وبص على التقرير: هل بتبعت map الأعداد، مش len بتاعتها؟»
-
-**Leakage review:** player still builds traversal, coordinates observations with updates, handles the existing starting count, and chooses report timing. No snake-route code or exact `counts[colony.GetEntity()]++` expression is supplied by hints. Creating a map and understanding a one-key increment teach the data structure, not the full field algorithm.
-
-**Fallback corrections:** replace “any key type” with equality-comparable key types. Replace “random every time” with unspecified order that may repeat. Keep fmt ordering but clarify Entity numeric order. Make the nil-map example terminal; show initialization as a separate alternative before writing, not an unreachable line after panic. Print/use len in a runnable example rather than a bare `len(counts)` statement. Distinguish entity counts from resource sizes and len from totals. Replace the old route-plus-counting-expression hint.
 
 ## 6-4 — ترتيب المخزون (`6-4-stock-order`)
 
@@ -973,7 +797,7 @@ OverlayHeat محتاجة نفس عدد الصفوف والأعمدة في الم
 
 **Fallback corrections:** remove the solved general nested-loop allocation/doubling example and loop-role hint. Keep the complete public function/error contract and all shape cases. Explicitly qualify shallow outer Clone and independent output rows; distinguish transpose from row reversal and matrix multiplication from elementwise multiplication. Do not present calls to unimplemented functions as verified outputs. Preserve first-lab guidance, tolerance, and absence of Report/ticks.
 
-## English learner copy — 6-1 only · revision 2
+## English learner copy appendix — 6-1 · revision 2
 
 ### Step `c61.v2.mission-step` — Mission
 
@@ -1470,7 +1294,7 @@ Real stderr: empty.
 
 ### Revision-2 sequence fixture and verification
 
-The next author-only fixture verifies the eight Add operations; it is not extra learner code. New 6-1 fixtures are verified by `TestSurveyStoryboardExamplesMatchRealGo` in temporary directories outside the worktree.
+The next author-only fixture verifies the eight Add operations; it is not extra learner code. New chapter-six lesson examples are verified by `TestChapterSixStoryboardExamplesMatchRealGo` in temporary directories.
 
 <!-- go-example id=e61-sequence-v2 imports=fmt outcome=ok -->
 ```go

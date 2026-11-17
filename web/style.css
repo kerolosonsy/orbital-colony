@@ -255,6 +255,14 @@ input[type="checkbox"] { accent-color: var(--regolith); }
 .lesson-crystal::before { content: ""; display: block; width: 14px; height: 20px; background: var(--crystal); clip-path: polygon(50% 0, 100% 30%, 75% 100%, 25% 100%, 0 30%); }
 .lesson-crystal b { font: 14px/1.6 var(--mono); }
 .lesson-crystal .lesson-index { font: 11px/1.4 var(--mono); color: var(--paper-2); }
+.lesson-sort-copy { margin: 12px 0; }
+.lesson-sort-copy figcaption { font-size: 13px; margin-block-end: 8px; }
+.lesson-map-kinds { display: flex; flex-wrap: wrap; gap: 6px; }
+.lesson-map-kinds .tool { min-height: 40px; direction: ltr; unicode-bidi: isolate; }
+.lesson-map-table { width: 100%; border-collapse: collapse; direction: ltr; unicode-bidi: isolate; }
+.lesson-map-table th, .lesson-map-table td { padding: 5px 8px; border-bottom: 1px solid var(--rule); text-align: start; }
+.lesson-map-table td:last-child, .lesson-map-table th:last-child { text-align: end; font-family: var(--mono); }
+.lesson-map-empty, .lesson-map-readout { margin-block: 6px; }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
 
 /* ---------- editor ---------- */

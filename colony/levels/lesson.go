@@ -56,20 +56,28 @@ type LessonQuestion struct {
 }
 
 type LessonSandbox struct {
-	Kind          string              `json:"kind"`
-	Presets       []LessonSlicePreset `json:"presets,omitempty"`
-	AppendValue   int                 `json:"appendValue,omitempty"`
-	Limit         int                 `json:"limit,omitempty"`
-	GrowthLabel   string              `json:"growthLabel,omitempty"`
-	ReservedLabel string              `json:"reservedLabel,omitempty"`
-	LimitLabel    string              `json:"limitLabel,omitempty"`
-	AppendText    string              `json:"appendText,omitempty"`
-	ResetText     string              `json:"resetText,omitempty"`
-	Sequence      []int               `json:"sequence,omitempty"`
-	SourceLabel   string              `json:"sourceLabel,omitempty"`
-	AppendLabel   string              `json:"appendLabel,omitempty"`
-	ResetLabel    string              `json:"resetLabel,omitempty"`
-	DoneText      string              `json:"doneText,omitempty"`
+	Kind              string              `json:"kind"`
+	Presets           []LessonSlicePreset `json:"presets,omitempty"`
+	AppendValue       int                 `json:"appendValue,omitempty"`
+	Limit             int                 `json:"limit,omitempty"`
+	GrowthLabel       string              `json:"growthLabel,omitempty"`
+	ReservedLabel     string              `json:"reservedLabel,omitempty"`
+	LimitLabel        string              `json:"limitLabel,omitempty"`
+	AppendText        string              `json:"appendText,omitempty"`
+	ResetText         string              `json:"resetText,omitempty"`
+	Sequence          []int               `json:"sequence,omitempty"`
+	SourceLabel       string              `json:"sourceLabel,omitempty"`
+	AppendLabel       string              `json:"appendLabel,omitempty"`
+	ResetLabel        string              `json:"resetLabel,omitempty"`
+	DoneText          string              `json:"doneText,omitempty"`
+	Kinds             []string            `json:"kinds,omitempty"`
+	CloneSortLabel    string              `json:"cloneSortLabel,omitempty"`
+	OriginalSortLabel string              `json:"originalSortLabel,omitempty"`
+	CloneSortText     string              `json:"cloneSortText,omitempty"`
+	OriginalSortText  string              `json:"originalSortText,omitempty"`
+	MissingKey        string              `json:"missingKey,omitempty"`
+	MissingReadLabel  string              `json:"missingReadLabel,omitempty"`
+	MapOrderLabel     string              `json:"mapOrderLabel,omitempty"`
 }
 
 type LessonSlicePreset struct {

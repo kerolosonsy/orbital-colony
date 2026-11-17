@@ -244,6 +244,8 @@ const Lessons = (() => {
   function sandbox(block) {
     const spec = block.sandbox;
     if (spec.kind === "slice-append-sequence") return sequenceSandbox(spec);
+    if (spec.kind === "slice-sort-clone") return sortCloneSandbox(spec);
+    if (spec.kind === "map-count") return mapCountSandbox(spec);
     const model = createSandbox(spec);
     const panel = element("section", "lesson-sandbox");
     const presets = element("div", "lesson-presets");
@@ -265,6 +267,106 @@ const Lessons = (() => {
     panel.append(presets, view, element("p", "lesson-reserved-label", spec.reservedLabel), element("p", "lesson-growth-label", spec.growthLabel), status, limit, controls);
     update();
     return panel;
+  }
+
+  function sortCloneSandbox(spec) {
+    const state = { source: [...spec.sequence], copy: null, status: "" };
+    const view = sortCloneView(spec);
+    const refresh = () => renderSortClone(state, view);
+    view.controls.append(
+      button(spec.cloneSortLabel, () => { state.copy = [...state.source].sort((a, b) => a - b); state.status = spec.cloneSortText; refresh(); }),
+      button(spec.originalSortLabel, () => { state.source.sort((a, b) => a - b); state.status = spec.originalSortText; refresh(); }),
+      button(spec.resetLabel, () => { state.source = [...spec.sequence]; state.copy = null; state.status = spec.resetText; refresh(); }),
+    );
+    refresh();
+    return view.panel;
+  }
+
+  function sortCloneView(spec) {
+    const panel = element("section", "lesson-sandbox lesson-sort-clone");
+    const source = element("figure", "lesson-sequence-source");
+    const sourceRow = element("ol", "lesson-crystals");
+    source.append(element("figcaption", "", spec.sourceLabel), sourceRow);
+    const controls = element("div", "lesson-controls");
+    const copyFigure = element("figure", "lesson-sort-copy");
+    const copyRow = element("ol", "lesson-crystals");
+    copyFigure.append(element("figcaption", "", T("النسخة المرتبة", "Sorted copy")), copyRow);
+    const status = element("p", "lesson-caption");
+    status.setAttribute("role", "status");
+    panel.append(source, controls, copyFigure, status);
+    return { panel, sourceRow, copyFigure, copyRow, controls, status };
+  }
+
+  function renderSortClone(state, view) {
+    view.sourceRow.replaceChildren(...state.source.map(sortCloneSourceCell));
+    view.copyRow.replaceChildren(...(state.copy || []).map(sortCloneCopyCell));
+    view.copyFigure.hidden = state.copy === null;
+    view.status.textContent = state.status;
+    view.status.hidden = !state.status;
+  }
+
+  function sortCloneSourceCell(size, index) {
+    const cell = element("li", "lesson-crystal");
+    cell.append(element("b", "", String(size)), element("span", "lesson-index", String(index)));
+    cell.setAttribute("aria-label", T(`index ${index}، حجم ${size}`, `index ${index}, size ${size}`));
+    return cell;
+  }
+
+  function sortCloneCopyCell(size) {
+    const cell = element("li", "lesson-crystal");
+    cell.appendChild(element("b", "", String(size)));
+    return cell;
+  }
+
+  function mapCountSandbox(spec) {
+    const state = { counts: Object.create(null), readResult: null };
+    const view = mapCountView(spec);
+    const refresh = () => renderMapCount(state, view, spec);
+    spec.kinds.forEach((kind) => view.kinds.appendChild(button(kind, () => {
+      state.counts[kind] = (state.counts[kind] || 0) + 1;
+      refresh();
+    })));
+    view.controls.append(
+      button(spec.missingReadLabel, () => { state.readResult = "0, false"; refresh(); }),
+      button(spec.resetLabel, () => { state.counts = Object.create(null); state.readResult = null; refresh(); }),
+    );
+    refresh();
+    return view.panel;
+  }
+
+  function mapCountView(spec) {
+    const panel = element("section", "lesson-sandbox lesson-map-count");
+    const kinds = element("div", "lesson-map-kinds");
+    const summary = element("p", "lesson-position");
+    const order = element("p", "lesson-model-label", spec.mapOrderLabel);
+    const table = element("table", "lesson-map-table");
+    const head = element("thead");
+    const headerRow = element("tr");
+    headerRow.append(element("th", "", T("النوع", "Kind")), element("th", "", T("العدد", "Count")));
+    head.appendChild(headerRow);
+    const body = element("tbody");
+    const empty = element("p", "lesson-map-empty", T("مفيش مفاتيح لسه.", "No keys yet."));
+    const result = element("p", "lesson-map-readout");
+    result.setAttribute("role", "status");
+    const controls = element("div", "lesson-controls");
+    table.append(head, body);
+    panel.append(element("p", "lesson-model-label", spec.sourceLabel), kinds, summary, table, empty, order, controls, result);
+    return { panel, kinds, summary, body, empty, result, controls };
+  }
+
+  function renderMapCount(state, view, spec) {
+    const keys = Object.keys(state.counts).sort();
+    view.summary.textContent = `counts · len=${keys.length}`;
+    view.body.replaceChildren(...keys.map((key) => mapCountRow(key, state.counts[key])));
+    view.empty.hidden = keys.length > 0;
+    view.result.hidden = state.readResult === null;
+    view.result.textContent = state.readResult === null ? "" : `${spec.missingKey}: ${state.readResult}`;
+  }
+
+  function mapCountRow(key, count) {
+    const row = element("tr");
+    row.append(element("td", "", key), element("td", "", String(count)));
+    return row;
   }
 
   function sequenceSource(spec) {

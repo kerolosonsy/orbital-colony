@@ -153,6 +153,7 @@ fmt.Println(sizes, len(sizes), sizes[0])
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: topThreeLessonEnglish,
 			Title: "The Top 3",
 			Goal:  "The drone can carry only 3 crystals. Collect the largest 3",
 			Lesson: `# range and the slices Package 🏆
@@ -222,11 +223,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Copy and sort the slice: ~sorted := slices.Clone(sizes)~, then ~slices.Sort(sorted)~ (requires ~import \"slices\"~). The largest 3 are the last 3.",
-				"The threshold is ~sorted[len(sorted)-3]~. Any crystal at least that large belongs to the top 3.",
-				"Return west from x = 9 to 0, harvesting only where ~sizes[x] >= threshold~.",
+				"Size is value; index is position.",
+				"Compare all sizes, then plan visits.",
+				"Review ~slices.Clone~ and ~slices.Sort~; which order must stay linked to positions?",
 			},
 		},
+		LessonRevision: 1, Steps: topThreeLessonArabic,
 		ID: "6-2-top-three", Chapter: 6, Title: "أغلى 3",
 		Goal: "الدرون يقدر يشيل 3 كريستالات بس. هات أكبر 3",
 		Par:  45, Gold: 31, MaxTicks: 200,
@@ -281,9 +283,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"انسخ الـ slice وارتّبها: ~sorted := slices.Clone(sizes)~ ثم ~slices.Sort(sorted)~ (محتاج ~import \"slices\"~). أكبر 3 هيبقوا آخر 3.",
-			"الحد الأدنى = ~sorted[len(sorted)-3]~. أي كريستال حجمه أكبر منه أو بيساويه يبقى من الـ 3.",
-			"ارجع غرب من x = 9 لـ 0، واحصد بس لو ~sizes[x] >= threshold~.",
+			"الحجم قيمة، والـindex مكان.",
+			"قارن الأحجام، ثم خطط الزيارة والحصاد.",
+			"راجع ~slices.Clone~ و~slices.Sort~؛ أي ترتيب يفضل مربوط بالمواقع؟",
 		},
 		Lesson: `# range ومكتبة slices 🏆
 
@@ -335,6 +337,7 @@ fmt.Println(a) // [1 2 3]  ← a اتغيرت كمان!
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: censusLessonEnglish,
 			Title: "Life Census",
 			Goal:  "Create and report a map counting each type (moss, lichen, and crystal)",
 			Lesson: `# Maps: The Colony Dictionary 🗂️
@@ -399,10 +402,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Use the chapter 3 snake route, but replace Harvest with ~counts[colony.GetEntity()]++~.",
-				"You do not need to count empty tiles, but including them is accepted too.",
+				"A map counts each kind; len counts keys.",
+				"Start from the starter's count; visit other tiles once.",
+				"Check the map and ~colony.GetEntity()~ line: do key types match?",
 			},
 		},
+		LessonRevision: 1, Steps: censusLessonArabic,
 		ID: "6-3-census", Chapter: 6, Title: "تعداد الحياة",
 		Goal: "اعمل map فيها عدد كل نوع (moss و lichen و crystal) وابعتها",
 		Par:  60, Gold: 47, MaxTicks: 300,
@@ -476,8 +481,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"نفس لفّة الثعبان بتاعة الفصل 3، بس بدل Harvest هتعمل ~counts[colony.GetEntity()]++~.",
-			"الخانات الفاضية (empty) مش لازم تتعد، بس لو عدّيتها برضه مقبولة.",
+			"الـmap بتعد كل نوع؛ ~len~ بتعد المفاتيح.",
+			"ابدأ بعدّ الـstarter، وزُر باقي الخانات مرة.",
+			"راجع الـmap وسطر ~colony.GetEntity()~: هل المفتاح متوافق؟",
 		},
 		Lesson: `# Maps: قاموس المستعمرة 🗂️
 

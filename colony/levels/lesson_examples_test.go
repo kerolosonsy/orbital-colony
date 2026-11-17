@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func TestSurveyStoryboardExamplesMatchRealGo(t *testing.T) {
+func TestChapterSixStoryboardExamplesMatchRealGo(t *testing.T) {
 	goBin, err := exec.LookPath("go")
 	if err != nil {
 		t.Skip("go toolchain unavailable: cannot execute storyboard examples")
@@ -22,30 +22,38 @@ func TestSurveyStoryboardExamplesMatchRealGo(t *testing.T) {
 		t.Fatal(err)
 	}
 	storyboard := string(body)
-	pattern := regexp.MustCompile("(?s)<!-- go-example id=(e61-[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\\n```go\\n(.*?)\\n```")
+	pattern := regexp.MustCompile("(?s)<!-- go-example id=(e61-(?:crystal-log-v2|sequence-v2)|e62-range-clone-sort|e63-map-count) imports=([^ ]+) outcome=([^ ]+) -->\\n```go\\n(.*?)\\n```")
 	examples := pattern.FindAllStringSubmatch(storyboard, -1)
-	if len(examples) != 2 {
-		t.Fatalf("expected both revision-2 survey examples, found %d", len(examples))
+	wantIDs := map[string]bool{
+		"e61-crystal-log-v2": true, "e61-sequence-v2": true,
+		"e62-range-clone-sort": true, "e63-map-count": true,
+	}
+	if len(examples) != len(wantIDs) {
+		t.Fatalf("expected four chapter-six lesson examples, found %d", len(examples))
 	}
 	seen := map[string]bool{}
 	for _, example := range examples {
-		if seen[example[1]] {
-			t.Fatal("duplicate survey example ID")
+		if seen[example[1]] || !wantIDs[example[1]] {
+			t.Fatalf("unexpected or duplicate example ID %q", example[1])
 		}
 		seen[example[1]] = true
+		delete(wantIDs, example[1])
 		t.Run(example[1], func(t *testing.T) {
-			verifySurveyExample(t, goBin, storyboard, example)
+			verifyChapterSixExample(t, goBin, storyboard, example)
 		})
+	}
+	if len(wantIDs) != 0 {
+		t.Fatalf("missing examples: %v", wantIDs)
 	}
 }
 
-func verifySurveyExample(t *testing.T, goBin, storyboard string, example []string) {
+func verifyChapterSixExample(t *testing.T, goBin, storyboard string, example []string) {
 	t.Helper()
 	id, imports, outcome, code := example[1], example[2], example[3], example[4]
-	if (id != "e61-crystal-log-v2" && id != "e61-sequence-v2") || outcome != "ok" {
-		t.Fatal("unexpected revision-2 example")
+	if outcome != "ok" {
+		t.Fatal("chapter-six lesson example must run successfully")
 	}
-	for _, steps := range [][]LessonStep{surveyLessonArabic, surveyLessonEnglish} {
+	for _, steps := range [][]LessonStep{surveyLessonArabic, surveyLessonEnglish, topThreeLessonArabic, topThreeLessonEnglish, censusLessonArabic, censusLessonEnglish} {
 		for _, step := range steps {
 			for _, block := range step.Blocks {
 				if block.ExampleID == id && block.Code != code {
@@ -55,6 +63,13 @@ func verifySurveyExample(t *testing.T, goBin, storyboard string, example []strin
 					literal := strings.ReplaceAll(fmt.Sprintf("%#v", block.Sandbox.Sequence), " ", "")
 					if !strings.Contains(strings.ReplaceAll(code, " ", ""), literal) {
 						t.Fatal("sequence fixture differs from playground data")
+					}
+				}
+				if id == "e63-map-count" && block.Sandbox != nil && block.Sandbox.Kind == "map-count" {
+					for _, kind := range block.Sandbox.Kinds {
+						if !strings.Contains(code, fmt.Sprintf("%q", kind)) {
+							t.Fatalf("map fixture omits playground kind %q", kind)
+						}
 					}
 				}
 			}
@@ -70,7 +85,7 @@ func verifySurveyExample(t *testing.T, goBin, storyboard string, example []strin
 	if match := outputPattern.FindStringSubmatch(transcript); match != nil {
 		wantOutput = match[1] + "\n"
 	}
-	for _, steps := range [][]LessonStep{surveyLessonArabic, surveyLessonEnglish} {
+	for _, steps := range [][]LessonStep{surveyLessonArabic, surveyLessonEnglish, topThreeLessonArabic, topThreeLessonEnglish, censusLessonArabic, censusLessonEnglish} {
 		for _, step := range steps {
 			for _, block := range step.Blocks {
 				if block.ExampleID == id && block.Walkthrough != nil {

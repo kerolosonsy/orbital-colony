@@ -97,6 +97,34 @@ function sequenceLesson(lang = "en") {
   ] };
 }
 
+function sortCloneLesson(lang = "en") {
+  return { id: "top-three", lessonRevision: 1, steps: [
+    { id: "mission", title: "Mission", blocks: [{ id: "mission-copy", kind: "markdown", text: "The starter measured the crystals." }] },
+    { id: "try", title: "Try it", blocks: [{ id: "sort-copy", kind: "sandbox", text: "Compare sorting the original and a copy.", sandbox: {
+      kind: "slice-sort-clone", sequence: [5, 2, 8, 4, 1, 7, 3, 6],
+      sourceLabel: lang === "ar" ? "أحجام للتوضيح، مش بيانات المهمة." : "Illustrative sizes, not mission data.",
+      cloneSortLabel: lang === "ar" ? "رتّب نسخة (Clone ثم Sort)" : "Sort copy (Clone then Sort)",
+      originalSortLabel: lang === "ar" ? "رتّب الأصل" : "Sort original", resetLabel: lang === "ar" ? "من الأول" : "Reset",
+      cloneSortText: lang === "ar" ? "النسخة المرتبة تحت؛ الأصل فضل زي ما هو." : "Sorted copy below; the original stays unchanged.",
+      originalSortText: lang === "ar" ? "الترتيب اتغير؛ الـindex مبقاش يحدد الكريستالة." : "Order changed; indexes no longer identify crystals.",
+      resetText: lang === "ar" ? "رجعنا لترتيب البداية." : "Original order restored.",
+    } }] },
+  ] };
+}
+
+function mapCountLesson(lang = "en") {
+  return { id: "census", lessonRevision: 1, steps: [
+    { id: "mission", title: "Mission", blocks: [{ id: "mission-map", kind: "markdown", text: "Count the illustrative kinds." }] },
+    { id: "try", title: "Try it", blocks: [{ id: "map-count", kind: "sandbox", text: "Click kinds to count them.", sandbox: {
+      kind: "map-count", kinds: ["moss", "lichen", "crystal"], missingKey: "spore",
+      sourceLabel: lang === "ar" ? "أنواع للتوضيح، مش بيانات المهمة." : "Illustrative kinds, not mission data.",
+      missingReadLabel: lang === "ar" ? "اقرأ مفتاح غايب: spore" : "Read absent key: spore",
+      resetLabel: lang === "ar" ? "من الأول" : "Reset",
+      mapOrderLabel: lang === "ar" ? "الجدول للعرض بس؛ ترتيب range على map مش مضمون." : "Sorted for display; map range order is unspecified.",
+    } }] },
+  ] };
+}
+
 test("sequence playground grows one indexed cell per click, stops at eight, and resets in both languages", () => {
   for (const lang of ["ar", "en"]) {
     const view = fixture({ lang }), level = sequenceLesson(lang);
@@ -132,6 +160,70 @@ test("sequence playground grows one indexed cell per click, stops at eight, and 
     assert.deepEqual(spec.sequence, [5, 2, 8, 4, 1, 7, 3, 6]);
     click(add);
     assert.deepEqual(summaryParts(box.querySelector(".lesson-slice")), ["sizes:", "len=1"]);
+  }
+});
+
+test("sort-copy playground preserves the original or visibly loses its position links, then resets", () => {
+  for (const lang of ["ar", "en"]) {
+    const view = fixture({ lang }), level = sortCloneLesson(lang);
+    const spec = level.steps[1].blocks[0].sandbox;
+    practice(view, level);
+    const box = view.article.querySelector(".lesson-sort-clone");
+    const source = box.querySelector(".lesson-sequence-source");
+    const sourceRow = source.querySelector(".lesson-crystals");
+    const copyFigure = box.querySelector(".lesson-sort-copy");
+    const cloneSort = namedButton(box, spec.cloneSortLabel);
+    const originalSort = namedButton(box, spec.originalSortLabel);
+    const reset = namedButton(box, spec.resetLabel);
+    const initial = spec.sequence.map(String);
+    assert.equal(sourceRow.querySelectorAll("li").length, 8);
+    assert.deepEqual(sourceRow.querySelectorAll("b").map((cell) => cell.textContent), initial);
+    assert.deepEqual(sourceRow.querySelectorAll(".lesson-index").map((cell) => cell.textContent), ["0", "1", "2", "3", "4", "5", "6", "7"]);
+    assert.equal(copyFigure.hidden, true);
+    assert.equal(box.querySelector(".lesson-caption").hidden, true);
+    click(cloneSort);
+    assert.deepEqual(sourceRow.querySelectorAll("b").map((cell) => cell.textContent), initial);
+    assert.equal(copyFigure.hidden, false);
+    assert.deepEqual(copyFigure.querySelectorAll("b").map((cell) => cell.textContent), [...initial].sort((a, b) => Number(a) - Number(b)));
+    assert.match(box.querySelector(".lesson-caption").textContent, /unchanged|فضل زي ما هو/);
+    click(originalSort);
+    assert.deepEqual(sourceRow.querySelectorAll("b").map((cell) => cell.textContent), [...initial].sort((a, b) => Number(a) - Number(b)));
+    assert.deepEqual(sourceRow.querySelectorAll(".lesson-index").map((cell) => cell.textContent), ["0", "1", "2", "3", "4", "5", "6", "7"]);
+    assert.match(box.querySelector(".lesson-caption").textContent, /no longer identify|مبقاش يحدد/);
+    click(reset);
+    assert.deepEqual(sourceRow.querySelectorAll("b").map((cell) => cell.textContent), initial);
+    assert.equal(copyFigure.hidden, true);
+    assert.match(box.querySelector(".lesson-caption").textContent, /restored|رجعنا/);
+  }
+});
+
+test("map-count playground increments chips, reads absence without insertion, and resets in both languages", () => {
+  for (const lang of ["ar", "en"]) {
+    const view = fixture({ lang }), level = mapCountLesson(lang);
+    const spec = level.steps[1].blocks[0].sandbox;
+    practice(view, level);
+    const box = view.article.querySelector(".lesson-map-count");
+    const rows = () => box.querySelector(".lesson-map-table").querySelector("tbody").querySelectorAll("tr");
+    const summary = () => box.querySelector(".lesson-position").textContent;
+    assert.match(box.textContent, /range.*مش مضمون|range order is unspecified/);
+    assert.equal(summary(), "counts · len=0");
+    assert.equal(box.querySelector(".lesson-map-empty").hidden, false);
+    assert.equal(rows().length, 0);
+    click(namedButton(box, spec.missingReadLabel));
+    assert.equal(box.querySelector(".lesson-map-readout").textContent, "spore: 0, false");
+    assert.equal(summary(), "counts · len=0");
+    click(namedButton(box, "moss")); click(namedButton(box, "moss")); click(namedButton(box, "lichen"));
+    assert.equal(summary(), "counts · len=2");
+    assert.equal(box.querySelector(".lesson-map-empty").hidden, true);
+    assert.deepEqual(rows().map((row) => row.querySelectorAll("td").map((cell) => cell.textContent)), [["lichen", "1"], ["moss", "2"]]);
+    click(namedButton(box, spec.missingReadLabel));
+    assert.equal(box.querySelector(".lesson-map-readout").textContent, "spore: 0, false");
+    assert.equal(summary(), "counts · len=2");
+    click(namedButton(box, spec.resetLabel));
+    assert.equal(summary(), "counts · len=0");
+    assert.equal(rows().length, 0);
+    assert.equal(box.querySelector(".lesson-map-empty").hidden, false);
+    assert.equal(box.querySelector(".lesson-map-readout").hidden, true);
   }
 });
 
