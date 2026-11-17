@@ -70,6 +70,7 @@ func remaining(w *sim.World, ps []sim.Point) int {
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch07WaypointsEnglish,
 			Title: "Checkpoints",
 			Goal:  "Visit the checkpoints 📡 in the order given by colony.Waypoints()",
 			Lesson: `# Structs: Values with Parts 🧱
@@ -140,10 +141,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"You need 4 loops in goTo: x too small (East), x too large (West), y too small (North), y too large (South).",
-				"In main: ~for _, p := range points { goTo(p) }~.",
+				"Concept: a point groups coordinates, and the list keeps visit order.",
+				"Structure: separate travel to one point from visiting the list.",
+				"Location: finish ~goTo~ after ~colony.Position()~ and check coordinate updates.",
 			},
 		},
+		LessonRevision: 1, Steps: ch07WaypointsArabic,
 		ID: "7-1-waypoints", Chapter: 7, Title: "نقاط التفتيش",
 		Goal: "عدّي على نقاط التفتيش 📡 بالترتيب اللي في colony.Waypoints()",
 		Par:  40, Gold: 30, MaxTicks: 200,
@@ -189,8 +192,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"محتاج 4 حلقات في goTo: x أصغر (East)، x أكبر (West)، y أصغر (North)، y أكبر (South).",
-			"في main: ~for _, p := range points { goTo(p) }~.",
+			"المفهوم: النقطة تجمع الإحداثيين، والقائمة تحفظ ترتيب المرور.",
+			"الهيكل: افصل الوصول لنقطة عن تكرار المرور على النقاط.",
+			"الموضع: كمّل ~goTo~ بعد ~colony.Position()~ وراجع تحديث الإحداثيات.",
 		},
 		Lesson: `# Structs: حاجات ليها أجزاء 🧱
 
@@ -236,6 +240,7 @@ if (colony.Point{X: x, Y: y}) == target {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch07NavigationEnglish,
 			Title: "Navigation System",
 			Goal:  "Harvest only the crystal in colony.Targets(). Other crystal is contaminated!",
 			Lesson: `# Methods: Functions Attached to a Type ⚙️
@@ -307,11 +312,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Complete GoTo for the other directions, updating ~n.X~ or ~n.Y~ after each move.",
-				"After ~nav.GoTo(t)~, call ~colony.Harvest()~.",
-				"You can add another method: ~func (n *Nav) Collect(p colony.Point) { n.GoTo(p); colony.Harvest() }~.",
+				"Concept: keep navigation state with the movement behavior.",
+				"Structure: separate travel from handling each target.",
+				"Location: inspect ~colony.Targets()~ and the code after ~nav.GoTo(t)~.",
 			},
 		},
+		LessonRevision: 1, Steps: ch07NavigationArabic,
 		ID: "7-2-nav-system", Chapter: 7, Title: "نظام الملاحة",
 		Goal: "احصد كريستال الأهداف بس (colony.Targets()). الكريستال التاني ملوّث!",
 		Par:  60, Gold: 45, MaxTicks: 300,
@@ -362,9 +368,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"كمّل GoTo بباقي الاتجاهات، وكل مرة تتحرك حدّث ~n.X~ أو ~n.Y~.",
-			"بعد ~nav.GoTo(t)~ اعمل ~colony.Harvest()~.",
-			"ممكن تضيف method تانية: ~func (n *Nav) Collect(p colony.Point) { n.GoTo(p); colony.Harvest() }~.",
+			"المفهوم: خَلّي حالة الملاحة مع سلوك الحركة.",
+			"الهيكل: افصل الوصول عن التعامل مع كل هدف.",
+			"الموضع: راجع ~colony.Targets()~ والكود بعد ~nav.GoTo(t)~.",
 		},
 		Lesson: `# Methods: دوال بتاعة نوع معيّن ⚙️
 
@@ -412,6 +418,7 @@ func (n Nav) Here() colony.Point {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch07ShortestRouteEnglish,
 			Title: "The Shortest Route",
 			Goal:  "Harvest every target. Choose the order; shorter routes earn more stars",
 			Lesson: `# A Simple Algorithm: Visit the Nearest 🧭
@@ -486,11 +493,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"The greedy approach: from your current position, visit the nearest unvisited target. Repeat.",
-				"Keep targets in a slice and remove each one you visit: ~left = append(left[:i], left[i+1:]...)~.",
-				"You need goTo from the previous mission; the same Nav type can help here too.",
+				"Concept: compare target distances from your current position.",
+				"Structure: track remaining targets and refresh your current point.",
+				"Location: inspect the ~Dist~ method and the distance print in ~main~.",
 			},
 		},
+		LessonRevision: 1, Steps: ch07ShortestRouteArabic,
 		ID: "7-3-shortest-route", Chapter: 7, Title: "أقصر طريق",
 		Goal: "احصد كل الأهداف. الترتيب عليك، وأقصر طريق ياخد النجوم",
 		Par:  70, Gold: 50, MaxTicks: 400,
@@ -539,9 +547,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الطريقة الطماعة (greedy): من مكانك، روح لأقرب هدف لسه ماروحتلوش. وكرّر.",
-			"احفظ الأهداف في slice، ولما تروح لواحد امسحه: ~left = append(left[:i], left[i+1:]...)~.",
-			"محتاج goTo من المهمة اللي فاتت، ونفس Nav ممكن ينفع هنا.",
+			"المفهوم: قارن مسافات الأهداف من مكانك الحالي.",
+			"الهيكل: تابع الأهداف الباقية وحدّث موضعك الحالي.",
+			"الموضع: راجع method ~Dist~ وسطر طباعة المسافة في ~main~.",
 		},
 		Lesson: `# خوارزمية بسيطة: روح للأقرب 🧭
 
@@ -598,9 +606,14 @@ func main() {
 }
 `
 	add(&Level{ID: "7-4-composite-units", Chapter: 7, Title: "وحدات مركّبة", Goal: "استخدم embedding وmethod لتوزيع فاتورة الطاقم بالـ cents",
+		LessonRevision: 1, Steps: ch07CompositeArabic,
 		Requires: []string{"embed", "method"}, Bridge: []int{12},
 		Par: 0, Gold: 0, MaxTicks: 100,
-		Starter: compositeUnitsStarter, Lesson: `# وحدة جوّا وحدة 🧩
+		Starter: compositeUnitsStarter, Hints: []string{
+			"المفهوم: embedding يرقّي fields النوع الداخلي.",
+			"الهيكل: افصل بيانات الفاتورة عن method الأنصبة.",
+			"الموضع: استخدم قيم Invoice وراجع الـreceiver والـfields.",
+		}, Lesson: `# وحدة جوّا وحدة 🧩
 
 عرفنا structs في نقاط الطريق وmethods في نظام الملاحة. دلوقتي هنجمع نوعين مع بعض بـ embedding، ونستخدمهم لتقسيم فاتورة الطاقم من غير ما نخلق أو نضيّع cent.
 
@@ -661,8 +674,12 @@ fmt.Println(p.Name) // الحقل ده مش مترقّي
 ## المهمة
 عرّف ~Ledger struct { TotalCents, People int }~، وضمّه بدون اسم حقل جوه ~CrewUnit struct { Ledger }~. اكتب ~Shares() []int~ كـ method على CrewUnit، واستخدم ~u.TotalCents~ و~u.People~ مباشرة.
 
-ابني الوحدة من Invoice، وابعت slice الأنصبة بتقرير واحد. ترتيبها هو ترتيب أفراد الطاقم: أول ~total%people~ أفراد بياخدوا cent زيادة، والباقي النصيب الأساسي. المجموع لازم يساوي الإجمالي بالظبط، حتى مع صفر أو فرد واحد.`, Hints: []string{"~Ledger~ جوه CrewUnit تكتبها لوحدها، من غير اسم حقل قبل النوع.", "استعمل method بترجّع ~[]int~ جديدة طولها عدد الطاقم.", "املأها بنصيب القسمة، وزوّد cent واحد بس لو index الفرد أقل من باقي القسمة."},
-		En: &LevelText{Title: "Composite Units", Goal: "Use embedding and a method to allocate crew invoice cents", Starter: compositeUnitsStarter, Lesson: `# One Unit Inside Another 🧩
+ابني الوحدة من Invoice، وابعت slice الأنصبة بتقرير واحد. ترتيبها هو ترتيب أفراد الطاقم: أول ~total%people~ أفراد بياخدوا cent زيادة، والباقي النصيب الأساسي. المجموع لازم يساوي الإجمالي بالظبط، حتى مع صفر أو فرد واحد.`,
+		En: &LevelText{LessonRevision: 1, Steps: ch07CompositeEnglish, Title: "Composite Units", Goal: "Use embedding and a method to allocate crew invoice cents", Starter: compositeUnitsStarter, Hints: []string{
+			"Concept: embedding promotes inner type fields.",
+			"Structure: separate invoice data from the shares method.",
+			"Location: use Invoice values and inspect the receiver and fields.",
+		}, Lesson: `# One Unit Inside Another 🧩
 
 Waypoints introduced structs and Navigation System introduced methods. Now combine types with embedding and split a crew invoice without inventing or losing a cent.
 
@@ -723,7 +740,7 @@ fmt.Println(p.Name) // This field was not promoted
 ## Your mission
 Define ~Ledger struct { TotalCents, People int }~ and embed it without a field name in ~CrewUnit struct { Ledger }~. Write a ~Shares() []int~ method on CrewUnit using ~u.TotalCents~ and ~u.People~ directly.
 
-Build the unit from Invoice and report the shares slice once. Its order is crew order: the first ~total%people~ members receive an extra cent; the rest receive the base share. The sum must equal the total exactly, including zero total and one-person cases.`, Hints: []string{"Write ~Ledger~ alone inside CrewUnit, without a field name before the type.", "Return a fresh ~[]int~ from a method, with length equal to the crew count.", "Fill with the quotient and add one cent only when a member index is below the remainder."}},
+Build the unit from Invoice and report the shares slice once. Its order is crew order: the first ~total%people~ members receive an extra cent; the rest receive the base share. The sum must equal the total exactly, including zero total and one-person cases.`},
 		Setup: func(w *sim.World) {
 			w.Init(4, 2, sim.Regolith)
 			w.Data.People = 1 + w.Rand.Intn(7)
@@ -764,9 +781,14 @@ func main() {
 }
 `
 	add(&Level{ID: "7-5-crew-exam", Chapter: 7, Title: "اختبار الطاقم", Goal: "جاوب اختبار أرض النباتات واحسب نسبة الأسئلة الصالحة",
+		LessonRevision: 1, Steps: ch07CrewExamArabic,
 		Requires: []string{"struct", "range"}, Bridge: []int{5},
 		Par: 0, Gold: 0, MaxTicks: 100,
-		Starter: crewExamStarter, Lesson: `# سؤال كامل بدل متغيرات متفرّقة 🧑‍🚀
+		Starter: crewExamStarter, Hints: []string{
+			"المفهوم: كل سؤال يجمع بياناته في struct واحدة.",
+			"الهيكل: افحص السؤال، اختياراته، ثم النتيجة.",
+			"الموضع: احتفظ بـindex range عند استدعاء ~colony.Answer~.",
+		}, Lesson: `# سؤال كامل بدل متغيرات متفرّقة 🧑‍🚀
 
 الطاقم محتاج يراجع أرض كل محصول. بنك الأسئلة بيتغيّر وترتيب الاختيارات بيتبدّل، لكن كل سؤال بيجمع بياناته في struct واحدة زي ما نقاط الطريق جمعت X وY.
 
@@ -828,8 +850,12 @@ for i := range questions {
 ## المهمة
 عرّف struct عندك للعدادين ~Correct~ و~Attempted~. جاوب كل سؤال صالح بالقاعدة: moss→soil، lichen→ice، crystal→regolith. سيب السؤال اللي من غير اختيارات من غير Answer.
 
-احسب ~correct*100/attempted~ كعدد صحيح، وابعت النسبة في تقرير واحد. المطلوب إجابات صحيحة لكل الأسئلة الصالحة، فالنتيجة النهائية100؛ التحقق بيراجع الإجابات المسجّلة نفسها كمان، مش التقرير بس.`, Hints: []string{"خلّي رقم السؤال i اللي من range زي ما هو، حتى لما تتخطى سؤال.", "استعمل switch على Prompt لتحديد نص الأرض، وبعدين range على Choices عشان تعرف رقمها.", "زوّد Attempted للسؤال الصالح بس، وCorrect بعد اختيار مطابق وقبول Answer؛ اضرب في100 قبل القسمة."},
-		En: &LevelText{Title: "Crew Exam", Goal: "Answer the crop-ground exam and score usable questions", Starter: crewExamStarter, Lesson: `# A Whole Question Instead of Scattered Variables 🧑‍🚀
+احسب ~correct*100/attempted~ كعدد صحيح، وابعت النسبة في تقرير واحد. المطلوب إجابات صحيحة لكل الأسئلة الصالحة، فالنتيجة النهائية100؛ التحقق بيراجع الإجابات المسجّلة نفسها كمان، مش التقرير بس.`,
+		En: &LevelText{LessonRevision: 1, Steps: ch07CrewExamEnglish, Title: "Crew Exam", Goal: "Answer the crop-ground exam and score usable questions", Starter: crewExamStarter, Hints: []string{
+			"Concept: each question groups its data in one struct.",
+			"Structure: inspect the question, its choices, then the result.",
+			"Location: keep range's index when calling ~colony.Answer~.",
+		}, Lesson: `# A Whole Question Instead of Scattered Variables 🧑‍🚀
 
 The crew is reviewing crop terrain. The bank and choice order vary, but every question groups its data in one struct, just as waypoints group X and Y.
 
@@ -891,7 +917,7 @@ Choice order varies, and the empty question has no choice 0 at all. Counting all
 ## Your mission
 Define your own struct with ~Correct~ and ~Attempted~ counters. Answer every usable question using moss→soil, lichen→ice, crystal→regolith. Do not call Answer for the question without choices.
 
-Compute integer ~correct*100/attempted~ and send one percentage report. All usable answers must be correct, so the final score is 100. Verification also inspects recorded answers, not just your report.`, Hints: []string{"Keep the original range index i, even when skipping a question.", "Use switch on Prompt to select terrain text, then range over Choices to find its index.", "Count only usable questions; increment Correct after a matching accepted answer, and multiply by 100 before dividing."}},
+Compute integer ~correct*100/attempted~ and send one percentage report. All usable answers must be correct, so the final score is 100. Verification also inspects recorded answers, not just your report.`},
 		Setup: func(w *sim.World) {
 			w.Init(4, 2, sim.Regolith)
 			n := 4 + w.Rand.Intn(4)
