@@ -12,6 +12,7 @@ func levelForLang(l *levels.Level, lang string) *levels.Level {
 		return l
 	}
 	localized := *l
+	localized.LessonRevision, localized.Steps = l.En.LessonRevision, l.En.Steps
 	localized.Title, localized.Goal = l.En.Title, l.En.Goal
 	localized.Lesson, localized.Starter = l.En.Lesson, l.En.Starter
 	localized.Hints = l.En.Hints

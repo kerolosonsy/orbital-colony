@@ -203,6 +203,51 @@ input[type="checkbox"] { accent-color: var(--regolith); }
   animation: rise .45s var(--ease);
 }
 .hint code { color: var(--star); }
+.lesson-nav { position: sticky; top: -16px; z-index: 2; padding-block: 10px; background: var(--sheet); border-bottom: 1px solid var(--rule); }
+.lesson-panel { scroll-padding-block-start: var(--lesson-nav-offset, 0px); }
+.lesson-code, .lesson-step-title { scroll-margin-block-start: 12px; }
+.lesson-step-select { width: 100%; min-width: 0; min-height: 44px; padding: 6px 10px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--ink-2); color: var(--paper); font: inherit; }
+.lesson-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-block: 10px; }
+.lesson-controls .tool, .lesson-choice, .lesson-presets .tool { min-height: 44px; height: auto; padding-block: 8px; white-space: normal; }
+.lesson-position { font: 600 15px var(--cond); font-variant-numeric: tabular-nums; }
+.lesson-block { min-width: 0; margin-block: 18px 24px; overflow-wrap: anywhere; }
+.lesson-block + .lesson-block { border-top: 1px solid var(--rule); padding-top: 14px; }
+.lesson-note { margin-block: 12px; }
+.lesson summary { cursor: pointer; color: var(--regolith); padding-block: 8px; }
+.lesson-model-label, .lesson-growth-label, .lesson-reserved-label { font-size: 13px; }
+.lesson-growth-label { color: var(--warn); }
+.lesson .lesson-code { padding-inline: 0; }
+.lesson-walkthrough .lesson-code { position: relative; max-block-size: min(12rem, 30dvh); overflow: auto; overscroll-behavior: contain; scroll-behavior: auto; }
+.lesson-code-line { display: block; padding-inline: 12px; min-height: 1.65em; }
+.lesson-code-line.current { background: color-mix(in oklab, var(--regolith) 22%, var(--ink)); outline: 1px solid var(--regolith); outline-offset: -1px; }
+.lesson-variables { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 4px 12px; direction: ltr; unicode-bidi: isolate; font: 13px/1.6 var(--mono); }
+.lesson-variables dt, .lesson-variables dd { margin: 0; overflow-wrap: anywhere; }
+.lesson-slice { margin: 12px 0; }
+.lesson-slice figcaption { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; margin-bottom: 6px; }
+.lesson-summary-part { display: inline-flex; align-items: baseline; gap: 4px; }
+.lesson-summary-go { font-family: var(--mono); }
+.lesson-cells { display: flex; flex-wrap: wrap; gap: 5px; direction: ltr; unicode-bidi: isolate; }
+.lesson-cell { min-width: 42px; text-align: center; border: 1px solid var(--rule-strong); background: var(--ink-2); border-radius: var(--r); }
+.lesson-cell span, .lesson-cell b { display: block; padding: 3px 8px; font: 14px/1.4 var(--mono); }
+.lesson-cell .lesson-index { font-size: 11px; color: var(--paper-2); border-bottom: 1px solid var(--rule); }
+.lesson-cell.reserved { border-style: dashed; background: transparent; }
+.lesson .lesson-output { margin-block: 4px 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.lesson-output-label { font-weight: 600; }
+.lesson-panic, .lesson-limit { color: var(--err); overflow-wrap: anywhere; }
+.lesson-panic { direction: ltr; unicode-bidi: isolate; }
+.lesson-question { min-width: 0; padding: 10px; margin: 12px 0; border: 1px solid var(--rule); }
+.lesson-question legend { padding-inline: 4px; }
+.lesson-choice { display: block; width: 100%; text-align: start; margin-block: 8px; overflow-wrap: anywhere; }
+.lesson-choice:disabled { opacity: 1; }
+.lesson-choice.correct { border-color: var(--ok); }
+.lesson-choice.incorrect { border-color: var(--err); }
+.lesson-feedback { font-weight: 500; }
+.lesson-answer-label { display: block; font-size: 12px; margin-block-start: 4px; }
+.lesson-answer-explanation { display: block; margin-block-start: 4px; }
+.lesson-feedback:empty { display: none; }
+.lesson-presets { display: flex; flex-direction: column; gap: 6px; }
+.lesson-presets .tool { font: 12px/1.6 var(--mono); direction: ltr; unicode-bidi: isolate; justify-content: center; }
+.lesson-presets [aria-pressed="true"] { border-color: var(--regolith); background: var(--ink-2); }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
 
 /* ---------- editor ---------- */

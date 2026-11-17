@@ -11,6 +11,7 @@ import (
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: surveyLessonEnglish,
 			Title: "Crystal Log",
 			Goal:  "Measure every crystal and report their sizes in order in one slice",
 			Lesson: `# Slices: A List That Grows 📋
@@ -26,17 +27,19 @@ fmt.Println(sizes[0])      // 5  ← Counting starts at 0
 ~~~
 
 - ~[]int~ means "a slice of int."
-- ~append~ returns a **new slice value**, so assign it back: ~sizes = append(sizes, x)~.
+- ~append~ returns an **updated slice value**, which may reuse its backing array. Keep its result, for example: ~sizes = append(sizes, x)~.
 - ~len(s)~ tells you how many elements it holds.
-- ~s[i]~ retrieves element i. If i is outside the bounds, the program **panics** (panic: index out of range).
+- ~s[i]~ retrieves element i. The index must satisfy 0 <= i < len(s). Outside those bounds, the program **panics** (panic: index out of range).
 
 ## Other ways to create a slice
 
 ~~~go
 nums := []int{4, 8, 15}     // With initial values
 grid := make([]int, 10)     // 10 zeros, ready to use: grid[3] = 7
-part := nums[1:3]           // [8 15]: from 1 up to, but not including, 3
+room := make([]int, 0, 10) // Length 0, capacity 10; append adds real elements
 ~~~
+
+cap is available room, not the number of elements. Appending after make([]int, 10) adds after the ten zeros; it does not fill them. A nil slice can be appended to. Slice sharing is explained in 6-2. The starter already stores the first observation.
 
 ## Your mission
 Measure the 8 crystals from left to right, store their sizes in a slice, and report it to base.`,
@@ -56,11 +59,9 @@ func main() {
 	// Continue to the end of the row, then send all of sizes with colony.Report
 }
 `,
-			Hints: []string{
-				"Loop 8 times: Measure and append, then Move (except on the last iteration).",
-				"~colony.Report(sizes)~ sends the whole slice at once, looking like ~[3 7 1 ...]~.",
-			},
+			Hints: []string{"The log stores ordered observations, rather than their sum. Remember the difference between printing the log and sending it to base.", "Before repeating a step, check what the starter has already recorded. Give each observation exactly one place in the log.", "Check the append statement: are you keeping its result? Check the report value too: is it the log itself, rather than its length or its last reading?"},
 		},
+		LessonRevision: 1, Steps: surveyLessonArabic,
 		ID: "6-1-survey", Chapter: 6, Title: "سجل الكريستال",
 		Goal: "قيس كل الكريستال وابعت أحجامهم بالترتيب في slice واحدة",
 		Par:  15, Gold: 15, MaxTicks: 60,
@@ -100,10 +101,7 @@ func main() {
 	// كمّل لحد آخر الصف، وبعدين ابعت sizes كلها بـ colony.Report
 }
 `,
-		Hints: []string{
-			"حلقة 8 لفّات: Measure وappend، وبعدين Move (إلا آخر لفّة).",
-			"~colony.Report(sizes)~ بتبعت الـ slice كلها مرة واحدة، شكلها هيبقى ~[3 7 1 ...]~.",
-		},
+		Hints: []string{"السجل بيحفظ ملاحظات مرتبة؛ مش مجموع الأحجام. افتكر الفرق بين طباعة السجل وإرساله للقاعدة.", "قبل ما تكرر أي خطوة، راجع إيه اللي اتسجل بالفعل في الـstarter. خلي لكل ملاحظة مكان واحد في السجل.", "راجع السطر اللي بيستخدم append: هل محتفظ بالناتج؟ وراجع قيمة التقرير: هل هي السجل نفسه بدل طوله أو آخر قراءة؟"},
 		Lesson: `# Slices: قايمة بتكبر 📋
 
 لحد دلوقتي كل متغير كان فيه قيمة واحدة. بس لو عايز تفتكر 8 أحجام؟ أو 1000؟ هنا بنستخدم **slice**.
@@ -117,17 +115,19 @@ fmt.Println(sizes[0])      // 5  ← العدّ من 0
 ~~~
 
 - ~[]int~ معناها "slice من int".
-- ~append~ بترجّع slice **جديدة**، فلازم تحطها في نفس المتغير: ~sizes = append(sizes, x)~.
+- ~append~ بترجّع **وصف slice محدث**، وممكن تستخدم نفس مخزن العناصر. احتفظ بالناتج، مثلاً: ~sizes = append(sizes, x)~.
 - ~len(s)~ بيقولك فيها كام عنصر.
-- ~s[i]~ بيجيبلك العنصر رقم i. ولو i برا الحدود، البرنامج **بيقع** (panic: index out of range).
+- ~s[i]~ بيجيبلك العنصر رقم i. ولازم 0 <= i < len(s). لو i برا الحدود، البرنامج **بيقع** (panic: index out of range).
 
 ## طرق تانية تعمل بيها slice
 
 ~~~go
 nums := []int{4, 8, 15}     // بقيم جاهزة
 grid := make([]int, 10)     // 10 أصفار جاهزين: grid[3] = 7
-part := nums[1:3]           // [8 15]: من 1 لحد قبل 3
+room := make([]int, 0, 10) // الطول صفر والسعة 10؛ append بتضيف عناصر
 ~~~
+
+cap هي المساحة المتاحة، مش عدد العناصر. لو عملت append بعد make([]int, 10)، الإضافة تيجي بعد العشرة أصفار، مش مكانهم. ينفع تعمل append لـslice nil. مشاركة المخزن هنتكلم عنها في 6-2. الـstarter سجل أول قراءة بالفعل.
 
 ## المهمة
 قيس الكريستال الـ 8 بالترتيب من الشمال لليمين، واحفظهم في slice، وابعتها للقاعدة.`,
