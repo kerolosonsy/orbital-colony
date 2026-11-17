@@ -1,6 +1,6 @@
 # Chapter 6 lesson storyboards — review draft
 
-Short bilingual lesson content for branch `lessons-ch6`. Mission setups, starters, checks, thresholds, and APIs stay unchanged. 6-1 revision 2 is approved; 6-2 and 6-3 now use the same short six-step format.
+Short bilingual lesson content for chapter 6. Mission setups, starters, checks, thresholds, and APIs stay unchanged. 6-1 revision 2 is approved; 6-2 to 6-5 use the same short six-step format.
 
 ## Style rules
 
@@ -9,7 +9,7 @@ Short bilingual lesson content for branch `lessons-ch6`. Mission setups, starter
 - One short analogy, then show code and let the player manipulate data. One idea per visual. No paragraph should exceed three lines at 290px; split sentences into short paragraphs where needed. Frame captions: at most about eight words.
 - Mission → Idea → Try it → Watch out → Think & check → Your turn. At most two one-line warnings, a short prose plan, three mission questions, one next action. Wrong picks reveal only their feedback until the correct pick or two wrong picks on that question.
 - Egyptian Arabic first, short sentences, English technical terms. English has the same meaning and depth. Label invented values as illustrative. No free-form interpreter, complete mission loop, or last-move condition supplied as code.
-- 6-2 and 6-3 below follow these rules. The older 6-4 and 6-5 storyboards remain unchanged.
+- All chapter 6 sections below follow these rules.
 
 ## Reading and implementation conventions
 
@@ -420,384 +420,234 @@ Real stdout:
 0 false 2
 ```
 
-## 6-4 — ترتيب المخزون (`6-4-stock-order`)
+## 6-4 — ترتيب المخزون (`6-4-stock-order`) · revision 1
 
-**Teaching objective:** interpret comparator signs; preserve item identity while ordering; make ties explicit. Owns `sort.comparator`, `sort.identity-ties`. Links to `slice.sort`, `slice.sharing`, `slice.basics`, and function values/closures from `5-5-command-table`; these are not introduced again.
+**Word count:** Arabic 271; English 316, including titles, captions, questions and feedback, sandbox controls, and hints; excluding Go code. The tests count screen-reader card labels too.
 
-**Starter audit:** only prints one `colony.Measure()` result at the starting tile. That measurement has already cost one tick but is **not saved** in a variable. It does not build arrays, move, sort, or report. The player may revise that debugging statement to retain its value or remove it as part of their own implementation; this storyboard changes no starter. Width is 6–10, must come from `WorldSize`; first and last sizes tie by construction. No structs required. Exactly one correct report, no successful harvests; `slices.SortFunc` source feature required.
+### المهمة / Mission
 
-### Step `c64.mission-step` — Mission
+**AR:** 1. رتّب المواقع: الحجم الأكبر أولًا، ثم x الأصغر عند التعادل.
+2. اقرأ العرض بـ~colony.WorldSize~ وابعث المواقع بتقرير واحد.
+3. الـstarter طبع قياسًا من غير حفظ؛ كلف tick. ممنوع الحصاد.
 
-#### `c64.mission` · markdown
-**Purpose:** give observable contract, not a comparator implementation.
-**Links (author metadata; render natural titles):** `slice.sort`.
+الذهب: **19 ticks أو أقل**.
 
-**AR:** القاعدة عايزة **المواقع**، مش الأحجام: الحجم الأكبر يسبق، ولو الحجم اتعادل يبقى x الأصغر يسبق. اقرأ عرض الصف من `colony.WorldSize`؛ مش رقم ثابت. ابعت ترتيب المواقع كله بتقرير واحد، من غير حصاد، واستخدم `slices.SortFunc`.
+**EN:** 1. Rank positions: larger sizes first, then smaller x on ties.
+2. Read width with ~colony.WorldSize~; report positions once.
+3. The starter printed an unsaved measurement (one tick); do not harvest.
 
-الـstarter طبع قراءة واحدة بس؛ مقاسَتش ببلاش، ومتحفظتش في متغير. خد قرارك هتحتفظ بالقراية دي إزاي قبل ما تبدأ تسجيلك. راجع علاقة الحجم بالموقع من «الترتيب والمواقع» في 6-2.
+Gold: **19 ticks or fewer**.
 
-### Step `c64.idea-step` — Idea
+### الفكرة / Idea — walkthrough
 
-#### `c64.idea` · markdown
-**Purpose:** introduce comparator as a consistent decision rule; connect to existing function values.
-**Links (author metadata; render natural titles):** `5-5-command-table`, `slice.sort`.
+**AR:** المقارنة بتقول مين يسبق: السالب يقدّم a، والصفر تعادل، والموجب يأخّره.
 
-**AR:** تخيل موظف بينظم دور خدمة. كل ما تقوله «مين يسبق من الاتنين دول؟» محتاج قاعدة واحدة واضحة، مش إجابة تتغير كل مرة.
+المثال أسماء ثم أعمار؛ قاعدة المهمة مختلفة.
 
-الـ**comparator** دالة مقارنة بترجع int: **سالب** لو a تسبق b، **صفر** لو متساويين حسب القاعدة، **موجب** لو a تيجي بعد b. مش بترجع true أو false. `SortFunc` بتاخد الدالة كقيمة، زي درس لوحة الأوامر (5-5)، وبتعدّل ترتيب عناصر الـslice نفسها زي «الترتيب والمواقع».
+**EN:** A comparator returns a sign: negative puts a first, zero ties, positive puts it later.
 
-**Optional AR:** صفر مش معناه «رتبهم حسب ذوقك»؛ معناه القاعدة بتعتبرهم متساويين. لازم القاعدة تبقى متسقة، والعنصر مع نفسه يرجع صفر. `SortFunc` مش بتضمن الحفاظ على ترتيب العناصر اللي المقارنة اعتبرتها متساوية. قاعدة التعادل الواضحة هي اللي بتحدد الأول هنا، مش الاعتماد على مصادفة ترتيب سابق.
+This toy sorts names, then ages; the mission differs.
 
-### Step `c64.example-step` — Example
-
-#### `c64.comparator-trace` · walkthrough
-**Purpose:** small one-key ascending comparison, not a mission multi-key comparator.
-
-**AR:** في صندوق تذاكر تدريب، عايزين الأرقام الأصغر الأول. توقّع النتيجة قبل «التالي». هنا بنشوف معنى علامة المقارنة؛ المهمة ليها قاعدة مختلفة إنت هتكتبها.
-
-<!-- go-example id=e64-comparator imports=fmt,slices outcome=ok -->
+<!-- go-example id=e64-sort-sign-late imports=cmp,fmt,slices outcome=ok -->
 ```go
-tickets := []int{8, 3, 5}
-before := func(a, b int) int {
-    if a < b { return -1 }
-    if a > b { return 1 }
-    return 0
+type Player struct { name string; age int }
+players := []Player{{"Mira", 8}, {"Ari", 12}, {"Ari", 9}}
+before := func(a, b Player) int {
+	if byName := cmp.Compare(a.name, b.name); byName != 0 {
+		return byName
+	}
+	return cmp.Compare(a.age, b.age)
 }
-fmt.Println(before(3, 8), before(8, 3), before(5, 5))
-slices.SortFunc(tickets, before)
-fmt.Println(tickets)
+fmt.Println(before(players[1], players[0]))
+fmt.Println(before(players[1], players[2]))
+slices.SortFunc(players, before)
+fmt.Println(players)
 ```
 
-| Frame | Highlight | Variables / slice view | Cumulative output | AR caption |
-|---|---|---|---|---|
-| 0 | before 1 | — | — | «قبل التذاكر.» |
-| 1 | 1 | tickets=[8 3 5] | — | «ترتيب البداية.» |
-| 2 | 2–6 declaration | before=function value; no body executed | — | «تعريف دالة، مش نداء ليها.» |
-| 3 | 7 first call →3 | a=3,b=8; result=-1; tickets unchanged | — | «3 يسبق 8.» |
-| 4 | 7 second call →4 | a=8,b=3; first condition false; result=1 | — | «8 ييجي بعد 3.» |
-| 5 | 7 third call →5 | a=5,b=5; both conditions false; result=0 | — | «المتساوي مع نفسه صفر.» |
-| 6 | 7 after calls | a/b out of scope | `-1 1 0` | «دي نتائج النداءات اللي طلبناها صراحة.» |
-| 7 | 8 after library call | tickets=[3 5 8]; before unchanged | `-1 1 0` | «SortFunc نداء واحد في الرسم؛ مش بندّعي ترتيب نداءات Go الداخلية.» |
-| 8 terminal | 9 | unchanged | `-1 1 0\n[3 5 8]` | «الترتيب بقى تصاعدي.» |
+| Frame | AR caption | EN caption |
+|---|---|---|
+| 0 | قبل الكروت. | Before the cards. |
+| 1 | نوع بيانات للتجربة. | An illustrative type. |
+| 2 | أسماء وأعمار للتوضيح. | Illustrative names and ages. |
+| 3 | قاعدة المقارنة محفوظة. | Comparator saved. |
+| 9 | Ari يسبق Mira؛ النتيجة -1. | Ari precedes Mira; result -1. |
+| 10 | الاسم اتعادل؛ العمر حسمها. | Names tie; age decides. |
+| 11 | SortFunc رتّبت القائمة. | SortFunc reorders the slice. |
+| 12 | الأسماء ثم الأعمار. | Names, then ages. |
 
-#### `c64.identity-trace` · walkthrough
-**Purpose:** distinguish position IDs from the data they identify without supplying sorting of positions.
+#### Verified e64-sort-sign-late
 
-**AR:** رقم بطاقة الرف غير الكلام المكتوب عليها. السجل ده أسماء رفوف، وورقة تانية فيها أرقام بطاقاتهم. لما أول رقم في الورقة يبقى 2، ده مش معناه قيمة الرف 2؛ دي هويته. توقّع أنهي اسم هنقراه.
+Real stdout:
 
-<!-- go-example id=e64-identity imports=fmt outcome=ok -->
+```text
+-1
+1
+[{Ari 9} {Ari 12} {Mira 8}]
+```
+
+### جرّب / Try it
+
+**AR:** بدّل اتجاه الحجم وكسر التعادل؛ الكروت توضيحية والتعادلات مميزة.
+**EN:** Toggle size direction and tie-breaking; cards are illustrative and ties are highlighted.
+
+**Sandbox labels:** illustrative sizes, size direction, ascending/descending, tie-break on/off, reset. Each card has an accessible position and size label. Sample sizes by position: 3, 5, 3, 5, 2.
+
+### خد بالك / Watch out
+
+**AR:** خلي نتيجة المقارنة متسقة: سالب أو صفر أو موجب. ~slices.SortFunc~ مش stable؛ ~slices.SortStableFunc~ بتحافظ على ترتيب العناصر المتعادلة.
+
+~Measure~ و~Move~ (حتى لو فشلت) كل واحدة tick.
+
+~WorldSize~ و~Report~ والحساب بلا ticks. الحصاد tick وممنوع هنا.
+
+**EN:** Keep comparator results consistent: negative, zero, or positive. ~slices.SortFunc~ is not stable; ~slices.SortStableFunc~ keeps equal items in input order.
+
+~Measure~, ~Move~ (even when it fails), and ~Harvest~ each cost one tick.
+
+~WorldSize~, ~Report~, and computation cost none.
+
+### فكّر واختبر / Think & check
+
+**Plan AR:** قيس الكل → احتفظ بالقراءات → رتّب المواقع → ابعت تقريرًا واحدًا.
+**Plan EN:** Measure all → keep the readings → rank positions → send one report.
+
+1. **AR:** -1 معناها إيه؟ · a يسبق / تعادل / a يتأخر. **الإجابة:** a يسبق.
+   **Feedback:** السالب يقدّم a. / الصفر يعني تعادل. / الموجب يأخر a.
+   **EN:** What does -1 mean? · a comes first / Tie / a comes later. **Answer:** a comes first.
+   **Feedback:** Negative puts a first. / Zero means a tie. / Positive puts a later.
+
+2. **AR:** هل ~SortFunc~ تحفظ ترتيب المتعادلين؟ · دايمًا / مش مضمون / بس مع أرقام. **الإجابة:** مش مضمون.
+   **Feedback:** SortFunc مش stable. / صح؛ SortStableFunc تحفظ ترتيبهم. / نوع العنصر مش فارق هنا.
+   **EN:** Does ~SortFunc~ keep tied items in input order? · Always / Not guaranteed / Only for numbers. **Answer:** Not guaranteed.
+   **Feedback:** SortFunc is not stable. / Right; SortStableFunc keeps their order. / The element type does not matter here.
+
+3. **AR:** تقرير المهمة يبعت إيه؟ · أحجام / مواقع / طباعة. **الإجابة:** مواقع.
+   **Feedback:** المهمة عايزة المواقع. / صح؛ ابعت المواقع المرتبة. / الطباعة للتصحيح.
+   **EN:** What does the mission report? · Sizes / Positions / Printed output. **Answer:** Positions.
+   **Feedback:** The mission needs positions. / Right; report ranked positions. / Printing is for debugging.
+
+### دورك / Your turn
+
+**AR:** افتح الـstarter، عدّل حاجة صغيرة، وشغّل المهمة وراجع التقرير.
+**EN:** Open the starter; make a small change and inspect its report.
+
+**Hints AR:** فكرة: المقارنة دالة قرار؛ نتيجتها تحدد مين يسبق. · بنية: افصل قراءات الحجم عن هويات المواقع قبل اختيار ما ستفرزه. · محدد: راجع معنى نتيجة comparator في ~slices.SortFunc~: السالب والصفر والموجب.
+**Hints EN:** Concept: a comparator is a decision rule; its result says which item comes first. · Structure: separate measured sizes from position identities before choosing what to sort. · Specific: review comparator results in ~slices.SortFunc~: negative, zero, and positive.
+
+## 6-5 — شبكة الحرارة (`6-5-heat-grid`) · revision 1
+
+**Word count:** Arabic 311; English 320, including titles, captions, questions and feedback, sandbox controls, and hints; excluding Go code. The tests count screen-reader cell labels too.
+
+### المهمة / Mission
+
+**AR:** دي lab: زر Run بيشغّل tests للدوال، مش حركة للدرون. كمّل ~OverlayHeat~ و~ThroughHeat~ و~FlipHeat~؛ مفيش ~Report~ ولا ticks.
+**EN:** Lab: Run tests, not drones. Implement ~OverlayHeat~, ~ThroughHeat~, and ~FlipHeat~; no ~Report~ or ticks.
+
+### الفكرة / Idea — walkthrough
+
+**AR:** الـ2D slice صفوف جوه slice. في ~grid[r][c]~، الأول row والتاني column؛ ~len(grid)~ للصفوف و~len(grid[0])~ للأعمدة.
+**EN:** 2D slices hold rows. In ~grid[r][c]~, row comes first, then column; ~len(grid)~ counts rows and ~len(grid[0])~ counts columns.
+
+<!-- go-example id=e65-grid-copy-late imports=fmt,slices outcome=ok -->
 ```go
-labels := []string{"ink", "paper", "tape"}
-order := []int{2, 0, 1}
-id := order[0]
-fmt.Println(id, labels[id])
-fmt.Println(labels)
+grid := make([][]int, 2)
+grid[0] = make([]int, 3)
+grid[1] = make([]int, 3)
+grid[0][1] = 4
+grid[1][2] = 5
+outer := slices.Clone(grid)
+outer[0][1] = 9
+rows := [][]int{slices.Clone(grid[0]), slices.Clone(grid[1])}
+rows[0][1] = 7
+fmt.Println(len(grid), len(grid[0]), grid[1][2])
+fmt.Println(grid[0][1], outer[0][1], rows[0][1])
 ```
 
-Frames: 0 before 1, no state/output, caption «قبل الرفوف». 1 line 1, labels=[ink paper tape] in A, caption «كل اسم له رقم ثابت في الدفتر». 2 line 2, order=[2 0 1] in B, labels unchanged, caption «ورقة أرقام، مش نسخة من الأسماء». 3 line 3, id=2, highlight order[0] then labels index 2, caption «أول بطاقة بتشير للرف رقم 2». 4 line 4, stdout `2 tape`, caption «الهوية 2 والاسم tape». 5 terminal line 5, stdout `2 tape\n[ink paper tape]`, unchanged state, caption «ترتيب دفتر الأسماء متغيرش». Output before frame 4 is empty. No ordering algorithm occurs in this example.
+| Line | AR caption | EN caption |
+|---|---|---|
+| 0 | قبل الشبكة. | Before. |
+| 1 | اتعمل مكان لصفين. | Two rows. |
+| 2 | الصف صفر بقى 3 خانات. | Row 0: three cells. |
+| 3 | الصف الأول بقى 3 خانات. | Row 1: three cells. |
+| 4 | [0][1] بقت 4. | Cell [0][1] becomes 4. |
+| 5 | [1][2] بقت 5. | Cell [1][2] becomes 5. |
+| 6 | نسخنا outer بس. | Outer slice cloned. |
+| 7 | الشبكتين شافوا 9. | Both show 9. |
+| 8 | نسخنا كل صف لوحده. | Clone each row. |
+| 9 | النسخة بقت 7 لوحدها. | Copy row now has 7. |
+| 10 | عدد الصفوف والأعمدة، ثم خلية. | Rows, columns, cell. |
+| 11 | الخرج يوضح الصف المشترك والمنسوخ. | Shared 9; copy 7. |
 
-### Step `c64.watch-step` — Watch out
+#### Verified e65-grid-copy-late
 
-#### `c64.mistakes` · markdown
-**Purpose:** prevent bool comparator, unstable ties, and accidental identity loss.
-**Links (author metadata; render natural titles):** `5-5-command-table`, `c64.identity-trace`, `slice.sharing`.
+Real stdout:
 
-**AR:** **الافتراض:** «السؤال مين يسبق، فهرجع bool.» → **الواقع:** SortFunc مستنية int له 3 حالات. → **ليه؟** محتاجة تفرق قبل/متساوي/بعد. → **فكّر في الإصلاح:** حدد معنى العلامة قبل كتابة المقارنة.
-
-**الافتراض:** «حجمين متساويين؟ أرجع صفر وخلاص وهما يفضلوا بالترتيب المطلوب.» → **الواقع:** كده لسه ماقلتَش مين يسبق حسب الموقع، وSortFunc مش stable. → **ليه؟** التعادل في الحجم مش كل قاعدة المهمة. → **فكّر في الإصلاح:** اختبر اتنين متساويين في الحجم واسأل عن المعيار التاني؛ إنت اللي هتربطه بالدالة.
-
-**الافتراض:** «أرتب القيم وأعتبر index الجديد مكانها القديم.» → **الواقع:** ضيّعت علاقة الهوية بالقيمة. → **ليه؟** index موضع جوه سجل، مش إثبات موقع في العالم. → **فكّر في الإصلاح:** ارجع لـ«مشاركة مخزن العناصر» و«بطاقة الرف وقيمته» وحدد إيه اللي هيتحرك وإيه اللي لازم يفضل مرجع ثابت.
-
-**Optional AR:** طرح عددين عشان تطلع علامة المقارنة ممكن يعمل overflow لو الأعداد كبيرة. المثال استخدم شروط واضحة بدل تعميم اختصار الطرح. والـclosure تقدر تقرا بيانات برّه جسمها زي ما شوفنا في درس لوحة الأوامر (5-5)؛ ده مفيد لو عنصر الترتيب هو هوية، لكن تصميم المقارنة في المهمة لسه عليك.
-
-#### `c64.ticks` · markdown · Optional
-**Purpose:** apply scan cost to variable-width toy data, explicitly accounting for starter debugging.
-**Links (author metadata; render natural titles):** `ticks.actions`.
-
-**AR:** تجربة رفوف من 4 علامات: قراءة واحدة لكل علامة و3 حركات بينهم = **7 ticks**. المقارنة والترتيب في الذاكرة مش أوامر درون. لو قريت أول علامة للتجربة وبعدين تجاهلت القراية وبدأت قراءة الكل من جديد، هتزود tick من غير معلومة جديدة.
-
-ده تقدير، مش عرض خريطتك. افترض البداية عند أول علامة، مفيش حصاد ولا أوامر زيادة، وتقرير واحد بعد الحساب. راجع «تكلفة أوامر الدرون»، وراجع `fmt.Println(colony.Measure())` في الـstarter قبل حساب قراءاتك.
-
-**Author tick audit:** live width n=6..10, one-read-per-tile cost `2n-1`=11..19; Par=Gold=19 and MaxTicks=50 are fixed. Do not present 19 as mandatory actual cost or recompute star thresholds as `2n-1`. Source: `ch06.go:510–665`.
-
-### Step `c64.check-step` — Check
-
-#### `c64.q-sign` · question
-**Purpose:** assess sign semantics independently of mission values.
-
-**AR prompt:** في قاعدة تدريب بتقول «a يسبق b»، أنهي نتيجة مناسبة من comparator؟
-
-Options: A «-1»; B «0»; C «1». **Correct: A.**
-
-Feedback A: «صح؛ السالب بيقول a يسبق b، ومش لازم يكون -1 بالذات.»
-
-Feedback B: «الصفر بيقول القاعدة بتعتبرهم متساويين، مش إن a يسبق.»
-
-Feedback C: «الموجب بيحط a بعد b؛ اعكس تصورك للعلامة.»
-
-#### `c64.q-bool` · question
-**Purpose:** recognize an intentional compile failure rather than silently fix the mission comparator.
-
-**AR prompt:** الكود ده هيرتب التذاكر ولا فيه مشكلة قبل التشغيل؟
-
-<!-- go-example id=e64-bool-error imports=fmt,slices outcome=compile-error -->
-```go
-tickets := []int{8, 3}
-slices.SortFunc(tickets, func(a, b int) int {
-    return a < b
-})
-fmt.Println(tickets)
+```text
+2 3 5
+9 9 7
 ```
 
-Options: A «هيترتب تصاعدي»; B «Compile error: رجع bool مكان int»; C «Panic بعد أول مقارنة». **Correct: B.**
+### جرّب / Try it
 
-Feedback A: «ده ينفع كشكل مقارنة في APIs تانية، لكن مش عقد SortFunc هنا.»
+**AR:** اختار خلية وشوف ~grid[r][c]~؛ بدّل النسخ وعدّل النسخة.
+**EN:** Select a cell for ~grid[r][c]~; change clone mode and edit the copy.
 
-Feedback B: «أيوه؛ قبل التشغيل، نوع النتيجة مش النوع المكتوب للدالة.»
+**Sandbox labels:** illustrative grid, clone outer only, clone each row, edit copy, reset, Original, Copy. The selected row and column headers highlight r and c. Sample grid: [3 7 2] / [8 6 4].
 
-Feedback C: «المشكلة معروفة وقت البناء، فمش هنوصل لنداء الدالة أصلًا.»
+### خد بالك / Watch out
 
-#### `c64.q-tie` · question
-**Purpose:** assess explicit tie rule without the code that enforces it.
+**AR:** ~grid[r][c]~: row ثم column. ~slices.Clone(grid)~ سطحي؛ الصفوف مشتركة.
+**EN:** ~grid[r][c]~: row, then column. ~slices.Clone(grid)~ is shallow; rows stay shared.
 
-**AR prompt:** بطاقتين في تمرين تنظيم: نفس الأولوية، وأرقامهما 7 و2. القاعدة المكتوبة: الأولوية أولًا، وبعدها الرقم الأصغر. هل مساواتهما في المقارنة كفاية لضمان ظهور 2 الأول مع SortFunc؟
+### فكّر واختبر / Think & check
 
-Options: A «أيوه، المساواة كفاية»; B «لأ؛ لسه لازم المقارنة تعبر عن فرق الرقم»; C «الترتيب ثابت لو حطيناهم في map». **Correct: B.**
+**Plan AR:** الشكل → العملية → نتيجة مستقلة أو error.
+**Plan EN:** Shape → operation → independent result or error.
 
-Feedback A: «المساواة تجاهلت المعيار التاني، وSortFunc مش بتضمن الحفاظ على ترتيب المتساويين.»
+**Contract AR:** OverlayHeat بتجمع خانات لشبكتين نفس الشكل.
 
-Feedback B: «صح؛ القاعدة ذات معيارين لازم تميزهم لما المعيار الأول يتعادل.»
+كل خانة في ThroughHeat مجموع ضرب صف في عمود؛ أعمدة A = صفوف B.
 
-Feedback C: «map مش بتضمن ترتيب range. تغيير المخزن مش بديل عن قاعدة مقارنة كاملة.»
+FlipHeat بتبدّل المحاور.
 
-### Step `c64.turn-step` — Your turn
+المدخل الفاضي أو المتعرج أو أبعاده غلط يرجّع error؛ وممنوع تعدّل المدخلات.
 
-#### `c64.turn` · markdown
-**Purpose:** one preparatory identity decision, not initialization or comparator code.
+صفوف الناتج مستقلة؛ حتى 1×1 والصف أو العمود الواحد صالحين.
+**Contract EN:** OverlayHeat adds matching cells.
 
-**AR:** قبل ما تكتب SortFunc، اكتب تعليق يحدد «العنصر اللي هرتّبه بيمثل إيه؟». جرّب تفسير إجابتك على اتنين حجمهم متساوي؛ لو الموقع الأصلي اختفى من تفكيرك، ارجع لنموذج الهوية.
+Each ThroughHeat cell sums row-by-column products; columns(A)=rows(B).
 
-### Three hints
+FlipHeat swaps axes.
 
-1. **Concept — `c64.h1`:** «القاعدة بتطلب مواقع مرتبة، مش قايمة أحجام مرتبة. اسأل نفسك مين صاحب كل قيمة.»
-2. **Structure — `c64.h2`:** «اختبر قرار المقارنة في حالتين على ورقة: حجمين مختلفين، وحجمين متساويين. هل كل حالة ليها قرار واضح؟»
-3. **Specific — `c64.h3`:** «راجع نوع ناتج comparator ومعنى السالب. لو مثال التعادل عندك بيرجع صفر رغم اختلاف الموقعين، قاعدتك لسه ناقصة.»
+Empty, ragged, or incompatible input returns an error; leave inputs unchanged.
 
-**Leakage review:** no full position-list initialization, collection loop, lookup-based two-key comparator, or combined “compare sizes then subtract positions” recipe. Player chooses storage, obtains measurements without accidental duplication, implements both criteria and identity preservation, and sends exactly one report. The ascending single-key SortFunc example teaches its actual signature; the shelf example never sorts IDs.
+Output rows are independent; 1×1 and row or column vectors are valid.
 
-**Fallback corrections:** remove the complete ranks/order two-key comparator, which nearly implements the mission. Keep function-value links to 5-5 and clarify comparator parameters are slice elements, not automatically sort-internal indices. Preserve variable width, descending size/ascending-x tie contract, no harvesting, exactly one report. Prefer explicit comparisons to general subtraction; say SortFunc is not stable. Explain the discarded starter measurement and fixed 19 target. Replace the old near-complete last hint.
+1. **AR:** في شبكة جرّب، ~grid[1][0]~ كام؟ · 7 / 8 / 6. **الإجابة:** 8.
+   **Feedback:** 7 في [0][1]. / صح؛ row 1 وcolumn 0. / 6 في [1][2].
+   **EN:** In the playground grid, what is ~grid[1][0]~? · 7 / 8 / 6. **Answer:** 8.
+   **Feedback:** 7 is at [0][1]. / Right; row 1, column 0. / 6 is at [1][2].
 
-## 6-5 — شبكة الحرارة (`6-5-heat-grid`)
+2. **AR:** A 2×3 وB 3×4؛ ThroughHeat صالحة؟ · آه؛ 2×4 / لأ / آه؛ 3×3. **الإجابة:** آه؛ 2×4.
+   **Feedback:** صح؛ 3 هو البعد المشترك. / ThroughHeat محتاجة أعمدة A تساوي صفوف B. / 3 هو البعد المشترك، مش الناتج.
+   **EN:** A is 2×3 and B is 3×4; is ThroughHeat valid? · Yes; 2×4 / No / Yes; 3×3. **Answer:** Yes; 2×4.
+   **Feedback:** Right; 3 is the shared dimension. / ThroughHeat needs A's columns to equal B's rows. / 3 is shared, not the output shape.
 
-**Teaching objective:** represent rectangular numeric grids with independently owned rows; reason about valid shapes and three mathematical operations; use the first lab's function/test contract. Owns `grid.shape`, `grid.row-ownership`, `grid.operations`, `lab.contract`. Links to `slice.make-append`/`slice.bounds`, `slice.sharing`, `range.slice`, nested loops in `3-2-full-field`, float64 in `2-2-survey`, and errors/functions in `5-1-functions`/`5-2-storm`/`5-3-fault-log`.
+3. **AR:** نسخت outer وعدّلت خلية؛ إيه اللي يحصل؟ · المصدر يتغير / النسخة بس / Compile error. **الإجابة:** المصدر يتغير.
+   **Feedback:** الصفوف لسه مشتركة. / ده محتاج نسخ كل row. / Go تسمح بالنسخ السطحي.
+   **EN:** Clone the outer slice and edit a cell; what happens? · Source changes / Copy only / Compile error. **Answer:** Source changes.
+   **Feedback:** Rows are still shared. / That needs each row cloned. / Go allows shallow clones.
 
-**Starter audit:** `main.go` already declares `OverlayHeat`, `ThroughHeat`, and `FlipHeat`, returning nil results and descriptive “implement …” errors. `main` is empty. There is no grid allocated or arithmetic implemented. Run invokes tests; no drone traversal or Report is required. Do not ask the player to write tests or insert drone calls. Keep signatures. The lab's supplied hidden tests check rectangularity, operation dimensions, correct numbers, input preservation on success/error, and output-row independence. Tests use relative tolerance 1e-9 with absolute floor 1e-9. No benchmark/bonus/tick target.
+### دورك / Your turn
 
-### Step `c65.mission-step` — Mission + first-lab orientation
+**AR:** شغّل الـstarter، وحدد أول contract فشل، واختار دالة.
+**EN:** Run once; note first failed contract, then choose a function.
 
-#### `c65.mission` · markdown
-**Purpose:** orient to a lab and give the behavioural contract without a solution skeleton.
+**Hints AR:** فكرة: ارسم مصدر خلية ناتجة. · بنية: افصل الشكل عن أبعاد العملية. · محدد: ~slices.Clone(grid)~ يترك الصفوف مشتركة.
+**Hints EN:** Concept: trace one output cell. · Structure: separate shape and dimension checks. · Specific: ~slices.Clone(grid)~ leaves rows shared.
 
-**AR:** المرة دي Run مش هيحرّك درون: دي أول **lab**، يعني تمرين بيتراجع باختبارات. افتح `main.go` وكمّل الدوال الثلاثة اللي موجودة؛ متغيّرش أسماءها أو المدخلات والنواتج. `main` ينفع تفضل فاضية.
 
-`OverlayHeat` تجمع شبكتين خانة بخانة. `ThroughHeat` تعمل ضرب مصفوفات، مش ضرب كل خانتين قصاد بعض. `FlipHeat` تبدّل الصفوف بالأعمدة. كل نتيجة لازم تكون شبكة جديدة، ومدخلاتك تفضل زي ما كانت حتى لو فيه error.
-
-مش مطلوب `colony.Report` ولا اختبارات تكتبها بنفسك. شوف نتيجة كل خطوة في الـConsole؛ الاختبارات هتقولك أنهي شرط لسه ناقص. مفيش سباق ticks في الـlab دي.
-
-### Step `c65.idea-step` — Idea
-
-#### `c65.idea` · markdown
-**Purpose:** introduce slice-of-rows and shape before computation.
-**Links (author metadata; render natural titles):** `2-2-survey`, `5-3-fault-log`, `slice.basics`.
-
-**AR:** تخيل دولاب فيه أرفف، وكل رف شايل صف قراءات. `[][]float64` معناها slice عناصرها صفوف، وكل صف `[]float64`. أول index بيختار الصف، والتاني بيختار العمود. float64 عرفناه في درس مسح المنطقة (2-2)، والصف نفسه هو الـslice اللي عرفناها في «الـslice والعناصر».
-
-الـouter slice بتعد الصفوف؛ هي مش ورقة مستطيلة تلقائيًا. ممكن صف يبقى أقصر من التاني، أو فاضي. **rectangular** يعني كل الصفوف بنفس عدد الأعمدة. ده شرط الشبكة في المهمة، مش شرط كل slice من slices في Go.
-
-**Optional AR:** متقراش أول صف قبل ما تعرف إن فيه صفوف، ومتعتبرش طول أول صف دليل على الباقي. الإدخال الغلط هنا يرجع error مفهوم زي درس سجل الأعطال (5-3)، مش panic. الأرقام السالبة والعشرية صالحة؛ فحص الشكل مش مسح للقيم اللي مش عاجباك.
-
-### Step `c65.example-step` — Example
-
-#### `c65.q-index` · question
-**Purpose:** predict a row/column selection before visual reveal.
-
-**AR prompt:** شبكة تدريب صفوفها `[3 7 2]` وبعدين `[8 6 4]`. الخانة ذات index `[1][0]` قيمتها كام؟
-
-Options: A «7»; B «8»; C «6». **Correct: B.**
-
-Feedback A: «7 في الصف 0 والعمود 1؛ بدّلت ترتيب المؤشرين.»
-
-Feedback B: «صح؛ الصف رقم 1 هو التاني، والعمود 0 أول خانة فيه.»
-
-Feedback C: «6 عند [1][1]. أول عمود رقمه صفر، مش واحد.»
-
-#### `c65.grid-trace` · walkthrough
-**Purpose:** labelled row/column view and lengths, with concrete output.
-
-**AR:** خلينا نشوف نفس لوحة التدريب. خلي عينك على اختيار الصف الأول، وبعده العمود، بدل ما تشوف `[1][0]` كرقم واحد.
-
-<!-- go-example id=e65-grid-index imports=fmt outcome=ok -->
-```go
-board := [][]float64{{3, 7, 2}, {8, 6, 4}}
-fmt.Println(len(board), len(board[0]))
-fmt.Println(board[1][0])
-```
-
-Frames: 0 before line 1, absent state/output, caption «قبل اللوحة». 1 line 1, outer descriptor O len=2, row descriptors point to A=[3 7 2],B=[8 6 4], each len=3; grid row labels 0,1 and column labels 0,1,2; output none; caption «صفين، كل واحد 3 عناصر». 2 line 2, unchanged view with outer length and row-0 length highlighted; stdout `2 3`; caption «عدد الصفوف، وبعدين طول أول صف». 3 terminal line 3, highlight row 1 then cell column 0; stdout `2 3\n8`; caption «اختارنا 8». Capacities are not asserted; no matrix operation was executed.
-
-#### `c65.shallow-trace` · walkthrough · Optional
-**Purpose:** apply `slice.sharing` to row descriptors, exposing shallow outer cloning.
-**Links (author metadata; render natural titles):** `slice.sharing`.
-
-**AR:** فاكر Clone في «مشاركة مخزن العناصر»؟ هناك العناصر كانت int. هنا العنصر نفسه وصف صف. توقّع قبل «التالي»: هل تغيير النسخة هيبان في المصدر؟ خلينا نشوف حدود النسخ السطحي بدل ما نفترض إنه نسخ كل الشبكة.
-
-<!-- go-example id=e65-shallow imports=fmt,slices outcome=ok -->
-```go
-board := [][]float64{{2, 6}, {5, 7}}
-copyBoard := slices.Clone(board)
-copyBoard[0][1] = 9
-fmt.Println(board)
-fmt.Println(copyBoard)
-```
-
-| Frame | Highlight | Variables / grid view | Cumulative output | AR caption |
-|---|---|---|---|---|
-| 0 | before 1 | — | — | «قبل الشبكة.» |
-| 1 | 1 | board outer O → row stores A=[2 6],B=[5 7] | — | «وصفين صفوف جوه outer slice.» |
-| 2 | 2 | copyBoard outer P≠O; P[0]/O[0]→A, P[1]/O[1]→B | — | «الـouter اتنسخت، لكن مخازن الصفوف لأ.» |
-| 3 | 3 | A=[2 9],B=[5 7]; both grids see A | — | «التعديل وصل لنفس الصف المشترك.» |
-| 4 | 4 | unchanged | `[[2 9] [5 7]]` | «المصدر اتغير.» |
-| 5 terminal | 5 | unchanged | `[[2 9] [5 7]]\n[[2 9] [5 7]]` | «Clone للـouter لوحدها مش استقلال شبكة.» |
-
-#### `c65.rows-trace` · walkthrough
-**Purpose:** show independent row allocation on a fixed 2×2 blank board, without a general copy/computation loop.
-
-**AR:** زي أرفف منفصلة: تخصيص الدولاب مش هو تخصيص كل رف. دي لوحة فاضية صغيرة، مش تنفيذ أي دالة من المهمة. توقّع هل تغيير أول صف هيغيّر التاني.
-
-<!-- go-example id=e65-rows imports=fmt outcome=ok -->
-```go
-blank := make([][]float64, 2)
-blank[0] = make([]float64, 2)
-blank[1] = make([]float64, 2)
-blank[0][0] = 7
-fmt.Println(blank)
-```
-
-Frames: 0 before line 1, absent state/output, caption «قبل التخصيص». 1 line 1, O=[nil nil], two nil row descriptors, no inner cells; output none; caption «صفين لسه من غير عناصر». 2 line 2, O[0]→A=[0 0], O[1]=nil, caption «أول رف اتعمل». 3 line 3, O[1]→B=[0 0], A≠B, caption «رف تاني مستقل». 4 line 4, A=[7 0],B=[0 0], caption «التعديل في أول رف بس». 5 terminal line 5, same variables/grid, stdout `[[7 0] [0 0]]`, caption «الصف التاني فضل صفر». No output before frame 5. This contains no loops or dynamic dimensions.
-
-#### `c65.operations-trace` · walkthrough
-**Purpose:** define the mathematics through three separate one-cell examples; no player function implementations.
-
-**AR:** العمليات ليها معاني مختلفة. شوف مثال واحد كل مرة؛ مفيش دالة من دوال مهمتك شغالة هنا.
-
-**Subview A — AR title «جمع خانة بخانة»:** لو شكل الشبكتين واحد، الخانة في الناتج بتجمع القيمتين اللي في نفس المكان. مثال خليتين في أول صف: 1.5 و2.5 ناتجهم 4.
-
-<!-- go-example id=e65-overlay-cell imports=fmt outcome=ok -->
-```go
-left := []float64{1.5, -2}
-right := []float64{2.5, 3}
-fmt.Println(left[0] + right[0])
-```
-
-Frames A: 0 before 1, absent state/output, «قبل القراءات». 1 line 1, left=[1.5 -2], row view columns 0,1, «صف من المصدر الأول». 2 line 2, right=[2.5 3], both rows visible and unchanged, «صف من المصدر التاني». 3 terminal line 3, highlight both index-0 cells, show scalar result=4 separately (not an allocated output grid), stdout `4`, «حسبنا خانة واحدة بس». No output before the final frame.
-
-**Subview B — AR title «صف في عمود»:** ضرب المصفوفات بيجمع نواتج الضرب على البعد المشترك. صف `[1.5 -2 4]` وعمود `[2 0 -1]` يدوا `1.5×2 + (-2)×0 + 4×(-1) = -1`. مش بنضرب خانتين متناظرتين وبس.
-
-<!-- go-example id=e65-dot-cell imports=fmt outcome=ok -->
-```go
-row := []float64{1.5, -2, 4}
-column := []float64{2, 0, -1}
-value := row[0]*column[0] + row[1]*column[1] + row[2]*column[2]
-fmt.Println(value)
-```
-
-Frames B: 0 before 1, absent state/output, «تجربة جديدة». 1 line 1, row stored A=[1.5 -2 4], «ده الصف». 2 line 2, column stored B=[2 0 -1] rendered vertically with indices 0,1,2, «وده العمود». 3 line 3 after expression, value=-1; paired indices highlighted and terms shown as `3 + 0 + (-4)`; stores unchanged, «كل مكان في البعد المشترك ساهم في نفس الخانة». 4 terminal line 4, stdout `-1`, «الناتج لخانة واحدة». The term highlighting is an explanation of the expression, not invented extra Go statement execution.
-
-**Subview C — AR title «Transpose: بدّل المحورين»:** في شبكة 2×3، الخانة [1][0] بتروح لمكان [0][1] في شبكة 3×2. القيمة نفسها مش بتتغير؛ إحداثياتها هي اللي بتتبدّل. ده اسم **transpose**، مش قلب أرقام الصف من الآخر للأول.
-
-**Code:** reuse the exact `e65-grid-index` fragment, with its original three lines and stdout `2 3\n8`; this view adds a **mathematical destination overlay**, not a call to FlipHeat. Frames C: same 0–3 execution as `c65.grid-trace`; at terminal line 3 highlight source [1][0]=8 and an unallocated destination stencil 3×2 with only [0][1] marked 8 and all other cells “not computed”, caption «ده مكان نقل القيمة حسب تعريف العملية؛ لسه مفيش كود بينفذ النقل». No additional output or claim that Go constructed that stencil.
-
-### Step `c65.watch-step` — Watch out
-
-#### `c65.mistakes` · markdown
-**Purpose:** separate shape validation, data mutation, row ownership, and arithmetic misconceptions.
-**Links (author metadata; render natural titles):** `slice.bounds`.
-
-**AR:** **الافتراض:** «أول صف طوله 3، يبقى كل الصفوف كده.» → **الواقع:** كل صف slice مستقلة وممكن طولها يختلف. → **ليه؟** النوع مش بيفرض مستطيل. → **فكّر في الإصلاح:** اثبت صلاحية الشكل كله قبل أي فهرسة تفترض عرض ثابت؛ راجع «حدود الفهرسة».
-
-**الافتراض:** «outer جديدة يبقى الشبكة مستقلة.» → **الواقع:** صفوفها ممكن تشير لنفس مخازن المصدر، أو صفين يشاوروا لنفس المخزن. → **ليه؟** عناصر الـouter أوصاف صفوف. → **فكّر في الإصلاح:** راجع مين مالك عناصر كل صف، مش اسم الشبكة بس.
-
-**الافتراض:** «ThroughHeat ضرب كل قيمة في اللي قصادها.» → **الواقع:** كل خانة ناتجة من صف في عمود ومجموع على البعد المشترك. → **ليه؟** ده تعريف ضرب المصفوفات. → **فكّر في الإصلاح:** ارسم مساهمات خانة واحدة قبل تعميمها بحلقاتك.
-
-**Optional AR:** اكتشاف خطأ بعد ما تغيّر المدخلات مش مقبول. الاختبارات بتراجع إن المدخلات متغيرتش حتى في مسار error. متعالجش اختلاف الأبعاد بقص صفوف أو إضافة أصفار من عندك؛ رجّع خطأ بدل تغيير معنى العملية.
-
-### Step `c65.check-step` — Check
-
-#### `c65.q-shape` · question
-**Purpose:** assess valid rectangular/dimension reasoning.
-
-**AR prompt:** A شكلها 2×3 وB شكلها 3×2، وكل الصفوف سليمة وغير فاضية. أنهي وصف صح؟
-
-Options: A «OverlayHeat وThroughHeat الاتنين صالحين»; B «ThroughHeat صالحة وناتجها 2×2؛ OverlayHeat ترفض اختلاف الشكل»; C «ThroughHeat ناتجها 3×3». **Correct: B.**
-
-Feedback A: «الجمع خانة بخانة محتاج نفس الشكل، و2×3 مختلفة عن 3×2.»
-
-Feedback B: «صح؛ البعد المشترك 3 متوافق، والنتيجة صفوف A في أعمدة B.»
-
-Feedback C: «3 هو البعد اللي بيتجمع عليه، مش أبعاد الناتج. الناتج صفوف A وأعمدة B.»
-
-#### `c65.q-rows` · question
-**Purpose:** assess row sharing without giving a general allocation loop.
-
-**AR prompt:** اتنين صفوف بيشيروا لنفس slice اسمها row. بعد التعديل ده، أنهي طباعة هتحصل؟
-
-<!-- go-example id=e65-shared-rows imports=fmt outcome=ok -->
-```go
-row := []float64{2, 6}
-board := [][]float64{row, row}
-board[0][0] = 9
-fmt.Println(board)
-```
-
-Options: A «`[[9 6] [2 6]]`»; B «`[[9 6] [9 6]]`»; C «Compile error؛ تكرار row ممنوع». **Correct: B.**
-
-Feedback A: «ده كان محتاج مخزنين مستقلين؛ هنا الوصفين بيشوفوا نفس عناصر row.»
-
-Feedback B: «أيوه؛ الكتابة لنفس مخزن العناصر باينة من الصفين. اختلاف الـindex الخارجي مش ضمان الاستقلال.»
-
-Feedback C: «Go بتسمح بالمشاركة؛ استقلال الصفوف شرط المهمة اللي إنت لازم تحققه.»
-
-#### `c65.contract` · markdown
-**Purpose:** complete the mathematical/error contract as short main text plus optional details.
-
-**AR:** قبل الحساب، الشبكة لازم فيها صف واحد على الأقل، وكل صف فيه عمود واحد على الأقل، وكل الصفوف نفس الطول. صف فاضي أو صفوف بأطوال مختلفة يتعاملوا كإدخال غلط في المهمة دي.
-
-OverlayHeat محتاجة نفس عدد الصفوف والأعمدة في المدخلين. ThroughHeat محتاجة **أعمدة A = صفوف B**، والناتج **صفوف A × أعمدة B**. FlipHeat بتحوّل R×C إلى C×R، وتنقل [i][j] إلى [j][i]. دي مواصفات النتيجة؛ ترتيب الفحص والتخصيص والحلقات إنت اللي هتبنيه.
-
-**Optional AR:** الشبكات 1×1 وصف أو عمود واحد صالحين. ارفض nil وصفر صفوف وصفر أعمدة والصفوف غير المتساوية، وارفض الأبعاد غير المناسبة للعملية. استخدم error غير nil برسالة مفهومة؛ النص مش لازم يطابق جملة حرفية. كل ناتج مستقل عن المدخلات، وكل صف مستقل عن باقي صفوف الناتج. مقارنة الأرقام في الاختبارات بسماحية نسبية `1e-9` وبحد أدنى مطلق `1e-9`؛ مش مطلوب منك اكتشاف overflow في float64. دي سماحية فحص، مش طلب تقريب أو تعديل الأرقام بإيدك.
-
-### Step `c65.turn-step` — Your turn
-
-#### `c65.turn` · markdown
-**Purpose:** one concrete first-lab action without a validation/allocation/loop skeleton.
-
-**AR:** افتح `main.go` وشغّل الـstarter زي ما هو مرة. اختار أول فشل ظاهر، واكتب في تعليق شرط واحد في عقد الدالة يفسره. اشتغل على الشرط ده الأول بدل ما تحاول تكتب الدوال كلها مرة واحدة.
-
-### Three hints
-
-1. **Concept — `c65.h1`:** «كل عملية ليها معنى مختلف. ارسم خانة ناتج واحدة واسأل جت منين، قبل ما تفكر في تعميمها.»
-2. **Structure — `c65.h2`:** «افصل في تفكيرك بين صلاحية شكل المدخل وصلاحية الأبعاد للعملية. الاختبار اللي بيقع بيقولك أي وعد لسه متحققش.»
-3. **Specific — `c65.h3`:** «راجع سطر make للـouter وسطر إنشاء كل صف، أو نداء slices.Clone لو استخدمته: النسخ السطحي للـouter بينسخ أوصاف الصفوف، مش عناصرها. تغيير خلية في الناتج لازم ما يغيّرش المصدر ولا أي صف تاني.»
-
-**Tick explanation:** none. Learner text already states “مفيش سباق ticks”. Hide estimate/measured tick widgets here. Run is a lab-test result, not a zero-tick achievement. Successful ordinary hidden checks give three stars; no performance target is invented.
-
-**Hint link metadata:** c65.h3 → `c65.shallow-trace`; display the natural walkthrough title, never the internal ID.
-
-**Leakage review:** player still implements full shape/error checking, operation-specific dimensions, dynamic independent result allocation, all traversal/accumulation/index-transfer loops, and input preservation. Fixed 2×2 blank allocation is not a general nested-loop copy skeleton. Mathematical definitions and one scalar worked calculation are necessary specifications; no general matrix function, triple-loop layout, or exact function-specific fix is given. Existing solved grid-doubling loop is deliberately omitted.
-
-**Fallback corrections:** remove the solved general nested-loop allocation/doubling example and loop-role hint. Keep the complete public function/error contract and all shape cases. Explicitly qualify shallow outer Clone and independent output rows; distinguish transpose from row reversal and matrix multiplication from elementwise multiplication. Do not present calls to unimplemented functions as verified outputs. Preserve first-lab guidance, tolerance, and absence of Report/ticks.
-
-## English learner copy appendix — 6-1 · revision 2
+## English learner copy — 6-1 revision 2
 
 ### Step `c61.v2.mission-step` — Mission
 
@@ -1294,7 +1144,7 @@ Real stderr: empty.
 
 ### Revision-2 sequence fixture and verification
 
-The next author-only fixture verifies the eight Add operations; it is not extra learner code. New chapter-six lesson examples are verified by `TestChapterSixStoryboardExamplesMatchRealGo` in temporary directories.
+The next author-only fixture verifies the eight Add operations; it is not extra learner code. New 6-1 fixtures are verified by `TestSurveyStoryboardExamplesMatchRealGo` in temporary directories outside the worktree.
 
 <!-- go-example id=e61-sequence-v2 imports=fmt outcome=ok -->
 ```go
@@ -1337,4 +1187,3 @@ Real stdout:
 ```
 
 Real stderr: empty.
-
