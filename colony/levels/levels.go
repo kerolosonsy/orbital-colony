@@ -24,33 +24,37 @@ type Chapter struct {
 }
 
 type LevelText struct {
-	Title   string    `json:"title"`
-	Goal    string    `json:"goal"`
-	Lesson  string    `json:"lesson"`
-	Starter string    `json:"starter"`
-	Hints   []string  `json:"hints"`
-	Files   []LabFile `json:"files,omitempty"`
+	LessonRevision int          `json:"lessonRevision,omitempty"`
+	Steps          []LessonStep `json:"steps,omitempty"`
+	Title          string       `json:"title"`
+	Goal           string       `json:"goal"`
+	Lesson         string       `json:"lesson"`
+	Starter        string       `json:"starter"`
+	Hints          []string     `json:"hints"`
+	Files          []LabFile    `json:"files,omitempty"`
 }
 
 type Level struct {
-	Boss      bool       `json:"boss,omitempty"`
-	Deps      []string   `json:"deps,omitempty"`
-	Service   string     `json:"service,omitempty"`
-	CarryFrom string     `json:"carryFrom,omitempty"`
-	Bridge    []int      `json:"bridge,omitempty"`
-	En        *LevelText `json:"en,omitempty"`
-	ID        string     `json:"id"`
-	Chapter   int        `json:"chapter"`
-	Title     string     `json:"title"`
-	Goal      string     `json:"goal"`
-	Lesson    string     `json:"lesson"`
-	Starter   string     `json:"starter"`
-	Hints     []string   `json:"hints"`
-	Par       int        `json:"par"`  // ticks for 2 stars
-	Gold      int        `json:"gold"` // ticks for 3 stars
-	MaxTicks  int        `json:"maxTicks"`
-	Requires  []string   `json:"requires"` // source features, checked by the server
-	Race      bool       `json:"race"`     // build with -race; a detected race fails the mission
+	LessonRevision int          `json:"lessonRevision,omitempty"`
+	Steps          []LessonStep `json:"steps,omitempty"`
+	Boss           bool         `json:"boss,omitempty"`
+	Deps           []string     `json:"deps,omitempty"`
+	Service        string       `json:"service,omitempty"`
+	CarryFrom      string       `json:"carryFrom,omitempty"`
+	Bridge         []int        `json:"bridge,omitempty"`
+	En             *LevelText   `json:"en,omitempty"`
+	ID             string       `json:"id"`
+	Chapter        int          `json:"chapter"`
+	Title          string       `json:"title"`
+	Goal           string       `json:"goal"`
+	Lesson         string       `json:"lesson"`
+	Starter        string       `json:"starter"`
+	Hints          []string     `json:"hints"`
+	Par            int          `json:"par"`  // ticks for 2 stars
+	Gold           int          `json:"gold"` // ticks for 3 stars
+	MaxTicks       int          `json:"maxTicks"`
+	Requires       []string     `json:"requires"` // source features, checked by the server
+	Race           bool         `json:"race"`     // build with -race; a detected race fails the mission
 
 	Setup func(w *sim.World) `json:"-"`
 

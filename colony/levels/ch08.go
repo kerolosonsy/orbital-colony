@@ -11,6 +11,7 @@ import (
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch08CopyEnglish,
 			Title: "The Counter That Does Not Count",
 			Goal:  "Fix the bug: base must receive the actual crystal total",
 			Lesson: `# Go Copies Every Argument 📋
@@ -84,11 +85,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Run the starter first and inspect the printed total. Why is it zero?",
-				"Change the parameter to ~total *int~ and use ~*total += n~ inside the function.",
-				"Pass the address when calling it: ~addHarvest(&total, n)~.",
+				"An ordinary parameter receives a value copy; a pointer refers to an address.",
+				"Inspect the function, its call site, then compare the printed value with storage.",
+				"Check the ~addHarvest~ declaration and its call in the starter.",
 			},
 		},
+		LessonRevision: 1, Steps: ch08CopyArabic,
 		ID: "8-1-copy-bug", Chapter: 8, Title: "العدّاد اللي مبيعدّش",
 		Goal: "صلّح الـ bug: القاعدة لازم تستلم مجموع الكريستال الحقيقي",
 		Par:  15, Gold: 15, MaxTicks: 60,
@@ -138,9 +140,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"شغّل الكود زي ما هو الأول وشوف المجموع اللي اتطبع. ليه صفر؟",
-			"غيّر الـ parameter لـ ~total *int~، وجوه الدالة ~*total += n~.",
-			"وإنت بتنادي الدالة ابعت العنوان: ~addHarvest(&total, n)~.",
+			"الـparameter العادي بياخد نسخة من القيمة، والـpointer بيشاور على عنوان.",
+			"راجع الدالة، مكان استدعائها، وبعدها قارن الرقم المطبوع بالمخزون.",
+			"افحص تعريف ~addHarvest~ وسطر استدعائها في الـstarter.",
 		},
 		Lesson: `# Go بينسخ كل حاجة 📋
 
@@ -191,6 +193,7 @@ addHarvest(&total, n)
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch08CargoEnglish,
 			Title: "Cargo Runs",
 			Goal:  "Store 30 crystal at base. The drone carries only 10 at a time",
 			Lesson: `# Pointer Receivers: State That Stays ⚓
@@ -271,11 +274,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Run it and inspect the Console: \"Not enough cargo space.\" The drone does not realize it is full. Why does ~d.Cargo~ stay zero?",
-				"Compare ~func (d Drone) Load~ with ~func (d *Drone) GoTo~. One works on a copy.",
-				"For more stars: return to base only when full, start with crystal near base, and remember the final Unload!",
+				"A value receiver changes its copy; a pointer receiver can change the original struct.",
+				"Inspect Cargo updates, the capacity check, and the unload timing as separate phases.",
+				"Compare the receiver on ~Load~ with the one on ~GoTo~ in the starter.",
 			},
 		},
+		LessonRevision: 1, Steps: ch08CargoArabic,
 		ID: "8-2-cargo-runs", Chapter: 8, Title: "رحلات الشحن",
 		Goal: "خزّن 30 كريستال في القاعدة. الدرون بيشيل 10 بس في المرة",
 		Par:  120, Gold: 80, MaxTicks: 600,
@@ -348,9 +352,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"شغّله وبص على الـ Console: \"الشحنة مش هتساع\". يعني الدرون مبيعرفش إنه اتملى. ليه ~d.Cargo~ فاضلة صفر؟",
-			"قارن ~func (d Drone) Load~ بـ ~func (d *Drone) GoTo~. واحدة فيهم بتشتغل على نسخة.",
-			"للنجوم: مترجعش للقاعدة غير لما تتملى، وابدأ بالكريستال القريب من القاعدة. وفي الآخر متنساش Unload!",
+			"Value receiver بتغيّر نسختها؛ pointer receiver يقدر يغيّر الـstruct الأصلية.",
+			"راجع تحديث Cargo، وفحص السعة، ووقت التفريغ كخطوات منفصلة.",
+			"قارن receiver بتاعة ~Load~ باللي على ~GoTo~ في الـstarter.",
 		},
 		Lesson: `# Pointer receivers: الحالة اللي بتفضل ⚓
 
@@ -387,6 +391,7 @@ func (d *Drone) Load(n int) {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch08RadarEnglish,
 			Title: "Radar",
 			Goal:  "Use colony.Nearest() to find and harvest every target",
 			Lesson: `# nil: A Pointer to Nothing 📡
@@ -443,11 +448,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Use: ~for p := colony.Nearest(); p != nil; p = colony.Nearest() { ... }~",
-				"Inside the loop: ~goTo(*p)~, then ~colony.Harvest()~. You need goTo from chapter 7.",
-				"Try dereferencing ~*p~ when it is nil to see the panic for yourself. Once is enough 😅",
+				"A nil pointer means the radar found no remaining target; check before reading it.",
+				"Plan a scan phase, a safe-result phase, and a visit phase; repeat after a harvest.",
+				"Inspect the ~Nearest~ call and the ~*p~ print in the starter.",
 			},
 		},
+		LessonRevision: 1, Steps: ch08RadarArabic,
 		ID: "8-3-nil-radar", Chapter: 8, Title: "الرادار",
 		Goal: "استخدم colony.Nearest() عشان تلاقي الأهداف وتحصدها كلها",
 		Par:  80, Gold: 60, MaxTicks: 400,
@@ -479,9 +485,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الشكل: ~for p := colony.Nearest(); p != nil; p = colony.Nearest() { ... }~",
-			"جوه الحلقة: ~goTo(*p)~ ثم ~colony.Harvest()~. محتاج goTo من الفصل 7.",
-			"جرّب تعمل ~*p~ وهي nil عشان تشوف الـ panic بعينك. مرة واحدة كفاية 😅",
+			"المؤشر nil معناه إن الرادار ملاقاش هدف فاضل؛ افحصه قبل قراءته.",
+			"خطط لمرحلة مسح، وفحص النتيجة، وزيارة؛ وكرر بعد الحصاد.",
+			"راجع نداء ~Nearest~ وسطر طباعة ~*p~ في الـstarter.",
 		},
 		Lesson: `# nil: الـ pointer اللي مبيشاورش على حاجة 📡
 
@@ -523,7 +529,13 @@ nil بيعبّر عن "مفيش قيمة" من غير ما تحتاج قيمة �
 كل سؤال للرادار بياخد tick. الرادار نفسه بيختار الأقرب، يعني حلّك بيمشي بالـ greedy تلقائياً.`,
 	})
 	add(&Level{ID: "8-4-cart-chain", Chapter: 8, Kind: "lab", Title: "سلسلة العربات", Goal: "وصّل وافصل عربات من سلسلة من غير ما تضيّع باقي القطر", Requires: []string{"pointer", "struct"}, Bridge: []int{29},
+		LessonRevision: 1, Steps: ch08CartArabic,
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: cartChainStarter, ReadOnly: false}},
+		Hints: []string{
+			"كل node بتوصل للي بعدها بعنوان، و~nil~ بتحدد نهاية السلسلة.",
+			"افحص الحالة الفاضية، وبعدها التوصيل والفصل والبحث كل واحدة لوحدها.",
+			"تابع حقلي ~Head~ و~Next~ في struct قبل تعديل أي وصلة.",
+		},
 		Lesson: `# عربات ماسكة في بعض
 
 كل عربة شايلة اسمها وعنوان اللي بعدها. القطر مش محتاج generics ولا recursion: هنمشي على الوصلات بحلقة عادية، باستخدام pointers اللي عرفناها في الفصل ده.
@@ -588,8 +600,12 @@ fmt.Println(last.Next.Label)      // nil: panic
 نفّذ ~Convoy~ من عقد ~Cart{Tag string; Next *Cart}~ وبداية ~Head *Cart~؛ الـ zero value فاضية وشغالة. ~Couple(at, tag)~ تدخل قبل الموقع at من0 لحد الطول شامل الطرفين؛ أي موقع تاني يرجّع ~ErrCoupling~ من غير تعديل.
 
 ~Release(tag) bool~ تحذف أول تطابق فقط؛ false لو مفيش. ~Locate(tag) int~ ترجع موقع أول تطابق من صفر، أو -1. ~Tags() []string~ ترجع نسخة مستقلة بالترتيب، وفاضية لو القطر فاضي. مثال: بعد Couple(0,"a") وCouple(1,"b")، Tags نتيجتها [a b]. مفيش Report في المختبر؛ التستات بتراجع العقد مباشرة.
-`, Hints: []string{"افصل حالة at=0 عن المشي للعقدة السابقة.", "احفظ Next القديمة في العقدة الجديدة؛ في الحذف خلّي السابق يعدّي العقدة المطلوبة.", "عدّ المواقع بحلقة؛ عند nil قبل الموقع المطلوب رجّع ErrCoupling من غير تعديل."},
-		En: &LevelText{Title: "Cart Chain", Goal: "Couple and release carts without losing the rest of the convoy", Files: []LabFile{{Name: "main.go", Starter: cartChainStarter, ReadOnly: false}}, Lesson: `# Carts Linked Together
+`,
+		En: &LevelText{LessonRevision: 1, Steps: ch08CartEnglish, Title: "Cart Chain", Goal: "Couple and release carts without losing the rest of the convoy", Files: []LabFile{{Name: "main.go", Starter: cartChainStarter, ReadOnly: false}}, Hints: []string{
+			"Each node links to the next by address, and ~nil~ marks the end.",
+			"Inspect the empty case, then linking, release, and search as separate phases.",
+			"Follow the ~Head~ and ~Next~ fields before changing any link.",
+		}, Lesson: `# Carts Linked Together
 
 Each cart stores its tag and the address of the next cart. No generics or recursion are needed: follow pointers with an ordinary loop, using this chapter's pointer tools.
 
@@ -653,7 +669,7 @@ Return a fresh slice so changing it cannot change cart data. This contract is se
 Implement ~Convoy~ using ~Cart{Tag string; Next *Cart}~ nodes and ~Head *Cart~. Its zero value is usable and empty. ~Couple(at, tag)~ inserts before zero-based position at, accepting 0 through length inclusive. Other positions return ~ErrCoupling~ without mutation.
 
 ~Release(tag) bool~ deletes only the first match, returning false for a miss. ~Locate(tag) int~ returns the first zero-based position or -1. ~Tags() []string~ returns an independent ordered snapshot, empty for an empty convoy. For example, Couple(0,"a") then Couple(1,"b") yields [a b]. There is no Report in this lab; tests call the contract directly.
-`, Hints: []string{"Separate at=0 from walking to the preceding node.", "Preserve the old Next in the new node; deletion links the predecessor past a match.", "Count positions in a loop; nil before the required position means ErrCoupling without mutation."}},
+`},
 		Lab: &Lab{ReqFile: "main.go", Hidden: cartChainHidden},
 	})
 }

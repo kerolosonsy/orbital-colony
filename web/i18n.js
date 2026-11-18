@@ -22,7 +22,8 @@ const T = (ar, en) => (LANG === "en" ? en : ar);
 function localizeLevel(l) {
   if (LANG !== "en" || !l.en) return l;
   const e = l.en;
-  return { ...l, title: e.title || l.title, goal: e.goal || l.goal, lesson: e.lesson || l.lesson,
+  return { ...l, ...(e.steps?.length ? { steps: e.steps, lessonRevision: e.lessonRevision } : {}),
+    title: e.title || l.title, goal: e.goal || l.goal, lesson: e.lesson || l.lesson,
     starter: e.starter || l.starter, hints: e.hints?.length ? e.hints : l.hints,
     files: e.files?.length ? e.files : l.files };
 }

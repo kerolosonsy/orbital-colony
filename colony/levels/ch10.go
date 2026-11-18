@@ -25,6 +25,7 @@ const spawnHint = "لو main خلصت قبل الدرونات التانية، �
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch10LessonEnglish["10-1-second-drone"],
 			Title: "A Second Drone",
 			Goal:  "Harvest both rows at once: one for you and one for a new drone",
 			Lesson: `# Goroutines: Several Things at Once 🚁🚁
@@ -92,11 +93,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Use ~wg.Add(1)~, then ~go func() { defer wg.Done(); ... }()~. End main with ~wg.Wait()~.",
-				"Inside the goroutine: ~helper.Move(colony.North)~ twice, then ~harvestRow(helper, colony.East)~.",
-				"Remove ~_ = helper~ and ~_ = &wg~ once you use those variables.",
+				"Give each drone separate work.",
+				"Start the helper and wait in main.",
+				"Check ~_ = helper~ and the end of ~main~.",
 			},
 		},
+		LessonRevision: 1, Steps: ch10LessonArabic["10-1-second-drone"],
 		ID: "10-1-second-drone", Chapter: 10, Title: "درون تاني",
 		Goal: "احصد الصفين في نفس الوقت: إنت صف، ودرون جديد الصف التاني",
 		Par:  32, Gold: 25, MaxTicks: 200,
@@ -142,9 +144,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"~wg.Add(1)~، وبعدين ~go func() { defer wg.Done(); ... }()~. وفي آخر main: ~wg.Wait()~.",
-			"جوه الـ goroutine: ~helper.Move(colony.North)~ مرتين، وبعدين ~harvestRow(helper, colony.East)~.",
-			"شيل سطور ~_ = helper~ و~_ = &wg~ لما تستخدمهم.",
+			"كل درون له شغل منفصل.",
+			"شغّل helper وخلي main تستناه.",
+			"راجع ~_ = helper~ وآخر ~main~.",
 		},
 		Lesson: `# Goroutines: أكتر من حاجة في نفس الوقت 🚁🚁
 
@@ -187,6 +189,7 @@ wg.Wait()              // استنى لحد ما العدّاد يبقى صفر
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch10LessonEnglish["10-2-swarm"],
 			Title: "The Swarm",
 			Goal:  "4 drones, 4 rows. Finish the whole field at once",
 			Lesson: `# Goroutines in a Loop 🐝
@@ -249,11 +252,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Inside the loop: ~wg.Add(1)~, then ~go func() { defer wg.Done(); work(d, row) }()~.",
-				"In work: ~for i := 0; i < row; i++ { d.Move(colony.North) }~, then harvest 8 tiles.",
-				"The drones' Println output may appear in any order. That is normal with goroutines.",
+				"One row is one task.",
+				"Set up each task inside the loop.",
+				"Check ~_ = d~ and ~work~.",
 			},
 		},
+		LessonRevision: 1, Steps: ch10LessonArabic["10-2-swarm"],
 		ID: "10-2-swarm", Chapter: 10, Title: "السرب",
 		Goal: "4 درونات، 4 صفوف. خلّصوا الحقل كله في نفس الوقت",
 		Par:  30, Gold: 22, MaxTicks: 300,
@@ -293,9 +297,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"جوه الحلقة: ~wg.Add(1)~ ثم ~go func() { defer wg.Done(); work(d, row) }()~.",
-			"في work: ~for i := 0; i < row; i++ { d.Move(colony.North) }~، وبعدين احصد 8 خانات.",
-			"لاحظ إن الـ Println بتاعة الدرونات ممكن تطلع بأي ترتيب. ده طبيعي مع الـ goroutines.",
+			"كل صف مهمة لوحدها.",
+			"جهّز كل مهمة جوه الحلقة.",
+			"راجع ~_ = d~ و~work~.",
 		},
 		Lesson: `# goroutines في حلقة 🐝
 
@@ -336,6 +340,7 @@ wg.Go(func() { work(d, row) }) // Add + go + Done في سطر واحد
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch10LessonEnglish["10-3-divide"],
 			Title: "Divide the Work",
 			Goal:  "3 drones and 15 scattered targets. Divide the targets wisely",
 			Lesson: `# Dividing the Work ✂️
@@ -415,11 +420,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"The simplest split: ~targets[0:5]~, ~targets[5:10]~, and ~targets[10:15]~. Try it first.",
-				"A smarter split: sort by X with ~slices.SortFunc~ or ~sort.Slice~, giving each drone a region.",
-				"Within each region, visit the nearest target first (greedy), as in chapter 7.",
+				"Balance routes, not just counts.",
+				"Group targets before visiting them.",
+				"Start at ~colony.Targets()~ in ~main~.",
 			},
 		},
+		LessonRevision: 1, Steps: ch10LessonArabic["10-3-divide"],
 		ID: "10-3-divide", Chapter: 10, Title: "قسّم الشغل",
 		Goal: "3 درونات و15 هدف متفرقين. قسّم الأهداف عليهم بذكاء",
 		Par:  60, Gold: 40, MaxTicks: 400,
@@ -484,9 +490,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"أسهل تقسيمة: ~targets[0:5]~ و~targets[5:10]~ و~targets[10:15]~. جرّبها الأول.",
-			"تقسيمة أذكى: رتّب حسب X بـ ~slices.SortFunc~ أو ~sort.Slice~، فكل درون ياخد منطقة.",
-			"وجوه كل منطقة، روح للأقرب فالأقرب (greedy) زي الفصل 7.",
+			"وازن المسافة مع العدد.",
+			"قسّم قبل زيارة الأهداف.",
+			"ابدأ عند ~colony.Targets()~ في ~main~.",
 		},
 		Lesson: `# تقسيم الشغل ✂️
 

@@ -32,6 +32,7 @@ func poolMakespan(jobs []sim.Point, n int) int {
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch11ScoutLessonEnglish,
 			Title: "The Scout",
 			Goal:  "Have the scout send locations of large crystals (5 or more) through a channel, then harvest them",
 			Lesson: `# Channels: Goroutines Talk to Each Other 📨
@@ -102,11 +103,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"~for x := range found { ... }~ receives until the channel closes.",
-				"Track your position in ~at := 0~, move East until you reach x, then call ~colony.Harvest()~.",
-				"Your drone has no scanner (Measure returns -1), and the scout cannot harvest. They must work together.",
+				"Channels pass values; ~close~ marks the end.",
+				"Send places, receive them, harvest, then await closure.",
+				"Check ~x := <-found~; what should happen after the first receive?",
 			},
 		},
+		LessonRevision: 1, Steps: ch11ScoutLessonArabic,
 		ID: "11-1-scout", Chapter: 11, Title: "الكشّاف",
 		Goal: "الكشّاف يقيس ويبعت مكان الكريستال الكبير (5 فأكتر) في channel، وإنت تحصده",
 		Par:  40, Gold: 30, MaxTicks: 300,
@@ -168,9 +170,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"~for x := range found { ... }~ بتستقبل لحد ما الـ channel تتقفل.",
-			"احفظ مكانك في متغير ~at := 0~، واتحرك East لحد ما توصل لـ x، وبعدين ~colony.Harvest()~.",
-			"الدرون بتاعك مفيهوش سكانر (Measure بترجع -1)، والكشّاف مبيعرفش يحصد. لازم يشتغلوا مع بعض.",
+			"الـchannel بتنقل قيمة من goroutine للتانية؛ و~close~ بيعلن النهاية.",
+			"جهّز إرسال الأماكن، واستقبلها، واحصد، واستنى القناة تخلص.",
+			"راجع ~x := <-found~؛ إيه اللي يحصل بعد أول استقبال؟",
 		},
 		Lesson: `# Channels: goroutines بتكلّم بعض 📨
 
@@ -215,6 +217,7 @@ ch := make(chan int, 3) // تقدر تبعت 3 من غير ما حد يستقب�
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch11PoolLessonEnglish,
 			Title: "The Job Queue",
 			Goal:  "3 workers take targets from one channel and send back their harvests. Report the total",
 			Lesson: `# Worker Pool: A Smart Queue 🏗️
@@ -302,11 +305,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"For each worker: ~d := colony.Spawn()~, ~wg.Add(1)~, ~go func() { defer wg.Done(); worker(d, jobs, results) }()~.",
-				"Sending into jobs blocks main unless someone receives. Send from a goroutine: ~go func() { for _, t := range targets { jobs <- t }; close(jobs) }()~.",
-				"Close results once all workers finish: ~go func() { wg.Wait(); close(results) }()~. Then use ~for n := range results { total += n }~.",
+				"Each worker can take the next job from one shared channel.",
+				"Start workers, send targets, collect results, and close channels at the right time.",
+				"Check the ~worker~ signature; channel arrows show which side receives or sends.",
 			},
 		},
+		LessonRevision: 1, Steps: ch11PoolLessonArabic,
 		ID: "11-2-worker-pool", Chapter: 11, Title: "طابور الشغل",
 		Goal: "3 عمّال بياخدوا الأهداف من channel واحدة، وبيبعتوا اللي جمعوه. ابعت المجموع",
 		Par:  70, Gold: 50, MaxTicks: 500,
@@ -379,9 +383,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"لكل worker: ~d := colony.Spawn()~، ~wg.Add(1)~، ~go func() { defer wg.Done(); worker(d, jobs, results) }()~.",
-			"الإرسال في jobs هيعلّق main لو محدش بيستقبل، فابعت من goroutine: ~go func() { for _, t := range targets { jobs <- t }; close(jobs) }()~.",
-			"اقفل results لما كل العمّال يخلصوا: ~go func() { wg.Wait(); close(results) }()~. وبعدين ~for n := range results { total += n }~.",
+			"كل worker يقدر يسحب الشغل التالي من channel مشتركة.",
+			"شغّل العمال، وابعت الأهداف، واجمع النتائج، واقفل القنوات في وقتها.",
+			"راجع توقيع ~worker~؛ أسهم القنوات بتوضح مين يستقبل ومين يبعت.",
 		},
 		Lesson: `# Worker pool: الطابور الذكي 🏗️
 
@@ -427,6 +431,7 @@ for n := range results {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch11StormLessonEnglish,
 			Title: "A Storm Is Coming",
 			Goal:  "Collect 30 crystal. When warned, return to base before the storm hits",
 			Lesson: `# select: Wait for Several Possibilities 🌪️
@@ -502,11 +507,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Back at base, ~<-calm~ waits until the channel closes. Then return to your previous position and continue.",
-				"Remember your position so you can return: write ~goTo(p colony.Point)~ and harvest in a snake pattern.",
-				"The farthest tile is 12 steps from base; the warning comes 14 ticks before the storm. You have enough time if you return immediately.",
+				"~select~ handles ready channel cases, while ~default~ lets the loop continue now.",
+				"Work between warnings, return, wait for calm, then resume.",
+				"Check ~colony.StormWarning()~ and ~colony.StormClear()~ for the warning and all-clear signals.",
 			},
 		},
+		LessonRevision: 1, Steps: ch11StormLessonArabic,
 		ID: "11-3-storm", Chapter: 11, Title: "العاصفة جاية",
 		Goal: "اجمع 30 كريستال. لما الإنذار ييجي، ارجع للقاعدة قبل ما العاصفة تضرب",
 		Par:  140, Gold: 105, MaxTicks: 500,
@@ -556,9 +562,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"بعد ما ترجع للقاعدة: ~<-calm~ بتستنى لحد ما الـ channel تتقفل. وبعد كده ارجع مكانك وكمّل.",
-			"محتاج تفتكر مكانك عشان ترجعله: اكتب ~goTo(p colony.Point)~ وخلّي الحصاد بتاعك يلف على الخريطة بالثعبان.",
-			"أبعد خانة عن القاعدة على بعد 12 خطوة، والإنذار بييجي قبلها بـ 14. يعني عندك وقت لو رجعت فوراً.",
+			"~select~ تتعامل مع حالة channel الجاهزة، و~default~ تكمّل فورًا.",
+			"اشتغل بين الإنذارات، ارجع، استنى الهدوء، وبعدها استأنف.",
+			"راجع ~colony.StormWarning()~ و~colony.StormClear()~ لإشارات التحذير والهدوء.",
 		},
 		Lesson: `# select: استنى أكتر من حاجة 🌪️
 

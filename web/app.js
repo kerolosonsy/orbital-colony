@@ -16,10 +16,10 @@ async function api(path, body, method, signal) {
 }
 
 // ---------- persistence ----------
-// Each player profile keeps one blob on the server: { progress, prefs, quizScores }.
+// Each player profile keeps mission, quiz and lesson progress in separate fields.
 // localStorage holds a copy so a failed upload is never lost.
 const store = {
-  blob: { progress: {}, prefs: {}, quizScores: {} }, timer: null,
+  blob: { progress: {}, prefs: {}, quizScores: {}, lessons: {} }, timer: null,
   cacheKey: "orbital.p." + PROFILE,
   async load() {
     let b = null, online = true;
@@ -29,7 +29,8 @@ const store = {
     if (!online) { try { b = JSON.parse(localStorage.getItem(this.cacheKey)); } catch { b = null; } }
     const legacy = !b?.progress && PROFILE === "default" && online && this.legacy();
     if (legacy) b = legacy;
-    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {}, review: b?.review || {} };
+    const lessons = b?.lessons && typeof b.lessons === "object" && !Array.isArray(b.lessons) ? b.lessons : {};
+    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {}, review: b?.review || {}, lessons };
     if (legacy) {
       await this.push();
       for (const k of ["orbital.progress.v1", "orbital.current", "orbital.welcomed", "orbital.linked"]) localStorage.removeItem(k);
@@ -100,6 +101,7 @@ function highlight(code) {
 function inline(s) {
   return esc(s)
     .replace(/~([^~]+)~/g, (_, c) => `<code>${c.replace(/\\\|/g, "|")}</code>`)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
 }
 
@@ -1283,7 +1285,7 @@ async function loadLevel(id, review = null) {
   $("#goal-strip-text").innerHTML = inline(l.goal);
   refreshService(l);
   parText(l.par, l.gold, false);
-  $("#lesson").innerHTML = md(l.lesson);
+  Lessons.open(l);
   $("#hint-list").innerHTML = "";
   $("#btn-hint").disabled = !l.hints?.length;
   $("#btn-hint").querySelector("span").textContent = T(`تلميح (${l.hints?.length || 0})`, `Hint (${l.hints?.length || 0})`);
@@ -1316,7 +1318,9 @@ $("#btn-hint").onclick = () => {
   if (S.hintsShown >= l.hints.length) return;
   const d = document.createElement("div");
   d.className = "hint";
-  d.innerHTML = inline(l.hints[S.hintsShown++].replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, ""));
+  const hintText = inline(l.hints[S.hintsShown++].replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, ""));
+  const hintLabel = l.steps?.length ? [T("الفكرة", "Concept"), T("التنظيم", "Structure"), T("ركّز هنا", "Specific")][S.hintsShown - 1] : "";
+  d.innerHTML = hintLabel ? `<strong>${hintLabel}</strong><div>${hintText}</div>` : hintText;
   Sound.play("hint");
   $("#hint-list").appendChild(d);
   $("#btn-hint").querySelector("span").textContent = S.hintsShown < l.hints.length ? T(`تلميح كمان (${l.hints.length - S.hintsShown})`, `Another hint (${l.hints.length - S.hintsShown})`) : T("خلصت التلميحات", "No more hints");

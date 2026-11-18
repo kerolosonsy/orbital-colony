@@ -11,8 +11,10 @@ import (
 func init() {
 	add(&Level{
 		En: &LevelText{
-			Title: "The Shared Counter",
-			Goal:  "4 drones add to one variable. Report the correct total... without a data race",
+			LessonRevision: 1,
+			Steps:          ch12Lesson121English,
+			Title:          "The Shared Counter",
+			Goal:           "4 drones add to one variable. Report the correct total... without a data race",
 			Lesson: `# Data Race: Everyone Writes at Once 🏁
 
 This mission runs with the **race detector** (~go build -race~), a real Go tool that catches dangerous concurrency bugs.
@@ -87,10 +89,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Run the starter: the number might be correct, but the race detector catches the problem. Read its report in the Console.",
-				"Declare ~var mu sync.Mutex~ above, then surround ~total += n~ with ~mu.Lock()~ and ~mu.Unlock()~.",
+				"A lucky correct result does not prove shared writes are safe.",
+				"Separate the total update from movement, harvesting, and waiting.",
+				"Inspect the ~total += n~ line inside the goroutine.",
 			},
 		},
+		LessonRevision: 1, Steps: ch12Lesson121Arabic,
 		ID: "12-1-shared-total", Chapter: 12, Title: "العدّاد المشترك",
 		Goal: "4 درونات بيجمعوا في نفس المتغير. ابعت المجموع الصح… من غير data race",
 		Par:  25, Gold: 20, MaxTicks: 300,
@@ -148,8 +152,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"شغّله زي ما هو: الرقم ممكن يطلع صح، بس الـ race detector هيمسك المشكلة. اقرا التقرير في الـ Console.",
-			"~var mu sync.Mutex~ فوق، وحوالين ~total += n~ اكتب ~mu.Lock()~ و~mu.Unlock()~.",
+			"نتيجة سليمة مرة مش إثبات إن الكتابة المشتركة آمنة.",
+			"افصل تحديث الإجمالي عن الحركة والحصاد وانتظار العمال.",
+			"راجع ~total += n~ جوه الـgoroutine.",
 		},
 		Lesson: `# Data race: لما الكل يكتب في نفس الوقت 🏁
 
@@ -196,8 +201,10 @@ mutex اتنسخ = قفل تاني خالص. ابعته دايماً كـ pointe
 
 	add(&Level{
 		En: &LevelText{
-			Title: "The Safe Registry",
-			Goal:  "3 drones measure and record into one map. Report the largest crystal's location",
+			LessonRevision: 1,
+			Steps:          ch12Lesson122English,
+			Title:          "The Safe Registry",
+			Goal:           "3 drones measure and record into one map. Report the largest crystal's location",
 			Lesson: `# A Mutex Inside a Struct: A Common Go Pattern 🗃️
 
 Go maps are **not safe** for concurrent writes. The program can crash with ~fatal error: concurrent map writes~, or the race detector can report the problem.
@@ -275,11 +282,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Add ~mu sync.Mutex~ as a Registry field and lock it at the start of Record.",
-				"Add ~func (r *Registry) Best() colony.Point~ to lock and search for the largest crystal.",
-				"~colony.Report(reg.Best())~ sends the point as ~{3 1}~.",
+				"Concurrent writers to one map need one shared mutex.",
+				"Let Registry own the map and lock; separate recording from reading.",
+				"Inspect ~Record~ and the ~r.sizes[p] = size~ line.",
 			},
 		},
+		LessonRevision: 1, Steps: ch12Lesson122Arabic,
 		ID: "12-2-registry", Chapter: 12, Title: "السجل الآمن",
 		Goal: "3 درونات بيقيسوا ويسجلوا في map واحدة. ابعت مكان أكبر كريستال",
 		Par:  30, Gold: 24, MaxTicks: 300,
@@ -349,9 +357,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"ضيف ~mu sync.Mutex~ كحقل جوه Registry، واقفله في أول Record.",
-			"اعمل method تانية ~func (r *Registry) Best() colony.Point~ بتقفل وتدوّر على الأكبر.",
-			"~colony.Report(reg.Best())~ هتبعت النقطة بالشكل ~{3 1}~.",
+			"الكتّاب المتزامنين في map واحدة محتاجين mutex مشتركة.",
+			"خلّي Registry تملك الـmap والقفل، وافصل التسجيل عن القراءة.",
+			"راجع ~Record~ وسطر ~r.sizes[p] = size~.",
 		},
 		Lesson: `# Mutex جوه struct: النمط الاحترافي 🗃️
 
@@ -392,8 +400,10 @@ mu.Unlock()
 
 	add(&Level{
 		En: &LevelText{
-			Title: "Deadlock",
-			Goal:  "The drones have stopped! Find and fix the deadlock, then harvest both rows",
+			LessonRevision: 1,
+			Steps:          ch12Lesson123English,
+			Title:          "Deadlock",
+			Goal:           "The drones have stopped! Find and fix the deadlock, then harvest both rows",
 			Lesson: `# Deadlock: Each Waits for the Other 🔒🔒
 
 Imagine two people in a narrow corridor, each waiting for the other to pass first. Neither can move.
@@ -465,10 +475,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Run it: the drones Wait, then stop forever. Drone a holds drill and waits for cart; drone b holds cart and waits for drill.",
-				"The classic fix: every goroutine acquires locks **in the same order**. For example, always drill first, then cart.",
+				"A deadlock can form when each worker holds one resource and waits for another.",
+				"Compare the two lock orders on every path before tracing Wait.",
+				"Inspect the arguments to ~harvestWith~ in both ~work~ calls inside ~main~.",
 			},
 		},
+		LessonRevision: 1, Steps: ch12Lesson123Arabic,
 		ID: "12-3-deadlock", Chapter: 12, Title: "الجمود",
 		Goal: "الدرونات وقفت ومحدش بيتحرك! لاقي الـ deadlock وصلّحه، واحصد الصفين",
 		Par:  36, Gold: 28, MaxTicks: 200,
@@ -523,8 +535,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"شغّله وشوف: الدرونات بتعمل Wait وبعدين بتقف للأبد. درون a ماسك drill ومستني cart، ودرون b ماسك cart ومستني drill.",
-			"الحل الكلاسيكي: كل الـ goroutines تقفل الأقفال **بنفس الترتيب**. مثلاً دايماً drill الأول وبعدين cart.",
+			"الـdeadlock ممكن يحصل لما كل عامل ماسك مورد ومستني التاني.",
+			"قارن ترتيب القفلين في كل مسار قبل تتبّع Wait.",
+			"راجع arguments بتوع ~harvestWith~ في استدعاءي ~work~ جوه ~main~.",
 		},
 		Lesson: `# Deadlock: كل واحد مستني التاني 🔒🔒
 
