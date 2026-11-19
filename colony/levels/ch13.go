@@ -12,6 +12,7 @@ import (
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch131RecallEnglish,
 			Title: "Recall Order",
 			Goal:  "Work with 3 drones until base cancels the mission (ctx.Done), then return everyone to (0, 0) in time",
 			Lesson: `# context: Tell Every Task to Stop 📣
@@ -88,12 +89,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"To return: West until x = 0, then South until y = 0. Use ~d.Position()~.",
-				"When a row ends (Move returns false at the wall), move up to the next row or turn back West.",
-				"You need a certain crystal count, so do not return early. Work until ctx is actually canceled.",
+				"A context communicates cancellation; workers need to observe its signal.",
+				"Separate each worker's search, return path, and the wait in main.",
+				"Inspect ~ctx.Done()~ and ~d.Position()~ in the starter's work function.",
 			},
 		},
-		ID: "13-1-recall", Chapter: 13, Title: "أمر الرجوع",
+		ID: "13-1-recall", Chapter: 13, LessonRevision: 1, Steps: ch131RecallArabic, Title: "أمر الرجوع",
 		Goal: "اشتغل بـ 3 درونات لحد ما القاعدة تلغي المهمة (ctx.Done)، وبعدها الكل يرجع (0, 0) في الوقت",
 		Par:  0, Gold: 0, MaxTicks: 400,
 		Requires: []string{"sel:context.Context"},
@@ -160,9 +161,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الرجوع: West لحد x = 0، وبعدين South لحد y = 0. محتاج ~d.Position()~.",
-			"لو الصف خلص (Move بترجع false عند الحيطة)، اطلع للصف اللي بعده، أو لف راجع West.",
-			"المطلوب عدد كريستال معيّن، فمترجعش بدري. اشتغل لحد ما الـ ctx يتلغي بالظبط.",
+			"الـcontext بيوصل إشارة الإلغاء؛ وكل worker لازم يلاحظها.",
+			"افصل بحث كل worker عن طريق الرجوع وعن الانتظار في main.",
+			"راجع ~ctx.Done()~ و~d.Position()~ جوه دالة work في الـstarter.",
 		},
 		Lesson: `# context: إزاي تقول لكل الشغل "بطّل" 📣
 
@@ -200,6 +201,7 @@ func work(ctx context.Context, d *colony.Drone, row int)
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch132TimeoutEnglish,
 			Title: "Deep Scan",
 			Goal:  "DeepScan each crystal and harvest only those with at least 50% purity. Some scans hang forever!",
 			Lesson: `# Timeouts: Do Not Wait Forever ⏱️
@@ -258,12 +260,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"A healthy scan takes at most 4 ticks. ~colony.Ticks(5)~ converts ticks to time.Duration.",
-				"For each crystal: ~sctx, cancel := context.WithTimeout(ctx, colony.Ticks(5))~, then ~colony.DeepScan(sctx)~, then ~cancel()~.",
-				"If ~errors.Is(err, context.DeadlineExceeded)~, the scan hung: skip that crystal and continue.",
+				"A timeout bounds one operation that might otherwise wait forever.",
+				"Use a child context for a scan and release it when that call ends.",
+				"Inspect ~colony.DeepScan~ and distinguish ~context.DeadlineExceeded~ from success.",
 			},
 		},
-		ID: "13-2-timeouts", Chapter: 13, Title: "الفحص العميق",
+		ID: "13-2-timeouts", Chapter: 13, LessonRevision: 1, Steps: ch132TimeoutArabic, Title: "الفحص العميق",
 		Goal: "افحص كل كريستال بـ DeepScan، واحصد بس اللي نقاؤه 50% أو أكتر. وفيه فحوصات بتعلّق للأبد!",
 		Par:  70, Gold: 50, MaxTicks: 400,
 		Requires: []string{"sel:context.WithTimeout"},
@@ -338,9 +340,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الفحص السليم بياخد 4 tick بالكتير. ~colony.Ticks(5)~ بتحوّل الـ ticks لـ time.Duration.",
-			"لكل كريستال: ~sctx, cancel := context.WithTimeout(ctx, colony.Ticks(5))~، وبعدين ~colony.DeepScan(sctx)~، وبعدها ~cancel()~.",
-			"لو ~errors.Is(err, context.DeadlineExceeded)~ يبقى الفحص علّق: سيب الكريستال ده وكمّل.",
+			"الـtimeout بيحد عملية ممكن تفضل مستنية للأبد.",
+			"استخدم child context للفحص ونضّفه لما النداء يخلص.",
+			"راجع ~colony.DeepScan~ وفرّق ~context.DeadlineExceeded~ عن النجاح.",
 		},
 		Lesson: `# timeouts: متستناش للأبد ⏱️
 
@@ -379,6 +381,7 @@ Background
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch133FirstWinsEnglish,
 			Title: "The Legendary Crystal",
 			Goal:  "3 drones search for a size-10 crystal. Once one finds it, the others stop. Return everyone to (0, 0)",
 			Lesson: `# WithCancel: First to Find It Wins 🏆
@@ -480,12 +483,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Use ~ctx, cancel := context.WithCancel(context.Background())~. The drone that finds the crystal calls ~cancel()~.",
-				"In search, before each step: ~if ctx.Err() != nil { return false }~.",
-				"Complete search to explore ~row+1~ while returning West. Remember ~defer cancel()~ in main.",
+				"One cancel function can signal every worker sharing its context.",
+				"Keep cancellation checks inside each worker's search loop.",
+				"Inspect ~context.WithCancel~ and the point where ~search~ reports success.",
 			},
 		},
-		ID: "13-3-first-wins", Chapter: 13, Title: "الكريستال الأسطوري",
+		ID: "13-3-first-wins", Chapter: 13, LessonRevision: 1, Steps: ch133FirstWinsArabic, Title: "الكريستال الأسطوري",
 		Goal: "3 درونات بيدوّروا على كريستال حجمه 10. أول ما واحد يلاقيه، الباقي يبطّلوا. الكل يرجع (0, 0)",
 		Par:  60, Gold: 40, MaxTicks: 400,
 		Requires: []string{"sel:context.WithCancel"},
@@ -598,9 +601,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"~ctx, cancel := context.WithCancel(context.Background())~. اللي يلاقي الكريستال ينادي ~cancel()~.",
-			"جوه search، قبل كل خطوة: ~if ctx.Err() != nil { return false }~.",
-			"كمّل search تدوّر في الصف ~row+1~ وهي راجعة West. ومتنساش ~defer cancel()~ في main.",
+			"دالة cancel واحدة تقدر تبلغ كل worker مشارك نفس الـcontext.",
+			"خلي فحص الإلغاء جوه loop البحث لكل worker.",
+			"راجع ~context.WithCancel~ ومكان ما ~search~ بتعلن النجاح.",
 		},
 		Lesson: `# WithCancel: أول واحد يكسب 🏆
 
@@ -645,7 +648,7 @@ err := g.Wait() // أول error بيلغي الباقي
 
 ده النمط اللي هتستخدمه في الشغل لما تبعت كذا request في نفس الوقت.`,
 	})
-	add(&Level{ID: "13-4-chain-of-command", Chapter: 13, Title: "سلسلة القيادة", Goal: "عدّي context عبر القيادة والوسيط والمسبار ورجّع سبب التوقف", Requires: []string{"sel:context.Context", "select"}, Bridge: []int{41}, Par: 50, Gold: 30, MaxTicks: 300,
+	add(&Level{ID: "13-4-chain-of-command", Chapter: 13, LessonRevision: 1, Steps: ch134ChainArabic, Title: "سلسلة القيادة", Goal: "عدّي context عبر القيادة والوسيط والمسبار ورجّع سبب التوقف", Requires: []string{"sel:context.Context", "select"}, Bridge: []int{41}, Par: 50, Gold: 30, MaxTicks: 300,
 		Starter: chainOfCommandStarter, Lesson: `# نفس الأمر لآخر السلسلة
 
 الـ context مش إعداد ثابت للجهاز؛ هو عمر عملية واحدة. لو وسيط قطع السلسلة، المسبار هيفضل شغال بعد ما القيادة وقّفت المهمة.
@@ -702,8 +705,8 @@ err := next(context.Background()) // فقد إلغاء الأب وموعده
 كمّل ~command(ctx) → relay(ctx) → probe(ctx)~، كل واحدة تستقبل context.Context كأول parameter. سجّل بالترتيب command.enter ثم relay.enter ثم probe.enter، وبعد رجوع المسبار probe.exit ثم relay.exit ثم command.exit. ممنوع ctx في struct.
 
 نفّذ السلسلة مرتين زي main: أب ملغي بـ WithCancel، وبعدين أب بـ WithTimeout ومدته ~colony.Ticks(colony.Reading(0))~. المسبار ينتظر Done بـ select ويرجع Err، والوسيط والقيادة يرجّعوا نفس الخطأ. سجل كل حدود الدخول والخروج حتى لو ملغي مسبقاً. بعد التحقق إن السببين Canceled وDeadlineExceeded ابعت تقرير واحد بالنص ~canceled deadline~. التحقق بيراجع الأثر والموعد وحالة السياق، مش النص لوحده.
-`, Hints: []string{"مينفعش relay تعمل Background؛ عدّي ctx اللي وصلها.", "خلّي probe تستنى Done وتعيد ctx.Err؛ الخروج بيتسجّل بعد الانتظار.", "جرّب ملغي مسبقاً وبعدين موعد من Reading(0)، وارجع نفس الخطأ عبر كل المستويات."},
-		En: &LevelText{Title: "Chain of Command", Goal: "Pass context through command, relay, and probe and return the stop reason", Starter: chainOfCommandStarter, Lesson: `# One Order Through the Whole Chain
+`, Hints: []string{"الـcontext بيحمل عمر العملية وسبب توقفها.", "خلّي كل مستوى يحافظ على القيمة اللي استلمها ويرجع نتيجة اللي بعده.", "راجع parameter ~ctx~ في relay ونداء ~probe~ في الـstarter."},
+		En: &LevelText{LessonRevision: 1, Steps: ch134ChainEnglish, Title: "Chain of Command", Goal: "Pass context through command, relay, and probe and return the stop reason", Starter: chainOfCommandStarter, Lesson: `# One Order Through the Whole Chain
 
 A context describes one operation's lifetime, rather than permanent device configuration. If a relay breaks the chain, the probe can continue after command has stopped the mission.
 
@@ -759,7 +762,7 @@ Do not put a replacement context in a field or return nil after Done; command wo
 Complete ~command(ctx) → relay(ctx) → probe(ctx)~, each taking context.Context first. Trace command.enter, relay.enter, probe.enter, then probe.exit, relay.exit, command.exit while unwinding. Do not store ctx in a struct.
 
 Run twice as in main: an already-canceled WithCancel parent, then a WithTimeout parent lasting ~colony.Ticks(colony.Reading(0))~. The probe waits for Done with select and returns Err; relay and command return the same error. Trace every boundary even when canceled before entry. After checking for Canceled and DeadlineExceeded, send exactly one report containing ~canceled deadline~. Verification inspects traces, deadline, and context state as well as the text.
-`, Hints: []string{"Relay must pass its received ctx instead of creating Background.", "Have probe wait for Done and return ctx.Err; trace exit after waiting.", "Exercise already-canceled and Reading(0) deadline parents, returning the error through every level."}}, Setup: func(w *sim.World) {
+`, Hints: []string{"A context carries an operation's lifetime and stop reason.", "Each layer should preserve the value it received and return the next result.", "Inspect relay's ~ctx~ parameter and its ~probe~ call in the starter."}}, Setup: func(w *sim.World) {
 			w.Init(4, 2, sim.Regolith)
 			w.Realtime = true
 			w.Data.SensorReadings = []int{15 + w.Rand.Intn(10)}
