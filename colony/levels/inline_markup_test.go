@@ -34,6 +34,9 @@ func TestInlineCodeSpansCloseOnTheirLine(t *testing.T) {
 			if opens%2 != 0 {
 				t.Errorf("%s %s: unclosed ~code~ span in %q", id, where, line)
 			}
+			if strings.Count(line, "**")%2 != 0 {
+				t.Errorf("%s %s: unclosed **bold** in %q", id, where, line)
+			}
 		}
 	}
 	scan := func(id, lang, goal, lesson string, hints []string, steps []LessonStep) {
