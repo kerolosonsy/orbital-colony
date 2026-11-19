@@ -1,0 +1,307 @@
+{
+  "ch13-context-chain": {
+    "code": [
+      "command(ctx)",
+      "relay(ctx)",
+      "probe(ctx)",
+      "return err"
+    ],
+    "frames": [
+      {
+        "caption": {
+          "ar": "القيادة تمرر السياق.",
+          "en": "Command passes context."
+        },
+        "line": 0
+      },
+      {
+        "caption": {
+          "ar": "الوسيط يمرر نفس السياق.",
+          "en": "Relay passes the same context."
+        },
+        "line": 1
+      },
+      {
+        "caption": {
+          "ar": "المسبار يقرأ السبب.",
+          "en": "Probe reads the reason."
+        },
+        "line": 2
+      },
+      {
+        "caption": {
+          "ar": "السبب يرجع للقيادة.",
+          "en": "The reason returns to command."
+        },
+        "line": 3
+      }
+    ],
+    "labels": {
+      "canceled": {
+        "ar": "context.Canceled",
+        "en": "context.Canceled"
+      },
+      "context": {
+        "ar": "السياق",
+        "en": "Context"
+      },
+      "deadline": {
+        "ar": "context.DeadlineExceeded",
+        "en": "context.DeadlineExceeded"
+      },
+      "err": {
+        "ar": "Err",
+        "en": "Err"
+      },
+      "next": {
+        "ar": "اللي بعده",
+        "en": "Next"
+      },
+      "nil": {
+        "ar": "nil",
+        "en": "nil"
+      },
+      "previous": {
+        "ar": "اللي فات",
+        "en": "Previous"
+      },
+      "reason": {
+        "ar": "سبب الإلغاء",
+        "en": "Stop reason"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "same": {
+        "ar": "نفس ctx",
+        "en": "same ctx"
+      }
+    }
+  },
+  "ch13-first-wins": {
+    "labels": {
+      "canceled": {
+        "ar": "اتقفلت",
+        "en": "closed"
+      },
+      "explanation": {
+        "ar": "الإلغاء إشارة؛ كل عامل يستجيب بنفسه.",
+        "en": "Cancellation signals; each worker responds."
+      },
+      "found": {
+        "ar": "لقى الهدف",
+        "en": "found target"
+      },
+      "open": {
+        "ar": "لسه مفتوحة",
+        "en": "still open"
+      },
+      "order": {
+        "ar": "ترتيب البحث بيتغير",
+        "en": "Possible search order"
+      },
+      "raceStep": {
+        "ar": "شغّل محاولة",
+        "en": "Run search step"
+      },
+      "respond": {
+        "ar": "عامل يفحص Done",
+        "en": "Worker checks Done"
+      },
+      "searching": {
+        "ar": "بيدوّر",
+        "en": "searching"
+      },
+      "shuffleAgain": {
+        "ar": "رتّب وجرب تاني",
+        "en": "Shuffle and try again"
+      },
+      "signal": {
+        "ar": "Done",
+        "en": "Done"
+      },
+      "stopped": {
+        "ar": "وقف بعد الإشارة",
+        "en": "stopped after signal"
+      },
+      "workersLabel": {
+        "ar": "العمال",
+        "en": "Workers"
+      }
+    },
+    "orders": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        1,
+        2,
+        0
+      ]
+    ],
+    "workers": [
+      "D1",
+      "D2",
+      "D3"
+    ]
+  },
+  "ch13-recall": {
+    "labels": {
+      "active": {
+        "ar": "شغال",
+        "en": "active"
+      },
+      "advance": {
+        "ar": "خطوة عامل",
+        "en": "Worker step"
+      },
+      "atBase": {
+        "ar": "في القاعدة",
+        "en": "at base"
+      },
+      "canceled": {
+        "ar": "اتلغى",
+        "en": "canceled"
+      },
+      "explanation": {
+        "ar": "الإشارة ما بترجعش الدرون لوحدها.",
+        "en": "The signal does not return drones by itself."
+      },
+      "joined": {
+        "ar": "الكل خلص",
+        "en": "all joined"
+      },
+      "notJoined": {
+        "ar": "لسه مستنيين",
+        "en": "still waiting"
+      },
+      "order": {
+        "ar": "ترتيب محتمل",
+        "en": "Possible order"
+      },
+      "recall": {
+        "ar": "ابعت الرجوع",
+        "en": "Send recall"
+      },
+      "shuffleReset": {
+        "ar": "ترتيب تاني",
+        "en": "Shuffle again"
+      },
+      "signal": {
+        "ar": "السياق",
+        "en": "Context"
+      },
+      "wait": {
+        "ar": "استنى الكل",
+        "en": "Wait for all"
+      },
+      "workersLabel": {
+        "ar": "الدرونات",
+        "en": "Drones"
+      },
+      "working": {
+        "ar": "بيشتغل",
+        "en": "working"
+      }
+    },
+    "orders": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        1,
+        2,
+        0
+      ]
+    ],
+    "workers": [
+      "D1",
+      "D2",
+      "D3"
+    ]
+  },
+  "ch13-timeout": {
+    "deadlineTicks": 3,
+    "labels": {
+      "active": {
+        "ar": "شغال",
+        "en": "active"
+      },
+      "cancel": {
+        "ar": "إلغاء يدوي",
+        "en": "Cancel manually"
+      },
+      "canceledError": {
+        "ar": "context.Canceled",
+        "en": "context.Canceled"
+      },
+      "closed": {
+        "ar": "مقفولة",
+        "en": "closed"
+      },
+      "context": {
+        "ar": "السياق",
+        "en": "Context"
+      },
+      "deadline": {
+        "ar": "المهلة",
+        "en": "Deadline"
+      },
+      "deadlineError": {
+        "ar": "context.DeadlineExceeded",
+        "en": "context.DeadlineExceeded"
+      },
+      "deadlineReached": {
+        "ar": "المهلة انتهت",
+        "en": "deadline reached"
+      },
+      "done": {
+        "ar": "Done",
+        "en": "Done"
+      },
+      "elapsed": {
+        "ar": "الوقت",
+        "en": "Time"
+      },
+      "err": {
+        "ar": "Err",
+        "en": "Err"
+      },
+      "manuallyStopped": {
+        "ar": "اتلغى يدويًا",
+        "en": "canceled manually"
+      },
+      "nil": {
+        "ar": "nil",
+        "en": "nil"
+      },
+      "open": {
+        "ar": "مفتوحة",
+        "en": "open"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "tick": {
+        "ar": "عدّي وقت",
+        "en": "Advance time"
+      }
+    }
+  }
+}

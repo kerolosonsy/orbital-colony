@@ -1,1 +1,107 @@
-/* Chapter 14 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch14-sandbox {
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.45rem;
+  width: min(100%, 282px);
+  padding: 0.65rem;
+  border: 1px solid var(--line, #ccd6db);
+  border-radius: 0.65rem;
+  background: var(--surface, #f8fbfc);
+  color: var(--ink, #19323c);
+  font-size: 0.88rem;
+}
+
+.ch14-sandbox p,
+.ch14-sandbox ol {
+  margin: 0;
+}
+
+.ch14-readout,
+.ch14-caption,
+.ch14-section-label {
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.35rem;
+  background: var(--surface-raised, #fff);
+}
+
+.ch14-code,
+.ch14-values {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+  font-family: var(--mono, monospace);
+}
+
+.ch14-values,
+.ch14-history,
+.ch14-queue-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  direction: ltr;
+}
+
+.ch14-value,
+.ch14-stack-cell,
+.ch14-queue-item {
+  display: inline-flex;
+  min-width: 2rem;
+  justify-content: center;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--line, #ccd6db);
+  border-radius: 0.35rem;
+  background: var(--surface-raised, #fff);
+}
+
+.ch14-value.current {
+  outline: 2px solid var(--accent, #159879);
+}
+
+.ch14-value.best,
+.ch14-result.accepted {
+  background: #e3f2ed;
+}
+
+.ch14-result {
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.35rem;
+  font-weight: 700;
+}
+
+.ch14-result.rejected {
+  background: #f7e8e8;
+}
+
+.ch14-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ch14-controls button {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.ch14-examples {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.ch14-call-stack {
+  display: grid;
+  gap: 0.25rem;
+  padding-inline-start: 1.4rem;
+}
+
+.ch14-call-stack li {
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.3rem;
+  background: var(--surface-raised, #fff);
+}
+
+.ch14-empty {
+  padding: 0.35rem;
+  color: var(--muted, #5c7079);
+}

@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -19,16 +20,18 @@ var ch14InlineCodePattern = regexp.MustCompile("~[^~]*~")
 var ch14SentenceBreakPattern = regexp.MustCompile(`[.!?؟]\s+\S`)
 
 func TestCh14Lessons(t *testing.T) {
+	sandboxFixtures := ch14ReadSandboxFixtures(t)
 	cases := []struct {
 		id     string
 		prefix string
+		kind   string
 		pair   ch14LessonPair
 	}{
-		{"14-1-generic-max", "c141.", ch14Lesson141},
-		{"14-2-stack", "c142.", ch14Lesson142},
-		{"14-3-constraints", "c143.", ch14Lesson143},
-		{"14-4-airlock-queue", "c144.", ch14Lesson144},
-		{"14-5-archive-tree", "c145.", ch14Lesson145},
+		{"14-1-generic-max", "c141.", "ch14-generic-max", ch14Lesson141},
+		{"14-2-stack", "c142.", "ch14-stack", ch14Lesson142},
+		{"14-3-constraints", "c143.", "ch14-type-constraints", ch14Lesson143},
+		{"14-4-airlock-queue", "c144.", "ch14-queue", ch14Lesson144},
+		{"14-5-archive-tree", "c145.", "ch14-recursion", ch14Lesson145},
 	}
 	arTitles := []string{"المهمة", "الفكرة", "جرّب", "خد بالك", "فكّر واختبر", "دورك"}
 	enTitles := []string{"Mission", "Idea", "Try it", "Watch out", "Think & check", "Your turn"}
@@ -57,6 +60,32 @@ func TestCh14Lessons(t *testing.T) {
 			}
 			ch14ValidateLessonCopy(t, item.id+" Arabic", item.prefix, level.Steps, level.Hints, arTitles)
 			ch14ValidateLessonCopy(t, item.id+" English", item.prefix, level.En.Steps, level.En.Hints, enTitles)
+			for _, steps := range [][]LessonStep{level.Steps, level.En.Steps} {
+				var sandboxes []LessonBlock
+				for _, step := range steps {
+					for _, block := range step.Blocks {
+						if block.Kind == "sandbox" {
+							sandboxes = append(sandboxes, block)
+						}
+					}
+				}
+				if len(sandboxes) != 1 || len(steps[2].Blocks) != 3 || steps[2].Blocks[2].Kind != "sandbox" {
+					t.Errorf("%s: expected exactly one sandbox after the Try it question and walkthrough", item.id)
+					continue
+				}
+				sandbox := sandboxes[0]
+				if sandbox.Sandbox == nil || !strings.HasPrefix(sandbox.Sandbox.Kind, "ch14-") {
+					t.Errorf("%s: sandbox kind must use the ch14- prefix", item.id)
+					continue
+				}
+				if sandbox.Sandbox.Kind != item.kind {
+					t.Errorf("%s: got sandbox kind %q, want %q", item.id, sandbox.Sandbox.Kind, item.kind)
+				}
+				fixture, exists := sandboxFixtures[sandbox.Sandbox.Kind]
+				if !exists || !reflect.DeepEqual(ch14JSONValue(sandbox.Sandbox.Config), fixture) {
+					t.Errorf("%s: Config differs from fixture %q", item.id, sandbox.Sandbox.Kind)
+				}
+			}
 			for i, step := range level.Steps {
 				translated := level.En.Steps[i]
 				if step.ID != translated.ID || len(step.Blocks) != len(translated.Blocks) {
@@ -86,6 +115,9 @@ func TestCh14Lessons(t *testing.T) {
 							}
 						}
 					}
+					if block.Sandbox != nil && (other.Sandbox == nil || block.Sandbox.Kind != other.Sandbox.Kind || !reflect.DeepEqual(ch14ConfigShape(block.Sandbox.Config), ch14ConfigShape(other.Sandbox.Config))) {
+						t.Errorf("%s: sandbox Config structure differs across languages", block.ID)
+					}
 				}
 			}
 		})
@@ -98,6 +130,58 @@ func ch14BlockIDs(blocks []LessonBlock) []string {
 		ids = append(ids, block.ID)
 	}
 	return ids
+}
+
+func ch14ReadSandboxFixtures(t *testing.T) map[string]any {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch14.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]any
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	return fixtures
+}
+
+func ch14JSONValue(value any) any {
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		panic(err)
+	}
+	var normalized any
+	if err := json.Unmarshal(encoded, &normalized); err != nil {
+		panic(err)
+	}
+	return normalized
+}
+
+func ch14ConfigShape(value any) any {
+	switch value := value.(type) {
+	case string:
+		return "string"
+	case map[string]any:
+		result := make(map[string]any, len(value))
+		for key, child := range value {
+			result[key] = ch14ConfigShape(child)
+		}
+		return result
+	case []any:
+		result := make([]any, len(value))
+		for index, child := range value {
+			result[index] = ch14ConfigShape(child)
+		}
+		return result
+	case []string:
+		return make([]string, len(value))
+	case []int:
+		return append([]int(nil), value...)
+	case [][]int:
+		return append([][]int(nil), value...)
+	default:
+		return value
+	}
 }
 
 func ch14ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonStep, hints, titles []string) {
@@ -136,6 +220,10 @@ func ch14ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonSte
 					continue
 				}
 				ch14ValidateFrames(t, name, block)
+			case "sandbox":
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch14-") || len(block.Sandbox.Config) == 0 {
+					t.Errorf("%s: %s has incomplete sandbox Config", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed block kind %q", name, block.ID, block.Kind)
 			}
@@ -149,8 +237,8 @@ func ch14ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonSte
 			t.Errorf("%s: hint %d must be one unprefixed sentence", name, i+1)
 		}
 	}
-	if len(steps[2].Blocks) != 2 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" {
-		t.Errorf("%s: Try it must predict first, then reveal with a walkthrough", name)
+	if len(steps[2].Blocks) != 3 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" || steps[2].Blocks[2].Kind != "sandbox" {
+		t.Errorf("%s: Try it must predict, reveal, then show one sandbox", name)
 		return
 	}
 	if strings.TrimSpace(ch14QuestionCode(steps[2].Blocks[0].Text)) != strings.TrimSpace(steps[2].Blocks[1].Code) {

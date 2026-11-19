@@ -4,7 +4,7 @@ Short bilingual lesson examples for the four chapter 13 missions. Examples use s
 
 ## 13-1 — Recall Order
 
-Mission: let three drones work until recall, then return them and wait for all workers. Idea: `Done` signals cancellation and `Err` gives its reason. Try: predict the error after manual cancellation. Watch out: cancellation is cooperative and a WaitGroup only waits. Think: stop work, return, then join. Your turn: finish the worker's cancellation path.
+Mission: let three drones work until recall, then return them and wait for all workers. Idea: `Done` signals cancellation and `Err` gives its reason. Try: predict the error after manual cancellation. Playground: shuffle the worker order, send recall, and step each drone's response before waiting for all. Watch out: cancellation is cooperative and a WaitGroup only waits. Think: stop work, return, then join. Your turn: finish the worker's cancellation path.
 
 <!-- go-example id=e131-context imports=context,fmt outcome=ok -->
 ```go
@@ -46,7 +46,7 @@ true
 
 ## 13-2 — Deep Scan
 
-Mission: scan each crystal and harvest only after a successful scan meets the purity rule. Idea: a timeout context ends a hung operation and exposes `DeadlineExceeded`. Try: predict whether a future deadline is still active. Watch out: cancel child contexts after each operation. Think: distinguish timeout from other errors. Your turn: add a bounded scan and continue after timeouts.
+Mission: scan each crystal and harvest only after a successful scan meets the purity rule. Idea: a timeout context ends a hung operation and exposes `DeadlineExceeded`. Try: predict whether a future deadline is still active. Playground: advance a small clock to expire a deadline or cancel manually, then compare `Done` and `Err`. Watch out: cancel child contexts after each operation. Think: distinguish timeout from other errors. Your turn: add a bounded scan and continue after timeouts.
 
 <!-- go-example id=e132-timeout imports=context,errors,fmt outcome=ok -->
 ```go
@@ -85,7 +85,7 @@ true
 
 ## 13-3 — The Legendary Crystal
 
-Mission: share a search among three drones; the first finder cancels the others, and all return. Idea: cancellation reaches workers through `Done`. Try: predict `Err` after cancellation. Watch out: context cancellation does not move a drone or forcibly stop a goroutine. Think: have workers check the shared signal and wait for completion. Your turn: connect a successful search to cancellation.
+Mission: share a search among three drones; the first finder cancels the others, and all return. Idea: cancellation reaches workers through `Done`. Try: predict `Err` after cancellation. Playground: shuffle search order, let one drone find first, then step other workers as they observe `Done`. Watch out: context cancellation does not move a drone or forcibly stop a goroutine. Think: have workers check the shared signal and wait for completion. Your turn: connect a successful search to cancellation.
 
 <!-- go-example id=e133-cancel imports=context,fmt outcome=ok -->
 ```go
@@ -130,7 +130,7 @@ context canceled
 
 ## 13-4 — Chain of Command
 
-Mission: carry context through command, relay, and probe, preserving its stop reason. Idea: pass the same context into each call and return `Err` outward. Try: predict whether relay preserves cancellation. Watch out: a new `Background` breaks the parent lifetime. Think: inspect entry and exit traces. Your turn: repair propagation and exercise both stop reasons.
+Mission: carry context through command, relay, and probe, preserving its stop reason. Idea: pass the same context into each call and return `Err` outward. Try: predict whether relay preserves cancellation. Playground: switch between cancellation reasons and trace one context through command, relay, and probe. Watch out: a new `Background` breaks the parent lifetime. Think: inspect entry and exit traces. Your turn: repair propagation and exercise both stop reasons.
 
 <!-- go-example id=e134-chain imports=context,fmt outcome=ok -->
 ```go

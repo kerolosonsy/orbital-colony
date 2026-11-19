@@ -4,7 +4,7 @@ Draft for `lessons-ch14-15`, 2026-11-19. Each level has six short steps; practic
 
 ## 14-1 — One Function for Every Type
 
-Playground: run one generic maximum over integer and decimal slices, then predict the result for a smaller integer slice. The walkthrough follows type inference and the best value.
+Playground: step through one generic maximum over integer and decimal slices; watch type inference and the best value. The walkthrough follows the algorithm.
 
 <!-- go-example id=e14-1-idea imports=cmp,fmt outcome=ok -->
 ```go
@@ -63,7 +63,7 @@ func main() {
 
 ## 14-3 — Type Constraints
 
-Playground: pass a defined numeric type through a small generic operation, then predict its doubled value. The example shows why a type set can match underlying types.
+Playground: cycle through defined and built-in types to see which underlying types match the constraint's type set.
 
 <!-- go-example id=e14-3-idea imports=fmt outcome=ok -->
 ```go
@@ -87,7 +87,7 @@ func main() {
 
 ## 14-4 — Airlock Queue
 
-Playground: choose the type stored by a generic parcel, then predict its value. Discuss the FIFO contract, presence signal, and read-versus-remove behavior without implementing the lab API.
+Playground: add, read, and remove parcels in a small generic FIFO queue. Discuss the presence signal and read-versus-remove behavior without implementing the lab API.
 
 <!-- go-example id=e14-4-idea imports=fmt outcome=ok -->
 ```go

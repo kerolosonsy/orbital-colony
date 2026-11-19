@@ -25,6 +25,106 @@ func ch13Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	}
 }
 
+func ch13Locale(arabic, english string) map[string]any {
+	return map[string]any{"ar": arabic, "en": english}
+}
+
+func ch13Sandbox(id, kind, text string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch131RecallSandbox(text string) LessonBlock {
+	return ch13Sandbox("c131.sandbox", "ch13-recall", text, map[string]any{
+		"workers": []string{"D1", "D2", "D3"},
+		"orders":  [][]int{{0, 1, 2}, {2, 0, 1}, {1, 2, 0}},
+		"labels": map[string]any{
+			"signal":       ch13Locale("السياق", "Context"),
+			"active":       ch13Locale("شغال", "active"),
+			"canceled":     ch13Locale("اتلغى", "canceled"),
+			"working":      ch13Locale("بيشتغل", "working"),
+			"atBase":       ch13Locale("في القاعدة", "at base"),
+			"joined":       ch13Locale("الكل خلص", "all joined"),
+			"notJoined":    ch13Locale("لسه مستنيين", "still waiting"),
+			"order":        ch13Locale("ترتيب محتمل", "Possible order"),
+			"workersLabel": ch13Locale("الدرونات", "Drones"),
+			"recall":       ch13Locale("ابعت الرجوع", "Send recall"),
+			"advance":      ch13Locale("خطوة عامل", "Worker step"),
+			"shuffleReset": ch13Locale("ترتيب تاني", "Shuffle again"),
+			"wait":         ch13Locale("استنى الكل", "Wait for all"),
+			"explanation":  ch13Locale("الإشارة ما بترجعش الدرون لوحدها.", "The signal does not return drones by itself."),
+		},
+	})
+}
+
+func ch132TimeoutSandbox(text string) LessonBlock {
+	return ch13Sandbox("c132.sandbox", "ch13-timeout", text, map[string]any{
+		"deadlineTicks": 3,
+		"labels": map[string]any{
+			"context":         ch13Locale("السياق", "Context"),
+			"active":          ch13Locale("شغال", "active"),
+			"deadlineReached": ch13Locale("المهلة انتهت", "deadline reached"),
+			"manuallyStopped": ch13Locale("اتلغى يدويًا", "canceled manually"),
+			"elapsed":         ch13Locale("الوقت", "Time"),
+			"deadline":        ch13Locale("المهلة", "Deadline"),
+			"done":            ch13Locale("Done", "Done"),
+			"open":            ch13Locale("مفتوحة", "open"),
+			"closed":          ch13Locale("مقفولة", "closed"),
+			"err":             ch13Locale("Err", "Err"),
+			"nil":             ch13Locale("nil", "nil"),
+			"deadlineError":   ch13Locale("context.DeadlineExceeded", "context.DeadlineExceeded"),
+			"canceledError":   ch13Locale("context.Canceled", "context.Canceled"),
+			"tick":            ch13Locale("عدّي وقت", "Advance time"),
+			"cancel":          ch13Locale("إلغاء يدوي", "Cancel manually"),
+			"reset":           ch13Locale("من الأول", "Reset"),
+		},
+	})
+}
+
+func ch133RaceSandbox(text string) LessonBlock {
+	return ch13Sandbox("c133.sandbox", "ch13-first-wins", text, map[string]any{
+		"workers": []string{"D1", "D2", "D3"},
+		"orders":  [][]int{{0, 1, 2}, {2, 0, 1}, {1, 2, 0}},
+		"labels": map[string]any{
+			"order":        ch13Locale("ترتيب البحث بيتغير", "Possible search order"),
+			"signal":       ch13Locale("Done", "Done"),
+			"open":         ch13Locale("لسه مفتوحة", "still open"),
+			"canceled":     ch13Locale("اتقفلت", "closed"),
+			"workersLabel": ch13Locale("العمال", "Workers"),
+			"searching":    ch13Locale("بيدوّر", "searching"),
+			"found":        ch13Locale("لقى الهدف", "found target"),
+			"stopped":      ch13Locale("وقف بعد الإشارة", "stopped after signal"),
+			"raceStep":     ch13Locale("شغّل محاولة", "Run search step"),
+			"respond":      ch13Locale("عامل يفحص Done", "Worker checks Done"),
+			"shuffleAgain": ch13Locale("رتّب وجرب تاني", "Shuffle and try again"),
+			"explanation":  ch13Locale("الإلغاء إشارة؛ كل عامل يستجيب بنفسه.", "Cancellation signals; each worker responds."),
+		},
+	})
+}
+
+func ch134ChainSandbox(text string) LessonBlock {
+	return ch13Sandbox("c134.sandbox", "ch13-context-chain", text, map[string]any{
+		"code": []string{"command(ctx)", "relay(ctx)", "probe(ctx)", "return err"},
+		"frames": []any{
+			map[string]any{"line": 0, "caption": ch13Locale("القيادة تمرر السياق.", "Command passes context.")},
+			map[string]any{"line": 1, "caption": ch13Locale("الوسيط يمرر نفس السياق.", "Relay passes the same context.")},
+			map[string]any{"line": 2, "caption": ch13Locale("المسبار يقرأ السبب.", "Probe reads the reason.")},
+			map[string]any{"line": 3, "caption": ch13Locale("السبب يرجع للقيادة.", "The reason returns to command.")},
+		},
+		"labels": map[string]any{
+			"previous": ch13Locale("اللي فات", "Previous"),
+			"next":     ch13Locale("اللي بعده", "Next"),
+			"reset":    ch13Locale("من الأول", "Reset"),
+			"reason":   ch13Locale("سبب الإلغاء", "Stop reason"),
+			"canceled": ch13Locale("context.Canceled", "context.Canceled"),
+			"deadline": ch13Locale("context.DeadlineExceeded", "context.DeadlineExceeded"),
+			"context":  ch13Locale("السياق", "Context"),
+			"same":     ch13Locale("نفس ctx", "same ctx"),
+			"err":      ch13Locale("Err", "Err"),
+			"nil":      ch13Locale("nil", "nil"),
+		},
+	})
+}
+
 const (
 	ch13ContextCode = `func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -111,6 +211,7 @@ var ch131RecallArabic = []LessonStep{
 			{Line: 4, Caption: "Done اتقفلت."},
 			{Line: 5, Caption: "السبب يطابق Canceled.", Output: "true"},
 		}),
+		ch131RecallSandbox("بدّل الترتيب، وراقب استجابة الدرونات لإشارة الرجوع."),
 	}},
 	{ID: "c131.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch13Markdown("c131.watch", `كل goroutine لازم تفحص الإلغاء بنفسها.
 
@@ -153,6 +254,7 @@ Cancellation does not force-stop a function; the work must notice it.`, ch13Cont
 			{Line: 4, Caption: "Done is closed."},
 			{Line: 5, Caption: "The reason matches Canceled.", Output: "true"},
 		}),
+		ch131RecallSandbox("Shuffle workers; watch each respond to recall."),
 	}},
 	{ID: "c131.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch13Markdown("c131.watch", `Each goroutine must check for cancellation itself.
 
@@ -195,6 +297,7 @@ var ch132TimeoutArabic = []LessonStep{
 			{Line: 3, Caption: "التنظيف مؤجل للخروج."},
 			{Line: 4, Caption: "Err ما زال nil.", Output: "true"},
 		}),
+		ch132TimeoutSandbox("قدّم الوقت أو ألغِ يدويًا؛ قارن أخطاء السياق."),
 	}},
 	{ID: "c132.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch13Markdown("c132.watch", `كل عملية طويلة محتاجة child context مناسب.
 
@@ -237,6 +340,7 @@ Zero duration shows an already-expired deadline; it is not a mission setting.`, 
 			{Line: 3, Caption: "Cleanup is deferred."},
 			{Line: 4, Caption: "Err is still nil.", Output: "true"},
 		}),
+		ch132TimeoutSandbox("Advance or cancel; compare context errors."),
 	}},
 	{ID: "c132.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch13Markdown("c132.watch", `Give each long operation an appropriate child context.
 
@@ -280,6 +384,7 @@ var ch133FirstWinsArabic = []LessonStep{
 			{Line: 4, Caption: "Done تقفل فورًا."},
 			{Line: 5, Caption: "اقرأ سبب الإلغاء.", Output: "context canceled"},
 		}),
+		ch133RaceSandbox("بدّل البحث؛ تابع الفائز واستجابة الباقي."),
 	}},
 	{ID: "c133.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch13Markdown("c133.watch", `الـworker لازم يفحص السياق خلال البحث.
 
@@ -323,6 +428,7 @@ Frames show one possible order; goroutine scheduling has no guaranteed order.`, 
 			{Line: 4, Caption: "Done closes immediately."},
 			{Line: 5, Caption: "Read the cancellation reason.", Output: "context canceled"},
 		}),
+		ch133RaceSandbox("Shuffle searches; watch the winner and worker response."),
 	}},
 	{ID: "c133.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch13Markdown("c133.watch", `Each worker must check the context during its search.
 
@@ -370,6 +476,7 @@ var ch134ChainArabic = []LessonStep{
 			{Line: 2, Caption: "probe ترجع Err."},
 			{Line: 7, Caption: "السبب حافظ على هويته.", Output: "true"},
 		}),
+		ch134ChainSandbox("بدّل السبب؛ تتبّع السياق عبر السلسلة."),
 	}},
 	{ID: "c134.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch13Markdown("c134.watch", `إنشاء ~context.Background()~ في النص يقطع إلغاء الأب.
 
@@ -417,6 +524,7 @@ The probe reads ~Err~; outer calls return the reason without replacing it.
 			{Line: 2, Caption: "probe returns Err."},
 			{Line: 7, Caption: "The reason keeps its identity.", Output: "true"},
 		}),
+		ch134ChainSandbox("Switch reasons; trace context through the chain."),
 	}},
 	{ID: "c134.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch13Markdown("c134.watch", `Creating a new ~context.Background()~ breaks parent cancellation.
 

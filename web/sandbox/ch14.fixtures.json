@@ -1,0 +1,465 @@
+{
+  "ch14-generic-max": {
+    "frames": [
+      {
+        "best": -1,
+        "caption": {
+          "ar": "ابدأ بأرقام صحيحة.",
+          "en": "Start with integers."
+        },
+        "current": -1,
+        "type": {
+          "ar": "int",
+          "en": "int"
+        },
+        "values": [
+          4,
+          9,
+          2
+        ]
+      },
+      {
+        "best": 0,
+        "caption": {
+          "ar": "أول قيمة تبدأ best.",
+          "en": "The first value starts best."
+        },
+        "current": 0,
+        "type": {
+          "ar": "int",
+          "en": "int"
+        },
+        "values": [
+          4,
+          9,
+          2
+        ]
+      },
+      {
+        "best": 1,
+        "caption": {
+          "ar": "9 أكبر؛ best اتغيّرت.",
+          "en": "9 is larger; best changes."
+        },
+        "current": 1,
+        "type": {
+          "ar": "int",
+          "en": "int"
+        },
+        "values": [
+          4,
+          9,
+          2
+        ]
+      },
+      {
+        "best": 1,
+        "caption": {
+          "ar": "2 أصغر؛ best ثابتة.",
+          "en": "2 is smaller; best stays."
+        },
+        "current": 2,
+        "type": {
+          "ar": "int",
+          "en": "int"
+        },
+        "values": [
+          4,
+          9,
+          2
+        ]
+      },
+      {
+        "best": 0,
+        "caption": {
+          "ar": "نداء تاني يستنتج float64.",
+          "en": "Another call infers float64."
+        },
+        "current": 0,
+        "type": {
+          "ar": "float64",
+          "en": "float64"
+        },
+        "values": [
+          1.5,
+          3.25
+        ]
+      },
+      {
+        "best": 1,
+        "caption": {
+          "ar": "جسم واحد يقارن النوعين.",
+          "en": "One body compares both types."
+        },
+        "current": 1,
+        "type": {
+          "ar": "float64",
+          "en": "float64"
+        },
+        "values": [
+          1.5,
+          3.25
+        ]
+      }
+    ],
+    "labels": {
+      "best": {
+        "ar": "best",
+        "en": "best"
+      },
+      "current": {
+        "ar": "الحالية",
+        "en": "Current"
+      },
+      "next": {
+        "ar": "اللي بعده",
+        "en": "Next"
+      },
+      "none": {
+        "ar": "—",
+        "en": "—"
+      },
+      "previous": {
+        "ar": "اللي فات",
+        "en": "Previous"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "type": {
+        "ar": "T المستنتج",
+        "en": "Inferred T"
+      },
+      "values": {
+        "ar": "القيم",
+        "en": "Values"
+      }
+    }
+  },
+  "ch14-queue": {
+    "arrivals": [
+      {
+        "ar": "وقود",
+        "en": "fuel"
+      },
+      {
+        "ar": "خريطة",
+        "en": "map"
+      }
+    ],
+    "elementType": {
+      "ar": "Queue[string]",
+      "en": "Queue[string]"
+    },
+    "initial": [
+      {
+        "ar": "دواء",
+        "en": "medic"
+      },
+      {
+        "ar": "أدوات",
+        "en": "tools"
+      }
+    ],
+    "labels": {
+      "add": {
+        "ar": "وصل طرد",
+        "en": "Arrive"
+      },
+      "added": {
+        "ar": "اتضاف طرد",
+        "en": "Parcel added"
+      },
+      "depart": {
+        "ar": "شيل الأمام",
+        "en": "Depart"
+      },
+      "departed": {
+        "ar": "خرج أول طرد",
+        "en": "Front departed"
+      },
+      "empty": {
+        "ar": "فاضي",
+        "en": "empty"
+      },
+      "front": {
+        "ar": "الأمام",
+        "en": "Front"
+      },
+      "length": {
+        "ar": "العدد",
+        "en": "Length"
+      },
+      "noRead": {
+        "ar": "مفيش قيمة للقراءة",
+        "en": "Nothing to read"
+      },
+      "queue": {
+        "ar": "الطابور",
+        "en": "Queue"
+      },
+      "read": {
+        "ar": "اقرأ الأمام",
+        "en": "Read front"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "resetDone": {
+        "ar": "الطابور رجع",
+        "en": "Queue restored"
+      }
+    }
+  },
+  "ch14-recursion": {
+    "frames": [
+      {
+        "calls": [
+          "total(0)"
+        ],
+        "caption": {
+          "ar": "أول نداء يبدأ هنا.",
+          "en": "The first call starts here."
+        },
+        "returned": "—"
+      },
+      {
+        "calls": [
+          "total(0)",
+          "total(1)"
+        ],
+        "caption": {
+          "ar": "النداء يتقدم لموضع 1.",
+          "en": "The call advances to index 1."
+        },
+        "returned": "—"
+      },
+      {
+        "calls": [
+          "total(0)",
+          "total(1)",
+          "total(2)"
+        ],
+        "caption": {
+          "ar": "وصلنا لآخر قيمة.",
+          "en": "The last value is reached."
+        },
+        "returned": "—"
+      },
+      {
+        "calls": [
+          "total(0)",
+          "total(1)",
+          "total(2)",
+          "total(3)"
+        ],
+        "caption": {
+          "ar": "حالة التوقف ترجع صفر.",
+          "en": "The stopping case returns zero."
+        },
+        "returned": "0"
+      },
+      {
+        "calls": [
+          "total(0)",
+          "total(1)",
+          "total(2)"
+        ],
+        "caption": {
+          "ar": "4 يضاف بعد الرجوع.",
+          "en": "4 is added on return."
+        },
+        "returned": "4"
+      },
+      {
+        "calls": [
+          "total(0)",
+          "total(1)"
+        ],
+        "caption": {
+          "ar": "3 يركب على 4.",
+          "en": "3 combines with 4."
+        },
+        "returned": "7"
+      },
+      {
+        "calls": [
+          "total(0)"
+        ],
+        "caption": {
+          "ar": "القيمة رجعت لأول نداء.",
+          "en": "The value returns to the first call."
+        },
+        "returned": "9"
+      }
+    ],
+    "labels": {
+      "calls": {
+        "ar": "Call stack",
+        "en": "Call stack"
+      },
+      "next": {
+        "ar": "اللي بعده",
+        "en": "Next"
+      },
+      "previous": {
+        "ar": "اللي فات",
+        "en": "Previous"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "returned": {
+        "ar": "الناتج الراجع",
+        "en": "Returned value"
+      }
+    }
+  },
+  "ch14-stack": {
+    "arrivals": [
+      {
+        "ar": "شرق",
+        "en": "East"
+      },
+      {
+        "ar": "جنوب",
+        "en": "South"
+      }
+    ],
+    "examples": [
+      {
+        "type": {
+          "ar": "Cell[int]",
+          "en": "Cell[int]"
+        },
+        "value": {
+          "ar": "12",
+          "en": "12"
+        }
+      },
+      {
+        "type": {
+          "ar": "Cell[string]",
+          "en": "Cell[string]"
+        },
+        "value": {
+          "ar": "north",
+          "en": "north"
+        }
+      }
+    ],
+    "generic": {
+      "ar": "Stack[Direction]",
+      "en": "Stack[Direction]"
+    },
+    "initial": [
+      {
+        "ar": "شمال",
+        "en": "North"
+      }
+    ],
+    "labels": {
+      "cells": {
+        "ar": "قيم توضيحية",
+        "en": "Illustrative values"
+      },
+      "empty": {
+        "ar": "مفيش اتجاهات",
+        "en": "No turns"
+      },
+      "generic": {
+        "ar": "نوع التخزين",
+        "en": "Generic type"
+      },
+      "peek": {
+        "ar": "اقرأ الآخر",
+        "en": "Read top"
+      },
+      "pop": {
+        "ar": "شيل الآخر",
+        "en": "Pop top"
+      },
+      "push": {
+        "ar": "أضف اتجاه",
+        "en": "Push turn"
+      },
+      "pushed": {
+        "ar": "اتضاف اتجاه",
+        "en": "Turn pushed"
+      },
+      "removed": {
+        "ar": "اتشال اتجاه",
+        "en": "Turn popped"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "resetDone": {
+        "ar": "رجعنا للبداية",
+        "en": "Back at start"
+      },
+      "route": {
+        "ar": "سجل الطريق",
+        "en": "Route history"
+      },
+      "top": {
+        "ar": "آخر اتجاه",
+        "en": "Newest turn"
+      }
+    }
+  },
+  "ch14-type-constraints": {
+    "constraint": "~int | ~float64",
+    "labels": {
+      "accepted": {
+        "ar": "مقبول",
+        "en": "Accepted"
+      },
+      "constraint": {
+        "ar": "Type set",
+        "en": "Type set"
+      },
+      "next": {
+        "ar": "نوع تاني",
+        "en": "Next type"
+      },
+      "rejected": {
+        "ar": "خارج المجموعة",
+        "en": "Outside the set"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "type": {
+        "ar": "النوع",
+        "en": "Type"
+      },
+      "underlying": {
+        "ar": "النوع الأساسي",
+        "en": "Underlying type"
+      }
+    },
+    "types": [
+      {
+        "accepted": true,
+        "name": "Meter",
+        "underlying": "float64"
+      },
+      {
+        "accepted": true,
+        "name": "Count",
+        "underlying": "int"
+      },
+      {
+        "accepted": false,
+        "name": "Route",
+        "underlying": "string"
+      }
+    ]
+  }
+}
