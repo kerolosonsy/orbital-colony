@@ -736,6 +736,11 @@ ed.addEventListener("keydown", (e) => {
     renderEditor();
     return;
   }
+  if (ed.readOnly && !isLinked() && e.key.length === 1 && !e.metaKey && !e.ctrlKey) {
+    // typing into a read-only lab file did nothing, silently: say why
+    $("#save-state").textContent = T("الملف ده للقراية بس — اكتب في ملف تاني", "This file is read-only — edit another tab");
+    return;
+  }
   if (ed.readOnly || !window.EditKeys) return;
   const edit = EditKeys.handle(ed.value, ed.selectionStart, ed.selectionEnd, e);
   if (!edit) return;
