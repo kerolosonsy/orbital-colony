@@ -174,6 +174,14 @@ const Colony = (() => {
       try { ev = JSON.parse(m.data); } catch { return; }
       onEvent(ev);
     };
+    // A closed stream (e.g. the server restarted with a new token) never comes
+    // back by itself: say so once instead of silently freezing the colony.
+    const stream = es;
+    es.onerror = () => {
+      if (stream !== es || stream.readyState !== EventSource.CLOSED || stream.warned) return;
+      stream.warned = true;
+      log(T("الاتصال المباشر بالمستعمرة اتقطع. اعمل refresh للصفحة (⌘R / F5).", "The live colony connection was lost. Refresh the page (⌘R / F5)."), "c-warn");
+    };
   }
 
   // ---------- live events ----------
