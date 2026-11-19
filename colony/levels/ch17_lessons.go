@@ -164,7 +164,7 @@ func main() {
 			ch17Question("c171.predict-layer", "إيه اللي هيتطبع بعد زيادة z؟", "What prints after z increases?", increment, []string{"1", "0", "2"}, []string{"1", "0", "2"}, 0,
 				[]string{"بدأت z بصفر وزادت مرة.", "دي قيمتها قبل الزيادة.", "الزيادة خطوة واحدة بس."},
 				[]string{"z starts at zero and increases once.", "That is its value before the increment.", "It increases by one step."}, english),
-			ch17Walkthrough("c171.layer-reveal", "اتبع قيمة الطبقة خطوة خطوة.", "Follow the layer value one step at a time.", increment, "e171-layer", []string{"fmt"}, []ch17FrameCopy{
+			ch17Walkthrough("c171.layer-reveal", "تابع value الطبقة خطوة خطوة.", "Follow the layer value one step at a time.", increment, "e171-layer", []string{"fmt"}, []ch17FrameCopy{
 				{line: 0, ar: "قبل التنفيذ.", en: "Before execution."},
 				{line: 2, ar: "z تبدأ بصفر.", en: "z starts at zero.", vars: []LessonVariable{{Name: "z", Value: "0"}}},
 				{line: 3, ar: "زودناها واحد.", en: "Increase it by one.", vars: []LessonVariable{{Name: "z", Value: "1"}}},
@@ -213,10 +213,10 @@ func ch17Mission2(english bool) []LessonStep {
 				{line: 6, ar: "الخانة المختارة فيها F.", en: "The selected tile contains F.", output: "F"},
 			}, english)}},
 		{ID: "c172.try-step", Title: ch17Copy("جرّب", "Try it", english), Blocks: []LessonBlock{
-			ch17Question("c172.predict-index", "أنهي قيمة هتطلع؟", "Which value is printed?", index, []string{"7", "6", "3"}, []string{"7", "6", "3"}, 0,
+			ch17Question("c172.predict-index", "أنهي value هتطلع؟", "Which value is printed?", index, []string{"7", "6", "3"}, []string{"7", "6", "3"}, 0,
 				[]string{"الطبقة 1، ثم x=1، ثم y=0 توصل لـ7.", "6 عند y=1 في نفس العمود.", "3 في الطبقة 0، العمود 1."},
 				[]string{"Layer 1, then x=1, then y=0 reaches 7.", "Six is at y=1 in that column.", "Three is in layer 0, column 1."}, english),
-			ch17Walkthrough("c172.index-reveal", "اقرأ كل index بالترتيب.", "Read each index in order.", index, "e172-index", []string{"fmt"}, []ch17FrameCopy{
+			ch17Walkthrough("c172.index-reveal", "اقرا كل index بالترتيب.", "Read each index in order.", index, "e172-index", []string{"fmt"}, []ch17FrameCopy{
 				{line: 0, ar: "قبل التنفيذ.", en: "Before execution."},
 				{line: 2, ar: "قيم مختلفة لكل بُعد.", en: "Distinct values for each dimension.", vars: []LessonVariable{{Name: "layers", Value: "2 layers; each 2 by 2"}}},
 				{line: 3, ar: "اختار الطبقة التانية.", en: "Select the second layer.", vars: []LessonVariable{{Name: "z", Value: "1"}}},
@@ -226,12 +226,12 @@ func ch17Mission2(english bool) []LessonStep {
 			ch17VolumeSandbox(english),
 		}},
 		{ID: "c172.watch-step", Title: ch17Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch17Markdown("c172.watch",
-			"الخريطة مش لازم تبقى مربعة؛ استخدم طول كل slice في مستواها.\n\nالخانة المفتوحة تشمل ~Tunnel~ و~Shaft~.",
+			"الخريطة مش لازم تبقى مربعة؛ استعمل طول كل slice في مستواها.\n\nالخانة المفتوحة تشمل ~Tunnel~ و~Shaft~.",
 			"The map need not be square; use each slice's own length.\n\nOpen ground includes ~Tunnel~ and ~Shaft~.", english)}},
 		{ID: "c172.check-step", Title: ch17Copy("فكّر واختبر", "Think & check", english), Blocks: []LessonBlock{
-			ch17Markdown("c172.plan", "اكتب شكل الأبعاد بتعليق صغير، وافحص قراءة خانة واحدة قبل توسيع اللفّات.\n\nبعد كل طبقة، ضيف عددها لمكانها في slice التقرير.", "Write the dimension order in a short comment and verify one tile before expanding loops.\n\nAdd each layer's count to its position in the report slice.", english),
+			ch17Markdown("c172.plan", "اكتب شكل الأبعاد بتعليق صغير، وبص على value خانة واحدة قبل ما تزود الـloops.\n\nبعد كل طبقة، ضيف عددها لمكانها في slice التقرير.", "Write the dimension order in a short comment and verify one tile before expanding loops.\n\nAdd each layer's count to its position in the report slice.", english),
 			ch17Choice("c172.layer-grid-question", "داخل ~LayerGrid(z)~، إيه ترتيب index؟", "Inside ~LayerGrid(z)~, what is the index order?", []string{"[x][y]", "[y][x]", "[z][y]"}, []string{"[x][y]", "[y][x]", "[z][y]"}, 0,
-				[]string{"الدالة بترجع grid لطبقة واحدة: x وبعدها y.", "ترتيب المحاور جزء من العقد.", "z اختار الطبقة قبل استدعاء الدالة."},
+				[]string{"الـfunction بترجّع grid لطبقة واحدة: x وبعدها y.", "ترتيب المحاور جزء من العقد.", "z اختار الطبقة قبل استدعاء الـfunction."},
 				[]string{"The function returns one layer grid: x, then y.", "Axis order is part of the contract.", "z selects the layer before the call."}, english),
 		}},
 		{ID: "c172.turn-step", Title: ch17Copy("دورك", "Your turn", english), Blocks: []LessonBlock{ch17Markdown("c172.turn",
@@ -260,7 +260,7 @@ func main() {
 			"1. وصّل للجيود في layer 2 بأقل خطوات عبر الأنفاق والآبار.\n\n2. هدف الذهب بيتحدد حسب الخريطة المعروضة.\n\n3. الـstarter حمّل خرائط الطبقات وحدد مكان الهدف.",
 			"1. Reach the layer 2 geode in the fewest steps through tunnels and shafts.\n\n2. The gold target depends on the displayed map.\n\n3. The starter loaded layer maps and located the target.", english)}},
 		{ID: "c173.idea-step", Title: ch17Copy("الفكرة", "Idea", english), Blocks: []LessonBlock{ch17Walkthrough("c173.cell-key",
-			"BFS من الفصل 15 لسه هو نفسه، بس node بقت فيها z كمان.\n\nstruct حقولها أرقام ينفع تبقى map key؛ نفس x وy على طبقة مختلفة node تانية.",
+			"BFS من الفصل 15 لسه زي ما هو، بس node بقى فيها z كمان.\n\nstruct حقولها أرقام ينفع تبقى map key؛ نفس x وy على طبقة مختلفة node تانية.",
 			"The chapter 15 BFS is still the same, but a node now includes z.\n\nA struct of numbers can be a map key; the same x and y on another layer is a different node.",
 			keys, "e173-cell-key", []string{"fmt"}, []ch17FrameCopy{
 				{line: 0, ar: "قبل التنفيذ.", en: "Before execution."},
@@ -272,13 +272,13 @@ func main() {
 			}, english)}},
 		{ID: "c173.try-step", Title: ch17Copy("جرّب", "Try it", english), Blocks: []LessonBlock{
 			ch17Question("c173.predict-queue", "إيه اللي هيتطبع بعد إزالة أول عنصر؟", "What prints after removing the first item?", queue, []string{"dock [shaft]", "shaft [dock]", "dock [dock shaft]"}, []string{"dock [shaft]", "shaft [dock]", "dock [dock shaft]"}, 0,
-				[]string{"الطابور FIFO: خُد الأول وسيب الباقي.", "shaft لسه في الطابور.", "الإزالة قصّت العنصر الأول."},
+				[]string{"الـqueue FIFO: خد الأول وسيب الباقي.", "shaft لسه في الـqueue.", "الإزالة قصّت العنصر الأول."},
 				[]string{"The queue is FIFO: take the first and keep the rest.", "shaft remains in the queue.", "Removal sliced off the first item."}, english),
-			ch17Walkthrough("c173.queue-reveal", "تابع حركة أول عنصر في الطابور.", "Follow the first item leaving the queue.", queue, "e173-queue", []string{"fmt"}, []ch17FrameCopy{
+			ch17Walkthrough("c173.queue-reveal", "تابع أول عنصر وهو بيخرج من الـqueue.", "Follow the first item leaving the queue.", queue, "e173-queue", []string{"fmt"}, []ch17FrameCopy{
 				{line: 0, ar: "قبل التنفيذ.", en: "Before execution."},
 				{line: 2, ar: "الدور: dock ثم shaft.", en: "Order: dock, then shaft.", vars: []LessonVariable{{Name: "queue", Value: "[dock shaft]"}}},
 				{line: 3, ar: "اختارنا أول محطة.", en: "Select the first station.", vars: []LessonVariable{{Name: "current", Value: "dock"}}},
-				{line: 4, ar: "باقي shaft في الطابور.", en: "shaft remains in the queue.", vars: []LessonVariable{{Name: "queue", Value: "[shaft]"}}},
+				{line: 4, ar: "باقي shaft في الـqueue.", en: "shaft remains in the queue.", vars: []LessonVariable{{Name: "queue", Value: "[shaft]"}}},
 				{line: 5, ar: "يطبع المحطة والباقي.", en: "Print the item and remainder.", vars: []LessonVariable{{Name: "current", Value: "dock"}, {Name: "queue", Value: "[shaft]"}}, output: "dock [shaft]"},
 			}, english),
 			ch17QueueSandbox(english),
@@ -289,7 +289,7 @@ func main() {
 		{ID: "c173.check-step", Title: ch17Copy("فكّر واختبر", "Think & check", english), Blocks: []LessonBlock{
 			ch17Markdown("c173.plan", "ارسم الجيران المسموحين لكل node، وبعدها راجع أي طبقة أو اتجاه اتغير.\n\nاحسب خطوة الحفر الأخيرة ضمن الخطة.", "List allowed neighbors for each node, then check which layer or direction changed.\n\nInclude the final dig action in the plan.", english),
 			ch17Choice("c173.node-question", "نفس x وy مع z مختلف؛ نفس node؟", "Same x and y but different z: same node?", []string{"لأ، دي node مختلفة", "أيوه، z مش مهم", "حسب ترتيب الـmap"}, []string{"No, that is a different node", "Yes, z does not matter", "It depends on map order"}, 0,
-				[]string{"z جزء من قيمة Cell ومن مفتاح الـmap.", "الأبعاد التلاتة بيميزوا المكان.", "ترتيب الـmap مش بيحدد الهوية."},
+				[]string{"z جزء من value الـCell ومن key الـmap.", "الأبعاد التلاتة بيميزوا المكان.", "ترتيب الـmap مش بيحدد الهوية."},
 				[]string{"z is part of the Cell value and map key.", "All three dimensions identify the location.", "Map order does not define identity."}, english),
 		}},
 		{ID: "c173.turn-step", Title: ch17Copy("دورك", "Your turn", english), Blocks: []LessonBlock{ch17Markdown("c173.turn",
@@ -317,23 +317,23 @@ func main() {
 			"1. المختبر طالب ~RelayPath[T comparable]~ لمسارات موجهة.\n\n2. راجع عقد النتيجة والفشل والملكية والدورات.\n\n3. اكتب tests وbenchmark؛ الكودين ظاهرين في الـstarter.",
 			"1. The lab asks for ~RelayPath[T comparable]~ over directed routes.\n\n2. Review result, failure, ownership, and cycle promises.\n\n3. Write tests and a benchmark; both files are in the starter.", english)}},
 		{ID: "c17b.idea-step", Title: ch17Copy("الفكرة", "Idea", english), Blocks: []LessonBlock{ch17Walkthrough("c17b.comparable-map",
-			"~comparable~ بتسمح باستخدام T كمفتاح map.\n\nالمثال يسجل مفتاح نوعه string؛ في العقد النوع بيتغير، لكن خاصية المقارنة تفضل مطلوبة.",
+			"~comparable~ بتسمح باستخدام T كـkey في map.\n\nالمثال بيسجّل key نوعه string؛ في العقد النوع بيتغير، لكن خاصية المقارنة تفضل مطلوبة.",
 			"~comparable~ allows T to be a map key.\n\nThis example records a string key; the contract can change its type, but comparability is still required.",
 			genericMap, "e17b-comparable", []string{"fmt"}, []ch17FrameCopy{
 				{line: 0, ar: "قبل التنفيذ.", en: "Before execution."},
 				{line: 1, ar: "T لازم تقبل المقارنة.", en: "T must support comparison."},
-				{line: 5, ar: "map string تبدأ فاضية.", en: "The string map starts empty.", vars: []LessonVariable{{Name: "seen", Value: "{}"}}},
+				{line: 5, ar: "map من نوع string بتبدأ فاضية.", en: "The string map starts empty.", vars: []LessonVariable{{Name: "seen", Value: "{}"}}},
 				{line: 6, ar: "سجلنا dock.", en: "Record dock.", vars: []LessonVariable{{Name: "seen[dock]", Value: "true"}}},
-				{line: 7, ar: "المفتاح موجود.", en: "The key is present.", vars: []LessonVariable{{Name: "seen[dock]", Value: "true"}}, output: "true"},
+				{line: 7, ar: "الـkey موجود.", en: "The key is present.", vars: []LessonVariable{{Name: "seen[dock]", Value: "true"}}, output: "true"},
 			}, english)}},
 		{ID: "c17b.try-step", Title: ch17Copy("جرّب", "Try it", english), Blocks: []LessonBlock{
 			ch17Question("c17b.predict-cell", "أنهي lookup يرجّع false؟", "Which lookup returns false?", cellMap, []string{"اللي z فيها 2", "اللي z فيها 1", "الاتنين true"}, []string{"The one with z equal to 2", "The one with z equal to 1", "Both are true"}, 0,
-				[]string{"المفتاح المخزن فيه z=1.", "ده نفس المفتاح اللي اتخزن.", "تغيير z يغيّر قيمة المفتاح."},
+				[]string{"الـkey المخزّن فيه z=1.", "ده نفس الـkey اللي اتخزن.", "تغيير z بيغيّر value الـkey."},
 				[]string{"The stored key has z=1.", "That is the stored key.", "Changing z changes the key value."}, english),
-			ch17Walkthrough("c17b.cell-reveal", "قارن مفاتيح الـstruct كاملة.", "Compare the complete struct keys.", cellMap, "e17b-cell", []string{"fmt"}, []ch17FrameCopy{
+			ch17Walkthrough("c17b.cell-reveal", "قارن كل الـkeys في الـstruct.", "Compare the complete struct keys.", cellMap, "e17b-cell", []string{"fmt"}, []ch17FrameCopy{
 				{line: 0, ar: "قبل التنفيذ.", en: "Before execution."},
 				{line: 1, ar: "Cell فيها X وZ.", en: "Cell has X and Z."},
-				{line: 3, ar: "الخريطة فيها z=1.", en: "The map stores z=1.", vars: []LessonVariable{{Name: "known", Value: "{{2 1}:true}"}}},
+				{line: 3, ar: "الـmap فيها z=1.", en: "The map stores z=1.", vars: []LessonVariable{{Name: "known", Value: "{{2 1}:true}"}}},
 				{line: 4, ar: "الأول true، والتاني false.", en: "First is true; second is false.", vars: []LessonVariable{{Name: "known[{2 1}]", Value: "true"}, {Name: "known[{2 2}]", Value: "false"}}, output: "true false"},
 			}, english),
 			ch17KeySandbox(english),
@@ -342,13 +342,13 @@ func main() {
 			"العقد بيوصف مسار موجه؛ الجار مش لازم يرجعلك.\n\nالنجاح الوهمي للوجهة الغايبة يخرق العقد، و~nil~ غير slice فاضية.",
 			"The contract describes directed routes; a neighbor need not link back.\n\nInventing success for a missing destination breaks the contract, and ~nil~ differs from an empty slice.", english)}},
 		{ID: "c17b.check-step", Title: ch17Copy("فكّر واختبر", "Think & check", english), Blocks: []LessonBlock{
-			ch17Markdown("c17b.plan", "حوّل كل وعد لملاحظة مستقلة: قِصر الطريق، الإشارة عند الفشل، عدم تغيير المدخل، وانتهاء البحث مع الدورات.\n\nقِس الأداء لوحده.", "Turn each promise into a separate observation: shortest route, failure signal, unchanged input, and termination with cycles.\n\nMeasure performance separately.", english),
+			ch17Markdown("c17b.plan", "حوّل كل وعد لملاحظة مستقلة: أقصر طريق، إشارة الفشل، عدم تغيير الـinput، وإن البحث يخلص مع الدورات.\n\nقيس الأداء لوحده.", "Turn each promise into a separate observation: shortest route, failure signal, unchanged input, and termination with cycles.\n\nMeasure performance separately.", english),
 			ch17Choice("c17b.comparable-question", "إيه اللي بتضمنه ~comparable~؟", "What does ~comparable~ guarantee?", []string{"T ينفع مفتاح map", "كل T نوع رقمي", "كل القيم مرتبة"}, []string{"T can be a map key", "Every T is numeric", "All values are ordered"}, 0,
-				[]string{"المقارنة مطلوبة للمفتاح؛ مش لازم يكون رقم.", "string وstruct مناسبين كمان لو حقولهم قابلة للمقارنة.", "comparable ما بتفرضش ترتيب."},
+				[]string{"المقارنة مطلوبة للـkeys؛ مش لازم يكون رقم.", "string وstruct ينفعوا كمان لو حقولهم قابلة للمقارنة.", "comparable ما بتفرضش ترتيب."},
 				[]string{"Keys need comparison; they need not be numeric.", "Strings and comparable structs can work too.", "comparable does not define an order."}, english),
 		}},
 		{ID: "c17b.turn-step", Title: ch17Copy("دورك", "Your turn", english), Blocks: []LessonBlock{ch17Markdown("c17b.turn",
-			"اكتب قائمة بالعقد جنب placeholder التست، وبعدها طبّق البحث وbenchmark.\n\nراجع النتيجة والملكية قبل ما تقيس السرعة.",
+			"اكتب قائمة بالعقد جنب placeholder الـtest، وبعدها طبّق البحث وbenchmark.\n\nبص على النتيجة والملكية قبل ما تقيس السرعة.",
 			"Write a contract checklist beside the test placeholder, then implement the search and benchmark.\n\nReview results and ownership before measuring speed.", english)}},
 	}
 }

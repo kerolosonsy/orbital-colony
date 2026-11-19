@@ -3,7 +3,7 @@ package levels
 import "orbital/colony/i18n"
 
 func init() {
-	add(&Level{ID: "18-1-mission-log", Chapter: 18, LessonRevision: 1, Steps: ch18MissionLogArabic, Kind: "lab", Title: "سجل المهام", Goal: "اختبر سجل طلعات بهوية ثابتة وترتيب مستقر",
+	add(&Level{ID: "18-1-mission-log", Chapter: 18, LessonRevision: 1, Steps: ch18MissionLogArabic, Kind: "lab", Title: "سجل المهام", Goal: "اكتب tests لسجل طلعات بهوية ثابتة وترتيب ثابت",
 		Requires: []string{"tabletest"}, Bridge: []int{16}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: missionLogImplementation, ReadOnly: true}, {Name: "main_test.go", Starter: missionLogTestStarter}},
 		Lesson: `# سجل مش بيتلخبط
 
@@ -133,7 +133,7 @@ Cover empty state, trimming, addition, repeated sealing, head/middle/tail deleti
 			{Desc: i18n.T("لقطة مشتركة", "Shared snapshot"), Code: mutate(missionLogImplementation, "return append([]MissionEntry(nil), m.entries...)", "return m.entries")},
 		}},
 	})
-	add(&Level{ID: "18-2-black-box", Chapter: 18, LessonRevision: 1, Steps: ch18BlackBoxArabic, Kind: "lab", Title: "الصندوق الأسود", Goal: "احفظ واقرأ بيانات الصندوق الأسود بصيغة JSON من غير ضياع دليل العطل",
+	add(&Level{ID: "18-2-black-box", Chapter: 18, LessonRevision: 1, Steps: ch18BlackBoxArabic, Kind: "lab", Title: "الصندوق الأسود", Goal: "خزّن واقرا بيانات الصندوق الأسود بصيغة JSON من غير ما تضيع دليل العطل",
 		Requires: []string{"sel:json.Unmarshal"}, Bridge: []int{17}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: blackBoxStarter}},
 		Lesson: `# الصندوق الأسود مش مجرد نص
 
@@ -197,7 +197,7 @@ os.WriteFile(path,[]byte("{}"),0600) // مسح دليل العطل كعلاج ل
 نفّذ ~WriteBlackBox(path string, box BlackBox) error~ و~ReadBlackBox(path string) (BlackBox,error)~. ~BlackBox~ فيها ~Cycle int~ بـ tag ~json:"cycle"~ و~Callsigns []string~ بـ tag ~json:"callsigns"~. Cycle لازم موجب؛ Callsigns لازم مش nil، ومسموح فاضية. كل اسم لازم TrimSpace بتاعه مش فاضي، بس احفظ الاسم الأصلي بالمسافات والترتيب والتكرار.
 
 الكتابة تتحقق الأول ثم تحفظ JSON بالحقلين الاتنين؛ القراية تفك JSON وتتحقق وترجع نفس القيم. الحقول المجهولة تتجاهلها. ملف ناقص، فاضي، بايظ، نوع غلط، schema ناقصة أو غير صالحة: رجّع ~BlackBox{}~ وخطأ واضح فيه المسار ومرحلة read أو decode أو validate؛ أخطاء نظام الملفات تحتفظ بسببها بـ %w. القراية عمرها ما تكتب. فشل validation قبل الحفظ يسيب الملف زي ما هو؛ فشل الكتابة يرجع خطأ. مش مطلوب atomic rename أو استرجاع بعد انقطاع كهربا. مفيش Report؛ التستات بتستخدم ملفات مؤقتة.
-`, Hints: []string{"فك JSON بيشرح الصيغة؛ validation بتراجع معنى البيانات.", "قسّم الشغل لمراحل مستقلة للتحقق والقراءة والكتابة.", "راجع الـpointer في ~Unmarshal~ ورسالة الخطأ اللي فيها المسار."},
+`, Hints: []string{"فك JSON بيشرح الصيغة؛ validation بتراجع معنى البيانات.", "قسّم الشغل لمراحل مستقلة للتحقق والقراءة والكتابة.", "بص على الـpointer في ~Unmarshal~ ورسالة الـerror اللي فيها المسار."},
 		En: &LevelText{LessonRevision: 1, Steps: ch18BlackBoxEnglish, Title: "Black Box", Goal: "Save and load black-box JSON without destroying failure evidence", Files: []LabFile{{Name: "main.go", Starter: blackBoxStarter}},
 			Lesson: `# The Black Box Is More Than Text
 
@@ -264,7 +264,7 @@ Validate before writing JSON with both fields. Reading decodes and validates, re
 `, Hints: []string{"Decoding JSON explains its syntax; validation checks the data's meaning.", "Separate the validation, read, and write stages.", "Check the ~Unmarshal~ pointer and the path in each error."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: blackBoxHidden},
 	})
-	add(&Level{ID: "18-3-cargo-manifest", Chapter: 18, LessonRevision: 1, Steps: ch18CargoArabic, Kind: "lab", Title: "بيان الشحنة", Goal: "اقرأ CSV الشحنة واجمع الكميات من غير بلع صف بايظ",
+	add(&Level{ID: "18-3-cargo-manifest", Chapter: 18, LessonRevision: 1, Steps: ch18CargoArabic, Kind: "lab", Title: "بيان الشحنة", Goal: "اقرا CSV الشحنة واجمع الكميات من غير ما تتجاهل record بايظة",
 		Requires: []string{"sel:csv.NewReader"}, Bridge: []int{18}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: cargoManifestStarter}},
 		Lesson: `# الصناديق اللي جواها فاصلة
 
@@ -329,7 +329,7 @@ units,_:=strconv.Atoi(fields[2]) // النص البايظ يتحسب صفر با
 كل record بيانات لازم 3 حقول: id يقبله Atoi وغير سالب؛ callsign بعد TrimSpace مش فاضي؛ cargo يقبله Atoi من 0 لـ1000000 شامل. تكرار IDs مسموح لأنها أرقام محلية لمصدر الشحنة. اجمع عدد records في Rows، وكل cargo في Units، ولكل اسم في ByCallsign. المدخل الصالح أقصى 100000 record بيانات عشان مجموع int يفضل آمن. متخزّنش الصفوف كلها.
 
 أي schema أو quoting أو field count أو قيمة بايظة، وأي خطأ قراية، يرجّع ~CargoTotals{}~ وخطأ. خطأ البيانات يحتوي ~record N~ بالرقم المنطقي بداية من 2؛ احتفظ بأسباب أخطاء المكتبة. اقبل quoted commas وescaped quotes وCRLF وآخر record من غير newline؛ اتجاهل السطور الفاضية زي csv.Reader. النجمة التالتة: quoted field متعدد السطور، حتى لو المصدر بيبعت بايت واحد في كل Read. مفيش Report ولا ملفات قرص.
-`, Hints: []string{"record في CSV مش لازم تطابق سطر ظاهر بسبب quotes.", "ابدأ بالـheader وخلي القراءة تتقدم record record.", "راجع ~Reader.Read~ وميّز ~io.EOF~ عن أي خطأ تاني."},
+`, Hints: []string{"record في CSV مش لازم تطابق سطر ظاهر بسبب quotes.", "ابدأ بالـheader واقرا record record.", "بص على ~Reader.Read~ وميّز ~io.EOF~ عن أي error تاني."},
 		En: &LevelText{LessonRevision: 1, Steps: ch18CargoEnglish, Title: "Cargo Manifest", Goal: "Read cargo CSV and aggregate units without swallowing broken records", Files: []LabFile{{Name: "main.go", Starter: cargoManifestStarter}},
 			Lesson: `# Crates With Commas Inside
 
@@ -528,7 +528,7 @@ Empty or punctuation-only input returns length zero,nil. Negative limit returns 
 `, Hints: []string{"Unicode text is split by runes, not bytes.", "Separate tokenizing, counting, and result ordering.", "Review the ~FieldsFunc~ predicate and ~Scanner.Buffer~ before the first ~Scan~."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: signalWordsHidden},
 	})
-	add(&Level{ID: "18-5-flight-recorder", Chapter: 18, LessonRevision: 1, Steps: ch18RecorderArabic, Kind: "lab", Title: "مسجّل الرحلة", Goal: "حلّل سيل الرحلة وميّز السطر البايظ عن فشل النقل",
+	add(&Level{ID: "18-5-flight-recorder", Chapter: 18, LessonRevision: 1, Steps: ch18RecorderArabic, Kind: "lab", Title: "مسجّل الرحلة", Goal: "حلّل stream الرحلة وميّز record بايظة عن error في النقل",
 		Requires: []string{"sel:bufio.Scanner", "struct"}, Bridge: []int{21}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: flightRecorderStarter}},
 		Lesson: `# مسجّل الرحلة بيسمع لحد الآخر
 
@@ -596,7 +596,7 @@ for scanner.Scan() {} // ضيّع أرقام السطور وبلع scanner.Err
 زوّد counter المستوى لكل سطر صالح. أي سطر تاني، بما فيه الفاضي أو leading whitespace أو level مجهول، ضيف رقمه 1-based لـ BadLines وكمّل. EOF نجاح؛ الفاضي ملخص أصفار. اقبل CRLF وآخر سطر من غير terminator.
 
 أكبر محتوى سطر 256 KiB شامل، من غير LF أو CRLF؛ الأكبر خطأ هيكلي، مش diagnostic. أي خطأ قراية أو حد حجم يرجّع ~FlightSummary{}~,error مع الاحتفاظ بسبب خطأ المصدر. اختبارات النجاح الأساسية تستخدم سطور لحد 4 KiB؛ النجمة التالتة لقبول سطور أطول من حد Scanner الافتراضي، لحد 256 KiB بالظبط. استخدم Scanner وstruct، ومتحتفظش بكل السطور. مفيش Report.
-`, Hints: []string{"record malformed مش معناها إن مصدر القراءة كله فشل.", "افصل عدّ records وتشخيصها عن حالة الـscanner.", "راجع ~SplitN~ للرسالة و~Scanner.Err~ بعد آخر سطر."},
+`, Hints: []string{"record بايظة مش معناها إن مصدر القراءة كله فشل.", "افصل عدّ records وتشخيصها عن حالة الـscanner.", "بص على ~SplitN~ للرسالة و~Scanner.Err~ بعد آخر سطر."},
 		En: &LevelText{LessonRevision: 1, Steps: ch18RecorderEnglish, Title: "Flight Recorder", Goal: "Analyze flight streams and distinguish bad records from transport failure", Files: []LabFile{{Name: "main.go", Starter: flightRecorderStarter}},
 			Lesson: `# The Flight Recorder Listens to the End
 
@@ -667,7 +667,7 @@ Maximum content length is 256 KiB inclusive, excluding LF or CRLF. Longer lines 
 `, Hints: []string{"A malformed record does not mean the whole source read failed.", "Separate record counts and diagnostics from scanner state.", "Review ~SplitN~ for the message and ~Scanner.Err~ after the final line."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: flightRecorderHidden, Bonus: true},
 	})
-	add(&Level{ID: "18-6-crew-directory", Chapter: 18, LessonRevision: 1, Steps: ch18CrewArabic, Kind: "lab", Title: "دليل الطاقم", Goal: "سجّل الطاقم وابحث عنهم واحفظ عن طريق interface صغيرة",
+	add(&Level{ID: "18-6-crew-directory", Chapter: 18, LessonRevision: 1, Steps: ch18CrewArabic, Kind: "lab", Title: "دليل الطاقم", Goal: "سجّل الطاقم، وابحث عنهم، وخزّنهم من خلال interface صغيرة",
 		Requires: []string{"iface"}, Bridge: []int{22}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: crewDirectoryStarter}},
 		Lesson: `# دليل الطاقم من غير ربطه بالقرص
 
@@ -732,7 +732,7 @@ return store.SaveCrew(d.crew) // المخزن يقدر يبوّظ slice الدل
 ~Search(query string) []Crew~ ترجع اللي callsign أو role فيهم query بعد ToLower للطرفين. متبحثش في ID، ومتعملش TrimSpace للـ query. الفاضية ترجع الكل، والمفيش تطابق طول صفر. النتائج نسخ مستقلة مرتبة بـ ID تصاعدي بترتيب Go.
 
 عرّف ~CrewStore interface { SaveCrew([]Crew) error }~. ~Save(store CrewStore) error~ تدي المخزن لقطة مستقلة مرتبة لكل الطاقم، حتى لو فاضية. nil interface ترجع error؛ typed nil pointer جوه interface مش مطلوب دعمها. رجّع خطأ المخزن مع الحفاظ على السبب، وسيب الدليل زي ما هو حتى لو المخزن عدّل البيانات أو فشل. العقد تسلسلي؛ مفيش CRUD تاني أو ملف أو Report مطلوب.
-`, Hints: []string{"الـinterface بتفصل اللي الكود محتاجه عن نوع المخزن.", "خلي بيانات الدليل مستقلة عن نتائج البحث والحفظ.", "راجع نسخة الـslice اللي بتتسلم للـstore وخطأ ~Save~."},
+`, Hints: []string{"الـinterface بتفصل اللي الكود محتاجه عن نوع المخزن.", "خلي بيانات الدليل مستقلة عن نتائج البحث والتخزين.", "بص على نسخة الـslice اللي بتتسلم للـstore والـerror من ~Save~."},
 		En: &LevelText{LessonRevision: 1, Steps: ch18CrewEnglish, Title: "Crew Directory", Goal: "Register crew, search them, and save through a small interface", Files: []LabFile{{Name: "main.go", Starter: crewDirectoryStarter}},
 			Lesson: `# A Crew Directory Independent of Disk
 

@@ -175,7 +175,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch14Lesson141.Arabic,
 		ID: "14-1-generic-max", Chapter: 14, Title: "دالة لكل الأنواع",
-		Goal: "ابعت أكبر عمق (int) وأعلى حرارة (float64) بدالة Max واحدة generic",
+		Goal: "ابعت أكبر عمق (int) وأعلى حرارة (float64) بـgeneric function واحدة ~Max~",
 		Par:  0, Gold: 0, MaxTicks: 20,
 		Requires: []string{"generic"},
 		Setup: func(w *sim.World) {
@@ -513,7 +513,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch14Lesson143.Arabic,
 		ID: "14-3-constraints", Chapter: 14, Title: "قيود الأنواع",
-		Goal: "ابعت مجموع الأعماق والأوزان (Kg) ودرجات الحرارة، بدالة Sum واحدة",
+		Goal: "ابعت مجموع الأعماق والأوزان (Kg) ودرجات الحرارة، بـfunction واحدة ~Sum~",
 		Par:  0, Gold: 0, MaxTicks: 20,
 		Requires: []string{"generic"},
 		Setup: func(w *sim.World) {
@@ -615,7 +615,7 @@ cmp.Ordered // كل الأنواع اللي بتتقارن، ومعمولة با
 - لما تلاقي نفسك بتكتب **نفس الكود** لأكتر من نوع: containers، وخوارزميات على slices وmaps.
 - **مش** لكل حاجة. لو دالة بتشتغل مع نوع واحد، خلّيها عادية. الـ generics بتصعّب القراية لو اتستخدمت من غير داعي.`,
 	})
-	add(&Level{LessonRevision: 1, Steps: ch14Lesson144.Arabic, ID: "14-4-airlock-queue", Chapter: 14, Kind: "lab", Title: "طابور البوابة", Goal: "ابني طابور generic يحافظ على ترتيب الوصول", Requires: []string{"generictype"}, Bridge: []int{27},
+	add(&Level{LessonRevision: 1, Steps: ch14Lesson144.Arabic, ID: "14-4-airlock-queue", Chapter: 14, Kind: "lab", Title: "طابور البوابة", Goal: "ابني generic queue تحافظ على ترتيب الوصول", Requires: []string{"generictype"}, Bridge: []int{27},
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: airlockQueueStarter, ReadOnly: false}},
 		Lesson: `# اللي وصل الأول يخرج الأول
 

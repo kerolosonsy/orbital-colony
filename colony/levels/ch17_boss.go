@@ -46,8 +46,8 @@ if len(queue) == 0 { return []T{goal}, true } // invents a route
 اكتب table-driven tests في ~main_test.go~ تمسك 3 نسخ غلط: فشل دايماً، نجاح وهمي لوجهة غايبة، واختيار الطريق الأطول. اكتب ~BenchmarkRelayRoutes~ زي 16-3؛ مش مطلوب رقم سرعة معيّن. سيب ~main~ فاضية. النجمة التالتة: عند التعادل، استخدم ترتيب الجيران الأصلي في BFS، وارجع مسار مملوك للمنادي حتى مع إحداثيات 3D كنوع generic.
 `,
 		Hints: []string{
-			"~comparable~ تخلي T ينفع مفتاح map لأي نوع يحقق المقارنة.",
-			"اقرأ كل وعد في العقد لوحده قبل ترتيب التنفيذ والتست والـbenchmark.",
+			"~comparable~ تخلي T ينفع key في map لو نوعه بيدعم المقارنة.",
+			"اقرا كل وعد في العقد لوحده قبل ما ترتب التنفيذ والـtest والـbenchmark.",
 			"ابدأ من ~RelayPath~ وplaceholders في ~main_test.go~ وخلي العقد checklist.",
 		},
 		En: &LevelText{LessonRevision: 1, Steps: ch17Boss(true), Title: "Boss: Rescue Capsule Route", Goal: "Find a generic shortest route and prove its contract with tests and a benchmark", Files: []LabFile{{Name: "main.go", Starter: `package main
