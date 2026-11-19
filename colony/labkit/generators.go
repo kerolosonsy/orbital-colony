@@ -12,6 +12,7 @@ import (
 // FreeAddr asks the listener to bind a free loopback port atomically.
 func FreeAddr() string { return "127.0.0.1:0" }
 
+// Logs returns n deterministic log lines ("0007 WARN drone=42") for the seed.
 func Logs(seed int64, n int) string {
 	rng := rand.New(rand.NewSource(seed))
 	var out strings.Builder
@@ -22,6 +23,8 @@ func Logs(seed int64, n int) string {
 	return out.String()
 }
 
+// CSV returns a deterministic CSV with header id,callsign,cargo and n rows,
+// including quoted commas and non-ASCII names.
 func CSV(seed int64, n int) string {
 	rng := rand.New(rand.NewSource(seed))
 	var out bytes.Buffer
@@ -35,6 +38,7 @@ func CSV(seed int64, n int) string {
 	return out.String()
 }
 
+// Text returns n deterministic space-separated words, mixing Arabic, English and emoji.
 func Text(seed int64, n int) string {
 	rng := rand.New(rand.NewSource(seed))
 	words := []string{"قمر", "مستعمرة", "🚀", "🛰️", "طاقم", "orbit"}
