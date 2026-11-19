@@ -482,10 +482,34 @@ const caretLine = $("#caret-line");
 function placeCaretLine() {
   const show = !ed.readOnly && ed.selectionStart === ed.selectionEnd;
   caretLine.classList.toggle("on", show);
-  if (!show) return;
+  if (!show) { bracketMarks.forEach((mark) => mark.classList.remove("on")); return; }
   const line = ed.value.slice(0, ed.selectionStart).split("\n").length;
   const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
   caretLine.style.top = `${14 + (line - 1) * lineHeight - ed.scrollTop}px`;
+  placeBrackets(lineHeight);
+}
+// The bracket at the caret and its partner get a small box.
+const bracketMarks = [$("#bracket-a"), $("#bracket-b")];
+let charWidth = 0;
+function placeBrackets(lineHeight) {
+  const pair = ed.selectionStart === ed.selectionEnd && window.EditKeys?.matchBracket(ed.value, ed.selectionStart);
+  bracketMarks.forEach((mark, i) => {
+    mark.classList.toggle("on", !!pair);
+    if (!pair) return;
+    if (!charWidth) {
+      const ctx = document.createElement("canvas").getContext("2d");
+      ctx.font = getComputedStyle(ed).font;
+      charWidth = ctx.measureText("0").width || 8.4;
+    }
+    const at = pair[i];
+    const startOfLine = ed.value.lastIndexOf("\n", at - 1) + 1;
+    const row = ed.value.slice(0, at).split("\n").length - 1;
+    let col = 0;
+    for (const c of ed.value.slice(startOfLine, at)) col = c === "\t" ? col + 4 - (col % 4) : col + 1;
+    mark.style.top = `${14 + row * lineHeight - ed.scrollTop}px`;
+    mark.style.left = `${16 + col * charWidth - ed.scrollLeft}px`;
+    mark.style.width = `${charWidth}px`;
+  });
 }
 document.addEventListener("selectionchange", () => { if (document.activeElement === ed) placeCaretLine(); });
 let saveTimer;
@@ -1836,7 +1860,11 @@ async function run(opts = {}) {
           logCompileError(e);
           logErrorHelp(e.tip, e.tipCause, e.tipCheck);
         }
-        showFile(firstErrorFile(lastErrors, levelFiles(level), S.file));
+        // land on the first error so the fix starts right there
+        const line = Number(lastErrors[0].line);
+        const file = firstErrorFile(lastErrors, levelFiles(level), S.file);
+        if (line > 0 && !ed.readOnly) jumpToLine(file, line);
+        else showFile(file);
       } else log(r.compileOutput, "c-err");
       if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
       banner(r.result.message, false);

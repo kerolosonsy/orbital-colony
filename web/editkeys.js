@@ -149,7 +149,39 @@
     return null;
   }
 
-  const api = { handle };
+  // matchBracket finds the bracket next to the caret (before it first) and
+  // its partner, skipping strings and comments. Returns [a, b] or null.
+  function matchBracket(value, caret) {
+    const OPEN = "([{", CLOSE = ")]}";
+    let at = -1;
+    for (const i of [caret - 1, caret]) {
+      if (i >= 0 && i < value.length && (OPEN + CLOSE).includes(value[i])) { at = i; break; }
+    }
+    if (at < 0) return null;
+    // mark code characters (outside strings, runes and comments)
+    const code = new Uint8Array(value.length);
+    for (let i = 0; i < value.length; i++) {
+      const c = value[i], n = value[i + 1];
+      if (c === "/" && n === "/") { while (i < value.length && value[i] !== "\n") i++; continue; }
+      if (c === "/" && n === "*") { const e = value.indexOf("*/", i + 2); i = e < 0 ? value.length : e + 1; continue; }
+      if (c === '"' || c === "'") { i++; while (i < value.length && value[i] !== c && value[i] !== "\n") { if (value[i] === "\\") i++; i++; } continue; }
+      if (c === "`") { const e = value.indexOf("`", i + 1); i = e < 0 ? value.length : e; continue; }
+      code[i] = 1;
+    }
+    if (!code[at]) return null;
+    const ch = value[at];
+    const forward = OPEN.includes(ch);
+    const mate = forward ? CLOSE[OPEN.indexOf(ch)] : OPEN[CLOSE.indexOf(ch)];
+    let depth = 0;
+    for (let i = at; forward ? i < value.length : i >= 0; i += forward ? 1 : -1) {
+      if (!code[i]) continue;
+      if (value[i] === ch) depth++;
+      else if (value[i] === mate && --depth === 0) return [at, i];
+    }
+    return null;
+  }
+
+  const api = { handle, matchBracket };
   if (typeof window !== "undefined") window.EditKeys = api;
   if (typeof module !== "undefined") module.exports = api;
 })();

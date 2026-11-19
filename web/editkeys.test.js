@@ -79,3 +79,14 @@ test("Alt+arrows move lines and Shift+Alt+arrows duplicate them", () => {
   assert.equal(type("x|", "ArrowDown", { altKey: true, shiftKey: true }), "x\nx|");
   assert.equal(type("x|", "ArrowUp", { altKey: true, shiftKey: true }), "x|\nx");
 });
+
+test("matchBracket pairs the bracket at the caret and skips strings and comments", () => {
+  const { matchBracket } = require("./editkeys.js");
+  const src = 'f(a, ")", g(b)) // )';
+  assert.deepEqual(matchBracket(src, 2), [1, 14]);   // after "("
+  assert.deepEqual(matchBracket(src, 15), [14, 1]);  // after the last ")"
+  assert.deepEqual(matchBracket(src, 11), [11, 13]); // before "(" of g(
+  assert.equal(matchBracket(src, 7), null);          // ")" inside a string
+  assert.equal(matchBracket("x := 1", 3), null);
+  assert.equal(matchBracket("f(", 2), null);         // unmatched
+});

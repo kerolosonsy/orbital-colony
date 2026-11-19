@@ -303,6 +303,8 @@ input[type="checkbox"] { accent-color: var(--regolith); }
 /* the caret's line: a faint band under the code, hidden while debugging or selecting */
 .caret-line { position: absolute; left: 0; right: 0; height: 1.65em; pointer-events: none; background: color-mix(in srgb, var(--paper) 5%, transparent); display: none; }
 .code-wrap:focus-within .caret-line.on { display: block; }
+.bracket-mark { position: absolute; height: 1.65em; pointer-events: none; display: none; border-radius: 3px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--survey-hi) 70%, transparent); background: color-mix(in srgb, var(--survey-hi) 14%, transparent); }
+.code-wrap:focus-within .bracket-mark.on { display: block; }
 .code-wrap textarea { background: transparent; color: transparent; caret-color: var(--survey-hi); resize: none; outline: none; }
 .code-wrap textarea::selection { background: #4a3f7a; color: transparent; }
 .code-wrap textarea[readonly] { caret-color: transparent; }
