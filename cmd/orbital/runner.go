@@ -18,11 +18,13 @@ import (
 )
 
 type compileError struct {
-	File string `json:"file"`
-	Line int    `json:"line"`
-	Col  int    `json:"col"`
-	Msg  string `json:"msg"`
-	Tip  string `json:"tip,omitempty"`
+	File     string `json:"file"`
+	Line     int    `json:"line"`
+	Col      int    `json:"col"`
+	Msg      string `json:"msg"`
+	Tip      string `json:"tip,omitempty"`
+	TipCause string `json:"tipCause,omitempty"`
+	TipCheck string `json:"tipCheck,omitempty"`
 }
 
 type result struct {
@@ -44,6 +46,8 @@ type runResponse struct {
 	Stderr        string            `json:"stderr"`
 	Events        []json.RawMessage `json:"events"`
 	RuntimeTip    string            `json:"runtimeTip,omitempty"`
+	RuntimeCause  string            `json:"runtimeTipCause,omitempty"`
+	RuntimeCheck  string            `json:"runtimeTipCheck,omitempty"`
 	Steps         []labStep         `json:"steps,omitempty"`
 	Race          bool              `json:"race,omitempty"`
 	Result        result            `json:"result"`
@@ -67,65 +71,8 @@ func parseCompileLine(line string, languages ...string) (compileError, bool) {
 	}
 	ln, _ := strconv.Atoi(m[2])
 	col, _ := strconv.Atoi(m[3])
-	return compileError{m[1], ln, col, m[4], tipFor(m[4], lang)}, true
-}
-
-func compileTips(lang string) []struct{ needle, tip string } {
-	return []struct{ needle, tip string }{
-		{"declared and not used", tr(lang, "عرّفت متغير ومستخدمتوش. Go مبيقبلش متغيرات مش مستخدمة: استخدمه أو امسحه.", "You declared a variable without using it. Go requires variables to be used: use it or remove it.")},
-		{"imported and not used", tr(lang, "عملت import لـ package ومستخدمتهاش. امسح السطر أو استخدمها.", "You imported a package without using it. Remove the import or use the package.")},
-		{"undefined:", tr(lang, "الاسم ده مش معروف. راجع الإملاء، والحروف الكبيرة والصغيرة بتفرق (Move غير move).", "Unknown name. Check spelling and capitalization (Move differs from move).")},
-		{"missing return", tr(lang, "الدالة دي المفروض ترجّع قيمة، بس فيه طريق بيخلص من غير return.", "This function must return a value, but one path ends without a return.")},
-		{"syntax error", tr(lang, "خطأ في كتابة الكود. راجع الأقواس { } ( ) وإن كل حاجة مقفولة.", "Syntax error. Check that all braces { } and parentheses ( ) are closed.")},
-		{"non-boolean condition", tr(lang, "شرط الـ if أو الـ for لازم يكون true/false. يمكن كتبت = بدل ==؟", "An if or for condition must be true or false. Did you use = instead of ==?")},
-		{"cannot use", tr(lang, "النوع مش مناسب. مثلاً بتحط string مكان int.", "The type does not match, such as using a string where an int is expected.")},
-		{"mismatched types", tr(lang, "بتعمل عملية على نوعين مختلفين (زي int + string). Go مش بيحوّل لوحده.", "This operation uses different types (such as int + string). Go does not convert them automatically.")},
-		{"assignment mismatch", tr(lang, "عدد المتغيرات مش زي عدد القيم اللي الدالة بترجّعها.", "The number of variables does not match the number of returned values.")},
-		{"no new variables on left side of :=", tr(lang, "المتغير موجود قبل كده. استخدم = بدل := عشان تغيّر قيمته.", "This variable already exists. Use = instead of := to change its value.")},
-		{"is not used", tr(lang, "قيمة اتحسبت ومحدش استخدمها.", "A value was calculated but never used.")},
-		{"too many arguments", tr(lang, "بعت قيم أكتر من اللي الدالة مستنياها.", "You passed more arguments than the function expects.")},
-		{"not enough arguments", tr(lang, "الدالة مستنية قيم أكتر. راجع الأقواس.", "The function expects more arguments. Check the parentheses.")},
-	}
-}
-
-func runTips(lang string) []struct{ needle, tip string } {
-	return []struct{ needle, tip string }{
-		{"WARNING: DATA RACE", tr(lang, "Race detector لقى data race: أكتر من goroutine بيقروا ويكتبوا نفس المتغير في نفس الوقت من غير حماية. التقرير فوق بيقولك السطرين. احميهم بـ sync.Mutex.", "The race detector found a data race: goroutines access the same variable concurrently without protection. The report above shows both lines. Protect access with sync.Mutex.")},
-		{"concurrent map writes", tr(lang, "أكتر من goroutine بيكتبوا في نفس الـ map في نفس الوقت. الـ maps في Go مش آمنة للـ concurrency: احميها بـ sync.Mutex.", "Multiple goroutines are writing to the same map at once. Go maps need protection for concurrent access: use sync.Mutex.")},
-		{"concurrent map read and map write", tr(lang, "goroutine بتقرا من map وواحدة تانية بتكتب فيها في نفس الوقت. احميها بـ sync.Mutex أو RWMutex.", "One goroutine reads a map while another writes to it. Protect it with sync.Mutex or RWMutex.")},
-		{"all goroutines are asleep", tr(lang, "Deadlock: كل الـ goroutines مستنية بعض. دوّر على channel محدش بيستقبل منها، أو محدش قفلها، أو mutex مقفول ومحدش بيفتحه.", "Deadlock: all goroutines are waiting. Check for a channel with no receiver, an unclosed channel, or a mutex that is never unlocked.")},
-		{"nil pointer dereference", tr(lang, "استخدمت pointer قيمته nil. اتأكد منه بـ != nil قبل ما تستخدمه.", "You used a nil pointer. Check != nil before using it.")},
-		{"index out of range", tr(lang, "حاولت توصل لعنصر برّه حدود الـ slice. اتأكد إن الـ index أصغر من len.", "You accessed an element outside the slice. Check that the index is less than len.")},
-		{"send on closed channel", tr(lang, "بعت على channel اتقفلت. اللي بيبعت بس هو اللي يقفل، وبعد ما يخلّص إرسال خالص.", "You sent to a closed channel. Only the sender should close it, after all sends finish.")},
-		{"close of closed channel", tr(lang, "قفلت نفس الـ channel مرتين.", "You closed the same channel twice.")},
-		{"negative WaitGroup counter", tr(lang, "عملت wg.Done() أكتر من wg.Add(). كل Add(1) يقابلها Done() واحدة بس.", "You called wg.Done() more often than wg.Add(). Each Add(1) needs exactly one Done().")},
-	}
-}
-
-func runtimeTipFor(stderr string, languages ...string) string {
-	lang := "ar"
-	if len(languages) > 0 {
-		lang = normalizeLang(languages[0])
-	}
-	for _, t := range runTips(lang) {
-		if strings.Contains(stderr, t.needle) {
-			return t.tip
-		}
-	}
-	return ""
-}
-
-func tipFor(msg string, languages ...string) string {
-	lang := "ar"
-	if len(languages) > 0 {
-		lang = normalizeLang(languages[0])
-	}
-	for _, t := range compileTips(lang) {
-		if strings.Contains(msg, t.needle) {
-			return t.tip
-		}
-	}
-	return ""
+	tip := errorTipFor(m[4], tipCompile, lang)
+	return compileError{File: m[1], Line: ln, Col: col, Msg: m[4], Tip: tip.Meaning, TipCause: tip.Cause, TipCheck: tip.Check}, true
 }
 
 func (r *runner) goCmd(ctx context.Context, dir string, args ...string) *exec.Cmd {
@@ -177,6 +124,11 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	build.Stdout, build.Stderr = bout, bout
 	if err := runCommand(build); err != nil {
 		out := strings.ReplaceAll(bout.String(), dir+string(os.PathSeparator), "")
+		if errors.Is(bctx.Err(), context.DeadlineExceeded) {
+			out += "\n" + context.DeadlineExceeded.Error()
+			tip := errorTipFor(out, tipRuntime, lang)
+			resp.RuntimeTip, resp.RuntimeCause, resp.RuntimeCheck = tip.Meaning, tip.Cause, tip.Check
+		}
 		resp.CompileOutput = dependencyHint(out, lang)
 		for _, line := range strings.Split(out, "\n") {
 			if ce, ok := parseCompileLine(line, lang); ok {
@@ -206,6 +158,12 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	runErr := runCommand(prog)
 	resp.Stdout = stdout.String()
 	resp.Stderr = strings.ReplaceAll(stderr.String(), dir+string(os.PathSeparator), "")
+	if errors.Is(rctx.Err(), context.DeadlineExceeded) {
+		if resp.Stderr != "" {
+			resp.Stderr += "\n"
+		}
+		resp.Stderr += context.DeadlineExceeded.Error()
+	}
 
 	data, _ := os.ReadFile(trace)
 	var last struct {
@@ -248,7 +206,8 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	}
 	resp.Result.Progress = progress
 	resp.Result.Ticks = last.T
-	resp.RuntimeTip = runtimeTipFor(resp.Stderr, lang)
+	runtimeTip := errorTipFor(resp.Stderr, tipRuntime, lang)
+	resp.RuntimeTip, resp.RuntimeCause, resp.RuntimeCheck = runtimeTip.Meaning, runtimeTip.Cause, runtimeTip.Check
 	resp.Race = lvl.Race && strings.Contains(resp.Stderr, "WARNING: DATA RACE")
 
 	switch {
