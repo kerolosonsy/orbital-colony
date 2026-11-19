@@ -1,1 +1,72 @@
-/* Chapter 18 sandbox styles will be added with its renderer. */
+.ch18-sandbox {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  margin-block: 8px;
+  padding: 10px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-2);
+  color: var(--paper);
+}
+
+.ch18-sandbox-state {
+  display: grid;
+  gap: 5px;
+  min-inline-size: 0;
+}
+
+.ch18-sandbox-heading,
+.ch18-sandbox-caption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ch18-sandbox-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.ch18-sandbox-label {
+  color: var(--muted);
+}
+
+.ch18-sandbox-value {
+  max-inline-size: 70%;
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: var(--mono, monospace);
+  overflow-wrap: anywhere;
+}
+
+.ch18-sandbox-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ch18-sandbox-item {
+  max-inline-size: 100%;
+  padding: 3px 7px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.ch18-sandbox-controls {
+  display: flex;
+  gap: 6px;
+  margin-block-start: 8px;
+}
+
+.ch18-sandbox-controls button {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  min-block-size: 40px;
+}

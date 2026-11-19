@@ -12,6 +12,98 @@ func ch18Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	return LessonBlock{ID: id, Kind: "walkthrough", Text: text, Code: code, Imports: imports, ExampleID: exampleID, Walkthrough: &LessonWalkthrough{Frames: frames}}
 }
 
+func ch18Localized(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch18Sandbox(id, kind, ar, en, mode string, english bool) LessonBlock {
+	if english {
+		ar = en
+	}
+	return LessonBlock{
+		ID: id, Kind: "sandbox", Text: ar,
+		Sandbox: &LessonSandbox{Kind: kind, Config: ch18SandboxConfig(mode)},
+	}
+}
+
+func ch18SandboxConfig(mode string) map[string]any {
+	labels := map[string]any{}
+	data := map[string]any{}
+	switch mode {
+	case "index":
+		labels = map[string]any{
+			"values": ch18Localized("القيم", "Values"),
+			"read":   ch18Localized("القراءة", "Read"),
+			"action": ch18Localized("index التالي", "Next index"),
+			"caption": []map[string]any{
+				ch18Localized("ابدأ من index صفر", "Start at index zero"),
+				ch18Localized("كل index له قيمة", "Each index has a value"),
+				ch18Localized("الترتيب يحدد القراءة", "Order determines the read"),
+			},
+		}
+		data = map[string]any{"values": []int{7, 4, 9}}
+	case "json":
+		labels = map[string]any{
+			"source": ch18Localized("قيمة Go", "Go value"),
+			"result": ch18Localized("JSON bytes", "JSON bytes"),
+			"action": ch18Localized("Marshal", "Marshal"),
+			"before": ch18Localized("جاهزة للتحويل", "Ready to encode"),
+			"after":  ch18Localized("بايتات JSON", "JSON bytes"),
+		}
+		data = map[string]any{"source": "Beacon{Charge: 7}", "encoded": `{"charge":7}`}
+	case "csv":
+		labels = map[string]any{
+			"source": ch18Localized("سطر CSV", "CSV row"),
+			"fields": ch18Localized("الحقول", "Fields"),
+			"action": ch18Localized("السطر التالي", "Next row"),
+			"captions": []map[string]any{
+				ch18Localized("حقلان منفصلان", "Two separate fields"),
+				ch18Localized("الفاصلة جوه quotes", "Comma stays inside quotes"),
+			},
+		}
+		data = map[string]any{"rows": []map[string]any{
+			{"source": ch18Localized("شمال,4", "north,4"), "fields": []map[string]any{ch18Localized("شمال", "north"), ch18Localized("4", "4")}},
+			{"source": ch18Localized(`"غرب، علوي",4`, `"west, upper",4`), "fields": []map[string]any{ch18Localized("غرب، علوي", "west, upper"), ch18Localized("4", "4")}},
+		}}
+	case "unicode":
+		labels = map[string]any{
+			"source":       ch18Localized("النص", "Text"),
+			"result":       ch18Localized("الكلمات", "Words"),
+			"split":        ch18Localized("FieldsFunc", "FieldsFunc"),
+			"lower":        ch18Localized("ToLower", "ToLower"),
+			"splitCaption": ch18Localized("الفواصل تفصل الكلمات", "Separators split words"),
+			"rawCaption":   ch18Localized("النص الأصلي", "Original text"),
+			"lowerCaption": ch18Localized("الحروف بقت صغيرة", "Letters are lowercase"),
+		}
+		data = map[string]any{
+			"raw":        ch18Localized("إيكو—Relay 7", "Echo—Relay 7"),
+			"lowerRaw":   ch18Localized("إيكو—relay 7", "echo—relay 7"),
+			"words":      []map[string]any{ch18Localized("إيكو", "Echo"), ch18Localized("Relay", "Relay"), ch18Localized("7", "7")},
+			"lowerWords": []map[string]any{ch18Localized("إيكو", "echo"), ch18Localized("relay", "relay"), ch18Localized("7", "7")},
+		}
+	case "splitn":
+		labels = map[string]any{
+			"source":  ch18Localized("النص", "Text"),
+			"limit":   ch18Localized("عدد الأجزاء", "Piece limit"),
+			"parts":   ch18Localized("الناتج", "Parts"),
+			"action":  ch18Localized("زوّد الحد", "Raise limit"),
+			"caption": ch18Localized("آخر جزء يحتفظ بالباقي", "Last part keeps the rest"),
+		}
+		data = map[string]any{"raw": "9|relay|warm|again", "separator": "|", "limits": []int{2, 3}}
+	case "search":
+		labels = map[string]any{
+			"name":    ch18Localized("الاسم", "Name"),
+			"query":   ch18Localized("البحث", "Search"),
+			"result":  ch18Localized("النتيجة", "Result"),
+			"pending": ch18Localized("لسه ما اتبحثش", "Not searched yet"),
+			"action":  ch18Localized("Normalize + Contains", "Normalize + Contains"),
+			"caption": ch18Localized("وحّد الحالة قبل البحث", "Normalize case before searching"),
+		}
+		data = map[string]any{"name": "Pilot", "normalized": "pilot", "query": "lot", "match": "true"}
+	}
+	return map[string]any{"mode": mode, "labels": labels, "data": data}
+}
+
 var ch18MissionLogArabic = []LessonStep{
 	{ID: "c181.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c181.mission", "الكود في ~main.go~ جاهز؛ شغلك في ~main_test.go~.\n\nاكتب table-driven tests تثبت إن سجل الطلعات بيحافظ على هويتها وترتيبها.\n\nكل حالة تبقى مستقلة، والاختبار يثبت السلوك مش عدد العناصر بس.")}},
 	{ID: "c181.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch18Walkthrough("c181.idea-table", "الـtable بتجمع بيانات حالات مختلفة؛ loop واحدة تشغّل نفس الفحص على كل حالة.", ch18MissionLogTableCode, "e18-1-table", []string{"fmt"}, []LessonFrame{
@@ -30,6 +122,7 @@ var ch18MissionLogArabic = []LessonStep{
 			{Line: 2, Caption: "قيمتان بترتيبهم.", Variables: []LessonVariable{{Name: "values", Value: "[7 4]"}}},
 			{Line: 3, Caption: "اقرأ index واحد.", Variables: []LessonVariable{{Name: "values", Value: "[7 4]"}}, Output: "4"},
 		}),
+		ch18Sandbox("c181.sandbox", "ch18-slice-index", "غيّر index.", "Move the index.", "index", false),
 	}},
 	{ID: "c181.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c181.watch", "حالات مستقلة بتمنع test يأثر على اللي بعده.\n\nقارن القيم والأخطاء والترتيب؛ الطول لوحده مش كفاية.")}},
 	{ID: "c181.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -57,6 +150,7 @@ var ch18MissionLogEnglish = []LessonStep{
 			{Line: 2, Caption: "Two ordered values.", Variables: []LessonVariable{{Name: "values", Value: "[7 4]"}}},
 			{Line: 3, Caption: "Read index one.", Variables: []LessonVariable{{Name: "values", Value: "[7 4]"}}, Output: "4"},
 		}),
+		ch18Sandbox("c181.sandbox", "ch18-slice-index", "غيّر index.", "Move the index.", "index", true),
 	}},
 	{ID: "c181.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch18Markdown("c181.watch", "Independent cases keep one test from affecting the next.\n\nCompare values, errors, and order; length alone is not enough.")}},
 	{ID: "c181.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -82,6 +176,7 @@ var ch18BlackBoxArabic = []LessonStep{
 			{Line: 2, Caption: "Marshal ترجع بايتات."},
 			{Line: 3, Caption: "الناتج object وخطأ nil.", Output: "{\"hull\":3} <nil>"},
 		}),
+		ch18Sandbox("c182.sandbox", "ch18-json-marshal", "جرّب Marshal.", "Try Marshal.", "json", false),
 	}},
 	{ID: "c182.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c182.watch", "~Unmarshal~ محتاجة pointer عشان تملا القيمة.\n\nفرّق بين JSON سليمة ومعناها، وافحص كل خطأ قبل استخدام الناتج.")}},
 	{ID: "c182.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -107,6 +202,7 @@ var ch18BlackBoxEnglish = []LessonStep{
 			{Line: 2, Caption: "Marshal returns bytes."},
 			{Line: 3, Caption: "Object output and nil error.", Output: "{\"hull\":3} <nil>"},
 		}),
+		ch18Sandbox("c182.sandbox", "ch18-json-marshal", "جرّب Marshal.", "Try Marshal.", "json", true),
 	}},
 	{ID: "c182.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch18Markdown("c182.watch", "~Unmarshal~ needs a pointer to fill the value.\n\nSeparate valid JSON from valid meaning, and check each error before using output.")}},
 	{ID: "c182.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -132,6 +228,7 @@ var ch18CargoArabic = []LessonStep{
 			{Line: 3, Caption: "Read تفك الحقول."},
 			{Line: 4, Caption: "الاسم يفضل حقل واحد.", Output: "[west, upper 4] <nil>"},
 		}),
+		ch18Sandbox("c183.sandbox", "ch18-csv-quoted-field", "بدّل الصف.", "Switch rows.", "csv", false),
 	}},
 	{ID: "c183.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c183.watch", "~io.EOF~ نهاية طبيعية بعد الـheader؛ أي error تاني يوقف الملف.\n\nعدّ records، مش السطور الظاهرة، واحتفظ بسبب أخطاء القراءة.")}},
 	{ID: "c183.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -157,6 +254,7 @@ var ch18CargoEnglish = []LessonStep{
 			{Line: 3, Caption: "Read decodes the fields."},
 			{Line: 4, Caption: "The name stays one field.", Output: "[west, upper 4] <nil>"},
 		}),
+		ch18Sandbox("c183.sandbox", "ch18-csv-quoted-field", "بدّل الصف.", "Switch rows.", "csv", true),
 	}},
 	{ID: "c183.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch18Markdown("c183.watch", "~io.EOF~ is normal after the header; other errors stop the file.\n\nCount records, not visible lines, and preserve read error causes.")}},
 	{ID: "c183.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -181,6 +279,7 @@ var ch18SignalArabic = []LessonStep{
 			{Line: 2, Caption: "حوّل الكلمة لحروف صغيرة."},
 			{Line: 3, Caption: "اعرض القيمة الجديدة.", Output: "echo"},
 		}),
+		ch18Sandbox("c184.sandbox", "ch18-unicode-words", "افصل وحوّل.", "Split and lowercase.", "unicode", false),
 	}},
 	{ID: "c184.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c184.watch", "استخدم ~unicode.IsLetter~ و~IsDigit~ على rune، مش byte.\n\n~Scanner.Buffer~ لازم تتظبط قبل أول ~Scan~؛ افحص ~Err~ بعد الحلقة.")}},
 	{ID: "c184.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -205,6 +304,7 @@ var ch18SignalEnglish = []LessonStep{
 			{Line: 2, Caption: "Convert the word to lowercase."},
 			{Line: 3, Caption: "Print the new value.", Output: "echo"},
 		}),
+		ch18Sandbox("c184.sandbox", "ch18-unicode-words", "افصل وحوّل.", "Split and lowercase.", "unicode", true),
 	}},
 	{ID: "c184.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch18Markdown("c184.watch", "Use ~unicode.IsLetter~ and ~IsDigit~ on runes, not bytes.\n\nSet ~Scanner.Buffer~ before the first ~Scan~; check ~Err~ after the loop.")}},
 	{ID: "c184.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -228,6 +328,7 @@ var ch18RecorderArabic = []LessonStep{
 			{Line: 2, Caption: "اقسم على أول فاصلين."},
 			{Line: 3, Caption: "اعرض العدد والجزء الأخير.", Output: "3 warm|again"},
 		}),
+		ch18Sandbox("c185.sandbox", "ch18-splitn-limit", "زوّد الحد.", "Raise the limit.", "splitn", false),
 	}},
 	{ID: "c185.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c185.watch", "عدّ records بشكل مستقل عن sequence المكتوبة جوه السطر.\n\nالـrecord الغلط له تشخيص؛ ~Scanner.Err~ مشكلة في المصدر كله.")}},
 	{ID: "c185.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -251,6 +352,7 @@ var ch18RecorderEnglish = []LessonStep{
 			{Line: 2, Caption: "Split on the first two separators."},
 			{Line: 3, Caption: "Print count and final piece.", Output: "3 warm|again"},
 		}),
+		ch18Sandbox("c185.sandbox", "ch18-splitn-limit", "زوّد الحد.", "Raise the limit.", "splitn", true),
 	}},
 	{ID: "c185.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch18Markdown("c185.watch", "Count records independently of sequence numbers inside each line.\n\nA malformed record gets a diagnosis; ~Scanner.Err~ indicates a source failure.")}},
 	{ID: "c185.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -276,6 +378,7 @@ var ch18CrewArabic = []LessonStep{
 			{Line: 2, Caption: "وحّد حالة الأحرف."},
 			{Line: 3, Caption: "ابحث واعرض النتيجة.", Output: "true"},
 		}),
+		ch18Sandbox("c186.sandbox", "ch18-normalized-search", "جرّب البحث.", "Try the search.", "search", false),
 	}},
 	{ID: "c186.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c186.watch", "افحص البيانات قبل تعديل الـslice، وسيب النص الأصلي زي ما اتسجل.\n\nرتّب نسخة للعرض، وتعامل مع خطأ التخزين كجزء من النتيجة.")}},
 	{ID: "c186.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -301,6 +404,7 @@ var ch18CrewEnglish = []LessonStep{
 			{Line: 2, Caption: "Normalize letter case."},
 			{Line: 3, Caption: "Search and print the result.", Output: "true"},
 		}),
+		ch18Sandbox("c186.sandbox", "ch18-normalized-search", "جرّب البحث.", "Try the search.", "search", true),
 	}},
 	{ID: "c186.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch18Markdown("c186.watch", "Validate before changing the slice, and keep original text as registered.\n\nSort a copy for display, and treat storage errors as part of the result.")}},
 	{ID: "c186.check-step", Title: "Think & check", Blocks: []LessonBlock{
