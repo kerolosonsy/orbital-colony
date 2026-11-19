@@ -1,0 +1,2482 @@
+{
+  "levels": [
+    {
+      "id": "35-1-task-queue",
+      "kind": "ch35-event-trace",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب ترتيب تاني",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "المهمة مستنية.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "المهمة",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "valve-a",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الحالة",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "ready",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "التسليمات",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "0",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "انتهاء الـlease يعيدها.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "العامل الجديد",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "worker-b",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الحالة",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "leased تاني",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "التسليمات",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "2",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "العامل التاني كسب السباق.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "العامل",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "worker-b",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الحالة",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "leased",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الـack",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "لسه",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "من غير ack، المهمة ترجع.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "العامل التالي",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "worker-a",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الحالة",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "ready",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الترتيب",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "اتغيّر",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try another order"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The task is waiting."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Task"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "valve-a"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "State"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "ready"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Deliveries"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "0"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Lease expiry returns work."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "New worker"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "worker-b"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "State"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "leased again"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Deliveries"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "2"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Worker B wins this race."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Worker"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "worker-b"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "State"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "leased"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Ack"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "pending"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Without ack, work returns."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Next worker"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "worker-a"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "State"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "ready"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "changed"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "35-2-scheduler",
+      "kind": "ch35-event-trace",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب ترتيب تاني",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "الـheap تحفظ أقرب موعد.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الوقت",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "1",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الجذر",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "relay @ 2",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "بعده",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "scan @ 4",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "بعد الوقت، الجذر يتغير.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الوقت",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "2",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "المستحق",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "relay",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الجذر التالي",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "scan @ 4",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "موعدين متساويين.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الوقت",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "2",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الجذر",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "scan @ 2",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الآخر",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "relay @ 2",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "ترتيب التعادل ممكن يتغير.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الوقت",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "2",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الجذر",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "relay @ 2",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الآخر",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "scan @ 2",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try another order"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The heap keeps the nearest job."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Clock"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "1"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Root"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "relay @ 2"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Next"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "scan @ 4"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "After time moves, the root changes."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Clock"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "2"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Due"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "relay"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Next root"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "scan @ 4"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Two jobs share a deadline."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Clock"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "2"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Root"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "scan @ 2"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Other"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "relay @ 2"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Tie order can vary."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Clock"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "2"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Root"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "relay @ 2"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Other"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "scan @ 2"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "35-3-redis-lock",
+      "kind": "ch35-event-trace",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب ترتيب تاني",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "العامل A ماسك lock.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "المالك",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "worker-a",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "token",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "T-old",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الوقت",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "قبل الانتهاء",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "المالك الجديد يفضل محمي.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "المالك",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "worker-b",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "token",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "T-new",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "محاولة القديم",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "مرفوضة",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "العامل B كسب السباق.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الترتيب",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "B ثم A",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "المالك",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "worker-b",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "token",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "T-old",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "القديم مايمسحش lock الجديد.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "المالك الجديد",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "worker-a",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "token",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "T-new",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "محاولة B",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "مرفوضة",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try another order"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Worker A holds the lock."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Owner"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "worker-a"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Token"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "T-old"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Clock"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "before expiry"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The new owner stays protected."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Owner"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "worker-b"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Token"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "T-new"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Old release"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "ignored"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Worker B wins this race."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "B then A"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Owner"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "worker-b"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Token"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "T-old"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The old owner cannot clear the new lock."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "New owner"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "worker-a"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Token"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "T-new"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Worker B release"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "ignored"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "35-4-outbox",
+      "kind": "ch35-event-trace",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب ترتيب تاني",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "الطلب والـrow اتسجلوا سوا.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الطلب",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "saved",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الـoutbox",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "pending",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الحدث",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "evt-4",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "النشر ممكن يتكرر؛ الأثر لأ.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الـrelay",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "نشر ثم crash",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "retry",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "evt-4 مجددًا",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "المستهلك",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "المجموع 1",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "حدثان ممكن يوصلوا بترتيبين.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الوارد",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "evt-4 ثم evt-5",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "المجموع",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "0",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الحالة",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "منتظر",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "ترتيب الوصول اتبدّل.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الوارد",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "evt-5 ثم evt-4",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "المجموع",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "2",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "المكرر",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "evt-4 يتجاهل",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try another order"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Order and outbox row are saved together."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "saved"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Outbox"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "pending"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Event"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "evt-4"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Publish can repeat; the effect stays once."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Relay"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "publish then crash"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Retry"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "evt-4 again"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Consumer"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "total 1"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Two events may arrive in either order."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Incoming"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "evt-4 then evt-5"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Total"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "0"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "State"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "waiting"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Arrival order changed."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Incoming"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "evt-5 then evt-4"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Total"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "2"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Duplicate"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "evt-4 ignored"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "35-5-kafka",
+      "kind": "ch35-event-trace",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب ترتيب تاني",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "المفتاح يحدد الـpartition.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "partition 0",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "rover-7 · offset 4",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "partition 1",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "rover-9 · offset 8",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "المرحلة",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "fetch",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "الـcommit يتأخر بعد retry.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "partition 0",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "handler نجح",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "partition 1",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "retry",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الـcommit",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "لسه",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "الـpartitionين مستقلين.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "أول وصول",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "partition 1",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "التالي",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "partition 0",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الترتيب",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "مختلف",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "كل partition يحفظ ترتيبه.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "partition 0",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "offset 4 ثم 5",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "partition 1",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "offset 8 ثم retry",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الـcommit",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "بعد النجاح",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try another order"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The key selects a partition."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "partition 0"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "rover-7 · offset 4"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "partition 1"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "rover-9 · offset 8"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Stage"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "fetch"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Commit waits through a retry."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "partition 0"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "handler succeeded"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "partition 1"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "retry"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Commit"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "pending"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Partitions progress independently."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "First arrival"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "partition 1"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Next"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "partition 0"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "varied"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Each partition keeps its order."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "partition 0"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "offset 4 then 5"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "partition 1"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "offset 8 then retry"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Commit"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "after success"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "35-6-raft-election",
+      "kind": "ch35-event-trace",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب ترتيب تاني",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "المرشح بعت vote request.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الدور",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "candidate",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "term",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "4",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الرسائل",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "vote ثم heartbeat",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "term أحدث يرجّع follower.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الدور",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "follower",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "term",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "5",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الرسائل",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "heartbeat وصل",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "الـheartbeat وصل الأول.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الدور",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "candidate",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "term",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "4",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الرسائل",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "heartbeat ثم vote",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "رسائل Raft مش بترتيب ثابت.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الدور",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "follower",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "term",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "5",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الرسائل",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "vote أقدم اتشاف",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try another order"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Candidate sent a vote request."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Role"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "candidate"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Term"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "4"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Messages"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "vote then heartbeat"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "A newer term returns follower."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Role"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "follower"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Term"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "5"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Messages"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "heartbeat arrived"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The heartbeat arrived first."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Role"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "candidate"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Term"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "4"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Messages"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "heartbeat then vote"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Raft messages have no fixed order."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Role"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "follower"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Term"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "5"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Messages"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "older vote observed"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "35-7-raft-log",
+      "kind": "ch35-event-trace",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب ترتيب تاني",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "الـsuffix مختلف.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "leader",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "1:scan · 2:dock",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "follower",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "1:scan · 2:wait",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "committed",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "1",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "المطابقة تصلح الـsuffix.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "leader",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "1:scan · 2:dock",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "follower",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "1:scan · 2:dock",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "committed",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "2",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "الـacks وصلت B ثم C.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الـprefix",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "متطابق",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الترتيب",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "B → C",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "committed",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "2",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "ممكن توصل C قبل B.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "الـprefix",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "متطابق",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الترتيب",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "C → B",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "committed",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "2",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try another order"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The suffix conflicts."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Leader"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "1:scan · 2:dock"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Follower"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "1:scan · 2:wait"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Committed"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "1"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "A matching prefix repairs the suffix."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Leader"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "1:scan · 2:dock"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Follower"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "1:scan · 2:dock"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Committed"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "2"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Acks arrived B, then C."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Prefix"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "matching"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "B → C"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Committed"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "2"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "C may arrive before B."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Prefix"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "matching"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "C → B"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Committed"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "2"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

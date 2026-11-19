@@ -1,7 +1,127 @@
 package levels
 
+type ch36SandboxPair struct {
+	Arabic  string `json:"ar"`
+	English string `json:"en"`
+}
+
+type ch36SandboxRow struct {
+	Label ch36SandboxPair `json:"label"`
+	Value ch36SandboxPair `json:"value"`
+}
+
+type ch36SandboxFrame struct {
+	Caption ch36SandboxPair  `json:"caption"`
+	Rows    []ch36SandboxRow `json:"rows"`
+}
+
+func ch36Pair(arabic, english string) ch36SandboxPair {
+	return ch36SandboxPair{Arabic: arabic, English: english}
+}
+
+func ch36LanguagePair(pair ch36SandboxPair, language int) ch36SandboxPair {
+	if language == 0 {
+		pair.English = ""
+	} else {
+		pair.Arabic = ""
+	}
+	return pair
+}
+
+func ch36Row(labelArabic, labelEnglish, valueArabic, valueEnglish string) ch36SandboxRow {
+	return ch36SandboxRow{Label: ch36Pair(labelArabic, labelEnglish), Value: ch36Pair(valueArabic, valueEnglish)}
+}
+
+func ch36Frame(captionArabic, captionEnglish string, rows ...ch36SandboxRow) ch36SandboxFrame {
+	return ch36SandboxFrame{Caption: ch36Pair(captionArabic, captionEnglish), Rows: rows}
+}
+
+func ch36SandboxInstruction(prefix string, language int) string {
+	text := map[string][2]string{
+		"c361.": {"سجّل قراءة وراقب counter وgauge.", "Record a reading and compare counter and gauge."},
+		"c362.": {"بدّل runtime وشغّل نفس method.", "Swap the runtime and call the same method."},
+		"c363.": {"بدّل حالة DB واطلب probes.", "Change database state and request both probes."},
+		"c364.": {"جرّب فشل delivery وبعده retry.", "Try a failed delivery, then retry."},
+	}[prefix]
+	return text[language]
+}
+
+func ch36SandboxConfig(prefix string, language int) map[string]any {
+	advance := ch36Pair("كمّل خطوة", "Next step")
+	replay := ch36Pair("جرّب الحالة التانية", "Try the other case")
+	reset := ch36Pair("من الأول", "Reset")
+	variants := [][]ch36SandboxFrame{}
+	switch prefix {
+	case "c361.":
+		variants = [][]ch36SandboxFrame{
+			{
+				ch36Frame("الـcounter بيجمع القراءات.", "The counter accumulates readings.", ch36Row("label", "Label", "bay-east", "bay-east"), ch36Row("counter", "Counter", "4", "4"), ch36Row("gauge", "Gauge", "18", "18")),
+				ch36Frame("قراءة جديدة تزود counter.", "A new reading raises the counter.", ch36Row("label", "Label", "bay-east", "bay-east"), ch36Row("counter", "Counter", "5", "5"), ch36Row("gauge", "Gauge", "18", "18")),
+			},
+			{
+				ch36Frame("labels مختلفة تتجمع في other.", "Different labels group under other.", ch36Row("label", "Label", "other", "other"), ch36Row("counter", "Counter", "5", "5"), ch36Row("gauge", "Gauge", "18", "18")),
+				ch36Frame("الـgauge ممكن يقل.", "A gauge can move down.", ch36Row("label", "Label", "other", "other"), ch36Row("counter", "Counter", "5", "5"), ch36Row("gauge", "Gauge", "16", "16")),
+			},
+		}
+	case "c362.":
+		variants = [][]ch36SandboxFrame{
+			{
+				ch36Frame("الـCLI ينادي contract مش engine.", "The CLI calls a contract, not an engine.", ch36Row("caller", "Caller", "RunPodCtl", "RunPodCtl"), ch36Row("interface", "Interface", "Runtime", "Runtime"), ch36Row("implementation", "Implementation", "fake-a", "fake-a")),
+				ch36Frame("نفس method وصلت للـfake.", "The same method reached the fake.", ch36Row("method", "Method", "Start(probe-4)", "Start(probe-4)"), ch36Row("implementation", "Implementation", "fake-a", "fake-a"), ch36Row("result", "Result", "started", "started")),
+			},
+			{
+				ch36Frame("الـinterface تقبل implementation تانية.", "The interface accepts another implementation.", ch36Row("caller", "Caller", "RunPodCtl", "RunPodCtl"), ch36Row("interface", "Interface", "Runtime", "Runtime"), ch36Row("implementation", "Implementation", "fake-b", "fake-b")),
+				ch36Frame("النداء نفسه؛ التنفيذ اتبدّل.", "Same call, different implementation.", ch36Row("method", "Method", "Start(probe-4)", "Start(probe-4)"), ch36Row("implementation", "Implementation", "fake-b", "fake-b"), ch36Row("result", "Result", "probe ready", "probe ready")),
+			},
+		}
+	case "c363.":
+		variants = [][]ch36SandboxFrame{
+			{
+				ch36Frame("قاعدة البيانات جاهزة.", "The database is ready.", ch36Row("DB", "Database", "connected", "connected"), ch36Row("/livez", "/livez", "ok", "ok"), ch36Row("/readyz", "/readyz", "ready", "ready")),
+				ch36Frame("ترتيب الطلبات ممكن يختلف.", "Request order can vary.", ch36Row("أول رد", "First response", "/livez: ok", "/livez: ok"), ch36Row("تاني رد", "Second response", "/readyz: ready", "/readyz: ready"), ch36Row("الترتيب", "Order", "live ثم ready", "live then ready")),
+			},
+			{
+				ch36Frame("قاعدة البيانات واقفة.", "The database is offline.", ch36Row("DB", "Database", "offline", "offline"), ch36Row("/livez", "/livez", "ok", "ok"), ch36Row("/readyz", "/readyz", "waiting", "waiting")),
+				ch36Frame("الـliveness مستقل عن DB.", "Liveness stays independent of the database.", ch36Row("أول رد", "First response", "/readyz: waiting", "/readyz: waiting"), ch36Row("تاني رد", "Second response", "/livez: ok", "/livez: ok"), ch36Row("الترتيب", "Order", "ready ثم live", "ready then live")),
+			},
+		}
+	case "c364.":
+		variants = [][]ch36SandboxFrame{
+			{
+				ch36Frame("الـrows اتقفلت قبل broker.", "Rows closed before the broker call.", ch36Row("DB rows", "DB rows", "closed", "closed"), ch36Row("محاولة A", "Attempt A", "failed", "failed"), ch36Row("outbox", "Outbox", "pending", "pending")),
+				ch36Frame("retry نجح والحدث اتسجل.", "Retry succeeded and delivery is recorded.", ch36Row("DB rows", "DB rows", "closed", "closed"), ch36Row("محاولة B", "Attempt B", "sent", "sent"), ch36Row("outbox", "Outbox", "delivered", "delivered")),
+			},
+			{
+				ch36Frame("محاولة B وصلت الأول.", "Attempt B arrived first.", ch36Row("DB rows", "DB rows", "closed", "closed"), ch36Row("ترتيب المحاولات", "Attempt order", "B ثم A", "B then A"), ch36Row("outbox", "Outbox", "pending", "pending")),
+				ch36Frame("الترتيب اختلف، والحالة محفوظة.", "Order changed; durable state remains.", ch36Row("DB rows", "DB rows", "closed", "closed"), ch36Row("المحاولة الناجحة", "Successful attempt", "A", "A"), ch36Row("outbox", "Outbox", "delivered", "delivered")),
+			},
+		}
+	}
+	labels := map[string]ch36SandboxPair{"advance": advance, "again": replay, "reset": reset}
+	for key, pair := range labels {
+		labels[key] = ch36LanguagePair(pair, language)
+	}
+	for variant := range variants {
+		for frame := range variants[variant] {
+			variants[variant][frame].Caption = ch36LanguagePair(variants[variant][frame].Caption, language)
+			for row := range variants[variant][frame].Rows {
+				variants[variant][frame].Rows[row].Label = ch36LanguagePair(variants[variant][frame].Rows[row].Label, language)
+				variants[variant][frame].Rows[row].Value = ch36LanguagePair(variants[variant][frame].Rows[row].Value, language)
+			}
+		}
+	}
+	return map[string]any{
+		"labels":   labels,
+		"variants": variants,
+	}
+}
+
 func ch36Markdown(id, text string) LessonBlock {
 	return LessonBlock{ID: id, Kind: "markdown", Text: text}
+}
+
+func ch36Sandbox(id, text, prefix string, language int) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: "ch36-service-flow", Config: ch36SandboxConfig(prefix, language)}}
 }
 
 func ch36Question(id, text string, options []string, answer int, feedback []string) LessonBlock {
@@ -110,6 +230,7 @@ var ch36MetricsArabicSteps = []LessonStep{
 					{Line: 8, Caption: "الفئة ثابتة للغريب.", Output: "amber other"},
 				},
 			),
+			ch36Sandbox("c361.playground", ch36SandboxInstruction("c361.", 0), "c361.", 0),
 		},
 	},
 	{
@@ -173,6 +294,7 @@ var ch36MetricsEnglishSteps = []LessonStep{
 					{Line: 8, Caption: "Unknown values share one group.", Output: "amber other"},
 				},
 			),
+			ch36Sandbox("c361.playground", ch36SandboxInstruction("c361.", 1), "c361.", 1),
 		},
 	},
 	{
@@ -302,6 +424,7 @@ var ch36OpsArabicSteps = []LessonStep{
 					{Line: 3, Caption: "اطبع المسار وحده.", Output: "/readyz"},
 				},
 			),
+			ch36Sandbox("c363.playground", ch36SandboxInstruction("c363.", 0), "c363.", 0),
 		},
 	},
 	{
@@ -367,6 +490,7 @@ var ch36OpsEnglishSteps = []LessonStep{
 					{Line: 3, Caption: "Print only the path.", Output: "/readyz"},
 				},
 			),
+			ch36Sandbox("c363.playground", ch36SandboxInstruction("c363.", 1), "c363.", 1),
 		},
 	},
 	{
@@ -447,6 +571,7 @@ var ch36BossArabicSteps = []LessonStep{
 					{Line: 8, Caption: "العلامة تتبع النجاح.", Output: "false true"},
 				},
 			),
+			ch36Sandbox("c364.playground", ch36SandboxInstruction("c364.", 0), "c364.", 0),
 		},
 	},
 	{
@@ -511,6 +636,7 @@ var ch36BossEnglishSteps = []LessonStep{
 					{Line: 8, Caption: "The marker follows success.", Output: "false true"},
 				},
 			),
+			ch36Sandbox("c364.playground", ch36SandboxInstruction("c364.", 1), "c364.", 1),
 		},
 	},
 	{
@@ -590,6 +716,7 @@ var ch36ContainersArabicSteps = []LessonStep{
 					{Line: 6, Caption: "الـmethod ترجع النص.", Output: "relay"},
 				},
 			),
+			ch36Sandbox("c362.playground", ch36SandboxInstruction("c362.", 0), "c362.", 0),
 		},
 	},
 	{
@@ -653,6 +780,7 @@ var ch36ContainersEnglishSteps = []LessonStep{
 					{Line: 6, Caption: "The method returns text.", Output: "relay"},
 				},
 			),
+			ch36Sandbox("c362.playground", ch36SandboxInstruction("c362.", 1), "c362.", 1),
 		},
 	},
 	{
