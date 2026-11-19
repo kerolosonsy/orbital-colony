@@ -3,7 +3,7 @@ package levels
 func init() {
 	add(&Level{
 		ID: "33-boss-survey-uplink", Chapter: 33, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: true,
-		Title: "Boss: وصلة المسح", Goal: "وصّل إطار المنارة بخدمة HTTPS بموعد وإعادة محدودة",
+		LessonRevision: 1, Steps: ch33Lesson33BossArabic, Title: "Boss: وصلة المسح", Goal: "وصّل إطار المنارة بخدمة HTTPS بموعد وإعادة محدودة",
 		Requires: []string{"sel:binary.BigEndian", "sel:io.ReadFull", "sel:http.NewRequestWithContext"}, Bridge: []int{71, 74, 77, 78, 83, 84},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
 import ("net";"net/http";"time";"errors")
@@ -41,8 +41,8 @@ resp, _ := client.Get(target) // drops errors and leaves the response body open
 
 503 بس له إعادة فورية واحدة؛ اقفل جسم كل رد قبل الإعادة أو الرجوع. أي status نهائي غير 200 يرجع ~ErrSurveyUpstream~. أخطاء النقل/القراءة/الكتابة تحتفظ بالسبب. رد 200 بحد 1024 بايت؛ الزيادة ~ErrSurveyFrame~ من غير رد جزئي. ابعت نفس الإطار بطول محتوى الرد (الصفر مسموح). سيب ~main~ فاضية. النجمة التالتة: شهادة غير موثوقة تفضل مرفوضة، والاتصال اللي مش بيبعت ينتهي بموعده. التستات TLS حقيقي فوق net.Pipe من غير بورت أو Docker.
 `,
-		Hints: []string{"اقرأ الطول قبل حجز المحتوى، وحدد deadline قبل أول Read.", "استخدم url.Query وNewRequestWithContext عشان الأسماء والإلغاء.", "503 يتعاد مرة واحدة؛ اقفل Body حتى عند الفشل ومتغيّرش إعدادات TLS."},
-		En: &LevelText{Title: "Boss: Survey Uplink", Goal: "Bridge a beacon frame to HTTPS with a deadline and bounded retry", Files: []LabFile{{Name: "main.go", Starter: `package main
+		Hints: ch33Lesson33BossHintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch33Lesson33BossEnglish, Title: "Boss: Survey Uplink", Goal: "Bridge a beacon frame to HTTPS with a deadline and bounded retry", Files: []LabFile{{Name: "main.go", Starter: `package main
 import ("net";"net/http";"time";"errors")
 type SurveyUplink struct { Client *http.Client; URL,Token string }
 var ErrSurveyFrame=errors.New("invalid survey frame")
@@ -78,7 +78,7 @@ Apply ~conn.SetDeadline(deadline)~ before reading. Read one frame: a two-byte bi
 
 Only 503 gets one immediate retry; close every response body before retry or return. Any final non-200 status returns ~ErrSurveyUpstream~. Preserve transport/read/write causes. Bound 200 response content to 1024 bytes; overflow returns ~ErrSurveyFrame~ with no partial reply. Reply using the same frame format and response length (zero allowed). Leave ~main~ empty. Third star: untrusted certificates remain rejected and idle incoming connections expire at their deadline. Tests use real TLS over net.Pipe without ports or Docker.
 `,
-			Hints: []string{"Read the bounded length first; set deadline before the first Read.", "Use url.Query and NewRequestWithContext for names and deadlines.", "Retry 503 once; close Body on errors and preserve TLS verification."}},
+			Hints: ch33Lesson33BossHintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, HiddenFiles: map[string]string{"zz_transport_test.go": ch24HTTPHidden}, Hidden: `package main
 import (
     "bytes"
