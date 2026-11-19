@@ -40,7 +40,7 @@ func TestStructuredLessonsAreValidAndBilingual(t *testing.T) {
 					assertLessonParity(t, block, translated.Blocks[j])
 				}
 			}
-			english, _ := json.Marshal(level.En.Steps)
+			english := withoutSandboxConfig(level.En.Steps)
 			if strings.ContainsFunc(string(english), func(r rune) bool { return unicode.Is(unicode.Arabic, r) }) {
 				t.Error("Arabic text in English steps")
 			}
@@ -141,6 +141,14 @@ func validateLessonFrames(t *testing.T, block LessonBlock) {
 
 func validateLessonSandbox(t *testing.T, sandbox *LessonSandbox, claimID func(string)) {
 	t.Helper()
+	if strings.HasPrefix(sandbox.Kind, "ch") {
+		// Chapter plugin sandboxes: validated by their chapter tests and the
+		// registration check; here only require config data.
+		if len(sandbox.Config) == 0 {
+			t.Fatalf("plugin sandbox %q has no config", sandbox.Kind)
+		}
+		return
+	}
 	if sandbox.Kind == "sort-compare" {
 		if len(sandbox.Sequence) != 5 || len(sandbox.Grid) != 0 || len(sandbox.Presets) != 0 {
 			t.Fatal("sort sandbox must have five illustrative sizes")
@@ -418,4 +426,29 @@ func TestSurveyLessonPreservesMissionContract(t *testing.T) {
 			t.Fatal("correct ordered report rejected")
 		}
 	}
+}
+
+// withoutSandboxConfig marshals steps with every sandbox "config" removed:
+// plugin configs carry both ar and en strings by convention.
+func withoutSandboxConfig(steps []LessonStep) []byte {
+	raw, _ := json.Marshal(steps)
+	var v any
+	_ = json.Unmarshal(raw, &v)
+	var strip func(any)
+	strip = func(x any) {
+		switch n := x.(type) {
+		case map[string]any:
+			delete(n, "config")
+			for _, c := range n {
+				strip(c)
+			}
+		case []any:
+			for _, c := range n {
+				strip(c)
+			}
+		}
+	}
+	strip(v)
+	out, _ := json.Marshal(v)
+	return out
 }

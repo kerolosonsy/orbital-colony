@@ -1,0 +1,78 @@
+{
+  "2-1-inventory": {
+    "kind": "ch02-inventory-flow",
+    "config": {
+      "labels": {
+        "previous": { "ar": "السابق", "en": "Previous" },
+        "next": { "ar": "التالي", "en": "Next" },
+        "reset": { "ar": "من الأول", "en": "Reset" },
+        "moss": { "ar": "طحلب", "en": "Moss" },
+        "crystal": { "ar": "كريستال", "en": "Crystal" },
+        "total": { "ar": "المجموع", "en": "Total" },
+        "output": { "ar": "الوجهة", "en": "Destination" },
+        "console": { "ar": "Console", "en": "Console" },
+        "base": { "ar": "القاعدة", "en": "Base" },
+        "empty": { "ar": "لسه مفيش قيمة", "en": "No value yet" }
+      },
+      "frames": [
+        { "moss": null, "crystal": null, "total": null, "caption": { "ar": "ابدأ بقيم تدريبية.", "en": "Start with sample values." } },
+        { "moss": 4, "crystal": null, "total": null, "caption": { "ar": "اقرأ القيمة وخزنها في متغير.", "en": "Read a value into a variable." } },
+        { "moss": 4, "crystal": 5, "total": null, "caption": { "ar": "كل متغير يحتفظ بقيمته.", "en": "Each variable keeps its value." } },
+        { "moss": 4, "crystal": 5, "total": 9, "caption": { "ar": "الجمع يكوّن قيمة جديدة.", "en": "Addition creates a new value." } }
+      ]
+    }
+  },
+  "2-2-survey": {
+    "kind": "ch02-return-pair",
+    "config": {
+      "labels": {
+        "width": { "ar": "العرض", "en": "Width" },
+        "height": { "ar": "الارتفاع", "en": "Height" },
+        "firstReturn": { "ar": "القيمة الأولى", "en": "First return" },
+        "secondReturn": { "ar": "القيمة التانية", "en": "Second return" },
+        "caption": { "ar": "كل قيمة تروح لمتغيرها.", "en": "Each value fills its matching variable." }
+      },
+      "width": { "value": 5, "min": 2, "max": 7 },
+      "height": { "value": 3, "min": 2, "max": 6 }
+    }
+  },
+  "2-3-callsigns": {
+    "kind": "ch02-utf8-span",
+    "config": {
+      "labels": {
+        "select": { "ar": "اختار", "en": "Select" },
+        "selected": { "ar": "المختار", "en": "Selected" },
+        "bytes": { "ar": "Bytes", "en": "Bytes" },
+        "runes": { "ar": "Runes", "en": "Runes" },
+        "first": { "ar": "أول Rune", "en": "First rune" },
+        "last": { "ar": "آخر Rune", "en": "Last rune" },
+        "caption": { "ar": "كل Rune يغطي Bytes متجاورة.", "en": "Each rune spans adjacent bytes." }
+      },
+      "runes": [
+        { "text": "é", "bytes": ["C3", "A9"] },
+        { "text": "🚀", "bytes": ["F0", "9F", "9A", "80"] }
+      ]
+    }
+  },
+  "2-4-units": {
+    "kind": "ch02-unit-align",
+    "config": {
+      "labels": {
+        "caption": { "ar": "اختار وحدة موحدة وشوف التحويل.", "en": "Choose one unit and watch conversion." },
+        "empty": { "ar": "اختار وحدة.", "en": "Choose a shared unit." },
+        "total": { "ar": "الإجمالي", "en": "Total" },
+        "equals": "="
+      },
+      "cargo": [
+        { "label": { "ar": "صناديق", "en": "Crates" }, "count": 2, "cellsEach": 6 },
+        { "label": { "ar": "عبوات", "en": "Packs" }, "count": 2, "cellsEach": 3 },
+        { "label": { "ar": "خلايا", "en": "Cells" }, "count": 6, "cellsEach": 1 }
+      ],
+      "units": [
+        { "id": "cell", "label": { "ar": "خلايا", "en": "Cells" }, "cellsPerUnit": 1 },
+        { "id": "pack", "label": { "ar": "عبوات", "en": "Packs" }, "cellsPerUnit": 3 },
+        { "id": "crate", "label": { "ar": "صناديق", "en": "Crates" }, "cellsPerUnit": 6 }
+      ]
+    }
+  }
+}

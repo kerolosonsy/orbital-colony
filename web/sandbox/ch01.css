@@ -1,1 +1,63 @@
-/* Chapter 01 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch01-sandbox {
+  display: grid;
+  gap: 8px;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  min-inline-size: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-2);
+  color: var(--paper);
+  text-align: start;
+}
+
+.ch01-route-frame,
+.ch01-harvest-frame,
+.ch01-plant-frame {
+  display: grid;
+  gap: 7px;
+  min-inline-size: 0;
+}
+
+.ch01-route-command,
+.ch01-route-position,
+.ch01-state-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.ch01-label { color: var(--muted); }
+.ch01-value,
+.ch01-coordinate { color: var(--paper); font-variant-numeric: tabular-nums; }
+.ch01-coordinate { direction: ltr; unicode-bidi: isolate; }
+.ch01-caption { margin: 0; color: var(--paper-2); }
+
+.ch01-tile-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.ch01-tile {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-inline-size: 0;
+  min-block-size: 55px;
+  box-sizing: border-box;
+  padding: 5px;
+  border: 1px solid var(--rule);
+  background: var(--ink);
+  direction: inherit;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.ch01-tile.occupied { border-color: var(--regolith); box-shadow: inset 0 0 0 1px var(--regolith); }
+.ch01-tile-name { color: var(--paper); }
+.ch01-tile-state { color: var(--muted); font-size: .9em; }
+.ch01-tile.occupied .ch01-tile-state { color: var(--regolith); }

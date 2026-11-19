@@ -53,6 +53,82 @@ func ch02Variable(name, value string) LessonVariable {
 	return LessonVariable{Name: name, Value: value}
 }
 
+func ch02TextPair(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch02Sandbox(id, text, kind string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: ch02Paragraphs(text), Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+var ch02InventorySandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"previous": ch02TextPair("السابق", "Previous"),
+		"next":     ch02TextPair("التالي", "Next"),
+		"reset":    ch02TextPair("من الأول", "Reset"),
+		"moss":     ch02TextPair("طحلب", "Moss"),
+		"crystal":  ch02TextPair("كريستال", "Crystal"),
+		"total":    ch02TextPair("المجموع", "Total"),
+		"output":   ch02TextPair("الوجهة", "Destination"),
+		"console":  ch02TextPair("Console", "Console"),
+		"base":     ch02TextPair("القاعدة", "Base"),
+		"empty":    ch02TextPair("لسه مفيش قيمة", "No value yet"),
+	},
+	"frames": []map[string]any{
+		{"moss": nil, "crystal": nil, "total": nil, "caption": ch02TextPair("ابدأ بقيم تدريبية.", "Start with sample values.")},
+		{"moss": 4, "crystal": nil, "total": nil, "caption": ch02TextPair("اقرأ القيمة وخزنها في متغير.", "Read a value into a variable.")},
+		{"moss": 4, "crystal": 5, "total": nil, "caption": ch02TextPair("كل متغير يحتفظ بقيمته.", "Each variable keeps its value.")},
+		{"moss": 4, "crystal": 5, "total": 9, "caption": ch02TextPair("الجمع يكوّن قيمة جديدة.", "Addition creates a new value.")},
+	},
+}
+
+var ch02SurveySandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"width":        ch02TextPair("العرض", "Width"),
+		"height":       ch02TextPair("الارتفاع", "Height"),
+		"firstReturn":  ch02TextPair("القيمة الأولى", "First return"),
+		"secondReturn": ch02TextPair("القيمة التانية", "Second return"),
+		"caption":      ch02TextPair("كل قيمة تروح لمتغيرها.", "Each value fills its matching variable."),
+	},
+	"width":  map[string]any{"value": 5, "min": 2, "max": 7},
+	"height": map[string]any{"value": 3, "min": 2, "max": 6},
+}
+
+var ch02CallsignsSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"select":   ch02TextPair("اختار", "Select"),
+		"selected": ch02TextPair("المختار", "Selected"),
+		"bytes":    ch02TextPair("Bytes", "Bytes"),
+		"runes":    ch02TextPair("Runes", "Runes"),
+		"first":    ch02TextPair("أول Rune", "First rune"),
+		"last":     ch02TextPair("آخر Rune", "Last rune"),
+		"caption":  ch02TextPair("كل Rune يغطي Bytes متجاورة.", "Each rune spans adjacent bytes."),
+	},
+	"runes": []map[string]any{
+		{"text": "é", "bytes": []string{"C3", "A9"}},
+		{"text": "🚀", "bytes": []string{"F0", "9F", "9A", "80"}},
+	},
+}
+
+var ch02UnitsSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"caption": ch02TextPair("اختار وحدة موحدة وشوف التحويل.", "Choose one unit and watch conversion."),
+		"empty":   ch02TextPair("اختار وحدة.", "Choose a shared unit."),
+		"total":   ch02TextPair("الإجمالي", "Total"),
+		"equals":  "=",
+	},
+	"cargo": []map[string]any{
+		{"label": ch02TextPair("صناديق", "Crates"), "count": 2, "cellsEach": 6},
+		{"label": ch02TextPair("عبوات", "Packs"), "count": 2, "cellsEach": 3},
+		{"label": ch02TextPair("خلايا", "Cells"), "count": 6, "cellsEach": 1},
+	},
+	"units": []map[string]any{
+		{"id": "cell", "label": ch02TextPair("خلايا", "Cells"), "cellsPerUnit": 1},
+		{"id": "pack", "label": ch02TextPair("عبوات", "Packs"), "cellsPerUnit": 3},
+		{"id": "crate", "label": ch02TextPair("صناديق", "Crates"), "cellsPerUnit": 6},
+	},
+}
+
 var ch02InventoryArabic = []LessonStep{
 	{ID: "c21.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch02Markdown("c21.mission", "1. اقرأ رصيد الطحالب والكريستال من المخزن.\n2. ابعت مجموعهم للقاعدة.\n3. القيم بتتغير مع كل تشغيل.\n\nالـstarter قرأ الطحالب وطبعها للمراجعة؛ ده مش تقرير للقاعدة.")}},
 	{ID: "c21.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c21.variables", "المتغير اسم لقيمة هنستخدمها بعدين. الرمز ~:=~ بيعرّف متغيرًا داخل الدالة. بعد القراءة، تقدر تحسب قيمة جديدة وتطبعها؛ المثال بأرقام للتوضيح.",
@@ -72,6 +148,7 @@ var ch02InventoryArabic = []LessonStep{
 	fmt.Println(parts + extra)
 }`,
 			"e21-total", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "parts تساوي 4.", Variables: []LessonVariable{ch02Variable("parts", "4")}}, {Line: 3, Caption: "extra تساوي 2.", Variables: []LessonVariable{ch02Variable("parts", "4"), ch02Variable("extra", "2")}}, {Line: 4, Caption: "اجمع واطبع الناتج.", Variables: []LessonVariable{ch02Variable("parts", "4"), ch02Variable("extra", "2")}, Output: "6"}}),
+		ch02Sandbox("ch02-inventory", "تابع القيم والجمع، وبدّل وجهة الناتج.", "ch02-inventory-flow", ch02InventorySandboxConfig),
 	}},
 	{ID: "c21.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c21.watch", "- Go مش هتقبل متغير اتعرّف وماتستخدمش.\n- ~fmt.Println~ بيطبع ليك؛ ~colony.Report~ هو اللي يبعت للقاعدة.")}},
 	{ID: "c21.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -100,6 +177,7 @@ var ch02InventoryEnglish = []LessonStep{
 	fmt.Println(parts + extra)
 }`,
 			"e21-total", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "Before running."}, {Line: 2, Caption: "parts is 4.", Variables: []LessonVariable{ch02Variable("parts", "4")}}, {Line: 3, Caption: "extra is 2.", Variables: []LessonVariable{ch02Variable("parts", "4"), ch02Variable("extra", "2")}}, {Line: 4, Caption: "Add and print the result.", Variables: []LessonVariable{ch02Variable("parts", "4"), ch02Variable("extra", "2")}, Output: "6"}}),
+		ch02Sandbox("ch02-inventory", "Follow values and addition; switch the output.", "ch02-inventory-flow", ch02InventorySandboxConfig),
 	}},
 	{ID: "c21.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch02Markdown("c21.watch", "- Go rejects a variable that is declared but never used.\n- ~fmt.Println~ prints for you; ~colony.Report~ sends to base.")}},
 	{ID: "c21.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -129,6 +207,7 @@ func main() {
 	fmt.Println(a, b)
 }`,
 			"e22-pair", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 3, Caption: "اطلب قيمتين من pair."}, {Line: 1, Caption: "الدالة ترجع 2 و3."}, {Line: 3, Caption: "استقبل النتيجتين.", Variables: []LessonVariable{ch02Variable("a", "2"), ch02Variable("b", "3")}}, {Line: 4, Caption: "اطبع حسب ترتيب الاستقبال.", Variables: []LessonVariable{ch02Variable("a", "2"), ch02Variable("b", "3")}, Output: "2 3"}}),
+		ch02Sandbox("ch02-survey", "غيّر أبعاد الخريطة وتابع ترتيب القيم.", "ch02-return-pair", ch02SurveySandboxConfig),
 	}},
 	{ID: "c22.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c22.watch", "- ~WorldSize~ ترجع العرض قبل الارتفاع.\n- ترتيب التقارير مهم: القاعدة مستنية المساحة قبل المحيط.")}},
 	{ID: "c22.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -158,6 +237,7 @@ func main() {
 	fmt.Println(a, b)
 }`,
 			"e22-pair", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "Before running."}, {Line: 3, Caption: "Request two values from pair."}, {Line: 1, Caption: "The function returns 2 and 3."}, {Line: 3, Caption: "Receive both results.", Variables: []LessonVariable{ch02Variable("a", "2"), ch02Variable("b", "3")}}, {Line: 4, Caption: "Print in receive order.", Variables: []LessonVariable{ch02Variable("a", "2"), ch02Variable("b", "3")}, Output: "2 3"}}),
+		ch02Sandbox("ch02-survey", "Resize the map and track return order.", "ch02-return-pair", ch02SurveySandboxConfig),
 	}},
 	{ID: "c22.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch02Markdown("c22.watch", "- ~WorldSize~ returns width before height.\n- Report order matters: base expects area before perimeter.")}},
 	{ID: "c22.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -185,6 +265,7 @@ var ch02CallsignsArabic = []LessonStep{
 	fmt.Println(utf8.RuneCountInString(text))
 }`,
 			"e23-count", []string{"fmt", "unicode/utf8"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "النص محفوظ كما هو.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}}, {Line: 3, Caption: "الدالة تطبع عدد runes.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}, Output: "2"}}),
+		ch02Sandbox("ch02-callsigns", "اختار Rune وشوف Bytes بتاعتها.", "ch02-utf8-span", ch02CallsignsSandboxConfig),
 	}},
 	{ID: "c23.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c23.watch", "- ~name[0]~ byte واحدة، مش أول rune كاملة.\n- حوّل الـrune لـ~string~ قبل تقرير الحرف.")}},
 	{ID: "c23.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -212,6 +293,7 @@ var ch02CallsignsEnglish = []LessonStep{
 	fmt.Println(utf8.RuneCountInString(text))
 }`,
 			"e23-count", []string{"fmt", "unicode/utf8"}, []LessonFrame{{Line: 0, Caption: "Before running."}, {Line: 2, Caption: "Keep the text intact.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}}, {Line: 3, Caption: "The function prints rune count.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}, Output: "2"}}),
+		ch02Sandbox("ch02-callsigns", "Select a Rune and inspect its Bytes.", "ch02-utf8-span", ch02CallsignsSandboxConfig),
 	}},
 	{ID: "c23.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch02Markdown("c23.watch", "- ~name[0]~ is one byte, not a whole first rune.\n- Convert a rune to ~string~ before reporting the character.")}},
 	{ID: "c23.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -245,6 +327,7 @@ const (
 )
 func main() { fmt.Println(int(Ready)) }`,
 			"e24-badge", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "ابدأ تعريف الثوابت."}, {Line: 3, Caption: "New تبدأ من صفر."}, {Line: 4, Caption: "Ready بعدها بواحد."}, {Line: 7, Caption: "اطبع القيمة بعد التحويل.", Output: "1"}}),
+		ch02Sandbox("ch02-units", "وحّد الوحدات وشوف أثر التحويل.", "ch02-unit-align", ch02UnitsSandboxConfig),
 	}},
 	{ID: "c24.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c24.watch", "- الأنواع المسماة مش بتختلط تلقائيًا مع ~int~.\n- وحّد الوحدات قبل جمع كميات الشحنات.")}},
 	{ID: "c24.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -278,6 +361,7 @@ const (
 )
 func main() { fmt.Println(int(Ready)) }`,
 			"e24-badge", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "Before running."}, {Line: 2, Caption: "Begin the constants."}, {Line: 3, Caption: "New starts at zero."}, {Line: 4, Caption: "Ready follows by one."}, {Line: 7, Caption: "Print after conversion.", Output: "1"}}),
+		ch02Sandbox("ch02-units", "Align units and watch each conversion.", "ch02-unit-align", ch02UnitsSandboxConfig),
 	}},
 	{ID: "c24.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch02Markdown("c24.watch", "- Named types do not mix with ~int~ automatically.\n- Convert to a shared unit before adding cargo quantities.")}},
 	{ID: "c24.check-step", Title: "Think & check", Blocks: []LessonBlock{
