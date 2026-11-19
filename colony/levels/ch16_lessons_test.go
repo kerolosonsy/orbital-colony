@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -26,6 +27,22 @@ func TestCh16Lessons(t *testing.T) {
 		{"16-3-benchmark", "c163.", "المهمة|الفكرة|جرّب|خد بالك|فكّر واختبر|دورك", "Mission|Idea|Try it|Watch out|Think & check|Your turn"},
 		{"16-4-wild-inputs", "c164.", "المهمة|الفكرة|جرّب|خد بالك|فكّر واختبر|دورك", "Mission|Idea|Try it|Watch out|Think & check|Your turn"},
 		{"16-5-fake-clock", "c165.", "المهمة|الفكرة|جرّب|خد بالك|فكّر واختبر|دورك", "Mission|Idea|Try it|Watch out|Think & check|Your turn"},
+	}
+	chapterIDs := make(map[string]bool, len(cases))
+	for _, item := range cases {
+		chapterIDs[item.id] = true
+	}
+	chapterLevels := 0
+	for _, level := range All {
+		if strings.HasPrefix(level.ID, "16-") {
+			chapterLevels++
+			if !chapterIDs[level.ID] {
+				t.Errorf("chapter 16 level %s has no sandbox assertions", level.ID)
+			}
+		}
+	}
+	if chapterLevels != len(cases) {
+		t.Fatalf("expected %d chapter 16 levels, found %d", len(cases), chapterLevels)
 	}
 	for _, item := range cases {
 		t.Run(item.id, func(t *testing.T) {
@@ -57,6 +74,7 @@ func TestCh16Lessons(t *testing.T) {
 
 func ch16ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonStep, hints, titles []string) {
 	t.Helper()
+	sandboxCount := 0
 	if len(steps) != 6 || len(titles) != 6 || len(hints) != 3 {
 		t.Fatalf("%s: need six steps and three hints", name)
 	}
@@ -103,6 +121,11 @@ func ch16ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonSte
 					continue
 				}
 				words += ch16ValidateFrames(t, name, block)
+			case "sandbox":
+				sandboxCount++
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch16-") || block.Question != nil || block.Walkthrough != nil || block.Code != "" {
+					t.Errorf("%s: %s has an invalid chapter 16 sandbox", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed block kind %q", name, block.ID, block.Kind)
 			}
@@ -114,8 +137,11 @@ func ch16ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonSte
 		}
 		words += ch16TextWords(hint)
 	}
-	if len(steps[2].Blocks) != 2 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" {
-		t.Errorf("%s: Try it must predict first, then reveal with a walkthrough", name)
+	if sandboxCount != 1 {
+		t.Errorf("%s: expected exactly one sandbox, found %d", name, sandboxCount)
+	}
+	if len(steps[2].Blocks) != 3 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" || steps[2].Blocks[2].Kind != "sandbox" {
+		t.Errorf("%s: Try it must predict, reveal, then show one sandbox", name)
 	} else if strings.TrimSpace(ch16QuestionCode(steps[2].Blocks[0].Text)) != strings.TrimSpace(steps[2].Blocks[1].Code) {
 		t.Errorf("%s: prediction code differs from its walkthrough", name)
 	}
@@ -154,6 +180,9 @@ func ch16AssertParity(t *testing.T, ar, en LessonBlock) {
 	if ar.ID != en.ID || ar.Kind != en.Kind || ar.Code != en.Code || ar.ExampleID != en.ExampleID || !reflect.DeepEqual(ar.Imports, en.Imports) {
 		t.Errorf("%s: Arabic and English block identity differs", ar.ID)
 	}
+	if ar.Sandbox != nil && (en.Sandbox == nil || ar.Sandbox.Kind != en.Sandbox.Kind || !reflect.DeepEqual(ar.Sandbox.Config, en.Sandbox.Config)) {
+		t.Errorf("%s: sandbox config differs across languages", ar.ID)
+	}
 	if ar.Question != nil {
 		if en.Question == nil || ar.Question.Answer != en.Question.Answer || len(ar.Question.Options) != len(en.Question.Options) {
 			t.Errorf("%s: question answer or option count differs", ar.ID)
@@ -171,6 +200,40 @@ func ch16AssertParity(t *testing.T, ar, en LessonBlock) {
 				t.Errorf("%s frame %d: execution state differs", ar.ID, i)
 			}
 		}
+	}
+}
+
+func TestCh16SandboxFixture(t *testing.T) {
+	var fixture struct {
+		ID     string         `json:"id"`
+		Kind   string         `json:"kind"`
+		Config map[string]any `json:"config"`
+	}
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch16.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(body, &fixture); err != nil {
+		t.Fatal(err)
+	}
+	level := Get("16-1-mutants")
+	if level == nil || len(level.Steps) < 3 || len(level.Steps[2].Blocks) < 3 {
+		t.Fatal("missing chapter 16 fixture level sandbox")
+	}
+	sandbox := level.Steps[2].Blocks[2]
+	if sandbox.ID != fixture.ID || sandbox.Sandbox == nil || sandbox.Sandbox.Kind != fixture.Kind {
+		t.Fatalf("chapter 16 fixture does not identify the lesson sandbox")
+	}
+	actualJSON, err := json.Marshal(sandbox.Sandbox.Config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var actual any
+	if err := json.Unmarshal(actualJSON, &actual); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(actual, fixture.Config) {
+		t.Fatal("chapter 16 fixture config differs from the lesson config")
 	}
 }
 

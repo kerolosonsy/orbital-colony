@@ -1,0 +1,34 @@
+{
+  "id": "c161.sandbox",
+  "kind": "ch16-lab-trace",
+  "config": {
+    "labels": {
+      "previous": { "ar": "السابق", "en": "Back" },
+      "next": { "ar": "اللي بعده", "en": "Next" },
+      "reset": { "ar": "من الأول", "en": "Reset" }
+    },
+    "frames": [
+      {
+        "caption": { "ar": "كل وعد محتاج ملاحظة.", "en": "Each promise needs an observation." },
+        "rows": [
+          { "label": { "ar": "الوعد", "en": "Promise" }, "values": ["A"] },
+          { "label": { "ar": "الملاحظات", "en": "Observations" }, "values": ["0"] }
+        ]
+      },
+      {
+        "caption": { "ar": "افحص سلوكًا واحدًا.", "en": "Inspect one behavior at a time." },
+        "rows": [
+          { "label": { "ar": "الوعد", "en": "Promise" }, "values": ["A"] },
+          { "label": { "ar": "الملاحظات", "en": "Observations" }, "values": ["1"] }
+        ]
+      },
+      {
+        "caption": { "ar": "الوعد التالي محتاج فحص.", "en": "The next promise needs a check." },
+        "rows": [
+          { "label": { "ar": "الوعد", "en": "Promise" }, "values": ["B"] },
+          { "label": { "ar": "الملاحظات", "en": "Observations" }, "values": ["2"] }
+        ]
+      }
+    ]
+  }
+}

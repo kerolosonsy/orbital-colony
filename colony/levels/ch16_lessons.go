@@ -15,6 +15,47 @@ func ch16Copy(ar, en string, english bool) string {
 	return ar
 }
 
+type ch16SandboxRowData struct {
+	label  map[string]string
+	values []string
+}
+
+func ch16SandboxText(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch16SandboxRow(ar, en string, values ...string) ch16SandboxRowData {
+	return ch16SandboxRowData{label: ch16SandboxText(ar, en), values: values}
+}
+
+func ch16SandboxFrame(ar, en string, rows ...ch16SandboxRowData) map[string]any {
+	encodedRows := make([]map[string]any, len(rows))
+	for i, row := range rows {
+		encodedRows[i] = map[string]any{"label": row.label, "values": row.values}
+	}
+	return map[string]any{"caption": ch16SandboxText(ar, en), "rows": encodedRows}
+}
+
+func ch16SandboxConfig(frames ...map[string]any) map[string]any {
+	return map[string]any{
+		"labels": map[string]map[string]string{
+			"previous": ch16SandboxText("السابق", "Back"),
+			"next":     ch16SandboxText("اللي بعده", "Next"),
+			"reset":    ch16SandboxText("من الأول", "Reset"),
+		},
+		"frames": frames,
+	}
+}
+
+func ch16TraceBlock(id string, config map[string]any, english bool) LessonBlock {
+	return LessonBlock{
+		ID:      id,
+		Kind:    "sandbox",
+		Text:    ch16Copy("تابع الحالات واحدة واحدة.", "Step through each state.", english),
+		Sandbox: &LessonSandbox{Kind: "ch16-lab-trace", Config: config},
+	}
+}
+
 func ch16Markdown(id, ar, en string, english bool) LessonBlock {
 	return LessonBlock{ID: id, Kind: "markdown", Text: ch16Copy(ar, en, english)}
 }
@@ -117,6 +158,14 @@ func main() {
 				{line: 5, ar: "بعدها ضاف 5.", en: "Then it adds 5.", vars: []LessonVariable{{Name: "sum", Value: "7"}}},
 				{line: 7, ar: "الناتج هو 7.", en: "The output is 7.", vars: []LessonVariable{{Name: "sum", Value: "7"}}, output: "7"},
 			}, english),
+			ch16TraceBlock("c161.sandbox", ch16SandboxConfig(
+				ch16SandboxFrame("كل وعد محتاج ملاحظة.", "Each promise needs an observation.",
+					ch16SandboxRow("الوعد", "Promise", "A"), ch16SandboxRow("الملاحظات", "Observations", "0")),
+				ch16SandboxFrame("افحص سلوكًا واحدًا.", "Inspect one behavior at a time.",
+					ch16SandboxRow("الوعد", "Promise", "A"), ch16SandboxRow("الملاحظات", "Observations", "1")),
+				ch16SandboxFrame("الوعد التالي محتاج فحص.", "The next promise needs a check.",
+					ch16SandboxRow("الوعد", "Promise", "B"), ch16SandboxRow("الملاحظات", "Observations", "2")),
+			), english),
 		}},
 		{ID: "c161.watch-step", Title: ch16Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch16Markdown(
 			"c161.watch",
@@ -173,6 +222,12 @@ func ch16Mission2(english bool) []LessonStep {
 				{line: 4, ar: "العنصر بقى 3.", en: "The element becomes 3.", vars: []LessonVariable{{Name: "tail[0]", Value: "3"}, {Name: "data", Value: "[6 3]"}}},
 				{line: 5, ar: "data بتطبع بعد التعديل.", en: "data prints after the change.", vars: []LessonVariable{{Name: "data", Value: "[6 3]"}}, output: "[6 3]"},
 			}, english),
+			ch16TraceBlock("c162.sandbox", ch16SandboxConfig(
+				ch16SandboxFrame("الـview بتشارك أول عنصر.", "The view shares its first element.",
+					ch16SandboxRow("الأصل", "Original", "8", "3"), ch16SandboxRow("الـview", "View", "8")),
+				ch16SandboxFrame("تغيير الـview يغيّر الأصل.", "Changing the view changes its source.",
+					ch16SandboxRow("الأصل", "Original", "4", "3"), ch16SandboxRow("الـview", "View", "4")),
+			), english),
 		}},
 		{ID: "c162.watch-step", Title: ch16Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch16Markdown("c162.watch",
 			"اختبار القيمة وحده ممكن يفوّت side effect.\n\nفصل النتيجة عن سلامة input بيخلّي الوعد واضح؛ الحالة العادية لوحدها مش كفاية.",
@@ -225,6 +280,20 @@ func ch16Mission3(english bool) []LessonStep {
 				{line: 3, ar: "3 مضروبة في نفسها.", en: "Three multiplied by itself.", vars: []LessonVariable{{Name: "n*n", Value: "9"}}},
 				{line: 3, ar: "يطبع ناتج الضرب.", en: "Prints the product.", vars: []LessonVariable{{Name: "n*n", Value: "9"}}, output: "9"},
 			}, english),
+			ch16TraceBlock("c163.sandbox", ch16SandboxConfig(
+				ch16SandboxFrame("الشغل بيتناسب مع n².", "Work grows with n squared.",
+					ch16SandboxRow("حجم الإدخال n", "Input size n", "2"),
+					ch16SandboxRow("شغل n²", "n-squared work", "4"),
+					ch16SandboxRow("لفة واحدة", "Single-pass work", "2")),
+				ch16SandboxFrame("المربّع كبر أسرع.", "The square grew faster.",
+					ch16SandboxRow("حجم الإدخال n", "Input size n", "4"),
+					ch16SandboxRow("شغل n²", "n-squared work", "16"),
+					ch16SandboxRow("لفة واحدة", "Single-pass work", "4")),
+				ch16SandboxFrame("زود الحجم وقارن تاني.", "Grow the input and compare again.",
+					ch16SandboxRow("حجم الإدخال n", "Input size n", "6"),
+					ch16SandboxRow("شغل n²", "n-squared work", "36"),
+					ch16SandboxRow("لفة واحدة", "Single-pass work", "6")),
+			), english),
 		}},
 		{ID: "c163.watch-step", Title: ch16Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch16Markdown("c163.watch",
 			"Big-O بيشرح نمو الشغل، مش زمن جهازك.\n\nbenchmark ممكن يختلف حسب المدخل والبيئة؛ خليك على نفس البيانات وقت المقارنة.",
@@ -275,6 +344,20 @@ func ch16Mission4(english bool) []LessonStep {
 				{line: 3, ar: "length=2 وindex 1 قيمته 4.", en: "Length is 2; index 1 is 4.", vars: []LessonVariable{{Name: "len(packet)", Value: "2"}, {Name: "packet[1]", Value: "4"}}},
 				{line: 3, ar: "يطبع الاتنين بالترتيب.", en: "Prints both values in order.", output: "2 4"},
 			}, english),
+			ch16TraceBlock("c164.sandbox", ch16SandboxConfig(
+				ch16SandboxFrame("وصل بايتين.", "Two bytes arrive.",
+					ch16SandboxRow("البايتات", "Bytes", "9", "4"),
+					ch16SandboxRow("الطول", "Length", "2"),
+					ch16SandboxRow("أول بايت", "First byte", "9")),
+				ch16SandboxFrame("وصل بايت واحد.", "One byte arrives.",
+					ch16SandboxRow("البايتات", "Bytes", "11"),
+					ch16SandboxRow("الطول", "Length", "1"),
+					ch16SandboxRow("أول بايت", "First byte", "11")),
+				ch16SandboxFrame("مفيش بايتات وصلت.", "No bytes arrive.",
+					ch16SandboxRow("البايتات", "Bytes", "—"),
+					ch16SandboxRow("الطول", "Length", "0"),
+					ch16SandboxRow("أول بايت", "First byte", "—")),
+			), english),
 		}},
 		{ID: "c164.watch-step", Title: ch16Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch16Markdown("c164.watch",
 			"عدم الـpanic مش معناه إن كل حاجة صح؛ parser ممكن يرفض كل input.\n\nكمان بلاش recover يخفي الـpanic اللي fuzz المفروض يكشفه.",
@@ -325,6 +408,17 @@ func ch16Mission5(english bool) []LessonStep {
 				{line: 3, ar: "later بعدها بنص ثانية.", en: "later is half a second later.", vars: []LessonVariable{{Name: "later", Value: "start + 500ms"}}},
 				{line: 4, ar: "المقارنة نتيجتها true.", en: "The comparison is true.", output: "true"},
 			}, english),
+			ch16TraceBlock("c165.sandbox", ch16SandboxConfig(
+				ch16SandboxFrame("ابدأ من لحظة ثابتة.", "Start from a fixed instant.",
+					ch16SandboxRow("وقت البداية", "Start time", "0 ms"),
+					ch16SandboxRow("المدة", "Elapsed", "0 ms")),
+				ch16SandboxFrame("حرّك الساعة من غير انتظار.", "Advance the clock without waiting.",
+					ch16SandboxRow("وقت البداية", "Start time", "0 ms"),
+					ch16SandboxRow("المدة", "Elapsed", "250 ms")),
+				ch16SandboxFrame("الوقت يتقدم كـinput.", "Time advances as an input.",
+					ch16SandboxRow("وقت البداية", "Start time", "0 ms"),
+					ch16SandboxRow("المدة", "Elapsed", "500 ms")),
+			), english),
 		}},
 		{ID: "c165.watch-step", Title: ch16Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch16Markdown("c165.watch",
 			"ساعة جديدة لكل subtest تمنع الوقت والرصيد من التسريب.\n\nافحص الـbool والـerror؛ واحدة منهم لوحدها ممكن تسيب سلوك ناقص.",

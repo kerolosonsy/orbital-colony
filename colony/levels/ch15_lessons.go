@@ -28,6 +28,7 @@ type ch15LessonExample struct {
 	Code    string
 	Imports []string
 	Frames  []ch15LessonFrame
+	Sandbox LessonSandbox
 }
 
 type ch15LessonPair struct {
@@ -35,6 +36,41 @@ type ch15LessonPair struct {
 	English      []LessonStep
 	ArabicHints  []string
 	EnglishHints []string
+}
+
+type ch15SandboxRow struct {
+	label  map[string]string
+	values []string
+}
+
+func ch15SandboxText(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch15SandboxRowFor(ar, en string, values ...string) ch15SandboxRow {
+	return ch15SandboxRow{label: ch15SandboxText(ar, en), values: values}
+}
+
+func ch15SandboxFrame(ar, en string, rows ...ch15SandboxRow) map[string]any {
+	encodedRows := make([]map[string]any, len(rows))
+	for i, row := range rows {
+		encodedRows[i] = map[string]any{"label": row.label, "values": row.values}
+	}
+	return map[string]any{"caption": ch15SandboxText(ar, en), "rows": encodedRows}
+}
+
+func ch15LessonSandbox(frames ...map[string]any) LessonSandbox {
+	return LessonSandbox{
+		Kind: "ch15-algorithm-trace",
+		Config: map[string]any{
+			"labels": map[string]map[string]string{
+				"previous": ch15SandboxText("السابق", "Back"),
+				"next":     ch15SandboxText("اللي بعده", "Next"),
+				"reset":    ch15SandboxText("من الأول", "Reset"),
+			},
+			"frames": frames,
+		},
+	}
 }
 
 func ch15Markdown(id, text string) LessonBlock {
@@ -59,12 +95,17 @@ func ch15Walkthrough(id, text string, example ch15LessonExample, arabic bool) Le
 
 func ch15MakeLesson(prefix string, ar, en ch15LessonCopy, idea, try ch15LessonExample, tryAnswer, checkAnswer int) ch15LessonPair {
 	makeSteps := func(copy ch15LessonCopy, arabic bool) []LessonStep {
+		sandboxText := "حرّك خطوة، وراقب تغيّر الحالة."
+		if !arabic {
+			sandboxText = "Step through and watch the state change."
+		}
 		steps := []LessonStep{
 			{ID: prefix + ".mission-step", Title: "Mission", Blocks: []LessonBlock{ch15Markdown(prefix+".mission", copy.Mission)}},
 			{ID: prefix + ".idea-step", Title: "Idea", Blocks: []LessonBlock{ch15Walkthrough(prefix+".idea-walkthrough", copy.Idea, idea, arabic)}},
 			{ID: prefix + ".try-step", Title: "Try it", Blocks: []LessonBlock{
 				ch15Question(prefix+".try-question", copy.TryQuestion+"\n\n~~~go\n"+try.Code+"\n~~~", copy.TryOptions, copy.TryFeedback, tryAnswer),
 				ch15Walkthrough(prefix+".try-reveal", copy.TryReveal, try, arabic),
+				{ID: prefix + ".sandbox", Kind: "sandbox", Text: sandboxText, Sandbox: &try.Sandbox},
 			}},
 			{ID: prefix + ".watch-step", Title: "Watch out", Blocks: []LessonBlock{ch15Markdown(prefix+".watch", copy.Watch)}},
 			{ID: prefix + ".check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -123,7 +164,19 @@ var ch15Lesson151 = ch15MakeLesson("c151",
 	queue = queue[1:]
 	fmt.Println(first, queue)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "north وصلت الأول.", English: "north arrived first."}, {Line: 3, Arabic: "اقرأ المقدمة.", English: "Read the front."}, {Line: 4, Arabic: "اقص أول عنصر.", English: "Slice off the first item."}, {Line: 5, Arabic: "اعرض الباقي.", English: "Show what remains."}, {Line: 6, Arabic: "east لسه موجودة.", English: "east is still queued.", Output: "north [east]"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "north وصلت الأول.", English: "north arrived first."}, {Line: 3, Arabic: "اقرأ المقدمة.", English: "Read the front."}, {Line: 4, Arabic: "اقص أول عنصر.", English: "Slice off the first item."}, {Line: 5, Arabic: "اعرض الباقي.", English: "Show what remains."}, {Line: 6, Arabic: "east لسه موجودة.", English: "east is still queued.", Output: "north [east]"}},
+		Sandbox: ch15LessonSandbox(
+			ch15SandboxFrame("A في أول الطابور.", "A waits at the front.",
+				ch15SandboxRowFor("الطابور", "Queue", "A", "B"),
+				ch15SandboxRowFor("اتسحب", "Removed", "—")),
+			ch15SandboxFrame("اسحب أول عنصر بس.", "Remove just the first item.",
+				ch15SandboxRowFor("الطابور", "Queue", "B"),
+				ch15SandboxRowFor("اتسحب", "Removed", "A")),
+			ch15SandboxFrame("ضيف الاكتشاف الجديد في الآخر.", "Append the new discovery last.",
+				ch15SandboxRowFor("الطابور", "Queue", "B", "C"),
+				ch15SandboxRowFor("اتسحب", "Removed", "A")),
+		),
+	},
 	0, 0)
 
 var ch15Lesson152 = ch15MakeLesson("c152",
@@ -168,7 +221,16 @@ var ch15Lesson152 = ch15MakeLesson("c152",
 	}
 	fmt.Println(sizes)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "3 أكبر من 1.", English: "3 is greater than 1."}, {Line: 3, Arabic: "شرط التبديل صحيح.", English: "The swap condition is true."}, {Line: 4, Arabic: "بدّل العنصرين.", English: "Swap the two elements."}, {Line: 5, Arabic: "slice بقت مرتبة.", English: "The slice is now ordered."}, {Line: 6, Arabic: "اطبع النتيجة.", English: "Print the result."}, {Line: 7, Arabic: "الناتج هو [1 3].", English: "The output is [1 3].", Output: "[1 3]"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "3 أكبر من 1.", English: "3 is greater than 1."}, {Line: 3, Arabic: "شرط التبديل صحيح.", English: "The swap condition is true."}, {Line: 4, Arabic: "بدّل العنصرين.", English: "Swap the two elements."}, {Line: 5, Arabic: "slice بقت مرتبة.", English: "The slice is now ordered."}, {Line: 6, Arabic: "اطبع النتيجة.", English: "Print the result."}, {Line: 7, Arabic: "الناتج هو [1 3].", English: "The output is [1 3].", Output: "[1 3]"}},
+		Sandbox: ch15LessonSandbox(
+			ch15SandboxFrame("قارن زوجًا متجاورًا.", "Compare one adjacent pair.",
+				ch15SandboxRowFor("الأحجام", "Sizes", "4", "1", "3"),
+				ch15SandboxRowFor("الزوج", "Pair", "4", "1")),
+			ch15SandboxFrame("بدّل القيمتين معًا.", "Swap both slice entries.",
+				ch15SandboxRowFor("الأحجام", "Sizes", "1", "4", "3"),
+				ch15SandboxRowFor("الزوج", "Pair", "1", "4")),
+		),
+	},
 	1, 2)
 
 var ch15Lesson153 = ch15MakeLesson("c153",
@@ -221,7 +283,22 @@ func main() {
 	around := enterCost(false) + enterCost(false) + enterCost(false) + enterCost(false)
 	fmt.Println(through, around)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "دخول الجليد يساوي 4.", English: "Entering ice costs 4."}, {Line: 4, Arabic: "الخانة العادية تساوي 1.", English: "An ordinary tile costs 1."}, {Line: 7, Arabic: "المسار الأول يدخل جليدًا.", English: "The first route enters ice."}, {Line: 8, Arabic: "المسار الثاني كله عادي.", English: "The second route is ordinary."}, {Line: 9, Arabic: "اطبع المجموعين.", English: "Print both totals."}, {Line: 10, Arabic: "النتيجة 6 و4.", English: "The result is 6 and 4.", Output: "6 4"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "دخول الجليد يساوي 4.", English: "Entering ice costs 4."}, {Line: 4, Arabic: "الخانة العادية تساوي 1.", English: "An ordinary tile costs 1."}, {Line: 7, Arabic: "المسار الأول يدخل جليدًا.", English: "The first route enters ice."}, {Line: 8, Arabic: "المسار الثاني كله عادي.", English: "The second route is ordinary."}, {Line: 9, Arabic: "اطبع المجموعين.", English: "Print both totals."}, {Line: 10, Arabic: "النتيجة 6 و4.", English: "The result is 6 and 4.", Output: "6 4"}},
+		Sandbox: ch15LessonSandbox(
+			ch15SandboxFrame("المجموعين بيبدأوا من صفر.", "Both totals start at zero.",
+				ch15SandboxRowFor("عبر الجليد", "Through ice", "0"),
+				ch15SandboxRowFor("حول الجليد", "Around ice", "0")),
+			ch15SandboxFrame("ضيف كلفة أول خانة.", "Add the first entry cost.",
+				ch15SandboxRowFor("عبر الجليد", "Through ice", "4"),
+				ch15SandboxRowFor("حول الجليد", "Around ice", "1")),
+			ch15SandboxFrame("ضيف كلفة الخانة اللي بعدها.", "Add the next entry cost.",
+				ch15SandboxRowFor("عبر الجليد", "Through ice", "5"),
+				ch15SandboxRowFor("حول الجليد", "Around ice", "2")),
+			ch15SandboxFrame("قارن الكلفتين التراكميتين.", "Compare the accumulated costs.",
+				ch15SandboxRowFor("عبر الجليد", "Through ice", "6"),
+				ch15SandboxRowFor("حول الجليد", "Around ice", "3")),
+		),
+	},
 	0, 1)
 
 var ch15Lesson154 = ch15MakeLesson("c154",
@@ -271,7 +348,22 @@ var ch15Lesson154 = ch15MakeLesson("c154",
 func main() {
 	fmt.Println(run([]bool{true, true, false}, 0))
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 1, Arabic: "ابدأ عند أول خانة.", English: "Begin at the first cell."}, {Line: 2, Arabic: "الخانة مفتوحة.", English: "The cell is open."}, {Line: 5, Arabic: "كل نداء يتقدم.", English: "Each call moves forward."}, {Line: 2, Arabic: "الخانة التالية مقفولة.", English: "The next cell is closed."}, {Line: 8, Arabic: "اجمع عدد الخانات.", English: "Add the cell counts."}, {Line: 9, Arabic: "العدد هو 2.", English: "The count is 2.", Output: "2"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 1, Arabic: "ابدأ عند أول خانة.", English: "Begin at the first cell."}, {Line: 2, Arabic: "الخانة مفتوحة.", English: "The cell is open."}, {Line: 5, Arabic: "كل نداء يتقدم.", English: "Each call moves forward."}, {Line: 2, Arabic: "الخانة التالية مقفولة.", English: "The next cell is closed."}, {Line: 8, Arabic: "اجمع عدد الخانات.", English: "Add the cell counts."}, {Line: 9, Arabic: "العدد هو 2.", English: "The count is 2.", Output: "2"}},
+		Sandbox: ch15LessonSandbox(
+			ch15SandboxFrame("أول نداء يبدأ من الصفر.", "The first call starts at zero.",
+				ch15SandboxRowFor("النداءات", "Call stack", "0"),
+				ch15SandboxRowFor("العدد", "Count", "—")),
+			ch15SandboxFrame("الخلية المفتوحة تنادي بعدها.", "An open cell calls the next.",
+				ch15SandboxRowFor("النداءات", "Call stack", "0", "1"),
+				ch15SandboxRowFor("العدد", "Count", "—")),
+			ch15SandboxFrame("الخلية المقفولة توقف recursion.", "The closed cell stops recursion.",
+				ch15SandboxRowFor("النداءات", "Call stack", "0", "1", "2"),
+				ch15SandboxRowFor("العدد", "Count", "0")),
+			ch15SandboxFrame("كل رجوع يضيف خلية.", "Each return adds one cell.",
+				ch15SandboxRowFor("النداءات", "Call stack", "0"),
+				ch15SandboxRowFor("العدد", "Count", "2")),
+		),
+	},
 	0, 1)
 
 var ch15Lesson155 = ch15MakeLesson("c155",
@@ -336,5 +428,20 @@ func main() {
 	heap.Push(q, 3)
 	fmt.Println(heap.Pop(q).(int))
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 3, Arabic: "الأصغر يتقدم في المثال.", English: "The smaller value comes first."}, {Line: 13, Arabic: "ابدأ heap فاضية.", English: "Start with an empty heap."}, {Line: 14, Arabic: "أضف 6 أولًا.", English: "Add 6 first."}, {Line: 15, Arabic: "أضف 3 بعده.", English: "Add 3 next."}, {Line: 16, Arabic: "اطبع العنصر الأصغر.", English: "Print the smaller item.", Output: "3"}, {Line: 17, Arabic: "الناتج النهائي 3.", English: "The final output is 3.", Output: "3"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 3, Arabic: "الأصغر يتقدم في المثال.", English: "The smaller value comes first."}, {Line: 13, Arabic: "ابدأ heap فاضية.", English: "Start with an empty heap."}, {Line: 14, Arabic: "أضف 6 أولًا.", English: "Add 6 first."}, {Line: 15, Arabic: "أضف 3 بعده.", English: "Add 3 next."}, {Line: 16, Arabic: "اطبع العنصر الأصغر.", English: "Print the smaller item.", Output: "3"}, {Line: 17, Arabic: "الناتج النهائي 3.", English: "The final output is 3.", Output: "3"}},
+		Sandbox: ch15LessonSandbox(
+			ch15SandboxFrame("الـheap لسه فاضية.", "The heap starts empty.",
+				ch15SandboxRowFor("العناصر", "Items", "—"),
+				ch15SandboxRowFor("اتشال", "Popped", "—")),
+			ch15SandboxFrame("ضيف 7 للـheap.", "Push 7 into the heap.",
+				ch15SandboxRowFor("العناصر", "Items", "7"),
+				ch15SandboxRowFor("اتشال", "Popped", "—")),
+			ch15SandboxFrame("الأصغر بقى في الجذر.", "The smaller item reaches the root.",
+				ch15SandboxRowFor("العناصر", "Items", "2", "7"),
+				ch15SandboxRowFor("اتشال", "Popped", "—")),
+			ch15SandboxFrame("Pop شالت عنصر الجذر.", "Pop removes the root item.",
+				ch15SandboxRowFor("العناصر", "Items", "7"),
+				ch15SandboxRowFor("اتشال", "Popped", "2")),
+		),
+	},
 	1, 1)
