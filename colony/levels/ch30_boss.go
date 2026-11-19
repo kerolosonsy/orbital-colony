@@ -2,6 +2,7 @@ package levels
 
 func init() {
 	add(&Level{
+		LessonRevision: 1, Steps: ch30Lesson30bArabic,
 		ID: "30-boss-nursery", Chapter: 30, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: true,
 		Title: "Boss: موسم الزراعة", Goal: "احجز مؤن المشتل في transaction وحدّث الكاش بعد النجاح",
 		Requires: []string{"iface", "sel:sql.ErrNoRows"}, Bridge: []int{61, 64, 65, 66, 68, 70},
@@ -47,8 +48,8 @@ cache.Invalidate(ctx, name) // wrong before commit: rollback must not affect cac
 
 بعد commit بس نادِ ~cache.Invalidate(ctx, name)~ بترتيب lines. مفيش قراية من الكاش هنا؛ القاعدة مصدر الحقيقة. نجاح الاختبارات العادية بيفترض كاش شغال. سيب ~main~ فاضية. النجمة التالتة: أول فشل invalidation يوقف الباقي ويرجع خطأ يطابق ~ErrCacheSync~ وسبب الكاش معاً؛ الحجز اتثبت ومبيتكررش عند إعادة الطلب. ده تحذير بعد commit، مش transaction موزعة؛ إصلاح الكاش مسؤولية المنادي.
 `,
-		Hints: []string{"راجع الطلب والصفوف قبل BeginTx.", "اجمع الخصم وتسجيل الطلب في transaction واحدة مع defer Rollback.", "اقفل المعاملة بـ commit قبل الكاش؛ فشل الكاش ميعنيش إن الخصم اتلغى."},
-		En: &LevelText{Title: "Boss: Planting Season", Goal: "Reserve nursery supplies transactionally and invalidate cache after commit", Files: []LabFile{{Name: "main.go", Starter: `package main
+		Hints: []string{"الـtransaction تجمع تغييرات قاعدة البيانات كعملية واحدة.", "افحص الطلب قبل ~BeginTx~، وبعدها افصل commit عن مزامنة الكاش.", "استخدم rollback المؤجل واحتفظ بسبب الخطأ بعد commit."},
+		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson30bEnglish, Title: "Boss: Planting Season", Goal: "Reserve nursery supplies transactionally and invalidate cache after commit", Files: []LabFile{{Name: "main.go", Starter: `package main
 import ("context";"database/sql";"errors")
 type SeedLine struct { Name string; Units int }
 type NurseryCache interface { Invalidate(context.Context,string) error }
@@ -89,7 +90,7 @@ Each ~SeedLine{Name: "moss", Units: 3}~ reserves a resource. Require a nonempty 
 
 Only after commit call ~cache.Invalidate(ctx, name)~ in line order. This API never reads cache; SQL remains authoritative. Required tests assume healthy cache. Leave ~main~ empty. Third star: stop at the first invalidation failure and return an error matching both ~ErrCacheSync~ and the cache cause. The reservation remains committed and replay must never debit again. This is a post-commit warning, not a distributed transaction; the caller repairs cache.
 `,
-			Hints: []string{"Validate the request and lines before BeginTx.", "Debit and record the request in one transaction with defer Rollback.", "Commit before cache I/O; cache failure does not undo committed debits."}},
+			Hints: []string{"A transaction groups database changes into one unit.", "Validate before ~BeginTx~, then separate commit from cache synchronization.", "Defer rollback and preserve the cause of a post-commit error."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: `package main
 import (
     "context"

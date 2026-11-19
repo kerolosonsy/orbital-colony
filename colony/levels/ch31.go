@@ -3,7 +3,7 @@ package levels
 import "orbital/colony/i18n"
 
 func init() {
-	add(&Level{ID: "31-1-echo", Chapter: 31, Kind: "lab", Title: "الصدى", Goal: "رجّع سطور منارة الاستغاثة بحد بايتات وموعد نهائي",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson311Arabic, ID: "31-1-echo", Chapter: 31, Kind: "lab", Title: "الصدى", Goal: "رجّع سطور منارة الاستغاثة بحد بايتات وموعد نهائي",
 		Requires: []string{"sel:net.Conn"}, Bridge: []int{71}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch311Starter}},
 		Lesson: `# صدى منارة الاستغاثة
@@ -77,8 +77,8 @@ c.Write(buf[:n]) // غلط: قراية TCP مش بالضرورة سطر كامل
 
 نهاية نظيفة ترجع ~nil~؛ نهاية وسط سطر ترجع ~io.ErrUnexpectedEOF~. أخطاء النقل والموعد تتحفظ بـ ~errors.Is~. اتعامل مع الكتابة الجزئية ومن غير تقدم زي الشرح. مفيش goroutines داخل الدالة أو ~Report~؛ ~main~ فاضية.
 `,
-		Hints: []string{"ابدأ بملكية الاتصال والتحقق، وبعدها اضبط الموعد المحقون.", "اقرا بايت بايت؛ افحص الحد قبل إضافة محتوى جديد.", "عند الفاصل اكتب السطر كله بحلقة للكتابة الجزئية، وبعدها صفّر السطر."},
-		En: &LevelText{Title: "Echo", Goal: "Echo distress-beacon lines with a byte limit and deadline", Files: []LabFile{{Name: "main.go", Starter: ch311Starter}},
+		Hints: []string{"TCP stream محتاج framing عشان يحدد نهاية الرسالة.", "افصل ملكية الاتصال عن حد السطر والكتابة.", "راجع ~bufio.Reader~ و~io.ErrShortWrite~ عند التعامل مع البايتات."},
+		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson311English, Title: "Echo", Goal: "Echo distress-beacon lines with a byte limit and deadline", Files: []LabFile{{Name: "main.go", Starter: ch311Starter}},
 			Lesson: `# Distress Beacon Echo
 
 ## Before you write
@@ -150,7 +150,7 @@ Implement ~EchoBeacon(c net.Conn, limit int, deadline time.Time) error~. The non
 
 Clean closure returns ~nil~; EOF within a line returns ~io.ErrUnexpectedEOF~. Preserve transport and deadline causes for ~errors.Is~. Handle partial writes and zero progress as explained. No internal goroutines or ~Report~; leave ~main~ empty.
 `,
-			Hints: []string{"Own and validate the connection, then set the injected deadline.", "Read bytes and check the limit before appending content.", "At a delimiter write the whole line using a partial-write loop, then reset it."}},
+			Hints: []string{"A TCP stream needs framing to identify message boundaries.", "Separate connection ownership from line limits and writing.", "Review ~bufio.Reader~ and ~io.ErrShortWrite~ for byte handling."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch311Hidden},
 	})
 }
@@ -307,7 +307,7 @@ func TestHiddenBeaconPipe(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "31-2-chat", Chapter: 31, Kind: "lab", Title: "غرفة الراديو", Goal: "شغّل قلب غرفة الراديو بمالك واحد وعزل العميل البطيء",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson312Arabic, ID: "31-2-chat", Chapter: 31, Kind: "lab", Title: "غرفة الراديو", Goal: "شغّل قلب غرفة الراديو بمالك واحد وعزل العميل البطيء",
 		Requires: []string{"chan", "select"}, Bridge: []int{72}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch312Starter}},
 		Lesson: `# غرفة راديو المستعمرة
@@ -375,8 +375,8 @@ for _, mailbox := range members {
 
 النجمة التالتة: حافظ على نفس العقد مع منتجين متزامنين للأوامر؛ كل رسالة من كل منتج توصل مرة واحدة، من غير فرض ترتيب بين المنتجين.
 `,
-		Hints: []string{"خلي الخريطة محلية للحلقة، والقفل في مسار خروج واحد.", "رد join بعد الفحص؛ leave يمسح قبل القفل، وsay يتأكد من العضوية.", "اعمل إرسال select/default لكل مستقبل؛ احذف واقفل البطيء، وبعدها ابعت رد الأمر."},
-		En: &LevelText{Title: "Radio Room", Goal: "Run a single-owner radio hub that isolates slow crew members", Files: []LabFile{{Name: "main.go", Starter: ch312Starter}},
+		Hints: []string{"مالك واحد لحالة الغرفة يقلل مشاركة الخريطة.", "عالج كل أمر ثم أرسل رده، وحدد مالك كل قناة.", "استخدم ~select~ و~default~ لتجنب انتظار صندوق ممتلئ."},
+		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson312English, Title: "Radio Room", Goal: "Run a single-owner radio hub that isolates slow crew members", Files: []LabFile{{Name: "main.go", Starter: ch312Starter}},
 			Lesson: `# Colony Radio Room
 
 ## Before you write
@@ -442,7 +442,7 @@ A ~leave~ removes and closes its member queue; absent names return ~ErrRadioMemb
 
 Third star: preserve the contract under concurrent command producers. Every producer's message arrives exactly once, with no specified order between producers.
 `,
-			Hints: []string{"Keep the map local to the loop and close remaining queues in one exit path.", "Validate before joining; remove before closing; check membership before speaking.", "Use select/default per recipient; evict slow members, then acknowledge."}},
+			Hints: []string{"One owner for room state reduces shared map access.", "Handle each command before replying, and name every channel owner.", "Use ~select~ and ~default~ to avoid waiting on a full mailbox."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch312Hidden},
 	})
 }
@@ -665,7 +665,7 @@ func TestHiddenBonusRadioConcurrentProducers(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "31-3-discovery", Chapter: 31, Kind: "lab", Title: "اكتشاف الجيران", Goal: "رد على حزمة تعريف جار واحدة ببروتوكول UDP محدود",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson313Arabic, ID: "31-3-discovery", Chapter: 31, Kind: "lab", Title: "اكتشاف الجيران", Goal: "رد على حزمة تعريف جار واحدة ببروتوكول UDP محدود",
 		Requires: []string{"sel:net.ListenPacket"}, Bridge: []int{73}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch313Starter}},
 		Lesson: `# حزمة تعريف من رصيف قريب
@@ -725,8 +725,8 @@ pc.WriteTo(buf[:n], peer)
 
 نفّذ ~AnswerNeighbor(pc net.PacketConn, station string, deadline time.Time) error~. الاتصال غير ~nil~ ومملوك للمنادي. افحص اسم المحطة قبل I/O، واضبط الموعد مرة، واقرا حزمة واحدة بمخزن 65. الطلب البايظ يرجع ~ErrNeighborPacket~ من غير إرسال. الطلب السليم يترد عليه مرة بعنوان المصدر من ~ReadFrom~ وبنفس الكود. رجّع أخطاء الموعد والقراية والكتابة زي ما هي، والكتابة القصيرة ~io.ErrShortWrite~. متقفلش الاتصال ولا تعمل goroutines أو تقرا وقت حقيقي. ~main~ فاضية؛ مفيش ~Report~.
 `,
-		Hints: []string{"اعمل فحص صغير للكود والاسم، وافصل codec عن النقل.", "استخدم مخزن أكبر ببايت من الحد، ومتردش على طلب بايظ.", "احتفظ بعنوان ReadFrom للرد؛ المصنع يقبل دالة فتح عشان الاختبار ميحتاجش بورت."},
-		En: &LevelText{Title: "Neighbor Discovery", Goal: "Answer one bounded UDP neighbor-discovery packet", Files: []LabFile{{Name: "main.go", Starter: ch313Starter}},
+		Hints: []string{"UDP يحافظ على حدود packet، ومش stream زي TCP.", "افصل codec عن socket، واحتفظ بعنوان المرسل.", "ابدأ من ~net.PacketConn.ReadFrom~ في مسار الرد."},
+		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson313English, Title: "Neighbor Discovery", Goal: "Answer one bounded UDP neighbor-discovery packet", Files: []LabFile{{Name: "main.go", Starter: ch313Starter}},
 			Lesson: `# A Neighboring Dock's Discovery Packet
 
 ## Before you write
@@ -784,7 +784,7 @@ Implement ~OpenNeighbor(listen func(string,string)(net.PacketConn,error)) (net.P
 
 Implement ~AnswerNeighbor(pc net.PacketConn, station string, deadline time.Time) error~. The non-~nil~ connection remains caller-owned. Validate station before I/O, set the deadline once, then read one datagram into 65 bytes. Invalid requests return ~ErrNeighborPacket~ without sending. Answer valid requests exactly once to the ~ReadFrom~ source with the same code. Preserve deadline/read/write errors; short writes return ~io.ErrShortWrite~. Do not close the connection, start goroutines, or read wall time. Empty ~main~; no ~Report~.
 `,
-			Hints: []string{"Validate codes and names separately; keep the codec independent of transport.", "Read into a max-plus-one buffer and never answer malformed requests.", "Reply to ReadFrom's source; inject the factory listener for socket-free tests."}},
+			Hints: []string{"UDP preserves packet boundaries; it is not a TCP stream.", "Separate the codec from the socket, and retain the sender address.", "Start with ~net.PacketConn.ReadFrom~ in the reply path."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch313Hidden},
 	})
 }
@@ -995,7 +995,7 @@ func TestHiddenNeighborLoopback(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "31-4-frames", Chapter: 31, Kind: "lab", Title: "إطارات binary", Goal: "فك إطارات تليمتري محفوظة بحدود واضحة واختبار fuzz",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson314Arabic, ID: "31-4-frames", Chapter: 31, Kind: "lab", Title: "إطارات binary", Goal: "فك إطارات تليمتري محفوظة بحدود واضحة واختبار fuzz",
 		Requires: []string{"fuzz", "sel:binary.BigEndian"}, Bridge: []int{85}, Race: false, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch314Starter}, {Name: "main_test.go", Starter: ch314TestStarter}},
 		Lesson: `# إطارات التليمتري المحفوظة
@@ -1051,8 +1051,8 @@ return Radiogram{Payload: wire[8:8+length]}, nil // alias ومن غير فحص �
 
 اكتب ~FuzzRadiogram(f *testing.F)~ في ~main_test.go~ مع seeds المذكورة وبناء seed واحدة على الأقل بـ ~binary.BigEndian~. اثبت عدم الـ panic وعدم تعديل المدخل والقبول الصحيح ونسخ المحتوى، وشغّل نفس الاختبارات ضد التلات mutants: endian غلط، نوع مجهول مقبول، و payload بتشارك المدخل. التستات لازم ترفض التلاتة وتعدّي على حلك.
 `,
-		Hints: []string{"افحص الهيدر قبل slicing؛ افحص الطول قبل النوع عشان أولوية الخطأ.", "حوّل الطول لـ int واطلب مساواة الطول الكلي، وانسخ payload.", "ابني seeds بـ BigEndian، وخلي توقعات fuzz بحساب مستقل، وغيّر payload الناتجة لكشف alias."},
-		En: &LevelText{Title: "Binary Frames", Goal: "Parse offline telemetry frames with bounds checks and fuzzing", Files: []LabFile{{Name: "main.go", Starter: ch314Starter}, {Name: "main_test.go", Starter: ch314TestStarter}},
+		Hints: []string{"الإطار الثنائي يعلن طول payload وترتيب البايتات.", "تحقق من شكل الهيدر قبل أي slicing أو نوع.", "استخدم ~binary.BigEndian.Uint16~ بعد فحص الحدود."},
+		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson314English, Title: "Binary Frames", Goal: "Parse offline telemetry frames with bounds checks and fuzzing", Files: []LabFile{{Name: "main.go", Starter: ch314Starter}, {Name: "main_test.go", Starter: ch314TestStarter}},
 			Lesson: `# Archived Telemetry Frames
 
 ## Before you write
@@ -1106,7 +1106,7 @@ Implement ~ParseRadiogram(wire []byte) (Radiogram,error)~ with the stated header
 
 Write ~FuzzRadiogram(f *testing.F)~ in ~main_test.go~ with the specified seeds and at least one seed built using ~binary.BigEndian~. Assert no panic, unchanged input, correct acceptance and fields, and independent payload ownership. Tests must reject three mutants: wrong endianness, accepted unknown kind, and payload aliasing, while passing on your solution.
 `,
-			Hints: []string{"Check the header before slicing and length before kind to preserve error precedence.", "Convert length to int, require exact total size, and copy payload.", "Build seeds with BigEndian, use an independent fuzz oracle, and mutate returned payload to detect aliasing."}},
+			Hints: []string{"A binary frame declares payload length and byte order.", "Validate the header shape before slicing or checking its kind.", "Use ~binary.BigEndian.Uint16~ only after checking bounds."}},
 		Lab: &Lab{ReqFile: "main_test.go", Bonus: false, Fuzz: "FuzzRadiogram", Hidden: ch314Hidden, Mutants: []Mutant{{Desc: i18n.T("إطار بترتيب بايتات غلط", "Wrong byte order"), Code: ch314EndianMutant}, {Desc: i18n.T("نوع مجهول مقبول", "Unknown kind accepted"), Code: ch314KindMutant}, {Desc: i18n.T("محتوى بيشارك المدخل", "Payload aliases input"), Code: ch314AliasMutant}}},
 	})
 }
@@ -1316,7 +1316,7 @@ func main() {}
 `
 
 func init() {
-	add(&Level{ID: "31-5-dns", Chapter: 31, Kind: "lab", Title: "دليل العناوين", Goal: "اجمع عناوين أرصفة المستعمرة من resolver محقون بترتيب ثابت",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson315Arabic, ID: "31-5-dns", Chapter: 31, Kind: "lab", Title: "دليل العناوين", Goal: "اجمع عناوين أرصفة المستعمرة من resolver محقون بترتيب ثابت",
 		Requires: []string{"iface"}, Bridge: []int{80}, Race: false, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch315Starter}},
 		Lesson: `# دليل عناوين الأرصفة
@@ -1377,8 +1377,8 @@ return AddressCard{A: []string{ips[0].String()}}, nil // ترتيب وفحص ن�
 
 النجمة التالتة: شيل تكرار العناوين بعد التحويل canonical، بما فيها IPv4-mapped وكتابات IPv6 المختلفة لنفس العنوان، من غير تعديل إجابة resolver.
 `,
-		Hints: []string{"ابدأ بفحص اسم المحطة والسياق؛ مرّر نفس ctx والاسم للواجهتين.", "استخدم To4 قبل To16 وصنّف الأخطاء بـ errors.As، متخلطش الفراغ بالغياب.", "سوّي canonical ورتّب كل عائلة؛ خريطة للنص canonical تمنع التكرار للنجمة الإضافية."},
-		En: &LevelText{Title: "Address Directory", Goal: "Build deterministic dock address cards through an injected resolver", Files: []LabFile{{Name: "main.go", Starter: ch315Starter}},
+		Hints: []string{"غياب DNS خطأ، لكن قائمة عناوين فاضية ممكن تكون نجاح.", "مرّر نفس السياق للـresolver وصنّف بعد كل نداء.", "جرّب ~net.IP.To4~ قبل ~To16~، واستخدم ~errors.As~ لأخطاء DNS."},
+		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson315English, Title: "Address Directory", Goal: "Build deterministic dock address cards through an injected resolver", Files: []LabFile{{Name: "main.go", Starter: ch315Starter}},
 			Lesson: `# Dock Address Directory
 
 ## Before you write
@@ -1437,7 +1437,7 @@ Success stores the original station, normalized canonical name, and each canonic
 
 Third star: deduplicate after canonicalization, including IPv4-mapped forms and alternative IPv6 spellings, without mutating resolver answers.
 `,
-			Hints: []string{"Validate station and context first; pass the same context and name to both methods.", "Use To4 before To16 and errors.As for DNS failures; empty answers are not absence.", "Normalize canonical names and sort each family; deduplicate canonical strings for the bonus."}},
+			Hints: []string{"DNS absence is an error, while an empty address list can succeed.", "Pass one context to the resolver and classify each call result.", "Try ~net.IP.To4~ before ~To16~, and use ~errors.As~ for DNS errors."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch315Hidden},
 	})
 }
@@ -1640,7 +1640,7 @@ func TestHiddenBonusDockCanonicalDeduplication(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "31-6-port-check", Chapter: 31, Kind: "lab", Title: "فحص المنافذ", Goal: "افحص قائمة منافذ أرصفة محلية بحد توازي وdial محقون",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson316Arabic, ID: "31-6-port-check", Chapter: 31, Kind: "lab", Title: "فحص المنافذ", Goal: "افحص قائمة منافذ أرصفة محلية بحد توازي وdial محقون",
 		Requires: []string{"go", "sel:net.DialTimeout"}, Bridge: []int{82}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch316Starter}},
 		Lesson: `# فحص أرصفة على جهازك فقط
@@ -1704,8 +1704,8 @@ if strings.HasPrefix(host, "127") {
 
 شغّل عدد عوامل يساوي الأصغر بين عدد المنافذ و ~Workers~، وكل منفذ يتحاول مرة واحدة بـ ~tcp~ والعنوان والمدة المحددين. استخدم ~go~ و ~net.DialTimeout~ كافتراضي قابل للحقن. النتائج بنفس ترتيب ~ports~، وكلها تظهر بعد اكتمال العمال وقفل كل اتصال. فشل منفذ يرجع في خانة ~Err~ وميرجعش خطأ عام؛ الإعداد البايظ وحده خطأ عام. حافظ على causes بـ ~errors.Is~، وصنّف زي الشرح. ممنوع DNS أو فحص أي جهاز خارجي أو ~Report~؛ ~main~ فاضية.
 `,
-		Hints: []string{"افحص الخطة كلها قبل العمال، واستخدم ParseIP وIsLoopback بدل فحص النص.", "وزّع indices على عدد عوامل محدود، واكتب نتيجة كل index في مكانها.", "اختار DialTimeout لو callback غايبة، واقفل أي conn راجعة، وصنّف المهلة بـ errors.As."},
-		En: &LevelText{Title: "Port Check", Goal: "Check registered local dock ports with bounded concurrent injected dialing", Files: []LabFile{{Name: "main.go", Starter: ch316Starter}},
+		Hints: []string{"حد التوازي يقيّد محاولات dial النشطة.", "تحقق من الخطة كلها قبل العمال، وخزّن النتيجة في خانة index.", "استخدم ~net.ParseIP~ و~net.JoinHostPort~ بدل تركيب العنوان يدوياً."},
+		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson316English, Title: "Port Check", Goal: "Check registered local dock ports with bounded concurrent injected dialing", Files: []LabFile{{Name: "main.go", Starter: ch316Starter}},
 			Lesson: `# Check Docks on Your Own Machine
 
 ## Before you write
@@ -1767,7 +1767,7 @@ Implement ~CheckDockPorts(host string, ports []int, options PortOptions) ([]Port
 
 Start the minimum of port count and ~Workers~ workers. Try each port exactly once using ~tcp~, the specified address, and timeout. Use ~go~ and injectable ~net.DialTimeout~ as the default. Results preserve input order and return after joining workers and closing every connection. Port failures belong in their ~Err~ slots, with no overall error; only invalid configuration causes an overall error. Preserve causes for ~errors.Is~ and classify as explained. No DNS, external scanning, or ~Report~; empty ~main~.
 `,
-			Hints: []string{"Validate the whole plan before workers; use ParseIP and IsLoopback instead of text matching.", "Distribute indices to bounded workers and write each result into its own slot.", "Default to DialTimeout, close every returned connection, and classify timeouts with errors.As."}},
+			Hints: []string{"A concurrency limit bounds active dial attempts.", "Validate the whole plan before workers, then store results by index.", "Use ~net.ParseIP~ and ~net.JoinHostPort~ instead of manual address joining."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch316Hidden},
 	})
 }
