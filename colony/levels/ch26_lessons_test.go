@@ -398,7 +398,7 @@ func TestCh26StoryboardExamples(t *testing.T) {
 		t.Fatal(err)
 	}
 	storyboard := string(body)
-	pattern := regexp.MustCompile("(?s)<!-- go-example id=(e26[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\\n\\x60\\x60\\x60go\\n(.*?)\\n\\x60\\x60\\x60")
+	pattern := regexp.MustCompile(`(?s)<!-- go-example id=(e26[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\n\x60\x60\x60go\n(.*?)\n\x60\x60\x60`)
 	examples := pattern.FindAllStringSubmatch(storyboard, -1)
 	if len(examples) != 12 {
 		t.Fatalf("expected twelve chapter 26 examples, found %d", len(examples))
@@ -446,7 +446,7 @@ func ch26VerifyExample(t *testing.T, goBin, storyboard string, example []string)
 		t.Fatalf("%s: missing documented output", id)
 	}
 	transcript := strings.Split(parts[1], "#### Verified")[0]
-	outputPattern := regexp.MustCompile("(?s)Real stdout:\\n\\n\\x60\\x60\\x60text\\n(.*?)\\n\\x60\\x60\\x60")
+	outputPattern := regexp.MustCompile(`(?s)Real stdout:\n\n\x60\x60\x60text\n(.*?)\n\x60\x60\x60`)
 	match := outputPattern.FindStringSubmatch(transcript)
 	if match == nil {
 		t.Fatalf("%s: missing stdout block", id)

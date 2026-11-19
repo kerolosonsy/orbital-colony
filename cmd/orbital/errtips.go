@@ -340,41 +340,10 @@ func errorTipFor(message string, scopes tipScope, lang string) errorTipText {
 	return best.ar
 }
 
-func compileTips(lang string) []struct{ needle, tip string } {
-	return legacyTipList(tipCompile, lang)
-}
-
-func runTips(lang string) []struct{ needle, tip string } {
-	return legacyTipList(tipRuntime|tipLab, lang)
-}
-
-func legacyTipList(scopes tipScope, lang string) []struct{ needle, tip string } {
-	list := make([]struct{ needle, tip string }, 0, len(errorTips))
-	for _, entry := range errorTips {
-		if entry.scope&scopes == 0 {
-			continue
-		}
-		text := entry.ar
-		if normalizeLang(lang) == "en" {
-			text = entry.en
-		}
-		list = append(list, struct{ needle, tip string }{entry.needle, text.Meaning})
-	}
-	return list
-}
-
 func runtimeTipFor(stderr string, languages ...string) string {
 	lang := "ar"
 	if len(languages) > 0 {
 		lang = normalizeLang(languages[0])
 	}
 	return errorTipFor(stderr, tipRuntime|tipLab, lang).Meaning
-}
-
-func tipFor(message string, languages ...string) string {
-	lang := "ar"
-	if len(languages) > 0 {
-		lang = normalizeLang(languages[0])
-	}
-	return errorTipFor(message, tipCompile, lang).Meaning
 }
