@@ -1,0 +1,64 @@
+{
+  "ch27-signed-pass": {
+    "labels": {
+      "payload": {"ar": "الـpayload", "en": "Payload"},
+      "key": {"ar": "المفتاح", "en": "Key"},
+      "tag": {"ar": "tag توضيحي", "en": "Toy tag"},
+      "changeMessage": {"ar": "غيّر الرسالة", "en": "Change message"},
+      "rotateKey": {"ar": "بدّل المفتاح", "en": "Rotate key"},
+      "caption": {"ar": "الرسالة مقروءة والـtag يتغير.", "en": "The payload stays readable; the tag changes."}
+    },
+    "messages": ["crew=Mira", "crew=Vega"],
+    "keys": ["key-A", "key-B"],
+    "tags": ["tag-01", "tag-02", "tag-03", "tag-04"]
+  },
+  "ch27-session-lookup": {
+    "labels": {
+      "browser": {"ar": "مع المتصفح", "en": "Browser holds"},
+      "server": {"ar": "نتيجة السيرفر", "en": "Server lookup"},
+      "next": {"ar": "بدّل الـID", "en": "Switch ID"}
+    },
+    "lookups": [
+      {"id": "sess-A7", "result": "Mira", "caption": {"ar": "السجل ربط الـID بالاسم.", "en": "The record maps the ID to a name."}},
+      {"id": "sess-X2", "result": "—", "caption": {"ar": "مفيش سجل بالـID ده.", "en": "No record matches this ID."}}
+    ]
+  },
+  "ch27-preflight": {
+    "labels": {
+      "method": {"ar": "الطريقة", "en": "Method"},
+      "stage": {"ar": "الفرع", "en": "Path"},
+      "status": {"ar": "الرد", "en": "Response"},
+      "innerCalls": {"ar": "نداءات handler", "en": "Handler calls"},
+      "next": {"ar": "الطلب التالي", "en": "Next request"}
+    },
+    "requests": [
+      {"method": "OPTIONS", "stage": "preflight", "status": "204", "calls": "0", "caption": {"ar": "الفرع ده ما ناداش handler.", "en": "This branch skipped the handler."}},
+      {"method": "GET", "stage": "route", "status": "200", "calls": "1", "caption": {"ar": "الطلب العادي وصل للـhandler.", "en": "The normal request reached the handler."}}
+    ]
+  },
+  "ch27-client-counts": {
+    "labels": {
+      "client": {"ar": "العميل", "en": "Client"},
+      "count": {"ar": "الطلبات", "en": "Requests"},
+      "caption": {"ar": "كل عنوان له عدّاده.", "en": "Each address has its own count."}
+    },
+    "clients": [
+      {"address": "198.51.100.8", "button": {"ar": "طلب من A", "en": "Request A"}},
+      {"address": "198.51.100.9", "button": {"ar": "طلب من B", "en": "Request B"}}
+    ]
+  },
+  "ch27-base62-index": {
+    "labels": {
+      "index": {"ar": "index", "en": "Index"},
+      "symbol": {"ar": "الرمز", "en": "Symbol"},
+      "previous": {"ar": "السابق", "en": "Previous"},
+      "next": {"ar": "التالي", "en": "Next"},
+      "reset": {"ar": "من الأول", "en": "Reset"}
+    },
+    "lookups": [
+      {"index": "0", "symbol": "0", "caption": {"ar": "أول خانة تبدأ بصفر.", "en": "The first slot starts at zero."}},
+      {"index": "10", "symbol": "a", "caption": {"ar": "بعد الأرقام تبدأ الحروف.", "en": "Letters follow the digits."}},
+      {"index": "61", "symbol": "Z", "caption": {"ar": "الترتيب يحدد الرمز.", "en": "The order selects the symbol."}}
+    ]
+  }
+}

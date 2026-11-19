@@ -1,0 +1,77 @@
+{
+  "ch28-gin-flow": {
+    "labels": {
+      "step": {"ar": "الطبقة", "en": "Layer"},
+      "value": {"ar": "القيمة", "en": "Value"},
+      "previous": {"ar": "السابق", "en": "Previous"},
+      "next": {"ar": "التالي", "en": "Next"},
+      "reset": {"ar": "من الأول", "en": "Reset"}
+    },
+    "frames": [
+      {"step": "request", "value": "  Vega  ", "caption": {"ar": "الطلب دخل بقيمة خام.", "en": "The request carries raw input."}},
+      {"step": "handler", "value": "Vega", "caption": {"ar": "الـhandler نظّف المدخل.", "en": "The handler normalized the input."}},
+      {"step": "registry", "value": "Vega", "caption": {"ar": "الـregistry هو صاحب الحالة.", "en": "The registry owns the state."}},
+      {"step": "response", "value": "Vega", "caption": {"ar": "الرد رجّع القيمة النظيفة.", "en": "The response returns the clean value."}}
+    ]
+  },
+  "ch28-fiber-copy": {
+    "labels": {
+      "buffer": {"ar": "buffer", "en": "Buffer"},
+      "saved": {"ar": "النص المحفوظ", "en": "Saved string"},
+      "reuse": {"ar": "أعد استخدام buffer", "en": "Reuse buffer"},
+      "caption": {"ar": "النسخة المحفوظة مستقلة.", "en": "The saved string stays independent."}
+    },
+    "values": ["north", "sorth"]
+  },
+  "ch28-json-shape": {
+    "labels": {
+      "field": {"ar": "قيمة depth", "en": "depth value"},
+      "jsonType": {"ar": "نوع JSON", "en": "JSON type"},
+      "number": {"ar": "فحص الرقم", "en": "Number assertion"},
+      "next": {"ar": "قيمة تانية", "en": "Next sample"}
+    },
+    "samples": [
+      {"value": "3", "type": "number", "number": "true", "caption": {"ar": "الرقم يطابق النوع.", "en": "A number matches the type."}},
+      {"value": "\"3\"", "type": "string", "number": "false", "caption": {"ar": "النص مش رقمًا.", "en": "A string is not a number."}},
+      {"value": "—", "type": "missing", "number": "false", "caption": {"ar": "المفتاح الغايب ملوش قيمة.", "en": "A missing key has no value."}}
+    ]
+  },
+  "ch28-shutdown-order": {
+    "labels": {
+      "timeline": {"ar": "تسلسل توضيحي", "en": "Illustrative timeline"},
+      "runAgain": {"ar": "بدّل الترتيب / شغّل تاني", "en": "Shuffle / run again"},
+      "caption": {"ar": "طلبات نشطة بترتيب متغير.", "en": "Active requests may finish in either order."}
+    },
+    "orders": [
+      [
+        {"ar": "الإغلاق بدأ", "en": "Shutdown starts"},
+        {"ar": "الطلب A خلص", "en": "Request A completes"},
+        {"ar": "الطلب B خلص", "en": "Request B completes"},
+        {"ar": "التنضيف بدأ", "en": "Cleanup starts"}
+      ],
+      [
+        {"ar": "الإغلاق بدأ", "en": "Shutdown starts"},
+        {"ar": "الطلب B خلص", "en": "Request B completes"},
+        {"ar": "الطلب A خلص", "en": "Request A completes"},
+        {"ar": "التنضيف بدأ", "en": "Cleanup starts"}
+      ]
+    ]
+  },
+  "ch28-response-commit": {
+    "labels": {
+      "status": {"ar": "status", "en": "Status"},
+      "header": {"ar": "header", "en": "Header"},
+      "body": {"ar": "body", "en": "Body"},
+      "state": {"ar": "حالة الرد", "en": "Response state"},
+      "previous": {"ar": "السابق", "en": "Previous"},
+      "next": {"ar": "التالي", "en": "Next"},
+      "reset": {"ar": "من الأول", "en": "Reset"}
+    },
+    "frames": [
+      {"status": "unset", "header": "unset", "body": "—", "state": "open", "caption": {"ar": "لسه مفيش بيانات اتكتبت.", "en": "Nothing has been written yet."}},
+      {"status": "sample", "header": "example/type", "body": "—", "state": "open", "caption": {"ar": "الـmetadata جاهزة والرد مفتوح.", "en": "Metadata is set; the response is open."}},
+      {"status": "sample", "header": "example/type", "body": "ready", "state": "committed", "caption": {"ar": "كتابة body ثبّتت الرد.", "en": "Writing the body committed the response."}},
+      {"status": "sample", "header": "example/type", "body": "ready", "state": "committed", "caption": {"ar": "تغيير metadata المتأخر ما أثرش.", "en": "A late metadata change had no effect."}}
+    ]
+  }
+}

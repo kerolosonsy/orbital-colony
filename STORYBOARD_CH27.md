@@ -203,3 +203,11 @@ Real stdout:
 ```text
 true
 ```
+
+## Playground notes
+
+- **Signed Pass:** Change an illustrative message or key and watch its readable payload remain separate from a changing toy tag.
+- **Sessions:** Switch between two IDs and compare the browser-held ID with the server lookup.
+- **CORS:** Cycle a preflight and a normal request; watch whether the inner handler runs.
+- **Rate Limit:** Increment two client counters independently, without showing a limit threshold.
+- **Short Links:** Step through a few illustrative Base62 indexes and their symbols without generating a code.
