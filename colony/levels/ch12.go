@@ -289,7 +289,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch12Lesson122Arabic,
 		ID: "12-2-registry", Chapter: 12, Title: "السجل الآمن",
-		Goal: "3 درونات بيقيسوا ويسجلوا في map واحدة. ابعت مكان أكبر كريستال",
+		Goal: "3 درونات بيقيسوا ويسجلوا في نفس الـmap. ابعت مكان أكبر كريستال",
 		Par:  30, Gold: 24, MaxTicks: 300,
 		Requires: []string{"mutex", "method"},
 		Race:     true,
@@ -357,8 +357,8 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الكتّاب المتزامنين في map واحدة محتاجين mutex مشتركة.",
-			"خلّي Registry تملك الـmap والقفل، وافصل التسجيل عن القراءة.",
+			"الكتّاب المتزامنين على نفس الـmap محتاجين الـmutex المشتركة.",
+			"خلّي Registry تملك الـmap والـmutex، وافصل التسجيل عن القراية.",
 			"راجع ~Record~ وسطر ~r.sizes[p] = size~.",
 		},
 		Lesson: `# Mutex جوه struct: النمط الاحترافي 🗃️
@@ -482,7 +482,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch12Lesson123Arabic,
 		ID: "12-3-deadlock", Chapter: 12, Title: "الجمود",
-		Goal: "الدرونات وقفت ومحدش بيتحرك! لاقي الـ deadlock وصلّحه، واحصد الصفين",
+		Goal: "الدرونات وقفت ومحدش بيتحرك! لاقي الـdeadlock وصلّحه، واحصد الصفين",
 		Par:  36, Gold: 28, MaxTicks: 200,
 		Requires: []string{"mutex"},
 		Setup: func(w *sim.World) {
@@ -536,7 +536,7 @@ func main() {
 `,
 		Hints: []string{
 			"الـdeadlock ممكن يحصل لما كل عامل ماسك مورد ومستني التاني.",
-			"قارن ترتيب القفلين في كل مسار قبل تتبّع Wait.",
+			"قارن ترتيب الـlocks في كل مسار قبل تتبّع Wait.",
 			"راجع arguments بتوع ~harvestWith~ في استدعاءي ~work~ جوه ~main~.",
 		},
 		Lesson: `# Deadlock: كل واحد مستني التاني 🔒🔒

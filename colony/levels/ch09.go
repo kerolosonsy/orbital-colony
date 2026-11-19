@@ -408,7 +408,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch09SignalsArabic,
 		ID: "9-3-signals", Chapter: 9, Title: "إشارات الراديو",
-		Goal: "رد على كل Distress بإنك تروح مكانها، واجمع قيم الـ Supply وابعت المجموع",
+		Goal: "رد على كل Distress بإنك تروح مكانها، واجمع الـvalues بتاعة الـSupply وابعت المجموع",
 		Par:  60, Gold: 40, MaxTicks: 400,
 		Requires: []string{"typeswitch"},
 		Setup: func(w *sim.World) {
@@ -462,7 +462,7 @@ func main() {
 		Hints: []string{
 			"الـtype switch بيكشف النوع الحقيقي اللي شايله كل `Signal`.",
 			"افصل جمع بيانات الرسائل عن زيارة المواقع وإرسال التقرير.",
-			"راجع loop `colony.Signals()` وحقلي `At` و`Amount`.",
+			"راجع الـloop `colony.Signals()` وحقلي `At` و`Amount`.",
 		},
 		Lesson: `# Type switch: إيه اللي جوه الـ interface؟ 📻
 
@@ -504,7 +504,7 @@ if ok {
 ## any
 ~any~ هو ~interface{}~: interface مفيهوش ولا method، فأي قيمة في Go بتحققه. عشان كده ~colony.Report(v any)~ بتقبل أي حاجة. بس كل مرة تستخدم ~any~، بتخسر مساعدة الـ compiler في الأنواع، فاستخدمه بحساب.`,
 	})
-	add(&Level{ID: "9-4-small-plugs", Chapter: 9, Kind: "lab", Title: "مقابس صغيرة", Goal: "افصل أوامر المنارات عن التيرمنال بمقابس صغيرة", Requires: []string{"iface", "sel:io.Reader"}, Bridge: []int{11, 22},
+	add(&Level{ID: "9-4-small-plugs", Chapter: 9, Kind: "lab", Title: "مقابس صغيرة", Goal: "افصل أوامر المنارات عن التيرمنال باستخدام interfaces صغيرة", Requires: []string{"iface", "sel:io.Reader"}, Bridge: []int{11, 22},
 		LessonRevision: 1, Steps: ch09PlugsArabic,
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: smallPlugsStarter, ReadOnly: false}},
 		Lesson: `# منطق يشتغل بأي سلك
@@ -558,8 +558,8 @@ for scanner.Scan() {} // نسي scanner.Err(): بلع فشل القراية
 
 المفتاح ~end~ يكتب ~closed~ ويرجع فوراً من غير lookup ولا قراية اللي بعده. EOF العادي يكتب ~exhausted~. كل سطر ناتج ينتهي بـ newline. رجّع أخطاء القراية والكتابة من غير بلعها؛ استخدم Scanner بحدّه الافتراضي، ورجّع خطأه لو السطر طويل. دليل فاضي شغال. مفيش Report ولا وصول للـ stdin/stdout هنا.
 `, Hints: []string{
-			"الـinterfaces الصغيرة بتطلب السلوك اللي محتاجاه الدالة بس.",
-			"افصل قراءة السطر عن تفسير الأمر والكتابة.",
+			"الـinterfaces الصغيرة بتطلب السلوك اللي محتاجاه الـfunction بس.",
+			"افصل قراية السطر عن تفسير الأمر والكتابة.",
 			"راجع `scanner.Scan()` و`scanner.Err()` في درس القراية.",
 		},
 		En: &LevelText{Title: "Small Plugs", Goal: "Separate beacon commands from the terminal with small interfaces", LessonRevision: 1, Steps: ch09PlugsEnglish, Hints: []string{

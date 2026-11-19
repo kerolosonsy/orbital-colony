@@ -19,19 +19,19 @@ var ch11ScoutSandboxConfig = map[string]any{
 	},
 	"schedules": []any{
 		map[string]any{"name": ch11Copy("الإرسال ثم الاستقبال", "Send, then receive"), "events": []any{
-			ch11ChannelEvent("القناة بدأت فاضية", "Channel starts empty", []string{}, "", false),
+			ch11ChannelEvent("الـchannel بدأت فاضية", "Channel starts empty", []string{}, "", false),
 			ch11ChannelEvent("المرسل بعث 3", "Sender sends 3", []string{"3"}, "", false),
 			ch11ChannelEvent("المرسل بعث 8", "Sender sends 8", []string{"3", "8"}, "", false),
-			ch11ChannelEvent("المرسل قفل القناة", "Sender closes channel", []string{"3", "8"}, "", true),
+			ch11ChannelEvent("المرسل قفل الـchannel", "Sender closes channel", []string{"3", "8"}, "", true),
 			ch11ChannelEvent("المستقبل أخذ 3", "Receiver gets 3", []string{"8"}, "3", true),
 			ch11ChannelEvent("المستقبل أخذ 8", "Receiver gets 8", []string{}, "8", true),
 		}},
 		map[string]any{"name": ch11Copy("استقبال بين الرسائل", "Receive between sends"), "events": []any{
-			ch11ChannelEvent("القناة بدأت فاضية", "Channel starts empty", []string{}, "", false),
+			ch11ChannelEvent("الـchannel بدأت فاضية", "Channel starts empty", []string{}, "", false),
 			ch11ChannelEvent("المرسل بعث 3", "Sender sends 3", []string{"3"}, "", false),
 			ch11ChannelEvent("المستقبل أخذ 3", "Receiver gets 3", []string{}, "3", false),
 			ch11ChannelEvent("المرسل بعث 8", "Sender sends 8", []string{"8"}, "3", false),
-			ch11ChannelEvent("المرسل قفل القناة", "Sender closes channel", []string{"8"}, "3", true),
+			ch11ChannelEvent("المرسل قفل الـchannel", "Sender closes channel", []string{"8"}, "3", true),
 			ch11ChannelEvent("المستقبل أخذ 8", "Receiver gets 8", []string{}, "8", true),
 		}},
 	},
@@ -39,8 +39,8 @@ var ch11ScoutSandboxConfig = map[string]any{
 
 var ch11PoolSandboxConfig = map[string]any{
 	"labels": map[string]any{
-		"schedule": ch11Copy("الجدولة", "Schedule"), "jobs": ch11Copy("طابور المهام", "Jobs"),
-		"results": ch11Copy("النتائج", "Results"), "resultsChannel": ch11Copy("قناة النتائج", "Results channel"),
+		"schedule": ch11Copy("الجدولة", "Schedule"), "jobs": ch11Copy("الـqueue بتاعة المهام", "Jobs"),
+		"results": ch11Copy("النتائج", "Results"), "resultsChannel": ch11Copy("الـchannel بتاعة النتائج", "Results channel"),
 		"waitGroup": ch11Copy("WaitGroup", "WaitGroup"), "empty": ch11Copy("فاضي", "Empty"),
 		"waiting": ch11Copy("لسه فيه عمال", "Workers still running"), "done": ch11Copy("العمال خلصوا", "Workers finished"),
 		"open": ch11Copy("مفتوحة", "Open"), "closed": ch11Copy("مقفولة", "Closed"),
@@ -48,14 +48,14 @@ var ch11PoolSandboxConfig = map[string]any{
 	},
 	"schedules": []any{
 		map[string]any{"name": ch11Copy("ترتيب ممكن: A ثم B", "One possible order: A then B"), "events": []any{
-			map[string]any{"caption": ch11Copy("طابور فيه 3 مهام", "Queue has three jobs"), "jobs": []string{"A", "B", "C"}, "results": []string{}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("الـqueue فيها 3 مهام", "Queue has three jobs"), "jobs": []string{"A", "B", "C"}, "results": []string{}, "done": false, "closed": false},
 			map[string]any{"caption": ch11Copy("العامل A سحب A", "Worker A takes A"), "jobs": []string{"B", "C"}, "results": []string{}, "done": false, "closed": false},
 			map[string]any{"caption": ch11Copy("العامل B سحب B", "Worker B takes B"), "jobs": []string{"C"}, "results": []string{"A", "B"}, "done": false, "closed": false},
 			map[string]any{"caption": ch11Copy("العامل A سحب C", "Worker A takes C"), "jobs": []string{}, "results": []string{"A", "B", "C"}, "done": false, "closed": false},
 			map[string]any{"caption": ch11Copy("WaitGroup خلص؛ اقفل results", "WaitGroup done; close results"), "jobs": []string{}, "results": []string{"A", "B", "C"}, "done": true, "closed": true},
 		}},
 		map[string]any{"name": ch11Copy("ترتيب ممكن: B ثم A", "One possible order: B then A"), "events": []any{
-			map[string]any{"caption": ch11Copy("طابور فيه 3 مهام", "Queue has three jobs"), "jobs": []string{"A", "B", "C"}, "results": []string{}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("الـqueue فيها 3 مهام", "Queue has three jobs"), "jobs": []string{"A", "B", "C"}, "results": []string{}, "done": false, "closed": false},
 			map[string]any{"caption": ch11Copy("العامل B سحب A", "Worker B takes A"), "jobs": []string{"B", "C"}, "results": []string{}, "done": false, "closed": false},
 			map[string]any{"caption": ch11Copy("العامل A سحب B", "Worker A takes B"), "jobs": []string{"C"}, "results": []string{"B"}, "done": false, "closed": false},
 			map[string]any{"caption": ch11Copy("العامل B سحب C", "Worker B takes C"), "jobs": []string{}, "results": []string{"B", "A", "C"}, "done": false, "closed": false},
@@ -74,8 +74,8 @@ var ch11StormSandboxConfig = map[string]any{
 		"idle": ch11Copy("اضغط افحص select", "Check select"), "work": ch11Copy("الشغل يكمل", "Work continues"),
 		"wait": ch11Copy("مستني إشارة", "Waiting for a signal"), "return": ch11Copy("ارجع للقاعدة", "Return to base"),
 		"resume":        ch11Copy("العاصفة هديت؛ كمّل", "Storm cleared; resume"),
-		"bothReady":     ch11Copy("الإشارتين جاهزين؛ الاختيار ممكن يختلف", "Both signals ready; choice may vary"),
-		"warningButton": ch11Copy("بدّل التحذير", "Toggle warning"), "calmButton": ch11Copy("بدّل قناة الهدوء", "Toggle calm channel"),
+		"bothReady":     ch11Copy("الإشارتين جاهزين؛ والـselect ممكن يختار بينهم", "Both signals ready; choice may vary"),
+		"warningButton": ch11Copy("بدّل التحذير", "Toggle warning"), "calmButton": ch11Copy("بدّل الـchannel بتاعة الهدوء", "Toggle calm channel"),
 		"modeButton": ch11Copy("بدّل طريقة select", "Toggle select mode"), "run": ch11Copy("افحص select تاني", "Run select again"),
 	},
 }
@@ -158,11 +158,11 @@ var ch11ScoutLessonArabic = []LessonStep{
 		ID: "c111.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{{
 			ID: "c111.channel-trace", Kind: "walkthrough",
-			Text: "الـchannel بتنقل قيمة بين goroutines.\n\nمن غير buffer، الإرسال والاستقبال بيستّنوا بعض.\n\nالـscout يقيس؛ الدرون التاني يستقبل المكان ويحصد.\n\nهنا فيه رسالتين في الطابور؛ `range` يقرأهم، وبعد القفل يعرف إن مفيش رسائل تانية.",
+			Text: "الـchannel بتنقل الـvalues بين goroutines.\n\nمن غير buffer، الإرسال والاستقبال بيستّنوا بعض.\n\nالـscout يقيس؛ الدرون التاني يستقبل المكان ويحصد.\n\nهنا فيه رسالتين في الـqueue؛ `range` بيقراهم، وبعد الـclose يعرف إن مفيش رسائل تانية.",
 			Code: ch11ScoutChannelExample, Imports: []string{"fmt"}, ExampleID: "e11-scout-channel",
 			Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل التشغيل."},
-				{Line: 1, Caption: "قناة فاضية.", Variables: []LessonVariable{{Name: "queued", Value: "0"}}},
+				{Line: 1, Caption: "الـchannel فاضية.", Variables: []LessonVariable{{Name: "queued", Value: "0"}}},
 				{Line: 2, Caption: "وصل أول مكان.", Variables: []LessonVariable{{Name: "queued", Value: "1"}}},
 				{Line: 3, Caption: "وصل تاني مكان.", Variables: []LessonVariable{{Name: "queued", Value: "2"}}},
 				{Line: 4, Caption: "المرسل خلّص.", Variables: []LessonVariable{{Name: "queued", Value: "2"}, {Name: "closed", Value: "true"}}},
@@ -182,19 +182,19 @@ var ch11ScoutLessonArabic = []LessonStep{
 				Code: ch11ScoutTryExample, Imports: []string{"fmt"}, ExampleID: "e11-scout-order",
 				Question: &LessonQuestion{
 					Options: []string{"4 وبعده 7", "7 وبعده 4", "0 وبعده 0"}, Answer: 0,
-					Feedback: []string{"رسائل الإرسال بتتقرأ بالترتيب.", "الاستقبال مش بيقلب ترتيب الرسائل.", "القناة فيها قيم اتبعتت قبل القفل."},
+					Feedback: []string{"الرسائل بتوصل بالترتيب.", "الاستقبال مش بيقلب ترتيب الرسائل.", "الـchannel فيها الـvalues اللي اتبعتت قبل الـclose."},
 				},
 			},
 			{
 				ID: "c111.reveal", Kind: "walkthrough",
-				Text: "الرسالتين بيوصلوا بالترتيب، وبعد استهلاكهم القناة المقفولة بتنهي القراءة.",
+				Text: "الرسالتين بيوصلوا بالترتيب؛ وبعد ما يتقرو، الـclose بيعلن إن مفيش رسائل تانية.",
 				Code: ch11ScoutTryExample, Imports: []string{"fmt"}, ExampleID: "e11-scout-order",
 				Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
-					{Line: 1, Caption: "قناة فاضية."},
+					{Line: 1, Caption: "الـchannel فاضية."},
 					{Line: 2, Caption: "اتضاف 4."},
 					{Line: 3, Caption: "اتضاف 7."},
-					{Line: 4, Caption: "القناة اتقفلت."},
+					{Line: 4, Caption: "الـchannel اتقفلت."},
 					{Line: 5, Caption: "اتطبع 4.", Output: "4"},
 					{Line: 6, Caption: "اتطبع 7.", Output: "4\n7"},
 				}},
@@ -206,20 +206,20 @@ var ch11ScoutLessonArabic = []LessonStep{
 		ID: "c111.watch-step", Title: "خد بالك",
 		Blocks: []LessonBlock{{
 			ID: "c111.watch", Kind: "markdown",
-			Text: "- اللي بيبعت هو اللي يقفل القناة بعد آخر رسالة.\n- الإرسال على channel مقفولة يعمل panic.",
+			Text: "- اللي بيبعت هو اللي يقفل الـchannel بعد آخر رسالة.\n- الإرسال على الـchannel المقفولة يعمل panic.",
 		}},
 	},
 	{
 		ID: "c111.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			{ID: "c111.plan", Kind: "markdown", Text: "خلي scout يقيس، والـchannel تنقل المكان، والدرون التاني يستقبل ويحصد.\n\nاستقبل البلاغات لحد نهاية القناة، وخلي كل درون مسؤول عن دوره."},
+			{ID: "c111.plan", Kind: "markdown", Text: "خلي scout يقيس، والـchannel تنقل المكان، والدرون التاني يستقبل ويحصد.\n\nاستقبل البلاغات لحد نهاية الـchannel، وخلي كل درون مسؤول عن دوره."},
 			{ID: "c111.q-range", Kind: "question", Text: "إمتى `range found` توقف؟", Question: &LessonQuestion{
-				Options: []string{"بعد القفل وتفريغ الرسائل", "بعد أول رسالة", "أول ما الطابور يفضى"}, Answer: 0,
-				Feedback: []string{"بتقرأ كل الموجود، وبعدها القفل بينهي الحلقة.", "رسالة واحدة مش كفاية لو فيه غيرها.", "القناة المفتوحة ممكن تستقبل رسائل تانية."},
+				Options: []string{"بعد الـclose وتفريغ الرسائل", "بعد أول رسالة", "أول ما الـqueue تفضى"}, Answer: 0,
+				Feedback: []string{"الرسائل اللي اتبعتت بتتقرا كلها، وبعدها الـclose بينهي الـloop.", "رسالة واحدة مش كفاية لو فيه غيرها.", "الـchannel المفتوحة ممكن تستقبل رسائل تانية."},
 			}},
 			{ID: "c111.q-close", Kind: "question", Text: "مين يقفل `found`؟", Question: &LessonQuestion{
 				Options: []string{"المرسل", "المستقبل", "أي طرف وقت ما يحب"}, Answer: 0,
-				Feedback: []string{"المرسل عارف إنه خلّص إرسال.", "المستقبل يقرأ، لكنه ما يعلنش النهاية.", "الإغلاق المبكر ممكن يكسر إرسال لسه جاي."},
+				Feedback: []string{"المرسل عارف إنه خلّص إرسال.", "المستقبل بيقرا، لكنه ما يعلنش النهاية.", "الإغلاق المبكر ممكن يكسر إرسال لسه جاي."},
 			}},
 		},
 	},
@@ -317,21 +317,21 @@ var ch11PoolLessonArabic = []LessonStep{
 		ID: "c112.mission-step", Title: "المهمة",
 		Blocks: []LessonBlock{{
 			ID: "c112.mission", Kind: "markdown",
-			Text: "1. 3 workers يسحبوا أهداف من channel واحدة.\n2. كل واحد يرجّع ناتج حصاده.\n3. اجمع النواتج وابعت المجموع للقاعدة.\n\nالـstarter مجهّز worker والقنوات وWaitGroup؛ الـmain لسه فاضي.",
+			Text: "1. 3 workers يسحبوا أهداف من الـchannel الواحدة.\n2. كل واحد يرجّع ناتج حصاده.\n3. اجمع النواتج وابعت المجموع للقاعدة.\n\nالـstarter مجهّز worker والـchannels وWaitGroup؛ الـmain لسه فاضي.",
 		}},
 	},
 	{
 		ID: "c112.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{{
 			ID: "c112.queue-trace", Kind: "walkthrough",
-			Text: "الـworker pool طابور مشترك؛ العامل الفاضي ياخد المهمة الجاية.\n\n`range jobs` يخلص بعد القفل وتفريغ الرسائل؛ و`results` بتنقل ناتج الحصاد.\n\n`<-chan T` استقبال بس؛ `chan<- T` إرسال بس.\n\nالتتبع هنا لعامل واحد؛ الـpool يشغّل أكتر من عامل على القناة نفسها.",
+			Text: "الـworker pool بيستخدم queue مشتركة؛ العامل الفاضي ياخد المهمة الجاية.\n\n`range jobs` يخلص بعد الـclose وتفريغ الرسائل؛ و`results` بتنقل ناتج الحصاد.\n\n`<-chan T` استقبال بس؛ `chan<- T` إرسال بس.\n\nالتتبع هنا لعامل واحد؛ الـpool يشغّل أكتر من عامل على الـchannel نفسها.",
 			Code: ch11PoolQueueExample, Imports: []string{"fmt"}, ExampleID: "e11-pool-queue",
 			Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل التشغيل."},
-				{Line: 1, Caption: "طابور فاضي."},
+				{Line: 1, Caption: "الـqueue فاضية."},
 				{Line: 2, Caption: "دخلت مهمة 3."},
 				{Line: 3, Caption: "دخلت مهمة 5."},
-				{Line: 4, Caption: "المرسل قفل الطابور."},
+				{Line: 4, Caption: "المرسل قفل الـchannel بتاعة الـjobs."},
 				{Line: 5, Caption: "العامل استلم 3."},
 				{Line: 6, Caption: "الناتج 6.", Output: "6"},
 				{Line: 5, Caption: "العامل استلم 5.", Output: "6"},
@@ -344,11 +344,11 @@ var ch11PoolLessonArabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{
 				ID: "c112.predict", Kind: "question",
-				Text: "الـworkerين بعتوا 2 و3؛ هتطبع كام لو وصلوا بأي ترتيب؟",
+				Text: "الـworkers بعتوا 2 و3؛ هتطبع كام لو وصلوا بأي ترتيب؟",
 				Code: ch11PoolTryExample, Imports: []string{"fmt"}, ExampleID: "e11-pool-total",
 				Question: &LessonQuestion{
 					Options: []string{"5", "23", "3"}, Answer: 0,
-					Feedback: []string{"الجمع يوصل لنفس الإجمالي بأي ترتيب.", "القيم بتتجمع كأرقام، مش بتتلزق كنص.", "النتيجتين بيتضافوا للإجمالي."},
+					Feedback: []string{"الجمع يوصل لنفس الإجمالي بأي ترتيب.", "الـvalues بتتجمع كأرقام، مش بتتلزق كنص.", "النتيجتين بيتضافوا للإجمالي."},
 				},
 			},
 			{
@@ -356,8 +356,8 @@ var ch11PoolLessonArabic = []LessonStep{
 				Text: "ده ترتيب استقبال واحد ممكن؛ Go مش بيضمن مين يوصل الأول.",
 				Code: ch11PoolTryExample, Imports: []string{"fmt"}, ExampleID: "e11-pool-total",
 				Walkthrough: ch11PoolTryTrace([]string{
-					"قبل التشغيل.", "قناة النتائج فاضية.", "الأول بعت 2.", "التاني بعت 3.",
-					"استقبلت a قيمة 2.", "استقبلت b قيمة 3.", "الإجمالي اتطبع.",
+					"قبل التشغيل.", "الـchannel بتاعة النتائج فاضية.", "الأول بعت 2.", "التاني بعت 3.",
+					"استقبلت الـvalue 2.", "استقبلت الـvalue 3.", "الإجمالي اتطبع.",
 				}),
 			},
 			{ID: "c112.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch11-worker-pool", Config: ch11PoolSandboxConfig}},
@@ -367,20 +367,20 @@ var ch11PoolLessonArabic = []LessonStep{
 		ID: "c112.watch-step", Title: "خد بالك",
 		Blocks: []LessonBlock{{
 			ID: "c112.watch", Kind: "markdown",
-			Text: "- مرسل `jobs` يقفلها بعد آخر هدف.\n- استخدم WaitGroup قبل قفل `results`؛ من غير القفل، `range` هتفضل مستنية.",
+			Text: "- مرسل `jobs` يقفلها بعد آخر هدف.\n- استخدم WaitGroup قبل ما تقفل `results`؛ من غير الـclose، `range` هتفضل مستنية.",
 		}},
 	},
 	{
 		ID: "c112.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			{ID: "c112.plan", Kind: "markdown", Text: "رتّب تشغيل العمال، إرسال الأهداف، جمع النواتج، وإغلاق القنوات بعد اكتمال دورها."},
+			{ID: "c112.plan", Kind: "markdown", Text: "رتّب تشغيل العمال، إرسال الأهداف، جمع النواتج، وقفل الـchannels بعد ما شغلها يخلص."},
 			{ID: "c112.q-close", Kind: "question", Text: "إمتى تقفل `results`؟", Question: &LessonQuestion{
 				Options: []string{"بعد ما كل العمال يخلصوا", "بعد أول نتيجة", "قبل تشغيل العمال"}, Answer: 0,
-				Feedback: []string{"استنى المجموعة كلها قبل ما تعلن النهاية.", "ممكن لسه فيه عامل هيبعت نتيجة.", "العمال لسه محتاجين القناة المفتوحة."},
+				Feedback: []string{"استنى المجموعة كلها قبل ما تعلن النهاية.", "ممكن لسه فيه عامل هيبعت نتيجة.", "العمال لسه محتاجين الـchannel المفتوحة."},
 			}},
 			{ID: "c112.q-range", Kind: "question", Text: "إيه اللي ينهي `range jobs`؟", Question: &LessonQuestion{
-				Options: []string{"القناة تتقفل بعد تفريغها", "أول عامل يسحب هدف", "انتهاء أول عامل"}, Answer: 0,
-				Feedback: []string{"العمال يكملوا اللي في الطابور قبل ما يقفوا.", "باقي العمال يقدروا ياخدوا شغل كمان.", "عامل واحد خلص مش معناه إن الطابور خلص."},
+				Options: []string{"الـchannel تتقفل بعد تفريغها", "أول عامل يسحب هدف", "انتهاء أول عامل"}, Answer: 0,
+				Feedback: []string{"العمال يكملوا اللي في الـqueue قبل ما يقفوا.", "باقي العمال يقدروا ياخدوا شغل كمان.", "عامل واحد خلص مش معناه إن الـqueue خلص."},
 			}},
 		},
 	},
@@ -473,24 +473,24 @@ var ch11StormLessonArabic = []LessonStep{
 		ID: "c113.mission-step", Title: "المهمة",
 		Blocks: []LessonBlock{{
 			ID: "c113.mission", Kind: "markdown",
-			Text: "1. اجمع الكريستال المطلوب.\n2. عند الإنذار، ارجع للقاعدة قبل الضربة.\n3. بعد هدوء العاصفة، كمّل الشغل.\n\nالـstarter جهّز قناتي التحذير والهدوء؛ دورك تدير الرجوع والاستئناف.",
+			Text: "1. اجمع الكريستال المطلوب.\n2. عند الإنذار، ارجع للقاعدة قبل الضربة.\n3. بعد هدوء العاصفة، كمّل الشغل.\n\nالـstarter جهّز الـchannels بتاعة التحذير والهدوء؛ دورك تدير الرجوع والاستئناف.",
 		}},
 	},
 	{
 		ID: "c113.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{{
 			ID: "c113.select-trace", Kind: "walkthrough",
-			Text: "`select` شبه `switch` للقنوات: يستنى عملية جاهزة.\n\nمع `default`، لو مفيش تحذير جاهز، يكمل فورًا.\n\nقناة `colony.StormClear()` بتتقفل عند نهاية العاصفة؛ الاستقبال منها ساعتها يرجع فورًا.",
+			Text: "`select` شبه `switch` للـchannels: يستنى عملية جاهزة.\n\nمع `default`، لو مفيش تحذير جاهز، يكمل فورًا.\n\nالـchannel `colony.StormClear()` بتتقفل عند نهاية العاصفة؛ الاستقبال منها ساعتها بيرجع فورًا.",
 			Code: ch11StormSelectExample, Imports: []string{"fmt"}, ExampleID: "e11-storm-select",
 			Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل التشغيل."},
-				{Line: 1, Caption: "قناة التحذير فاضية."},
+				{Line: 1, Caption: "الـchannel بتاعة التحذير فاضية."},
 				{Line: 2, Caption: "أول select يفحص."},
 				{Line: 5, Caption: "مفيش تحذير؛ default جاهزة."},
 				{Line: 6, Caption: "الشغل مستمر.", Output: "work"},
-				{Line: 8, Caption: "وصل تحذير للقناة.", Output: "work"},
+				{Line: 8, Caption: "وصل تحذير للـchannel.", Output: "work"},
 				{Line: 9, Caption: "select يفحص تاني.", Output: "work"},
-				{Line: 10, Caption: "وصلت قيمة التحذير.", Output: "work"},
+				{Line: 10, Caption: "وصلت الـvalue بتاعة التحذير.", Output: "work"},
 				{Line: 11, Caption: "الرجوع اتطبع.", Output: "work\nreturn"},
 			}},
 		}},
@@ -500,21 +500,21 @@ var ch11StormLessonArabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{
 				ID: "c113.predict", Kind: "question",
-				Text: "قناة `calm` اتقفلت؛ توقّع أي فرع يطبع.",
+				Text: "الـchannel `calm` اتقفلت؛ توقّع أي فرع بيطبع.",
 				Code: ch11StormTryExample, Imports: []string{"fmt"}, ExampleID: "e11-storm-clear",
 				Question: &LessonQuestion{
 					Options: []string{"safe", "work", "مفيش output"}, Answer: 0,
-					Feedback: []string{"الاستقبال من قناة مقفولة جاهز فورًا.", "`default` تعمل بس لو مفيش استقبال جاهز.", "القناة المقفولة مش بتعلّق الاستقبال."},
+					Feedback: []string{"الاستقبال من الـchannel المقفولة جاهز فورًا.", "`default` تعمل بس لو مفيش استقبال جاهز.", "الـchannel المقفولة مش بتعلّق الاستقبال."},
 				},
 			},
 			{
 				ID: "c113.reveal", Kind: "walkthrough",
-				Text: "القفل بيخلّي الاستقبال جاهز، فـ`select` يدخل الحالة دي.",
+				Text: "الـclose بيخلّي الاستقبال جاهز، فـ`select` يدخل الحالة دي.",
 				Code: ch11StormTryExample, Imports: []string{"fmt"}, ExampleID: "e11-storm-clear",
 				Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
-					{Line: 1, Caption: "اتعملت قناة فاضية."},
-					{Line: 2, Caption: "القناة اتقفلت."},
+					{Line: 1, Caption: "اتعملت الـchannel فاضية."},
+					{Line: 2, Caption: "الـchannel اتقفلت."},
 					{Line: 3, Caption: "select يفحص."},
 					{Line: 4, Caption: "الاستقبال جاهز."},
 					{Line: 5, Caption: "اتطبع safe.", Output: "safe"},
@@ -527,20 +527,20 @@ var ch11StormLessonArabic = []LessonStep{
 		ID: "c113.watch-step", Title: "خد بالك",
 		Blocks: []LessonBlock{{
 			ID: "c113.watch", Kind: "markdown",
-			Text: "- `default` ما بتستناش؛ خلّي الحلقة تعمل شغل بعد الفحص.\n- حدّث channel الهدوء بعد كل إنذار عشان تستنى العاصفة الجاية.",
+			Text: "- `default` ما بتستناش؛ خلّي الـloop تعمل شغل بعد الفحص.\n- حدّث الـchannel بتاعة الهدوء بعد كل إنذار عشان تستنى العاصفة الجاية.",
 		}},
 	},
 	{
 		ID: "c113.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			{ID: "c113.plan", Kind: "markdown", Text: "اشتغل بين الإنذارات، ارجع وقت التحذير، استنى الهدوء، وبعدها استأنف."},
+			{ID: "c113.plan", Kind: "markdown", Text: "اشتغل بين الإنذارات، ارجع وقت التحذير، استنى الهدوء، وبعدها كمّل."},
 			{ID: "c113.q-default", Kind: "question", Text: "لو `warning` لسه فاضية، `default` تعمل إيه؟", Question: &LessonQuestion{
-				Options: []string{"تتنفذ فورًا", "تستنى التحذير", "تقفل القناة"}, Answer: 0,
-				Feedback: []string{"مفيش عملية جاهزة، فـ`default` تكمل فورًا.", "من غير `default`، `select` هيستنى.", "`default` مش بتغيّر حالة القناة."},
+				Options: []string{"تتنفذ فورًا", "تستنى التحذير", "تقفل الـchannel"}, Answer: 0,
+				Feedback: []string{"مفيش عملية جاهزة، فـ`default` تكمل فورًا.", "من غير `default`، `select` هيستنى.", "`default` مش بتغيّر حالة الـchannel."},
 			}},
-			{ID: "c113.q-clear", Kind: "question", Text: "إمتى `<-calm` يرجع بعد القفل؟", Question: &LessonQuestion{
-				Options: []string{"فورًا", "بعد رسالة جديدة", "بعد ما يتقفل تاني"}, Answer: 0,
-				Feedback: []string{"الاستقبال من قناة مقفولة جاهز دايمًا.", "القفل نفسه علامة انتهاء الإشارة.", "القناة المقفولة مش محتاجة قفل تاني."},
+			{ID: "c113.q-clear", Kind: "question", Text: "إمتى استقبال `<-calm` بيبقى جاهز بعد الـclose؟", Question: &LessonQuestion{
+				Options: []string{"فورًا", "بعد رسالة جديدة", "بعد ما تتقفل تاني"}, Answer: 0,
+				Feedback: []string{"الاستقبال من الـchannel المقفولة جاهز دايمًا.", "الـclose نفسه علامة انتهاء الإشارة.", "الـchannel المقفولة مش محتاجة تتقفل تاني."},
 			}},
 		},
 	},
