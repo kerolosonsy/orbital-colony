@@ -82,3 +82,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 78. **Result sheet says how many ticks to save** — below three stars it now adds "(N to save)" next to the 3★ target, instead of making you subtract.
 79. **Index shows your best on hover** — each finished mission cell's tooltip includes your best tick count.
 80. **No stale mission banner in the colony** — entering the colony right after finishing a mission kept "Mission complete in 3 ticks!" under the colony map; the banner is now cleared on entry (seen in a screenshot, fixed).
+81. **Tests for the new client helpers** — `web/helpers.test.js` covers the server-hint rules (down / stale token in both languages / unrelated 403 and 500 give no hint) and mission-link resolution (`#3-1` vs `#13-1`, full ids).
