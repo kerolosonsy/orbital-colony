@@ -133,6 +133,7 @@ doctor: ## اتأكد إن كل حاجة جاهزة على الجهاز
 	@lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1 && echo "• البورت $(PORT) مستخدم دلوقتي" || echo "✓ البورت $(PORT) فاضي"
 	@(cd labdeps && GOPROXY=off GOFLAGS=-mod=mod go build ./... >/dev/null 2>&1) && echo "✓ مكتبات المختبرات جاهزة" || echo "• مكتبات المختبرات مش جاهزة: شغّل make deps مرة وإنت متوصل بالإنترنت"
 	@command -v docker >/dev/null && echo "✓ Docker (لمهمات الخدمات: make services-up)" || echo "• Docker مش متسطب: محتاجه بس لمهمات Postgres/MongoDB/Kafka"
+	@command -v node >/dev/null && echo "✓ Node $$(node --version) (لاختبارات الواجهة: make test-web)" || echo "• Node مش متسطب: محتاجه بس لـ make test-web"
 
 clean: ## امسح ملفات البناء والـ logs (الحفظ مش بيتمسح)
 	rm -f $(BIN) $(LOGFILE)
