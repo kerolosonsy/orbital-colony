@@ -616,13 +616,28 @@ function logCompileError(e) {
   button.type = "button";
   button.className = "c-error-line";
   button.textContent = `${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`;
-  button.onclick = () => {
-    showFile(file);
-    const lines = ed.value.split("\n");
-    const start = Math.min(ed.value.length, lines.slice(0, line - 1).reduce((n, value) => n + value.length + 1, 0));
-    ed.focus();
-    ed.setSelectionRange(start, Math.min(ed.value.length, start + (lines[line - 1] || "").length));
-  };
+  button.onclick = () => jumpToLine(file, line);
+  appendConsoleNode(button);
+}
+function jumpToLine(file, line) {
+  showFile(file);
+  const lines = ed.value.split("\n");
+  const start = Math.min(ed.value.length, lines.slice(0, line - 1).reduce((n, value) => n + value.length + 1, 0));
+  ed.focus();
+  ed.setSelectionRange(start, Math.min(ed.value.length, start + (lines[line - 1] || "").length));
+}
+// Panic traces and failing test output name "main.go:12": make those lines
+// clickable when the file is one of the mission's files.
+function logOutputLine(text, cls) {
+  const match = /(?:^|[\s/])([\w.-]+\.go):(\d+)\b/.exec(text);
+  const file = match && levelFiles(S.cur).find((f) => f.name === match[1]);
+  if (!file) return log(text, cls);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `c-error-line ${cls}`;
+  button.textContent = text;
+  button.title = T(`روح لسطر ${match[2]} في ${match[1]}`, `Go to line ${match[2]} in ${match[1]}`);
+  button.onclick = () => jumpToLine(file.name, Number(match[2]));
   appendConsoleNode(button);
 }
 
@@ -1833,14 +1848,14 @@ async function run(opts = {}) {
       refreshService(level);
       for (const st of r.steps || []) {
         log(`${st.ok ? T("نجح:", "Passed:") : T("فشل:", "Failed:")} ${st.title}`, st.ok ? "c-ok" : "c-err");
-        if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-err"));
+        if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => logOutputLine("   " + l, "c-err"));
         if (!st.ok) logErrorHelp(st.tip, st.tipCause, st.tipCheck);
       }
       finish(level, r.result, r.missing || []);
       return;
     }
     if (r.stdout) { log("fmt output:", "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => log(l)); }
-    if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => log(l, "c-err"));
+    if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => logOutputLine(l, "c-err"));
     if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
     log(T("الدرون شغال…", "Drone running…"), "c-info");
     if (r.trace?.available && r.trace.synced && r.trace.frames?.length) {

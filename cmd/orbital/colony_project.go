@@ -157,7 +157,7 @@ func (r *runner) vetColonyProject(ctx context.Context, files map[string]string) 
 	cmd := r.goCmd(ctx, dir, "vet", "./...")
 	cmd.Stdout, cmd.Stderr = output, output
 	runErr := runCommand(cmd)
-	return runErr == nil, strings.ReplaceAll(output.String(), dir+string(os.PathSeparator), ""), nil
+	return runErr == nil, stripDir(output.String(), dir), nil
 }
 
 func (r *runner) colonyProjectDir(files map[string]string) (string, error) {
@@ -258,7 +258,7 @@ func (r *runner) buildColonyProject(ctx context.Context, dir string, project *co
 	build := r.goCmd(ctx, dir, append(args, ".")...)
 	build.Stdout, build.Stderr = output, output
 	if err := runCommand(build); err != nil {
-		out := strings.ReplaceAll(output.String(), dir+string(os.PathSeparator), "")
+		out := stripDir(output.String(), dir)
 		return map[string]any{"phase": "compile", "compileErrors": compileErrorsFor(out, lang), "compileOutput": out}
 	}
 	return nil

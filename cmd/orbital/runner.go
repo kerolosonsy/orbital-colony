@@ -139,7 +139,7 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	}
 	defer traced.cleanup()
 	if err != nil {
-		out := strings.ReplaceAll(bout.String(), dir+string(os.PathSeparator), "")
+		out := stripDir(bout.String(), dir)
 		if errors.Is(bctx.Err(), context.DeadlineExceeded) {
 			out += "\n" + context.DeadlineExceeded.Error()
 			tip := errorTipFor(out, tipRuntime, lang)
@@ -184,7 +184,7 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	runErr := runCommand(prog)
 	plainTook := time.Since(started)
 	resp.Stdout = stdout.String()
-	resp.Stderr = strings.ReplaceAll(stderr.String(), dir+string(os.PathSeparator), "")
+	resp.Stderr = stripDir(stderr.String(), dir)
 	if errors.Is(rctx.Err(), context.DeadlineExceeded) {
 		if resp.Stderr != "" {
 			resp.Stderr += "\n"
@@ -290,6 +290,16 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 		}
 	}
 	return resp, nil
+}
+
+// stripDir removes the temporary build directory from compiler, test and
+// panic output so the learner sees "main.go:8". On macOS the binary records
+// the resolved path (/private/var/...), so that spelling goes first.
+func stripDir(text, dir string) string {
+	if real, err := filepath.EvalSymlinks(dir); err == nil && real != dir {
+		text = strings.ReplaceAll(text, real+string(os.PathSeparator), "")
+	}
+	return strings.ReplaceAll(text, dir+string(os.PathSeparator), "")
 }
 
 type limitedBuffer struct {

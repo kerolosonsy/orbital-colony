@@ -366,3 +366,15 @@ func TestStaticFilesRevalidate(t *testing.T) {
 		t.Fatalf("unchanged file should be 304, got %d", response.Code)
 	}
 }
+
+func TestStripDirRemovesResolvedTempPath(t *testing.T) {
+	dir := t.TempDir()
+	real, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	in := "\t" + real + "/main.go:8 +0x1c\n" + dir + "/util.go:3: oops"
+	if got := stripDir(in, dir); got != "\tmain.go:8 +0x1c\nutil.go:3: oops" {
+		t.Fatalf("stripDir = %q", got)
+	}
+}
