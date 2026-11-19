@@ -11,6 +11,7 @@ import (
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch04RipeOnlyEnglish,
 			Title: "Patience Pays",
 			Goal:  "Collect 10 moss without destroying a single plant",
 			Lesson: `# if: The Drone Makes Decisions 🤔
@@ -70,11 +71,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"~colony.CanHarvest()~ returns ~true~ when the tile is ready. Inside the if, Harvest then Plant to keep the tile productive.",
-				"The field has two rows: head right along the first, go North, return left, then go South. Repeat.",
-				"~colony.Position()~ returns x and y. Choose a direction from them: ~if y == 0 && x < 4 { ... } else if ...~",
+				"~if~ protects an action by running it only when ready is true.",
+				"Keep the readiness decision separate from your route to the next tile.",
+				"Use the starter's ~colony.CanHarvest()~ condition to guide its body.",
 			},
 		},
+		LessonRevision: 1, Steps: ch04RipeOnlyArabic,
 		ID: "4-1-ripe-only", Chapter: 4, Title: "الصبر مفتاح",
 		Goal: "اجمع 10 طحالب من غير ما تدمّر ولا نبتة",
 		Par:  80, Gold: 55, MaxTicks: 800,
@@ -102,9 +104,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"~colony.CanHarvest()~ بترجّع ~true~ لو الخانة جاهزة. جوه الـ if: Harvest وبعدين Plant عشان الخانة تفضل شغالة.",
-			"الحقل صفين: امشي يمين في الصف الأول، اطلع North، ارجع شمال، وانزل South. وكرّر.",
-			"~colony.Position()~ بترجّع x و y. ممكن تقرر الاتجاه على حسبهم: ~if y == 0 && x < 4 { ... } else if ...~",
+			"~if~ بتحمي فعل وبتشغّله بس لما الجاهزية تبقى true.",
+			"افصل قرار الجاهزية عن طريقك للخانة اللي بعدها.",
+			"استخدم شرط ~colony.CanHarvest()~ الموجود في الـstarter عشان توجّه جسمه.",
 		},
 		Lesson: `# if: الدرون بيفكّر 🤔
 
@@ -153,6 +155,7 @@ if x, _ := colony.Position(); x == 4 {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch04TerrainEnglish,
 			Title: "Mixed Terrain",
 			Goal:  "Plant the right crop on every tile: moss on soil, lichen on ice",
 			Lesson: `# switch: Many Choices 🔀
@@ -203,11 +206,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Nothing grows on Rock, so leave it alone. Regolith needs Till first, then Moss.",
-				"Traverse the whole field in a snake pattern and switch on ~colony.GetGround()~ for each tile.",
-				"Each GetGround costs a tick. Call it just once per tile.",
+				"~switch~ sends one value to one matching case.",
+				"Plan a ground choice for each tile, including unsupported terrain.",
+				"Inspect the starter's ~colony.GetGround()~ value and its existing cases.",
 			},
 		},
+		LessonRevision: 1, Steps: ch04TerrainArabic,
 		ID: "4-2-terrain", Chapter: 4, Title: "تضاريس مختلطة",
 		Goal: "ازرع كل خانة باللي يناسبها: طحالب على التربة، أشنة على الجليد",
 		Par:  80, Gold: 60, MaxTicks: 400,
@@ -251,9 +255,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"Rock مبيتزرعش، سيبه في حاله. الـ regolith محتاج Till الأول، وبعدها Moss.",
-			"لف على الحقل كله بنفس طريقة الثعبان، ولكل خانة اعمل switch على ~colony.GetGround()~.",
-			"كل GetGround بتاخد tick. نادِها مرة واحدة بس لكل خانة.",
+			"~switch~ بتبعت قيمة لفرع case واحد مطابق.",
+			"خطط لاختيار حسب الأرض في كل خانة، بما فيها الأرض اللي مش مدعومة.",
+			"راجع قيمة ~colony.GetGround()~ وحالات الـswitch الموجودة في الـstarter.",
 		},
 		Lesson: `# switch: اختيارات كتير 🔀
 
@@ -303,113 +307,23 @@ func main() {
 	// Build the report described in the lesson.
 }
 `
-	add(&Level{ID: "4-3-checkpoint", Chapter: 4, Title: "بوابة الفحص", Goal: "صنّف قراءات صحيحة مع فحص الحدود والقيم خارج المدى",
+	add(&Level{LessonRevision: 1, Steps: ch04CheckpointArabic, ID: "4-3-checkpoint", Chapter: 4, Title: "بوابة الفحص", Goal: "صنّف قراءات صحيحة مع فحص الحدود والقيم خارج المدى",
 		Requires: []string{"if"}, Bridge: []int{1, 7},
 		Par: 0, Gold: 0, MaxTicks: 100,
-		Starter: checkpointStarter, Lesson: `# الحدود ليها صاحب 🚦
+		Starter: checkpointStarter, Lesson: `# بوابة الفحص 🚦
 
-بوابة الفحص بتستقبل أرقام صحيحة من حسّاسات الأكسجين. هنا مش محتاج تحوّل نصوص؛ شغلتك تقرر كل رقم ينتمي لأنهي فئة.
+كل قراءة رقم صحيح وليها تصنيف نصّي. استخدم ~ReadingCount~ لمعرفة عدد القراءات و~Reading(i)~ لقراءة واحدة بالـindex.
 
-## قبل ما تكتب
-- الرقم اللي على الحد بالظبط هينتمي للفئة اللي قبله ولا بعده؟
-- هتفحص المدى المسموح قبل التصنيف ولا بعده؟
+امشِ على القراءات بترتيبها. افحص القيم الخارجة عن المجال قبل اختيار الفئة، وخلي كل حد تابع لفئة واحدة.
 
-## قراءة رقم برقم
-~~~go
-count := colony.ReadingCount()
-n := colony.Reading(0)
-fmt.Println(count, n)
-~~~
-~ReadingCount~ بتقولك عدد القراءات. ~Reading(i)~ بتجيب قراءة واحدة كـ ~int~، ورقمها يبدأ من صفر. الأرقام جاهزة للحساب؛ مفيش parsing أو error.
+ابعت label واحدة لكل قراءة بـ~colony.Report~. راجع العقد والحدود من غير ما تفترض ترتيب ثابت للبيانات.`, Hints: []string{"الحد لازم يتبع فئة واحدة بس.", "افصل فحص المجال عن اختيار الفئة، وحافظ على ترتيب القراءات.", "استخدم ~colony.ReadingCount()~ لحد الحلقة و~colony.Reading(i)~ للقيمة الحالية."},
+		En: &LevelText{LessonRevision: 1, Steps: ch04CheckpointEnglish, Title: "Inspection Checkpoint", Goal: "Classify integer readings, including boundaries and out-of-range values", Starter: checkpointStarter, Lesson: `# Inspection Checkpoint 🚦
 
-استخدم حلقة العدّ اللي عرفناها في الفصل 3 عشان تزور الأرقام من 0 لحد قبل count. مثلاً حلقة عرض عدّاد بسيطة:
-~~~go
-for i := 0; i < 3; i++ {
- fmt.Println(i)
-}
-~~~
+Each reading is an integer with a text category. Use ~ReadingCount~ for the number of readings and ~Reading(i)~ for one indexed value.
 
-## رتب شروطك
-~~~go
-power := 7
-label := "blocked"
-if power < 2 || power > 8 {
- label = "blocked"
-} else if power < 5 {
- label = "slow"
-} else {
- label = "fast"
-}
-fmt.Println(label) // fast
-~~~
-ده مثال تصريح موتور: من 2 لـ8 مسموح، و5 بداية السرعة العالية. بنفحص القيم المرفوضة الأول، وبعدها الحدود من الأصغر للأكبر. أول شرط صحيح هو اللي بيتنفّذ، ومش بنكمل باقي السلسلة.
+Visit readings in order. Check values outside the allowed range before choosing a category, and give each boundary one owner.
 
-~label~ اتعرّفت قبل if عشان نقدر نستخدمها في التقرير بعد نهاية الشروط.
-
-## أخطاء شائعة
-~~~go
-if power <= 5 {
- label = "slow"
-}
-~~~
-لو 5 بداية fast، فـ ~<=~ حطّت القيمة دي في الفئة الغلط. كمان لو بدأت بفحص ~power < 5~ قبل المدى المسموح، رقم سالب ممكن يتصنّف slow بالغلط.
-
-## المهمة
-لف على كل القراءات وابعت تقرير نصّي منفصل لكل قراءة بنفس ترتيبها. المدى المسموح من 0 لـ100 شامل الطرفين؛ أي رقم أقل من 0 أو أكبر من 100 تقريره ~invalid~.
-
-جوه المدى: أقل من20 هو ~low~، من20 لأقل من50 هو ~ready~، من50 لأقل من80 هو ~high~، ومن80 لحد100 هو ~alert~. ابعت الكلمة بس بـ ~colony.Report(label)~، من غير index أو أرقام إضافية. القيم 20 و50 و80 بتبدأ الفئة الجديدة بالظبط.`, Hints: []string{"اقرأ ~ReadingCount~ واستعمل حلقة عدّ، بدل ما تعمل قايمة قراءات.", "ابدأ برفض ~n < 0 || n > 100~ قبل شروط الفئات.", "خلي شروط الحدود تصاعدية وبـ ~<~، وابعت تقرير واحد بعد سلسلة if لكل قراءة."},
-		En: &LevelText{Title: "Inspection Checkpoint", Goal: "Classify integer readings, including boundaries and out-of-range values", Starter: checkpointStarter, Lesson: `# Every Boundary Has an Owner 🚦
-
-The checkpoint receives integer oxygen readings. There is no text conversion here; decide which band owns each number.
-
-## Before you write
-- Does an exact threshold belong to the preceding or following band?
-- Will you validate the allowed range before or after classification?
-
-## Read one number at a time
-~~~go
-count := colony.ReadingCount()
-n := colony.Reading(0)
-fmt.Println(count, n)
-~~~
-~ReadingCount~ gives the number of readings. ~Reading(i)~ returns one ~int~, with indices starting at zero. Values are ready for arithmetic; no parsing or errors are involved.
-
-Use the counting loop from chapter 3 to visit indices from 0 up to, but not including, count. For example, this small display loop prints a counter:
-~~~go
-for i := 0; i < 3; i++ {
- fmt.Println(i)
-}
-~~~
-
-## Order your conditions
-~~~go
-power := 7
-label := "blocked"
-if power < 2 || power > 8 {
- label = "blocked"
-} else if power < 5 {
- label = "slow"
-} else {
- label = "fast"
-}
-fmt.Println(label) // fast
-~~~
-This worked example grants motor access: 2 through 8 are allowed, and 5 starts the fast band. Reject invalid values first, then test thresholds from smallest to largest. Only the first matching branch runs.
-
-~label~ is declared before the if so it can be used in a report after the branches.
-
-## Common mistakes
-~~~go
-if power <= 5 {
- label = "slow"
-}
-~~~
-If 5 starts fast, ~<=~ puts that exact value in the wrong band. Also, testing ~power < 5~ before validating the range can wrongly classify a negative number as slow.
-
-## Your mission
-Visit every reading and send one separate text report for each, in input order. The allowed range is 0 through 100 inclusive; anything below 0 or above 100 is ~invalid~.
-
-Within that range: below 20 is ~low~, 20 to below 50 is ~ready~, 50 to below 80 is ~high~, and 80 through 100 is ~alert~. Send only the word with ~colony.Report(label)~, with no index or extra numbers. Exactly 20, 50, and 80 start their new bands.`, Hints: []string{"Read ~ReadingCount~ and use a counting loop rather than building a collection.", "Reject ~n < 0 || n > 100~ before testing bands.", "Test ascending thresholds with ~<~ and send one report after the if chain for each reading."}},
+Send one label per reading with ~colony.Report~. Follow the contract without assuming a fixed data order.`, Hints: []string{"A boundary should belong to exactly one category.", "Separate range validation from band selection and preserve reading order.", "Use ~colony.ReadingCount()~ for the loop bound and ~colony.Reading(i)~ for the current value."}},
 		Setup: func(w *sim.World) {
 			w.Init(4, 2, sim.Regolith)
 			w.Data.SensorReadings = []int{-1, 0, 19, 20, 49, 50, 79, 80, 100, 101}

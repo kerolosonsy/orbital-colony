@@ -10,6 +10,7 @@ import (
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch03LongRowEnglish,
 			Title: "The Long Row",
 			Goal:  "Harvest 14 moss plants — use for instead of writing 28 lines!",
 			Lesson: `# The for Loop 🔁
@@ -47,10 +48,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Everything inside the for loop's ~{ }~ repeats. Put both Move and Harvest inside.",
-				"Change 3 to 14.",
+				"A ~for~ body repeats while its condition stays true.",
+				"Keep the repeated drone work inside the loop body.",
+				"Check the starter's loop condition and commands inside its braces.",
 			},
 		},
+		LessonRevision: 1, Steps: ch03LongRowArabic,
 		ID: "3-1-long-row", Chapter: 3, Title: "الصف الطويل",
 		Goal: "احصد الـ 14 طحلب — بـ for، مش 28 سطر!",
 		Par:  28, Gold: 28, MaxTicks: 80,
@@ -77,8 +80,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"كل اللي جوه ~{ }~ بتاعة الـ for بيتكرر. حط Move و Harvest الاتنين جوه.",
-			"غيّر 3 لـ 14.",
+			"جسم ~for~ بيتكرر طول ما الشرط true.",
+			"خلّي شغل الدرون اللي محتاج تكراره جوه جسم الـloop.",
+			"راجع شرط الـfor وأوامر الـstarter اللي بين الأقواس.",
 		},
 		Lesson: `# الحلقة for 🔁
 
@@ -108,6 +112,7 @@ for i := 0; i < 5; i++ {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch03FullFieldEnglish,
 			Title: "The Whole Field",
 			Goal:  "Harvest the entire 6×6 field (36 moss)",
 			Lesson: `# A Loop Inside a Loop 🧩
@@ -149,11 +154,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"For one row: Harvest, then Move(East) 5 times, harvesting after each move.",
-				"After finishing a row, use ~colony.Move(colony.North)~ to reach the next one.",
-				"For 3 stars, avoid returning to the left edge each time. Alternate directions between rows, like a snake 🐍. ~if y%2 == 0~ can help... or use a direction variable.",
+				"Nested loops give separate counters to rows and items.",
+				"Plan one row at a time, then account for the next row.",
+				"Compare the two loop bounds and the direction choice in your row logic.",
 			},
 		},
+		LessonRevision: 1, Steps: ch03FullFieldArabic,
 		ID: "3-2-full-field", Chapter: 3, Title: "الحقل الكامل",
 		Goal: "احصد الحقل كله 6×6 (36 طحلب)",
 		Par:  100, Gold: 71, MaxTicks: 300,
@@ -177,9 +183,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"صف واحد: Harvest، وبعدين Move(East) 5 مرات مع Harvest بعد كل حركة.",
-			"بعد ما تخلّص صف، ~colony.Move(colony.North)~ واطلع للصف اللي فوقه.",
-			"عشان 3 نجوم: متنزلش ترجع للشمال كل مرة. امشي ذهاب في صف وعودة في اللي بعده (زي الثعبان 🐍). ~if y%2 == 0~ هتساعدك… أو استخدم متغير للاتجاه.",
+			"الحلقات المتداخلة بتدي عدّاد منفصل للصفوف والخانات.",
+			"خطط صف واحد في كل مرة، وبعده فكّر في الصف اللي بعده.",
+			"راجع حدود الحلقتين واختيار الاتجاه في منطق الصفوف.",
 		},
 		Lesson: `# حلقة جوه حلقة 🧩
 
@@ -213,6 +219,7 @@ dir = colony.West // نفس المتغير، قيمة جديدة
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch03EndlessEnglish,
 			Title: "A Farm That Never Sleeps",
 			Goal:  "Collect 30 moss from a 3×3 field",
 			Lesson: `# for Without a Counter ♾️
@@ -250,11 +257,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Moss takes 8 ticks to ripen after planting.",
-				"Harvest fails harmlessly on an empty tile. Plant also fails if a plant is already there.",
-				"A full tour (Harvest + Plant + Move for each tile) takes more than 8 ticks, so the first tile will be ripe when you return.",
+				"A condition-only ~for~ repeats until its condition becomes false.",
+				"Make each pass add progress and advance the game state.",
+				"Inspect the ~colony.Count~ condition and add a drone action to the body.",
 			},
 		},
+		LessonRevision: 1, Steps: ch03EndlessArabic,
 		ID: "3-3-endless", Chapter: 3, Title: "مزرعة لا تنام",
 		Goal: "اجمع 30 طحلب من حقل 3×3",
 		Par:  200, Gold: 140, MaxTicks: 1200,
@@ -277,9 +285,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الطحلب بياخد 8 ticks عشان ينضج بعد ما يتزرع.",
-			"Harvest على خانة فاضية بتفشل بس مش بتضر. Plant على خانة فيها نبات بتفشل برضه.",
-			"لفّة على الحقل كله (Harvest + Plant + Move لكل خانة) بتاخد أكتر من 8 ticks، فلما ترجع لأول خانة هتلاقيها نضجت.",
+			"حلقة ~for~ بشرط بس بتتكرر لحد ما الشرط يبقى false.",
+			"خلّي كل دورة تزود التقدم وتحرك حالة اللعبة لقدّام.",
+			"راجع شرط ~colony.Count~ وضيف أمر للدرون جوه جسم الحلقة.",
 		},
 		Lesson: `# for من غير عدّاد ♾️
 
