@@ -1,0 +1,64 @@
+{
+  "ch19-duration-add": {
+    "startHour": 23,
+    "startMinute": 40,
+    "duration": {"value": 35, "min": 0, "max": 120, "step": 5},
+    "labels": {
+      "start": {"ar": "البداية", "en": "Start"},
+      "duration": {"ar": "المدة بالدقايق", "en": "Duration in minutes"},
+      "arrival": {"ar": "الوصول", "en": "Arrival"},
+      "nextDay": {"ar": "اليوم التالي", "en": "next day"}
+    }
+  },
+  "ch19-zone-view": {
+    "hour": {"value": 0, "min": 0, "max": 23, "step": 1},
+    "offsets": {"west": -5, "east": 4},
+    "labels": {
+      "hour": {"ar": "ساعة UTC", "en": "UTC hour"},
+      "instant": {"ar": "نفس اللحظة", "en": "Same instant"},
+      "utc": {"ar": "UTC", "en": "UTC"},
+      "west": {"ar": "UTC−5", "en": "UTC−5"},
+      "east": {"ar": "UTC+4", "en": "UTC+4"},
+      "previousDay": {"ar": "اليوم السابق", "en": "previous day"},
+      "nextDay": {"ar": "اليوم التالي", "en": "next day"}
+    }
+  },
+  "ch19-select-race": {
+    "labels": {
+      "schedule": {"ar": "مسار محتمل", "en": "Possible schedule"},
+      "runAgain": {"ar": "جرّب ترتيب تاني", "en": "Try another order"},
+      "reset": {"ar": "من الأول", "en": "Reset"},
+      "caption": {"ar": "الإشارات ممكن تبقى جاهزة مع بعض.", "en": "Both signals may be ready."}
+    },
+    "runs": [
+      {"events": [
+        {"ar": "الإلغاء جاهز", "en": "Cancellation is ready"},
+        {"ar": "select ممكن يختار الإلغاء", "en": "select may choose cancellation"},
+        {"ar": "الـticker اتوقف", "en": "Ticker stopped"}
+      ]},
+      {"events": [
+        {"ar": "الـtick والإلغاء جاهزين", "en": "Tick and cancel are ready"},
+        {"ar": "select ممكن يختار الـtick", "en": "select may choose the tick"},
+        {"ar": "فحص Err تخطّى callback", "en": "Err check skips callback"}
+      ]}
+    ]
+  },
+  "ch19-worker-order": {
+    "workers": [
+      {"id": "A", "label": {"ar": "الرصيف A", "en": "Dock A"}},
+      {"id": "B", "label": {"ar": "الرصيف B", "en": "Dock B"}},
+      {"id": "C", "label": {"ar": "الرصيف C", "en": "Dock C"}}
+    ],
+    "runs": [
+      {"finishOrder": ["C", "A", "B"]},
+      {"finishOrder": ["B", "C", "A"]}
+    ],
+    "requestOrder": ["A", "B", "C"],
+    "labels": {
+      "finishOrder": {"ar": "ترتيب الإكمال", "en": "Finish order"},
+      "requestOrder": {"ar": "ترتيب الطلبات", "en": "Request order"},
+      "runAgain": {"ar": "شغّل ترتيب محتمل تاني", "en": "Show another possible run"},
+      "caption": {"ar": "التوقيت الحقيقي ممكن يختلف.", "en": "Actual timing can vary."}
+    }
+  }
+}

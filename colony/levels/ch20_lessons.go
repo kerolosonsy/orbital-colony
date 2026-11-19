@@ -12,6 +12,42 @@ func ch20Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	return LessonBlock{ID: id, Kind: "walkthrough", Text: text, Code: code, Imports: imports, ExampleID: exampleID, Walkthrough: &LessonWalkthrough{Frames: frames}}
 }
 
+func ch20Localized(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch20SandboxBlock(id, kind, text string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch20EnglishSandboxBlock(id, kind, text string, config map[string]any) LessonBlock {
+	return ch20SandboxBlock(id, kind, text, ch20EnglishConfig(config).(map[string]any))
+}
+
+func ch20EnglishConfig(value any) any {
+	switch value := value.(type) {
+	case map[string]any:
+		if english, ok := value["en"].(string); ok {
+			if _, localized := value["ar"].(string); localized {
+				return map[string]any{"ar": english, "en": english}
+			}
+		}
+		copy := make(map[string]any, len(value))
+		for key, item := range value {
+			copy[key] = ch20EnglishConfig(item)
+		}
+		return copy
+	case []any:
+		copy := make([]any, len(value))
+		for index, item := range value {
+			copy[index] = ch20EnglishConfig(item)
+		}
+		return copy
+	default:
+		return value
+	}
+}
+
 var ch20BulletinArabic = []LessonStep{
 	{ID: "c201.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch20Markdown("c201.mission", "1. حوّل نص النشرة لـ HTML آمن بـ~RenderBulletin~.\n2. اتعامل مع tagين معروفين بس؛ الأقواس التانية تفضل نص عادي.\n3. الـstarter بيرجع خطأ مؤقت، والمهمة من غير Report.")}},
 	{ID: "c201.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch20Walkthrough("c201.state-example", "اعتبر كل tag معروفة مفتاح لحالة. ~HasPrefix~ بتتعرف على بداية النص، وبعدها تقرأ الباقي حسب الحالة.\n\nده مثال توضيحي صغير، مش parser كامل. خليك عارف هل النص عادي ولا جوه tag.", `func main() {
@@ -39,6 +75,24 @@ fmt.Println(out.String())
 			{Line: 2, Caption: "Builder جاهزة فاضية.", Variables: []LessonVariable{{Name: "out", Value: ""}}},
 			{Line: 3, Caption: "اتضاف نص آمن.", Variables: []LessonVariable{{Name: "out", Value: "&lt;relay&gt;"}}},
 			{Line: 4, Caption: "الناتج فيه entities.", Variables: []LessonVariable{{Name: "out", Value: "&lt;relay&gt;"}}, Output: "&lt;relay&gt;"},
+		}),
+		ch20SandboxBlock("c201.try-sandbox", "ch20-bulletin-state", "تابع state والـoutput خطوة خطوة.", map[string]any{
+			"source": "[alert]<relay>[/alert]",
+			"frames": []any{
+				map[string]any{"piece": ch20Localized("بداية النص", "Start of input"), "state": ch20Localized("نص عادي", "plain"), "output": "", "caption": ch20Localized("ابدأ في حالة النص العادي.", "Start in plain text.")},
+				map[string]any{"piece": ch20Localized("[alert]", "[alert]"), "state": ch20Localized("تنبيه", "alert"), "output": "<strong>", "caption": ch20Localized("اتعرّف على الوسم المعروف.", "Recognize the known opening tag.")},
+				map[string]any{"piece": ch20Localized("<relay>", "<relay>"), "state": ch20Localized("تنبيه", "alert"), "output": "<strong>&lt;relay&gt;", "caption": ch20Localized("اعمِل escaping لنص المستخدم.", "Escape the user text once.")},
+				map[string]any{"piece": ch20Localized("[/alert]", "[/alert]"), "state": ch20Localized("نص عادي", "plain"), "output": "<strong>&lt;relay&gt;</strong>", "caption": ch20Localized("اقفل الوسم وارجع للنص العادي.", "Close the tag; return to plain text.")},
+			},
+			"labels": map[string]any{
+				"source":   ch20Localized("النص", "Input"),
+				"piece":    ch20Localized("الجزء", "Piece"),
+				"state":    ch20Localized("الحالة", "State"),
+				"output":   ch20Localized("ناتج آمن", "Safe output"),
+				"previous": ch20Localized("السابق", "Previous"),
+				"next":     ch20Localized("التالي", "Next"),
+				"reset":    ch20Localized("من الأول", "Reset"),
+			},
 		}),
 	}},
 	{ID: "c201.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c201.watch", "- اكتب tags بتاعتك مباشرة، واعمِل escaping لنص المستخدم مرة واحدة.\n- القفل الغلط أو نهاية النص وحالة tag مفتوحة معناهم خطأ من غير ناتج جزئي.")}},
@@ -77,6 +131,24 @@ fmt.Println(out.String())
 			{Line: 3, Caption: "Safe text is appended.", Variables: []LessonVariable{{Name: "out", Value: "&lt;relay&gt;"}}},
 			{Line: 4, Caption: "Output contains entities.", Variables: []LessonVariable{{Name: "out", Value: "&lt;relay&gt;"}}, Output: "&lt;relay&gt;"},
 		}),
+		ch20EnglishSandboxBlock("c201.try-sandbox", "ch20-bulletin-state", "Track state and escaped output.", map[string]any{
+			"source": "[alert]<relay>[/alert]",
+			"frames": []any{
+				map[string]any{"piece": ch20Localized("بداية النص", "Start of input"), "state": ch20Localized("نص عادي", "plain"), "output": "", "caption": ch20Localized("ابدأ في حالة النص العادي.", "Start in plain text.")},
+				map[string]any{"piece": ch20Localized("[alert]", "[alert]"), "state": ch20Localized("تنبيه", "alert"), "output": "<strong>", "caption": ch20Localized("اتعرّف على الوسم المعروف.", "Recognize the known opening tag.")},
+				map[string]any{"piece": ch20Localized("<relay>", "<relay>"), "state": ch20Localized("تنبيه", "alert"), "output": "<strong>&lt;relay&gt;", "caption": ch20Localized("اعمِل escaping لنص المستخدم.", "Escape the user text once.")},
+				map[string]any{"piece": ch20Localized("[/alert]", "[/alert]"), "state": ch20Localized("نص عادي", "plain"), "output": "<strong>&lt;relay&gt;</strong>", "caption": ch20Localized("اقفل الوسم وارجع للنص العادي.", "Close the tag; return to plain text.")},
+			},
+			"labels": map[string]any{
+				"source":   ch20Localized("النص", "Input"),
+				"piece":    ch20Localized("الجزء", "Piece"),
+				"state":    ch20Localized("الحالة", "State"),
+				"output":   ch20Localized("ناتج آمن", "Safe output"),
+				"previous": ch20Localized("السابق", "Previous"),
+				"next":     ch20Localized("التالي", "Next"),
+				"reset":    ch20Localized("من الأول", "Reset"),
+			},
+		}),
 	}},
 	{ID: "c201.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch20Markdown("c201.watch", "- Write your own tags directly, and escape user text exactly once.\n- A mismatched close or EOF inside a tag is an error with no partial output.")}},
 	{ID: "c201.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -110,6 +182,18 @@ fmt.Println(pattern.MatchString("relay!"))
 			{Line: 2, Caption: "الـpattern بتطلب حروف صغيرة."},
 			{Line: 3, Caption: "علامة التعجب مرفوضة.", Output: "false"},
 		}),
+		ch20SandboxBlock("c202.try-sandbox", "ch20-error-join", "بدّل الحقول وشوف تجميع الأسباب.", map[string]any{
+			"fields": []any{
+				map[string]any{"id": "pilot", "label": ch20Localized("اسم الطيار", "Pilot name"), "cause": ch20Localized("اسم الطيار ناقص", "Pilot name missing"), "invalid": true},
+				map[string]any{"id": "radio", "label": ch20Localized("نداء الراديو", "Radio call"), "cause": ch20Localized("نداء الراديو غير صالح", "Radio call invalid"), "invalid": false},
+				map[string]any{"id": "date", "label": ch20Localized("تاريخ المهمة", "Mission date"), "cause": ch20Localized("التاريخ غير صالح", "Date invalid"), "invalid": true},
+			},
+			"labels": map[string]any{
+				"valid":   ch20Localized("سليم", "valid"),
+				"invalid": ch20Localized("فيه خطأ", "invalid"),
+				"causes":  ch20Localized("الأسباب بالترتيب", "Causes in order"),
+			},
+		}),
 	}},
 	{ID: "c202.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c202.watch", "- regex من غير anchors ممكن تقبل جزء من قيمة غلط.\n- التاريخ محتاج parser حقيقي؛ regex لوحدها مش بتعرف إن اليوم موجود.")}},
 	{ID: "c202.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -142,6 +226,18 @@ fmt.Println(pattern.MatchString("relay!"))
 			{Line: 0, Caption: "Before execution."},
 			{Line: 2, Caption: "Pattern requires lowercase letters."},
 			{Line: 3, Caption: "The exclamation is rejected.", Output: "false"},
+		}),
+		ch20EnglishSandboxBlock("c202.try-sandbox", "ch20-error-join", "Toggle fields; inspect joined causes.", map[string]any{
+			"fields": []any{
+				map[string]any{"id": "pilot", "label": ch20Localized("اسم الطيار", "Pilot name"), "cause": ch20Localized("اسم الطيار ناقص", "Pilot name missing"), "invalid": true},
+				map[string]any{"id": "radio", "label": ch20Localized("نداء الراديو", "Radio call"), "cause": ch20Localized("نداء الراديو غير صالح", "Radio call invalid"), "invalid": false},
+				map[string]any{"id": "date", "label": ch20Localized("تاريخ المهمة", "Mission date"), "cause": ch20Localized("التاريخ غير صالح", "Date invalid"), "invalid": true},
+			},
+			"labels": map[string]any{
+				"valid":   ch20Localized("سليم", "valid"),
+				"invalid": ch20Localized("فيه خطأ", "invalid"),
+				"causes":  ch20Localized("الأسباب بالترتيب", "Causes in order"),
+			},
 		}),
 	}},
 	{ID: "c202.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch20Markdown("c202.watch", "- A regex without anchors can accept part of an invalid value.\n- Dates need a real parser; a regex cannot know whether a day exists.")}},
@@ -181,6 +277,25 @@ fmt.Println(i, string(source[i]))
 			{Line: 4, Caption: "أول بايت عند صفر.", Output: "0 g"},
 			{Line: 4, Caption: "البايت التانية عند واحد.", Output: "0 g\n1 o"},
 		}),
+		ch20SandboxBlock("c203.try-sandbox", "ch20-lexer-offset", "حرّك المسح وراقب token والـoffset.", map[string]any{
+			"source": "go_2 > 7",
+			"frames": []any{
+				map[string]any{"cursor": "0", "token": ch20Localized("لسه مفيش", "not yet"), "offset": "—", "caption": ch20Localized("ابدأ من أول byte.", "Start at the first byte.")},
+				map[string]any{"cursor": "4", "token": "name go_2", "offset": "0", "caption": ch20Localized("استهلك الاسم بالكامل.", "Consume the whole name.")},
+				map[string]any{"cursor": "6", "token": ">", "offset": "5", "caption": ch20Localized("تخطّى المسافة واحفظ الرمز.", "Skip space; keep the symbol.")},
+				map[string]any{"cursor": "8", "token": "number 7", "offset": "7", "caption": ch20Localized("سجّل بداية الرقم بالـbyte.", "Record the number's byte offset.")},
+				map[string]any{"cursor": "8", "token": "eof", "offset": "8", "caption": ch20Localized("EOF بعد آخر byte.", "EOF follows the final byte.")},
+			},
+			"labels": map[string]any{
+				"source":   ch20Localized("النص", "Input"),
+				"cursor":   ch20Localized("المؤشر", "Cursor"),
+				"token":    ch20Localized("آخر token", "Current token"),
+				"offset":   ch20Localized("offset", "Offset"),
+				"previous": ch20Localized("السابق", "Previous"),
+				"next":     ch20Localized("التالي", "Next"),
+				"reset":    ch20Localized("من الأول", "Reset"),
+			},
+		}),
 	}},
 	{ID: "c203.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c203.watch", "- اقرأ أطول run من الاسم أو الأرقام؛ ما تطلعش token لكل حرف.\n- أي byte مجهولة توقف التحليل بخطأ عند مكانها، ومفيش tokens جزئية.")}},
 	{ID: "c203.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -219,6 +334,25 @@ fmt.Println(i, string(source[i]))
 			{Line: 4, Caption: "First byte is at zero.", Output: "0 g"},
 			{Line: 4, Caption: "Second byte is at one.", Output: "0 g\n1 o"},
 		}),
+		ch20EnglishSandboxBlock("c203.try-sandbox", "ch20-lexer-offset", "Advance scanning; watch token offsets.", map[string]any{
+			"source": "go_2 > 7",
+			"frames": []any{
+				map[string]any{"cursor": "0", "token": ch20Localized("لسه مفيش", "not yet"), "offset": "—", "caption": ch20Localized("ابدأ من أول byte.", "Start at the first byte.")},
+				map[string]any{"cursor": "4", "token": "name go_2", "offset": "0", "caption": ch20Localized("استهلك الاسم بالكامل.", "Consume the whole name.")},
+				map[string]any{"cursor": "6", "token": ">", "offset": "5", "caption": ch20Localized("تخطّى المسافة واحفظ الرمز.", "Skip space; keep the symbol.")},
+				map[string]any{"cursor": "8", "token": "number 7", "offset": "7", "caption": ch20Localized("سجّل بداية الرقم بالـbyte.", "Record the number's byte offset.")},
+				map[string]any{"cursor": "8", "token": "eof", "offset": "8", "caption": ch20Localized("EOF بعد آخر byte.", "EOF follows the final byte.")},
+			},
+			"labels": map[string]any{
+				"source":   ch20Localized("النص", "Input"),
+				"cursor":   ch20Localized("المؤشر", "Cursor"),
+				"token":    ch20Localized("آخر token", "Current token"),
+				"offset":   ch20Localized("offset", "Offset"),
+				"previous": ch20Localized("السابق", "Previous"),
+				"next":     ch20Localized("التالي", "Next"),
+				"reset":    ch20Localized("من الأول", "Reset"),
+			},
+		}),
 	}},
 	{ID: "c203.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch20Markdown("c203.watch", "- Read the longest name or digit run; do not emit one token per character.\n- An unknown byte stops scanning with an error at its position, without partial tokens.")}},
 	{ID: "c203.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -244,6 +378,21 @@ fmt.Println(9 - 3 - 1)
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 2, Caption: "احسب من الشمال لليمين.", Output: "5"},
 		}),
+		ch20SandboxBlock("c204.try-sandbox", "ch20-expression-tree", "تابع تجميع التعبير خطوة خطوة.", map[string]any{
+			"frames": []any{
+				map[string]any{"expression": "4 + 2 * 3", "value": ch20Localized("لسه ما اتحسبتش", "not evaluated"), "caption": ch20Localized("ابدأ بالتعبير كامل.", "Start with the full expression.")},
+				map[string]any{"expression": "2 * 3", "value": "6", "caption": ch20Localized("الضرب يرتبط أقوى.", "Multiplication binds more tightly.")},
+				map[string]any{"expression": "4 + 6", "value": "10", "caption": ch20Localized("اجمع بعد تقييم الضرب.", "Add after evaluating multiplication.")},
+				map[string]any{"expression": "10", "value": "10", "caption": ch20Localized("التعبير رجّع قيمة.", "The expression returns a value.")},
+			},
+			"labels": map[string]any{
+				"expression": ch20Localized("التعبير", "Expression"),
+				"value":      ch20Localized("القيمة", "Value"),
+				"previous":   ch20Localized("السابق", "Previous"),
+				"next":       ch20Localized("التالي", "Next"),
+				"reset":      ch20Localized("من الأول", "Reset"),
+			},
+		}),
 	}},
 	{ID: "c204.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c204.watch", "- حلّل البرنامج كله قبل أي حركة؛ خطأ syntax ما يتحولش لأثر في العالم.\n- خطأ runtime يوقف الجمل الجاية، والحركة اللي تمت تفضل.")}},
 	{ID: "c204.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -268,6 +417,21 @@ fmt.Println(9 - 3 - 1)
 }`, "e204-associativity", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "Before execution."},
 			{Line: 2, Caption: "Calculate from left to right.", Output: "5"},
+		}),
+		ch20EnglishSandboxBlock("c204.try-sandbox", "ch20-expression-tree", "Step through expression grouping.", map[string]any{
+			"frames": []any{
+				map[string]any{"expression": "4 + 2 * 3", "value": ch20Localized("لسه ما اتحسبتش", "not evaluated"), "caption": ch20Localized("ابدأ بالتعبير كامل.", "Start with the full expression.")},
+				map[string]any{"expression": "2 * 3", "value": "6", "caption": ch20Localized("الضرب يرتبط أقوى.", "Multiplication binds more tightly.")},
+				map[string]any{"expression": "4 + 6", "value": "10", "caption": ch20Localized("اجمع بعد تقييم الضرب.", "Add after evaluating multiplication.")},
+				map[string]any{"expression": "10", "value": "10", "caption": ch20Localized("التعبير رجّع قيمة.", "The expression returns a value.")},
+			},
+			"labels": map[string]any{
+				"expression": ch20Localized("التعبير", "Expression"),
+				"value":      ch20Localized("القيمة", "Value"),
+				"previous":   ch20Localized("السابق", "Previous"),
+				"next":       ch20Localized("التالي", "Next"),
+				"reset":      ch20Localized("من الأول", "Reset"),
+			},
 		}),
 	}},
 	{ID: "c204.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch20Markdown("c204.watch", "- Parse the whole program before moving; a later syntax error must not affect the world.\n- A runtime error stops later statements, while completed movement remains.")}},

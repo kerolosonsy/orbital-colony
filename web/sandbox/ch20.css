@@ -1,1 +1,50 @@
-/* Chapter 20 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch20-bulletin-state,
+.lesson-sandbox.ch20-error-join,
+.lesson-sandbox.ch20-lexer-offset,
+.lesson-sandbox.ch20-expression-tree {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  direction: inherit;
+}
+
+.ch20-bulletin-state,
+.ch20-error-join,
+.ch20-lexer-offset,
+.ch20-expression-tree {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ch20-bulletin-frame,
+.ch20-lexer-frame,
+.ch20-expression-frame,
+.ch20-field-controls {
+  display: grid;
+  gap: 0.35rem;
+  min-inline-size: 0;
+}
+
+.ch20-playground-caption {
+  margin: 0;
+  color: var(--muted, #5d6877);
+  font-size: 0.82rem;
+}
+
+.ch20-field-controls .tool {
+  min-height: 40px;
+  block-size: auto;
+  max-inline-size: 100%;
+  padding-block: 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ch20-error-join .sandbox-kit-log-list {
+  margin-block: 0.25rem 0;
+  padding-inline-start: 1.4rem;
+}
+
+.ch20-error-join .sandbox-kit-log-list li {
+  padding-block: 0.12rem;
+}
