@@ -27,7 +27,7 @@ function ch10AdvanceTimeline(config, T, log, timeline) {
   timeline.visibleEvents.push(ch10Text(events[timeline.eventIndex], T));
   timeline.eventIndex++;
   log.set(timeline.visibleEvents);
-  log.list.children.forEach((entry) => entry.setAttribute("dir", "auto"));
+  Array.from(log.list.children).forEach((entry) => entry.setAttribute("dir", "auto"));
 }
 
 function ch10Timeline(kind, block, { element, button, T, kit }) {
