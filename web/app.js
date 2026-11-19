@@ -199,12 +199,18 @@ function saveFile(l, name, code) {
   else (r.files ||= {})[name] = code;
 }
 let lastErrors = [];
+// Caret and scroll per mission file, so switching tabs comes back to the same spot.
+const filePlaces = new Map();
 function showFile(name) {
   flushSave();
   const l = S.cur;
+  if (S.file && l && ed.value) filePlaces.set(`${l.id}/${S.file}`, { at: ed.selectionStart, top: ed.scrollTop });
   const f = levelFiles(l).find((x) => x.name === name) || levelFiles(l)[0];
   S.file = f.name;
+  if (levelFiles(l).length > 1 && !S.review) store.pref("lastFile", { ...(store.pref("lastFile") || {}), [l.id]: f.name });
   ed.value = fileCode(l, f);
+  const place = filePlaces.get(`${l.id}/${f.name}`);
+  if (place) { ed.setSelectionRange(place.at, place.at); ed.scrollTop = place.top; }
   ed.readOnly = !!f.readOnly || isLinked();
   errLines = new Map(lastErrors.filter((e) => (e.file || "main.go").replace(/^\.\//, "") === f.name).map((e) => [e.line, e.msg]));
   renderTabs();
@@ -1454,7 +1460,9 @@ async function loadLevel(id, review = null) {
   $("#lvl-stars").innerHTML = starHTML(r.stars);
   lastErrors = [];
   lastMtime = 0;
-  showFile(levelFiles(l)[0].name);
+  // multi-file labs reopen on the file you were working in
+  S.file = null;
+  showFile((!S.review && store.pref("lastFile")?.[id]) || levelFiles(l)[0].name);
   linkUI();
   $("#btn-vscode").disabled = S.review;
   if (isLinked()) syncFromWorkspace(true);
