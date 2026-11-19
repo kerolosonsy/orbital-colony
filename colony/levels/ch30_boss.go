@@ -4,7 +4,7 @@ func init() {
 	add(&Level{
 		LessonRevision: 1, Steps: ch30Lesson30bArabic,
 		ID: "30-boss-nursery", Chapter: 30, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: true,
-		Title: "Boss: موسم الزراعة", Goal: "احجز مؤن المشتل في transaction وحدّث الكاش بعد النجاح",
+		Title: "Boss: موسم الزراعة", Goal: "احجز مؤن المشتل في transaction وحدّث الـcache بعد النجاح",
 		Requires: []string{"iface", "sel:sql.ErrNoRows"}, Bridge: []int{61, 64, 65, 66, 68, 70},
 		Deps: []string{"modernc.org/sqlite"},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
@@ -48,7 +48,7 @@ cache.Invalidate(ctx, name) // wrong before commit: rollback must not affect cac
 
 بعد commit بس نادِ ~cache.Invalidate(ctx, name)~ بترتيب lines. مفيش قراية من الكاش هنا؛ القاعدة مصدر الحقيقة. نجاح الاختبارات العادية بيفترض كاش شغال. سيب ~main~ فاضية. النجمة التالتة: أول فشل invalidation يوقف الباقي ويرجع خطأ يطابق ~ErrCacheSync~ وسبب الكاش معاً؛ الحجز اتثبت ومبيتكررش عند إعادة الطلب. ده تحذير بعد commit، مش transaction موزعة؛ إصلاح الكاش مسؤولية المنادي.
 `,
-		Hints: []string{"الـtransaction تجمع تغييرات قاعدة البيانات كعملية واحدة.", "افحص الطلب قبل ~BeginTx~، وبعدها افصل commit عن مزامنة الكاش.", "استخدم rollback المؤجل واحتفظ بسبب الخطأ بعد commit."},
+		Hints: []string{"الـtransaction تجمع تغييرات قاعدة البيانات كعملية واحدة.", "افحص الـrequest قبل ~BeginTx~، وبعدها افصل commit عن مزامنة الـcache.", "استخدم rollback المؤجل واحتفظ بسبب الـerror بعد commit."},
 		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson30bEnglish, Title: "Boss: Planting Season", Goal: "Reserve nursery supplies transactionally and invalidate cache after commit", Files: []LabFile{{Name: "main.go", Starter: `package main
 import ("context";"database/sql";"errors")
 type SeedLine struct { Name string; Units int }

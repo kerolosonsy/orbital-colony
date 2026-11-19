@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch30Lesson301Arabic, ID: "30-1-cache-aside", Chapter: 30, Kind: "lab", Title: "كاش جانبي", Goal: "سرّع قراية المنارات بـ Redis مع صلاحية وإلغاء آمن للكاش", Setup: seededLabRoom,
+	add(&Level{LessonRevision: 1, Steps: ch30Lesson301Arabic, ID: "30-1-cache-aside", Chapter: 30, Kind: "lab", Title: "كاش جانبي", Goal: "سرّع قراية المنارات بـ Redis مع صلاحية وإبطال آمن للـcache", Setup: seededLabRoom,
 		Requires: []string{"iface", "mutex", "sel:redis.Nil"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{65}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch301Starter}},
 		Lesson: `# منارات بكاش جانبي
@@ -60,7 +60,7 @@ if err != nil { return Beacon{}, nil } // غلط: عطل المصدر اتحوّ
 
 النجمة التالتة: اعتبر JSON سليم نحوياً لكن ~ID~ مختلف أو ~Charge~ سالبة فساد، واتعامل معاه زي JSON البايظ. مفيش ~Report~ أو خدمات خارج التست.
 `,
-		Hints: []string{"الكاش نسخة مؤقتة، والمخزن يفضل المرجع لما القيمة تغيب.", "قسّم قراءة ~Read~ بين hit وmiss، وخلي كتابة ~Write~ تبدأ بالمصدر.", "فرّق بين ~redis.Nil~ وعطل Redis قبل اختيار مسار القراءة."},
+		Hints: []string{"الـcache نسخة مؤقتة، والمخزن يفضل المرجع لما الـvalue تغيب.", "قسّم قراءة ~Read~ بين hit وmiss، وخلي كتابة ~Write~ تبدأ بالمصدر.", "فرّق بين ~redis.Nil~ وعطل Redis قبل اختيار مسار القراءة."},
 		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson301English, Title: "Cache Aside", Goal: "Accelerate beacon reads with Redis, expiry, and safe invalidation", Files: []LabFile{{Name: "main.go", Starter: ch301Starter}},
 			Lesson: `# Beacons with a cache beside the store
 
@@ -467,7 +467,7 @@ func TestHiddenBonusBeaconSemanticCorruption(t *testing.T) {
 `
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch30Lesson302Arabic, ID: "30-2-documents", Chapter: 30, Kind: "lab", Title: "المستندات", Goal: "احفظ عينات الصخور كمستندات بفهرس فريد وصفحات ومهلة", Setup: seededLabRoom,
+	add(&Level{LessonRevision: 1, Steps: ch30Lesson302Arabic, ID: "30-2-documents", Chapter: 30, Kind: "lab", Title: "المستندات", Goal: "خزّن عينات الصخور كمستندات بـindex فريد وصفحات ومهلة", Setup: seededLabRoom,
 		Requires: []string{"iface", "sel:mongo.Collection"}, Deps: []string{"go.mongodb.org/mongo-driver/v2"}, Bridge: []int{67}, Race: true, Service: "mongo",
 		Files: []LabFile{{Name: "main.go", Starter: ch302Starter}},
 		Lesson: `# أرشيف عينات على MongoDB
@@ -566,7 +566,7 @@ for cursor.Next(ctx) { } // من غير Close ولا Err
 
 ~NewMongoSamples(collection)~ بتغلّف collection محقونة. ~Init(ctx)~ تنشئ فهرس تصاعدي فريد اسمه ~unique_sample_tag~ على ~tag~، بشكل قابل للتكرار. ~Insert~ و ~Get~ و ~Replace~ و ~Remove~ و ~After~ تنفذ العقد الحقيقي في MongoDB على حقول ~_id~ و ~tag~ و ~mass~ بالـ tags الموجودة. الاستبدال ميعملش upsert، والكتلة صفر تتكتب. ~After~ تعمل فلتر حصري وترتيب وحد على السيرفر وتقفل ~cursor~ وتفحص خطأها النهائي؛ فشل الفك يرجع ~nil,error~. الـ adapter ميطبعش ولا يتحقق تاني: المدخل جاي من الأرشيف صالح. مرّر السياق، وحوّل الفرادة لـ ~ErrSampleDuplicate~ والغياب لـ ~ErrSampleMissing~، وحافظ على باقي الأخطاء. ~Init~ والـ adapter بياخدوا سياق محدود من المنادي. مفيش ~Report~، والاتصال والتنضيف في التست بس.
 `,
-		Hints: []string{"المستند record من حقول، والفهرس الفريد يحمي القاعدة وقت السباق.", "افصل ~Archive~ عن adapter Mongo، وخلي المؤشر يستخدم IDs مرتبة.", "راجع ~MatchedCount~ و~cursor.Err~ عند التعديل والصفحات."},
+		Hints: []string{"المستند record من حقول، والـindex الفريد يحمي القاعدة وقت الـrace.", "افصل ~Archive~ عن adapter Mongo، وخلي الـcursor يستخدم IDs مرتبة.", "راجع ~MatchedCount~ و~cursor.Err~ عند التعديل والصفحات."},
 		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson302English, Title: "Documents", Goal: "Store rock samples as documents with a unique index, pagination, and a timeout", Files: []LabFile{{Name: "main.go", Starter: ch302Starter}},
 			Lesson: `# A MongoDB sample archive
 
@@ -1181,7 +1181,7 @@ func TestHiddenArchiveMongoIntegration(t *testing.T) {
 `
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch30Lesson303Arabic, ID: "30-3-search-index", Chapter: 30, Kind: "lab", Title: "فهرس البحث", Goal: "افهرس نشرات المستعمرة ورتّب نتائجها وصفّحها من غير تكرار", Setup: seededLabRoom,
+	add(&Level{LessonRevision: 1, Steps: ch30Lesson303Arabic, ID: "30-3-search-index", Chapter: 30, Kind: "lab", Title: "فهرس البحث", Goal: "ابني الـindex لنشرات المستعمرة ورتّب نتائجها وصفّحها من غير تكرار", Setup: seededLabRoom,
 		Requires: []string{"map"}, Deps: []string{}, Bridge: []int{69}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch303Starter}},
 		Lesson: `# فهرس نشرات المستعمرة
@@ -1248,7 +1248,7 @@ for code := range scores { hits = append(hits, DispatchHit{Dispatch: docs[code]}
 
 النجمة التالتة: نفّذ ~Vocabulary(prefix string, limit int) ([]string, error)~: البادئة بعد trim وlowercase إما فاضية أو حروف وأرقام بس، والحد من 1 لـ 20، وإلا ~nil,ErrSearch~. رجّع كلمات الفهرس المختلفة اللي بتبدأ بالبادئة، مرتبة تصاعدي ومحدودة، وslice فاضية مش ~nil~ لو مفيش. تعديل النتيجة ميغيّرش الفهرس ولا النداءات التالية.
 `,
-		Hints: []string{"الفهرس المقلوب يربط كل كلمة بالمستندات اللي ظهرت فيها.", "اجمع postings ثم رتّب النتائج قبل ما تقطع الصفحة.", "استخدم ~unicode.IsLetter~ و~sort.Strings~ في مواضعهما."},
+		Hints: []string{"الـindex المقلوب يربط كل كلمة بالمستندات اللي ظهرت فيها.", "اجمع postings ثم رتّب النتائج قبل ما تقطع الصفحة.", "استخدم ~unicode.IsLetter~ و~sort.Strings~ في مواضعهما."},
 		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson303English, Title: "Search Index", Goal: "Index colony dispatches, rank hits, and paginate without duplicates", Files: []LabFile{{Name: "main.go", Starter: ch303Starter}},
 			Lesson: `# An index for colony dispatches
 

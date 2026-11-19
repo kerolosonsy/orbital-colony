@@ -67,7 +67,7 @@ if account.Remaining() >= n {
 كل قرار وفحص وتحديث، وكل قراءة، تحت نفس ~sync.Mutex~. المتزامن يعادل ترتيب متسلسل للعمليات؛ مفيش ضمان لدرون فائز. الحسابات مستقلة وممنوع نسخها بعد الاستخدام. مفيش وقت أو شبكة أو ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: نفس العقد جنب أكبر ~int64~ من غير overflow.`,
-		Hints: []string{"المطلوب الحفاظ على invariant للحساب.", "خلّي فحص القيمة والتغيير متزامنين.", "راجع طرق ~Load~ و~Burn~ في التوقيع قبل حماية القراءات."},
+		Hints: []string{"المطلوب الحفاظ على invariant للحساب.", "خلّي فحص الـvalue والتغيير متزامنين.", "راجع methods ~Load~ و~Burn~ في التوقيع قبل حماية القراءات."},
 		En: &LevelText{LessonRevision: 1, Steps: ch25FuelEnglish, Title: "Fuel Account", Goal: "Protect tank balance and capacity during concurrent loading and burning", Files: []LabFile{{Name: "main.go", Starter: ch251Starter}},
 			Lesson: `# Keep the Tank Invariant True
 
@@ -308,7 +308,7 @@ func TestHiddenBonusFuelInt64Capacity(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "25-2-race-report", Chapter: 25, Kind: "lab", Race: true, LessonRevision: 1, Steps: ch25RaceArabic, Title: "تقرير السباق", Goal: "اثبت فقدان تحديث بتست حتمي، اشرح السبب، وصلّح جمع تقارير المسح",
+	add(&Level{ID: "25-2-race-report", Chapter: 25, Kind: "lab", Race: true, LessonRevision: 1, Steps: ch25RaceArabic, Title: "تقرير السباق", Goal: "اثبت فقدان تحديث بـtest حتمي، اشرح السبب، وصلّح جمع تقارير المسح",
 		Requires: []string{"mutex", "subtest"}, Bridge: []int{40}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch252Buggy}, {Name: "main_test.go", Starter: ch252TestStarter}},
 		Lesson: `# دليل على سباق تقارير المسح
@@ -905,7 +905,7 @@ events <- signal // ممكن Unsubscribe تكون قفلت القناة؛ وكم
 إلغاء موجود يرجع ~true~ ويقفل قناته مرة؛ الغريب أو المكرر ~false~. القفل النهائي يقفل الكل ويمنع النشر والاشتراك الجديد؛ القيم المخزنة تتصرف قبل نهاية القناة. كل الطرق آمنة بالتزامن، مفيش إرسال بعد القفل ولا انتظار مستهلك ولا نسخ للناقل بعد استخدامه. مفيش goroutines داخلية أو وقت أو شبكة أو ~Report~.
 
 النجمة التالتة: نفس دقة عدد التسليمات والقفل مرة واحدة لما ناشرين ونداءات ~Close~ يتسابقوا.`,
-		Hints: []string{"حدد معنى الإرسال المقبول للمشترك.", "افحص حالة القناة قبل التعامل مع إغلاقها.", "راجع فرع ~default~ في ~select~ عند إرسال غير حاجب."},
+		Hints: []string{"حدد معنى الإرسال المقبول للمشترك.", "افحص حالة الـchannel قبل التعامل مع إغلاقها.", "راجع فرع ~default~ في ~select~ عند إرسال غير حاجب."},
 		En: &LevelText{LessonRevision: 1, Steps: ch25BusEnglish, Title: "Event Bus", Goal: "Broadcast dock signals without allowing slow subscribers to block others", Files: []LabFile{{Name: "main.go", Starter: ch254Starter}},
 			Lesson: `# One Signal for Every Subscriber
 

@@ -42,20 +42,20 @@ func ch28Pair(ar, en string) map[string]string {
 var ch28SandboxSpecs = map[string]ch28SandboxSpec{
 	"c281": {
 		id: "ch28-gin-playground", kind: "ch28-gin-flow",
-		text: [2]string{"تابع الطلب بين الطبقات.", "Follow a request across layers."},
+		text: [2]string{"تابع الـrequest بين الطبقات.", "Follow a request across layers."},
 		config: map[string]any{
 			"labels": map[string]any{
 				"step":     ch28Pair("الطبقة", "Layer"),
-				"value":    ch28Pair("القيمة", "Value"),
+				"value":    ch28Pair("الـvalue", "Value"),
 				"previous": ch28Pair("السابق", "Previous"),
 				"next":     ch28Pair("التالي", "Next"),
 				"reset":    ch28Pair("من الأول", "Reset"),
 			},
 			"frames": []any{
-				map[string]any{"step": "request", "value": "  Vega  ", "caption": ch28Pair("الطلب دخل بقيمة خام.", "The request carries raw input.")},
+				map[string]any{"step": "request", "value": "  Vega  ", "caption": ch28Pair("الـrequest دخل بـvalue خام.", "The request carries raw input.")},
 				map[string]any{"step": "handler", "value": "Vega", "caption": ch28Pair("الـhandler نظّف المدخل.", "The handler normalized the input.")},
 				map[string]any{"step": "registry", "value": "Vega", "caption": ch28Pair("الـregistry هو صاحب الحالة.", "The registry owns the state.")},
-				map[string]any{"step": "response", "value": "Vega", "caption": ch28Pair("الرد رجّع القيمة النظيفة.", "The response returns the clean value.")},
+				map[string]any{"step": "response", "value": "Vega", "caption": ch28Pair("الـresponse رجّع الـvalue النظيفة.", "The response returns the clean value.")},
 			},
 		},
 	},
@@ -74,41 +74,41 @@ var ch28SandboxSpecs = map[string]ch28SandboxSpec{
 	},
 	"c283": {
 		id: "ch28-openapi-playground", kind: "ch28-json-shape",
-		text: [2]string{"بدّل نوع القيمة وراقب الفحص.", "Switch the value type and inspect the assertion."},
+		text: [2]string{"بدّل نوع الـvalue وراقب الفحص.", "Switch the value type and inspect the assertion."},
 		config: map[string]any{
 			"labels": map[string]any{
-				"field":    ch28Pair("قيمة depth", "depth value"),
+				"field":    ch28Pair("الـvalue بتاعة depth", "depth value"),
 				"jsonType": ch28Pair("نوع JSON", "JSON type"),
 				"number":   ch28Pair("فحص الرقم", "Number assertion"),
-				"next":     ch28Pair("قيمة تانية", "Next sample"),
+				"next":     ch28Pair("الـvalue التانية", "Next sample"),
 			},
 			"samples": []any{
 				map[string]any{"value": "3", "type": "number", "number": "true", "caption": ch28Pair("الرقم يطابق النوع.", "A number matches the type.")},
 				map[string]any{"value": "\"3\"", "type": "string", "number": "false", "caption": ch28Pair("النص مش رقمًا.", "A string is not a number.")},
-				map[string]any{"value": "—", "type": "missing", "number": "false", "caption": ch28Pair("المفتاح الغايب ملوش قيمة.", "A missing key has no value.")},
+				map[string]any{"value": "—", "type": "missing", "number": "false", "caption": ch28Pair("الـkey الغايب ملوش value.", "A missing key has no value.")},
 			},
 		},
 	},
 	"c284": {
 		id: "ch28-shutdown-playground", kind: "ch28-shutdown-order",
-		text: [2]string{"شغّل تاني؛ ترتيب الطلبات ممكن يتغير.", "Run again; request order can vary."},
+		text: [2]string{"شغّل تاني؛ ترتيب الـrequests ممكن يتغير.", "Run again; request order can vary."},
 		config: map[string]any{
 			"labels": map[string]any{
 				"timeline": ch28Pair("تسلسل توضيحي", "Illustrative timeline"),
 				"runAgain": ch28Pair("بدّل الترتيب / شغّل تاني", "Shuffle / run again"),
-				"caption":  ch28Pair("طلبات نشطة بترتيب متغير.", "Active requests may finish in either order."),
+				"caption":  ch28Pair("الـrequests النشطة بتخلص بترتيب متغير.", "Active requests may finish in either order."),
 			},
 			"orders": []any{
 				[]any{
 					ch28Pair("الإغلاق بدأ", "Shutdown starts"),
-					ch28Pair("الطلب A خلص", "Request A completes"),
-					ch28Pair("الطلب B خلص", "Request B completes"),
+					ch28Pair("الـrequest A خلص", "Request A completes"),
+					ch28Pair("الـrequest B خلص", "Request B completes"),
 					ch28Pair("التنضيف بدأ", "Cleanup starts"),
 				},
 				[]any{
 					ch28Pair("الإغلاق بدأ", "Shutdown starts"),
-					ch28Pair("الطلب B خلص", "Request B completes"),
-					ch28Pair("الطلب A خلص", "Request A completes"),
+					ch28Pair("الـrequest B خلص", "Request B completes"),
+					ch28Pair("الـrequest A خلص", "Request A completes"),
 					ch28Pair("التنضيف بدأ", "Cleanup starts"),
 				},
 			},
@@ -116,21 +116,21 @@ var ch28SandboxSpecs = map[string]ch28SandboxSpec{
 	},
 	"c28b": {
 		id: "ch28-boss-playground", kind: "ch28-response-commit",
-		text: [2]string{"تابع الرد لحد ما metadata تثبت.", "Follow the response until metadata commits."},
+		text: [2]string{"تابع الـresponse لحد ما metadata تثبت.", "Follow the response until metadata commits."},
 		config: map[string]any{
 			"labels": map[string]any{
 				"status":   ch28Pair("status", "Status"),
 				"header":   ch28Pair("header", "Header"),
 				"body":     ch28Pair("body", "Body"),
-				"state":    ch28Pair("حالة الرد", "Response state"),
+				"state":    ch28Pair("حالة الـresponse", "Response state"),
 				"previous": ch28Pair("السابق", "Previous"),
 				"next":     ch28Pair("التالي", "Next"),
 				"reset":    ch28Pair("من الأول", "Reset"),
 			},
 			"frames": []any{
 				map[string]any{"status": "unset", "header": "unset", "body": "—", "state": "open", "caption": ch28Pair("لسه مفيش بيانات اتكتبت.", "Nothing has been written yet.")},
-				map[string]any{"status": "sample", "header": "example/type", "body": "—", "state": "open", "caption": ch28Pair("الـmetadata جاهزة والرد مفتوح.", "Metadata is set; the response is open.")},
-				map[string]any{"status": "sample", "header": "example/type", "body": "ready", "state": "committed", "caption": ch28Pair("كتابة body ثبّتت الرد.", "Writing the body committed the response.")},
+				map[string]any{"status": "sample", "header": "example/type", "body": "—", "state": "open", "caption": ch28Pair("الـmetadata جاهزة والـresponse مفتوح.", "Metadata is set; the response is open.")},
+				map[string]any{"status": "sample", "header": "example/type", "body": "ready", "state": "committed", "caption": ch28Pair("كتابة body ثبّتت الـresponse.", "Writing the body committed the response.")},
 				map[string]any{"status": "sample", "header": "example/type", "body": "ready", "state": "committed", "caption": ch28Pair("تغيير metadata المتأخر ما أثرش.", "A late metadata change had no effect.")},
 			},
 		},
@@ -211,20 +211,20 @@ var ch28GinTryStates = []LessonFrame{
 }
 
 var ch28GinArabic = ch28LessonCopy{
-	Mission: `انقل سجل الأرصفة لـ Gin مع الحفاظ على عقد الطلب والرد.
+	Mission: `انقل سجل الأرصفة لـ Gin مع الحفاظ على عقد الـrequest والـresponse.
 
-الـstarter فيه ~NewBerthEngine~ بيرد بـ~TODO~. خليك مركز على مسؤولية كل طبقة.
+الـstarter فيه ~NewBerthEngine~ بيرجّع ~TODO~. خليك مركز على مسؤولية كل طبقة.
 
-راجع كمان الطلب الفاضي.`,
+راجع كمان الـrequest الفاضي.`,
 	Idea: `~gin.New()~ بيبدأ router من غير middleware تلقائي.
 
-الـhandler ينسّق الطلب؛ المخزن يملك الحالة. افصل تنظيف المدخل عن الراوتنج.`,
+الـhandler ينسّق الـrequest؛ المخزن يملك الحالة. افصل تنظيف المدخل عن الراوتنج.`,
 	IdeaCode: `func main() {
 	label := strings.TrimSpace("  Vega  ")
 	fmt.Println(label)
 }`,
 	IdeaImports: []string{"fmt", "strings"}, IdeaID: "e281-normalize", IdeaStates: ch28GinIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "نضّف الاسم.", "اطبع الاسم النضيف."},
+	IdeaCaptions: []string{"قبل التشغيل.", "نضّف الاسم.", "اطبع الاسم النضيف."},
 	TryPrompt:    "توقّع الناتج بعد تنظيف المسافات.",
 	TryCode: `func main() {
 	label := strings.TrimSpace("  Luna  ")
@@ -234,26 +234,26 @@ var ch28GinArabic = ch28LessonCopy{
 	TryOptions:  []string{"Luna", "  Luna", "luna"},
 	TryFeedback: []string{"TrimSpace شالت المسافات من الطرفين.", "المسافات الطرفية مش جزء من الناتج.", "TrimSpace ما بتغيّرش حالة الحروف."},
 	TryStates:   []LessonFrame{{Line: 0}, {Line: 2, Variables: []LessonVariable{{Name: "label", Value: "Luna"}}}, {Line: 3, Variables: []LessonVariable{{Name: "label", Value: "Luna"}}, Output: "Luna"}},
-	TryCaptions: []string{"قبل التنفيذ.", "القيمة بقت Luna.", "ده النص المطبوع."},
-	Reveal:      `تابع القيمة بعد التنظيف، وبعدين شوف النص المطبوع.`,
+	TryCaptions: []string{"قبل التشغيل.", "الـvalue بقت Luna.", "ده النص المطبوع."},
+	Reveal:      `تابع الـvalue بعد التنظيف، وبعدين شوف النص المطبوع.`,
 	Watch: `إعدادات الراوتر جزء من العقد؛ الشرطة الأخيرة ممكن تغيّر نتيجة المسار.
 
 خلّي الحالة مشتركة بين handlers، واحمي تحديثها.`,
-	Plan: `راجع رحلة الطلب: route، تحقق، store، ثم response.
+	Plan: `راجع رحلة الـrequest: route، تحقق، store، ثم الـresponse.
 
 ارفض المدخل قبل تعديل الحالة. الرفض المفروض ما يستهلكش ID.`,
 	CheckQuestion: `لو POST اترفض قبل الحفظ، إيه المتوقع من العداد؟`,
 	CheckOptions:  []string{"يفضل زي ما هو", "يزيد مرة", "يرجع للصفر"}, CheckAnswer: 0,
-	CheckFeedback: []string{"الطلب المرفوض ما بيغيّرش الحالة.", "الرقم بيتقدم مع نجاح الحفظ.", "العداد بيحتفظ بتقدمه السابق."},
-	Turn: `ابدأ بالـrouter، وبعدها شغّل طلبات من الذاكرة.
+	CheckFeedback: []string{"الـrequest المرفوض ما بيغيّرش الحالة.", "الرقم بيتقدم مع نجاح الحفظ.", "العداد بيحتفظ بتقدمه السابق."},
+	Turn: `ابدأ بالـrouter، وبعدها شغّل requests من الذاكرة.
 
 قارن status وbody والهيدرز بالعقد.
 
 راجع كمان المسار بشرطته الأخيرة.`,
 	Hints: []string{
 		`افصل مسؤولية الراوتنج عن ملكية بيانات السجل.`,
-		`امشِ مع الطلب من handler لحد الرد، ودوّن حدود كل جزء.`,
-		`راجع placeholder جوه ~NewBerthEngine~ وواجهات ~gin.Context~.`,
+		`امشِ مع الـrequest من الـhandler لحد الـresponse، ودوّن حدود كل جزء.`,
+		`راجع placeholder جوه ~NewBerthEngine~ والـinterfaces ~gin.Context~.`,
 	},
 }
 
@@ -314,9 +314,9 @@ var ch28FiberArabic = ch28LessonCopy{
 	Mission: `انقل نفس العقد لـ Fiber، واختبر التطبيق من غير فتح بورت.
 
 الـstarter فيه handler مؤقت، وملف المقارنة لسه فاضي.`,
-	Idea: `Fiber بيستخدم ~fiber.Ctx~ وبيشغّل الطلب عبر ~app.Test~.
+	Idea: `Fiber بيستخدم ~fiber.Ctx~ وبيشغّل الـrequest عبر ~app.Test~.
 
-بعض النصوص جاية من buffer بيتعاد استخدامه؛ انسخ اللي هتخزنه بعد الرد.`,
+بعض النصوص جاية من الـbuffer بيتعاد استخدامه؛ انسخ اللي هتخزنه بعد الـresponse.`,
 	IdeaCode: `func main() {
 	raw := []byte("north")
 	saved := strings.Clone(string(raw))
@@ -324,8 +324,8 @@ var ch28FiberArabic = ch28LessonCopy{
 	fmt.Println(saved, string(raw))
 }`,
 	IdeaImports: []string{"fmt", "strings"}, IdeaID: "e282-owned-string", IdeaStates: ch28FiberIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "احتفظ بنسخة النص.", "البافر اتغير؛ النسخة ثابتة.", "اطبع النسختين."},
-	TryPrompt:    `بعد تغيير أول بايت، إيه اللي بيظهر؟`,
+	IdeaCaptions: []string{"قبل التشغيل.", "احتفظ بنسخة النص.", "الـbuffer اتغير؛ النسخة ثابتة.", "اطبع النسختين."},
+	TryPrompt:    `بعد تغيير أول byte، إيه اللي بيظهر؟`,
 	TryCode: `func main() {
 	raw := []byte("east")
 	saved := string(raw)
@@ -336,19 +336,19 @@ var ch28FiberArabic = ch28LessonCopy{
 	TryOptions:  []string{"east", "west", "eest"},
 	TryFeedback: []string{"تحويل الـslice لـ string عمل نسخة مستقلة.", "التعديل حصل على raw بعد النسخ.", "الحرف الأول المحفوظ لسه e."},
 	TryStates:   ch28FiberTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "saved اتنسخت.", "raw اتغيرت.", "اطبع النص المحفوظ."},
+	TryCaptions: []string{"قبل التشغيل.", "saved اتنسخت.", "raw اتغيرت.", "اطبع النص المحفوظ."},
 	Reveal:      `راقب إن تعديل الـbuffer ما يغيّرش النص المحفوظ.`,
-	Watch: `ما تخزّنش ~c.Params~ بعد ما handler يرجع من غير نسخة.
+	Watch: `ما تخزّنش ~c.Params~ بعد ما الـhandler يعمل return من غير نسخة.
 
-JSON المفكوك بيملك نصوصه؛ راجع مصدر كل قيمة.`,
+الـJSON المفكوك بيملك نصوصه؛ راجع مصدر كل value.`,
 	Plan: `افصل شكل handler عن عقد البيانات اللي بتخدمه.
 
-قارن الـresponse، اختبار الذاكرة، وسلامة القيم بعد انتهاء الطلب.
+قارن الـresponse، الـtest في الذاكرة، وسلامة الـvalues بعد انتهاء الـrequest.
 
-جهّز request جديد لكل محاولة عشان عمر السياق يبقى واضح.`,
+جهّز الـrequest جديد لكل محاولة عشان عمر الـcontext يبقى واضح.`,
 	CheckQuestion: `إيه أداة Fiber اللي بتشغّل request في الذاكرة؟`,
 	CheckOptions:  []string{"~app.Test~", "~http.ListenAndServe~", "~time.Sleep~"}, CheckAnswer: 0,
-	CheckFeedback: []string{"~app.Test~ بيشغّل الطلب من غير port مفتوح.", "~http.ListenAndServe~ بيفتح listener حقيقي.", "~time.Sleep~ ما بيختبرش handler."},
+	CheckFeedback: []string{"~app.Test~ بيشغّل الـrequest من غير port مفتوح.", "~http.ListenAndServe~ بيفتح listener حقيقي.", "~time.Sleep~ ما بيختبرش الـhandler."},
 	Turn: `طبّق عقد الأرصفة، وبعدها املأ المقارنة بجمل قصيرة.
 
 جرّب المسارات بحروفها وشرطتها زي ما اتكتبت.`,
@@ -413,35 +413,35 @@ var ch28OpenAPITryStates = []LessonFrame{
 }
 
 var ch28OpenAPIArabic = ch28LessonCopy{
-	Mission: `اقرأ مستند OpenAPI لسجل المرحّلات، وراجع ردود الـAPI قدامه.
+	Mission: `اقرا مستند OpenAPI لسجل المرحّلات، وراجع الـresponses بتاعة الـAPI قدامه.
 
 الـstarter مقسّم بين محلّل مستند، checker، وhandler.`,
 	Idea: `JSON اللي شكله مش معروف بيتفك في ~any~؛ الأرقام تبقى ~float64~.
 
-استخدم type assertion بشكل آمن. المستند يصف المسارات والردود والـschema.`,
+استخدم type assertion بشكل آمن. المستند بيوصف المسارات والـresponses والـschema.`,
 	IdeaCode:    "func main() {\n\tvar value any\n\tif err := json.Unmarshal([]byte(`{\"depth\": 3}`), &value); err != nil {\n\t\tpanic(err)\n\t}\n\tobject, ok := value.(map[string]any)\n\tdepth, number := object[\"depth\"].(float64)\n\tfmt.Println(ok, depth, number)\n}",
 	IdeaImports: []string{"encoding/json", "fmt"}, IdeaID: "e283-json-shape", IdeaStates: ch28OpenAPIIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "ابدأ بقيمة عامة.", "الجذر object.", "الرقم اتعرف بأمان.", "اطبع النوع والقيمة."},
-	TryPrompt:    `توقّع قيمة ~ok~ لما depth نص مش رقم.`,
+	IdeaCaptions: []string{"قبل التشغيل.", "ابدأ بـvalue عامة.", "الجذر object.", "الرقم اتعرف بأمان.", "اطبع النوع والـvalue."},
+	TryPrompt:    `توقّع الـvalue بتاعة ~ok~ لما depth نص مش رقم.`,
 	TryCode:      "func main() {\n\tvar value any\n\tif err := json.Unmarshal([]byte(`{\"depth\": \"3\"}`), &value); err != nil {\n\t\tpanic(err)\n\t}\n\tobject := value.(map[string]any)\n\t_, ok := object[\"depth\"].(float64)\n\tfmt.Println(ok)\n}",
 	TryImports:   []string{"encoding/json", "fmt"}, TryID: "e283-type-check", TryAnswer: 1,
 	TryOptions:  []string{"true", "false", "3"},
 	TryFeedback: []string{"JSON decoded a string, not a number.", "The comma-ok assertion reports a type mismatch.", "The code prints the assertion result, not the field."},
 	TryStates:   ch28OpenAPITryStates,
 	TryCaptions: []string{"Before execution.", "Decode the object.", "The root is a map.", "The number assertion failed.", "Print the result."},
-	Reveal:      `تابع فك الـJSON ونوع القيمة قبل الطباعة.`,
+	Reveal:      `تابع فك الـJSON ونوع الـvalue قبل الطباعة.`,
 	Watch: `ماتعملش assertion مباشر من غير ~ok~؛ النوع الغلط ممكن يعمل panic.
 
 المسار القالب لازم يطابق عدد الأجزاء.`,
-	Plan: `افصل تحميل المستند عن مطابقة رد واحد.
+	Plan: `افصل تحميل المستند عن مطابقة response واحد.
 
 راجع المسار والطريقة والحالة والنوع، وبعدها شكل الجسم.`,
 	CheckQuestion: `لو response schema مفيهاش ~content~، الجسم المتوقع إيه؟`,
 	CheckOptions:  []string{"جسم فاضي", "أي JSON", "نص افتراضي"}, CheckAnswer: 0,
-	CheckFeedback: []string{"غياب content يعني إن الرد بلا body.", "الـschema مش موجودة عشان تقبل JSON.", "العقد ما بيضيفش نص تلقائي."},
-	Turn: `ابدأ بمحلّل المستند، وبعدها اختبر مطابقة رد بسيط.
+	CheckFeedback: []string{"غياب content يعني إن الـresponse من غير body.", "الـschema مش موجودة عشان تقبل JSON.", "العقد ما بيضيفش نص تلقائي."},
+	Turn: `ابدأ بمحلّل المستند، وبعدها اختبر مطابقة response بسيط.
 
-خلي بيانات المثال صغيرة، وامشِ من نوع القيمة للقاعدة.`,
+خلي بيانات المثال صغيرة، وامشِ من نوع الـvalue للقاعدة.`,
 	Hints: []string{
 		`المستند والعينة الفعلية مصدرين مختلفين للمقارنة.`,
 		`افصل تحميل الـschema عن فحص response واحد.`,
@@ -499,12 +499,12 @@ var ch28GracefulTryStates = []LessonFrame{
 }
 
 var ch28GracefulArabic = ch28LessonCopy{
-	Mission: `اقفل البوابة بعد ما ترفض طلبات جديدة وتستنى الجاري بمهلة.
+	Mission: `اقفل البوابة بعد ما ترفض الـrequests الجديدة وتستنى الـrequests الجارية بمهلة.
 
 الـstarter فيه Gate ناقص؛ ركّز على عمر الخدمة والتنضيف.`,
-	Idea: `~Serve~ ممكن يرجع أول ما الإغلاق يبدأ، قبل ما الطلب الجاري يخلص.
+	Idea: `~Serve~ ممكن يعمل return أول ما الإغلاق يبدأ، قبل ما الـrequest الجاري يخلص.
 
-استخدم رجوع ~Shutdown~ لتعرف إن الانتظار انتهى، وبعدها اجمع أخطاء التنضيف.`,
+استفيد من نتيجة ~Shutdown~ عشان تعرف إن الانتظار انتهى، وبعدها اجمع الـerrors بتاعة التنضيف.`,
 	IdeaCode: `func main() {
 	shutdownErr := errors.New("drain failed")
 	releaseErr := errors.New("close failed")
@@ -512,7 +512,7 @@ var ch28GracefulArabic = ch28LessonCopy{
 	fmt.Println(errors.Is(combined, releaseErr))
 }`,
 	IdeaImports: []string{"errors", "fmt"}, IdeaID: "e284-joined-errors", IdeaStates: ch28GracefulIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "خطأ الإغلاق موجود.", "اجمع أخطاء الإغلاق والتنضيف.", "هل خطأ التنضيف لسه معروف؟"},
+	IdeaCaptions: []string{"قبل التشغيل.", "الـerror بتاع الإغلاق موجود.", "اجمع الـerrors بتاعة الإغلاق والتنضيف.", "هل الـerror بتاع التنضيف لسه معروف؟"},
 	TryPrompt:    `توقّع نتيجتي محاولتي ~CompareAndSwap~.`,
 	TryCode: `func main() {
 	var used atomic.Bool
@@ -521,25 +521,25 @@ var ch28GracefulArabic = ch28LessonCopy{
 }`,
 	TryImports: []string{"fmt", "sync/atomic"}, TryID: "e284-once-guard", TryAnswer: 1,
 	TryOptions:  []string{"true ثم true", "true ثم false", "false ثم false"},
-	TryFeedback: []string{"بعد التغيير الأول، القيمة مش false تاني.", "المحاولة الأولى غيّرت القيمة؛ التانية ما لقتش false.", "القيمة الأولية false فالمقارنة الأولى بتنجح."},
+	TryFeedback: []string{"بعد التغيير الأول، الـvalue مش false تاني.", "المحاولة الأولى غيّرت الـvalue؛ التانية ما لقتش false.", "الـvalue الأولية false فالمقارنة الأولى بتنجح."},
 	TryStates:   ch28GracefulTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "used تبدأ false.", "المقارنة الأولى تنجح.", "التانية تشوف true."},
-	Reveal:      `نفّذ المقارنتين بالترتيب؛ المثال sequential.`,
+	TryCaptions: []string{"قبل التشغيل.", "used تبدأ false.", "المقارنة الأولى تنجح.", "التانية تشوف true."},
+	Reveal:      `شغّل المقارنتين بالترتيب؛ المثال sequential.`,
 	Watch: `ما تستخدمش context الإلغاء نفسه كمهلة drain.
 
 المهلة تبدأ بعد الإشارة، والتنضيف ينتظر هدوء الخدمة.`,
-	Plan: `افصل توقف listener عن انتهاء الطلبات الجارية.
+	Plan: `افصل توقف الـlistener عن انتهاء الـrequests الجارية.
 
 بعدها راجع إن ~release~ يحصل مرة واحدة في كل طريق خروج.`,
 	CheckQuestion: `إمتى يبقى آمن تقفل مورد بيستخدمه handler؟`,
 	CheckOptions:  []string{"بعد ما الخدمة تهدى", "فور إلغاء context", "قبل ~Shutdown~"}, CheckAnswer: 0,
-	CheckFeedback: []string{"الطلب الجاري لازم يخلص قبل التنضيف.", "الإلغاء بيبدأ الإغلاق، لكنه مش نهايته.", "المورد لازم يفضل متاح أثناء drain."},
+	CheckFeedback: []string{"الـrequest الجاري لازم يخلص قبل التنضيف.", "الإلغاء بيبدأ الإغلاق، لكنه مش نهايته.", "المورد لازم يفضل متاح أثناء drain."},
 	Turn: `ابدأ بمسار نجاح بسيط، وبعده جرّب الإلغاء والمهلة.
 
-راجع ترتيب رجوع ~Serve~ و~Shutdown~ و~release~.`,
+راجع ترتيب return بتاع ~Serve~ و~Shutdown~ و~release~.`,
 	Hints: []string{
 		`الإغلاق الهادئ له بداية ووقت انتهاء مختلفين.`,
-		`ارسم مسارين: Serve فشل، أو context طلب التوقف.`,
+		`ارسم مسارين: Serve فشل، أو context request التوقف.`,
 		`راجع نتائج ~Shutdown~ و~clock.After~ حول ~Run~.`,
 	},
 }
@@ -600,7 +600,7 @@ var ch28BossArabic = ch28LessonCopy{
 ده boss بيجمع راوتنج وHTTP وملكية حالة اتعلمتهم قبل كده.
 
 كل server له مخزن مستقل، والـhandler بيتعامل معاه.`,
-	Idea: `كل رد HTTP له status وheaders وbody.
+	Idea: `كل HTTP response له status وheaders وbody.
 
 اكتب headers قبل الجسم، وخلي التحقق يسبق أي تغيير في المخزن.`,
 	IdeaCode: `func main() {
@@ -611,7 +611,7 @@ var ch28BossArabic = ch28LessonCopy{
 	fmt.Println(w.Code, w.Header().Get("Content-Type"))
 }`,
 	IdeaImports: []string{"fmt", "net/http", "net/http/httptest"}, IdeaID: "e28b-response", IdeaStates: ch28BossIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "جهّز recorder.", "الهيدر جاهز.", "اختار status للإنشاء.", "اكتب الجسم.", "اطبع بيانات الرد."},
+	IdeaCaptions: []string{"قبل التشغيل.", "جهّز recorder.", "الهيدر جاهز.", "اختار status للإنشاء.", "اكتب الجسم.", "اطبع بيانات الـresponse."},
 	TryPrompt:    `توقّع رقم ~http.StatusForbidden~.`,
 	TryCode: `func main() {
 	status := http.StatusForbidden
@@ -621,22 +621,22 @@ var ch28BossArabic = ch28LessonCopy{
 	TryOptions:  []string{"401", "403", "404"},
 	TryFeedback: []string{"ده status فشل المصادقة.", "Forbidden رقمه 403.", "ده status للمسار الغايب."},
 	TryStates:   ch28BossTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "القيمة رقم 403.", "اطبع status."},
+	TryCaptions: []string{"قبل التشغيل.", "الـvalue رقم 403.", "اطبع status."},
 	Reveal:      `تابع الثابت من net/http لحد الخرج.`,
 	Watch: `فرّق بين مصادقة فاشلة ودور غير مسموح.
 
-حد الجسم قبل فك JSON؛ فشل الطلب ما يغيّرش المخزن.`,
+حد الجسم قبل فك JSON؛ فشل الـrequest ما يغيّرش المخزن.`,
 	Plan: `رتّب العقد: مصادقة، route وطريقة، دور، body، ثم تخزين.
 
-راجع كل رد خطأ وشوف إنه ما يسرّبش بيانات زيادة.`,
+راجع كل error response وشوف إنه ما يسرّبش بيانات زيادة.`,
 	CheckQuestion: `فين يتحط فحص credential بالنسبة لقراءة المخزن؟`,
-	CheckOptions:  []string{"قبلها", "بعد ما يغيّر البيانات", "جوه main فقط"}, CheckAnswer: 0,
-	CheckFeedback: []string{"الطلب غير المصرّح يتوقف قبل الوصول للحالة.", "التغيير الجانبي لازم يستنى التحقق.", "الـhandler هو اللي يعالج كل request."},
-	Turn: `ابدأ بـ ~NewQuarantine~ من غير تشغيل سيرفر.
+	CheckOptions:  []string{"قبلها", "بعد ما يغيّر البيانات", "جوه main بس"}, CheckAnswer: 0,
+	CheckFeedback: []string{"الـrequest غير المصرّح بيقف قبل الوصول للحالة.", "التغيير الجانبي لازم يستنى التحقق.", "الـhandler هو اللي بيعالج كل الـrequests."},
+	Turn: `ابدأ بـ ~NewQuarantine~ من غير ما تشغّل الـserver.
 
-راجع كل boundary، وبعدها اتأكد إن كل خطأ يحافظ على الحالة.
+راجع كل boundary، وبعدها اتأكد إن كل error يحافظ على الحالة.
 
-السيرفر يبدأ بس من عند المنادي.`,
+الـserver يبدأ بس من عند المنادي.`,
 	Hints: []string{
 		`خلّي المصادقة وملكية الكبسولات مسؤوليتين منفصلتين.`,
 		`رتّب تحقق المدخلات قبل أي تعديل مشترك.`,
