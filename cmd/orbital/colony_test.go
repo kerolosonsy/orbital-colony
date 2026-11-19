@@ -378,3 +378,28 @@ func TestStripDirRemovesResolvedTempPath(t *testing.T) {
 		t.Fatalf("stripDir = %q", got)
 	}
 }
+
+func TestLevelsPayloadIsCachedWithETag(t *testing.T) {
+	s := &server{}
+	get := func(lang, etag string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest("GET", "/api/levels", nil)
+		req.Header.Set("X-Orbital-Lang", lang)
+		if etag != "" {
+			req.Header.Set("If-None-Match", etag)
+		}
+		response := httptest.NewRecorder()
+		s.levels(response, req)
+		return response
+	}
+	ar, en := get("ar", ""), get("en", "")
+	if ar.Code != 200 || en.Code != 200 || ar.Header().Get("ETag") == "" || ar.Header().Get("ETag") == en.Header().Get("ETag") {
+		t.Fatalf("ar %d %q, en %d %q", ar.Code, ar.Header().Get("ETag"), en.Code, en.Header().Get("ETag"))
+	}
+	var payload struct{ Levels []json.RawMessage }
+	if err := json.Unmarshal(en.Body.Bytes(), &payload); err != nil || len(payload.Levels) != len(levels.All) {
+		t.Fatalf("payload: %v, %d levels", err, len(payload.Levels))
+	}
+	if again := get("ar", ar.Header().Get("ETag")); again.Code != http.StatusNotModified || again.Body.Len() != 0 {
+		t.Fatalf("unchanged payload should be 304, got %d", again.Code)
+	}
+}

@@ -58,3 +58,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 54. **File tabs keep your place** — switching between files of a lab (or colony) restores each file's caret and scroll position instead of jumping to the top.
 55. **Labs reopen on the file you were editing** — the last open file per multi-file mission is remembered per player (review runs start fresh).
 56. **Caret survives a reload** — the caret and scroll of the open file are saved when the page closes and restored on the next load of the same mission (verified: position 40 → reload → 40).
+57. **`/api/levels` is encoded once per language** — the 3.6 MB level payload was rebuilt and re-encoded on every page load; it is now cached per language with an `ETag` (`no-cache` + `304` when unchanged). Measured: ~10–20 ms → ~2 ms per request, and 0 bytes on revalidation. Test: `TestLevelsPayloadIsCachedWithETag`.

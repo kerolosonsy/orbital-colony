@@ -223,7 +223,39 @@ func writeJSON(w http.ResponseWriter, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 
+// levelsCache holds the encoded /api/levels payload per language: the level
+// data never changes while the server runs, and it is ~3.6 MB of JSON.
+var levelsCache sync.Map // lang -> cachedJSON
+
+type cachedJSON struct {
+	body []byte
+	etag string
+}
+
 func (s *server) levels(w http.ResponseWriter, r *http.Request) {
+	lang := requestLang(r)
+	entry, ok := levelsCache.Load(lang)
+	if !ok {
+		body, err := json.Marshal(levelsPayload(r))
+		if err != nil {
+			requestError(w, r, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		sum := sha256.Sum256(body)
+		entry, _ = levelsCache.LoadOrStore(lang, cachedJSON{body: append(body, '\n'), etag: `"` + hex.EncodeToString(sum[:8]) + `"`})
+	}
+	cached := entry.(cachedJSON)
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("ETag", cached.etag)
+	if match := r.Header.Get("If-None-Match"); match != "" && match == cached.etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(cached.body)
+}
+
+func levelsPayload(r *http.Request) map[string]any {
 	chapters := append([]levels.Chapter(nil), levels.Chapters...)
 	for i := range chapters {
 		chapters[i].Quiz = append([]levels.QuizQuestion(nil), chapters[i].Quiz...)
@@ -243,7 +275,7 @@ func (s *server) levels(w http.ResponseWriter, r *http.Request) {
 			chapters[i].Track = chapters[i].TrackEn
 		}
 	}
-	writeJSON(w, map[string]any{"chapters": chapters, "levels": missions})
+	return map[string]any{"chapters": chapters, "levels": missions}
 }
 
 func (s *server) preview(w http.ResponseWriter, r *http.Request) {
