@@ -2,7 +2,7 @@ package levels
 
 func init() {
 	add(&Level{
-		ID: "25-boss-refinery", Chapter: 25, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: true,
+		ID: "25-boss-refinery", Chapter: 25, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: true, LessonRevision: 1, Steps: ch25BossArabic,
 		Title: "Boss: مصفاة الطوارئ", Goal: "شغّل مصفاة محدودة بتقف نضيف عند الخطأ والإلغاء",
 		Requires: []string{"go", "chan", "select", "waitgroup", "mutex"}, Bridge: []int{34, 37, 41, 44},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
@@ -43,8 +43,8 @@ go func() { results <- value }() // blocks forever if nobody receives
 
 أول خطأ يلغي سياق العمال ويرجع نفس السبب بـ ~nil~ بدل النتيجة الجزئية. إلغاء الأب يرجع خطأ السياق. لازم كل العمال يخلصوا قبل الرجوع، وكل channel تتقفل من مالكها مرة واحدة. التستات بتستخدم ~-race~ و~labkit.LeakCheck~. سيب ~main~ فاضية. النجمة التالتة: نداءات مصافي مستقلة بالتوازي من غير حالة مشتركة.
 `,
-		Hints: []string{"قناة الشغل يملكها المرسل؛ اقفلها بعد الإرسال.", "نتائج بمؤشرات ثابتة تمنع خلط الترتيب؛ احمِ أول خطأ بقفل.", "كل إرسال لازم يلاحظ الإلغاء، وبعده Wait قبل الرجوع."},
-		En: &LevelText{Title: "Boss: Emergency Refinery", Goal: "Run a bounded refinery that joins on failure and cancellation", Files: []LabFile{{Name: "main.go", Starter: `package main
+		Hints: []string{"راجع ملكية القناة قبل التفكير في الإغلاق.", "افصل ترتيب النتائج عن ترتيب انتهاء العمل.", "ابدأ من توقيع ~Refine~ وحدد مالك كل error ونتيجة."},
+		En: &LevelText{LessonRevision: 1, Steps: ch25BossEnglish, Title: "Boss: Emergency Refinery", Goal: "Run a bounded refinery that joins on failure and cancellation", Files: []LabFile{{Name: "main.go", Starter: `package main
 import (
     "context"
     "errors"
@@ -82,7 +82,7 @@ Implement ~Refine(ctx, ore, crew, assay) ([]int, error)~ with the starter signat
 
 The first failure cancels the workers' context and returns its cause with nil output. Parent cancellation returns its context error. Join every worker before returning; the owner closes each channel once. Tests use ~-race~ and ~labkit.LeakCheck~. Leave ~main~ empty. Third star: independent concurrent refinery calls share no state.
 `,
-			Hints: []string{"The sender owns and closes the job channel.", "Index result slots to preserve order; lock the first error.", "Every send must observe cancellation, then Wait before returning."}},
+			Hints: []string{"Review channel ownership before considering closure.", "Separate result order from work completion order.", "Start from ~Refine~ and identify each error and result owner."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: `package main
 import (
     "context"

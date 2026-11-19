@@ -3,7 +3,7 @@ package levels
 import "orbital/colony/i18n"
 
 func init() {
-	add(&Level{ID: "25-1-fuel-account", Chapter: 25, Kind: "lab", Race: true,
+	add(&Level{ID: "25-1-fuel-account", Chapter: 25, Kind: "lab", Race: true, LessonRevision: 1, Steps: ch25FuelArabic,
 		Title: "حساب الوقود", Goal: "احمي رصيد خزان الوقود وحدوده مع التعبئة والسحب المتوازي",
 		Requires: []string{"mutex"}, Bridge: []int{38}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch251Starter}},
@@ -67,8 +67,8 @@ if account.Remaining() >= n {
 كل قرار وفحص وتحديث، وكل قراءة، تحت نفس ~sync.Mutex~. المتزامن يعادل ترتيب متسلسل للعمليات؛ مفيش ضمان لدرون فائز. الحسابات مستقلة وممنوع نسخها بعد الاستخدام. مفيش وقت أو شبكة أو ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: نفس العقد جنب أكبر ~int64~ من غير overflow.`,
-		Hints: []string{"خزّن السعة والرصيد والقفل في ~struct~ خاصة ورجّع مؤشر.", "اقفل من أول فحص الرصيد لحد نهاية التحديث، واقفل القراءة كمان.", "في ~Load~ قارن ~n~ بالمساحة ~capacity-fuel~ قبل الجمع؛ في ~Burn~ قارن بالرصيد قبل الطرح."},
-		En: &LevelText{Title: "Fuel Account", Goal: "Protect tank balance and capacity during concurrent loading and burning", Files: []LabFile{{Name: "main.go", Starter: ch251Starter}},
+		Hints: []string{"المطلوب الحفاظ على invariant للحساب.", "خلّي فحص القيمة والتغيير متزامنين.", "راجع طرق ~Load~ و~Burn~ في التوقيع قبل حماية القراءات."},
+		En: &LevelText{LessonRevision: 1, Steps: ch25FuelEnglish, Title: "Fuel Account", Goal: "Protect tank balance and capacity during concurrent loading and burning", Files: []LabFile{{Name: "main.go", Starter: ch251Starter}},
 			Lesson: `# Keep the Tank Invariant True
 
 ## Before you write
@@ -129,7 +129,7 @@ Implement ~NewFuelAccount(capacity, initial int64) (*FuelAccount,error)~, ~Load(
 Protect every complete check/update and every read with one ~sync.Mutex~. Concurrent behavior must match a serial order; no winner is promised. Accounts are independent and must not be copied after use. No time, network, or ~Report~; leave ~main~ empty.
 
 Third star: preserve the same contract near maximum ~int64~ without overflow.`,
-			Hints: []string{"Keep capacity, fuel, and lock private; return a pointer.", "Lock from the balance check through mutation, and lock readers too.", "Compare Load against capacity-fuel before adding; compare Burn against current fuel."}},
+			Hints: []string{"The account must preserve its balance invariant.", "Keep checking and changing state synchronized.", "Review ~Load~ and ~Burn~ in the signature before protecting reads."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch251Hidden},
 	})
 }
@@ -308,7 +308,7 @@ func TestHiddenBonusFuelInt64Capacity(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "25-2-race-report", Chapter: 25, Kind: "lab", Race: true, Title: "تقرير السباق", Goal: "اثبت فقدان تحديث بتست حتمي، اشرح السبب، وصلّح جمع تقارير المسح",
+	add(&Level{ID: "25-2-race-report", Chapter: 25, Kind: "lab", Race: true, LessonRevision: 1, Steps: ch25RaceArabic, Title: "تقرير السباق", Goal: "اثبت فقدان تحديث بتست حتمي، اشرح السبب، وصلّح جمع تقارير المسح",
 		Requires: []string{"mutex", "subtest"}, Bridge: []int{40}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch252Buggy}, {Name: "main_test.go", Starter: ch252TestStarter}},
 		Lesson: `# دليل على سباق تقارير المسح
@@ -364,8 +364,8 @@ mu.Unlock()
 اكتب تستات الأول وبعدين صلّح ~MergeScans(scans []int, checkpoint func(int) func()) (int,error)~. ارفض callback ~nil~ أو أكتر من 64 عنصر قبل أي callback بـ ~0,error~. غير كده الفاضي يرجع ~0,nil~. كل عنصر، حتى الصفر والسالب، له عامل ونداء ~checkpoint(index)~ مرة قبل التحديث، ثم نداء دالة الإقرار الناتجة مرة بعد التحديث. الدوال المحقونة بترجع، وممكن تستنى إشارات، ودالة الإقرار غير ~nil~. الاتنين خارج القفل. استنى كل العمال، متغيرش المدخل، وارجع المجموع الصحيح؛ المدخلات لا تسبب overflow.
 
 في ~main_test.go~ استخدم ~t.Run~ و ~sync.Mutex~ لحماية سجل الزيارات. التست الحتمي يرفض الأصل قبل اختبار الضغط الحر، ويمسك 3 mutants: تجاهل السالب، نسيان آخر عنصر، وجمع مرتين. في تعليق في ~main.go~ اشرح ~data race~ و ~happens-before~ وليه القفل يشمل القراءة والتحديث. مفيش وقت حقيقي أو ~Report~.`,
-		Hints: []string{"ابدأ بتست عاملين بقيم مختلفة وحاجز لكل عامل وإشارة بعد تحديثه.", "استنى وصول الاتنين قبل فتح أي عامل، وافتح التالي بعد إقرار السابق؛ افحص المجموع.", "انقل القراءة والجمع لنفس القفل بعد ~checkpoint~، والإقرار بعد ~Unlock~؛ ضيف الحالات السالبة وآخر عنصر."},
-		En: &LevelText{Title: "Race Report", Goal: "Prove a lost update deterministically, explain it, and repair concurrent scan aggregation", Files: []LabFile{{Name: "main.go", Starter: ch252Buggy}, {Name: "main_test.go", Starter: ch252TestStarter}},
+		Hints: []string{"اجعل فقد التحديث مفهومًا قبل تعديل السلوك.", "فكّر في حدود العملية المركبة المحمية.", "راجع ~checkpoint~ في العقد لتحديد نقطة التزامن."},
+		En: &LevelText{LessonRevision: 1, Steps: ch25RaceEnglish, Title: "Race Report", Goal: "Prove a lost update deterministically, explain it, and repair concurrent scan aggregation", Files: []LabFile{{Name: "main.go", Starter: ch252Buggy}, {Name: "main_test.go", Starter: ch252TestStarter}},
 			Lesson: `# Evidence of a Scan Report Race
 
 ## Before you write
@@ -419,7 +419,7 @@ mu.Unlock()
 Write tests first, then repair ~MergeScans(scans []int, checkpoint func(int) func()) (int,error)~. Reject a ~nil~ callback or more than 64 elements before callbacks with ~0,error~. Otherwise empty input returns ~0,nil~. Each element, including zero and negative values, gets a worker and exactly one ~checkpoint(index)~ before updating, followed by exactly one call of its returned acknowledgement after updating. Injected functions terminate, may await signals, and return non-~nil~ acknowledgements. Both callbacks run outside the lock. Join workers, preserve input, and return the exact sum; inputs do not overflow.
 
 In ~main_test.go~, use ~t.Run~ and ~sync.Mutex~ protecting the visit log. The controlled test rejects the original before free contention and catches three mutants: skipping negatives, omitting the last item, and doubling additions. Add a ~main.go~ comment explaining ~data race~, ~happens-before~, and why the lock includes reading and updating. No real time or ~Report~.`,
-			Hints: []string{"Start with two unequal values, per-worker barriers, and update acknowledgements.", "Wait for both arrivals before releasing either, then await each acknowledgement; assert the sum.", "Move reading and adding into one lock after checkpoint; acknowledge after Unlock. Test negative and final elements."}},
+			Hints: []string{"Understand the lost update before changing behavior.", "Think about the boundary of the protected compound operation.", "Review ~checkpoint~ in the contract to locate synchronization."}},
 		Lab: &Lab{ReqFile: "main_test.go", Buggy: ch252Buggy, Hidden: ch252Hidden, Mutants: []Mutant{
 			{i18n.T("تجاهل المسح السالب", "Skip negative scans"), mutate(ch252Correct, "total += n", "if n > 0 { total += n }")},
 			{i18n.T("نسيان آخر مسح", "Omit final scan"), mutate(ch252Correct, "total += n", "if i < len(scans)-1 { total += n }")},
@@ -578,7 +578,7 @@ func TestHiddenRaceExplanation(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "25-3-token-bucket", Chapter: 25, Kind: "lab", Race: true, Title: "خزان التصاريح", Goal: "نظّم دفعات إطلاق الشحنات بخزان تصاريح بيتجدد بساعة محقونة",
+	add(&Level{ID: "25-3-token-bucket", Chapter: 25, Kind: "lab", Race: true, LessonRevision: 1, Steps: ch25BucketArabic, Title: "خزان التصاريح", Goal: "نظّم دفعات إطلاق الشحنات بخزان تصاريح بيتجدد بساعة محقونة",
 		Requires: []string{"mutex"}, Bridge: []int{36}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: ch253Starter}},
 		Lesson: `# تصريح لكل فترة
 
@@ -628,8 +628,8 @@ credits -= cost // غلط قبل التأكد إن الرصيد كفاية
 نفّذ ~NewPermitTank(clock labkit.Clock, capacity int, every time.Duration) (*PermitTank,error)~ و ~Admit(cost int) (bool,error)~. ارفض ساعة ~nil~ وسعة أو فترة غير موجبة بـ ~nil,error~. ابدأ برصيد السعة. الطلب غير الموجب ~false,error~ من غير تغيير؛ الطلب الأكبر من الرصيد ~false,nil~ من غير استهلاك؛ غير كده استهلك بالظبط وارجع ~true,nil~.
 
 قبل القرار الصحيح احسب تصريح لكل ~every~ كاملة من آخر علامة، مع الاحتفاظ بباقي الزمن لو الخزان لسه مش مليان. لو التجديد يملأ الخزان، اقف عند السعة وامسح كل الرصيد الزمني الزائد بعلامة ~now~. الزمن الثابت أو الراجع للخلف ميجددش وميرجعش العلامة. كل ده تحت نفس ~sync.Mutex~، والحسابات متعملش overflow حتى بعد قفزة كبيرة. الحسابات مستقلة؛ ممنوع نسخها بعد الاستخدام. مفيش نوم أو وقت حقيقي أو goroutines للساعة أو ~Report~.`,
-		Hints: []string{"احتفظ بالساعة والسعة والرصيد والفترة وآخر علامة تحت قفل واحد.", "اقسم الزمن على ~every~؛ لو ~steps~ أقل من المساحة زوّد وحرك العلامة بفترات كاملة.", "لو ~steps~ تكفي لملء الخزان، عيّن الرصيد للسعة والعلامة لـ ~now~؛ متحوّلش ~steps~ لـ ~int~ قبل المقارنة الآمنة."},
-		En: &LevelText{Title: "Permit Tank", Goal: "Control cargo launch bursts with an injected-clock token bucket", Files: []LabFile{{Name: "main.go", Starter: ch253Starter}},
+		Hints: []string{"استخدم مرور الوقت كمدخل للحساب.", "افصل عدد الفترات عن عدد التصاريح المتاحة.", "راجع قسمة ~time.Duration~ على ~every~ في العقد."},
+		En: &LevelText{LessonRevision: 1, Steps: ch25BucketEnglish, Title: "Permit Tank", Goal: "Control cargo launch bursts with an injected-clock token bucket", Files: []LabFile{{Name: "main.go", Starter: ch253Starter}},
 			Lesson: `# One Permit Per Interval
 
 ## Before you write
@@ -678,7 +678,7 @@ credits -= cost // Wrong before checking affordability
 Implement ~NewPermitTank(clock labkit.Clock, capacity int, every time.Duration) (*PermitTank,error)~ and ~Admit(cost int) (bool,error)~. Reject a ~nil~ clock or nonpositive capacity/interval with ~nil,error~. Start full. Nonpositive requests return ~false,error~ without mutation; requests exceeding available credit return ~false,nil~ without consumption; other requests consume exactly their cost and return ~true,nil~.
 
 Before each valid decision, earn one permit per complete ~every~ since the marker, retaining fractional time while below capacity. Refill reaching capacity clamps balance and discards all surplus time by setting the marker to ~now~. Frozen/backward time earns nothing and never moves the marker backward. Protect everything with one ~sync.Mutex~ and avoid arithmetic overflow even after large jumps. Instances are independent and must not be copied after use. No sleeping, real time, clock goroutines, or ~Report~.`,
-			Hints: []string{"Keep clock, capacity, credit, interval, and marker behind one mutex.", "Divide elapsed time by every; below remaining room, add steps and advance by complete intervals.", "If steps fills the tank, set credit to capacity and marker to now; compare safely before converting steps to int."}},
+			Hints: []string{"Treat elapsed time as an input to the calculation.", "Separate interval count from available permits.", "Review division of ~time.Duration~ by ~every~ in the contract."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch253Hidden},
 	})
 }
@@ -839,7 +839,7 @@ func TestHiddenPermitConcurrentBudget(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "25-4-event-bus", Chapter: 25, Kind: "lab", Race: true, Title: "ناقل الأحداث", Goal: "وزّع إشارات الرصيف على المشتركين من غير ما البطيء يعطّلهم",
+	add(&Level{ID: "25-4-event-bus", Chapter: 25, Kind: "lab", Race: true, LessonRevision: 1, Steps: ch25BusArabic, Title: "ناقل الأحداث", Goal: "وزّع إشارات الرصيف على المشتركين من غير ما البطيء يعطّلهم",
 		Requires: []string{"chan", "mutex"}, Bridge: []int{42}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: ch254Starter}},
 		Lesson: `# إشارات لكل مشترك
 
@@ -905,8 +905,8 @@ events <- signal // ممكن Unsubscribe تكون قفلت القناة؛ وكم
 إلغاء موجود يرجع ~true~ ويقفل قناته مرة؛ الغريب أو المكرر ~false~. القفل النهائي يقفل الكل ويمنع النشر والاشتراك الجديد؛ القيم المخزنة تتصرف قبل نهاية القناة. كل الطرق آمنة بالتزامن، مفيش إرسال بعد القفل ولا انتظار مستهلك ولا نسخ للناقل بعد استخدامه. مفيش goroutines داخلية أو وقت أو شبكة أو ~Report~.
 
 النجمة التالتة: نفس دقة عدد التسليمات والقفل مرة واحدة لما ناشرين ونداءات ~Close~ يتسابقوا.`,
-		Hints: []string{"خريطة من رقم الاشتراك للموضوع والقناة؛ هيّأها عند أول ~Subscribe~ تحت القفل.", "~Publish~ تلف على المطابق وتستخدم ~select/default~، وترجع عدد الإرسالات الناجحة.", "خلي الإرسال و ~Unsubscribe~ و ~Close~ تحت نفس القفل؛ خزّن ~closed~ واحذف الاشتراك قبل الرجوع."},
-		En: &LevelText{Title: "Event Bus", Goal: "Broadcast dock signals without allowing slow subscribers to block others", Files: []LabFile{{Name: "main.go", Starter: ch254Starter}},
+		Hints: []string{"حدد معنى الإرسال المقبول للمشترك.", "افحص حالة القناة قبل التعامل مع إغلاقها.", "راجع فرع ~default~ في ~select~ عند إرسال غير حاجب."},
+		En: &LevelText{LessonRevision: 1, Steps: ch25BusEnglish, Title: "Event Bus", Goal: "Broadcast dock signals without allowing slow subscribers to block others", Files: []LabFile{{Name: "main.go", Starter: ch254Starter}},
 			Lesson: `# One Signal for Every Subscriber
 
 ## Before you write
@@ -971,7 +971,7 @@ Empty topic, nonpositive capacity, or closed bus rejects subscription with ~0,ni
 Removing an existing ID returns ~true~ and closes its channel once; unknown/repeated removal returns ~false~. Final closure closes all channels and prevents new subscriptions/publications; buffered events drain before channel termination. All methods are concurrency-safe, never send after closure, and never wait for consumption. Do not copy the bus after use. No internal goroutines, time, network, or ~Report~.
 
 Third star: preserve exact delivery accounting and single closure when publishers race with ~Close~ calls.`,
-			Hints: []string{"Map subscription IDs to topic/channel; initialize lazily under the lock.", "Publish selects nonblocking sends for matching topics and counts accepted sends.", "Serialize sending, Unsubscribe, and Close under the same mutex; keep a closed flag."}},
+			Hints: []string{"Define what counts as an accepted subscriber send.", "Check channel state before handling closure.", "Review the ~default~ branch for a nonblocking send."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch254Hidden, Bonus: true},
 	})
 }
@@ -1194,7 +1194,7 @@ func TestHiddenBonusBusConcurrentCloseAccounting(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "25-5-ttl-cache", Chapter: 25, Kind: "lab", Race: true, Title: "كاش بصلاحية", Goal: "خزّن قراءات الملاحة بصلاحية ونظّفها بعامل قابل للقفل من غير تسريب",
+	add(&Level{ID: "25-5-ttl-cache", Chapter: 25, Kind: "lab", Race: true, LessonRevision: 1, Steps: ch25CacheArabic, Title: "كاش بصلاحية", Goal: "خزّن قراءات الملاحة بصلاحية ونظّفها بعامل قابل للقفل من غير تسريب",
 		Requires: []string{"sel:sync.RWMutex"}, Bridge: []int{43}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: ch255Starter}},
 		Lesson: `# قراءة قديمة مش قراءة صالحة
 
@@ -1274,8 +1274,8 @@ mu.RUnlock()
 ارفض مفتاح فاضي أو ~ttl <= 0~ أو كتابة بعد القفل بخطأ من غير تغيير. النص الفاضي صالح. الكتابة تستبدل القيمة وموعد الانتهاء عند ~clock.Now().Add(ttl)~. القراءة المفقودة أو المنتهية أو بعد القفل ترجع ~"",false~؛ غير كده النص و ~true~. القراءة متجددش الصلاحية. ~Stored~ عدد عناصر الخريطة الفعلي، والمنتهي يتحذف في التنظيف. استخدم ~sync.RWMutex~ وقفل قراءة للقرايات وقفل حصري للتغيير.
 
 ابدأ ticker محقون وعامل تنظيف واحد قبل رجوع constructor. كل نبضة تمسح كل ما موعده أقل من أو يساوي ~clock.Now()~ وترسل عدد المحذوفات في قناة ~Sweeps~ بسعة 1 من غير انتظار. القناة الممتلئة تسقط التقرير الجديد. ~Close~ آمنة ومتكررة ومتزامنة: تمنع الكتابة، تفضي الخريطة، توقف العامل وticker، وتقفل ~Sweeps~ بعد آخر إرسال، وتستنى ده كله قبل الرجوع. ممنوع نوم أو ساعة حقيقية أو شبكة أو ~Report~.`,
-		Hints: []string{"خزّن ~text~ و ~expires~ لكل مفتاح؛ ~Lookup~ تقارن ~Now~ بالميعاد تحت ~RLock~ من غير حذف.", "اعمل ~ticker~ وقنوات ~stop~ و ~done~ و ~sweeps~ قبل ~go~؛ التنظيف تحت ~Lock~ والتقرير ~select/default~.", "أول ~Close~ تعلّم ~closed~ وتقفل ~stop~ وتفضي الخريطة؛ كل ~Close~ تفك القفل وتستنى ~done~."},
-		En: &LevelText{Title: "TTL Cache", Goal: "Cache navigation readings with expiry and a joined cleanup worker", Files: []LabFile{{Name: "main.go", Starter: ch255Starter}},
+		Hints: []string{"فصل صلاحية القراءة عن عملية التنظيف.", "فكّر في إشارة الإيقاف وإشارة الانتهاء كل واحدة لوحدها.", "راجع ~RLock~ و~Close~ في العقد قبل تتبع العامل."},
+		En: &LevelText{LessonRevision: 1, Steps: ch25CacheEnglish, Title: "TTL Cache", Goal: "Cache navigation readings with expiry and a joined cleanup worker", Files: []LabFile{{Name: "main.go", Starter: ch255Starter}},
 			Lesson: `# An Old Reading Is Not a Live Reading
 
 ## Before you write
@@ -1354,7 +1354,7 @@ Implement ~NewExpiryBoard(clock labkit.Clock, sweep time.Duration) (*ExpiryBoard
 Reject empty keys, ~ttl <= 0~, or post-close writes with an error without mutation. Empty text is valid. Writes replace text and expiry with ~clock.Now().Add(ttl)~. Missing, expired, or post-close lookup returns ~"",false~; otherwise return text,~true~. Reads do not renew expiry. ~Stored~ counts physical map entries; cleanup removes expired entries. Use ~sync.RWMutex~ with read locks for reads and exclusive locks for mutation.
 
 Start an injected ticker and one cleanup worker before construction returns. Each tick removes every entry expiring at or before ~clock.Now()~ and nonblockingly reports the deleted count through capacity-1 ~Sweeps~. A full report channel drops the new report. ~Close~ is safe, repeatable, and concurrent: reject future writes, clear storage, stop worker and ticker, close ~Sweeps~ after its last send, and join all of that before returning. No sleeping, real clock, network, or ~Report~.`,
-			Hints: []string{"Store text and expiry per key; Lookup compares Now under RLock without deleting.", "Create ticker, stop, done, and sweeps before go; sweep under Lock and report with select/default.", "First Close marks closed, closes stop, and clears storage; every caller unlocks before awaiting done."}},
+			Hints: []string{"Separate lookup validity from cleanup work.", "Treat stop and completion as different signals.", "Review ~RLock~ and ~Close~ in the contract before tracing the worker."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch255Hidden},
 	})
 }
@@ -1624,7 +1624,7 @@ func TestHiddenExpiryConcurrentOwnershipAndClose(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "25-6-atomic-bench", Chapter: 25, Kind: "lab", Race: true, Title: "atomic ولا mutex", Goal: "قارن عدّادي نبضات صحيحين تحت التزامن وقيس نفس الحمل على الاتنين",
+	add(&Level{ID: "25-6-atomic-bench", Chapter: 25, Kind: "lab", Race: true, LessonRevision: 1, Steps: ch25AtomicArabic, Title: "atomic ولا mutex", Goal: "قارن عدّادي نبضات صحيحين تحت التزامن وقيس نفس الحمل على الاتنين",
 		Requires: []string{"benchmark", "sel:atomic.Int64"}, Bridge: []int{45}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch256Main, ReadOnly: true}, {Name: "main_test.go", Starter: ch256Starter}},
 		Lesson: `# اختار بعد ما تقيس
@@ -1691,8 +1691,8 @@ b.RunParallel(func(pb *testing.PB) {
 في ~main_test.go~ نفّذ ~LockedPulses~ بـ ~sync.Mutex~ و ~AtomicPulses~ بـ ~atomic.Int64~ وطرق ~Add(delta int64) int64~ و ~Total() int64~. الصفر جاهز؛ القيم ممكن تزيد أو تقل أو تثبت، والمدخلات لا تسبب overflow. كل ~Add~ عملية واحدة وترجع قيمتها الجديدة، والقراءة آمنة مع الكتابة. الكائنات مستقلة وممنوع نسخها بعد الاستخدام.
 
 اكتب ~BenchmarkLockedPulses~ و ~BenchmarkAtomicPulses~ باستخدام ~b.RunParallel~: عدّاد واحد مشترك لكل benchmark وإضافة 1 لكل ~pb.Next~ وفحص المجموع بعد رجوع ~RunParallel~. اكتب تستات للقيم المتسلسلة والمتزامنة. التستات المخفية تفحص الاتنين من غير أحكام زمنية، ثم ~Lab.Bench~ تقارن الحمل نفسه بحدود النجوم الموضحة. مفيش ساعة تطبيق أو نوم أو شبكة أو ~Report~؛ توقيت benchmark مسؤولية أداة Go.`,
-		Hints: []string{"ابدأ بعقد واحد: ~Add~ ترجع القيمة الجديدة و ~Total~ تقراها؛ قفل ~mutex~ يحمي العمليتين.", "النسخة الذرّية حقل ~atomic.Int64~ وطرق ~Add~ و ~Load~، من غير قراءة عادية للذاكرة.", "خلّي العدّاد خارج ~RunParallel~، وضيف 1 لكل ~Next~، وافحص ~Total == int64(b.N)~ بعد انتهاء المشاركين."},
-		En: &LevelText{Title: "Atomic or Mutex", Goal: "Compare two correct concurrent pulse counters under identical benchmark workloads",
+		Hints: []string{"حدد سلوك العداد قبل مقارنة آلية الحماية.", "خلي الحمل متساويًا بين النسختين.", "راجع طرق ~Add~ و~Load~ في ~atomic.Int64~."},
+		En: &LevelText{LessonRevision: 1, Steps: ch25AtomicEnglish, Title: "Atomic or Mutex", Goal: "Compare two correct concurrent pulse counters under identical benchmark workloads",
 			Files: []LabFile{{Name: "main.go", Starter: ch256Main, ReadOnly: true}, {Name: "main_test.go", Starter: ch256Starter}},
 			Lesson: `# Choose After Measuring
 
@@ -1758,7 +1758,7 @@ b.RunParallel(func(pb *testing.PB) {
 In ~main_test.go~, implement ~LockedPulses~ with ~sync.Mutex~, ~AtomicPulses~ with ~atomic.Int64~, and methods ~Add(delta int64) int64~ and ~Total() int64~. Zero values work; deltas may increase, decrease, or preserve totals, without overflow. Each ~Add~ is indivisible and returns its new value. Reads synchronize with writes. Instances are independent and must not be copied after use.
 
 Write ~BenchmarkLockedPulses~ and ~BenchmarkAtomicPulses~ using ~b.RunParallel~: one shared counter per benchmark, adding 1 per ~pb.Next~, then checking the total after ~RunParallel~ returns. Write sequential and concurrent correctness tests. Hidden tests check both counters without timing assertions; ~Lab.Bench~ then compares identical workloads using the stated star tiers. No application clock, sleeping, network, or ~Report~; Go's benchmark tool owns measurement time.`,
-			Hints: []string{"Use one contract: Add returns the new total; Total reads it. The mutex protects both.", "The atomic version contains atomic.Int64 and delegates to Add/Load, never ordinary storage reads.", "Put counters outside RunParallel, add 1 per Next, then assert Total == int64(b.N)."}},
+			Hints: []string{"Define counter behavior before comparing synchronization.", "Keep the workload identical between versions.", "Review ~Add~ and ~Load~ on ~atomic.Int64~."}},
 		Lab: &Lab{ReqFile: "main_test.go", Hidden: ch256Hidden, Bench: &Bench{Tiers: [3]float64{0.1, 0.5, 1}}},
 	})
 }
