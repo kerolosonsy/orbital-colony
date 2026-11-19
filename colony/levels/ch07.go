@@ -192,8 +192,8 @@ func main() {
 }
 `,
 		Hints: []string{
-			"النقطة تجمع الإحداثيين، والقائمة تحفظ ترتيب المرور.",
-			"افصل الوصول لنقطة عن تكرار المرور على النقاط.",
+			"الـstruct تجمع الإحداثيين، والـslice بتحفظ ترتيب المرور.",
+			"افصل بين الوصول لنقطة وتكرار المرور على النقاط.",
 			"كمّل ~goTo~ بعد ~colony.Position()~ وراجع تحديث الإحداثيات.",
 		},
 		Lesson: `# Structs: حاجات ليها أجزاء 🧱
@@ -610,7 +610,7 @@ func main() {
 		Requires: []string{"embed", "method"}, Bridge: []int{12},
 		Par: 0, Gold: 0, MaxTicks: 100,
 		Starter: compositeUnitsStarter, Hints: []string{
-			"Embedding يرقّي fields النوع الداخلي.",
+			"الـembedding بيرقّي fields النوع الداخلي.",
 			"افصل بيانات الفاتورة عن method الأنصبة.",
 			"استخدم قيم Invoice وراجع الـreceiver والـfields.",
 		}, Lesson: `# وحدة جوّا وحدة 🧩
@@ -786,8 +786,8 @@ func main() {
 		Par: 0, Gold: 0, MaxTicks: 100,
 		Starter: crewExamStarter, Hints: []string{
 			"كل سؤال يجمع بياناته في struct واحدة.",
-			"افحص السؤال، اختياراته، ثم النتيجة.",
-			"احتفظ بـindex range عند استدعاء ~colony.Answer~.",
+			"راجع السؤال واختياراته، وبعدها النتيجة.",
+			"خلي معاك الـindex اللي range رجّعه لما تنادي ~colony.Answer~.",
 		}, Lesson: `# سؤال كامل بدل متغيرات متفرّقة 🧑‍🚀
 
 الطاقم محتاج يراجع أرض كل محصول. بنك الأسئلة بيتغيّر وترتيب الاختيارات بيتبدّل، لكن كل سؤال بيجمع بياناته في struct واحدة زي ما نقاط الطريق جمعت X وY.

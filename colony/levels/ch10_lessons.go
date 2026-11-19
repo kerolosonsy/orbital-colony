@@ -7,19 +7,19 @@ func ch10Pair(arabic, english string) map[string]any {
 var ch10WaitSandbox = &LessonSandbox{
 	Kind: "ch10-waitgroup-order",
 	Config: map[string]any{
-		"intro":    ch10Pair("Wait ترجع بعد انتهاء الشغل المسجل.", "Wait returns after registered work ends."),
+		"intro":    ch10Pair("Wait بتخلص بعد ما الشغل المسجل يخلص.", "Wait returns after registered work ends."),
 		"button":   ch10Pair("الخطوة التالية / تشغيل تاني", "Next step / run again"),
 		"logLabel": ch10Pair("ترتيب ممكن", "One possible order"),
 		"runs": []any{
 			map[string]any{"events": []any{
 				ch10Pair("main خلصت شغلها.", "main finishes its work."),
 				ch10Pair("helper خلصت المهمة.", "helper finishes its task."),
-				ch10Pair("Wait رجعت بعد ما helper خلص.", "Wait returns after helper finishes."),
+				ch10Pair("Wait خلصت بعد ما helper خلص.", "Wait returns after helper finishes."),
 			}},
 			map[string]any{"events": []any{
 				ch10Pair("helper خلصت المهمة.", "helper finishes its task."),
 				ch10Pair("main خلصت شغلها.", "main finishes its work."),
-				ch10Pair("Wait رجعت بعد ما helper خلص.", "Wait returns after helper finishes."),
+				ch10Pair("Wait خلصت بعد ما helper خلص.", "Wait returns after helper finishes."),
 			}},
 		},
 	},
@@ -28,21 +28,21 @@ var ch10WaitSandbox = &LessonSandbox{
 var ch10SwarmSandbox = &LessonSandbox{
 	Kind: "ch10-swarm-order",
 	Config: map[string]any{
-		"intro":    ch10Pair("كل تشغيل يوضح ترتيبًا ممكنًا.", "Each run shows one possible order."),
+		"intro":    ch10Pair("كل تشغيل بيوضح ترتيب ممكن.", "Each run shows one possible order."),
 		"button":   ch10Pair("الخطوة التالية / تشغيل تاني", "Next step / run again"),
 		"logLabel": ch10Pair("سجل الأحداث", "Event log"),
 		"runs": []any{
 			map[string]any{"events": []any{
 				ch10Pair("A تبدأ.", "A starts."), ch10Pair("B تبدأ.", "B starts."),
-				ch10Pair("A تطبع.", "A prints."), ch10Pair("A تنادي Done.", "A calls Done."),
-				ch10Pair("B تطبع.", "B prints."), ch10Pair("B تنادي Done.", "B calls Done."),
-				ch10Pair("Wait ترجع بعد الاتنين.", "Wait returns after both."),
+				ch10Pair("A بتطبع.", "A prints."), ch10Pair("A تنادي Done.", "A calls Done."),
+				ch10Pair("B بتطبع.", "B prints."), ch10Pair("B تنادي Done.", "B calls Done."),
+				ch10Pair("Wait بتخلص بعد الاتنين.", "Wait returns after both."),
 			}},
 			map[string]any{"events": []any{
 				ch10Pair("B تبدأ.", "B starts."), ch10Pair("A تبدأ.", "A starts."),
-				ch10Pair("B تطبع.", "B prints."), ch10Pair("B تنادي Done.", "B calls Done."),
-				ch10Pair("A تطبع.", "A prints."), ch10Pair("A تنادي Done.", "A calls Done."),
-				ch10Pair("Wait ترجع بعد الاتنين.", "Wait returns after both."),
+				ch10Pair("B بتطبع.", "B prints."), ch10Pair("B تنادي Done.", "B calls Done."),
+				ch10Pair("A بتطبع.", "A prints."), ch10Pair("A تنادي Done.", "A calls Done."),
+				ch10Pair("Wait بتخلص بعد الاتنين.", "Wait returns after both."),
 			}},
 		},
 	},
@@ -147,20 +147,20 @@ var ch10LessonArabic = map[string][]LessonStep{
 			{ID: "c101.mission", Kind: "markdown", Text: "1. احصد الصفين: إنت صف، ودرون جديد صف تاني.\n2. الـstarter جهّز helper وحصد صفك؛ كمّل شغله.\n3. خلي main تستنى المساعد.\n\nالصفين بعيدين عن بعض.\n\nhelper يبدأ من القاعدة ويوصل لصفه.\n\nلما main تخلص، البرنامج كله بيقفل.\n\n~harvestRow~ جاهزة وتاخد ~*colony.Drone~ واتجاه."},
 		}},
 		{ID: "c101.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-			{ID: "c101.wait-trace", Kind: "walkthrough", Text: "الـWaitGroup عدّاد للشغل: Add تسجل، Done تخلص، وWait تستنى الصفر.\n\nخلي كل Add يقابلها Done. كلمة ~go~ تشغّل الـclosure وترجع فوراً؛ مش بتستنى المهمة.\n\nده ترتيب واحد ممكن؛ بداية goroutine مش مضمونة.", Code: ch101WaitExample, Imports: []string{"fmt", "sync"}, ExampleID: "e10-1-wait", Walkthrough: ch10Trace(
+			{ID: "c101.wait-trace", Kind: "walkthrough", Text: "الـWaitGroup عدّاد للشغل: Add تسجل، Done تخلص، وWait تستنى الصفر.\n\nخلي كل Add يقابلها Done. كلمة ~go~ تشغّل الـclosure وتكمّل فورًا؛ مش بتستنى المهمة.\n\nده ترتيب واحد ممكن؛ بداية goroutine مش مضمونة.", Code: ch101WaitExample, Imports: []string{"fmt", "sync"}, ExampleID: "e10-1-wait", Walkthrough: ch10Trace(
 				[]int{0, 1, 2, 3, 5, 6, 7, 8},
-				[]string{"قبل.", "العداد صفر.", "شغلانة اتسجلت.", "ترتيب ممكن: بدأت.", "المساعد يطبع.", "Done تصفّر العداد.", "Wait ترجع.", "main تطبع."},
+				[]string{"قبل.", "العداد بيبدأ بصفر.", "شغلانة اتسجلت.", "ترتيب ممكن: بدأت.", "المساعد بيطبع.", "Done تصفّر العداد.", "Wait خلصت.", "main بتطبع."},
 				[]string{"", "", "", "", "helper finished\n", "helper finished\n", "helper finished\n", "helper finished\nall done\n"},
 			)},
 		}},
 		{ID: "c101.try-step", Title: "جرّب", Blocks: []LessonBlock{
-			{ID: "c101.predict", Kind: "question", Text: "توقع قيمة message المطبوعة بعد Wait.", Code: ch101ResultExample, Imports: []string{"fmt", "sync"}, ExampleID: "e10-1-result", Question: &LessonQuestion{
+			{ID: "c101.predict", Kind: "question", Text: "توقع الـvalue اللي هتتطبع بعد Wait.", Code: ch101ResultExample, Imports: []string{"fmt", "sync"}, ExampleID: "e10-1-result", Question: &LessonQuestion{
 				Options: []string{"waiting", "ready", "مفيش سطر"}, Answer: 1,
 				Feedback: []string{"التغيير حصل قبل الطباعة.", "Wait استنت التغيير.", "فيه طباعة بعد Wait."},
 			}},
 			{ID: "c101.reveal", Kind: "walkthrough", Text: "تابع التغيير، وبعده الطباعة.", Code: ch101ResultExample, Imports: []string{"fmt", "sync"}, ExampleID: "e10-1-result", Walkthrough: ch10Trace(
 				[]int{0, 2, 3, 4, 6, 8, 9},
-				[]string{"قبل.", "message تساوي waiting.", "الشغل اتسجل.", "ترتيب ممكن: بدأت.", "message بقت ready.", "Wait رجعت.", "اطبع القيمة."},
+				[]string{"قبل.", "message تساوي waiting.", "الشغل اتسجل.", "ترتيب ممكن: بدأت.", "message بقت ready.", "Wait خلصت.", "اطبع الـvalue."},
 				[]string{"", "", "", "", "", "", "ready\n"},
 			)},
 			{ID: "c101.wait-sandbox", Kind: "sandbox", Text: "حرّك الأحداث؛ الترتيب ممكن يتغير.", Sandbox: ch10WaitSandbox},
@@ -172,7 +172,7 @@ var ch10LessonArabic = map[string][]LessonStep{
 			{ID: "c101.plan", Kind: "markdown", Text: "المراحل: وزّع الشغل، شغّل المساعد، واستنى اكتمال المهام.\n\nWait تستنى الكل حتى لو main خلصت شغلها."},
 			{ID: "c101.q-wait", Kind: "question", Text: "إمتى main تقدر تكمل؟", Question: &LessonQuestion{
 				Options: []string{"بعد Wait", "بعد go", "بعد Add"}, Answer: 0,
-				Feedback: []string{"Wait ترجع عند الصفر.", "go تبدأ الشغل.", "Add تسجل المهمة."},
+				Feedback: []string{"Wait بتخلص عند الصفر.", "go تبدأ الشغل.", "Add تسجل المهمة."},
 			}},
 			{ID: "c101.q-done", Kind: "question", Text: "أنهي أمر يقلل العداد؟", Question: &LessonQuestion{
 				Options: []string{"Add", "Done", "Wait"}, Answer: 1,
@@ -185,12 +185,12 @@ var ch10LessonArabic = map[string][]LessonStep{
 	},
 	"10-2-swarm": {
 		{ID: "c102.mission-step", Title: "المهمة", Blocks: []LessonBlock{
-			{ID: "c102.mission", Kind: "markdown", Text: "1. وزّع الصفوف على الدرون الأصلي والتلاتة الجداد.\n2. الـstarter فيه حلقة؛ جسم work فاضي.\n3. شغّل الشغل واستنى الجميع.\n\nلكل درون مكانه. ترتيب الطباعة مش ترتيب البداية أو النهاية."},
+			{ID: "c102.mission", Kind: "markdown", Text: "1. وزّع الصفوف على الدرون الأصلي والتلاتة الجداد.\n2. الـstarter فيه loop؛ جسم work فاضي.\n3. شغّل الشغل واستنى الجميع.\n\nلكل درون مكانه. ترتيب الطباعة مش ترتيب البداية أو النهاية."},
 		}},
 		{ID: "c102.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-			{ID: "c102.loop-trace", Kind: "walkthrough", Text: "الحلقة تجهّز مهمة لكل قيمة. الـtrace ترتيب واحد ممكن؛ الرسائل ممكن تتعكس.\n\nتمرير name كـparameter يربط القيمة بمهمتها. مرّر row عشان كل مهمة تعرف صفها؛ القيمة الممررة تخصها.\n\nWait تضمن انتهاء الشغل المسجل بس.", Code: ch102LoopExample, Imports: []string{"fmt", "sync"}, ExampleID: "e10-2-loop", Walkthrough: ch10Trace(
+			{ID: "c102.loop-trace", Kind: "walkthrough", Text: "الـloop تجهّز مهمة لكل value. الـtrace ترتيب واحد ممكن؛ الرسائل ممكن تتعكس.\n\nتمرير name كـparameter يربط الـvalue بمهمتها. مرّر row عشان كل مهمة تعرف صفها؛ الـvalue الممررة تخصها.\n\nWait تضمن انتهاء الشغل المسجل بس.", Code: ch102LoopExample, Imports: []string{"fmt", "sync"}, ExampleID: "e10-2-loop", Walkthrough: ch10Trace(
 				[]int{0, 2, 3, 4, 5, 6, 7, 8, 6, 9},
-				[]string{"قبل.", "القيمة الأولى.", "مهمة اتسجلت.", "goroutine بدأت.", "تجهّز Done.", "ترتيب ممكن: gold.", "Done تشتغل.", "القيمة التانية.", "اطبع silver.", "Wait ترجع بعد الكل."},
+				[]string{"قبل.", "الـvalue الأولى.", "مهمة اتسجلت.", "goroutine بدأت.", "تجهّز Done.", "ترتيب ممكن: gold.", "Done تشتغل.", "الـvalue التانية.", "اطبع silver.", "Wait بتخلص بعد الكل."},
 				[]string{"", "", "", "", "", "", "gold\n", "gold\n", "gold\nsilver\n", "gold\nsilver\n"},
 			)},
 		}},
@@ -201,13 +201,13 @@ var ch10LessonArabic = map[string][]LessonStep{
 			}},
 			{ID: "c102.reveal", Kind: "walkthrough", Text: "ده ترتيب واحد: A قبل B. ممكن يتعكس؛ Wait تضمن انتهاء الاتنين بس.", Code: ch102OrderExample, Imports: []string{"fmt", "sync"}, ExampleID: "e10-2-order", Walkthrough: ch10Trace(
 				[]int{0, 2, 3, 5, 6, 7, 8, 10, 11, 12},
-				[]string{"قبل.", "مهمة A اتسجلت.", "goroutine A بدأت.", "ترتيب ممكن: اطبع A.", "A خلصت.", "مهمة B اتسجلت.", "goroutine B بدأت.", "اطبع B هنا.", "B خلصت.", "Wait رجعت."},
+				[]string{"قبل.", "مهمة A اتسجلت.", "goroutine A بدأت.", "ترتيب ممكن: اطبع A.", "A خلصت.", "مهمة B اتسجلت.", "goroutine B بدأت.", "اطبع B هنا.", "B خلصت.", "Wait خلصت."},
 				[]string{"", "", "", "", "A\n", "A\n", "A\n", "A\n", "A\nB\n", "A\nB\n"},
 			)},
 			{ID: "c102.swarm-sandbox", Kind: "sandbox", Text: "تابع التشغيل، وبعدها جرّب ترتيبًا تاني.", Sandbox: ch10SwarmSandbox},
 		}},
 		{ID: "c102.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
-			{ID: "c102.watch", Kind: "markdown", Text: "- زوّد العداد قبل go.\n- كل مهمة تنادي Done مرة.\n- مرّر قيمة الصف للمهمة بوضوح.\n\nابدأ Wait بعد تسجيل المهام؛ ترتيب الطباعة ممكن يتغير."},
+			{ID: "c102.watch", Kind: "markdown", Text: "- زوّد العداد قبل go.\n- كل مهمة تنادي Done مرة.\n- مرّر الـvalue بتاعة الصف للمهمة بوضوح.\n\nابدأ Wait بعد تسجيل المهام؛ ترتيب الطباعة ممكن يتغير."},
 		}},
 		{ID: "c102.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 			{ID: "c102.plan", Kind: "markdown", Text: "المراحل: جهّز شغل الصفوف، شغّل المهام، واستنى الكل. تابع مكان كل درون."},
@@ -225,14 +225,14 @@ var ch10LessonArabic = map[string][]LessonStep{
 			{ID: "c103.mission", Kind: "markdown", Text: "1. قسّم 15 هدف متفرق على تلاتة درونات.\n2. الـstarter جهّز targets وgoTo وcollect؛ اختار التوزيع.\n3. وازن الرحلات عشان درون مايتأخرش.\n\nالمسافة بتفرق جنب عدد الأهداف. مواقع targets بتتغير كل تشغيل."},
 		}},
 		{ID: "c103.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-			{ID: "c103.groups-trace", Kind: "walkthrough", Text: "~[][]string~ قائمة مجموعات؛ كل جزء قائمة مهام للتوضيح.\n\nفي المهمة، ~colony.Targets()~ بترجع ~[]colony.Point~. كل نقطة فيها X وY.\n\nالنوع ~[][]colony.Point~ يجمع قوائم النقاط؛ استخدم ~len~ لمقارنة حجم المجموعات. المثال يعرض الشكل بس.", Code: ch103GroupsExample, Imports: []string{"fmt"}, ExampleID: "e10-3-groups", Walkthrough: ch10Trace(
+			{ID: "c103.groups-trace", Kind: "walkthrough", Text: "~[][]string~ slice من الـslices؛ كل slice فيها مهام للتوضيح.\n\nفي المهمة، ~colony.Targets()~ بترجّع ~[]colony.Point~. كل نقطة فيها X وY.\n\nالنوع ~[][]colony.Point~ يجمع slices من النقاط؛ استخدم ~len~ لمقارنة حجم المجموعات. المثال يعرض الشكل بس.", Code: ch103GroupsExample, Imports: []string{"fmt"}, ExampleID: "e10-3-groups", Walkthrough: ch10Trace(
 				[]int{0, 1, 2, 3, 4, 6},
-				[]string{"قبل.", "قائمة مهام.", "قائمة مجموعات.", "المجموعة الأولى.", "المجموعة التانية.", "اطبعهم."},
+				[]string{"قبل.", "slice مهام.", "slice مجموعات.", "المجموعة الأولى.", "المجموعة التانية.", "اطبعهم."},
 				[]string{"", "", "", "", "", "[cup lamp] [map ring]\n"},
 			)},
 		}},
 		{ID: "c103.try-step", Title: "جرّب", Blocks: []LessonBlock{
-			{ID: "c103.predict", Kind: "question", Text: "توقع خرج الحلقة؛ الأرقام للتوضيح.", Code: ch103CountExample, Imports: []string{"fmt"}, ExampleID: "e10-3-count", Question: &LessonQuestion{
+			{ID: "c103.predict", Kind: "question", Text: "توقع خرج الـloop؛ الأرقام للتوضيح.", Code: ch103CountExample, Imports: []string{"fmt"}, ExampleID: "e10-3-count", Question: &LessonQuestion{
 				Options: []string{"0 2 ثم 1 1", "0 1 ثم 1 2", "1 2 بس"}, Answer: 0,
 				Feedback: []string{"الأولى فيها اتنين.", "الأعداد متعكسة.", "كل مجموعة ليها سطر."},
 			}},
@@ -250,10 +250,10 @@ var ch10LessonArabic = map[string][]LessonStep{
 			{ID: "c103.plan", Kind: "markdown", Text: "المراحل: افحص المواقع، كوّن مجموعات قريبة، وقارن أطول رحلة.\n\nترتيب الزيارات من الفصل 7 يقلل الرجوع.\n\nالوقت الكلي يستنى آخر درون يخلص."},
 			{ID: "c103.q-balance", Kind: "question", Text: "إيه اللي يغيّر وقت مجموعتين متساويتين؟", Question: &LessonQuestion{
 				Options: []string{"المسافة", "اسم المتغير", "الأقواس"}, Answer: 0,
-				Feedback: []string{"الحركة تضيف وقت.", "الاسم لا يغير الطريق.", "الأقواس لا تغيّر المسافة."},
+				Feedback: []string{"الحركة تضيف وقت.", "الاسم مش بيغيّر الطريق.", "الأقواس مش بتغيّر المسافة."},
 			}},
 			{ID: "c103.q-type", Kind: "question", Text: "إيه شكل ~[][]colony.Point~؟", Question: &LessonQuestion{
-				Options: []string{"قائمة مجموعات نقاط", "نقطة واحدة", "عداد مهام"}, Answer: 0,
+				Options: []string{"slice من مجموعات نقاط", "نقطة واحدة", "عداد مهام"}, Answer: 0,
 				Feedback: []string{"كل slice داخلية مجموعة نقاط.", "النوع بيضم مجموعات.", "ده نوع بيانات مش عداد."},
 			}},
 		}},

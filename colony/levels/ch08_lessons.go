@@ -12,7 +12,7 @@ var ch08CopyPointerConfig = map[string]any{
 	"start":   3,
 	"changed": 10,
 	"labels": map[string]any{
-		"caller":  ch08Locale("قيمة x عند المستدعي", "Caller x"),
+		"caller":  ch08Locale("الـvalue بتاعة x عند اللي نادى الـfunction", "Caller x"),
 		"local":   ch08Locale("نسخة n", "Local copy n"),
 		"noLocal": ch08Locale("لسه مفيش نسخة", "No local copy"),
 		"copy":    ch08Locale("غيّر النسخة", "Change the copy"),
@@ -23,7 +23,7 @@ var ch08CopyPointerConfig = map[string]any{
 		"ready":   ch08Locale("x يبدأ بـ3.", "x starts at 3."),
 		"copy":    ch08Locale("n اتغيرت؛ x زي ما هي.", "n changed; x stayed put."),
 		"pointer": ch08Locale("الكتابة عبر p غيّرت x.", "Writing through p changed x."),
-		"reset":   ch08Locale("x رجعت لقيمتها الأولى.", "x returned to its starting value."),
+		"reset":   ch08Locale("x رجعت للـvalue الأصلية بتاعتها.", "x returned to its starting value."),
 	},
 }
 
@@ -31,18 +31,18 @@ var ch08ReceiversConfig = map[string]any{
 	"start":  2,
 	"amount": 3,
 	"labels": map[string]any{
-		"caller":    ch08Locale("قيمة g.Value", "Caller g.Value"),
-		"receiver":  ch08Locale("قيمة receiver", "Receiver value"),
+		"caller":    ch08Locale("الـvalue بتاعة g.Value", "Caller g.Value"),
+		"receiver":  ch08Locale("value receiver", "Receiver value"),
 		"notCalled": ch08Locale("لسه ما اتندهش", "Not called yet"),
 		"value":     ch08Locale("Value Add", "Value Add"),
 		"pointer":   ch08Locale("Pointer Add", "Pointer Add"),
 		"reset":     ch08Locale("من الأول", "Reset"),
 	},
 	"captions": map[string]any{
-		"ready":   ch08Locale("g تبدأ بقيمة 2.", "g starts at 2."),
+		"ready":   ch08Locale("g بتبدأ بالـvalue 2.", "g starts at 2."),
 		"value":   ch08Locale("Value receiver غيّر نسخته.", "Value receiver changed its copy."),
 		"pointer": ch08Locale("Pointer receiver غيّر الأصل.", "Pointer receiver changed the original."),
-		"reset":   ch08Locale("رجعنا للقيم الأولى.", "Starting values restored."),
+		"reset":   ch08Locale("رجعنا للـvalues الأصلية.", "Starting values restored."),
 	},
 }
 
@@ -52,15 +52,15 @@ var ch08NilGuardConfig = map[string]any{
 		"target":       ch08Locale("الهدف موجود", "Target present"),
 		"on":           ch08Locale("آه", "yes"),
 		"off":          ch08Locale("لأ", "no"),
-		"pointer":      ch08Locale("المؤشر", "Pointer"),
+		"pointer":      ch08Locale("الـpointer", "Pointer"),
 		"result":       ch08Locale("نتيجة الفحص", "Guard result"),
 		"nilPointer":   ch08Locale("p = nil", "p = nil"),
 		"valuePointer": ch08Locale("p = &6", "p = &6"),
-		"emptyResult":  ch08Locale("رجوع آمن", "Return safely"),
+		"emptyResult":  ch08Locale("رجّع بأمان", "Return safely"),
 	},
 	"captions": map[string]any{
 		"empty": ch08Locale("فحص nil يمنع القراءة.", "The nil check skips reading."),
-		"value": ch08Locale("المؤشر صالح؛ القراءة آمنة.", "Pointer is valid; reading is safe."),
+		"value": ch08Locale("الـpointer صالح؛ القراية آمنة.", "Pointer is valid; reading is safe."),
 	},
 }
 
@@ -183,25 +183,25 @@ var ch08CopyArabic = []LessonStep{
 	ch08Step("c81.mission-step", "المهمة",
 		ch08Markdown("c81.mission", `شغّل الـstarter وقارن كمية الكريستال اللي اتجمعت بالرقم اللي اتطبع.
 
-المفروض كل إضافة تفضل محسوبة بعد رجوع الدالة.`)),
+	المفروض كل إضافة تفضل محسوبة بعد ما الـfunction تخلص.`)),
 	ch08Step("c81.idea-step", "الفكرة",
-		ch08Walkthrough("c81.copy-trace", `Go بيبعت الـargument كنسخة. تغيير parameter نوعه ~int~ ما يغيّرش الأصل.
+		ch08Walkthrough("c81.copy-trace", `Go بيبعت الـargument كنسخة. تغيير parameter نوعه ~int~ ما بيغيّرش الأصل.
 
-تابع النسخة، وبعد رجوع الدالة راجع طباعة ~x~.`, "e81-copy", ch08CopyExample,
+تابع النسخة، وبعد ما الـfunction تخلص راجع طباعة ~x~.`, "e81-copy", ch08CopyExample,
 			ch08Frame(0, "قبل التنفيذ.", ""),
 			ch08Frame(1, "x يبدأ بالرقم 3.", "", ch08Variable("x", "3")),
-			ch08Frame(2, "الدالة اتجهزت لاستقبال قيمة.", "", ch08Variable("x", "3")),
+			ch08Frame(2, "الـfunction جاهزة تستقبل الـvalue.", "", ch08Variable("x", "3")),
 			ch08Frame(3, "n نسخة محلية من x.", "", ch08Variable("x", "3"), ch08Variable("n", "3")),
 			ch08Frame(4, "التغيير يخص النسخة.", "", ch08Variable("x", "3"), ch08Variable("n", "10")),
-			ch08Frame(5, "الدالة رجعت؛ x كما هي.", "", ch08Variable("x", "3")),
+			ch08Frame(5, "الـfunction خلصت؛ x زي ما هي.", "", ch08Variable("x", "3")),
 			ch08Frame(6, "الخرج: 3.", "3", ch08Variable("x", "3")),
 		),
 	),
 	ch08Step("c81.try-step", "جرّب",
 		ch08Question("c81.try-question", "توقّع الخرج بعد التغيير عن طريق p:", "e81-pointer", ch08PointerExample,
 			[]string{"4 ثم 9", "4 ثم 4", "9 ثم 4"}, 0,
-			[]string{"القراءة الأولى 4، والكتابة عبر العنوان تغيّر x إلى 9.", "الكتابة عبر p توصل للمتغير الأصلي.", "السطر الأول يطبع قبل التغيير؛ الترتيب لا يتبدل."}),
-		ch08Walkthrough("c81.pointer-trace", `~p~ شايل عنوان ~x~. القراءة بـ~*p~ تعرض القيمة، والكتابة من خلاله تغيّر الأصل.`, "e81-pointer", ch08PointerExample,
+			[]string{"القراية الأولى 4، والكتابة عبر العنوان تغيّر x لـ9.", "الكتابة عبر p توصل للمتغير الأصلي.", "السطر الأول بيتطبع قبل التغيير؛ ترتيب السطرين ما بيتغيرش."}),
+		ch08Walkthrough("c81.pointer-trace", `~p~ شايل عنوان ~x~. القراية بـ~*p~ تعرض الـvalue، والكتابة من خلاله تغيّر الأصل.`, "e81-pointer", ch08PointerExample,
 			ch08Frame(0, "قبل التنفيذ.", ""),
 			ch08Frame(1, "x يبدأ بالرقم 4.", "", ch08Variable("x", "4")),
 			ch08Frame(2, "p يحمل عنوان x.", "", ch08Variable("x", "4"), ch08Variable("p", "&x")),
@@ -209,22 +209,22 @@ var ch08CopyArabic = []LessonStep{
 			ch08Frame(4, "الكتابة عبر p تغيّر x.", "4", ch08Variable("x", "9"), ch08Variable("p", "&x")),
 			ch08Frame(5, "الخرج النهائي: 4 ثم 9.", "4\n9", ch08Variable("x", "9")),
 		),
-		ch08Sandbox("c81.copy-pointer", "قارن نسخة بقيمة اتغيرت.", "ch08-copy-pointer", ch08CopyPointerConfig),
+		ch08Sandbox("c81.copy-pointer", "قارن التغيير على نسخة بالتغيير على الـvalue الأصلية.", "ch08-copy-pointer", ch08CopyPointerConfig),
 	),
 	ch08Step("c81.watch-step", "خد بالك",
-		ch08Markdown("c81.watch", `~int~ قيمة، و~*int~ نوع pointer. ~&x~ يجيب العنوان؛ و~*p~ يقرأ القيمة أو يكتب فيها.
+		ch08Markdown("c81.watch", `~int~ نوع، و~*int~ نوع pointer. ~&x~ يجيب العنوان؛ و~*p~ بيقرا الـvalue أو بيكتب فيها.
 
-	التعديل على نسخة محلية يختفي بعد رجوع الدالة. حدّد هل المطلوب تغيير الأصل أو حساب قيمة جديدة.`)),
+	التعديل على نسخة محلية بيختفي بعد ما الـfunction تخلص. حدّد هل المطلوب تغيير الأصل أو حساب value جديدة.`)),
 	ch08Step("c81.check-step", "فكّر واختبر",
 		ch08Markdown("c81.plan", `امشِ على مراحل: حدّد المتغير اللي يحتفظ بالتغيير، وافحص parameter، وبعدها راجع مكان النداء.
 
 	اختبر بأرقام صغيرة الأول.`),
-		ch08Question("c81.check-question", "لو دالة غيّرت parameter نوعه ~int~، هل يتغير متغير المستدعي؟",
-			"", "", []string{"دائمًا", "لا، دي نسخة", "بس لو القيمة موجبة"}, 1,
-			[]string{"نوع int وحده لا يربط التغيير بمتغير المستدعي.", "صحيح: parameter بياخد نسخة من القيمة.", "إشارة الرقم لا تغيّر قاعدة النسخ."}),
+		ch08Question("c81.check-question", "لو function غيّرت parameter نوعه ~int~، هل متغير اللي نادى الـfunction هيتغير؟",
+			"", "", []string{"دايمًا", "لأ، دي نسخة", "بس لو الـvalue موجبة"}, 1,
+			[]string{"الـint لوحده مش بيربط التغيير بمتغير اللي نادى الـfunction.", "صح: الـparameter بياخد نسخة من الـvalue.", "إشارة الرقم ما بتغيّرش قاعدة النسخ."}),
 	),
 	ch08Step("c81.turn-step", "دورك",
-		ch08Markdown("c81.turn", `ابدأ من دالة الـstarter. غيّر حاجة واحدة، شغّل البرنامج، وقارن التقرير بجمع الدرون.`)),
+		ch08Markdown("c81.turn", `ابدأ من function الـstarter. غيّر حاجة واحدة، شغّل البرنامج، وقارن التقرير بجمع الدرون.`)),
 }
 
 var ch08CopyEnglish = []LessonStep{
@@ -281,17 +281,17 @@ Compare the report with collected crystal.`)),
 
 var ch08CargoArabic = []LessonStep{
 	ch08Step("c82.mission-step", "المهمة",
-		ch08Markdown("c82.mission", `الدرون يشيل لحد 10 كريستالات في الشحنة، والمخزن محتاج 30.
+		ch08Markdown("c82.mission", `الدرون بيشيل لحد 10 كريستالات في الشحنة، والمخزن محتاج 30.
 
-الـstarter فيه struct وmethods ومسار جاهز، بس عدّاد الشحنة مش بيحتفظ بتغييره.
+الـstarter فيه struct وmethods ومسار جاهز، بس عدّاد الشحنة مش بيحتفظ بالتغيير اللي بيحصل له.
 
-اقرأ اللي بيحصل بعد أول تحميل، وبعدها راقب التفريغ عند القاعدة.`)),
+اقرا اللي بيحصل بعد أول تحميل، وبعدها راقب التفريغ عند القاعدة.`)),
 	ch08Step("c82.idea-step", "الفكرة",
-		ch08Walkthrough("c82.value-trace", `الـvalue receiver بياخد نسخة من الـstruct. تغيير الحقل في النسخة ما يغيّرش قيمة ~g~ اللي عند المستدعي.
+		ch08Walkthrough("c82.value-trace", `الـvalue receiver بياخد نسخة من الـstruct. تغيير الحقل في النسخة ما بيغيّرش الـvalue بتاعة ~g~ عند اللي نادى الـfunction.
 
-في المثال، method بترفع Gauge محلية؛ تابع القيمة بعد الرجوع.`, "e82-value", ch08ValueReceiverExample,
+في المثال، method بتزوّد Gauge محلية؛ تابع الـvalue بعد ما الـfunction تخلص.`, "e82-value", ch08ValueReceiverExample,
 			ch08Frame(0, "قبل التنفيذ.", ""),
-			ch08Frame(6, "Gauge تبدأ بقيمة 2.", "", ch08Variable("g.Value", "2")),
+			ch08Frame(6, "Gauge بتبدأ بالـvalue 2.", "", ch08Variable("g.Value", "2")),
 			ch08Frame(7, "استدعاء Add يعمل نسخة receiver.", "", ch08Variable("g.Value", "2"), ch08Variable("receiver.Value", "2")),
 			ch08Frame(3, "التعديل يقع على النسخة.", "", ch08Variable("g.Value", "2"), ch08Variable("receiver.Value", "5")),
 			ch08Frame(4, "نسخة receiver انتهت.", "", ch08Variable("g.Value", "2")),
@@ -301,21 +301,21 @@ var ch08CargoArabic = []LessonStep{
 	ch08Step("c82.try-step", "جرّب",
 		ch08Question("c82.try-question", "الـmethod هنا ليها pointer receiver؛ إيه الخرج؟", "e82-pointer", ch08PointerReceiverExample,
 			[]string{"2", "5", "0"}, 1,
-			[]string{"دي كانت نتيجة receiver بياخد نسخة عادية.", "صح: الـreceiver بيشاور على g، فتظهر الزيادة.", "قيمة Gauge اتحددت بـ2 قبل نداء method."}),
+			[]string{"دي كانت نتيجة receiver بياخد نسخة عادية.", "صح: الـreceiver بيشاور على g، فالزيادة بتظهر.", "الـvalue بتاعة Gauge اتحددت بـ2 قبل نداء الـmethod."}),
 		ch08Walkthrough("c82.pointer-trace", `الـpointer receiver يغيّر الـstruct الأصلية. لما تنادي method على متغير عادي، Go يمرّر عنوانه تلقائيًا.`, "e82-pointer", ch08PointerReceiverExample,
 			ch08Frame(0, "قبل التنفيذ.", ""),
-			ch08Frame(6, "g تبدأ بقيمة 2.", "", ch08Variable("g.Value", "2")),
+			ch08Frame(6, "g بتبدأ بالـvalue 2.", "", ch08Variable("g.Value", "2")),
 			ch08Frame(7, "النداء يمرّر عنوان g.", "", ch08Variable("g.Value", "2"), ch08Variable("receiver", "&g")),
 			ch08Frame(2, "الـreceiver يوصل للأصل.", "", ch08Variable("g.Value", "2"), ch08Variable("receiver.Value", "2")),
 			ch08Frame(3, "الحقل الأصلي يزيد.", "", ch08Variable("g.Value", "5"), ch08Variable("receiver.Value", "5")),
 			ch08Frame(8, "الخرج: 5.", "5", ch08Variable("g.Value", "5")),
 		),
-		ch08Sandbox("c82.receivers", "جرّب receiver بالقيمة وبـpointer.", "ch08-receivers", ch08ReceiversConfig),
+		ch08Sandbox("c82.receivers", "جرّب receiver بالـvalue وبـpointer.", "ch08-receivers", ch08ReceiversConfig),
 	),
 	ch08Step("c82.watch-step", "خد بالك",
-		ch08Markdown("c82.watch", `~func (g Gauge)~ تستقبل نسخة؛ ~func (g *Gauge)~ تستقبل عنوان الـstruct. ده فرق في تعريف receiver.
+		ch08Markdown("c82.watch", `~func (g Gauge)~ تستقبل نسخة؛ ~func (g *Gauge)~ تستقبل عنوان الـstruct. ده الفرق في تعريف receiver.
 
-~colony.Unload()~ تنقل الشحنة للمخزن من القاعدة فقط. والحصاد يفشل لو الكمية مش هتساع في الشحنة.`)),
+~colony.Unload()~ بتنقل الشحنة للمخزن من القاعدة بس. والحصاد بيفشل لو الكمية مش هتساع في الشحنة.`)),
 	ch08Step("c82.check-step", "فكّر واختبر",
 		ch08Markdown("c82.plan", `رتّب التفكير كده: راقب حالة Cargo، وافحص method اللي بتغيّرها، وبعدها راجع شرط المساحة ومكان التفريغ.
 
@@ -384,9 +384,9 @@ var ch08RadarArabic = []LessonStep{
 	ch08Step("c83.mission-step", "المهمة",
 		ch08Markdown("c83.mission", `الرادار بيرجّع عنوان أقرب هدف لسه موجود. المطلوب إن الدرون يزور الأهداف ويحصدها كلها.
 
-الـstarter بيقرأ النتيجة مرة واحدة؛ فكر إيه اللي يحصل لما تخلص الأهداف.`)),
+الـstarter بيقرا النتيجة مرة واحدة؛ فكر إيه اللي يحصل لما تخلص الأهداف.`)),
 	ch08Step("c83.idea-step", "الفكرة",
-		ch08Walkthrough("c83.nil-trace", `الـpointer ممكن يكون عنوان قيمة، أو ~nil~ لو مفيش قيمة. افحصه قبل ما تقرأ اللي بيشاور عليه.
+		ch08Walkthrough("c83.nil-trace", `الـpointer ممكن يكون عنوان الـvalue، أو ~nil~ لو مفيش value. افحصه قبل ما تقرا اللي بيشاور عليه.
 
 هنا ~p~ فاضي؛ الشرط يمنع قراءة عنوان غير موجود.`, "e83-nil", ch08NilGuardExample,
 			ch08Frame(0, "قبل التنفيذ.", ""),
@@ -397,20 +397,20 @@ var ch08RadarArabic = []LessonStep{
 		),
 	),
 	ch08Step("c83.try-step", "جرّب",
-		ch08Question("c83.try-question", "p عنوانه صالح هنا؛ إيه اللي هيتطبع؟", "e83-value", ch08NilValueExample,
+		ch08Question("c83.try-question", "p عنوانه صالح هنا؛ إيه اللي هيبتطبع؟", "e83-value", ch08NilValueExample,
 			[]string{"none", "6", "panic"}, 1,
-			[]string{"الفرع ده محتاج p تكون nil.", "صح: p مش nil، فبنقرأ القيمة اللي بتشاور عليها.", "الـdereference آمن بعد فحص المؤشر."}),
-		ch08Walkthrough("c83.value-trace", `فحص ~p == nil~ يختار مسارًا آمنًا. ولما المؤشر صالح، تقدر تقرأ القيمة اللي وراه.`, "e83-value", ch08NilValueExample,
+			[]string{"الفرع ده محتاج p تكون nil.", "صح: p مش nil، فنقدر نقرا الـvalue اللي بيشاور عليها.", "الـdereference آمن بعد فحص الـpointer."}),
+		ch08Walkthrough("c83.value-trace", `فحص ~p == nil~ بيختار مسار آمن. ولما الـpointer يبقى صالح، تقدر تقرا الـvalue اللي وراه.`, "e83-value", ch08NilValueExample,
 			ch08Frame(0, "قبل التنفيذ.", ""),
 			ch08Frame(1, "n يساوي 6.", "", ch08Variable("n", "6")),
 			ch08Frame(2, "p يشاور على n.", "", ch08Variable("n", "6"), ch08Variable("p", "&n")),
-			ch08Frame(3, "المؤشر مش nil.", "", ch08Variable("p", "&n")),
-			ch08Frame(6, "نقرأ القيمة 6.", "6", ch08Variable("n", "6"), ch08Variable("p", "&n")),
+			ch08Frame(3, "الـpointer مش nil.", "", ch08Variable("p", "&n")),
+			ch08Frame(6, "اقرا الـvalue 6.", "6", ch08Variable("n", "6"), ch08Variable("p", "&n")),
 		),
 		ch08Sandbox("c83.nil-guard", "بدّل وجود الهدف وشوف الـguard.", "ch08-nil-guard", ch08NilGuardConfig),
 	),
 	ch08Step("c83.watch-step", "خد بالك",
-		ch08Markdown("c83.watch", `~colony.Nearest()~ بيرجّع ~*colony.Point~، أو ~nil~ لما مفيش أهداف. متقرأش ~p.X~ قبل فحص ~p~.
+		ch08Markdown("c83.watch", `~colony.Nearest()~ بيرجّع ~*colony.Point~، أو ~nil~ لما مفيش أهداف. ما تقراش ~p.X~ قبل ما تفحص ~p~.
 
 كل سؤال للرادار بيكلف tick. كل نداء جديد بيبحث عن أقرب هدف باقي وقتها.`)),
 	ch08Step("c83.check-step", "فكّر واختبر",
@@ -419,10 +419,10 @@ var ch08RadarArabic = []LessonStep{
 ما تفترضش ترتيبًا ثابتًا بين الأهداف؛ الرادار يحدد الأقرب حسب موقع الدرون الحالي.`),
 		ch08Question("c83.check-question", "إيه معنى ~nil~ من ~colony.Nearest()~؟",
 			"", "", []string{"مفيش هدف متبقّي", "الهدف عند 0,0", "البرنامج لسه ما اتحركش"}, 0,
-			[]string{"صحيح: الرادار لم يعد يجد هدفًا متبقيًا.", "nil لا يحدد موقعًا؛ هو غياب النتيجة.", "النتيجة لا تخبرك هل الدرون تحرك أم لا."}),
+			[]string{"صح: الرادار ما بقاش لاقي هدف باقي.", "nil مش بيحدد موقع؛ معناه إن مفيش نتيجة.", "النتيجة مش بتقولك لو الدرون اتحرك ولا لأ."}),
 	),
 	ch08Step("c83.turn-step", "دورك",
-		ch08Markdown("c83.turn", `راجع طباعة الـstarter: هي بتفك المؤشر قبل ما تعرف حالته. جرّب حالة وجود هدف وحالة انتهاء الأهداف.`)),
+		ch08Markdown("c83.turn", `راجع طباعة الـstarter: هي بتعمل dereference للـpointer قبل ما تعرف حالته. جرّب حالة وجود هدف وحالة انتهاء الأهداف.`)),
 }
 
 var ch08RadarEnglish = []LessonStep{
@@ -478,18 +478,18 @@ var ch08CartArabic = []LessonStep{
 	ch08Step("c84.idea-step", "الفكرة",
 		ch08Walkthrough("c84.link-trace", `الـstruct تقدر تخزن pointer لنوعها نفسه. هنا ~Next~ بيربط عربتين، و~nil~ معناها إن الوصلة انتهت.
 
-اقرأ tag اللي ورا أول وصلة.`, "e84-link", ch08LinkExample,
+اقرا tag اللي ورا أول وصلة.`, "e84-link", ch08LinkExample,
 			ch08Frame(0, "قبل التنفيذ.", ""),
 			ch08Frame(2, "آخر لمبة اسمها blue.", "", ch08Variable("last.Tag", "blue"), ch08Variable("last.Next", "nil")),
 			ch08Frame(3, "first تتصل بآخر لمبة.", "", ch08Variable("first.Tag", "red"), ch08Variable("first.Next", "&last")),
-			ch08Frame(4, "نقرأ tag بعد الوصلة.", "blue", ch08Variable("first.Next.Tag", "blue")),
+			ch08Frame(4, "اقرا tag بعد الوصلة.", "blue", ch08Variable("first.Next.Tag", "blue")),
 		),
 	),
 	ch08Step("c84.try-step", "جرّب",
-		ch08Question("c84.try-question", "المؤشر اتحرك وصلة واحدة؛ إيه الخرج؟", "e84-walk", ch08WalkLinkExample,
+		ch08Question("c84.try-question", "الـpointer اتحرك وصلة واحدة؛ إيه الخرج؟", "e84-walk", ch08WalkLinkExample,
 			[]string{"red ثم green", "green ثم gold", "red ثم gold"}, 0,
 			[]string{"صحيح: p يبدأ عند head، وبعد الوصلة يصل للوسط.", "ده يبدأ من الوسط ويتحرك للآخر.", "الوصلة الواحدة توصل للوسط قبل الطرف."}),
-		ch08Walkthrough("c84.walk-trace", `المتغير ~p~ مؤشر مؤقت؛ تحريكه للسطر التالي ما يغيّرش ~head~. تابع tag قبل الحركة وبعدها.`, "e84-walk", ch08WalkLinkExample,
+		ch08Walkthrough("c84.walk-trace", `المتغير ~p~ هو pointer مؤقت؛ تحريكه للسطر التالي ما بيغيّرش ~head~. تابع tag قبل الحركة وبعدها.`, "e84-walk", ch08WalkLinkExample,
 			ch08Frame(0, "قبل التنفيذ.", ""),
 			ch08Frame(2, "tail هو gold.", "", ch08Variable("tail.Tag", "gold")),
 			ch08Frame(3, "middle يشاور على tail.", "", ch08Variable("middle.Tag", "green"), ch08Variable("middle.Next", "&tail")),
@@ -499,24 +499,24 @@ var ch08CartArabic = []LessonStep{
 			ch08Frame(7, "p يتبع Next للوسط.", "red", ch08Variable("p.Tag", "green")),
 			ch08Frame(8, "tag التالي هو green.", "red\ngreen", ch08Variable("p.Tag", "green")),
 		),
-		ch08Sandbox("c84.cart-chain", "اتبع المؤشر المؤقت جوه السلسلة.", "ch08-cart-chain", ch08CartChainConfig),
+		ch08Sandbox("c84.cart-chain", "اتبع الـpointer المؤقت جوه السلسلة.", "ch08-cart-chain", ch08CartChainConfig),
 	),
 	ch08Step("c84.watch-step", "خد بالك",
-		ch08Markdown("c84.watch", `تغيير المتغير ~p~ يحرك المؤشر المؤقت؛ تغيير ~Head~ أو ~Next~ يغيّر وصلة في القطر.
+		ch08Markdown("c84.watch", `تغيير المتغير ~p~ بيحرّك الـpointer المؤقت؛ تغيير ~Head~ أو ~Next~ بيغيّر وصلة في القطر.
 
 قبل التعديل، اعرف مين لسه بيوصل لباقي السلسلة.
 
-تقدر تقرأ field عبر pointer، لكن dereference لـ~nil~ يعمل panic.`)),
+تقدر تقرا field عبر pointer، لكن dereference لـ~nil~ بيعمل panic.`)),
 	ch08Step("c84.check-step", "فكّر واختبر",
 		ch08Markdown("c84.plan", `قسّم الشغل: راجع الحالات الفاضية، ثم التوصيل، ثم الفصل والبحث، وأخيرًا الـsnapshot اللي بترجعه Tags.
 
 اختبر البداية والوسط والنهاية. ما فيش concurrency في عقد المختبر.`),
 		ch08Question("c84.check-question", "إمتى تكون ~Next~ نهاية السلسلة؟",
 			"", "", []string{"لما تساوي nil", "لما tag تساوي فراغ", "بعد أول عنصر"}, 0,
-			[]string{"صحيح: nil تعني عدم وجود عقدة بعدها.", "نص tag لا يحدد نهاية الوصلة.", "السلسلة ممكن يكون فيها عقد كتير."}),
+			[]string{"صح: nil معناها مفيش عقدة بعدها.", "نص tag مش بيحدد نهاية الوصلة.", "السلسلة ممكن يكون فيها عقد كتير."}),
 	),
 	ch08Step("c84.turn-step", "دورك",
-		ch08Markdown("c84.turn", `ابدأ بأبسط حالة في العقد، وشغّل التستات بعد كل method. لو اختفى عنصر، ارجع لتغييرات Head وNext.`)),
+		ch08Markdown("c84.turn", `ابدأ بأبسط حالة في العقد، وشغّل الـtests بعد كل method. لو اختفى عنصر، ارجع لتغييرات Head وNext.`)),
 }
 
 var ch08CartEnglish = []LessonStep{

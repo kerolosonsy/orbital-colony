@@ -8,7 +8,7 @@ var ch09StringerSandbox = &LessonSandbox{
 	Kind: "ch09-stringer",
 	Config: map[string]any{
 		"intro":       ch09Pair("بدّل العرض وشوف Stringer.", "Switch the view; inspect Stringer."),
-		"outputLabel": ch09Pair("شكل القيمة", "Value display"),
+		"outputLabel": ch09Pair("شكل الـvalue", "Value display"),
 		"default":     ch09Pair("{4}", "{4}"),
 		"string":      ch09Pair("dock-04", "dock-04"),
 		"showString":  ch09Pair("اعرض String()", "Show String()"),
@@ -36,14 +36,14 @@ var ch09SignalsSandbox = &LessonSandbox{
 	Config: map[string]any{
 		"intro":       ch09Pair("النوع الحقيقي يختار الـcase.", "The concrete type selects the case."),
 		"button":      ch09Pair("الإشارة التالية", "Next value"),
-		"valueLabel":  ch09Pair("القيمة", "Value"),
+		"valueLabel":  ch09Pair("الـvalue", "Value"),
 		"typeLabel":   ch09Pair("النوع", "Type"),
 		"caseLabel":   ch09Pair("الـcase", "Case"),
 		"effectLabel": ch09Pair("النتيجة", "Effect"),
 		"values": []any{
 			map[string]any{"value": ch09Pair("42", "42"), "type": ch09Pair("int", "int"), "case": ch09Pair("int", "int"), "effect": ch09Pair("اجمع رقمًا", "Add a number")},
 			map[string]any{"value": ch09Pair("beacon", "beacon"), "type": ch09Pair("string", "string"), "case": ch09Pair("string", "string"), "effect": ch09Pair("تعامل مع النص", "Handle text")},
-			map[string]any{"value": ch09Pair("Point{2, 5}", "Point{2, 5}"), "type": ch09Pair("Point", "Point"), "case": ch09Pair("Point", "Point"), "effect": ch09Pair("اقرأ الحقول", "Read its fields")},
+			map[string]any{"value": ch09Pair("Point{2, 5}", "Point{2, 5}"), "type": ch09Pair("Point", "Point"), "case": ch09Pair("Point", "Point"), "effect": ch09Pair("اقرا الحقول", "Read its fields")},
 		},
 	},
 }
@@ -66,14 +66,14 @@ var ch09StringerArabic = []LessonStep{
 		ID: "c9m1.mission-step", Title: "المهمة",
 		Blocks: []LessonBlock{{
 			ID: "c9m1.mission", Kind: "markdown",
-			Text: "1. خلّي `Report(s)` يطلع سطر الموارد بالتنسيق المطلوب.\n2. الـstarter عامل `Status` وجامع القيم؛ ركّز على طريقة عرضه.\n3. التقرير بياخد **0 ticks**.",
+			Text: "1. خلّي `Report(s)` يطلع سطر الموارد بالتنسيق المطلوب.\n2. الـstarter عامل `Status` وجامع الـvalues؛ ركّز على طريقة عرضه.\n3. التقرير بياخد **0 ticks**.",
 		}},
 	},
 	{
 		ID: "c9m1.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{
-			{ID: "c9m1.string-format", Kind: "markdown", Text: "Go بتطابق الـinterface بالـmethods. `fmt.Stringer` محتاج `String() string`؛ مفيش كلمة `implements`.\n\n`fmt.Sprintf` بيبني نص، و`fmt.Sprint` بيستخدم `String` لو القيمة عندها الـmethod.\n\nالـmethod بتخلي التنسيق ييجي من القيمة. `Report` مش محتاج يعرف نوعها؛ ده سلوكها."},
-			{ID: "c9m1.format-trace", Kind: "walkthrough", Text: "تنسيق توضيحي صغير؛ القيمة دي مش بيانات المهمة.", Code: "label := fmt.Sprintf(\"dock-%02d\", 4)\nfmt.Println(label)", Imports: []string{"fmt"}, ExampleID: "e9m1-format", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
+			{ID: "c9m1.string-format", Kind: "markdown", Text: "Go بتطابق الـinterface بالـmethods. `fmt.Stringer` محتاج `String() string`؛ مفيش كلمة `implements`.\n\n`fmt.Sprintf` بيبني نص، و`fmt.Sprint` بيستخدم `String` لو الـvalue عندها الـmethod.\n\nالـmethod بتخلي التنسيق ييجي من الـvalue. `Report` مش محتاج يعرف نوعها؛ ده سلوكها."},
+			{ID: "c9m1.format-trace", Kind: "walkthrough", Text: "تنسيق توضيحي صغير؛ الـvalue دي مش بيانات المهمة.", Code: "label := fmt.Sprintf(\"dock-%02d\", 4)\nfmt.Println(label)", Imports: []string{"fmt"}, ExampleID: "e9m1-format", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل التنسيق."},
 				{Line: 1, Caption: "Sprintf جهّز النص.", Variables: []LessonVariable{{Name: "label", Value: "dock-04"}}},
 				{Line: 2, Caption: "Println عرض النص.", Variables: []LessonVariable{{Name: "label", Value: "dock-04"}}, Output: "dock-04"},
@@ -83,33 +83,33 @@ var ch09StringerArabic = []LessonStep{
 	{
 		ID: "c9m1.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{
-			{ID: "c9m1.stringer-predict", Kind: "question", Text: "تتوقع `fmt.Println(label)` يطبع إيه؟", Question: &LessonQuestion{
+			{ID: "c9m1.stringer-predict", Kind: "question", Text: "تتوقع `fmt.Println(label)` بيطبع إيه؟", Question: &LessonQuestion{
 				Options: []string{"90", "1m30s", "Stringer"}, Answer: 1,
 				Feedback: []string{"ده شكل الرقم الخام؛ Duration عندها تنسيق نصي.", "`String()` بتاعة Duration بتعرض دقيقة ونص.", "Stringer اسم interface؛ مش النص الناتج."},
 			}},
 			{ID: "c9m1.stringer-trace", Kind: "walkthrough", Text: "`time.Duration` عندها `String` جاهزة.", Code: "var label fmt.Stringer = 90 * time.Second\nfmt.Println(label)", Imports: []string{"fmt", "time"}, ExampleID: "e9m1-stringer", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
-				{Line: 0, Caption: "قبل إسناد القيمة."},
+				{Line: 0, Caption: "قبل إسناد الـvalue."},
 				{Line: 1, Caption: "Duration حققت العقد.", Variables: []LessonVariable{{Name: "label", Value: "time.Duration: 1m30s"}}},
 				{Line: 2, Caption: "الطباعة نادت String.", Variables: []LessonVariable{{Name: "label", Value: "time.Duration: 1m30s"}}, Output: "1m30s"},
 			}}},
-			{ID: "c9m1.stringer-sandbox", Kind: "sandbox", Text: "بدّل ~String()~ وشوف شكل القيمة.", Sandbox: ch09StringerSandbox},
+			{ID: "c9m1.stringer-sandbox", Kind: "sandbox", Text: "بدّل ~String()~ وشوف شكل الـvalue.", Sandbox: ch09StringerSandbox},
 		},
 	},
 	{
 		ID: "c9m1.watch-step", Title: "خد بالك",
-		Blocks: []LessonBlock{{ID: "c9m1.watch", Kind: "markdown", Text: "اسم الـmethod وحروفه مهمين. `String` لازم ترجع `string` من غير parameters.\n\n`fmt.Println(s)` بيعرض شكل افتراضي؛ `fmt.Sprintf` هو اللي بيكوّن نص بالشكل اللي تختاره."}},
+		Blocks: []LessonBlock{{ID: "c9m1.watch", Kind: "markdown", Text: "اسم الـmethod وحروفه مهمين. `String` لازم ترجّع `string` من غير parameters.\n\n`fmt.Println(s)` بيعرض شكل افتراضي؛ `fmt.Sprintf` هو اللي بيكوّن نص بالشكل اللي تختاره."}},
 	},
 	{
 		ID: "c9m1.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			{ID: "c9m1.plan", Kind: "markdown", Text: "الفكرة: خلي `Status` يوفّر سلوكه النصي، وبعدها ابعت القيمة الموجودة.\n\nراجع ترتيب الكلمات والأرقام وعلامات الفصل في النص المطلوب."},
+			{ID: "c9m1.plan", Kind: "markdown", Text: "الفكرة: خلي `Status` يوفّر سلوكه النصي، وبعدها ابعت الـvalue الموجودة.\n\nراجع ترتيب الكلمات والأرقام وعلامات الفصل في النص المطلوب."},
 			{ID: "c9m1.q-contract", Kind: "question", Text: "إيه اللي يخلّي نوع يحقق `fmt.Stringer`؟", Question: &LessonQuestion{
 				Options: []string{"method `String() string`", "حقل اسمه `String`", "method اسمها `Format`"}, Answer: 0,
 				Feedback: []string{"توقيع method هو عقد الـinterface.", "الحقول مش methods ومش بتحقق العقد.", "اسم method لازم يطابق `String`."},
 			}},
-			{ID: "c9m1.q-format", Kind: "question", Text: "أنهي دالة بترجّع نص متنسّق؟", Question: &LessonQuestion{
+			{ID: "c9m1.q-format", Kind: "question", Text: "أنهي function بترجّع نص متنسّق؟", Question: &LessonQuestion{
 				Options: []string{"`fmt.Sprintf`", "`fmt.Println`", "`colony.Report`"}, Answer: 0,
-				Feedback: []string{"`Sprintf` بترجّع النص عشان تستخدمه.", "`Println` بتكتب الناتج، مش بترجّع النص.", "`Report` بتبعت قيمة للقاعدة."},
+				Feedback: []string{"`Sprintf` بترجّع `string` عشان تستخدمها.", "`Println` بتكتب الناتج، مش بترجّع `string`.", "`Report` بتبعت الـvalue للقاعدة."},
 			}},
 		},
 	},
@@ -185,13 +185,13 @@ var ch09AutopilotArabic = []LessonStep{
 	{
 		ID: "c9m2.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{
-			{ID: "c9m2.contract", Kind: "markdown", Text: "الطيار بيملك اللفة على الخريطة، وبينادي `Plan` لكل `Tile`. أي نوع عنده توقيع `Plan(t colony.Tile) []colony.Action` يحقق `Planner`.\n\nالـactions اللي بترجعها بتتنفذ بالترتيب."},
+			{ID: "c9m2.contract", Kind: "markdown", Text: "الطيار بيتولى الـloop على الخريطة، وبينادي `Plan` لكل `Tile`. أي نوع عنده توقيع `Plan(t colony.Tile) []colony.Action` يحقق `Planner`.\n\nالـactions اللي بترجّعها بتتنفذ بالترتيب."},
 			{ID: "c9m2.callback-trace", Kind: "walkthrough", Text: "مكتبة Go بتنادي الـcallback لحد ما تلاقي نتيجة.", Code: "i := slices.IndexFunc([]int{2, 5, 8}, func(n int) bool {\n\tfmt.Println(\"check\", n)\n\treturn n > 4\n})\nfmt.Println(\"index\", i)", Imports: []string{"fmt", "slices"}, ExampleID: "e9m2-callback", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل البحث."},
 				{Line: 1, Caption: "المكتبة بدأت البحث."},
-				{Line: 2, Caption: "أول قيمة: 2.", Variables: []LessonVariable{{Name: "n", Value: "2"}}, Output: "check 2"},
+				{Line: 2, Caption: "أول value: 2.", Variables: []LessonVariable{{Name: "n", Value: "2"}}, Output: "check 2"},
 				{Line: 3, Caption: "2 مش مطلوبة؛ كمّل.", Output: "check 2"},
-				{Line: 2, Caption: "القيمة التالية: 5.", Variables: []LessonVariable{{Name: "n", Value: "5"}}, Output: "check 2\ncheck 5"},
+				{Line: 2, Caption: "الـvalue التالية: 5.", Variables: []LessonVariable{{Name: "n", Value: "5"}}, Output: "check 2\ncheck 5"},
 				{Line: 3, Caption: "الشرط نجح؛ وقف.", Output: "check 2\ncheck 5"},
 				{Line: 5, Caption: "أول index مطابق هو 1.", Variables: []LessonVariable{{Name: "i", Value: "1"}}, Output: "check 2\ncheck 5\nindex 1"},
 			}}},
@@ -202,13 +202,13 @@ var ch09AutopilotArabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{ID: "c9m2.callback-predict", Kind: "question", Text: "تتوقع النتيجة وعدد النداءات كام؟", Question: &LessonQuestion{
 				Options: []string{"`1 1`", "`1 2`", "`2 2`"}, Answer: 1,
-				Feedback: []string{"اتجربت قيمتين قبل ما الشرط ينجح.", "الـindex 1، والـcallback اتنادت مرتين.", "الـindex صفرية، مش عدد القيم."},
+				Feedback: []string{"اتجربت values قبل ما الشرط ينجح.", "الـindex 1، والـcallback اتنادت مرتين.", "الـindex بيبدأ من صفر، مش عدد الـvalues."},
 			}},
 			{ID: "c9m2.callback-reveal", Kind: "walkthrough", Text: "الـcallback بتوقف البحث عند أول true.", Code: "calls := 0\nfound := slices.IndexFunc([]int{3, 6}, func(n int) bool {\n\tcalls++\n\treturn n > 4\n})\nfmt.Println(found, calls)", Imports: []string{"fmt", "slices"}, ExampleID: "e9m2-predict", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل أول نداء."},
 				{Line: 1, Caption: "العداد بدأ بصفر.", Variables: []LessonVariable{{Name: "calls", Value: "0"}}},
 				{Line: 3, Caption: "فحص 3 زوّد العداد.", Variables: []LessonVariable{{Name: "calls", Value: "1"}}},
-				{Line: 4, Caption: "3 لا تحقق الشرط."},
+				{Line: 4, Caption: "3 مش بتحقق الشرط."},
 				{Line: 3, Caption: "فحص 6 زوّد العداد.", Variables: []LessonVariable{{Name: "calls", Value: "2"}}},
 				{Line: 4, Caption: "6 حققت الشرط؛ توقف."},
 				{Line: 6, Caption: "الـindex والنداءات.", Variables: []LessonVariable{{Name: "found", Value: "1"}, {Name: "calls", Value: "2"}}, Output: "1 2"},
@@ -311,13 +311,13 @@ var ch09SignalsArabic = []LessonStep{
 	{
 		ID: "c9m3.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{
-			{ID: "c9m3.type-switch", Kind: "markdown", Text: "الـinterface شايل نوع حقيقي وقيمة. `colony.Signals()` بترجع `[]colony.Signal`؛ كل عنصر `Distress` أو `Supply` أو `Noise`.\n\nفي `switch v := s.(type)`، نوع `v` بيتحدد حسب الـcase. كل case ليها fields مختلفة؛ استخدم اللي يناسب النوع."},
-			{ID: "c9m3.switch-trace", Kind: "walkthrough", Text: "مثال بقيم توضيحية: رقم ونص ثابت.", Code: "total := 0\nfor _, msg := range []any{7, \"static\"} {\n\tswitch v := msg.(type) {\n\tcase int:\n\t\ttotal += v\n\tcase string:\n\t\tfmt.Println(\"ignore\", v)\n\t}\n}\nfmt.Println(\"sum\", total)", Imports: []string{"fmt"}, ExampleID: "e9m3-switch", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
+			{ID: "c9m3.type-switch", Kind: "markdown", Text: "الـinterface شايل نوع حقيقي والـvalue بتاعته. `colony.Signals()` بترجّع `[]colony.Signal`؛ كل عنصر `Distress` أو `Supply` أو `Noise`.\n\nفي `switch v := s.(type)`، نوع `v` بيتحدد حسب الـcase. كل case ليها fields مختلفة؛ استخدم اللي يناسب النوع."},
+			{ID: "c9m3.switch-trace", Kind: "walkthrough", Text: "مثال فيه values توضيحية: رقم ونص ثابت.", Code: "total := 0\nfor _, msg := range []any{7, \"static\"} {\n\tswitch v := msg.(type) {\n\tcase int:\n\t\ttotal += v\n\tcase string:\n\t\tfmt.Println(\"ignore\", v)\n\t}\n}\nfmt.Println(\"sum\", total)", Imports: []string{"fmt"}, ExampleID: "e9m3-switch", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل قراءة الرسائل."},
 				{Line: 1, Caption: "المجموع بدأ بصفر.", Variables: []LessonVariable{{Name: "total", Value: "0"}}},
-				{Line: 2, Caption: "أول قيمة رقم 7.", Variables: []LessonVariable{{Name: "msg", Value: "int(7)"}}},
+				{Line: 2, Caption: "أول value رقم 7.", Variables: []LessonVariable{{Name: "msg", Value: "int(7)"}}},
 				{Line: 5, Caption: "حالة int زوّدت المجموع.", Variables: []LessonVariable{{Name: "total", Value: "7"}}},
-				{Line: 2, Caption: "القيمة التالية نص ثابت.", Variables: []LessonVariable{{Name: "msg", Value: "string(static)"}}},
+				{Line: 2, Caption: "الـvalue التالية نص ثابت.", Variables: []LessonVariable{{Name: "msg", Value: "string(static)"}}},
 				{Line: 8, Caption: "حالة النص تجاهلته.", Variables: []LessonVariable{{Name: "total", Value: "7"}}, Output: "ignore static"},
 				{Line: 10, Caption: "اطبع الإجمالي مرة.", Variables: []LessonVariable{{Name: "total", Value: "7"}}, Output: "ignore static\nsum 7"},
 			}}},
@@ -326,17 +326,17 @@ var ch09SignalsArabic = []LessonStep{
 	{
 		ID: "c9m3.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{
-			{ID: "c9m3.assert-predict", Kind: "question", Text: "القيمة نص `\"3\"`؛ تتوقع يطلع إيه؟", Question: &LessonQuestion{
+			{ID: "c9m3.assert-predict", Kind: "question", Text: "الـvalue نص `\"3\"`؛ تتوقع يطلع إيه؟", Question: &LessonQuestion{
 				Options: []string{"`4`", "`text 3`", "panic"}, Answer: 1,
 				Feedback: []string{"النوع string؛ الكود مش بيحوّله لرقم.", "الـcase المطابق هو string.", "الـtype switch بيتعامل مع النوع بأمان."},
 			}},
 			{ID: "c9m3.assert-reveal", Kind: "walkthrough", Text: "الـcase بيتحدد بالنوع الحقيقي.", Code: "signal := any(\"3\")\nswitch v := signal.(type) {\ncase int:\n\tfmt.Println(v + 1)\ncase string:\n\tfmt.Println(\"text\", v)\n}", Imports: []string{"fmt"}, ExampleID: "e9m3-type-check", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل فحص النوع."},
-				{Line: 1, Caption: "القيمة string.", Variables: []LessonVariable{{Name: "signal", Value: "string(3)"}}},
+				{Line: 1, Caption: "الـvalue نوعها string.", Variables: []LessonVariable{{Name: "signal", Value: "string(3)"}}},
 				{Line: 2, Caption: "الـswitch اختار string."},
 				{Line: 6, Caption: "اطبع النوع والنص.", Variables: []LessonVariable{{Name: "v", Value: "3"}}, Output: "text 3"},
 			}}},
-			{ID: "c9m3.type-switch-sandbox", Kind: "sandbox", Text: "حرّك القيم وشوف الـcase المطابق.", Sandbox: ch09SignalsSandbox},
+			{ID: "c9m3.type-switch-sandbox", Kind: "sandbox", Text: "حرّك الـvalues وشوف الـcase المطابق.", Sandbox: ch09SignalsSandbox},
 		},
 	},
 	{
@@ -346,14 +346,14 @@ var ch09SignalsArabic = []LessonStep{
 	{
 		ID: "c9m3.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			{ID: "c9m3.plan", Kind: "markdown", Text: "اقرأ الإشارات الأول؛ وبعدها زور المواقع وابعت المجموع. ترتيبها عشوائي."},
+			{ID: "c9m3.plan", Kind: "markdown", Text: "اقرا الإشارات الأول؛ وبعدها زور المواقع وابعت المجموع. ترتيبها عشوائي."},
 			{ID: "c9m3.q-fields", Kind: "question", Text: "أنهي نوع فيه `At`؟", Question: &LessonQuestion{
 				Options: []string{"`Distress`", "`Supply`", "`Noise`"}, Answer: 0,
 				Feedback: []string{"موقع الزيارة موجود في `Distress.At`.", "`Supply` شايلة `Amount`.", "`Noise` نص ثابت ملوش موقع."},
 			}},
 			{ID: "c9m3.q-assert", Kind: "question", Text: "إيه خطر assertion مباشرة على رسالة من نوع تاني؟", Question: &LessonQuestion{
-				Options: []string{"panic", "ترجع nil", "تتحول تلقائيًا"}, Answer: 0,
-				Feedback: []string{"من غير `ok`، النوع الغلط يعمل panic.", "القيمة مش pointer عشان ترجع nil.", "Go مش بتحوّل concrete types لوحدها."},
+				Options: []string{"panic", "بترجّع nil", "تتحول تلقائيًا"}, Answer: 0,
+				Feedback: []string{"من غير `ok`، النوع الغلط يعمل panic.", "الـvalue مش pointer؛ مش هترجّع nil.", "Go مش بتحوّل concrete types لوحدها."},
 			}},
 		},
 	},
@@ -426,19 +426,19 @@ var ch09SignalsEnglish = []LessonStep{
 var ch09PlugsArabic = []LessonStep{
 	{
 		ID: "c9m4.mission-step", Title: "المهمة",
-		Blocks: []LessonBlock{{ID: "c9m4.mission", Kind: "markdown", Text: "1. خلّي `RelayOrders` تقرأ أوامر من أي `io.Reader` وتكتب في أي `io.Writer`.\n2. كل سطر مفتاح؛ العنوان أو `unknown` حتى للسطر الفاضي. `end` يقفل، والـEOF العادي `exhausted`.\n3. رجّع أخطاء القراية والكتابة."}},
+		Blocks: []LessonBlock{{ID: "c9m4.mission", Kind: "markdown", Text: "1. خلّي `RelayOrders` بتقرا أوامر من أي `io.Reader` وتكتب في أي `io.Writer`.\n2. كل سطر key؛ العنوان أو `unknown` حتى للسطر الفاضي. `end` يقفل، والـEOF العادي `exhausted`.\n3. رجّع الـerrors اللي بتحصل في القراية والكتابة."}},
 	},
 	{
 		ID: "c9m4.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{
 			{ID: "c9m4.scanner", Kind: "markdown", Text: "الـinterface الصغير يطلب السلوك اللي محتاجه بس. `io.Reader` يوفّر `Read`، و`io.Writer` يوفّر `Write`.\n\n`Scanner` يجيب سطر؛ `Text` يجيبه من غير newline."},
-			{ID: "c9m4.scan-trace", Kind: "walkthrough", Text: "اقرأ السطر ونضّف المسافات الطرفية.", Code: "scanner := bufio.NewScanner(strings.NewReader(\"  beacon-7 \\n\"))\nif scanner.Scan() {\n\tkey := strings.TrimSpace(scanner.Text())\n\tfmt.Println(key)\n}\nfmt.Println(scanner.Err())", Imports: []string{"bufio", "fmt", "strings"}, ExampleID: "e9m4-scan", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
+			{ID: "c9m4.scan-trace", Kind: "walkthrough", Text: "اقرا السطر ونضّف المسافات الطرفية.", Code: "scanner := bufio.NewScanner(strings.NewReader(\"  beacon-7 \\n\"))\nif scanner.Scan() {\n\tkey := strings.TrimSpace(scanner.Text())\n\tfmt.Println(key)\n}\nfmt.Println(scanner.Err())", Imports: []string{"bufio", "fmt", "strings"}, ExampleID: "e9m4-scan", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل إنشاء القارئ."},
 				{Line: 1, Caption: "Reader يزوّد Scanner بسطر."},
 				{Line: 2, Caption: "Scan جابت السطر."},
 				{Line: 3, Caption: "TrimSpace شالت الطرفيات.", Variables: []LessonVariable{{Name: "key", Value: "beacon-7"}}},
-				{Line: 4, Caption: "اطبع المفتاح.", Variables: []LessonVariable{{Name: "key", Value: "beacon-7"}}, Output: "beacon-7"},
-				{Line: 6, Caption: "مفيش خطأ قراية.", Output: "beacon-7\n<nil>"},
+				{Line: 4, Caption: "اطبع الـkey.", Variables: []LessonVariable{{Name: "key", Value: "beacon-7"}}, Output: "beacon-7"},
+				{Line: 6, Caption: "مفيش error في القراية.", Output: "beacon-7\n<nil>"},
 			}}},
 		},
 	},
@@ -447,11 +447,11 @@ var ch09PlugsArabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{ID: "c9m4.trim-predict", Kind: "question", Text: "بعد `TrimSpace`، تتوقع المقارنة والطباعة؟", Question: &LessonQuestion{
 				Options: []string{"`false end`", "`true end`", "`true  end`"}, Answer: 1,
-				Feedback: []string{"المسافات الطرفية اتشالت قبل المقارنة.", "المفتاح بقى `end` من غير المسافات.", "المسافة اللي قبل end مش جزء من القيمة."},
+				Feedback: []string{"المسافات الطرفية اتشالت قبل المقارنة.", "الـkey بقى `end` من غير المسافات.", "المسافة اللي قبل end مش جزء من الـvalue."},
 			}},
 			{ID: "c9m4.trim-reveal", Kind: "walkthrough", Text: "القراية مش بتغيّر النص؛ TrimSpace هي اللي بتشيله.", Code: "key := strings.TrimSpace(\" end \\n\")\nfmt.Println(key == \"end\", key)", Imports: []string{"fmt", "strings"}, ExampleID: "e9m4-trim", Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 				{Line: 0, Caption: "قبل التنضيف."},
-				{Line: 1, Caption: "المفتاح بقى end.", Variables: []LessonVariable{{Name: "key", Value: "end"}}},
+				{Line: 1, Caption: "الـkey بقى end.", Variables: []LessonVariable{{Name: "key", Value: "end"}}},
 				{Line: 2, Caption: "المقارنة والنص.", Variables: []LessonVariable{{Name: "key", Value: "end"}}, Output: "true end"},
 			}}},
 			{ID: "c9m4.trim-sandbox", Kind: "sandbox", Text: "بدّل ~TrimSpace~.", Sandbox: ch09TrimSandbox},
@@ -459,19 +459,19 @@ var ch09PlugsArabic = []LessonStep{
 	},
 	{
 		ID: "c9m4.watch-step", Title: "خد بالك",
-		Blocks: []LessonBlock{{ID: "c9m4.watch", Kind: "markdown", Text: "`end` أمر صريح: اكتب `closed` وارجع قبل lookup. أما `Scan` اللي وقفت، رجّع `Err` لو مش `nil`؛ `nil` معناها EOF عادي.\n\nافحص خطأ كل كتابة، ومتستخدمش `fmt.Println` بدل الـwriter اللي اتبعتلك."}},
+		Blocks: []LessonBlock{{ID: "c9m4.watch", Kind: "markdown", Text: "`end` أمر صريح: اكتب `closed` واعمل `return` قبل lookup. أما `Scan` اللي وقفت، رجّع `Err` لو مش `nil`؛ `nil` معناها EOF عادي.\n\nافحص الـerror بعد كل كتابة، ومتستخدمش `fmt.Println` بدل الـwriter اللي اتبعتلك."}},
 	},
 	{
 		ID: "c9m4.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			{ID: "c9m4.plan", Kind: "markdown", Text: "الخطة: افصل المصدر والوجهة عن منطق الأمر.\n\nلكل سطر، نظّفه وافحصه؛ بعد توقف Scanner ميّز EOF عن خطأ."},
+			{ID: "c9m4.plan", Kind: "markdown", Text: "الخطة: افصل المصدر والوجهة عن منطق الأمر.\n\nلكل سطر، نظّفه وافحصه؛ بعد توقف Scanner ميّز EOF عن error."},
 			{ID: "c9m4.q-input", Kind: "question", Text: "إيه اللي محتاجه المنطق من المصدر؟", Question: &LessonQuestion{
 				Options: []string{"`io.Reader`", "ملف مفتوح بعينه", "`os.Stdin`"}, Answer: 0,
-				Feedback: []string{"أي مصدر يحقق Read ينفع.", "ربط الدالة بملف بعينه يقلل إعادة استخدامها.", "المدخل ييجي كـparameter؛ مش global."},
+				Feedback: []string{"أي مصدر يحقق Read ينفع.", "ربط الـfunction بملف بعينه يقلل إعادة استخدامها.", "المدخل ييجي كـparameter؛ مش global."},
 			}},
 			{ID: "c9m4.q-end", Kind: "question", Text: "إيه الفرق بين `end` وEOF؟", Question: &LessonQuestion{
 				Options: []string{"`end` أمر؛ EOF نهاية إدخال", "الاتنين نفس المعنى"}, Answer: 0,
-				Feedback: []string{"`end` مفتاح مقروء؛ EOF مفيش سطر تاني.", "نهاية الإدخال مش أمر إغلاق."},
+				Feedback: []string{"`end` key مقروء؛ EOF مفيش سطر تاني.", "نهاية الإدخال مش أمر إغلاق."},
 			}},
 		},
 	},

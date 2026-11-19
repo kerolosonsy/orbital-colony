@@ -6,7 +6,7 @@ Each mission uses the approved six-step sequence: Mission, Idea, Try it, Watch o
 
 **Playground:** Change a local copy, then compare a write through a pointer.
 
-**Word count:** Arabic 276; English 299. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
+**Word count:** Arabic 288; English 303. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
 
 **Six steps:** Mission compares collected crystal with the report; Idea traces a copied `int`; Try predicts pointer-based output before its trace; Watch out contrasts values and addresses; Think & check reviews parameter and call-site phases; Your turn returns to the starter function.
 
@@ -26,10 +26,10 @@ fmt.Println(x)
 |---:|---|---|
 | 0 | قبل التنفيذ. · Before execution. | |
 | 1 | x يبدأ بالرقم 3. · x starts at 3. | |
-| 2 | الدالة اتجهزت لاستقبال قيمة. · The function is ready for a value. | |
+| 2 | الـfunction اتجهزت لاستقبال الـvalue. · The function is ready for a value. | |
 | 3 | n نسخة محلية من x. · n is a local copy of x. | |
 | 4 | التغيير يخص النسخة. · Only the copy changes. | |
-| 5 | الدالة رجعت؛ x كما هي. · The function returns; x stays. | |
+| 5 | الـfunction رجعت؛ x كما هي. · The function returns; x stays. | |
 | 6 | الخرج: 3. · Output: 3. | `3` |
 
 <!-- go-example id=e81-pointer imports=fmt outcome=ok -->
@@ -56,7 +56,7 @@ fmt.Println(x)
 
 **Playground:** Run value and pointer receivers against the same small value.
 
-**Word count:** Arabic 286; English 299. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
+**Word count:** Arabic 295; English 301. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
 
 **Six steps:** Mission states the 10-unit hold and storage goal; Idea traces a value receiver; Try predicts a pointer-receiver result before its trace; Watch out notes unload location and fit; Think & check names cargo, space, and unload phases; Your turn points back to `Load`.
 
@@ -78,7 +78,7 @@ func main() {
 | Line | State / caption (AR · EN) | Output |
 |---:|---|---|
 | 0 | قبل التنفيذ. · Before execution. | |
-| 6 | Gauge تبدأ بقيمة 2. · Gauge starts at 2. | |
+| 6 | Gauge بتبدأ بالـvalue 2. · Gauge starts at 2. | |
 | 7 | استدعاء Add يعمل نسخة receiver. · Add receives a receiver copy. | |
 | 3 | التعديل يقع على النسخة. · The copy is changed. | |
 | 4 | نسخة receiver انتهت. · The receiver copy ends. | |
@@ -100,7 +100,7 @@ func main() {
 | Line | State / caption (AR · EN) | Output |
 |---:|---|---|
 | 0 | قبل التنفيذ. · Before execution. | |
-| 6 | g تبدأ بقيمة 2. · g starts at 2. | |
+| 6 | g بتبدأ بالـvalue 2. · g starts at 2. | |
 | 7 | النداء يمرّر عنوان g. · The call passes g's address. | |
 | 2 | الـreceiver يوصل للأصل. · The receiver reaches the original. | |
 | 3 | الحقل الأصلي يزيد. · The original field increases. | |
@@ -112,7 +112,7 @@ func main() {
 
 **Playground:** Toggle a target and watch the nil guard choose a safe path.
 
-**Word count:** Arabic 277; English 267. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
+**Word count:** Arabic 289; English 271. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
 
 **Six steps:** Mission asks for every target; Idea traces a nil guard; Try predicts a valid-pointer result before its trace; Watch out states the radar's pointer and tick behavior; Think & check names scan, check, use, repeat; Your turn tests the starter with and without targets.
 
@@ -152,8 +152,8 @@ if p == nil {
 | 0 | قبل التنفيذ. · Before execution. | |
 | 1 | n يساوي 6. · n is 6. | |
 | 2 | p يشاور على n. · p points to n. | |
-| 3 | المؤشر مش nil. · The pointer is not nil. | |
-| 6 | نقرأ القيمة 6. · Read the value 6. | `6` |
+| 3 | الـpointer مش nil. · The pointer is not nil. | |
+| 6 | اقرا الـvalue 6. · Read the value 6. | `6` |
 
 **Try:** Predict the guarded result when the pointer is valid. Mission notes identify `colony.Nearest()` as returning `*colony.Point`, or `nil`, and each radar query costs one tick.
 
@@ -161,7 +161,7 @@ if p == nil {
 
 **Playground:** Follow a temporary pointer while the links stay fixed.
 
-**Word count:** Arabic 294; English 300. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
+**Word count:** Arabic 296; English 304. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
 
 **Six steps:** Mission introduces preserving the convoy; Idea traces one `Next` link; Try predicts tags while a temporary pointer advances; Watch out separates moving a pointer from changing a link; Think & check names empty, link, release, search, snapshot phases; Your turn tests each method.
 
@@ -180,7 +180,7 @@ fmt.Println(first.Next.Tag)
 | 0 | قبل التنفيذ. · Before execution. | |
 | 2 | آخر لمبة اسمها blue. · The last lamp is blue. | |
 | 3 | first تتصل بآخر لمبة. · first links to the last lamp. | |
-| 4 | نقرأ tag بعد الوصلة. · Read the tag beyond the link. | `blue` |
+| 4 | اقرا tag بعد الوصلة. · Read the tag beyond the link. | `blue` |
 
 <!-- go-example id=e84-walk imports=fmt outcome=ok -->
 ```go

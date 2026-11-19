@@ -8,7 +8,7 @@ Word counts use whitespace-separated learner text, including titles, captions, q
 
 **Focus:** implicit interface satisfaction, `fmt.Stringer`, and formatted text. The starter already gathers the fields; the lesson leaves the formatting method for the player.
 
-**Word count:** Arabic 250; English 310.
+**Word count:** Arabic 252; English 313.
 
 1. **المهمة / Mission:** identify the required report and the starter's existing `Status` value.
 2. **الفكرة / Idea:** a method signature satisfies an interface; `Sprintf` builds text and `Sprint` uses `String`.
@@ -59,7 +59,7 @@ Real stdout:
 
 **Focus:** `Autopilot` owns the map loop and calls a `Planner`; `Plan` returns ordered actions. The example uses the real standard-library callback `slices.IndexFunc`, not a colony plan.
 
-**Word count:** Arabic 251; English 319.
+**Word count:** Arabic 253; English 319.
 
 1. **المهمة / Mission:** respond to tile ground and contents using the supplied `Farmer`.
 2. **الفكرة / Idea:** connect the `Planner` signature to library-owned callback flow.
@@ -119,7 +119,7 @@ Real stdout:
 
 **Focus:** type switches over `colony.Signal`; the randomized message order does not identify the type or route. The example uses `any` with ordinary Go values because the colony signal interface is sealed.
 
-**Word count:** Arabic 250; English 312.
+**Word count:** Arabic 255; English 316.
 
 1. **المهمة / Mission:** visit every distress location and total supply values; ignore noise.
 2. **الفكرة / Idea:** an interface stores a concrete type and value; each switch case gives `v` its case type.
@@ -184,7 +184,7 @@ text 3
 
 **Focus:** small `io.Reader`/`io.Writer` interfaces, line scanning, trimming, and distinguishing the `end` command from EOF. The existing fallback lesson stays available.
 
-**Word count:** Arabic 264; English 320.
+**Word count:** Arabic 269; English 319.
 
 1. **المهمة / Mission:** make `RelayOrders` work with injected readers and writers, returning errors; print an address or `unknown` for each key.
 2. **الفكرة / Idea:** scan one line and remove surrounding spaces.
@@ -244,7 +244,7 @@ Storyboard code is compiled and run as the body of `main` with the listed standa
 
 **Focus:** an integration lab for structs, interfaces, maps, and error results. The full contract stays in the existing fallback lesson.
 
-**Word count:** Arabic 274; English 312, including titles, captions, options, feedback, and hints; excluding code and shared controls.
+**Word count:** Arabic 284; English 319, including titles, captions, options, feedback, and hints; excluding code and shared controls.
 
 1. **المهمة / Mission:** complete `Pack` from its contract and keep `main` empty.
 2. **الفكرة / Idea:** structs group data; interfaces describe required methods; a signature lists inputs and results.
@@ -265,11 +265,11 @@ fmt.Println(counts["teal"])
 
 | Frame / line | Map | Output | Caption |
 |---|---|---|---|
-| 0 / before 1 | — | — | قبل إنشاء الخريطة. / Before creating the map. |
-| 1 / 1 | `map[]` | — | بدأنا بخريطة فاضية. / The map starts empty. |
-| 2 / 2 | `map[teal:2]` | — | القيمة بقت 2. / The value becomes 2. |
-| 3 / 3 | `map[teal:3]` | — | التحديث زوّد نفس المفتاح. / The same key increases. |
-| 4 / 4 | `map[teal:3]` | `3` | اطبع قيمة المفتاح. / Print the key's value. |
+| 0 / before 1 | — | — | قبل إنشاء الـmap. / Before creating the map. |
+| 1 / 1 | `map[]` | — | الـmap بدأت فاضية. / The map starts empty. |
+| 2 / 2 | `map[teal:2]` | — | الـvalue بقت 2. / The value becomes 2. |
+| 3 / 3 | `map[teal:3]` | — | التحديث زوّد نفس الـkey. / The same key increases. |
+| 4 / 4 | `map[teal:3]` | `3` | اطبع الـvalue بتاعة الـkey. / Print the key's value. |
 
 #### Verified `e9boss-map-count` — ok
 

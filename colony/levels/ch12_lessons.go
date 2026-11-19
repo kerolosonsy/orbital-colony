@@ -15,7 +15,7 @@ func ch12DeadlockFrame(ar, en, drill, cart, status string) map[string]any {
 var ch12CounterSandboxConfig = map[string]any{
 	"labels": map[string]any{
 		"scenario": ch12Copy("ترتيب ممكن", "One possible schedule"), "total": ch12Copy("الإجمالي", "Shared total"),
-		"mutex": ch12Copy("القفل المشترك", "Shared mutex"), "on": ch12Copy("شغّال", "On"), "off": ch12Copy("مقفول", "Off"),
+		"mutex": ch12Copy("الـmutex المشتركة", "Shared mutex"), "on": ch12Copy("شغّال", "On"), "off": ch12Copy("locked", "Off"),
 		"waitGroup": ch12Copy("WaitGroup", "WaitGroup"), "waiting": ch12Copy("العمال لسه شغالين", "Workers still running"),
 		"done": ch12Copy("الكل خلص", "All workers finished"), "next": ch12Copy("الخطوة الجاية", "Next step"),
 		"again": ch12Copy("ترتيب تاني", "Run again"),
@@ -24,35 +24,35 @@ var ch12CounterSandboxConfig = map[string]any{
 		map[string]any{
 			"name": ch12Copy("قراءتان متداخلتان", "Overlapping reads"),
 			"unlocked": []any{
-				ch12CounterFrame("الإجمالي يبدأ صفر", "Total starts at zero", "0", false),
-				ch12CounterFrame("العامل A قرأ صفر", "Worker A reads zero", "0", false),
-				ch12CounterFrame("العامل B قرأ صفر", "Worker B reads zero", "0", false),
+				ch12CounterFrame("الإجمالي بيبدأ بصفر", "Total starts at zero", "0", false),
+				ch12CounterFrame("العامل A قرا صفر", "Worker A reads zero", "0", false),
+				ch12CounterFrame("العامل B قرا صفر", "Worker B reads zero", "0", false),
 				ch12CounterFrame("العامل A كتب واحد", "Worker A writes one", "1", false),
 				ch12CounterFrame("العامل B كتب واحد", "Worker B writes one", "1", true),
 			},
 			"locked": []any{
-				ch12CounterFrame("الإجمالي يبدأ صفر", "Total starts at zero", "0", false),
-				ch12CounterFrame("A مسك القفل وقرأ صفر", "A locks and reads zero", "0", false),
-				ch12CounterFrame("A كتب واحد وفتح القفل", "A writes one and unlocks", "1", false),
-				ch12CounterFrame("B قرأ واحد تحت القفل", "B reads one under lock", "1", false),
-				ch12CounterFrame("B كتب اتنين وفتح القفل", "B writes two and unlocks", "2", true),
+				ch12CounterFrame("الإجمالي بيبدأ بصفر", "Total starts at zero", "0", false),
+				ch12CounterFrame("A عمل lock وقرا صفر", "A locks and reads zero", "0", false),
+				ch12CounterFrame("A كتب واحد وفك الـlock", "A writes one and unlocks", "1", false),
+				ch12CounterFrame("B قرا واحد والـlock مقفول", "B reads one under lock", "1", false),
+				ch12CounterFrame("B كتب اتنين وفك الـlock", "B writes two and unlocks", "2", true),
 			},
 		},
 		map[string]any{
 			"name": ch12Copy("عامل يخلص الأول", "One worker finishes first"),
 			"unlocked": []any{
-				ch12CounterFrame("الإجمالي يبدأ صفر", "Total starts at zero", "0", false),
-				ch12CounterFrame("العامل B قرأ صفر", "Worker B reads zero", "0", false),
+				ch12CounterFrame("الإجمالي بيبدأ بصفر", "Total starts at zero", "0", false),
+				ch12CounterFrame("العامل B قرا صفر", "Worker B reads zero", "0", false),
 				ch12CounterFrame("العامل B كتب واحد", "Worker B writes one", "1", false),
-				ch12CounterFrame("العامل A قرأ واحد", "Worker A reads one", "1", false),
+				ch12CounterFrame("العامل A قرا واحد", "Worker A reads one", "1", false),
 				ch12CounterFrame("العامل A كتب اتنين", "Worker A writes two", "2", true),
 			},
 			"locked": []any{
-				ch12CounterFrame("الإجمالي يبدأ صفر", "Total starts at zero", "0", false),
-				ch12CounterFrame("B مسك القفل وقرأ صفر", "B locks and reads zero", "0", false),
-				ch12CounterFrame("B كتب واحد وفتح القفل", "B writes one and unlocks", "1", false),
-				ch12CounterFrame("A قرأ واحد تحت القفل", "A reads one under lock", "1", false),
-				ch12CounterFrame("A كتب اتنين وفتح القفل", "A writes two and unlocks", "2", true),
+				ch12CounterFrame("الإجمالي بيبدأ بصفر", "Total starts at zero", "0", false),
+				ch12CounterFrame("B عمل lock وقرا صفر", "B locks and reads zero", "0", false),
+				ch12CounterFrame("B كتب واحد وفك الـlock", "B writes one and unlocks", "1", false),
+				ch12CounterFrame("A قرا واحد والـlock مقفول", "A reads one under lock", "1", false),
+				ch12CounterFrame("A كتب اتنين وفك الـlock", "A writes two and unlocks", "2", true),
 			},
 		},
 	},
@@ -60,12 +60,12 @@ var ch12CounterSandboxConfig = map[string]any{
 
 var ch12RegistrySandboxConfig = map[string]any{
 	"labels": map[string]any{
-		"scenario": ch12Copy("ترتيب كتابة ممكن", "One possible write order"), "sharedLock": ch12Copy("القفل نفسه لكل الكتّاب", "One mutex for every writer"),
-		"shared": ch12Copy("قفل واحد", "One shared lock"),
-		"map":    ch12Copy("السجل", "Map"), "log": ch12Copy("ترتيب التسجيل", "Write log"),
+		"scenario": ch12Copy("ترتيب كتابة ممكن", "One possible write order"), "sharedLock": ch12Copy("نفس الـmutex لكل الكتّاب", "One mutex for every writer"),
+		"shared": ch12Copy("نفس الـlock", "One shared lock"),
+		"map":    ch12Copy("الـmap", "Map"), "log": ch12Copy("ترتيب التسجيل", "Write log"),
 		"waitGroup": ch12Copy("WaitGroup", "WaitGroup"), "waiting": ch12Copy("لسه فيه كتّاب", "Writers still running"),
 		"done":  ch12Copy("الكتّاب خلصوا؛ القراءة آمنة", "Writers finished; read is safe"),
-		"empty": ch12Copy("فاضي", "Empty"), "start": ch12Copy("السجل بدأ فاضي", "Map starts empty"),
+		"empty": ch12Copy("فاضي", "Empty"), "start": ch12Copy("الـmap بدأت فاضية", "Map starts empty"),
 		"next": ch12Copy("سجّل التالي", "Record next"), "again": ch12Copy("جدولة تانية", "Run again"),
 		"completion": ch12Copy("كل الكتّاب خلصوا بعد Wait", "All writers finish after Wait"),
 	},
@@ -82,52 +82,52 @@ var ch12RegistrySandboxConfig = map[string]any{
 
 var ch12DeadlockSandboxConfig = map[string]any{
 	"labels": map[string]any{
-		"schedule": ch12Copy("ترتيب ممكن", "One possible schedule"), "drill": ch12Copy("المثقاب", "Drill lock"),
-		"cart": ch12Copy("العربية", "Cart lock"), "free": ch12Copy("فاضي", "Free"),
+		"schedule": ch12Copy("ترتيب ممكن", "One possible schedule"), "drill": ch12Copy("الـlock بتاع المثقاب", "Drill lock"),
+		"cart": ch12Copy("الـlock بتاع العربية", "Cart lock"), "free": ch12Copy("فاضي", "Free"),
 		"workerA": ch12Copy("العامل A", "Worker A"), "workerB": ch12Copy("العامل B", "Worker B"),
 		"status": ch12Copy("الحالة", "State"), "running": ch12Copy("الشغل مكمل", "Work continues"),
 		"cycle": ch12Copy("دورة انتظار", "Wait cycle"), "done": ch12Copy("العاملين خلصوا", "Both workers finished"),
-		"lockOrder": ch12Copy("ترتيب الأقفال", "Lock order"), "mixed": ch12Copy("مختلف", "Different"),
-		"fixed": ch12Copy("موحّد", "Fixed"), "orderButton": ch12Copy("بدّل ترتيب الأقفال", "Toggle lock order"),
+		"lockOrder": ch12Copy("ترتيب الـlocks", "Lock order"), "mixed": ch12Copy("مختلف", "Different"),
+		"fixed": ch12Copy("موحّد", "Fixed"), "orderButton": ch12Copy("بدّل ترتيب الـlocks", "Toggle lock order"),
 		"next": ch12Copy("الخطوة الجاية", "Next step"), "again": ch12Copy("جدولة تانية", "Run again"),
 	},
 	"mixed": []any{
-		map[string]any{"name": ch12Copy("A أخد القفلين الأول", "A gets both locks first"), "events": []any{
-			ch12DeadlockFrame("مفيش عامل ماسك قفل", "No worker holds a lock", "free", "free", "running"),
-			ch12DeadlockFrame("العامل A أخد المثقاب", "Worker A takes Drill", "a", "free", "running"),
-			ch12DeadlockFrame("العامل A أخد العربية", "Worker A takes Cart", "a", "a", "running"),
-			ch12DeadlockFrame("العامل A فتح القفلين", "Worker A releases both", "free", "free", "running"),
-			ch12DeadlockFrame("العامل B أخد العربية", "Worker B takes Cart", "free", "b", "running"),
-			ch12DeadlockFrame("العامل B أخد المثقاب", "Worker B takes Drill", "b", "b", "running"),
+		map[string]any{"name": ch12Copy("A مسك الـlocks الاتنين الأول", "A gets both locks first"), "events": []any{
+			ch12DeadlockFrame("مفيش عامل ماسك lock", "No worker holds a lock", "free", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد الـlock بتاع المثقاب", "Worker A takes Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد الـlock بتاع العربية", "Worker A takes Cart", "a", "a", "running"),
+			ch12DeadlockFrame("العامل A فكّ الـlocks الاتنين", "Worker A releases both", "free", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد الـlock بتاع العربية", "Worker B takes Cart", "free", "b", "running"),
+			ch12DeadlockFrame("العامل B أخد الـlock بتاع المثقاب", "Worker B takes Drill", "b", "b", "running"),
 			ch12DeadlockFrame("العاملين خلصوا", "Both workers finish", "free", "free", "done"),
 		}},
-		map[string]any{"name": ch12Copy("كل واحد ماسك قفل", "Each worker holds one lock"), "events": []any{
-			ch12DeadlockFrame("مفيش عامل ماسك قفل", "No worker holds a lock", "free", "free", "running"),
-			ch12DeadlockFrame("العامل A أخد المثقاب", "Worker A takes Drill", "a", "free", "running"),
-			ch12DeadlockFrame("العامل B أخد العربية", "Worker B takes Cart", "a", "b", "running"),
-			ch12DeadlockFrame("A مستني العربية عند B", "A waits for Cart held by B", "a", "b", "running"),
-			ch12DeadlockFrame("B مستني المثقاب عند A", "B waits for Drill held by A", "a", "b", "cycle"),
+		map[string]any{"name": ch12Copy("كل واحد ماسك lock", "Each worker holds one lock"), "events": []any{
+			ch12DeadlockFrame("مفيش عامل ماسك lock", "No worker holds a lock", "free", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد الـlock بتاع المثقاب", "Worker A takes Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد الـlock بتاع العربية", "Worker B takes Cart", "a", "b", "running"),
+			ch12DeadlockFrame("A مستني الـlock بتاع العربية عند B", "A waits for Cart held by B", "a", "b", "running"),
+			ch12DeadlockFrame("B مستني الـlock بتاع المثقاب عند A", "B waits for Drill held by A", "a", "b", "cycle"),
 		}},
 	},
 	"fixed": []any{
 		map[string]any{"name": ch12Copy("A يدخل الأول", "A enters first"), "events": []any{
-			ch12DeadlockFrame("مفيش عامل ماسك قفل", "No worker holds a lock", "free", "free", "running"),
-			ch12DeadlockFrame("العامل A أخد المثقاب", "Worker A takes Drill", "a", "free", "running"),
-			ch12DeadlockFrame("العامل B مستني المثقاب", "Worker B waits for Drill", "a", "free", "running"),
-			ch12DeadlockFrame("العامل A أخد العربية", "Worker A takes Cart", "a", "a", "running"),
-			ch12DeadlockFrame("العامل A فتح القفلين", "Worker A releases both", "free", "free", "running"),
-			ch12DeadlockFrame("العامل B أخد المثقاب", "Worker B takes Drill", "b", "free", "running"),
-			ch12DeadlockFrame("العامل B أخد العربية", "Worker B takes Cart", "b", "b", "running"),
+			ch12DeadlockFrame("مفيش عامل ماسك lock", "No worker holds a lock", "free", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد الـlock بتاع المثقاب", "Worker A takes Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل B مستني الـlock بتاع المثقاب", "Worker B waits for Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد الـlock بتاع العربية", "Worker A takes Cart", "a", "a", "running"),
+			ch12DeadlockFrame("العامل A فكّ الـlocks الاتنين", "Worker A releases both", "free", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد الـlock بتاع المثقاب", "Worker B takes Drill", "b", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد الـlock بتاع العربية", "Worker B takes Cart", "b", "b", "running"),
 			ch12DeadlockFrame("العاملين خلصوا", "Both workers finish", "free", "free", "done"),
 		}},
 		map[string]any{"name": ch12Copy("B يدخل الأول", "B enters first"), "events": []any{
-			ch12DeadlockFrame("مفيش عامل ماسك قفل", "No worker holds a lock", "free", "free", "running"),
-			ch12DeadlockFrame("العامل B أخد المثقاب", "Worker B takes Drill", "b", "free", "running"),
-			ch12DeadlockFrame("العامل A مستني المثقاب", "Worker A waits for Drill", "b", "free", "running"),
-			ch12DeadlockFrame("العامل B أخد العربية", "Worker B takes Cart", "b", "b", "running"),
-			ch12DeadlockFrame("العامل B فتح القفلين", "Worker B releases both", "free", "free", "running"),
-			ch12DeadlockFrame("العامل A أخد المثقاب", "Worker A takes Drill", "a", "free", "running"),
-			ch12DeadlockFrame("العامل A أخد العربية", "Worker A takes Cart", "a", "a", "running"),
+			ch12DeadlockFrame("مفيش عامل ماسك lock", "No worker holds a lock", "free", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد الـlock بتاع المثقاب", "Worker B takes Drill", "b", "free", "running"),
+			ch12DeadlockFrame("العامل A مستني الـlock بتاع المثقاب", "Worker A waits for Drill", "b", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد الـlock بتاع العربية", "Worker B takes Cart", "b", "b", "running"),
+			ch12DeadlockFrame("العامل B فكّ الـlocks الاتنين", "Worker B releases both", "free", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد الـlock بتاع المثقاب", "Worker A takes Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد الـlock بتاع العربية", "Worker A takes Cart", "a", "a", "running"),
 			ch12DeadlockFrame("العاملين خلصوا", "Both workers finish", "free", "free", "done"),
 		}},
 	},
@@ -232,7 +232,7 @@ var ch12Lesson121Arabic = []LessonStep{
 		ID: "c121.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{{
 			ID: "c121.idea", Kind: "markdown",
-			Text: "تخيّل ~total~ لوحة واحدة. كل تحديث يقرأها، يزوّدها، ثم يكتبها.\n\nلو التحديثات اتداخلت، ممكن قيمة تضيع؛ النتيجة الصح بالصدفة مش ضمان.\n\nMutex مشترك يسمح لواحد بس يدخل الجزء المحمي.\n~WaitGroup~ يستنى الشغل، لكنه مش بيحمي المتغير.",
+			Text: "تخيّل ~total~ لوحة واحدة. كل تحديث بيقراها، يزوّدها، ثم بيكتبها.\n\nلو التحديثات اتداخلت، ممكن الـvalue تضيع؛ النتيجة الصح بالصدفة مش ضمان.\n\nالـmutex المشتركة بتخلي goroutine واحدة بس تمسك الـlock في المرة.\n~WaitGroup~ يستنى الشغل، لكنه مش بيحمي المتغير.",
 		}},
 	},
 	{
@@ -240,22 +240,22 @@ var ch12Lesson121Arabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{
 				ID: "c121.predict", Kind: "question",
-				Text: "المثال يضيف 2 و3 تحت قفل واحد. إيه اللي يطبع؟",
+				Text: "المثال بيضيف 2 و3 تحت نفس الـlock. إيه اللي بيطبع؟",
 				Question: &LessonQuestion{
 					Options: []string{"5", "2", "النتيجة ممكن تتغير"}, Answer: 0,
 					Feedback: []string{
 						"التحديثين بيتجمعوا؛ ترتيبهم مش بيغيّر المجموع.",
 						"ده أول تحديث لوحده؛ العامل التاني كمان بيضيف.",
-						"الترتيب مش مضمون، لكن كل تحديث محمي بالقفل.",
+						"الترتيب مش مضمون، لكن كل update محمي بالـlock.",
 					},
 				},
 			},
 			{
 				ID: "c121.counter-trace", Kind: "walkthrough",
-				Text: "ده ترتيب واحد ممكن: 2 يدخل الأول. Go مش بتضمن مين يمسك القفل أولاً.",
+				Text: "ده ترتيب واحد ممكن: 2 يدخل الأول. Go مش بتضمن مين يمسك الـlock الأول.",
 				Code: ch12CounterExample, Imports: []string{"fmt", "sync"}, ExampleID: "e121-counter",
 				Walkthrough: ch12CounterTrace([]string{
-					"قبل التشغيل.", "الإجمالي يبدأ صفر.", "ترتيب ممكن: n=2 يمسك القفل.", "defer هيفتحه عند الخروج.", "الإجمالي صار 2.", "الرجوع يفتح القفل.", "بعده n=3 يدخل.", "الإجمالي صار 5.", "العمال خلصوا.", "يطبع 5.",
+					"قبل التشغيل.", "الإجمالي بيبدأ بصفر.", "ترتيب ممكن: n=2 يمسك الـlock.", "defer هيفك الـlock لما الـfunction تخلص.", "الإجمالي بقى 2.", "الـreturn بيفك الـlock.", "بعده n=3 يدخل.", "الإجمالي بقى 5.", "العمال خلصوا.", "بيطبع 5.",
 				}),
 			},
 			{ID: "c121.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch12-shared-counter", Config: ch12CounterSandboxConfig}},
@@ -265,7 +265,7 @@ var ch12Lesson121Arabic = []LessonStep{
 		ID: "c121.watch-step", Title: "خد بالك",
 		Blocks: []LessonBlock{{
 			ID: "c121.watch", Kind: "markdown",
-			Text: "القفل لازم يبقى هو نفسه عند كل العاملين.\n\nخلي الجزء بين ~Lock~ و~Unlock~ صغير؛ حرّره حتى لو الدالة خرجت.\n\nRace detector ممكن يكشف السباق حتى لو الإجمالي ظهر صح.",
+			Text: "لازم كل العاملين يستخدموا نفس الـmutex.\n\nخلي الجزء بين ~Lock~ و~Unlock~ صغير؛ استخدم defer علشان تفك الـlock حتى لو الـfunction خلصت.\n\nRace detector ممكن يكشف الـrace حتى لو الإجمالي ظهر صح.",
 		}},
 	},
 	{
@@ -275,17 +275,17 @@ var ch12Lesson121Arabic = []LessonStep{
 			{
 				ID: "c121.wait-question", Kind: "question", Text: "هل ~wg.Wait()~ بيحمي total أثناء تحديثه؟",
 				Question: &LessonQuestion{Options: []string{"أيوه", "لأ", "بس لو عامل واحد"}, Answer: 1, Feedback: []string{
-					"الانتظار مش قفل؛ ممكن العمال يكتبوا في نفس الوقت.",
-					"صح، Wait يستنى النهاية بس؛ القفل يحمي الكتابة.",
-					"عدد العمال مش بيحوّل الانتظار لقفل.",
+					"الانتظار مش lock؛ ممكن العمال يكتبوا في نفس الوقت.",
+					"صح، Wait بيستنى النهاية بس؛ الـlock بيحمي الكتابة.",
+					"عدد العمال مش بيحوّل الانتظار لـlock.",
 				}},
 			},
 			{
 				ID: "c121.lock-question", Kind: "question", Text: "أنهي اختيار يحمي كل تحديثات الإجمالي؟",
-				Question: &LessonQuestion{Options: []string{"نفس القفل المشترك", "قفل جديد لكل goroutine", "القفل بعد Wait"}, Answer: 0, Feedback: []string{
-					"كل كاتب لازم يتفق على نفس القفل.",
-					"أقفال مختلفة مش بتنسّق على نفس المتغير.",
-					"القفل بعد انتهاء الكتابة متأخر.",
+				Question: &LessonQuestion{Options: []string{"نفس الـmutex المشتركة", "الـmutex جديدة لكل goroutine", "الـlock بعد Wait"}, Answer: 0, Feedback: []string{
+					"لازم كل الكتّاب يستخدموا نفس الـmutex.",
+					"الـmutex المختلفة مش بتنسّق على نفس المتغير.",
+					"استخدام الـlock بعد ما الكتابة تخلص بيكون متأخر.",
 				}},
 			},
 		},
@@ -384,7 +384,7 @@ var ch12Lesson122Arabic = []LessonStep{
 		ID: "c122.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{{
 			ID: "c122.idea", Kind: "markdown",
-			Text: "الـmap المشتركة مش آمنة مع كتابات متزامنة.\n\nالنمط المعتاد: حط ~sync.Mutex~ جنب الـmap في ~Registry~.\nكل method بتوصل للبيانات تقفل نفس القفل؛ receiver من نوع ~*Registry~ ما ينسخش القفل.\n\nبعد ~wg.Wait()~، الكتابة خلصت؛ بعدها تقدر تقرأ السجل.",
+			Text: "الـmap المشتركة مش آمنة مع كتابات متزامنة.\n\nالنمط المعتاد: حط ~sync.Mutex~ جنب الـmap في ~Registry~.\nكل method بتوصل للبيانات بتعمل lock على نفس الـmutex؛ الـreceiver من نوع ~*Registry~ ما بينسخش الـmutex.\n\nبعد ~wg.Wait()~، الكتابة خلصت؛ بعدها تقدر تقرا الـmap.",
 		}},
 	},
 	{
@@ -392,19 +392,19 @@ var ch12Lesson122Arabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{
 				ID: "c122.predict", Kind: "question",
-				Text: "السجل التجريبي يضيف مفتاحين. إيه اللي يطبع؟",
+				Text: "الـmap التجريبية بتضيف keys. إيه اللي بيطبع؟",
 				Question: &LessonQuestion{Options: []string{"2 7", "2 4", "7 2"}, Answer: 0, Feedback: []string{
-					"فيه مفتاحين، وقيمة violet هي 7.",
-					"المفتاحين موجودين؛ راجع القيمة المرتبطة بـviolet.",
-					"البرنامج يطبع عدد المفاتيح قبل قيمة violet.",
+					"فيه keys، والـvalue المرتبطة بـviolet هي 7.",
+					"الـkeys موجودين؛ راجع الـvalue المرتبطة بـviolet.",
+					"البرنامج بيطبع عدد الـkeys قبل الـvalue بتاعة violet.",
 				}},
 			},
 			{
 				ID: "c122.registry-trace", Kind: "walkthrough",
-				Text: "مفاتيح توضيحية، مش بيانات المهمة. ده ترتيب واحد ممكن للكتابتين.",
+				Text: "الـkeys للتوضيح، مش بيانات المهمة. ده ترتيب واحد ممكن للكتابتين.",
 				Code: ch12RegistryExample, Imports: []string{"fmt", "sync"}, ExampleID: "e122-registry",
 				Walkthrough: ch12RegistryTrace([]string{
-					"قبل التشغيل.", "السجل فاضي.", "عامل amber مسك القفل.", "اتسجلت قيمته.", "violet مسك القفل بعده.", "بعده اتسجل violet.", "كل الكتّاب خلصوا.", "يطبع 2 7.",
+					"قبل التشغيل.", "الـmap فاضية.", "عامل amber عمل lock.", "اتسجلت الـvalue بتاعته.", "violet عمل lock بعده.", "بعده اتسجل violet.", "كل الكتّاب خلصوا.", "بيطبع 2 7.",
 				}),
 			},
 			{ID: "c122.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch12-registry-lock", Config: ch12RegistrySandboxConfig}},
@@ -414,7 +414,7 @@ var ch12Lesson122Arabic = []LessonStep{
 		ID: "c122.watch-step", Title: "خد بالك",
 		Blocks: []LessonBlock{{
 			ID: "c122.watch", Kind: "markdown",
-			Text: "كل وصول متزامن لنفس الـmap يستخدم نفس القفل.\n\n~Record~ يقفل الكتابة؛ method قراءة تحتاج حماية لو العمال لسه شغالين.\n\nبعد ~Wait~، مفيش عامل بيكتب، فاقرأ بعدها.",
+			Text: "كل وصول متزامن لنفس الـmap بيستخدم نفس الـmutex.\n\n~Record~ بتعمل lock قبل الكتابة؛ وmethod بتقرا محتاجة حماية لو العمال لسه شغالين.\n\nبعد ~Wait~، مفيش عامل بيكتب، فاقرا بعدها.",
 		}},
 	},
 	{
@@ -422,19 +422,19 @@ var ch12Lesson122Arabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{ID: "c122.plan", Kind: "markdown", Text: "الخطة: سجل بأمان → استنى الكل → دور على الموقع → ابعته."},
 			{
-				ID: "c122.lock-question", Kind: "question", Text: "لو كل goroutine معاها قفل لوحدها، هل تحمي map واحدة؟",
+				ID: "c122.lock-question", Kind: "question", Text: "لو كل goroutine معاها lock لوحدها، هل تحمي map واحدة؟",
 				Question: &LessonQuestion{Options: []string{"أيوه", "لأ", "بس وقت القراءة"}, Answer: 1, Feedback: []string{
-					"الأقفال المختلفة مش بتنسّق على نفس البيانات.",
-					"صح، كل الكتاب لازم يستخدموا mutex مشتركة.",
-					"قفل القراءة لوحده مش يحمي كتابات الأقفال التانية.",
+					"الـlocks المختلفة مش بتنسّق على نفس البيانات.",
+					"صح، لازم كل الكتّاب يستخدموا الـmutex المشتركة.",
+					"الـlock الخاص بالقراية لوحده مش بيحمي الكتابة اللي بتحصل تحت الـlocks التانية.",
 				}},
 			},
 			{
-				ID: "c122.wait-question", Kind: "question", Text: "بعد ما ~wg.Wait()~ يرجع، هل القراءة آمنة؟",
-				Question: &LessonQuestion{Options: []string{"أيوه، لو مفيش كاتب تاني", "لأ، map لا تُقرأ", "بس بقفل مختلف"}, Answer: 0, Feedback: []string{
+				ID: "c122.wait-question", Kind: "question", Text: "بعد ما ~wg.Wait()~ يخلص، هل القراءة آمنة؟",
+				Question: &LessonQuestion{Options: []string{"أيوه، لو مفيش كاتب تاني", "لأ، الـmap ما بتتقراش", "بس لو كل واحد استخدم lock مختلفة"}, Answer: 0, Feedback: []string{
 					"صح، الانتظار خلّص كل الكتّاب؛ مفيش كتابة متزامنة.",
-					"ممكن تقرأ بعد انتهاء الكتابة المتزامنة.",
-					"قفل مختلف مش مطلوب لما الكتّاب خلصوا.",
+					"ممكن تقرا بعد ما الكتابة المتزامنة تخلص.",
+					"الـlock المختلف مش مطلوب لما الكتّاب يخلصوا.",
 				}},
 			},
 		},
@@ -523,14 +523,14 @@ var ch12Lesson123Arabic = []LessonStep{
 		ID: "c123.mission-step", Title: "المهمة",
 		Blocks: []LessonBlock{{
 			ID: "c123.mission", Kind: "markdown",
-			Text: "1. رجّع حركة الدرونات اللي وقفت.\n2. حلّ الـdeadlock بين قفلين.\n3. احصد الصفين.\n\nالـstarter فيه عاملين بيطلبوا المثقاب والعربية بترتيبين مختلفين.",
+			Text: "1. خلّي الدرونات اللي وقفت ترجع تتحرك.\n2. حلّ الـdeadlock بين الـlocks.\n3. احصد الصفين.\n\nالـstarter فيه عاملين بيطلبوا الـlock بتاع المثقاب والـlock بتاع العربية بترتيبين مختلفين.",
 		}},
 	},
 	{
 		ID: "c123.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{{
 			ID: "c123.idea", Kind: "markdown",
-			Text: "Deadlock دايرة انتظار: goroutine ماسكة قفل ومستنية قفل تاني.\n\nلو عاملين أخدوا القفلين بترتيب عكسي، ممكن كل واحد يستنى التاني.\n\nGo مش بتضمن مين يبدأ؛ ده سيناريو محتمل، مش نتيجة كل تشغيل.\n\nالقاعدة: اطلب الموارد بترتيب ثابت في كل المسارات.",
+			Text: "الـdeadlock دايرة انتظار: goroutine ماسكة lock ومستنية lock تاني.\n\nلو عاملين أخدوا الـlocks بترتيب عكسي، ممكن كل واحد يستنى التاني.\n\nGo مش بتضمن مين يبدأ؛ ده سيناريو محتمل، مش نتيجة كل تشغيل.\n\nالقاعدة: اطلب الموارد بنفس الترتيب في كل المسارات.",
 		}},
 	},
 	{
@@ -538,11 +538,11 @@ var ch12Lesson123Arabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{
 				ID: "c123.predict", Kind: "question",
-				Text: "العاملين بيطلبوا القفلين بنفس الترتيب. إيه اللي يطبع؟",
+				Text: "العاملين بيطلبوا الـlocks بنفس الترتيب. إيه اللي بيطبع؟",
 				Question: &LessonQuestion{Options: []string{"2", "1", "البرنامج يعلّق"}, Answer: 0, Feedback: []string{
-					"العاملين بينفذوا الزيادة؛ القفلين مش بيعملوا دورة انتظار.",
+					"العاملين بينفذوا الزيادة؛ الـlocks مش بيعملوا دورة انتظار.",
 					"كل عامل بيزود done مرة واحدة.",
-					"الترتيب موحد، فمش هتتكوّن دورة بين القفلين.",
+					"الترتيب واحد، فمش هتتكوّن دورة بين الـlocks.",
 				}},
 			},
 			{
@@ -550,7 +550,7 @@ var ch12Lesson123Arabic = []LessonStep{
 				Text: "ترتيب واحد ممكن: العامل الأول يخلص ثم الثاني. الناتج ثابت، والجدولة ممكن تختلف.",
 				Code: ch12DeadlockExample, Imports: []string{"fmt", "sync"}, ExampleID: "e123-lock-order",
 				Walkthrough: ch12DeadlockTrace([]string{
-					"قبل التشغيل.", "العداد يبدأ صفر.", "ترتيب ممكن: الأول يأخذ القفل.", "بعده يأخذ القفل التاني.", "العداد صار 1.", "يفتح القفل التاني.", "العامل التاني يدخل بعده.", "العداد صار 2.", "يطبع 2.",
+					"قبل التشغيل.", "العداد بيبدأ بصفر.", "ترتيب ممكن: الأول ياخد الـlock.", "بعده ياخد الـlock التاني.", "العداد بقى 1.", "بيفك الـlock التاني.", "العامل التاني يدخل بعده.", "العداد بقى 2.", "بيطبع 2.",
 				}),
 			},
 			{ID: "c123.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch12-deadlock-order", Config: ch12DeadlockSandboxConfig}},
@@ -560,23 +560,23 @@ var ch12Lesson123Arabic = []LessonStep{
 		ID: "c123.watch-step", Title: "خد بالك",
 		Blocks: []LessonBlock{{
 			ID: "c123.watch", Kind: "markdown",
-			Text: "~WaitGroup~ مش بيفك deadlock؛ هو بس يستنى النهاية.\n\nكل المسارات لازم تطلب الأقفال بنفس الترتيب.\n\nافتح الأقفال بعد الشغل المحمي وبالترتيب العكسي.",
+			Text: "~WaitGroup~ مش بيفك deadlock؛ هو بس يستنى النهاية.\n\nكل المسارات لازم تطلب الـlocks بنفس الترتيب.\n\nفكّ الـlocks بعد الشغل المحمي وبالترتيب العكسي.",
 		}},
 	},
 	{
 		ID: "c123.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			{ID: "c123.plan", Kind: "markdown", Text: "الخطة: حدد مين ماسك كل قفل → امنع دورة الانتظار → اختبر حصاد الصفين."},
+			{ID: "c123.plan", Kind: "markdown", Text: "الخطة: حدد مين ماسك كل lock → امنع دورة الانتظار → اختبر حصاد الصفين."},
 			{
-				ID: "c123.order-question", Kind: "question", Text: "إيه اللي يمنع دورة انتظار بين قفلين؟",
-				Question: &LessonQuestion{Options: []string{"ترتيب ثابت واحد", "ترتيب مختلف لكل عامل", "WaitGroup إضافية"}, Answer: 0, Feedback: []string{
-					"الترتيب الموحد يمنع اختلاف ترتيب الطلب.",
+				ID: "c123.order-question", Kind: "question", Text: "إيه اللي يمنع دورة انتظار بين locks؟",
+				Question: &LessonQuestion{Options: []string{"ترتيب واحد ثابت", "ترتيب مختلف لكل عامل", "WaitGroup زيادة"}, Answer: 0, Feedback: []string{
+					"الترتيب الواحد يمنع اختلاف ترتيب الطلب.",
 					"الاختلاف ممكن يعمل دورة انتظار.",
-					"WaitGroup تستنى؛ مش بتغيّر ترتيب الأقفال.",
+					"WaitGroup بتستنى؛ مش بتغيّر ترتيب الـlocks.",
 				}},
 			},
 			{
-				ID: "c123.schedule-question", Kind: "question", Text: "هل Go تضمن مين يبدأ في الـwalkthrough؟",
+				ID: "c123.schedule-question", Kind: "question", Text: "هل Go بتضمن مين يبدأ في الـwalkthrough؟",
 				Question: &LessonQuestion{Options: []string{"لأ، ده ترتيب واحد ممكن", "أيوه، العامل الأول دايماً", "WaitGroup بترتبهم"}, Answer: 0, Feedback: []string{
 					"صح، goroutines ممكن تتجدول بترتيبات مختلفة.",
 					"ترتيب البدء مش مضمون من Go.",
