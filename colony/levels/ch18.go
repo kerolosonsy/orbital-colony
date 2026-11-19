@@ -3,7 +3,7 @@ package levels
 import "orbital/colony/i18n"
 
 func init() {
-	add(&Level{ID: "18-1-mission-log", Chapter: 18, Kind: "lab", Title: "سجل المهام", Goal: "اختبر سجل طلعات بهوية ثابتة وترتيب مستقر",
+	add(&Level{ID: "18-1-mission-log", Chapter: 18, LessonRevision: 1, Steps: ch18MissionLogArabic, Kind: "lab", Title: "سجل المهام", Goal: "اختبر سجل طلعات بهوية ثابتة وترتيب مستقر",
 		Requires: []string{"tabletest"}, Bridge: []int{16}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: missionLogImplementation, ReadOnly: true}, {Name: "main_test.go", Starter: missionLogTestStarter}},
 		Lesson: `# سجل مش بيتلخبط
 
@@ -64,8 +64,8 @@ if len(log.Entries())==2 { return } // العدد مش بيثبت IDs ولا ا�
 ~Seal(id int) error~ تختم الموجود؛ تكرار الختم نجاح من غير تغيير إضافي. ~Erase(id int) error~ تحذف الموجود بس وتحافظ على ترتيب الباقي. أي ID مش موجود، بما فيه صفر والسالب، يرجّع خطأ من غير تعديل. ~Entries() []MissionEntry~ لقطة مستقلة بترتيب ID تصاعدي؛ الفاضي طوله صفر.
 
 غطّي الفاضي، trimming، الإضافة، الختم المتكرر، حذف الأول والوسط والآخر، ID بعد الحذف، الأخطاء من غير تغيير، واستقلال لقطة العرض. لازم تمسك الأربع mutants: إعادة ID، ختم ضايع، حذف غلط، ولقطة مشتركة. مفيش Report ولا تزامن ولا I/O في العقد.
-`, Hints: []string{"اعمل جدول لحذف أول ووسط وآخر سجل، مع سجل جديد لكل حالة.", "بعد حذف ID 3، الإضافة اللي بعدها لازم تطلع 4، مش 3.", "افحص الختم والقيم والترتيب مش العدد بس؛ عدّل لقطة Entries وتأكد إن الأصل ثابت."},
-		En: &LevelText{Title: "Mission Log", Goal: "Test a flight log with stable identities and order", Files: []LabFile{{Name: "main.go", Starter: missionLogImplementation, ReadOnly: true}, {Name: "main_test.go", Starter: missionLogTestStarter}},
+`, Hints: []string{"هوية السجل بتفضل مرتبطة بالـID حتى لو ترتيب العناصر اتغير.", "افصل بيانات السيناريو عن خطوات الفحص المشتركة في subtests.", "في ~main_test.go~، قارن لقطة ~Entries~ قبل العملية وبعدها."},
+		En: &LevelText{LessonRevision: 1, Steps: ch18MissionLogEnglish, Title: "Mission Log", Goal: "Test a flight log with stable identities and order", Files: []LabFile{{Name: "main.go", Starter: missionLogImplementation, ReadOnly: true}, {Name: "main_test.go", Starter: missionLogTestStarter}},
 			Lesson: `# A Log That Keeps Its Identity
 
 Mission control needs an in-memory flight log. Its implementation is supplied and correct. Write table-driven tests proving that a flight's identity is independent of its current slice position. Deleting a flight must never recycle its ID.
@@ -125,7 +125,7 @@ Edit only ~main_test.go~; ~main.go~ is read-only. Write table-driven tests with 
 ~Seal(id int) error~ seals an existing entry; repeated sealing succeeds without further change. ~Erase(id int) error~ removes only that entry, retaining survivor order. Every absent ID, including zero and negatives, returns an error without mutation. ~Entries() []MissionEntry~ returns an independent snapshot in ascending ID order; an empty log has length zero.
 
 Cover empty state, trimming, addition, repeated sealing, head/middle/tail deletion, IDs after deletion, unchanged state on errors, and independent snapshots. Kill all four mutants: recycled ID, lost seal, wrong deletion, and shared snapshot. There is no Report, concurrency, or I/O in this contract.
-`, Hints: []string{"Table-drive head, middle, and tail deletion with a fresh log per case.", "After deleting ID 3, the next addition must issue 4, not 3.", "Assert seals, values, and order rather than count alone; edit an Entries snapshot and verify the log is intact."}},
+`, Hints: []string{"A log identity stays attached to its ID when item positions change.", "Separate scenario data from shared checks in subtests.", "In ~main_test.go~, compare an ~Entries~ snapshot before and after an operation."}},
 		Lab: &Lab{ReqFile: "main_test.go", Hidden: missionLogHidden, Mutants: []Mutant{
 			{Desc: i18n.T("إعادة استخدام ID", "Recycled ID"), Code: mutate(missionLogImplementation, "m.issued++", "m.issued = len(m.entries)+1")},
 			{Desc: i18n.T("الختم ضاع", "Lost seal"), Code: mutate(missionLogImplementation, "m.entries[i].Sealed = true", "m.entries[i].Sealed = false")},
@@ -133,7 +133,7 @@ Cover empty state, trimming, addition, repeated sealing, head/middle/tail deleti
 			{Desc: i18n.T("لقطة مشتركة", "Shared snapshot"), Code: mutate(missionLogImplementation, "return append([]MissionEntry(nil), m.entries...)", "return m.entries")},
 		}},
 	})
-	add(&Level{ID: "18-2-black-box", Chapter: 18, Kind: "lab", Title: "الصندوق الأسود", Goal: "احفظ واقرأ بيانات الصندوق الأسود بصيغة JSON من غير ضياع دليل العطل",
+	add(&Level{ID: "18-2-black-box", Chapter: 18, LessonRevision: 1, Steps: ch18BlackBoxArabic, Kind: "lab", Title: "الصندوق الأسود", Goal: "احفظ واقرأ بيانات الصندوق الأسود بصيغة JSON من غير ضياع دليل العطل",
 		Requires: []string{"sel:json.Unmarshal"}, Bridge: []int{17}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: blackBoxStarter}},
 		Lesson: `# الصندوق الأسود مش مجرد نص
 
@@ -197,8 +197,8 @@ os.WriteFile(path,[]byte("{}"),0600) // مسح دليل العطل كعلاج ل
 نفّذ ~WriteBlackBox(path string, box BlackBox) error~ و~ReadBlackBox(path string) (BlackBox,error)~. ~BlackBox~ فيها ~Cycle int~ بـ tag ~json:"cycle"~ و~Callsigns []string~ بـ tag ~json:"callsigns"~. Cycle لازم موجب؛ Callsigns لازم مش nil، ومسموح فاضية. كل اسم لازم TrimSpace بتاعه مش فاضي، بس احفظ الاسم الأصلي بالمسافات والترتيب والتكرار.
 
 الكتابة تتحقق الأول ثم تحفظ JSON بالحقلين الاتنين؛ القراية تفك JSON وتتحقق وترجع نفس القيم. الحقول المجهولة تتجاهلها. ملف ناقص، فاضي، بايظ، نوع غلط، schema ناقصة أو غير صالحة: رجّع ~BlackBox{}~ وخطأ واضح فيه المسار ومرحلة read أو decode أو validate؛ أخطاء نظام الملفات تحتفظ بسببها بـ %w. القراية عمرها ما تكتب. فشل validation قبل الحفظ يسيب الملف زي ما هو؛ فشل الكتابة يرجع خطأ. مش مطلوب atomic rename أو استرجاع بعد انقطاع كهربا. مفيش Report؛ التستات بتستخدم ملفات مؤقتة.
-`, Hints: []string{"ابدأ بالـ tags وبعدها Marshal وUnmarshal؛ افصل التحقق عن القراءة والكتابة.", "Cycle>0 وCallsigns!=nil بيفرقوا schema ناقصة عن قائمة فاضية صالحة.", "تحقق قبل WriteFile؛ لف أخطاء القراية وفك الترميز بالمسار و%w، ومتكتبش من ReadBlackBox."},
-		En: &LevelText{Title: "Black Box", Goal: "Save and load black-box JSON without destroying failure evidence", Files: []LabFile{{Name: "main.go", Starter: blackBoxStarter}},
+`, Hints: []string{"فك JSON بيشرح الصيغة؛ validation بتراجع معنى البيانات.", "قسّم الشغل لمراحل مستقلة للتحقق والقراءة والكتابة.", "راجع الـpointer في ~Unmarshal~ ورسالة الخطأ اللي فيها المسار."},
+		En: &LevelText{LessonRevision: 1, Steps: ch18BlackBoxEnglish, Title: "Black Box", Goal: "Save and load black-box JSON without destroying failure evidence", Files: []LabFile{{Name: "main.go", Starter: blackBoxStarter}},
 			Lesson: `# The Black Box Is More Than Text
 
 The flights have ended. Preserve device callsigns together with the operating cycle. JSON has data types and field names; text that merely resembles JSON is not necessarily valid data.
@@ -261,10 +261,10 @@ Check every error before using its output. Validate the schema before writing so
 Implement ~WriteBlackBox(path string, box BlackBox) error~ and ~ReadBlackBox(path string) (BlackBox,error)~. ~BlackBox~ contains ~Cycle int~ tagged ~json:"cycle"~ and ~Callsigns []string~ tagged ~json:"callsigns"~. Cycle must be positive. Callsigns must be non-nil but may be empty. Every callsign must be nonblank after TrimSpace; preserve the original strings, spaces, order, and duplicates.
 
 Validate before writing JSON with both fields. Reading decodes and validates, returning the same values. Ignore unknown fields. Missing, empty, malformed, wrongly typed, incomplete, or invalid files return ~BlackBox{}~ and a clear error containing the path and read, decode, or validate stage. Preserve filesystem error causes with %w. Reading never writes. Failed save validation leaves the file unchanged; write failures return errors. Atomic rename and power-loss recovery are outside this contract. No Report is needed; tests use temporary files.
-`, Hints: []string{"Start with tags, then Marshal and Unmarshal; separate validation from reading and writing.", "Cycle>0 and Callsigns!=nil distinguish missing schema from a valid empty list.", "Validate before WriteFile; wrap read/decode failures with path and %w, and never write from ReadBlackBox."}},
+`, Hints: []string{"Decoding JSON explains its syntax; validation checks the data's meaning.", "Separate the validation, read, and write stages.", "Check the ~Unmarshal~ pointer and the path in each error."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: blackBoxHidden},
 	})
-	add(&Level{ID: "18-3-cargo-manifest", Chapter: 18, Kind: "lab", Title: "بيان الشحنة", Goal: "اقرأ CSV الشحنة واجمع الكميات من غير بلع صف بايظ",
+	add(&Level{ID: "18-3-cargo-manifest", Chapter: 18, LessonRevision: 1, Steps: ch18CargoArabic, Kind: "lab", Title: "بيان الشحنة", Goal: "اقرأ CSV الشحنة واجمع الكميات من غير بلع صف بايظ",
 		Requires: []string{"sel:csv.NewReader"}, Bridge: []int{18}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: cargoManifestStarter}},
 		Lesson: `# الصناديق اللي جواها فاصلة
 
@@ -329,8 +329,8 @@ units,_:=strconv.Atoi(fields[2]) // النص البايظ يتحسب صفر با
 كل record بيانات لازم 3 حقول: id يقبله Atoi وغير سالب؛ callsign بعد TrimSpace مش فاضي؛ cargo يقبله Atoi من 0 لـ1000000 شامل. تكرار IDs مسموح لأنها أرقام محلية لمصدر الشحنة. اجمع عدد records في Rows، وكل cargo في Units، ولكل اسم في ByCallsign. المدخل الصالح أقصى 100000 record بيانات عشان مجموع int يفضل آمن. متخزّنش الصفوف كلها.
 
 أي schema أو quoting أو field count أو قيمة بايظة، وأي خطأ قراية، يرجّع ~CargoTotals{}~ وخطأ. خطأ البيانات يحتوي ~record N~ بالرقم المنطقي بداية من 2؛ احتفظ بأسباب أخطاء المكتبة. اقبل quoted commas وescaped quotes وCRLF وآخر record من غير newline؛ اتجاهل السطور الفاضية زي csv.Reader. النجمة التالتة: quoted field متعدد السطور، حتى لو المصدر بيبعت بايت واحد في كل Read. مفيش Report ولا ملفات قرص.
-`, Hints: []string{"اقرأ header بـ csv.Reader قبل الحلقة، وافحصه بالظبط.", "Read بترجع EOF للنهاية؛ أي خطأ تاني يبطل التقرير كله.", "اجمع حسب TrimSpace للاسم؛ خلي رقم record يزيد لكل Read ناجحة مش لكل newline."},
-		En: &LevelText{Title: "Cargo Manifest", Goal: "Read cargo CSV and aggregate units without swallowing broken records", Files: []LabFile{{Name: "main.go", Starter: cargoManifestStarter}},
+`, Hints: []string{"record في CSV مش لازم تطابق سطر ظاهر بسبب quotes.", "ابدأ بالـheader وخلي القراءة تتقدم record record.", "راجع ~Reader.Read~ وميّز ~io.EOF~ عن أي خطأ تاني."},
+		En: &LevelText{LessonRevision: 1, Steps: ch18CargoEnglish, Title: "Cargo Manifest", Goal: "Read cargo CSV and aggregate units without swallowing broken records", Files: []LabFile{{Name: "main.go", Starter: cargoManifestStarter}},
 			Lesson: `# Crates With Commas Inside
 
 The dock sends a CSV cargo manifest. A callsign can contain a comma or quote, so splitting on commas is not a parser. The library handles syntax; you own the schema and totals.
@@ -394,10 +394,10 @@ Implement ~ReadManifest(in io.Reader) (CargoTotals,error)~. ~CargoTotals~ contai
 Every data record has three fields: id accepted by Atoi and nonnegative; a nonblank trimmed callsign; and cargo accepted by Atoi in the inclusive range 0 through 1000000. Duplicate IDs are allowed because they are local numbers from shipment sources. Count records in Rows, all cargo in Units, and cargo per normalized callsign in ByCallsign. Valid input contains at most 100000 data records so int totals remain safe. Do not retain all rows.
 
 Any schema, quoting, field-count, value, or read failure returns ~CargoTotals{}~ and an error. Data errors contain ~record N~, counting logical records from 2; preserve library error causes. Accept quoted commas, escaped quotes, CRLF, and a final unterminated record. Skip completely empty lines as csv.Reader does. The third star covers multiline quoted fields, even when input arrives one byte per Read. No Report or disk files are involved.
-`, Hints: []string{"Read and check the exact header using csv.Reader before looping.", "Read returns EOF for completion; every other error invalidates the entire report.", "Aggregate by trimmed callsign; increment record number per successful Read, not per newline."}},
+`, Hints: []string{"A CSV record may not match one visible line because of quotes.", "Start with the header, then read one record at a time.", "Check ~Reader.Read~ and distinguish ~io.EOF~ from other errors."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: cargoManifestHidden, Bonus: true},
 	})
-	add(&Level{ID: "18-4-signal-words", Chapter: 18, Kind: "lab", Title: "كلمات الإشارة", Goal: "رتّب كلمات الراديو بالتكرار مع Unicode وتعادل حتمي",
+	add(&Level{ID: "18-4-signal-words", Chapter: 18, LessonRevision: 1, Steps: ch18SignalArabic, Kind: "lab", Title: "كلمات الإشارة", Goal: "رتّب كلمات الراديو بالتكرار مع Unicode وتعادل حتمي",
 		Requires: []string{"map", "sel:bufio.Scanner"}, Bridge: []int{19}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: signalWordsStarter}},
 		Lesson: `# الإشارة المتكررة تستاهل اهتمام
 
@@ -461,8 +461,8 @@ strings.Fields("ice,ice") // كلمة واحدة فيها فاصلة، مش كل
 نفّذ ~TopSignals(in io.Reader, limit int) ([]WordCount,error)~؛ ~WordCount~ فيها ~Word string~ و~Count int~. الكلمة سلسلة متصلة من Unicode letters أو digits؛ كل حاجة تانية فاصل، بما فيها hyphen وapostrophe وemoji. طبّق ToLower؛ عدّ التكرار، ورتّب Count تنازلي ثم Word تصاعدي بترتيب Go، ورجّع أول limit أو كل المتاح لو أقل.
 
 الفاضي أو الترقيم بس يرجّع طول صفر,nil. limit سالب يرجّع nil,error؛ صفر يرجّع nil,nil من غير قراية المصدر. كل سطر محتواه لحد 1 MiB شامل، من غير LF أو CRLF؛ اقبل عند الحد حتى من غير newline. الأكبر أو أي خطأ قراية يرجّع nil,error، من غير تقرير جزئي أو truncation. استخدم Scanner وmap؛ النص ممكن كبير ومتقسم على Read صغيرة. مفيش Report.
-`, Hints: []string{"اقرأ بسطر Scanner؛ FieldsFunc تفصل على أي rune مش حرف ولا رقم.", "ToLower قبل العد؛ حوّل map لـ slice ورتّب العدد ثم الكلمة.", "وسّع Buffer قبل Scan مع مساحة نهاية السطر وافحص الطول وErr؛ فشل المصدر يرجع nil."},
-		En: &LevelText{Title: "Signal Words", Goal: "Rank radio words by frequency with Unicode and deterministic ties", Files: []LabFile{{Name: "main.go", Starter: signalWordsStarter}},
+`, Hints: []string{"النص مع Unicode بيتقسّم على runes، مش bytes.", "افصل tokenizing عن العد وعن ترتيب النتائج.", "راجع شرط ~FieldsFunc~ و~Scanner.Buffer~ قبل أول ~Scan~."},
+		En: &LevelText{LessonRevision: 1, Steps: ch18SignalEnglish, Title: "Signal Words", Goal: "Rank radio words by frequency with Unicode and deterministic ties", Files: []LabFile{{Name: "main.go", Starter: signalWordsStarter}},
 			Lesson: `# Repeated Signals Deserve Attention
 
 The colony antenna received a large text stream. Find the most frequent words, rather than the earliest words received. Results must remain stable even when map iteration order changes.
@@ -525,10 +525,10 @@ Do not retain punctuation inside words or truncate before sorting the full dicti
 Implement ~TopSignals(in io.Reader, limit int) ([]WordCount,error)~. ~WordCount~ contains ~Word string~ and ~Count int~. Words are maximal runs of Unicode letters or digits. Everything else separates them, including hyphens, apostrophes, and emoji. Apply ToLower, count occurrences, sort by descending Count then ascending Word using Go string order, and return at most limit entries.
 
 Empty or punctuation-only input returns length zero,nil. Negative limit returns nil,error. Zero limit returns nil,nil without reading input. Each line may contain at most 1 MiB inclusive, excluding LF or CRLF; accept the exact boundary with or without a terminator. Longer lines and any read failure return nil,error, without partial results or truncation. Use Scanner and a map; large input may arrive across tiny Reads. No Report is needed.
-`, Hints: []string{"Scan lines; FieldsFunc separates on every rune that is neither a letter nor a digit.", "Lowercase before counting, collect the map into a slice, and sort by count then word.", "Increase Buffer before Scan with terminator headroom; check content length and Err, returning nil on source failure."}},
+`, Hints: []string{"Unicode text is split by runes, not bytes.", "Separate tokenizing, counting, and result ordering.", "Review the ~FieldsFunc~ predicate and ~Scanner.Buffer~ before the first ~Scan~."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: signalWordsHidden},
 	})
-	add(&Level{ID: "18-5-flight-recorder", Chapter: 18, Kind: "lab", Title: "مسجّل الرحلة", Goal: "حلّل سيل الرحلة وميّز السطر البايظ عن فشل النقل",
+	add(&Level{ID: "18-5-flight-recorder", Chapter: 18, LessonRevision: 1, Steps: ch18RecorderArabic, Kind: "lab", Title: "مسجّل الرحلة", Goal: "حلّل سيل الرحلة وميّز السطر البايظ عن فشل النقل",
 		Requires: []string{"sel:bufio.Scanner", "struct"}, Bridge: []int{21}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: flightRecorderStarter}},
 		Lesson: `# مسجّل الرحلة بيسمع لحد الآخر
 
@@ -596,8 +596,8 @@ for scanner.Scan() {} // ضيّع أرقام السطور وبلع scanner.Err
 زوّد counter المستوى لكل سطر صالح. أي سطر تاني، بما فيه الفاضي أو leading whitespace أو level مجهول، ضيف رقمه 1-based لـ BadLines وكمّل. EOF نجاح؛ الفاضي ملخص أصفار. اقبل CRLF وآخر سطر من غير terminator.
 
 أكبر محتوى سطر 256 KiB شامل، من غير LF أو CRLF؛ الأكبر خطأ هيكلي، مش diagnostic. أي خطأ قراية أو حد حجم يرجّع ~FlightSummary{}~,error مع الاحتفاظ بسبب خطأ المصدر. اختبارات النجاح الأساسية تستخدم سطور لحد 4 KiB؛ النجمة التالتة لقبول سطور أطول من حد Scanner الافتراضي، لحد 256 KiB بالظبط. استخدم Scanner وstruct، ومتحتفظش بكل السطور. مفيش Report.
-`, Hints: []string{"عدّ السطور من 1 من غير الاعتماد على sequence؛ SplitN بحد 3 تحفظ الرسالة.", "السطر البايظ يضيف رقمه وبس، لكن scanner.Err يبطل الملخص كله.", "للنجمة التالتة وسّع Buffer لحد 256 KiB مع مساحة CRLF وافحص حجم المحتوى بنفسك."},
-		En: &LevelText{Title: "Flight Recorder", Goal: "Analyze flight streams and distinguish bad records from transport failure", Files: []LabFile{{Name: "main.go", Starter: flightRecorderStarter}},
+`, Hints: []string{"record malformed مش معناها إن مصدر القراءة كله فشل.", "افصل عدّ records وتشخيصها عن حالة الـscanner.", "راجع ~SplitN~ للرسالة و~Scanner.Err~ بعد آخر سطر."},
+		En: &LevelText{LessonRevision: 1, Steps: ch18RecorderEnglish, Title: "Flight Recorder", Goal: "Analyze flight streams and distinguish bad records from transport failure", Files: []LabFile{{Name: "main.go", Starter: flightRecorderStarter}},
 			Lesson: `# The Flight Recorder Listens to the End
 
 Flight data arrives as a stream of lines in the colony's telemetry format. A malformed record should retain its location and allow processing to continue. A broken input wire invalidates the whole report. These are two distinct failure policies.
@@ -664,10 +664,10 @@ Implement ~ReadFlight(in io.Reader) (FlightSummary,error)~. ~FlightSummary~ cont
 Increment the matching counter for valid lines. For every other line, including blank lines, leading whitespace, and unknown levels, append its 1-based line number to BadLines and continue. EOF succeeds; empty input returns zero counters. Accept CRLF and a final line without a terminator.
 
 Maximum content length is 256 KiB inclusive, excluding LF or CRLF. Longer lines are structural errors, not diagnostics. Any read or size failure returns ~FlightSummary{}~,error, preserving source error causes. Core success tests use lines up to 4 KiB. The third star covers lines exceeding Scanner's default limit, through exactly 256 KiB. Use Scanner and a struct without retaining all lines. No Report is needed.
-`, Hints: []string{"Count lines from 1 independently of sequence numbers; SplitN with limit 3 retains the message.", "Malformed records only add their line number; scanner.Err invalidates the entire summary.", "For the third star, increase Buffer through 256 KiB plus CRLF headroom and check content length explicitly."}},
+`, Hints: []string{"A malformed record does not mean the whole source read failed.", "Separate record counts and diagnostics from scanner state.", "Review ~SplitN~ for the message and ~Scanner.Err~ after the final line."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: flightRecorderHidden, Bonus: true},
 	})
-	add(&Level{ID: "18-6-crew-directory", Chapter: 18, Kind: "lab", Title: "دليل الطاقم", Goal: "سجّل الطاقم وابحث عنهم واحفظ عن طريق interface صغيرة",
+	add(&Level{ID: "18-6-crew-directory", Chapter: 18, LessonRevision: 1, Steps: ch18CrewArabic, Kind: "lab", Title: "دليل الطاقم", Goal: "سجّل الطاقم وابحث عنهم واحفظ عن طريق interface صغيرة",
 		Requires: []string{"iface"}, Bridge: []int{22}, Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: crewDirectoryStarter}},
 		Lesson: `# دليل الطاقم من غير ربطه بالقرص
 
@@ -732,8 +732,8 @@ return store.SaveCrew(d.crew) // المخزن يقدر يبوّظ slice الدل
 ~Search(query string) []Crew~ ترجع اللي callsign أو role فيهم query بعد ToLower للطرفين. متبحثش في ID، ومتعملش TrimSpace للـ query. الفاضية ترجع الكل، والمفيش تطابق طول صفر. النتائج نسخ مستقلة مرتبة بـ ID تصاعدي بترتيب Go.
 
 عرّف ~CrewStore interface { SaveCrew([]Crew) error }~. ~Save(store CrewStore) error~ تدي المخزن لقطة مستقلة مرتبة لكل الطاقم، حتى لو فاضية. nil interface ترجع error؛ typed nil pointer جوه interface مش مطلوب دعمها. رجّع خطأ المخزن مع الحفاظ على السبب، وسيب الدليل زي ما هو حتى لو المخزن عدّل البيانات أو فشل. العقد تسلسلي؛ مفيش CRUD تاني أو ملف أو Report مطلوب.
-`, Hints: []string{"افحص الفراغ والتكرار قبل append، ومتغيّرش الحقول الأصلية.", "Lowercase للطرفين ثم Contains للاسم أو الدور؛ رتّب نسخة النتائج بالـ ID.", "Save تدي CrewStore نسخة مرتبة؛ رجّع خطأ التخزين، واختبر مخزن بيعدّل slice اللي استلمها."},
-		En: &LevelText{Title: "Crew Directory", Goal: "Register crew, search them, and save through a small interface", Files: []LabFile{{Name: "main.go", Starter: crewDirectoryStarter}},
+`, Hints: []string{"الـinterface بتفصل اللي الكود محتاجه عن نوع المخزن.", "خلي بيانات الدليل مستقلة عن نتائج البحث والحفظ.", "راجع نسخة الـslice اللي بتتسلم للـstore وخطأ ~Save~."},
+		En: &LevelText{LessonRevision: 1, Steps: ch18CrewEnglish, Title: "Crew Directory", Goal: "Register crew, search them, and save through a small interface", Files: []LabFile{{Name: "main.go", Starter: crewDirectoryStarter}},
 			Lesson: `# A Crew Directory Independent of Disk
 
 Communications needs to find crew by callsign or specialty and save the directory. Search need not know whether storage uses a file or memory. Put saving behind a small consumer-owned interface as in 9-4.
@@ -797,7 +797,7 @@ Implement a usable zero-value ~CrewDirectory~. ~Crew~ contains ~ID,Callsign,Role
 ~Search(query string) []Crew~ returns crew whose callsign or role contains the query after ToLower on both sides. Do not search IDs or TrimSpace the query. Empty queries return everyone; misses have length zero. Return independent snapshots sorted by ascending ID using Go string order.
 
 Define ~CrewStore interface { SaveCrew([]Crew) error }~. ~Save(store CrewStore) error~ gives storage an independent sorted snapshot of all crew, including an empty directory. A nil interface returns an error; typed nil pointers inside interfaces are outside the contract. Return storage failures preserving their causes. Leave the directory unchanged even if storage modifies its input or fails. This sequential contract requires no other CRUD operations, file implementation, or Report.
-`, Hints: []string{"Validate blank fields and duplicates before append without changing original strings.", "Lowercase both sides and use Contains on callsign or role; sort a fresh result by ID.", "Give CrewStore a sorted copy; propagate storage errors and test a store that mutates its input."}},
+`, Hints: []string{"An interface separates what code needs from a store's concrete type.", "Keep directory data independent from search and save results.", "Review the slice given to the store and the error from ~Save~."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: crewDirectoryHidden},
 	})
 }
