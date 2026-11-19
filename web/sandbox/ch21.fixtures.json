@@ -1,0 +1,71 @@
+{
+  "ch21-flags-env": {
+    "labels": {
+      "flag": {"ar": "Flag -details", "en": "Flag -details"},
+      "off": {"ar": "false", "en": "false"},
+      "on": {"ar": "true", "en": "true"},
+      "toggle": {"ar": "بدّل الـflag", "en": "Toggle flag"},
+      "lookup": {"ar": "مصدر البيئة", "en": "Environment lookup"},
+      "environment": {"ar": "os.LookupEnv", "en": "os.LookupEnv"},
+      "name": {"ar": "الاسم", "en": "Name"},
+      "presence": {"ar": "الوجود", "en": "Presence"},
+      "value": {"ar": "القيمة", "en": "Value"},
+      "present": {"ar": "موجود", "en": "Present"},
+      "missing": {"ar": "غايب", "en": "Missing"},
+      "next": {"ar": "الحالة الجاية", "en": "Next state"},
+      "caption": {"ar": "الـflag تبدأ false.", "en": "The flag starts false."}
+    },
+    "states": [
+      {"label": {"ar": "اسم غايب", "en": "Missing name"}, "value": {"ar": "مش موجود", "en": "Not set"}, "present": false},
+      {"label": {"ar": "قيمة فاضية", "en": "Empty value"}, "value": {"ar": "\"\"", "en": "\"\""}, "present": true},
+      {"label": {"ar": "قيمة موجودة", "en": "Present value"}, "value": {"ar": "crew-7", "en": "crew-7"}, "present": true}
+    ]
+  },
+  "ch21-reader-lines": {
+    "labels": {
+      "caption": {"ar": "كل Scan تكشف سطرًا واحدًا.", "en": "Each Scan exposes one line."},
+      "current": {"ar": "السطر الحالي", "en": "Current line"},
+      "written": {"ar": "سطور وصلت للـwriter", "en": "Lines sent to writer"},
+      "previous": {"ar": "السابق", "en": "Previous"},
+      "next": {"ar": "التالي", "en": "Next"},
+      "reset": {"ar": "من الأول", "en": "Reset"}
+    },
+    "frames": [
+      {"caption": {"ar": "الـReader فيه تلات سطور.", "en": "The Reader holds three lines."}, "current": {"ar": "—", "en": "—"}, "written": []},
+      {"caption": {"ar": "Scan تعرض السطر الأول.", "en": "Scan exposes the first line."}, "current": {"ar": "ping one", "en": "ping one"}, "written": [{"ar": "ping one", "en": "ping one"}]},
+      {"caption": {"ar": "السطر الحالي يتكتب مرة.", "en": "The current line is written once."}, "current": {"ar": "ping two", "en": "ping two"}, "written": [{"ar": "ping one", "en": "ping one"}, {"ar": "ping two", "en": "ping two"}]},
+      {"caption": {"ar": "كل سطر له دورة منفصلة.", "en": "Each line has its own pass."}, "current": {"ar": "ping three", "en": "ping three"}, "written": [{"ar": "ping one", "en": "ping one"}, {"ar": "ping two", "en": "ping two"}, {"ar": "ping three", "en": "ping three"}]}
+    ]
+  },
+  "ch21-injected-draw": {
+    "labels": {
+      "source": {"ar": "مصدر الاختيار", "en": "Choice source"},
+      "fixed": {"ar": "callback ثابت", "en": "Fixed callback"},
+      "varied": {"ar": "سحبات توضيحية", "en": "Sample random draws"},
+      "draw": {"ar": "اسحب index", "en": "Draw index"},
+      "bound": {"ar": "الحد exclusive", "en": "Exclusive bound"},
+      "index": {"ar": "index", "en": "index"},
+      "selected": {"ar": "الاسم المختار", "en": "Selected label"},
+      "calls": {"ar": "عدد النداءات", "en": "Calls"},
+      "none": {"ar": "لسه مفيش اختيار", "en": "No choice yet"},
+      "caption": {"ar": "المصدر يرجع index أصغر من الحد.", "en": "The source returns an index below the bound."}
+    },
+    "choices": [{"ar": "amber", "en": "amber"}, {"ar": "cyan", "en": "cyan"}, {"ar": "violet", "en": "violet"}],
+    "fixedResults": [1, 1, 1],
+    "variedResults": [0, 2, 1]
+  },
+  "ch21-maneuver-values": {
+    "labels": {
+      "caption": {"ar": "اسم النوع يفصل القيمة عن النص.", "en": "A named type separates value from text."},
+      "command": {"ar": "نص الأمر", "en": "Command text"},
+      "named": {"ar": "القيمة المسماة", "en": "Named value"},
+      "ordinal": {"ar": "قيمة iota", "en": "iota value"},
+      "next": {"ar": "أمر توضيحي تاني", "en": "Next example command"}
+    },
+    "commands": [
+      {"text": {"ar": "idle", "en": "idle"}, "name": {"ar": "LampMode.idle", "en": "LampMode.idle"}, "ordinal": 0},
+      {"text": {"ar": "scan", "en": "scan"}, "name": {"ar": "LampMode.scan", "en": "LampMode.scan"}, "ordinal": 1},
+      {"text": {"ar": "relay", "en": "relay"}, "name": {"ar": "LampMode.relay", "en": "LampMode.relay"}, "ordinal": 2}
+    ]
+  }
+}

@@ -6,6 +6,8 @@ Short bilingual lessons for the four labs. Examples use illustrative data and ar
 
 Mission: keep reports stable across machines. Idea: isolate host data and parse flags in a local parser. Try: predict a Boolean flag and remaining argument count. Watch out: distinguish missing environment data from an empty value. Think: identify checks before output. Your turn: use injected values and a writer.
 
+Playground: toggle a flag and cycle through missing, empty, and present environment values.
+
 <!-- go-example id=e211-local-flag imports=flag,fmt,io outcome=ok -->
 ```go
 func main() {
@@ -32,6 +34,8 @@ func main() {
 
 Mission: accept one command or a line stream. Idea: use injected readers, writers, and an interface around state. Try: predict what a scanner reads. Watch out: validate tokens before indexing and classify command errors separately from transport failures. Think: separate command source, interpretation, and state change. Your turn: inspect state across inputs.
 
+Playground: advance through sample lines and watch the scanner output accumulate.
+
 <!-- go-example id=e212-scan-lines imports=bufio,fmt,strings outcome=ok -->
 ```go
 func main() {
@@ -55,6 +59,8 @@ func main() {
 ## 21-3 — Guess the Depth
 
 Mission: guide a probe with bounded guesses. Idea: pass a choice source into the game so tests can repeat it. Try: predict a selected label. Watch out: validate a source result before using it as an index. Think: identify why fixed sources help tests. Your turn: exercise the game through injected input and randomness.
+
+Playground: switch between a fixed callback and sample draws, then inspect each index.
 
 <!-- go-example id=e213-injected-pick imports=fmt outcome=ok -->
 ```go
@@ -81,6 +87,8 @@ func main() {
 ## 21-4 — Drone Duel
 
 Mission: map text commands to maneuver values. Idea: use a named integer type and constants for a small vocabulary. Try: predict the numeric value of a named constant. Watch out: validate text before conversion. Think: parse first, then reason about ordered pairs. Your turn: separate input handling from round rules.
+
+Playground: cycle illustrative commands and inspect their named values and `iota` positions.
 
 <!-- go-example id=e214-iota-values imports=fmt outcome=ok -->
 ```go

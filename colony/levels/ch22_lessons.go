@@ -29,6 +29,79 @@ func ch22Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	}
 }
 
+func ch22Pair(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch22SandboxBlock(id, kind, text string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch22TreeSandboxConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"previous": ch22Pair("السابق", "Previous"), "next": ch22Pair("التالي", "Next"), "reset": ch22Pair("من الأول", "Reset"),
+			"depth": ch22Pair("العمق", "Depth"), "entries": ch22Pair("المدخلات المرتبة", "Sorted entries"),
+		},
+		"frames": []any{
+			map[string]any{"caption": ch22Pair("اقرأ عناصر الجذر أولًا.", "Read root entries first."), "depth": 0, "entries": []any{ch22Pair("alpha/", "alpha/"), ch22Pair("zeta.dat", "zeta.dat")}},
+			map[string]any{"caption": ch22Pair("انزل مجلدًا واحدًا.", "Recurse one directory deeper."), "depth": 1, "entries": []any{ch22Pair("alpha/", "alpha/"), ch22Pair("alpha/a.dat", "alpha/a.dat"), ch22Pair("alpha/nest/", "alpha/nest/"), ch22Pair("zeta.dat", "zeta.dat")}},
+			map[string]any{"caption": ch22Pair("الحد يوقف قراءة الفروع.", "The depth limit stops deeper reads."), "depth": 2, "entries": []any{ch22Pair("alpha/", "alpha/"), ch22Pair("alpha/a.dat", "alpha/a.dat"), ch22Pair("alpha/nest/", "alpha/nest/"), ch22Pair("alpha/nest/b.dat", "alpha/nest/b.dat"), ch22Pair("zeta.dat", "zeta.dat")}},
+		},
+	}
+}
+
+func ch22OrganizerSandboxConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"previous": ch22Pair("السابق", "Previous"), "next": ch22Pair("التالي", "Next"), "reset": ch22Pair("من الأول", "Reset"),
+			"plan": ch22Pair("خطة الحركة", "Move plan"), "store": ch22Pair("حالة المخزن", "Store state"),
+		},
+		"frames": []any{
+			map[string]any{"caption": ch22Pair("الحركة المقترحة لسه غير مرتبة.", "The draft moves are not sorted yet."), "moves": []any{ch22Pair("demo/zeta", "demo/zeta"), ch22Pair("demo/alpha", "demo/alpha")}, "store": ch22Pair("من غير تغيير", "Unchanged")},
+			map[string]any{"caption": ch22Pair("راجع الخطة قبل أي كتابة.", "Review the plan before any write."), "moves": []any{ch22Pair("demo/alpha", "demo/alpha"), ch22Pair("demo/zeta", "demo/zeta")}, "store": ch22Pair("من غير تغيير", "Unchanged")},
+		},
+	}
+}
+
+func ch22AtomicSandboxConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"target": ch22Pair("الهدف", "Target"), "staging": ch22Pair("المؤقت", "Staging"), "phase": ch22Pair("المرحلة", "Phase"),
+			"write": ch22Pair("جهّز المحتوى", "Stage content"), "publish": ch22Pair("انشر", "Publish"),
+			"fail": ch22Pair("حاكي فشل", "Simulate failure"), "reset": ch22Pair("من الأول", "Reset"),
+			"initial": ch22Pair("قبل التجهيز", "Before staging"), "staged": ch22Pair("كتابة معزولة", "Isolated write"),
+			"published": ch22Pair("اتنشر المكتمل", "Complete version published"), "failed": ch22Pair("القديم فضل سليم", "Old version stayed intact"),
+			"old": ch22Pair("old packet", "old packet"), "new": ch22Pair("new packet", "new packet"), "empty": ch22Pair("فاضي", "Empty"),
+		},
+		"captions": map[string]any{
+			"initial":   ch22Pair("الهدف محتفظ بالنسخة القديمة.", "The target still holds the old version."),
+			"staged":    ch22Pair("الهدف لسه بالنسخة القديمة.", "The target still holds the old version."),
+			"published": ch22Pair("النسخة الجديدة وصلت للهدف.", "New content reached the target."),
+			"failed":    ch22Pair("الفشل ساب النسخة القديمة.", "Failure kept the old version."),
+		},
+	}
+}
+
+func ch22DuplicatesSandboxConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"fileA": ch22Pair("الملف الأول", "First file"), "fileB": ch22Pair("الملف التاني", "Second file"),
+			"sizes": ch22Pair("الحجم بالبايت", "Size in bytes"), "sizeCheck": ch22Pair("فلتر الحجم", "Size filter"),
+			"contentCheck": ch22Pair("مقارنة المحتوى", "Content comparison"), "hashes": ch22Pair("بصمات المحتوى", "Content digests"),
+			"sameSize":      ch22Pair("مرشح للمقارنة", "Candidate for comparison"),
+			"differentSize": ch22Pair("تخطّى قبل البصمة", "Skip before hashing"), "sameContent": ch22Pair("نفس البصمة", "Same digest"),
+			"differentContent": ch22Pair("بصمتان مختلفتان", "Different digests"), "notChecked": ch22Pair("لسه ما اتقارنش", "Not compared"),
+			"next": ch22Pair("الزوج التالي", "Next pair"), "caption": ch22Pair("الحجم يفلتر؛ المحتوى يؤكد.", "Size filters; content confirms."),
+		},
+		"pairs": []any{
+			map[string]any{"first": ch22Pair("alpha.bin", "alpha.bin"), "second": ch22Pair("beta.bin", "beta.bin"), "firstSize": 12, "secondSize": 12, "firstHash": "h-a", "secondHash": "h-b"},
+			map[string]any{"first": ch22Pair("echo.bin", "echo.bin"), "second": ch22Pair("foxtrot.bin", "foxtrot.bin"), "firstSize": 8, "secondSize": 8, "firstHash": "h-c", "secondHash": "h-c"},
+			map[string]any{"first": ch22Pair("short.bin", "short.bin"), "second": ch22Pair("longer.bin", "longer.bin"), "firstSize": 3, "secondSize": 7, "firstHash": "h-d", "secondHash": "h-e"},
+		},
+	}
+}
+
 func ch22EnglishFrames(frames []LessonFrame) []LessonFrame {
 	translations := map[string]string{
 		"قبل التنفيذ.":              "Before run.",
@@ -118,6 +191,7 @@ var ch22Lesson221Arabic = []LessonStep{
 			"لما نوصل للصفر بنرجع من غير طباعة.",
 		}),
 		ch22Walkthrough("c221.recursion-reveal", "تابع القيمة وهي بتصغر لحد حالة التوقف.", ch22Example221Try, "e221-recursion", []string{"fmt"}, ch22Frames221Try),
+		ch22SandboxBlock("c221.playground", "ch22-depth-tree", "قدّم العمق خطوة؛ شوف الشجرة المرتبة.", ch22TreeSandboxConfig()),
 	}},
 	{ID: "c221.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch22Markdown("c221.watch", "- افحص الخطأ قبل استخدام ناتج القراءة.\n- عند حد العمق، متقراش المجلد الأبعد."),
@@ -149,6 +223,7 @@ var ch22Lesson221English = []LessonStep{
 			"At zero, the function returns without printing.",
 		}),
 		ch22Walkthrough("c221.recursion-reveal", "Follow the value as it shrinks to the stopping case.", ch22Example221Try, "e221-recursion", []string{"fmt"}, ch22EnglishFrames(ch22Frames221Try)),
+		ch22SandboxBlock("c221.playground", "ch22-depth-tree", "Advance one depth; inspect the sorted tree.", ch22TreeSandboxConfig()),
 	}},
 	{ID: "c221.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch22Markdown("c221.watch", "- Check an error before using a read result.\n- At the depth limit, do not read a deeper directory."),
@@ -204,6 +279,7 @@ var ch22Lesson222Arabic = []LessonStep{
 			"ده اسم الملف كله، مش الامتداد.",
 		}),
 		ch22Walkthrough("c222.extension-reveal", "راقب إزاي تصنيف الامتداد يفضل منفصل عن الاسم.", ch22Example222Try, "e222-extension", []string{"fmt", "path", "strings"}, ch22Frames222Try),
+		ch22SandboxBlock("c222.playground", "ch22-review-plan", "رتّب خطة توضيحية؛ المخزن ما بيتغيرش.", ch22OrganizerSandboxConfig()),
 	}},
 	{ID: "c222.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch22Markdown("c222.watch", "- اكتشاف المصدر مش معناه إنك تنقله.\n- افشل عند أي خطأ غير «غير موجود»."),
@@ -235,6 +311,7 @@ var ch22Lesson222English = []LessonStep{
 			"This is the whole filename, not its extension.",
 		}),
 		ch22Walkthrough("c222.extension-reveal", "See how extension classification stays separate from the name.", ch22Example222Try, "e222-extension", []string{"fmt", "path", "strings"}, ch22EnglishFrames(ch22Frames222Try)),
+		ch22SandboxBlock("c222.playground", "ch22-review-plan", "Sort an example plan; the store stays unchanged.", ch22OrganizerSandboxConfig()),
 	}},
 	{ID: "c222.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch22Markdown("c222.watch", "- Discovering a source does not mean moving it.\n- Fail on errors other than “not found.”"),
@@ -292,6 +369,7 @@ var ch22Lesson223Arabic = []LessonStep{
 			"الـwriter قبل النص من غير خطأ.",
 		}),
 		ch22Walkthrough("c223.writer-reveal", "اتبع الكتابة قبل ما تتخيل أي نشر للملف.", ch22Example223Try, "e223-writer", []string{"fmt", "io", "strings"}, ch22Frames223Try),
+		ch22SandboxBlock("c223.playground", "ch22-atomic-publish", "جرّب التجهيز والنشر والفشل؛ راقب الهدف.", ch22AtomicSandboxConfig()),
 	}},
 	{ID: "c223.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch22Markdown("c223.watch", "- متفتحش الهدف للكتابة قبل اكتمال المحتوى.\n- افحص خطأ ~Close~ قبل النقل."),
@@ -323,6 +401,7 @@ var ch22Lesson223English = []LessonStep{
 			"The writer accepted the text without an error.",
 		}),
 		ch22Walkthrough("c223.writer-reveal", "Follow the write before imagining any file publication.", ch22Example223Try, "e223-writer", []string{"fmt", "io", "strings"}, ch22EnglishFrames(ch22Frames223Try)),
+		ch22SandboxBlock("c223.playground", "ch22-atomic-publish", "Stage, publish, or fail; watch the target.", ch22AtomicSandboxConfig()),
 	}},
 	{ID: "c223.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch22Markdown("c223.watch", "- Do not open the target for writing before content is complete.\n- Check ~Close~ before renaming."),
@@ -380,6 +459,7 @@ var ch22Lesson224Arabic = []LessonStep{
 			"المحتوى مش متساوي.",
 		}),
 		ch22Walkthrough("c224.size-reveal", "قارن الحجم بالمحتوى في مثال صغير.", ch22Example224Try, "e224-size-filter", []string{"fmt"}, ch22Frames224Try),
+		ch22SandboxBlock("c224.playground", "ch22-size-hash", "بدّل الأزواج؛ الحجم مش دليل كفاية.", ch22DuplicatesSandboxConfig()),
 	}},
 	{ID: "c224.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch22Markdown("c224.watch", "- نفس الحجم مش دليل إن الملفين متطابقين.\n- اقفل كل ملف وافحص خطأ القراءة والقفل."),
@@ -411,6 +491,7 @@ var ch22Lesson224English = []LessonStep{
 			"The contents are not equal.",
 		}),
 		ch22Walkthrough("c224.size-reveal", "Compare size with content in a small example.", ch22Example224Try, "e224-size-filter", []string{"fmt"}, ch22EnglishFrames(ch22Frames224Try)),
+		ch22SandboxBlock("c224.playground", "ch22-size-hash", "Cycle pairs; size alone is not proof.", ch22DuplicatesSandboxConfig()),
 	}},
 	{ID: "c224.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch22Markdown("c224.watch", "- Equal size does not prove two files match.\n- Close every file and check read and close errors."),

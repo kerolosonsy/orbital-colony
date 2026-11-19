@@ -1,7 +1,9 @@
 package levels
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -50,6 +52,7 @@ func ch22ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 		}
 	}
 	words := 0
+	sandboxCount := 0
 	for i, step := range steps {
 		claim(step.ID)
 		if step.Title != titles[i] || len(step.Blocks) == 0 {
@@ -82,12 +85,20 @@ func ch22ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 					continue
 				}
 				words += ch22ValidateFrames(t, name, block)
+			case "sandbox":
+				sandboxCount++
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch22-") || len(block.Sandbox.Config) == 0 {
+					t.Errorf("%s: %s has an invalid chapter 22 sandbox", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s has disallowed kind %q", name, block.ID, block.Kind)
 			}
 		}
 	}
 	ch22ValidateHints(t, name, hints, &words)
+	if sandboxCount != 1 {
+		t.Errorf("%s: expected exactly one sandbox, found %d", name, sandboxCount)
+	}
 	if words < 200 || words > 320 {
 		t.Errorf("%s: learner text has %d words; want 200-320", name, words)
 	}
@@ -123,8 +134,8 @@ func ch22CompareLessonCopies(t *testing.T, id string, arabic, english []LessonSt
 			continue
 		}
 		if i == 2 {
-			if len(step.Blocks) != 2 || step.Blocks[0].Kind != "question" || step.Blocks[1].Kind != "walkthrough" {
-				t.Errorf("%s: Try it must predict, then reveal", id)
+			if len(step.Blocks) != 3 || step.Blocks[0].Kind != "question" || step.Blocks[1].Kind != "walkthrough" || step.Blocks[2].Kind != "sandbox" {
+				t.Errorf("%s: Try it must predict, reveal, then include one sandbox", id)
 			} else if ch22QuestionCode(step.Blocks[0].Text) != step.Blocks[1].Code {
 				t.Errorf("%s: prediction code differs from its walkthrough", id)
 			}
@@ -136,6 +147,9 @@ func ch22CompareLessonCopies(t *testing.T, id string, arabic, english []LessonSt
 			}
 			if block.Question != nil && (translated.Question == nil || block.Question.Answer != translated.Question.Answer || len(block.Question.Options) != len(translated.Question.Options)) {
 				t.Errorf("%s: question answer or option count differs for %s", id, block.ID)
+			}
+			if block.Sandbox != nil && (translated.Sandbox == nil || block.Sandbox.Kind != translated.Sandbox.Kind || !reflect.DeepEqual(block.Sandbox.Config, translated.Sandbox.Config)) {
+				t.Errorf("%s: sandbox config differs for %s", id, block.ID)
 			}
 			if block.Walkthrough != nil {
 				if translated.Walkthrough == nil || block.Code != translated.Code || block.ExampleID != translated.ExampleID || !reflect.DeepEqual(block.Imports, translated.Imports) {
@@ -232,6 +246,41 @@ func ch22TextWords(text string) int {
 func ch22EndsSentence(text string) bool {
 	text = strings.TrimSpace(text)
 	return strings.HasSuffix(text, ".") || strings.HasSuffix(text, "؟") || strings.HasSuffix(text, "!")
+}
+
+func TestCh22SandboxFixtures(t *testing.T) {
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch22.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]map[string]any
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	ids := []string{"22-1-tree", "22-2-organizer", "22-3-atomic-save", "22-4-duplicates"}
+	for _, id := range ids {
+		level := Get(id)
+		block := level.Steps[2].Blocks[2]
+		want, ok := fixtures[block.Sandbox.Kind]
+		if !ok {
+			t.Errorf("%s: missing fixture for %s", id, block.Sandbox.Kind)
+			continue
+		}
+		actualJSON, err := json.Marshal(block.Sandbox.Config)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fixtureJSON, err := json.Marshal(want)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(actualJSON, fixtureJSON) {
+			t.Errorf("%s: sandbox config differs from the JavaScript fixture", id)
+		}
+	}
+	if len(fixtures) != len(ids) {
+		t.Errorf("chapter 22 fixture has %d kinds; want %d", len(fixtures), len(ids))
+	}
 }
 
 func TestCh22StoryboardExamples(t *testing.T) {

@@ -1,0 +1,75 @@
+{
+  "ch22-depth-tree": {
+    "labels": {
+      "previous": {"ar": "السابق", "en": "Previous"},
+      "next": {"ar": "التالي", "en": "Next"},
+      "reset": {"ar": "من الأول", "en": "Reset"},
+      "depth": {"ar": "العمق", "en": "Depth"},
+      "entries": {"ar": "المدخلات المرتبة", "en": "Sorted entries"}
+    },
+    "frames": [
+      {"caption": {"ar": "اقرأ عناصر الجذر أولًا.", "en": "Read root entries first."}, "depth": 0, "entries": [{"ar": "alpha/", "en": "alpha/"}, {"ar": "zeta.dat", "en": "zeta.dat"}]},
+      {"caption": {"ar": "انزل مجلدًا واحدًا.", "en": "Recurse one directory deeper."}, "depth": 1, "entries": [{"ar": "alpha/", "en": "alpha/"}, {"ar": "alpha/a.dat", "en": "alpha/a.dat"}, {"ar": "alpha/nest/", "en": "alpha/nest/"}, {"ar": "zeta.dat", "en": "zeta.dat"}]},
+      {"caption": {"ar": "الحد يوقف قراءة الفروع.", "en": "The depth limit stops deeper reads."}, "depth": 2, "entries": [{"ar": "alpha/", "en": "alpha/"}, {"ar": "alpha/a.dat", "en": "alpha/a.dat"}, {"ar": "alpha/nest/", "en": "alpha/nest/"}, {"ar": "alpha/nest/b.dat", "en": "alpha/nest/b.dat"}, {"ar": "zeta.dat", "en": "zeta.dat"}]}
+    ]
+  },
+  "ch22-review-plan": {
+    "labels": {
+      "previous": {"ar": "السابق", "en": "Previous"},
+      "next": {"ar": "التالي", "en": "Next"},
+      "reset": {"ar": "من الأول", "en": "Reset"},
+      "plan": {"ar": "خطة الحركة", "en": "Move plan"},
+      "store": {"ar": "حالة المخزن", "en": "Store state"}
+    },
+    "frames": [
+      {"caption": {"ar": "الحركة المقترحة لسه غير مرتبة.", "en": "The draft moves are not sorted yet."}, "moves": [{"ar": "demo/zeta", "en": "demo/zeta"}, {"ar": "demo/alpha", "en": "demo/alpha"}], "store": {"ar": "من غير تغيير", "en": "Unchanged"}},
+      {"caption": {"ar": "راجع الخطة قبل أي كتابة.", "en": "Review the plan before any write."}, "moves": [{"ar": "demo/alpha", "en": "demo/alpha"}, {"ar": "demo/zeta", "en": "demo/zeta"}], "store": {"ar": "من غير تغيير", "en": "Unchanged"}}
+    ]
+  },
+  "ch22-atomic-publish": {
+    "labels": {
+      "target": {"ar": "الهدف", "en": "Target"},
+      "staging": {"ar": "المؤقت", "en": "Staging"},
+      "phase": {"ar": "المرحلة", "en": "Phase"},
+      "write": {"ar": "جهّز المحتوى", "en": "Stage content"},
+      "publish": {"ar": "انشر", "en": "Publish"},
+      "fail": {"ar": "حاكي فشل", "en": "Simulate failure"},
+      "reset": {"ar": "من الأول", "en": "Reset"},
+      "initial": {"ar": "قبل التجهيز", "en": "Before staging"},
+      "staged": {"ar": "كتابة معزولة", "en": "Isolated write"},
+      "published": {"ar": "اتنشر المكتمل", "en": "Complete version published"},
+      "failed": {"ar": "القديم فضل سليم", "en": "Old version stayed intact"},
+      "old": {"ar": "old packet", "en": "old packet"},
+      "new": {"ar": "new packet", "en": "new packet"},
+      "empty": {"ar": "فاضي", "en": "Empty"}
+    },
+    "captions": {
+      "initial": {"ar": "الهدف محتفظ بالنسخة القديمة.", "en": "The target still holds the old version."},
+      "staged": {"ar": "الهدف لسه بالنسخة القديمة.", "en": "The target still holds the old version."},
+      "published": {"ar": "النسخة الجديدة وصلت للهدف.", "en": "New content reached the target."},
+      "failed": {"ar": "الفشل ساب النسخة القديمة.", "en": "Failure kept the old version."}
+    }
+  },
+  "ch22-size-hash": {
+    "labels": {
+      "fileA": {"ar": "الملف الأول", "en": "First file"},
+      "fileB": {"ar": "الملف التاني", "en": "Second file"},
+      "sizes": {"ar": "الحجم بالبايت", "en": "Size in bytes"},
+      "sizeCheck": {"ar": "فلتر الحجم", "en": "Size filter"},
+      "contentCheck": {"ar": "مقارنة المحتوى", "en": "Content comparison"},
+      "hashes": {"ar": "بصمات المحتوى", "en": "Content digests"},
+      "sameSize": {"ar": "مرشح للمقارنة", "en": "Candidate for comparison"},
+      "differentSize": {"ar": "تخطّى قبل البصمة", "en": "Skip before hashing"},
+      "sameContent": {"ar": "نفس البصمة", "en": "Same digest"},
+      "differentContent": {"ar": "بصمتان مختلفتان", "en": "Different digests"},
+      "notChecked": {"ar": "لسه ما اتقارنش", "en": "Not compared"},
+      "next": {"ar": "الزوج التالي", "en": "Next pair"},
+      "caption": {"ar": "الحجم يفلتر؛ المحتوى يؤكد.", "en": "Size filters; content confirms."}
+    },
+    "pairs": [
+      {"first": {"ar": "alpha.bin", "en": "alpha.bin"}, "second": {"ar": "beta.bin", "en": "beta.bin"}, "firstSize": 12, "secondSize": 12, "firstHash": "h-a", "secondHash": "h-b"},
+      {"first": {"ar": "echo.bin", "en": "echo.bin"}, "second": {"ar": "foxtrot.bin", "en": "foxtrot.bin"}, "firstSize": 8, "secondSize": 8, "firstHash": "h-c", "secondHash": "h-c"},
+      {"first": {"ar": "short.bin", "en": "short.bin"}, "second": {"ar": "longer.bin", "en": "longer.bin"}, "firstSize": 3, "secondSize": 7, "firstHash": "h-d", "secondHash": "h-e"}
+    ]
+  }
+}

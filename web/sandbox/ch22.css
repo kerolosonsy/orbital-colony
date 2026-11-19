@@ -1,1 +1,25 @@
-/* Chapter 22 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch22-depth-tree,
+.lesson-sandbox.ch22-review-plan,
+.lesson-sandbox.ch22-atomic-publish,
+.lesson-sandbox.ch22-size-hash {
+  box-sizing: border-box;
+  max-width: 290px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ch22-caption { margin: 6px 0; color: var(--paper-2); }
+.ch22-depth-tree .sandbox-kit-value-row,
+.ch22-review-plan .sandbox-kit-value-row,
+.ch22-atomic-publish .sandbox-kit-value-row,
+.ch22-size-hash .sandbox-kit-value-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.ch22-depth-tree .tool,
+.ch22-review-plan .tool,
+.ch22-atomic-publish .tool,
+.ch22-size-hash .tool { margin-block: 4px; }
+.ch22-depth-tree .sandbox-kit-log-list,
+.ch22-review-plan .sandbox-kit-log-list { padding-inline-start: 20px; }
+.ch22-depth-tree .sandbox-kit-log-list li,
+.ch22-review-plan .sandbox-kit-log-list li,
+.ch22-size-hash .sandbox-kit-value { direction: ltr; unicode-bidi: isolate; }
+.ch22-atomic-publish .sandbox-kit-value { unicode-bidi: plaintext; }

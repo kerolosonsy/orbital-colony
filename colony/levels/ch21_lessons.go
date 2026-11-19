@@ -25,6 +25,77 @@ func ch21Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	}
 }
 
+func ch21Pair(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch21SandboxBlock(id, kind, text string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch21StationSandboxConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"flag": ch21Pair("Flag -details", "Flag -details"), "off": ch21Pair("false", "false"), "on": ch21Pair("true", "true"),
+			"toggle": ch21Pair("بدّل الـflag", "Toggle flag"), "lookup": ch21Pair("مصدر البيئة", "Environment lookup"),
+			"environment": ch21Pair("os.LookupEnv", "os.LookupEnv"),
+			"name":        ch21Pair("الاسم", "Name"), "presence": ch21Pair("الوجود", "Presence"), "value": ch21Pair("القيمة", "Value"),
+			"present": ch21Pair("موجود", "Present"), "missing": ch21Pair("غايب", "Missing"), "next": ch21Pair("الحالة الجاية", "Next state"),
+			"caption": ch21Pair("الـflag تبدأ false.", "The flag starts false."),
+		},
+		"states": []any{
+			map[string]any{"label": ch21Pair("اسم غايب", "Missing name"), "value": ch21Pair("مش موجود", "Not set"), "present": false},
+			map[string]any{"label": ch21Pair("قيمة فاضية", "Empty value"), "value": ch21Pair("\"\"", "\"\""), "present": true},
+			map[string]any{"label": ch21Pair("قيمة موجودة", "Present value"), "value": ch21Pair("crew-7", "crew-7"), "present": true},
+		},
+	}
+}
+
+func ch21CommandsSandboxConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"caption": ch21Pair("كل Scan تكشف سطرًا واحدًا.", "Each Scan exposes one line."),
+			"current": ch21Pair("السطر الحالي", "Current line"), "written": ch21Pair("سطور وصلت للـwriter", "Lines sent to writer"),
+			"previous": ch21Pair("السابق", "Previous"), "next": ch21Pair("التالي", "Next"), "reset": ch21Pair("من الأول", "Reset"),
+		},
+		"frames": []any{
+			map[string]any{"caption": ch21Pair("الـReader فيه تلات سطور.", "The Reader holds three lines."), "current": ch21Pair("—", "—"), "written": []any{}},
+			map[string]any{"caption": ch21Pair("Scan تعرض السطر الأول.", "Scan exposes the first line."), "current": ch21Pair("ping one", "ping one"), "written": []any{ch21Pair("ping one", "ping one")}},
+			map[string]any{"caption": ch21Pair("السطر الحالي يتكتب مرة.", "The current line is written once."), "current": ch21Pair("ping two", "ping two"), "written": []any{ch21Pair("ping one", "ping one"), ch21Pair("ping two", "ping two")}},
+			map[string]any{"caption": ch21Pair("كل سطر له دورة منفصلة.", "Each line has its own pass."), "current": ch21Pair("ping three", "ping three"), "written": []any{ch21Pair("ping one", "ping one"), ch21Pair("ping two", "ping two"), ch21Pair("ping three", "ping three")}},
+		},
+	}
+}
+
+func ch21DepthSandboxConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"source": ch21Pair("مصدر الاختيار", "Choice source"), "fixed": ch21Pair("callback ثابت", "Fixed callback"),
+			"varied": ch21Pair("سحبات توضيحية", "Sample random draws"), "draw": ch21Pair("اسحب index", "Draw index"),
+			"bound": ch21Pair("الحد exclusive", "Exclusive bound"), "index": ch21Pair("index", "index"), "selected": ch21Pair("الاسم المختار", "Selected label"),
+			"calls": ch21Pair("عدد النداءات", "Calls"), "none": ch21Pair("لسه مفيش اختيار", "No choice yet"),
+			"caption": ch21Pair("المصدر يرجع index أصغر من الحد.", "The source returns an index below the bound."),
+		},
+		"choices":      []any{ch21Pair("amber", "amber"), ch21Pair("cyan", "cyan"), ch21Pair("violet", "violet")},
+		"fixedResults": []int{1, 1, 1}, "variedResults": []int{0, 2, 1},
+	}
+}
+
+func ch21DuelSandboxConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"caption": ch21Pair("اسم النوع يفصل القيمة عن النص.", "A named type separates value from text."),
+			"command": ch21Pair("نص الأمر", "Command text"), "named": ch21Pair("القيمة المسماة", "Named value"),
+			"ordinal": ch21Pair("قيمة iota", "iota value"), "next": ch21Pair("أمر توضيحي تاني", "Next example command"),
+		},
+		"commands": []any{
+			map[string]any{"text": ch21Pair("idle", "idle"), "name": ch21Pair("LampMode.idle", "LampMode.idle"), "ordinal": 0},
+			map[string]any{"text": ch21Pair("scan", "scan"), "name": ch21Pair("LampMode.scan", "LampMode.scan"), "ordinal": 1},
+			map[string]any{"text": ch21Pair("relay", "relay"), "name": ch21Pair("LampMode.relay", "LampMode.relay"), "ordinal": 2},
+		},
+	}
+}
+
 var ch21StationArabic = []LessonStep{
 	{ID: "c211.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch21Markdown("c211.mission", "1. جهّز تقرير ثابت بين الأجهزة.\n2. خلي بيانات النظام توصل من برّه.\n3. الـstarter فيه نوع اللقطة؛ ركّز على فصل المصدر عن التقرير.")}},
 	{ID: "c211.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
@@ -62,6 +133,7 @@ var ch21StationArabic = []LessonStep{
 			{Line: 5, Caption: "active بقت مفعّلة."},
 			{Line: 6, Caption: "اطبع القيمة والبواقي.", Variables: []LessonVariable{{Name: "active", Value: "true"}}, Output: "true 0"},
 		}),
+		ch21SandboxBlock("c211.playground", "ch21-flags-env", "بدّل الـflag وقارن الاسم الغايب بالقيمة الفاضية.", ch21StationSandboxConfig()),
 	}},
 	{ID: "c211.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c211.watch", "- pointer من ~Bool~ بيتقري بـ~*value~.\n- القيمة الفاضية مش دليل إن اسم البيئة غايب.")}},
 	{ID: "c211.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -112,6 +184,7 @@ var ch21StationEnglish = []LessonStep{
 			{Line: 5, Caption: "active is now enabled."},
 			{Line: 6, Caption: "Print value and leftovers.", Variables: []LessonVariable{{Name: "active", Value: "true"}}, Output: "true 0"},
 		}),
+		ch21SandboxBlock("c211.playground", "ch21-flags-env", "Toggle the flag; compare missing and empty names.", ch21StationSandboxConfig()),
 	}},
 	{ID: "c211.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch21Markdown("c211.watch", "- Read a ~Bool~ pointer with ~*value~.\n- An empty value does not prove an environment name is missing.")}},
 	{ID: "c211.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -158,6 +231,7 @@ var ch21CommandsArabic = []LessonStep{
 			{Line: 3, Caption: "Scan لقت سطر."},
 			{Line: 4, Caption: "اطبع السطر مرة واحدة.", Output: "check bay"},
 		}),
+		ch21SandboxBlock("c212.playground", "ch21-reader-lines", "قدّم Scanner سطرًا؛ راقب ما وصل للـwriter.", ch21CommandsSandboxConfig()),
 	}},
 	{ID: "c212.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c212.watch", "- افحص عدد الكلمات قبل ما تستخدم index."), ch21Markdown("c212.watch-detail", "- خطأ الأمر غير خطأ القراءة أو الكتابة؛ كل واحد له تصرف مختلف.")}},
 	{ID: "c212.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -204,6 +278,7 @@ var ch21CommandsEnglish = []LessonStep{
 			{Line: 3, Caption: "Scan finds a line."},
 			{Line: 4, Caption: "Print the line once.", Output: "check bay"},
 		}),
+		ch21SandboxBlock("c212.playground", "ch21-reader-lines", "Advance the scanner; watch lines reach the writer.", ch21CommandsSandboxConfig()),
 	}},
 	{ID: "c212.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch21Markdown("c212.watch", "- Check the word count before using an index."), ch21Markdown("c212.watch-detail", "- A bad command differs from a read or write failure; each needs a different response.")}},
 	{ID: "c212.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -250,6 +325,7 @@ func main() {
 			{Line: 5, Caption: "المصدر الثابت يرجع 1.", Variables: []LessonVariable{{Name: "fixed", Value: "returns 1"}}},
 			{Line: 6, Caption: "اطبع الاسم المختار.", Output: "cyan"},
 		}),
+		ch21SandboxBlock("c213.playground", "ch21-injected-draw", "بدّل مصدر الاختيار وراقب الـindex والاسم.", ch21DepthSandboxConfig()),
 	}},
 	{ID: "c213.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c213.watch", "- افحص نتيجة المصدر قبل استخدامها كـindex."), ch21Markdown("c213.watch-detail", "- متعتمدش على random global جوه منطق تقدر تختبره.")}},
 	{ID: "c213.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -296,6 +372,7 @@ func main() {
 			{Line: 5, Caption: "The fixed source returns 1.", Variables: []LessonVariable{{Name: "fixed", Value: "returns 1"}}},
 			{Line: 6, Caption: "Print the chosen name.", Output: "cyan"},
 		}),
+		ch21SandboxBlock("c213.playground", "ch21-injected-draw", "Switch choice sources; watch the index and label.", ch21DepthSandboxConfig()),
 	}},
 	{ID: "c213.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch21Markdown("c213.watch", "- Validate the source result before using it as an index."), ch21Markdown("c213.watch-detail", "- Avoid global randomness inside logic you need to test.")}},
 	{ID: "c213.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -352,6 +429,7 @@ func main() {
 			{Line: 8, Caption: "اختار القيمة المسماة."},
 			{Line: 9, Caption: "الناتج الرقمي هو 1.", Output: "1"},
 		}),
+		ch21SandboxBlock("c214.playground", "ch21-maneuver-values", "مرّر أوامر توضيحية وشوف القيمة المسماة.", ch21DuelSandboxConfig()),
 	}},
 	{ID: "c214.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c214.watch", "- متحوّلش نص غير موثوق للنوع قبل ما تتحقق منه."), ch21Markdown("c214.watch-detail", "- parsing وقرار الجولة مرحلتين؛ خليك واضح في الحد بينهم.")}},
 	{ID: "c214.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -408,6 +486,7 @@ func main() {
 			{Line: 8, Caption: "Choose the named value."},
 			{Line: 9, Caption: "The numeric output is 1.", Output: "1"},
 		}),
+		ch21SandboxBlock("c214.playground", "ch21-maneuver-values", "Cycle example commands and inspect each named value.", ch21DuelSandboxConfig()),
 	}},
 	{ID: "c214.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch21Markdown("c214.watch", "- Do not convert untrusted text before validating it."), ch21Markdown("c214.watch-detail", "- Parsing and deciding a round are separate stages; keep their boundary clear.")}},
 	{ID: "c214.check-step", Title: "Think & check", Blocks: []LessonBlock{
