@@ -1,0 +1,67 @@
+{
+  "1-1-first-signal": {
+    "kind": "ch01-route-stepper",
+    "config": {
+      "labels": {
+        "position": { "ar": "المكان", "en": "Position" },
+        "command": { "ar": "الأمر", "en": "Command" },
+        "previous": { "ar": "السابق", "en": "Previous" },
+        "next": { "ar": "التالي", "en": "Next" },
+        "reset": { "ar": "من الأول", "en": "Reset" }
+      },
+      "frames": [
+        { "x": 1, "y": 1, "command": { "ar": "بداية", "en": "Start" }, "caption": { "ar": "لسه مفيش أمر.", "en": "No command yet." } },
+        { "x": 2, "y": 1, "command": { "ar": "East", "en": "East" }, "caption": { "ar": "East يغيّر x بخانة.", "en": "East changes x by one." } },
+        { "x": 2, "y": 2, "command": { "ar": "North", "en": "North" }, "caption": { "ar": "North يغيّر y بخانة.", "en": "North changes y by one." } },
+        { "x": 1, "y": 2, "command": { "ar": "West", "en": "West" }, "caption": { "ar": "كل أمر ييجي بالترتيب.", "en": "Each command follows in order." } }
+      ]
+    }
+  },
+  "1-2-first-harvest": {
+    "kind": "ch01-harvest-call",
+    "config": {
+      "labels": {
+        "command": { "ar": "الأمر", "en": "Command" },
+        "drone": { "ar": "الدرون", "en": "Drone" },
+        "plant": { "ar": "طحلب جاهز", "en": "Moss ready" },
+        "collected": { "ar": "اتجمع", "en": "Collected" },
+        "harvested": { "ar": "اللي اتجمع", "en": "Harvested" },
+        "previous": { "ar": "السابق", "en": "Previous" },
+        "next": { "ar": "التالي", "en": "Next" },
+        "reset": { "ar": "من الأول", "en": "Reset" }
+      },
+      "tiles": [
+        { "label": { "ar": "محطة", "en": "Dock" }, "plant": false },
+        { "label": { "ar": "قطعة طحلب", "en": "Moss plot" }, "plant": true },
+        { "label": { "ar": "صخرة", "en": "Rock" }, "plant": false }
+      ],
+      "frames": [
+        { "position": 0, "harvested": [], "action": { "ar": "استعداد", "en": "Ready" }, "caption": { "ar": "كل حاجة بتبدأ من المكان الحالي.", "en": "Everything starts at the current tile." } },
+        { "position": 1, "harvested": [], "action": { "ar": "Move East", "en": "Move East" }, "caption": { "ar": "الحركة تسبق استدعاء الدالة.", "en": "Movement comes before the function call." } },
+        { "position": 1, "harvested": [1], "action": { "ar": "Harvest()", "en": "Harvest()" }, "caption": { "ar": "Harvest تستخدم مكان الدرون الحالي.", "en": "Harvest uses the drone's current tile." } }
+      ]
+    }
+  },
+  "1-3-planting": {
+    "kind": "ch01-planting-state",
+    "config": {
+      "labels": {
+        "ground": { "ar": "الأرض", "en": "Ground" },
+        "plant": { "ar": "النبتة", "en": "Plant" },
+        "action": { "ar": "الأمر", "en": "Command" },
+        "empty": { "ar": "مفيش نبتة", "en": "No plant" },
+        "unready": { "ar": "لسه متجهزتش", "en": "Unprepared" },
+        "ready": { "ar": "متجهزة", "en": "Prepared" },
+        "planted": { "ar": "طحلب", "en": "Moss" },
+        "previous": { "ar": "السابق", "en": "Previous" },
+        "next": { "ar": "التالي", "en": "Next" },
+        "reset": { "ar": "من الأول", "en": "Reset" }
+      },
+      "frames": [
+        { "ground": "unready", "plant": "empty", "action": { "ar": "البداية", "en": "Start" }, "caption": { "ar": "الأرض لسه محتاجة تجهيز.", "en": "The ground still needs preparation." } },
+        { "ground": "ready", "plant": "empty", "action": { "ar": "Till", "en": "Till" }, "caption": { "ar": "Till يجهز حالة الأرض.", "en": "Till changes the ground state." } },
+        { "ground": "ready", "plant": "planted", "action": { "ar": "Plant", "en": "Plant" }, "caption": { "ar": "Plant تيجي بعد تجهيز الأرض.", "en": "Plant follows prepared ground." } }
+      ]
+    }
+  }
+}

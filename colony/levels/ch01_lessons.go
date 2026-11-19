@@ -53,6 +53,73 @@ func ch01Variable(name, value string) LessonVariable {
 	return LessonVariable{Name: name, Value: value}
 }
 
+func ch01TextPair(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch01Sandbox(id, text, kind string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: ch01Paragraphs(text), Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+var ch01SignalSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"position": ch01TextPair("المكان", "Position"),
+		"command":  ch01TextPair("الأمر", "Command"),
+		"previous": ch01TextPair("السابق", "Previous"),
+		"next":     ch01TextPair("التالي", "Next"),
+		"reset":    ch01TextPair("من الأول", "Reset"),
+	},
+	"frames": []map[string]any{
+		{"x": 1, "y": 1, "command": ch01TextPair("بداية", "Start"), "caption": ch01TextPair("لسه مفيش أمر.", "No command yet.")},
+		{"x": 2, "y": 1, "command": ch01TextPair("East", "East"), "caption": ch01TextPair("East يغيّر x بخانة.", "East changes x by one.")},
+		{"x": 2, "y": 2, "command": ch01TextPair("North", "North"), "caption": ch01TextPair("North يغيّر y بخانة.", "North changes y by one.")},
+		{"x": 1, "y": 2, "command": ch01TextPair("West", "West"), "caption": ch01TextPair("كل أمر ييجي بالترتيب.", "Each command follows in order.")},
+	},
+}
+
+var ch01HarvestSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"command":   ch01TextPair("الأمر", "Command"),
+		"drone":     ch01TextPair("الدرون", "Drone"),
+		"plant":     ch01TextPair("طحلب جاهز", "Moss ready"),
+		"collected": ch01TextPair("اتجمع", "Collected"),
+		"harvested": ch01TextPair("اللي اتجمع", "Harvested"),
+		"previous":  ch01TextPair("السابق", "Previous"),
+		"next":      ch01TextPair("التالي", "Next"),
+		"reset":     ch01TextPair("من الأول", "Reset"),
+	},
+	"tiles": []map[string]any{
+		{"label": ch01TextPair("محطة", "Dock"), "plant": false},
+		{"label": ch01TextPair("قطعة طحلب", "Moss plot"), "plant": true},
+		{"label": ch01TextPair("صخرة", "Rock"), "plant": false},
+	},
+	"frames": []map[string]any{
+		{"position": 0, "harvested": []int{}, "action": ch01TextPair("استعداد", "Ready"), "caption": ch01TextPair("كل حاجة بتبدأ من المكان الحالي.", "Everything starts at the current tile.")},
+		{"position": 1, "harvested": []int{}, "action": ch01TextPair("Move East", "Move East"), "caption": ch01TextPair("الحركة تسبق استدعاء الدالة.", "Movement comes before the function call.")},
+		{"position": 1, "harvested": []int{1}, "action": ch01TextPair("Harvest()", "Harvest()"), "caption": ch01TextPair("Harvest تستخدم مكان الدرون الحالي.", "Harvest uses the drone's current tile.")},
+	},
+}
+
+var ch01PlantingSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"ground":   ch01TextPair("الأرض", "Ground"),
+		"plant":    ch01TextPair("النبتة", "Plant"),
+		"action":   ch01TextPair("الأمر", "Command"),
+		"empty":    ch01TextPair("مفيش نبتة", "No plant"),
+		"unready":  ch01TextPair("لسه متجهزتش", "Unprepared"),
+		"ready":    ch01TextPair("متجهزة", "Prepared"),
+		"planted":  ch01TextPair("طحلب", "Moss"),
+		"previous": ch01TextPair("السابق", "Previous"),
+		"next":     ch01TextPair("التالي", "Next"),
+		"reset":    ch01TextPair("من الأول", "Reset"),
+	},
+	"frames": []map[string]any{
+		{"ground": "unready", "plant": "empty", "action": ch01TextPair("البداية", "Start"), "caption": ch01TextPair("الأرض لسه محتاجة تجهيز.", "The ground still needs preparation.")},
+		{"ground": "ready", "plant": "empty", "action": ch01TextPair("Till", "Till"), "caption": ch01TextPair("Till يجهز حالة الأرض.", "Till changes the ground state.")},
+		{"ground": "ready", "plant": "planted", "action": ch01TextPair("Plant", "Plant"), "caption": ch01TextPair("Plant تيجي بعد تجهيز الأرض.", "Plant follows prepared ground.")},
+	},
+}
+
 var ch01FirstSignalArabic = []LessonStep{
 	{ID: "c11.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch01Markdown("c11.mission", "1. وصّل الدرون للمنارة 📡.\n2. الدرون بيبدأ عند (0,0)، والمنارة شرقًا.\n3. شغّل البرنامج وراقب مكانه بعد كل أمر.\n\nالـstarter بدأ الحركة بالفعل؛ كمل من السطر الموجود.")}},
 	{ID: "c11.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch01Walkthrough("c11.sequence", "Go بتنّفذ أوامر ~main~ بالترتيب من فوق لتحت. كل استدعاء دالة أمر مستقل، وقيمة الاتجاه بتحدد وجهته. المثال للتوضيح وبيطبع رسالتين بالترتيب.",
@@ -69,6 +136,7 @@ var ch01FirstSignalArabic = []LessonStep{
 	fmt.Println("signal")
 }`,
 			"e11-order", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "اطبع الأمر الأول.", Output: "step"}, {Line: 3, Caption: "اطبع الإشارة بعده.", Output: "step\nsignal"}}),
+		ch01Sandbox("ch01-first-signal", "تابع مكان الدرون مع كل أمر.", "ch01-route-stepper", ch01SignalSandboxConfig),
 	}},
 	{ID: "c11.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch01Markdown("c11.watch", "- ~East~ معناها يمين الخريطة؛ الاتجاه مش عدد الخانات.\n- كل استدعاء ~Move~ بيحاول خطوة واحدة بس.")}},
 	{ID: "c11.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -94,6 +162,7 @@ var ch01FirstSignalEnglish = []LessonStep{
 	fmt.Println("signal")
 }`,
 			"e11-order", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "Before running."}, {Line: 2, Caption: "Print the first command.", Output: "step"}, {Line: 3, Caption: "Print the signal next.", Output: "step\nsignal"}}),
+		ch01Sandbox("ch01-first-signal", "Follow the drone's position after each command.", "ch01-route-stepper", ch01SignalSandboxConfig),
 	}},
 	{ID: "c11.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch01Markdown("c11.watch", "- ~East~ means right on the map; it is not a distance.\n- Each ~Move~ call tries just one step.")}},
 	{ID: "c11.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -121,6 +190,7 @@ func main() {
 	fmt.Println("harvest")
 }`,
 			"e12-order", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "نفّذ الحركة أولًا.", Output: "move"}, {Line: 3, Caption: "الحصاد يأتي بعدها.", Output: "move\nharvest"}}),
+		ch01Sandbox("ch01-first-harvest", "حرّك الدرون ثم تابع أثر ~Harvest()~.", "ch01-harvest-call", ch01HarvestSandboxConfig),
 	}},
 	{ID: "c12.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch01Markdown("c12.watch", "- ~Harvest()~ مالهاش argument، لكن لازم تكتب ~()~.\n- الحصاد بيحصل في مكان الدرون الحالي وقت الاستدعاء.")}},
 	{ID: "c12.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -148,6 +218,7 @@ func main() {
 	fmt.Println("harvest")
 }`,
 			"e12-order", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "Before running."}, {Line: 2, Caption: "Run the move first.", Output: "move"}, {Line: 3, Caption: "Harvest comes next.", Output: "move\nharvest"}}),
+		ch01Sandbox("ch01-first-harvest", "Move the drone, then watch ~Harvest()~.", "ch01-harvest-call", ch01HarvestSandboxConfig),
 	}},
 	{ID: "c12.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch01Markdown("c12.watch", "- ~Harvest()~ has no argument, but it still needs ~()~.\n- Harvest happens where the drone is when the call runs.")}},
 	{ID: "c12.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -173,6 +244,7 @@ var ch01PlantingArabic = []LessonStep{
 	fmt.Println("plant")
 }`,
 			"e13-try", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "التحضير في الأول.", Output: "prepare"}, {Line: 3, Caption: "الزراعة تأتي بعدها.", Output: "prepare\nplant"}}),
+		ch01Sandbox("ch01-planting", "تابع حالة الأرض قبل الزراعة.", "ch01-planting-state", ch01PlantingSandboxConfig),
 	}},
 	{ID: "c13.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch01Markdown("c13.watch", "- الطحلب محتاج ~soil~؛ ~regolith~ لسه محتاج تجهيز.\n- الـstarter حرث خانة البداية، فحالتها مختلفة عن الخانات التالية.")}},
 	{ID: "c13.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -198,6 +270,7 @@ var ch01PlantingEnglish = []LessonStep{
 	fmt.Println("plant")
 }`,
 			"e13-try", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "Before running."}, {Line: 2, Caption: "Prepare comes first.", Output: "prepare"}, {Line: 3, Caption: "Planting comes next.", Output: "prepare\nplant"}}),
+		ch01Sandbox("ch01-planting", "Watch the ground before planting.", "ch01-planting-state", ch01PlantingSandboxConfig),
 	}},
 	{ID: "c13.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch01Markdown("c13.watch", "- Moss needs ~soil~; ~regolith~ still needs preparation.\n- The starter tilled the starting tile, so it differs from later tiles.")}},
 	{ID: "c13.check-step", Title: "Think & check", Blocks: []LessonBlock{

@@ -1,1 +1,71 @@
-/* Chapter 02 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch02-sandbox {
+  display: grid;
+  gap: 8px;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  min-inline-size: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-2);
+  color: var(--paper);
+  text-align: start;
+}
+
+.ch02-caption { margin: 0; color: var(--paper-2); }
+.ch02-inventory-values,
+.ch02-cargo-source { display: grid; gap: 2px; min-inline-size: 0; }
+.ch02-inventory-flow > .tool { justify-self: start; }
+
+.ch02-survey-grid {
+  display: grid;
+  gap: 3px;
+  inline-size: 100%;
+  max-inline-size: 190px;
+  justify-self: center;
+}
+
+.ch02-survey-cell {
+  aspect-ratio: 1;
+  min-inline-size: 0;
+  border: 1px solid var(--rule);
+  background: var(--pat-regolith);
+}
+
+.ch02-returned-values { display: grid; gap: 2px; }
+.ch02-utf8-selected,
+.ch02-utf8-marker,
+.ch02-utf8-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ch02-utf8-selected { justify-content: space-between; }
+.ch02-rune-value { direction: ltr; unicode-bidi: isolate; font-size: 1.25em; }
+.ch02-utf8-counts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.ch02-utf8-byte-row { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; direction: ltr; }
+.ch02-utf8-group { padding: 4px; border: 1px solid var(--rule); background: var(--ink); }
+.ch02-utf8-group.selected { border-color: var(--regolith); box-shadow: inset 0 0 0 1px var(--regolith); }
+.ch02-utf8-byte { padding: 2px 4px; color: var(--paper); font: 12px/1.3 var(--mono); }
+.ch02-utf8-choices,
+.ch02-unit-choices { display: flex; flex-wrap: wrap; gap: 5px; }
+.ch02-utf8-choices .tool,
+.ch02-unit-choices .tool { min-height: 36px; height: auto; padding: 6px 9px; }
+.ch02-utf8-markers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+.ch02-utf8-marker { justify-content: center; min-inline-size: 0; padding: 5px; border: 1px solid var(--rule); overflow-wrap: anywhere; }
+.ch02-utf8-marker.active { border-color: var(--regolith); color: var(--regolith); }
+
+.ch02-unit-choice[aria-pressed="true"] { border-color: var(--regolith); color: var(--regolith); }
+.ch02-unit-conversions { display: grid; gap: 4px; min-inline-size: 0; }
+.ch02-unit-conversion-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  min-inline-size: 0;
+  padding: 4px 0;
+  border-block-end: 1px solid var(--rule);
+}
+.ch02-unit-number { min-inline-size: 0; overflow-wrap: anywhere; }
+.ch02-unit-equals { color: var(--muted); }

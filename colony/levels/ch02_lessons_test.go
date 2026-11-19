@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -34,6 +35,53 @@ func TestCh02Lessons(t *testing.T) {
 		ch02ValidateCopy(t, id+" Arabic", level.Steps, level.Hints, arabicTitles, prefix, seen)
 		ch02ValidateCopy(t, id+" English", level.En.Steps, level.En.Hints, englishTitles, prefix, nil)
 		ch02ValidateParity(t, level)
+		ch02ValidateSandboxes(t, level)
+	}
+}
+
+func TestCh02SandboxFixtures(t *testing.T) {
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch02.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]struct {
+		Kind   string         `json:"kind"`
+		Config map[string]any `json:"config"`
+	}
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	ids := []string{"2-1-inventory", "2-2-survey", "2-3-callsigns", "2-4-units"}
+	if len(fixtures) != len(ids) {
+		t.Fatalf("expected %d chapter 2 sandbox fixtures, found %d", len(ids), len(fixtures))
+	}
+	for _, id := range ids {
+		fixture, ok := fixtures[id]
+		if !ok {
+			t.Errorf("%s: missing sandbox fixture", id)
+			continue
+		}
+		var found *LessonSandbox
+		for _, block := range Get(id).Steps[2].Blocks {
+			if block.Sandbox != nil {
+				found = block.Sandbox
+			}
+		}
+		if found == nil || found.Kind != fixture.Kind {
+			t.Errorf("%s: sandbox kind does not match its fixture", id)
+			continue
+		}
+		encoded, err := json.Marshal(found.Config)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var actual map[string]any
+		if err := json.Unmarshal(encoded, &actual); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(actual, fixture.Config) {
+			t.Errorf("%s: sandbox config differs from its JavaScript fixture", id)
+		}
 	}
 }
 
@@ -81,7 +129,7 @@ func ch02ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 	t.Helper()
 	words := 0
 	claim := func(id string) {
-		if id == "" || !strings.HasPrefix(id, prefix) {
+		if id == "" || (!strings.HasPrefix(id, prefix) && !strings.HasPrefix(id, "ch02-")) {
 			t.Errorf("%s: ID %q is empty or lacks prefix %q", name, id, prefix)
 		}
 		if seen != nil && seen[id] {
@@ -131,6 +179,10 @@ func ch02ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 					continue
 				}
 				words += ch02ValidateFrames(t, name, block)
+			case "sandbox":
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch02-") || len(block.Sandbox.Config) == 0 || block.Question != nil || block.Walkthrough != nil || block.Code != "" {
+					t.Errorf("%s: %s has an invalid chapter 2 sandbox", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s has disallowed kind %q", name, block.ID, block.Kind)
 			}
@@ -154,8 +206,8 @@ func ch02ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 	}
 	if len(steps) == 6 {
 		try := steps[2]
-		if len(try.Blocks) != 2 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" {
-			t.Errorf("%s: Try it must predict first, then reveal with a walkthrough", name)
+		if len(try.Blocks) != 3 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" || try.Blocks[2].Kind != "sandbox" {
+			t.Errorf("%s: Try it must predict, reveal, then show one sandbox", name)
 		} else if strings.TrimSpace(ch02QuestionCode(try.Blocks[0].Text)) != strings.TrimSpace(try.Blocks[1].Code) {
 			t.Errorf("%s: prediction code differs from its walkthrough", name)
 		}
@@ -164,6 +216,30 @@ func ch02ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 		t.Errorf("%s: learner copy has %d words; want 200-320", name, words)
 	}
 	t.Logf("%s learner-authored words: %d", name, words)
+}
+
+func ch02ValidateSandboxes(t *testing.T, level *Level) {
+	t.Helper()
+	for _, copy := range []struct {
+		name  string
+		steps []LessonStep
+	}{{"Arabic", level.Steps}, {"English", level.En.Steps}} {
+		count := 0
+		for stepIndex, step := range copy.steps {
+			for _, block := range step.Blocks {
+				if block.Kind != "sandbox" {
+					continue
+				}
+				count++
+				if stepIndex != 2 || block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch02-") {
+					t.Errorf("%s %s: sandbox must be in Try it with a ch02 kind", level.ID, copy.name)
+				}
+			}
+		}
+		if count != 1 {
+			t.Errorf("%s %s: expected exactly one sandbox, found %d", level.ID, copy.name, count)
+		}
+	}
 }
 
 func ch02ValidateTextLines(t *testing.T, name string, block LessonBlock, maxRunes int) {
@@ -264,6 +340,13 @@ func ch02ValidateParity(t *testing.T, level *Level) {
 			translated := other.Blocks[j]
 			if block.ID != translated.ID || block.Kind != translated.Kind {
 				t.Errorf("%s: Arabic and English block identities differ", block.ID)
+			}
+			if block.Sandbox != nil {
+				if translated.Sandbox == nil || block.Sandbox.Kind != translated.Sandbox.Kind {
+					t.Errorf("%s: Arabic and English sandbox kinds differ", block.ID)
+				} else {
+					sandboxConfigParity(t, block.Sandbox.Config, translated.Sandbox.Config)
+				}
 			}
 			if block.Question != nil {
 				if translated.Question == nil || block.Question.Answer != translated.Question.Answer || len(block.Question.Options) != len(translated.Question.Options) || len(block.Question.Feedback) != len(translated.Question.Feedback) {
