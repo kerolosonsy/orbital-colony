@@ -1,1 +1,29 @@
-/* Chapter 23 sandbox styles will be added with its renderer. */
+.ch23-playground {
+  inline-size: 100%;
+  max-inline-size: 290px;
+  min-inline-size: 0;
+  padding: 8px;
+  border: 1px solid var(--rule);
+  background: var(--ink-2);
+}
+
+.ch23-playground-caption {
+  margin: 0 0 6px;
+  color: var(--paper);
+  font-weight: 650;
+}
+
+.ch23-playground-rows .sandbox-kit-value-row {
+  border-block-start: 1px solid var(--rule);
+}
+
+.ch23-playground .sandbox-kit-value {
+  overflow-wrap: anywhere;
+}
+
+.ch23-playground > .tool {
+  min-block-size: 40px;
+  block-size: auto;
+  margin-block-start: 8px;
+  padding-block: 6px;
+}

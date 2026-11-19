@@ -1,6 +1,7 @@
 package levels
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -65,11 +66,14 @@ func TestCh24Lessons(t *testing.T) {
 							}
 						}
 					}
+					if block.Sandbox != nil && (other.Sandbox == nil || block.Sandbox.Kind != other.Sandbox.Kind || !reflect.DeepEqual(block.Sandbox.Config, other.Sandbox.Config)) {
+						t.Errorf("%s: sandbox differs across languages", block.ID)
+					}
 				}
 			}
 			try := level.Steps[2].Blocks
-			if len(try) != 2 || try[0].Kind != "question" || try[1].Kind != "walkthrough" || ch24QuestionCode(try[0].Text) != try[1].Code {
-				t.Fatal("Try it must predict from code, then reveal the same code")
+			if len(try) != 3 || try[0].Kind != "question" || try[1].Kind != "walkthrough" || try[2].Kind != "sandbox" || ch24QuestionCode(try[0].Text) != try[1].Code {
+				t.Fatal("Try it must predict, reveal, then show one sandbox")
 			}
 		})
 	}
@@ -82,11 +86,12 @@ func ch24ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 	}
 	seen := map[string]bool{}
 	words := 0
+	sandboxCount := 0
 	claim := func(id string) {
 		if id == "" || seen[id] {
 			t.Errorf("%s: empty or repeated lesson ID %q", name, id)
 		}
-		if !strings.HasPrefix(id, prefix) {
+		if !strings.HasPrefix(id, prefix) && !strings.HasPrefix(id, "ch24-") {
 			t.Errorf("%s: ID %q does not begin with %q", name, id, prefix)
 		}
 		seen[id] = true
@@ -133,10 +138,18 @@ func ch24ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 					continue
 				}
 				words += ch24ValidateFrames(t, name, block)
+			case "sandbox":
+				sandboxCount++
+				if i != 2 || block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch24-") || block.Sandbox.Config == nil || block.Question != nil || block.Walkthrough != nil || block.Code != "" {
+					t.Errorf("%s: %s has an invalid chapter 24 sandbox", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed kind %q", name, block.ID, block.Kind)
 			}
 		}
+	}
+	if sandboxCount != 1 {
+		t.Errorf("%s: expected exactly one sandbox, got %d", name, sandboxCount)
 	}
 	if len(hints) != 3 {
 		t.Errorf("%s: expected exactly three hints", name)
@@ -159,6 +172,56 @@ func ch24ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 		t.Errorf("%s learner text has %d words; want 200–320", name, words)
 	}
 	t.Logf("%s learner-authored words: %d", name, words)
+}
+
+func TestCh24SandboxConfigsMatchFixtures(t *testing.T) {
+	fixtures := ch24ReadSandboxFixtures(t)
+	levels := []string{"24-1-ping-pong", "24-2-producers", "24-3-work-crew", "24-4-pipeline", "24-5-beacon-check", "24-6-chunk-download", "24-7-map-tiles"}
+	if len(fixtures) != len(levels) {
+		t.Fatalf("got %d playground fixtures for %d levels", len(fixtures), len(levels))
+	}
+	for _, id := range levels {
+		level := Get(id)
+		block := level.Steps[2].Blocks[len(level.Steps[2].Blocks)-1]
+		english := level.En.Steps[2].Blocks[len(level.En.Steps[2].Blocks)-1]
+		if block.Kind != "sandbox" || english.Kind != "sandbox" || block.ID != english.ID || block.Sandbox.Kind != english.Sandbox.Kind {
+			t.Fatalf("%s: missing matching bilingual sandbox", id)
+		}
+		fixture, ok := fixtures[block.Sandbox.Kind]
+		if !ok {
+			t.Errorf("%s: no fixture for %s", id, block.Sandbox.Kind)
+			continue
+		}
+		if !reflect.DeepEqual(ch24JSONValue(t, block.Sandbox.Config), fixture) || !reflect.DeepEqual(block.Sandbox.Config, english.Sandbox.Config) {
+			t.Errorf("%s: Go sandbox config differs from its fixture or translation", id)
+		}
+	}
+}
+
+func ch24ReadSandboxFixtures(t *testing.T) map[string]any {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch24.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]any
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	return fixtures
+}
+
+func ch24JSONValue(t *testing.T, input any) any {
+	t.Helper()
+	body, err := json.Marshal(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded any
+	if err := json.Unmarshal(body, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	return decoded
 }
 
 func ch24ValidateFrames(t *testing.T, name string, block LessonBlock) int {

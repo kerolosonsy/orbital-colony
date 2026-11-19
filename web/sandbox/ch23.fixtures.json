@@ -1,0 +1,376 @@
+{
+  "ch23-aad-check": {
+    "action": {
+      "ar": "غيّر بيانات الفتح",
+      "en": "Change open data"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "البيانات المصاحبة متطابقة.",
+          "en": "Associated data matches."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "المحتوى",
+              "en": "Payload"
+            },
+            "value": "encrypted"
+          },
+          {
+            "label": {
+              "ar": "وقت الختم",
+              "en": "Seal AAD"
+            },
+            "value": "label"
+          },
+          {
+            "label": {
+              "ar": "وقت الفتح",
+              "en": "Open AAD"
+            },
+            "value": "label"
+          },
+          {
+            "label": {
+              "ar": "التحقق",
+              "en": "Check"
+            },
+            "value": "accepted"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "البيانات المصاحبة مختلفة.",
+          "en": "Associated data differs."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "المحتوى",
+              "en": "Payload"
+            },
+            "value": "encrypted"
+          },
+          {
+            "label": {
+              "ar": "وقت الختم",
+              "en": "Seal AAD"
+            },
+            "value": "label"
+          },
+          {
+            "label": {
+              "ar": "وقت الفتح",
+              "en": "Open AAD"
+            },
+            "value": "other"
+          },
+          {
+            "label": {
+              "ar": "التحقق",
+              "en": "Check"
+            },
+            "value": "rejected"
+          }
+        ]
+      }
+    ]
+  },
+  "ch23-csv-records": {
+    "action": {
+      "ar": "السجل التالي",
+      "en": "Next record"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "اقرأ صف العناوين.",
+          "en": "Read the header row."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "السطر",
+              "en": "Line"
+            },
+            "value": "station,reading"
+          },
+          {
+            "label": {
+              "ar": "الحقول",
+              "en": "Fields"
+            },
+            "value": "[station] [reading]"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "كل عمود بقى field.",
+          "en": "Each column is a field."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "السطر",
+              "en": "Line"
+            },
+            "value": "sensor-2,7"
+          },
+          {
+            "label": {
+              "ar": "الحقول",
+              "en": "Fields"
+            },
+            "value": "[sensor-2] [7]"
+          }
+        ]
+      }
+    ]
+  },
+  "ch23-read-full": {
+    "action": {
+      "ar": "الخطوة التالية",
+      "en": "Next step"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "ابدأ بمصدر ثابت.",
+          "en": "Start with a fixed source."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "المصدر",
+              "en": "Source"
+            },
+            "value": "[9, 4]"
+          },
+          {
+            "label": {
+              "ar": "المخزن",
+              "en": "Buffer"
+            },
+            "value": "[_, _]"
+          },
+          {
+            "label": {
+              "ar": "القراءة",
+              "en": "Read"
+            },
+            "value": "n=0; waiting"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "أول بايت وصل.",
+          "en": "The first byte arrived."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "المصدر",
+              "en": "Source"
+            },
+            "value": "[9, 4]"
+          },
+          {
+            "label": {
+              "ar": "المخزن",
+              "en": "Buffer"
+            },
+            "value": "[9, _]"
+          },
+          {
+            "label": {
+              "ar": "القراءة",
+              "en": "Read"
+            },
+            "value": "n=1; still reading"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "المخزن اكتمل.",
+          "en": "The buffer is full."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "المصدر",
+              "en": "Source"
+            },
+            "value": "[9, 4]"
+          },
+          {
+            "label": {
+              "ar": "المخزن",
+              "en": "Buffer"
+            },
+            "value": "[9, 4]"
+          },
+          {
+            "label": {
+              "ar": "القراءة",
+              "en": "Read"
+            },
+            "value": "n=2; err=nil"
+          }
+        ]
+      }
+    ]
+  },
+  "ch23-read-limit": {
+    "action": {
+      "ar": "وسّع حد القراءة",
+      "en": "Increase read limit"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "اقرأ جزءًا محدودًا.",
+          "en": "Read a bounded part."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الحد",
+              "en": "Limit"
+            },
+            "value": "2 bytes"
+          },
+          {
+            "label": {
+              "ar": "المقروء",
+              "en": "Read"
+            },
+            "value": "pl"
+          },
+          {
+            "label": {
+              "ar": "المتبقي",
+              "en": "Remaining"
+            },
+            "value": "4 bytes"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "اسمح ببايتات أكتر.",
+          "en": "Allow more bytes."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الحد",
+              "en": "Limit"
+            },
+            "value": "4 bytes"
+          },
+          {
+            "label": {
+              "ar": "المقروء",
+              "en": "Read"
+            },
+            "value": "plan"
+          },
+          {
+            "label": {
+              "ar": "المتبقي",
+              "en": "Remaining"
+            },
+            "value": "2 bytes"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "اقرأ النص كله.",
+          "en": "Read the whole text."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الحد",
+              "en": "Limit"
+            },
+            "value": "6 bytes"
+          },
+          {
+            "label": {
+              "ar": "المقروء",
+              "en": "Read"
+            },
+            "value": "planet"
+          },
+          {
+            "label": {
+              "ar": "المتبقي",
+              "en": "Remaining"
+            },
+            "value": "0 bytes"
+          }
+        ]
+      }
+    ]
+  },
+  "ch23-stable-order": {
+    "action": {
+      "ar": "ترتيب إضافة تاني",
+      "en": "Another insertion order"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "ترتيب الإضافة اتغيّر.",
+          "en": "Insertion order changed."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الإضافة",
+              "en": "Inserted"
+            },
+            "value": "[bay/z, bay/a]"
+          },
+          {
+            "label": {
+              "ar": "بعد الترتيب",
+              "en": "Sorted"
+            },
+            "value": "[bay/a, bay/z]"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "النتيجة المرتبة ثابتة.",
+          "en": "The sorted result stays stable."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الإضافة",
+              "en": "Inserted"
+            },
+            "value": "[bay/a, bay/z]"
+          },
+          {
+            "label": {
+              "ar": "بعد الترتيب",
+              "en": "Sorted"
+            },
+            "value": "[bay/a, bay/z]"
+          }
+        ]
+      }
+    ]
+  }
+}
