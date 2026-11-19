@@ -1,1 +1,62 @@
-/* Chapter 30 sandbox styles will be added with its renderer. */
+.ch30-playground {
+  box-sizing: border-box;
+  inline-size: min(100%, 290px);
+  max-inline-size: 290px;
+  padding: 0.7rem;
+  border: 1px solid var(--lesson-border, #cbd5e1);
+  border-radius: 0.7rem;
+  background: var(--lesson-surface, #fff);
+  text-align: start;
+}
+
+.ch30-playground * {
+  box-sizing: border-box;
+}
+
+.ch30-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-block: 0.35rem;
+}
+
+.ch30-label,
+.ch30-status {
+  margin: 0.4rem 0;
+  color: var(--lesson-muted, #475569);
+  font-size: 0.88rem;
+}
+
+.ch30-value {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  unicode-bidi: isolate;
+}
+
+.ch30-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-block-start: 0.65rem;
+}
+
+.ch30-controls button {
+  max-inline-size: 100%;
+  font: inherit;
+}
+
+.ch30-document-list {
+  margin: 0.4rem 0;
+  padding-inline-start: 1.35rem;
+}
+
+.ch30-document-list li {
+  margin-block: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.ch30-status[role="status"] {
+  min-block-size: 1.35em;
+}

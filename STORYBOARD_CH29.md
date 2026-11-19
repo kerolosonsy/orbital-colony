@@ -139,6 +139,15 @@ func main() {
 }
 ```
 
+## Interactive playgrounds
+
+- 29-1: Switch a bound key and compare a found row with an absent one.
+- 29-2: Stage a schema change, then commit it with its version.
+- 29-3: Replay two concurrent transfers in alternate valid orders; the order can vary.
+- 29-4: Acquire and release a connection while the configured cap stays fixed.
+- 29-5: Switch a storage implementation behind one interface call.
+- 29-6: Load and hide the child slice associated with a parent.
+
 ## Toolchain transcripts
 
 Each example is compiled and run as a standalone Go program by `TestCh29StoryboardExamples`.

@@ -120,6 +120,14 @@ func main() {
 }
 ```
 
+## Interactive playgrounds
+
+- 30-1: Read through a cache miss, fill the cache, evict the key, then read again.
+- 30-2: Move across small document pages and watch the extra-row flag.
+- 30-3: Look up terms and inspect their posting lists.
+- 30-4: Write for one session, advance an illustrative clock, and compare read routes.
+- 30-Boss: Commit proposed state before simulating a cache failure.
+
 ## Toolchain transcripts
 
 #### Verified e301-cache-hit — ok

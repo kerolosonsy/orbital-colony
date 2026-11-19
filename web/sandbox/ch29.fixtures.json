@@ -1,0 +1,330 @@
+{
+  "29-1-sqlite-crud": {
+    "id": "c291.playground",
+    "kind": "ch29-sql-binding",
+    "config": {
+      "intro": {
+        "ar": "بدّل المفتاح وشوف نتيجة الربط.",
+        "en": "Change the key and watch binding."
+      },
+      "labels": {
+        "button": {
+          "ar": "بدّل المفتاح",
+          "en": "Try another key"
+        },
+        "found": {
+          "ar": "صف موجود",
+          "en": "Row found"
+        },
+        "missing": {
+          "ar": "مفيش صف مطابق",
+          "en": "No matching row"
+        },
+        "parameter": {
+          "ar": "القيمة المرتبطة",
+          "en": "Bound value"
+        },
+        "query": {
+          "ar": "استعلام ثابت",
+          "en": "Fixed query"
+        },
+        "result": {
+          "ar": "النتيجة",
+          "en": "Result"
+        }
+      },
+      "query": "SELECT payload FROM beacon WHERE code = ?",
+      "rows": [
+        {
+          "found": true,
+          "key": {
+            "ar": "ridge",
+            "en": "ridge"
+          },
+          "value": {
+            "ar": "جاهز",
+            "en": "ready"
+          }
+        },
+        {
+          "found": false,
+          "key": {
+            "ar": "cove",
+            "en": "cove"
+          },
+          "value": {
+            "ar": "—",
+            "en": "—"
+          }
+        }
+      ]
+    }
+  },
+  "29-2-migrations": {
+    "id": "c292.playground",
+    "kind": "ch29-migration-boundary",
+    "config": {
+      "intro": {
+        "ar": "جهّز تغيير المخطط وبعدين احفظه مع النسخة.",
+        "en": "Stage a schema change, then save its version."
+      },
+      "labels": {
+        "commit": {
+          "ar": "احفظ الاتنين",
+          "en": "Commit both"
+        },
+        "committed": {
+          "ar": "المخطط والنسخة اتحفظوا سوا",
+          "en": "Schema and version saved together"
+        },
+        "pending": {
+          "ar": "لسه ما اتحفظش",
+          "en": "Not saved yet"
+        },
+        "proposal": {
+          "ar": "التغيير المقترح",
+          "en": "Proposed change"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        },
+        "saved": {
+          "ar": "المخطط المحفوظ",
+          "en": "Saved schema"
+        },
+        "stage": {
+          "ar": "جهّز الترحيل",
+          "en": "Stage migration"
+        },
+        "version": {
+          "ar": "النسخة المحفوظة",
+          "en": "Saved version"
+        }
+      },
+      "nextSchema": {
+        "ar": "crates(label, zone)",
+        "en": "crates(label, zone)"
+      },
+      "schema": {
+        "ar": "crates(label)",
+        "en": "crates(label)"
+      },
+      "version": 2
+    }
+  },
+  "29-3-transfer": {
+    "id": "c293.playground",
+    "kind": "ch29-atomic-transfer",
+    "config": {
+      "intro": {
+        "ar": "جرّب ترتيبين صالحين لطلبين متزامنين.",
+        "en": "Try two valid orders for concurrent requests."
+      },
+      "labels": {
+        "accepted": {
+          "ar": "اتنقل",
+          "en": "Moved"
+        },
+        "north": {
+          "ar": "خزان الشمال",
+          "en": "North tank"
+        },
+        "possibleOrder": {
+          "ar": "ترتيب ممكن",
+          "en": "One possible order"
+        },
+        "run": {
+          "ar": "جرّب ترتيب تاني",
+          "en": "Try another order"
+        },
+        "skipped": {
+          "ar": "الرصيد ما كفّاش",
+          "en": "Not enough left"
+        },
+        "source": {
+          "ar": "المصدر",
+          "en": "Source"
+        },
+        "south": {
+          "ar": "خزان الجنوب",
+          "en": "South tank"
+        },
+        "vary": {
+          "ar": "الترتيب ممكن يتغير.",
+          "en": "The order can vary."
+        }
+      },
+      "orders": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "requests": [
+        {
+          "amount": 3,
+          "name": {
+            "ar": "الطلب A",
+            "en": "Request A"
+          },
+          "target": "north"
+        },
+        {
+          "amount": 2,
+          "name": {
+            "ar": "الطلب B",
+            "en": "Request B"
+          },
+          "target": "south"
+        }
+      ],
+      "startingBalance": 4
+    }
+  },
+  "29-4-pool": {
+    "id": "c294.playground",
+    "kind": "ch29-pool-state",
+    "config": {
+      "idle": 1,
+      "inUse": 1,
+      "intro": {
+        "ar": "حرّك اتصال وشوف الفرق بين الحد والحالة.",
+        "en": "Move a connection; compare the limit with current state."
+      },
+      "labels": {
+        "acquire": {
+          "ar": "استخدم اتصال",
+          "en": "Acquire connection"
+        },
+        "idle": {
+          "ar": "متاح",
+          "en": "Idle"
+        },
+        "inUse": {
+          "ar": "قيد الاستخدام",
+          "en": "In use"
+        },
+        "max": {
+          "ar": "الحد المفتوح",
+          "en": "Open limit"
+        },
+        "release": {
+          "ar": "حرّر اتصال",
+          "en": "Release connection"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        }
+      },
+      "maxOpen": 3
+    }
+  },
+  "29-5-sqlx": {
+    "id": "c295.playground",
+    "kind": "ch29-repository-boundary",
+    "config": {
+      "call": "Put(\"north\", 3)",
+      "contract": "Put(label, units)",
+      "implementations": [
+        {
+          "effect": {
+            "ar": "القيمة وصلت للـfake.",
+            "en": "The value reached the fake."
+          },
+          "name": {
+            "ar": "مخزن في الذاكرة",
+            "en": "Memory store"
+          }
+        },
+        {
+          "effect": {
+            "ar": "الـrepository بيربط الاسم بالقيمة.",
+            "en": "The repository binds name to value."
+          },
+          "name": {
+            "ar": "Repository بـsqlx",
+            "en": "sqlx repository"
+          }
+        }
+      ],
+      "intro": {
+        "ar": "بدّل التنفيذ وشوف عقد الواجهة ثابت.",
+        "en": "Switch implementations; the interface contract stays fixed."
+      },
+      "labels": {
+        "call": {
+          "ar": "النداء",
+          "en": "Call"
+        },
+        "contract": {
+          "ar": "عقد التخزين",
+          "en": "Store contract"
+        },
+        "implementation": {
+          "ar": "التنفيذ الحالي",
+          "en": "Current implementation"
+        },
+        "switch": {
+          "ar": "بدّل التنفيذ",
+          "en": "Switch implementation"
+        }
+      }
+    }
+  },
+  "29-6-gorm": {
+    "id": "c296.playground",
+    "kind": "ch29-association",
+    "config": {
+      "children": [
+        {
+          "ar": "داخلي",
+          "en": "inner"
+        },
+        {
+          "ar": "خارجي",
+          "en": "outer"
+        }
+      ],
+      "intro": {
+        "ar": "حمّل أبناء القبة وشوف الـassociation.",
+        "en": "Load the dome's children and inspect the association."
+      },
+      "labels": {
+        "children": {
+          "ar": "الأحواض",
+          "en": "Beds"
+        },
+        "hide": {
+          "ar": "اخفي الأحواض",
+          "en": "Hide beds"
+        },
+        "load": {
+          "ar": "حمّل الأحواض",
+          "en": "Load beds"
+        },
+        "loaded": {
+          "ar": "اتحمّلت العلاقة",
+          "en": "Association loaded"
+        },
+        "parent": {
+          "ar": "القبة",
+          "en": "Dome"
+        },
+        "unloaded": {
+          "ar": "العلاقة لسه ما اتحملتش",
+          "en": "Association not loaded"
+        }
+      },
+      "parentName": {
+        "ar": "Vega",
+        "en": "Vega"
+      }
+    }
+  }
+}

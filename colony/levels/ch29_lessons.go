@@ -66,6 +66,7 @@ func ch29BuildSteps(prefix string, english bool, lesson ch29LessonCopy) []Lesson
 		{ID: prefix + ".try-step", Title: titles[2], Blocks: []LessonBlock{
 			ch29Question(prefix+".try-predict", questionText, lesson.TryOptions, lesson.TryAnswer, lesson.TryFeedback),
 			ch29Walkthrough(prefix+".try-reveal", lesson.Reveal, lesson.TryCode, lesson.TryImports, lesson.TryID, ch29Frames(lesson.TryStates, lesson.TryCaptions)),
+			ch29SandboxBlock(prefix+".playground", prefix, english),
 		}},
 		{ID: prefix + ".watch-step", Title: titles[3], Blocks: []LessonBlock{ch29Markdown(prefix+".watch", lesson.Watch)}},
 		{ID: prefix + ".check-step", Title: titles[4], Blocks: []LessonBlock{
@@ -73,6 +74,103 @@ func ch29BuildSteps(prefix string, english bool, lesson ch29LessonCopy) []Lesson
 			ch29Question(prefix+".check", lesson.CheckQuestion, lesson.CheckOptions, lesson.CheckAnswer, lesson.CheckFeedback),
 		}},
 		{ID: prefix + ".turn-step", Title: titles[5], Blocks: []LessonBlock{ch29Markdown(prefix+".turn", lesson.Turn)}},
+	}
+}
+
+func ch29SandboxBlock(id, prefix string, english bool) LessonBlock {
+	kind, config := ch29SandboxFor(prefix)
+	intro := config["intro"].(map[string]string)
+	text := intro["ar"]
+	if english {
+		text = intro["en"]
+	}
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch29TextPair(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch29SandboxFor(prefix string) (string, map[string]any) {
+	switch prefix {
+	case "c291":
+		return "ch29-sql-binding", map[string]any{
+			"intro": ch29TextPair("بدّل المفتاح وشوف نتيجة الربط.", "Change the key and watch binding."),
+			"query": "SELECT payload FROM beacon WHERE code = ?",
+			"labels": map[string]any{
+				"query": ch29TextPair("استعلام ثابت", "Fixed query"), "parameter": ch29TextPair("القيمة المرتبطة", "Bound value"),
+				"result": ch29TextPair("النتيجة", "Result"), "found": ch29TextPair("صف موجود", "Row found"),
+				"missing": ch29TextPair("مفيش صف مطابق", "No matching row"), "button": ch29TextPair("بدّل المفتاح", "Try another key"),
+			},
+			"rows": []any{
+				map[string]any{"key": ch29TextPair("ridge", "ridge"), "value": ch29TextPair("جاهز", "ready"), "found": true},
+				map[string]any{"key": ch29TextPair("cove", "cove"), "value": ch29TextPair("—", "—"), "found": false},
+			},
+		}
+	case "c292":
+		return "ch29-migration-boundary", map[string]any{
+			"intro": ch29TextPair("جهّز تغيير المخطط وبعدين احفظه مع النسخة.", "Stage a schema change, then save its version."),
+			"labels": map[string]any{
+				"saved": ch29TextPair("المخطط المحفوظ", "Saved schema"), "version": ch29TextPair("النسخة المحفوظة", "Saved version"),
+				"proposal": ch29TextPair("التغيير المقترح", "Proposed change"), "stage": ch29TextPair("جهّز الترحيل", "Stage migration"),
+				"commit": ch29TextPair("احفظ الاتنين", "Commit both"), "reset": ch29TextPair("ابدأ من الأول", "Reset"),
+				"pending": ch29TextPair("لسه ما اتحفظش", "Not saved yet"), "committed": ch29TextPair("المخطط والنسخة اتحفظوا سوا", "Schema and version saved together"),
+			},
+			"schema": ch29TextPair("crates(label)", "crates(label)"), "nextSchema": ch29TextPair("crates(label, zone)", "crates(label, zone)"),
+			"version": 2,
+		}
+	case "c293":
+		return "ch29-atomic-transfer", map[string]any{
+			"intro": ch29TextPair("جرّب ترتيبين صالحين لطلبين متزامنين.", "Try two valid orders for concurrent requests."),
+			"labels": map[string]any{
+				"possibleOrder": ch29TextPair("ترتيب ممكن", "One possible order"), "source": ch29TextPair("المصدر", "Source"),
+				"north": ch29TextPair("خزان الشمال", "North tank"), "south": ch29TextPair("خزان الجنوب", "South tank"),
+				"run": ch29TextPair("جرّب ترتيب تاني", "Try another order"), "accepted": ch29TextPair("اتنقل", "Moved"),
+				"skipped": ch29TextPair("الرصيد ما كفّاش", "Not enough left"), "vary": ch29TextPair("الترتيب ممكن يتغير.", "The order can vary."),
+			},
+			"startingBalance": 4,
+			"requests": []any{
+				map[string]any{"name": ch29TextPair("الطلب A", "Request A"), "amount": 3, "target": "north"},
+				map[string]any{"name": ch29TextPair("الطلب B", "Request B"), "amount": 2, "target": "south"},
+			},
+			"orders": [][]int{{0, 1}, {1, 0}},
+		}
+	case "c294":
+		return "ch29-pool-state", map[string]any{
+			"intro": ch29TextPair("حرّك اتصال وشوف الفرق بين الحد والحالة.", "Move a connection; compare the limit with current state."),
+			"labels": map[string]any{
+				"max": ch29TextPair("الحد المفتوح", "Open limit"), "inUse": ch29TextPair("قيد الاستخدام", "In use"),
+				"idle": ch29TextPair("متاح", "Idle"), "acquire": ch29TextPair("استخدم اتصال", "Acquire connection"),
+				"release": ch29TextPair("حرّر اتصال", "Release connection"), "reset": ch29TextPair("ابدأ من الأول", "Reset"),
+			},
+			"maxOpen": 3, "inUse": 1, "idle": 1,
+		}
+	case "c295":
+		return "ch29-repository-boundary", map[string]any{
+			"intro": ch29TextPair("بدّل التنفيذ وشوف عقد الواجهة ثابت.", "Switch implementations; the interface contract stays fixed."),
+			"labels": map[string]any{
+				"contract": ch29TextPair("عقد التخزين", "Store contract"), "implementation": ch29TextPair("التنفيذ الحالي", "Current implementation"),
+				"call": ch29TextPair("النداء", "Call"), "switch": ch29TextPair("بدّل التنفيذ", "Switch implementation"),
+			},
+			"contract": "Put(label, units)", "call": "Put(\"north\", 3)",
+			"implementations": []any{
+				map[string]any{"name": ch29TextPair("مخزن في الذاكرة", "Memory store"), "effect": ch29TextPair("القيمة وصلت للـfake.", "The value reached the fake.")},
+				map[string]any{"name": ch29TextPair("Repository بـsqlx", "sqlx repository"), "effect": ch29TextPair("الـrepository بيربط الاسم بالقيمة.", "The repository binds name to value.")},
+			},
+		}
+	case "c296":
+		return "ch29-association", map[string]any{
+			"intro": ch29TextPair("حمّل أبناء القبة وشوف الـassociation.", "Load the dome's children and inspect the association."),
+			"labels": map[string]any{
+				"parent": ch29TextPair("القبة", "Dome"), "children": ch29TextPair("الأحواض", "Beds"),
+				"load": ch29TextPair("حمّل الأحواض", "Load beds"), "hide": ch29TextPair("اخفي الأحواض", "Hide beds"),
+				"unloaded": ch29TextPair("العلاقة لسه ما اتحملتش", "Association not loaded"), "loaded": ch29TextPair("اتحمّلت العلاقة", "Association loaded"),
+			},
+			"parentName": ch29TextPair("Vega", "Vega"),
+			"children":   []any{ch29TextPair("داخلي", "inner"), ch29TextPair("خارجي", "outer")},
+		}
+	default:
+		panic("unknown chapter 29 sandbox prefix: " + prefix)
 	}
 }
 
