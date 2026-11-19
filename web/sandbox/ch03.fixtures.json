@@ -1,0 +1,492 @@
+{
+  "ch03-repeat-counter": {
+    "ar": {
+      "labels": {
+        "counter": {
+          "ar": "العداد i",
+          "en": ""
+        },
+        "prints": {
+          "ar": "الناتج",
+          "en": ""
+        },
+        "next": {
+          "ar": "الخطوة الجاية",
+          "en": ""
+        },
+        "reset": {
+          "ar": "من الأول",
+          "en": ""
+        }
+      },
+      "frames": [
+        {
+          "i": 1,
+          "prints": [],
+          "caption": {
+            "ar": "قبل أول طبعة.",
+            "en": ""
+          }
+        },
+        {
+          "i": 1,
+          "prints": [
+            1
+          ],
+          "caption": {
+            "ar": "الجسم يطبع القيمة 1.",
+            "en": ""
+          }
+        },
+        {
+          "i": 2,
+          "prints": [
+            1
+          ],
+          "caption": {
+            "ar": "العداد يزيد إلى 2.",
+            "en": ""
+          }
+        },
+        {
+          "i": 2,
+          "prints": [
+            1,
+            2
+          ],
+          "caption": {
+            "ar": "اللفة التانية تطبع 2.",
+            "en": ""
+          }
+        },
+        {
+          "i": 3,
+          "prints": [
+            1,
+            2
+          ],
+          "caption": {
+            "ar": "العداد يزيد إلى 3.",
+            "en": ""
+          }
+        },
+        {
+          "i": 3,
+          "prints": [
+            1,
+            2,
+            3
+          ],
+          "caption": {
+            "ar": "اللفة الأخيرة تطبع 3.",
+            "en": ""
+          }
+        },
+        {
+          "i": 4,
+          "prints": [
+            1,
+            2,
+            3
+          ],
+          "caption": {
+            "ar": "عند 4 الشرط يقف.",
+            "en": ""
+          }
+        }
+      ]
+    },
+    "en": {
+      "labels": {
+        "counter": {
+          "ar": "",
+          "en": "Counter i"
+        },
+        "prints": {
+          "ar": "",
+          "en": "Output"
+        },
+        "next": {
+          "ar": "",
+          "en": "Next step"
+        },
+        "reset": {
+          "ar": "",
+          "en": "Reset"
+        }
+      },
+      "frames": [
+        {
+          "i": 1,
+          "prints": [],
+          "caption": {
+            "ar": "",
+            "en": "Before the first print."
+          }
+        },
+        {
+          "i": 1,
+          "prints": [
+            1
+          ],
+          "caption": {
+            "ar": "",
+            "en": "The body prints value 1."
+          }
+        },
+        {
+          "i": 2,
+          "prints": [
+            1
+          ],
+          "caption": {
+            "ar": "",
+            "en": "The counter advances to 2."
+          }
+        },
+        {
+          "i": 2,
+          "prints": [
+            1,
+            2
+          ],
+          "caption": {
+            "ar": "",
+            "en": "The second loop prints 2."
+          }
+        },
+        {
+          "i": 3,
+          "prints": [
+            1,
+            2
+          ],
+          "caption": {
+            "ar": "",
+            "en": "The counter advances to 3."
+          }
+        },
+        {
+          "i": 3,
+          "prints": [
+            1,
+            2,
+            3
+          ],
+          "caption": {
+            "ar": "",
+            "en": "The final loop prints 3."
+          }
+        },
+        {
+          "i": 4,
+          "prints": [
+            1,
+            2,
+            3
+          ],
+          "caption": {
+            "ar": "",
+            "en": "At 4, the condition stops."
+          }
+        }
+      ]
+    }
+  },
+  "ch03-nested-grid": {
+    "ar": {
+      "rows": 2,
+      "columns": 2,
+      "labels": {
+        "position": {
+          "ar": "الصف والعمود",
+          "en": ""
+        },
+        "next": {
+          "ar": "الخطوة الجاية",
+          "en": ""
+        },
+        "reset": {
+          "ar": "من الأول",
+          "en": ""
+        }
+      },
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "visited": [],
+          "caption": {
+            "ar": "ابدأ الصف الأول.",
+            "en": ""
+          }
+        },
+        {
+          "row": 0,
+          "column": 0,
+          "visited": [
+            0
+          ],
+          "caption": {
+            "ar": "ابدأ العمود من صفر.",
+            "en": ""
+          }
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "visited": [
+            0,
+            1
+          ],
+          "caption": {
+            "ar": "العمود الداخلي يتحرك.",
+            "en": ""
+          }
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "visited": [
+            0,
+            1,
+            2
+          ],
+          "caption": {
+            "ar": "صف جديد؛ العمود يرجع.",
+            "en": ""
+          }
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "visited": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "caption": {
+            "ar": "آخر خانة في الشبكة.",
+            "en": ""
+          }
+        }
+      ]
+    },
+    "en": {
+      "rows": 2,
+      "columns": 2,
+      "labels": {
+        "position": {
+          "ar": "",
+          "en": "Row and column"
+        },
+        "next": {
+          "ar": "",
+          "en": "Next step"
+        },
+        "reset": {
+          "ar": "",
+          "en": "Reset"
+        }
+      },
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "visited": [],
+          "caption": {
+            "ar": "",
+            "en": "Start the first row."
+          }
+        },
+        {
+          "row": 0,
+          "column": 0,
+          "visited": [
+            0
+          ],
+          "caption": {
+            "ar": "",
+            "en": "Start the column at zero."
+          }
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "visited": [
+            0,
+            1
+          ],
+          "caption": {
+            "ar": "",
+            "en": "The inner column advances."
+          }
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "visited": [
+            0,
+            1,
+            2
+          ],
+          "caption": {
+            "ar": "",
+            "en": "New row; the column resets."
+          }
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "visited": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "caption": {
+            "ar": "",
+            "en": "The last grid cell."
+          }
+        }
+      ]
+    }
+  },
+  "ch03-condition-loop": {
+    "ar": {
+      "limit": 3,
+      "labels": {
+        "count": {
+          "ar": "العدد",
+          "en": ""
+        },
+        "condition": {
+          "ar": "الشرط",
+          "en": ""
+        },
+        "running": {
+          "ar": "true · شغّال",
+          "en": ""
+        },
+        "stopped": {
+          "ar": "false · وقف",
+          "en": ""
+        },
+        "next": {
+          "ar": "الخطوة الجاية",
+          "en": ""
+        },
+        "reset": {
+          "ar": "من الأول",
+          "en": ""
+        }
+      },
+      "frames": [
+        {
+          "count": 0,
+          "runs": 0,
+          "running": true,
+          "caption": {
+            "ar": "ابدأ والعدد صفر.",
+            "en": ""
+          }
+        },
+        {
+          "count": 1,
+          "runs": 1,
+          "running": true,
+          "caption": {
+            "ar": "الجسم زوّد العدد.",
+            "en": ""
+          }
+        },
+        {
+          "count": 2,
+          "runs": 2,
+          "running": true,
+          "caption": {
+            "ar": "الشرط لسه true.",
+            "en": ""
+          }
+        },
+        {
+          "count": 3,
+          "runs": 3,
+          "running": false,
+          "caption": {
+            "ar": "الشرط بقى false.",
+            "en": ""
+          }
+        }
+      ]
+    },
+    "en": {
+      "limit": 3,
+      "labels": {
+        "count": {
+          "ar": "",
+          "en": "Count"
+        },
+        "condition": {
+          "ar": "",
+          "en": "Condition"
+        },
+        "running": {
+          "ar": "",
+          "en": "true · running"
+        },
+        "stopped": {
+          "ar": "",
+          "en": "false · stopped"
+        },
+        "next": {
+          "ar": "",
+          "en": "Next step"
+        },
+        "reset": {
+          "ar": "",
+          "en": "Reset"
+        }
+      },
+      "frames": [
+        {
+          "count": 0,
+          "runs": 0,
+          "running": true,
+          "caption": {
+            "ar": "",
+            "en": "Start with a zero count."
+          }
+        },
+        {
+          "count": 1,
+          "runs": 1,
+          "running": true,
+          "caption": {
+            "ar": "",
+            "en": "The body increased the count."
+          }
+        },
+        {
+          "count": 2,
+          "runs": 2,
+          "running": true,
+          "caption": {
+            "ar": "",
+            "en": "The condition is still true."
+          }
+        },
+        {
+          "count": 3,
+          "runs": 3,
+          "running": false,
+          "caption": {
+            "ar": "",
+            "en": "The condition became false."
+          }
+        }
+      ]
+    }
+  }
+}

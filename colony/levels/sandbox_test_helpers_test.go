@@ -1,6 +1,7 @@
 package levels
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +12,9 @@ import (
 
 func sandboxConfigParity(t *testing.T, arabic, english map[string]any) {
 	t.Helper()
-	if difference := sandboxConfigDifference(reflect.ValueOf(arabic), reflect.ValueOf(english), "config"); difference != "" {
+	// Compare the JSON shape the client receives, so typed structs and maps
+	// are treated alike and only string leaves may differ.
+	if difference := sandboxConfigDifference(reflect.ValueOf(sandboxConfigJSON(arabic)), reflect.ValueOf(sandboxConfigJSON(english)), "config"); difference != "" {
 		t.Errorf("sandbox %s differs across languages", difference)
 	}
 }
@@ -153,4 +156,16 @@ func TestSandboxKindsHaveRenderers(t *testing.T) {
 			t.Errorf("sandbox kind %q has no Lessons.registerSandbox call", kind)
 		}
 	}
+}
+
+func sandboxConfigJSON(config map[string]any) any {
+	raw, err := json.Marshal(config)
+	if err != nil {
+		return config
+	}
+	var v any
+	if json.Unmarshal(raw, &v) != nil {
+		return config
+	}
+	return v
 }

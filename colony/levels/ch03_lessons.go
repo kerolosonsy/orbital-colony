@@ -25,6 +25,93 @@ func ch03Walkthrough(id, text, code, exampleID string, frames []LessonFrame) Les
 	}
 }
 
+func ch03Locale(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch03Sandbox(id, text, kind string, config map[string]any, english bool) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: ch03ConfigForLanguage(config, english).(map[string]any)}}
+}
+
+func ch03ConfigForLanguage(value any, english bool) any {
+	switch current := value.(type) {
+	case map[string]any:
+		ar, hasArabic := current["ar"].(string)
+		en, hasEnglish := current["en"].(string)
+		if len(current) == 2 && hasArabic && hasEnglish {
+			if english {
+				return map[string]any{"ar": "", "en": en}
+			}
+			return map[string]any{"ar": ar, "en": ""}
+		}
+		localized := make(map[string]any, len(current))
+		for key, nested := range current {
+			localized[key] = ch03ConfigForLanguage(nested, english)
+		}
+		return localized
+	case []any:
+		localized := make([]any, len(current))
+		for i, nested := range current {
+			localized[i] = ch03ConfigForLanguage(nested, english)
+		}
+		return localized
+	default:
+		return current
+	}
+}
+
+var ch03RepeatConfig = map[string]any{
+	"labels": map[string]any{
+		"counter": ch03Locale("العداد i", "Counter i"),
+		"prints":  ch03Locale("الناتج", "Output"),
+		"next":    ch03Locale("الخطوة الجاية", "Next step"),
+		"reset":   ch03Locale("من الأول", "Reset"),
+	},
+	"frames": []any{
+		map[string]any{"i": 1, "prints": []int{}, "caption": ch03Locale("قبل أول طبعة.", "Before the first print.")},
+		map[string]any{"i": 1, "prints": []int{1}, "caption": ch03Locale("الجسم يطبع القيمة 1.", "The body prints value 1.")},
+		map[string]any{"i": 2, "prints": []int{1}, "caption": ch03Locale("العداد يزيد إلى 2.", "The counter advances to 2.")},
+		map[string]any{"i": 2, "prints": []int{1, 2}, "caption": ch03Locale("اللفة التانية تطبع 2.", "The second loop prints 2.")},
+		map[string]any{"i": 3, "prints": []int{1, 2}, "caption": ch03Locale("العداد يزيد إلى 3.", "The counter advances to 3.")},
+		map[string]any{"i": 3, "prints": []int{1, 2, 3}, "caption": ch03Locale("اللفة الأخيرة تطبع 3.", "The final loop prints 3.")},
+		map[string]any{"i": 4, "prints": []int{1, 2, 3}, "caption": ch03Locale("عند 4 الشرط يقف.", "At 4, the condition stops.")},
+	},
+}
+
+var ch03NestedConfig = map[string]any{
+	"rows": 2, "columns": 2,
+	"labels": map[string]any{
+		"position": ch03Locale("الصف والعمود", "Row and column"),
+		"next":     ch03Locale("الخطوة الجاية", "Next step"),
+		"reset":    ch03Locale("من الأول", "Reset"),
+	},
+	"frames": []any{
+		map[string]any{"row": 0, "column": 0, "visited": []int{}, "caption": ch03Locale("ابدأ الصف الأول.", "Start the first row.")},
+		map[string]any{"row": 0, "column": 0, "visited": []int{0}, "caption": ch03Locale("ابدأ العمود من صفر.", "Start the column at zero.")},
+		map[string]any{"row": 0, "column": 1, "visited": []int{0, 1}, "caption": ch03Locale("العمود الداخلي يتحرك.", "The inner column advances.")},
+		map[string]any{"row": 1, "column": 0, "visited": []int{0, 1, 2}, "caption": ch03Locale("صف جديد؛ العمود يرجع.", "New row; the column resets.")},
+		map[string]any{"row": 1, "column": 1, "visited": []int{0, 1, 2, 3}, "caption": ch03Locale("آخر خانة في الشبكة.", "The last grid cell.")},
+	},
+}
+
+var ch03ConditionConfig = map[string]any{
+	"limit": 3,
+	"labels": map[string]any{
+		"count":     ch03Locale("العدد", "Count"),
+		"condition": ch03Locale("الشرط", "Condition"),
+		"running":   ch03Locale("true · شغّال", "true · running"),
+		"stopped":   ch03Locale("false · وقف", "false · stopped"),
+		"next":      ch03Locale("الخطوة الجاية", "Next step"),
+		"reset":     ch03Locale("من الأول", "Reset"),
+	},
+	"frames": []any{
+		map[string]any{"count": 0, "runs": 0, "running": true, "caption": ch03Locale("ابدأ والعدد صفر.", "Start with a zero count.")},
+		map[string]any{"count": 1, "runs": 1, "running": true, "caption": ch03Locale("الجسم زوّد العدد.", "The body increased the count.")},
+		map[string]any{"count": 2, "runs": 2, "running": true, "caption": ch03Locale("الشرط لسه true.", "The condition is still true.")},
+		map[string]any{"count": 3, "runs": 3, "running": false, "caption": ch03Locale("الشرط بقى false.", "The condition became false.")},
+	},
+}
+
 var ch03LongRowArabic = []LessonStep{
 	{ID: "c31.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch03Markdown("c31.mission", "1. احصد الـ14 نبتة طحلب في الصف الطويل.\n2. الـstarter بيحرّك شرق 3 مرات ومش بيحصد.\n3. هدف الذهب 28 ticks؛ خلّي كل تكرار يعمل شغل مفيد.")}},
 	{ID: "c31.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch03Walkthrough("c31.loop-trace", "الـfor فيها بداية وشرط وتغيير للعداد.\n\nالجسم بيتكرر طول ما الشرط true. الأرقام هنا للتوضيح.", `func main() {
@@ -58,7 +145,9 @@ var ch03LongRowArabic = []LessonStep{
 			{Line: 2, Caption: "العداد بقى 1.", Variables: []LessonVariable{{Name: "n", Value: "1"}}, Output: "step"},
 			{Line: 3, Caption: "اطبع المرة التانية.", Variables: []LessonVariable{{Name: "n", Value: "1"}}, Output: "step\nstep"},
 			{Line: 2, Caption: "الشرط وقف عند 2.", Variables: []LessonVariable{{Name: "n", Value: "2"}}, Output: "step\nstep"},
-		})},
+		}),
+		ch03Sandbox("ch03-loop-counter", "اضغط وتابع العداد والناتج.", "ch03-repeat-counter", ch03RepeatConfig, false),
+	},
 	},
 	{ID: "c31.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch03Markdown("c31.watch", "- حط الأوامر اللي عايز تكررها جوه ~{ }~.\n- شرط غلط ممكن يكرر أكتر أو أقل من المطلوب.")}},
 	{ID: "c31.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -105,7 +194,9 @@ var ch03LongRowEnglish = []LessonStep{
 			{Line: 2, Caption: "The counter is now 1.", Variables: []LessonVariable{{Name: "n", Value: "1"}}, Output: "step"},
 			{Line: 3, Caption: "Print the second time.", Variables: []LessonVariable{{Name: "n", Value: "1"}}, Output: "step\nstep"},
 			{Line: 2, Caption: "The condition stops at 2.", Variables: []LessonVariable{{Name: "n", Value: "2"}}, Output: "step\nstep"},
-		})},
+		}),
+		ch03Sandbox("ch03-loop-counter", "Step through the counter and output.", "ch03-repeat-counter", ch03RepeatConfig, true),
+	},
 	},
 	{ID: "c31.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch03Markdown("c31.watch", "- Put the commands to repeat inside ~{ }~.\n- A wrong condition can repeat too many or too few times.")}},
 	{ID: "c31.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -160,7 +251,9 @@ var ch03FullFieldArabic = []LessonStep{
 			{Line: 2, Caption: "الصف التالي رقمه 1.", Variables: []LessonVariable{{Name: "row", Value: "1"}}, Output: "row 0"},
 			{Line: 3, Caption: "ابدأ العمود من جديد.", Variables: []LessonVariable{{Name: "row", Value: "1"}, {Name: "col", Value: "0"}}, Output: "row 0"},
 			{Line: 4, Caption: "اطبع الصف الأول.", Variables: []LessonVariable{{Name: "row", Value: "1"}, {Name: "col", Value: "0"}}, Output: "row 0\nrow 1"},
-		})},
+		}),
+		ch03Sandbox("ch03-nested-grid", "اضغط وشوف العداد الداخلي يرجع.", "ch03-nested-grid", ch03NestedConfig, false),
+	},
 	},
 	{ID: "c32.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch03Markdown("c32.watch", "- العداد الداخلي بيرجع للبداية مع كل صف جديد.\n- الشرط الحدّي غلط ممكن يفوّت صف أو يطلب حركة زيادة.")}},
 	{ID: "c32.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -215,7 +308,9 @@ var ch03FullFieldEnglish = []LessonStep{
 			{Line: 2, Caption: "The next row is 1.", Variables: []LessonVariable{{Name: "row", Value: "1"}}, Output: "row 0"},
 			{Line: 3, Caption: "Restart the column at zero.", Variables: []LessonVariable{{Name: "row", Value: "1"}, {Name: "col", Value: "0"}}, Output: "row 0"},
 			{Line: 4, Caption: "Print row one.", Variables: []LessonVariable{{Name: "row", Value: "1"}, {Name: "col", Value: "0"}}, Output: "row 0\nrow 1"},
-		})},
+		}),
+		ch03Sandbox("ch03-nested-grid", "Step through the inner counter resetting.", "ch03-nested-grid", ch03NestedConfig, true),
+	},
 	},
 	{ID: "c32.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch03Markdown("c32.watch", "- The inner counter restarts for each new row.\n- A bad bound may skip a row or add a move.")}},
 	{ID: "c32.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -272,7 +367,9 @@ var ch03EndlessArabic = []LessonStep{
 			{Line: 4, Caption: "اطبع القيمة 1.", Variables: []LessonVariable{{Name: "left", Value: "1"}}, Output: "2\n1"},
 			{Line: 5, Caption: "left بقت صفر.", Variables: []LessonVariable{{Name: "left", Value: "0"}}, Output: "2\n1"},
 			{Line: 3, Caption: "الشرط وقف عند صفر.", Variables: []LessonVariable{{Name: "left", Value: "0"}}, Output: "2\n1"},
-		})},
+		}),
+		ch03Sandbox("ch03-condition-loop", "اضغط وتابع تغيّر الشرط.", "ch03-condition-loop", ch03ConditionConfig, false),
+	},
 	},
 	{ID: "c33.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch03Markdown("c33.watch", "- لو الشرط ما بيتغيرش، loop مش هتخلص.\n- الطحلب محتاج 8 ticks بعد الزرع؛ بدري عليه يتدمر.")}},
 	{ID: "c33.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -329,7 +426,9 @@ var ch03EndlessEnglish = []LessonStep{
 			{Line: 4, Caption: "Print the value 1.", Variables: []LessonVariable{{Name: "left", Value: "1"}}, Output: "2\n1"},
 			{Line: 5, Caption: "left becomes zero.", Variables: []LessonVariable{{Name: "left", Value: "0"}}, Output: "2\n1"},
 			{Line: 3, Caption: "The condition stops at zero.", Variables: []LessonVariable{{Name: "left", Value: "0"}}, Output: "2\n1"},
-		})},
+		}),
+		ch03Sandbox("ch03-condition-loop", "Step through the changing condition.", "ch03-condition-loop", ch03ConditionConfig, true),
+	},
 	},
 	{ID: "c33.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch03Markdown("c33.watch", "- If the condition never changes, the loop will not finish.\n- Moss needs 8 ticks after planting; early harvest destroys it.")}},
 	{ID: "c33.check-step", Title: "Think & check", Blocks: []LessonBlock{

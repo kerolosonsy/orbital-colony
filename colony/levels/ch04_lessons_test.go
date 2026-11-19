@@ -1,7 +1,9 @@
 package levels
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,6 +17,14 @@ import (
 )
 
 func TestCh04Lessons(t *testing.T) {
+	fixtureBody, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch04.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]json.RawMessage
+	if err := json.Unmarshal(fixtureBody, &fixtures); err != nil {
+		t.Fatal(err)
+	}
 	ids := []string{"4-1-ripe-only", "4-2-terrain", "4-3-checkpoint"}
 	prefixes := []string{"c41.", "c42.", "c43."}
 	arabicTitles := []string{"المهمة", "الفكرة", "جرّب", "خد بالك", "فكّر واختبر", "دورك"}
@@ -30,7 +40,15 @@ func TestCh04Lessons(t *testing.T) {
 		}
 		ch04ValidateCopy(t, id+" Arabic", level.Steps, level.Hints, arabicTitles, prefixes[mission], seen)
 		ch04ValidateCopy(t, id+" English", level.En.Steps, level.En.Hints, englishTitles, prefixes[mission], nil)
-		englishJSON := fmt.Sprint(level.En.Steps)
+		ch04ValidateSandboxes(t, id, level.Steps, level.En.Steps, fixtures)
+		englishSteps := append([]LessonStep(nil), level.En.Steps...)
+		for i := range englishSteps {
+			englishSteps[i].Blocks = append([]LessonBlock(nil), englishSteps[i].Blocks...)
+			for j := range englishSteps[i].Blocks {
+				englishSteps[i].Blocks[j].Sandbox = nil
+			}
+		}
+		englishJSON := fmt.Sprint(englishSteps)
 		if strings.ContainsFunc(englishJSON, func(r rune) bool { return unicode.Is(unicode.Arabic, r) }) {
 			t.Errorf("%s: Arabic text appears in English steps", id)
 		}
@@ -66,6 +84,73 @@ func TestCh04Lessons(t *testing.T) {
 	}
 }
 
+func ch04ValidateSandboxes(t *testing.T, levelID string, arabic, english []LessonStep, fixtures map[string]json.RawMessage) {
+	t.Helper()
+	collect := func(steps []LessonStep) []LessonBlock {
+		var found []LessonBlock
+		for _, step := range steps {
+			for _, block := range step.Blocks {
+				if block.Kind == "sandbox" {
+					found = append(found, block)
+				}
+			}
+		}
+		return found
+	}
+	arabicBlocks, englishBlocks := collect(arabic), collect(english)
+	if len(arabicBlocks) != 1 || len(englishBlocks) != 1 {
+		t.Fatalf("%s: expected exactly one sandbox in both languages", levelID)
+	}
+	arabicBlock, englishBlock := arabicBlocks[0], englishBlocks[0]
+	if arabicBlock.ID != englishBlock.ID || arabicBlock.Kind != "sandbox" || englishBlock.Kind != "sandbox" || !strings.HasPrefix(arabicBlock.ID, "ch04-") {
+		t.Errorf("%s: Arabic and English sandbox block ID differs", levelID)
+	}
+	if arabicBlock.Sandbox == nil || englishBlock.Sandbox == nil {
+		t.Fatalf("%s: sandbox payload is missing", levelID)
+	}
+	if !strings.HasPrefix(arabicBlock.Sandbox.Kind, "ch04-") || arabicBlock.Sandbox.Kind != englishBlock.Sandbox.Kind {
+		t.Errorf("%s: Arabic and English sandbox kind prefix or identity differs", levelID)
+	}
+	if difference := sandboxConfigDifference(reflect.ValueOf(arabicBlock.Sandbox.Config), reflect.ValueOf(englishBlock.Sandbox.Config), "config"); difference != "" {
+		t.Errorf("%s: Arabic and English sandbox configs differ at %s", levelID, difference)
+	}
+	if len(arabic[2].Blocks) != 3 || arabic[2].Blocks[2].ID != arabicBlock.ID || arabic[2].Blocks[2].Sandbox == nil {
+		t.Errorf("%s: Try it sandbox must follow the question and walkthrough", levelID)
+	}
+	fixture, ok := fixtures[arabicBlock.Sandbox.Kind]
+	if !ok {
+		t.Errorf("%s: missing JS fixture for %s", levelID, arabicBlock.Sandbox.Kind)
+		return
+	}
+	var localizedFixtures map[string]json.RawMessage
+	if err := json.Unmarshal(fixture, &localizedFixtures); err != nil {
+		t.Fatal(err)
+	}
+	for _, language := range []struct {
+		name   string
+		config map[string]any
+	}{
+		{name: "ar", config: arabicBlock.Sandbox.Config},
+		{name: "en", config: englishBlock.Sandbox.Config},
+	} {
+		var expected any
+		if err := json.Unmarshal(localizedFixtures[language.name], &expected); err != nil {
+			t.Fatal(err)
+		}
+		want, err := json.Marshal(expected)
+		if err != nil {
+			t.Fatal(err)
+		}
+		actual, err := json.Marshal(language.config)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(actual, want) {
+			t.Errorf("%s: Go %s config for %s differs from its JS fixture", levelID, language.name, arabicBlock.Sandbox.Kind)
+		}
+	}
+}
+
 func TestCh04LessonIDsAreGloballyUnique(t *testing.T) {
 	seen := map[string]string{}
 	for _, level := range All {
@@ -91,8 +176,8 @@ func ch04BlockIDs(blocks []LessonBlock) []string {
 func ch04ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titles []string, prefix string, seen map[string]bool) {
 	t.Helper()
 	localIDs := map[string]bool{}
-	claim := func(id string) {
-		if id == "" || localIDs[id] || !strings.HasPrefix(id, prefix) {
+	claim := func(id, idPrefix string) {
+		if id == "" || localIDs[id] || !strings.HasPrefix(id, idPrefix) {
 			t.Errorf("%s: invalid, duplicate, or wrongly prefixed ID %q", name, id)
 		}
 		localIDs[id] = true
@@ -103,15 +188,19 @@ func ch04ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 			seen[id] = true
 		}
 	}
-	words, walkthroughs, questions := 0, 0, 0
+	words, walkthroughs, questions, sandboxes := 0, 0, 0, 0
 	for i, step := range steps {
-		claim(step.ID)
+		claim(step.ID, prefix)
 		if i >= len(titles) || step.Title != titles[i] || len(step.Blocks) == 0 {
 			t.Errorf("%s: step %d has a wrong title or no blocks", name, i+1)
 		}
 		words += ch04TextWords(step.Title)
 		for _, block := range step.Blocks {
-			claim(block.ID)
+			blockPrefix := prefix
+			if block.Kind == "sandbox" {
+				blockPrefix = "ch04-"
+			}
+			claim(block.ID, blockPrefix)
 			if strings.TrimSpace(block.Text) == "" {
 				t.Errorf("%s: %s has no learner text", name, block.ID)
 			}
@@ -144,6 +233,11 @@ func ch04ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 					continue
 				}
 				words += ch04ValidateFrames(t, name, block)
+			case "sandbox":
+				sandboxes++
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch04-") {
+					t.Errorf("%s: %s has an invalid chapter 4 sandbox", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed kind %q", name, block.ID, block.Kind)
 			}
@@ -157,8 +251,8 @@ func ch04ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 	}
 	if len(steps) > 2 {
 		try := steps[2]
-		if len(try.Blocks) != 2 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" {
-			t.Errorf("%s: Try it must predict first, then reveal with a walkthrough", name)
+		if len(try.Blocks) != 3 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" || try.Blocks[2].Kind != "sandbox" {
+			t.Errorf("%s: Try it must end with one sandbox after its prediction and walkthrough", name)
 		} else if strings.TrimSpace(ch04QuestionCode(try.Blocks[0].Text)) != strings.TrimSpace(try.Blocks[1].Code) {
 			t.Errorf("%s: prediction code differs from its reveal", name)
 		}
@@ -178,8 +272,8 @@ func ch04ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 			words += ch04TextWords(hint)
 		}
 	}
-	if walkthroughs != 2 || questions != 2 {
-		t.Errorf("%s: expected two walkthroughs and two questions, got %d and %d", name, walkthroughs, questions)
+	if walkthroughs != 2 || questions != 2 || sandboxes != 1 {
+		t.Errorf("%s: expected two walkthroughs, two questions, and one sandbox, got %d, %d, and %d", name, walkthroughs, questions, sandboxes)
 	}
 	if words < 200 || words > 320 {
 		t.Errorf("%s: learner text has %d words; want 200-320", name, words)

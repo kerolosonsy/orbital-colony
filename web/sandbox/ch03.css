@@ -1,1 +1,52 @@
-/* Chapter 03 sandbox styles will be added with its renderer. */
+.ch03-repeat-counter,
+.ch03-nested-grid,
+.ch03-condition-loop {
+  box-sizing: border-box;
+  inline-size: min(100%, 290px);
+  min-inline-size: 0;
+  padding: 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--ink-2);
+}
+
+.ch03-repeat-state,
+.ch03-nested-state,
+.ch03-condition-state { min-inline-size: 0; }
+
+.ch03-repeat-counter-value,
+.ch03-repeat-output,
+.ch03-nested-position,
+.ch03-condition-count,
+.ch03-condition-value { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin-block: 4px 8px; }
+
+.ch03-repeat-label,
+.ch03-nested-label,
+.ch03-condition-label { color: var(--paper-2); font-size: 12px; }
+
+.ch03-repeat-number,
+.ch03-nested-coordinates,
+.ch03-condition-number { font: 600 14px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
+
+.ch03-repeat-values { display: flex; flex-wrap: wrap; gap: 5px; min-block-size: 28px; }
+.ch03-repeat-value { min-inline-size: 28px; padding: 2px 6px; text-align: center; border: 1px solid var(--rule-strong); border-radius: 4px; font: 13px/1.5 var(--mono); }
+
+.ch03-nested-cells { display: grid; grid-template-columns: repeat(2, minmax(36px, 1fr)); gap: 5px; max-inline-size: 88px; }
+.ch03-nested-cell { display: grid; place-items: center; aspect-ratio: 1; border: 1px solid var(--rule-strong); border-radius: 4px; color: var(--paper-2); font: 11px/1 var(--mono); }
+.ch03-nested-cell.visited { background: color-mix(in oklab, var(--regolith) 30%, var(--ink-2)); color: var(--paper); }
+.ch03-nested-cell.active { outline: 2px solid var(--regolith); outline-offset: 1px; }
+
+.ch03-condition-status { font: 600 12px/1.5 var(--mono); }
+.ch03-condition-progress { display: flex; gap: 6px; padding-block: 4px; }
+.ch03-condition-dot { inline-size: 14px; block-size: 14px; border: 1px solid var(--rule-strong); border-radius: 50%; }
+.ch03-condition-dot.complete { border-color: var(--regolith); background: var(--regolith); }
+
+.ch03-repeat-caption,
+.ch03-nested-caption,
+.ch03-condition-caption { min-block-size: 1.5em; margin-block: 8px 4px; font-size: 13px; }
+.ch03-repeat-controls,
+.ch03-nested-controls,
+.ch03-condition-controls { gap: 6px; margin-block: 8px 0; }
+.ch03-repeat-controls .tool,
+.ch03-nested-controls .tool,
+.ch03-condition-controls .tool { min-height: 40px; height: auto; padding-block: 6px; }

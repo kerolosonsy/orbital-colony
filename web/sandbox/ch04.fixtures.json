@@ -1,0 +1,466 @@
+{
+  "ch04-if-branch": {
+    "ar": {
+      "labels": {
+        "condition": {
+          "ar": "الشرط",
+          "en": ""
+        },
+        "body": {
+          "ar": "الجسم",
+          "en": ""
+        },
+        "choose": {
+          "ar": "اختار حالة",
+          "en": ""
+        },
+        "notReady": {
+          "ar": "false",
+          "en": ""
+        },
+        "ready": {
+          "ar": "true",
+          "en": ""
+        },
+        "reset": {
+          "ar": "من الأول",
+          "en": ""
+        }
+      },
+      "choices": [
+        {
+          "ready": false,
+          "label": {
+            "ar": "لسه",
+            "en": ""
+          },
+          "bodyState": {
+            "ar": "اتخطّى",
+            "en": ""
+          },
+          "caption": {
+            "ar": "false تعدّي الجسم.",
+            "en": ""
+          }
+        },
+        {
+          "ready": true,
+          "label": {
+            "ar": "جاهز",
+            "en": ""
+          },
+          "bodyState": {
+            "ar": "اشتغل",
+            "en": ""
+          },
+          "caption": {
+            "ar": "true تدخل الجسم.",
+            "en": ""
+          }
+        }
+      ]
+    },
+    "en": {
+      "labels": {
+        "condition": {
+          "ar": "",
+          "en": "Condition"
+        },
+        "body": {
+          "ar": "",
+          "en": "Body"
+        },
+        "choose": {
+          "ar": "",
+          "en": "Choose a state"
+        },
+        "notReady": {
+          "ar": "",
+          "en": "false"
+        },
+        "ready": {
+          "ar": "",
+          "en": "true"
+        },
+        "reset": {
+          "ar": "",
+          "en": "Reset"
+        }
+      },
+      "choices": [
+        {
+          "ready": false,
+          "label": {
+            "ar": "",
+            "en": "Not yet"
+          },
+          "bodyState": {
+            "ar": "",
+            "en": "skipped"
+          },
+          "caption": {
+            "ar": "",
+            "en": "False skips the body."
+          }
+        },
+        {
+          "ready": true,
+          "label": {
+            "ar": "",
+            "en": "Ready"
+          },
+          "bodyState": {
+            "ar": "",
+            "en": "runs"
+          },
+          "caption": {
+            "ar": "",
+            "en": "True enters the body."
+          }
+        }
+      ]
+    }
+  },
+  "ch04-switch-case": {
+    "ar": {
+      "labels": {
+        "signal": {
+          "ar": "الإشارة",
+          "en": ""
+        },
+        "case": {
+          "ar": "الحالة المختارة",
+          "en": ""
+        },
+        "result": {
+          "ar": "الناتج",
+          "en": ""
+        },
+        "choose": {
+          "ar": "اختار قيمة",
+          "en": ""
+        }
+      },
+      "choices": [
+        {
+          "label": {
+            "ar": "أزرق",
+            "en": ""
+          },
+          "value": {
+            "ar": "blue",
+            "en": ""
+          },
+          "case": {
+            "ar": "case blue",
+            "en": ""
+          },
+          "result": {
+            "ar": "move",
+            "en": ""
+          },
+          "caption": {
+            "ar": "القيمة تطابق case واحدة.",
+            "en": ""
+          }
+        },
+        {
+          "label": {
+            "ar": "كهرماني",
+            "en": ""
+          },
+          "value": {
+            "ar": "amber",
+            "en": ""
+          },
+          "case": {
+            "ar": "case amber",
+            "en": ""
+          },
+          "result": {
+            "ar": "pause",
+            "en": ""
+          },
+          "caption": {
+            "ar": "case واحدة بس بتشتغل.",
+            "en": ""
+          }
+        },
+        {
+          "label": {
+            "ar": "قيمة تانية",
+            "en": ""
+          },
+          "value": {
+            "ar": "other",
+            "en": ""
+          },
+          "case": {
+            "ar": "default",
+            "en": ""
+          },
+          "result": {
+            "ar": "check",
+            "en": ""
+          },
+          "caption": {
+            "ar": "default تستقبل الباقي.",
+            "en": ""
+          }
+        }
+      ]
+    },
+    "en": {
+      "labels": {
+        "signal": {
+          "ar": "",
+          "en": "Signal"
+        },
+        "case": {
+          "ar": "",
+          "en": "Selected case"
+        },
+        "result": {
+          "ar": "",
+          "en": "Result"
+        },
+        "choose": {
+          "ar": "",
+          "en": "Choose a value"
+        }
+      },
+      "choices": [
+        {
+          "label": {
+            "ar": "",
+            "en": "Blue"
+          },
+          "value": {
+            "ar": "",
+            "en": "blue"
+          },
+          "case": {
+            "ar": "",
+            "en": "case blue"
+          },
+          "result": {
+            "ar": "",
+            "en": "move"
+          },
+          "caption": {
+            "ar": "",
+            "en": "The value matches one case."
+          }
+        },
+        {
+          "label": {
+            "ar": "",
+            "en": "Amber"
+          },
+          "value": {
+            "ar": "",
+            "en": "amber"
+          },
+          "case": {
+            "ar": "",
+            "en": "case amber"
+          },
+          "result": {
+            "ar": "",
+            "en": "pause"
+          },
+          "caption": {
+            "ar": "",
+            "en": "Only one case runs."
+          }
+        },
+        {
+          "label": {
+            "ar": "",
+            "en": "Other value"
+          },
+          "value": {
+            "ar": "",
+            "en": "other"
+          },
+          "case": {
+            "ar": "",
+            "en": "default"
+          },
+          "result": {
+            "ar": "",
+            "en": "check"
+          },
+          "caption": {
+            "ar": "",
+            "en": "Default handles the rest."
+          }
+        }
+      ]
+    }
+  },
+  "ch04-ordered-branches": {
+    "ar": {
+      "labels": {
+        "hours": {
+          "ar": "ساعات التوصيل",
+          "en": ""
+        },
+        "firstCheck": {
+          "ar": "hours < 3",
+          "en": ""
+        },
+        "secondCheck": {
+          "ar": "hours < 8",
+          "en": ""
+        },
+        "true": {
+          "ar": "true",
+          "en": ""
+        },
+        "false": {
+          "ar": "false",
+          "en": ""
+        },
+        "skipped": {
+          "ar": "متخطّي",
+          "en": ""
+        },
+        "result": {
+          "ar": "التصنيف",
+          "en": ""
+        },
+        "next": {
+          "ar": "العينة الجاية",
+          "en": ""
+        },
+        "reset": {
+          "ar": "من الأول",
+          "en": ""
+        }
+      },
+      "frames": [
+        {
+          "hours": 2,
+          "first": true,
+          "second": null,
+          "result": {
+            "ar": "short",
+            "en": ""
+          },
+          "caption": {
+            "ar": "الأول true؛ التاني بيتخطّى.",
+            "en": ""
+          }
+        },
+        {
+          "hours": 5,
+          "first": false,
+          "second": true,
+          "result": {
+            "ar": "medium",
+            "en": ""
+          },
+          "caption": {
+            "ar": "الأول false، التاني true.",
+            "en": ""
+          }
+        },
+        {
+          "hours": 9,
+          "first": false,
+          "second": false,
+          "result": {
+            "ar": "long",
+            "en": ""
+          },
+          "caption": {
+            "ar": "الاتنين false؛ تفضل القيمة الأصلية.",
+            "en": ""
+          }
+        }
+      ]
+    },
+    "en": {
+      "labels": {
+        "hours": {
+          "ar": "",
+          "en": "Delivery hours"
+        },
+        "firstCheck": {
+          "ar": "",
+          "en": "hours < 3"
+        },
+        "secondCheck": {
+          "ar": "",
+          "en": "hours < 8"
+        },
+        "true": {
+          "ar": "",
+          "en": "true"
+        },
+        "false": {
+          "ar": "",
+          "en": "false"
+        },
+        "skipped": {
+          "ar": "",
+          "en": "skipped"
+        },
+        "result": {
+          "ar": "",
+          "en": "Label"
+        },
+        "next": {
+          "ar": "",
+          "en": "Next sample"
+        },
+        "reset": {
+          "ar": "",
+          "en": "Reset"
+        }
+      },
+      "frames": [
+        {
+          "hours": 2,
+          "first": true,
+          "second": null,
+          "result": {
+            "ar": "",
+            "en": "short"
+          },
+          "caption": {
+            "ar": "",
+            "en": "First is true; second is skipped."
+          }
+        },
+        {
+          "hours": 5,
+          "first": false,
+          "second": true,
+          "result": {
+            "ar": "",
+            "en": "medium"
+          },
+          "caption": {
+            "ar": "",
+            "en": "First is false; second is true."
+          }
+        },
+        {
+          "hours": 9,
+          "first": false,
+          "second": false,
+          "result": {
+            "ar": "",
+            "en": "long"
+          },
+          "caption": {
+            "ar": "",
+            "en": "Both are false; the original stays."
+          }
+        }
+      ]
+    }
+  }
+}

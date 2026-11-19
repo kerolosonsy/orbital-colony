@@ -25,6 +25,89 @@ func ch04Walkthrough(id, text, code, exampleID string, frames []LessonFrame) Les
 	}
 }
 
+func ch04Locale(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch04Sandbox(id, text, kind string, config map[string]any, english bool) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: ch04ConfigForLanguage(config, english).(map[string]any)}}
+}
+
+func ch04ConfigForLanguage(value any, english bool) any {
+	switch current := value.(type) {
+	case map[string]any:
+		ar, hasArabic := current["ar"].(string)
+		en, hasEnglish := current["en"].(string)
+		if len(current) == 2 && hasArabic && hasEnglish {
+			if english {
+				return map[string]any{"ar": "", "en": en}
+			}
+			return map[string]any{"ar": ar, "en": ""}
+		}
+		localized := make(map[string]any, len(current))
+		for key, nested := range current {
+			localized[key] = ch04ConfigForLanguage(nested, english)
+		}
+		return localized
+	case []any:
+		localized := make([]any, len(current))
+		for i, nested := range current {
+			localized[i] = ch04ConfigForLanguage(nested, english)
+		}
+		return localized
+	default:
+		return current
+	}
+}
+
+var ch04IfConfig = map[string]any{
+	"labels": map[string]any{
+		"condition": ch04Locale("الشرط", "Condition"),
+		"body":      ch04Locale("الجسم", "Body"),
+		"choose":    ch04Locale("اختار حالة", "Choose a state"),
+		"notReady":  ch04Locale("false", "false"),
+		"ready":     ch04Locale("true", "true"),
+		"reset":     ch04Locale("من الأول", "Reset"),
+	},
+	"choices": []any{
+		map[string]any{"ready": false, "label": ch04Locale("لسه", "Not yet"), "bodyState": ch04Locale("اتخطّى", "skipped"), "caption": ch04Locale("false تعدّي الجسم.", "False skips the body.")},
+		map[string]any{"ready": true, "label": ch04Locale("جاهز", "Ready"), "bodyState": ch04Locale("اشتغل", "runs"), "caption": ch04Locale("true تدخل الجسم.", "True enters the body.")},
+	},
+}
+
+var ch04SwitchConfig = map[string]any{
+	"labels": map[string]any{
+		"signal": ch04Locale("الإشارة", "Signal"),
+		"case":   ch04Locale("الحالة المختارة", "Selected case"),
+		"result": ch04Locale("الناتج", "Result"),
+		"choose": ch04Locale("اختار قيمة", "Choose a value"),
+	},
+	"choices": []any{
+		map[string]any{"label": ch04Locale("أزرق", "Blue"), "value": ch04Locale("blue", "blue"), "case": ch04Locale("case blue", "case blue"), "result": ch04Locale("move", "move"), "caption": ch04Locale("القيمة تطابق case واحدة.", "The value matches one case.")},
+		map[string]any{"label": ch04Locale("كهرماني", "Amber"), "value": ch04Locale("amber", "amber"), "case": ch04Locale("case amber", "case amber"), "result": ch04Locale("pause", "pause"), "caption": ch04Locale("case واحدة بس بتشتغل.", "Only one case runs.")},
+		map[string]any{"label": ch04Locale("قيمة تانية", "Other value"), "value": ch04Locale("other", "other"), "case": ch04Locale("default", "default"), "result": ch04Locale("check", "check"), "caption": ch04Locale("default تستقبل الباقي.", "Default handles the rest.")},
+	},
+}
+
+var ch04OrderedConfig = map[string]any{
+	"labels": map[string]any{
+		"hours":       ch04Locale("ساعات التوصيل", "Delivery hours"),
+		"firstCheck":  ch04Locale("hours < 3", "hours < 3"),
+		"secondCheck": ch04Locale("hours < 8", "hours < 8"),
+		"true":        ch04Locale("true", "true"),
+		"false":       ch04Locale("false", "false"),
+		"skipped":     ch04Locale("متخطّي", "skipped"),
+		"result":      ch04Locale("التصنيف", "Label"),
+		"next":        ch04Locale("العينة الجاية", "Next sample"),
+		"reset":       ch04Locale("من الأول", "Reset"),
+	},
+	"frames": []any{
+		map[string]any{"hours": 2, "first": true, "second": nil, "result": ch04Locale("short", "short"), "caption": ch04Locale("الأول true؛ التاني بيتخطّى.", "First is true; second is skipped.")},
+		map[string]any{"hours": 5, "first": false, "second": true, "result": ch04Locale("medium", "medium"), "caption": ch04Locale("الأول false، التاني true.", "First is false; second is true.")},
+		map[string]any{"hours": 9, "first": false, "second": false, "result": ch04Locale("long", "long"), "caption": ch04Locale("الاتنين false؛ تفضل القيمة الأصلية.", "Both are false; the original stays.")},
+	},
+}
+
 var ch04RipeOnlyArabic = []LessonStep{
 	{ID: "c41.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch04Markdown("c41.mission", "1. اجمع 10 طحالب من غير ما تدمّر نبتة.\n2. الـstarter بيفحص الجاهزية، وجسم الشرط لسه فاضي.\n3. هدف الذهب 55 ticks؛ خليك حريص مع كل حصاد.")}},
 	{ID: "c41.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch04Walkthrough("c41.if-trace", "~if~ بتشغّل جسمها لما الشرط يبقى true.\n\nالقرار هنا على قيمة تدريب، مش فحص المهمة.", `func main() {
@@ -57,7 +140,9 @@ var ch04RipeOnlyArabic = []LessonStep{
 			{Line: 2, Caption: "الجاهزية true.", Variables: []LessonVariable{{Name: "ready", Value: "true"}}},
 			{Line: 3, Caption: "الشرط يسمح بالتنفيذ.", Variables: []LessonVariable{{Name: "ready", Value: "true"}}},
 			{Line: 4, Caption: "اطبع حالة الجاهزية.", Variables: []LessonVariable{{Name: "ready", Value: "true"}}, Output: "ready"},
-		})},
+		}),
+		ch04Sandbox("ch04-if-playground", "اختار حالة وشوف فرع if.", "ch04-if-branch", ch04IfConfig, false),
+	},
 	},
 	{ID: "c41.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch04Markdown("c41.watch", "- في إعداد المهمة الحالي، مسح ~CanHarvest~ بياخد tick؛ الحصاد قبل النضج يدمّر النبات.\n- حط الفعل الخطر جوه شرط الحماية.")}},
 	{ID: "c41.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -103,7 +188,9 @@ var ch04RipeOnlyEnglish = []LessonStep{
 			{Line: 2, Caption: "Readiness is true.", Variables: []LessonVariable{{Name: "ready", Value: "true"}}},
 			{Line: 3, Caption: "The condition allows execution.", Variables: []LessonVariable{{Name: "ready", Value: "true"}}},
 			{Line: 4, Caption: "Print the ready state.", Variables: []LessonVariable{{Name: "ready", Value: "true"}}, Output: "ready"},
-		})},
+		}),
+		ch04Sandbox("ch04-if-playground", "Choose a state and watch the if branch.", "ch04-if-branch", ch04IfConfig, true),
+	},
 	},
 	{ID: "c41.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch04Markdown("c41.watch", "- In this mission's default clock, the ~CanHarvest~ scan costs a tick; early harvest destroys the plant.\n- Put the risky action inside its guard.")}},
 	{ID: "c41.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -158,7 +245,9 @@ var ch04TerrainArabic = []LessonStep{
 			{Line: 3, Caption: "افحص الحالات بالترتيب."},
 			{Line: 6, Caption: "وصلنا للحالة المطابقة.", Variables: []LessonVariable{{Name: "color", Value: "amber"}}},
 			{Line: 7, Caption: "اطبع pause.", Variables: []LessonVariable{{Name: "color", Value: "amber"}}, Output: "pause"},
-		})},
+		}),
+		ch04Sandbox("ch04-switch-playground", "اختار قيمة وشوف case المطابقة.", "ch04-switch-case", ch04SwitchConfig, false),
+	},
 	},
 	{ID: "c42.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch04Markdown("c42.watch", "- في إعداد المهمة الحالي، مسح ~GetGround~ بياخد tick. خُد القيمة مرة وانت عارف هتستخدمها فين.\n- كل ~case~ بتنتهي لوحدها؛ مفيش fallthrough تلقائي.")}},
 	{ID: "c42.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -213,7 +302,9 @@ var ch04TerrainEnglish = []LessonStep{
 			{Line: 3, Caption: "Check the cases in order."},
 			{Line: 6, Caption: "We found the matching case.", Variables: []LessonVariable{{Name: "color", Value: "amber"}}},
 			{Line: 7, Caption: "Print pause.", Variables: []LessonVariable{{Name: "color", Value: "amber"}}, Output: "pause"},
-		})},
+		}),
+		ch04Sandbox("ch04-switch-playground", "Choose a value and watch its case.", "ch04-switch-case", ch04SwitchConfig, true),
+	},
 	},
 	{ID: "c42.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch04Markdown("c42.watch", "- In this mission's default clock, the ~GetGround~ scan costs a tick. Read its value once and plan its use.\n- Each ~case~ ends by itself; there is no automatic fallthrough.")}},
 	{ID: "c42.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -269,7 +360,9 @@ var ch04CheckpointArabic = []LessonStep{
 			{Line: 6, Caption: "اختار فرع else.", Variables: []LessonVariable{{Name: "label", Value: "high"}}},
 			{Line: 7, Caption: "حدّث label إلى middle.", Variables: []LessonVariable{{Name: "label", Value: "middle"}}},
 			{Line: 9, Caption: "اطبع التصنيف الجديد.", Variables: []LessonVariable{{Name: "label", Value: "middle"}}, Output: "middle"},
-		})},
+		}),
+		ch04Sandbox("ch04-ordered-playground", "اضغط وتابع أول شرط مطابق.", "ch04-ordered-branches", ch04OrderedConfig, false),
+	},
 	},
 	{ID: "c43.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch04Markdown("c43.watch", "- الحد لازم يتبع فئة واحدة بس. اختار ~<~ أو ~<=~ بوعي.\n- ~Reading(i)~ بترجع صفر للـindex الغلط؛ خليك جوه العدد.")}},
 	{ID: "c43.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -325,7 +418,9 @@ var ch04CheckpointEnglish = []LessonStep{
 			{Line: 6, Caption: "Choose the else branch.", Variables: []LessonVariable{{Name: "label", Value: "high"}}},
 			{Line: 7, Caption: "Update label to middle.", Variables: []LessonVariable{{Name: "label", Value: "middle"}}},
 			{Line: 9, Caption: "Print the new label.", Variables: []LessonVariable{{Name: "label", Value: "middle"}}, Output: "middle"},
-		})},
+		}),
+		ch04Sandbox("ch04-ordered-playground", "Step through the first matching condition.", "ch04-ordered-branches", ch04OrderedConfig, true),
+	},
 	},
 	{ID: "c43.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch04Markdown("c43.watch", "- A boundary should belong to one band. Choose ~<~ or ~<=~ deliberately.\n- ~Reading(i)~ returns zero for an invalid index; stay within the count.")}},
 	{ID: "c43.check-step", Title: "Think & check", Blocks: []LessonBlock{
