@@ -1448,6 +1448,8 @@ async function loadLevel(id, review = null) {
   $("#hint-list").innerHTML = "";
   $("#btn-hint").disabled = !l.hints?.length;
   $("#btn-hint").querySelector("span").textContent = T(`تلميح (${l.hints?.length || 0})`, `Hint (${l.hints?.length || 0})`);
+  // hints opened on an earlier visit stay open
+  if (!S.review) for (let k = Math.min(store.pref("hintsSeen")?.[id] || 0, l.hints?.length || 0); k > 0; k--) revealHint(true);
   const r = rec(id);
   $("#lvl-stars").innerHTML = starHTML(r.stars);
   lastErrors = [];
@@ -1472,21 +1474,27 @@ async function loadLevel(id, review = null) {
   } catch (e) { if (S.cur === l) log(String(e), "c-err"); }
 }
 
-$("#btn-hint").onclick = () => {
+$("#btn-hint").onclick = () => revealHint();
+// revealHint shows the next hint. Replays (silent) restore hints the player
+// already opened for this mission, without sound or a second metric.
+function revealHint(silent = false) {
   const l = S.cur;
-  if (S.hintsShown >= l.hints.length) return;
+  if (!l?.hints || S.hintsShown >= l.hints.length) return;
   const d = document.createElement("div");
   d.className = "hint";
   const hintIndex = S.hintsShown;
   const hintText = inline(l.hints[S.hintsShown++].replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, ""));
-  LearningMetrics.recordHint(store, l.id, hintIndex);
+  if (!silent) {
+    LearningMetrics.recordHint(store, l.id, hintIndex);
+    if (!S.review) store.pref("hintsSeen", { ...(store.pref("hintsSeen") || {}), [l.id]: S.hintsShown });
+    Sound.play("hint");
+  }
   const hintLabel = l.steps?.length ? [T("الفكرة", "Concept"), T("التنظيم", "Structure"), T("ركّز هنا", "Specific")][S.hintsShown - 1] : "";
   d.innerHTML = hintLabel ? `<strong>${hintLabel}</strong><div>${hintText}</div>` : hintText;
-  Sound.play("hint");
   $("#hint-list").appendChild(d);
   $("#btn-hint").querySelector("span").textContent = S.hintsShown < l.hints.length ? T(`تلميح كمان (${l.hints.length - S.hintsShown})`, `Another hint (${l.hints.length - S.hintsShown})`) : T("خلصت التلميحات", "No more hints");
   $("#btn-hint").disabled = S.hintsShown >= l.hints.length;
-};
+}
 
 $("#btn-reset").onclick = () => {
   if (!confirm(T("ترجع لكود البداية؟ الكود الحالي هيتمسح.", "Go back to the starter code? Your current code will be erased."))) return;

@@ -54,3 +54,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 50. **Caret line number lights up** — the gutter number of the line you're on is brighter, matching the current-line band (cleared during debugging, where the debugger marks its own line).
 51. **Console doesn't yank you to the bottom** — new output only auto-scrolls when you're already at the bottom, so you can read an earlier error while a long run keeps printing.
 52. **Esc closes the lesson drawer** on narrow screens and returns focus to the code.
+53. **Opened hints stay open** — hints you revealed for a mission are remembered per player and shown again (silently, no sound or second hint metric) when you come back or reload; before, they vanished and had to be clicked again. Review runs keep starting without hints. Verified by reload in the browser; test extended.
