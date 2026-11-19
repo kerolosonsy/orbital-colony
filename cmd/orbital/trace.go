@@ -22,11 +22,12 @@ import (
 )
 
 const (
-	traceFrameLimit = 400
-	traceByteLimit  = 64 << 10
-	traceValueLimit = 160
-	traceNameLimit  = 96
-	traceVarLimit   = 32
+	traceFrameLimit  = 2000
+	traceByteLimit   = 256 << 10
+	traceStdoutLimit = 64 << 10
+	traceValueLimit  = 160
+	traceNameLimit   = 96
+	traceVarLimit    = 64
 )
 
 type traceVariable struct {
@@ -37,17 +38,24 @@ type traceVariable struct {
 type traceFrame struct {
 	File      string          `json:"file"`
 	Line      int             `json:"line"`
+	Func      string          `json:"func"`
+	Depth     int             `json:"depth"`
+	Event     string          `json:"event"`
 	Goroutine int             `json:"goroutine"`
 	Variables []traceVariable `json:"variables"`
+	Returns   []traceVariable `json:"returns,omitempty"`
+	Stdout    int64           `json:"stdout"`
 	Truncated bool            `json:"truncated,omitempty"`
 }
 
 type traceResponse struct {
-	Available bool         `json:"available"`
-	Completed bool         `json:"completed"`
-	Frames    []traceFrame `json:"frames"`
-	Truncated bool         `json:"truncated,omitempty"`
-	Message   string       `json:"message,omitempty"`
+	Available       bool         `json:"available"`
+	Completed       bool         `json:"completed"`
+	Frames          []traceFrame `json:"frames"`
+	Stdout          string       `json:"stdout"`
+	StdoutTruncated bool         `json:"stdoutTruncated,omitempty"`
+	Truncated       bool         `json:"truncated,omitempty"`
+	Message         string       `json:"message,omitempty"`
 }
 
 type traceRequest struct {
@@ -55,6 +63,25 @@ type traceRequest struct {
 	Code  string            `json:"code"`
 	Files map[string]string `json:"files"`
 }
+
+type traceStdoutBuffer struct {
+	prefix    bytes.Buffer
+	truncated bool
+}
+
+func (b *traceStdoutBuffer) Write(part []byte) (int, error) {
+	n := len(part)
+	remaining := traceStdoutLimit - b.prefix.Len()
+	if remaining > 0 {
+		_, _ = b.prefix.Write(part[:min(len(part), remaining)])
+	}
+	if n > remaining {
+		b.truncated = true
+	}
+	return n, nil
+}
+
+func (b *traceStdoutBuffer) String() string { return b.prefix.String() }
 
 type traceRecorderSource struct {
 	name string
@@ -182,6 +209,7 @@ func (r *runner) executeTrace(ctx context.Context, dir string, lvl *levels.Level
 		return traceUnavailable(lang), nil
 	}
 	defer traceFile.Close()
+	stdout := &traceStdoutBuffer{}
 	cmd := exec.CommandContext(rctx, filepath.Join(dir, "trace-program"))
 	configureProcess(cmd)
 	cmd.Dir = dir
@@ -189,11 +217,13 @@ func (r *runner) executeTrace(ctx context.Context, dir string, lvl *levels.Level
 	if seed, ok := ctx.Value(reviewSeedKey{}).(int64); ok {
 		cmd.Env = append(cmd.Env, "ORBITAL_SEED="+strconv.FormatInt(seed, 10))
 	}
-	cmd.Stdout = &limitedBuffer{max: 64 << 10, lang: lang}
+	cmd.Stdout = stdout
 	cmd.Stderr = &limitedBuffer{max: 64 << 10, lang: lang}
 	runErr := runCommand(cmd)
 	resp := readTraceFile(traceFile, lang)
 	resp.Completed = runErr == nil
+	resp.Stdout = stdout.String()
+	resp.StdoutTruncated = stdout.truncated
 	return resp, nil
 }
 
@@ -247,9 +277,13 @@ func decodeTraceFrame(line []byte) (traceFrame, bool) {
 }
 
 type traceInstrumenter struct {
-	fset   *token.FileSet
-	file   string
-	prefix string
+	fset         *token.FileSet
+	file         string
+	prefix       string
+	functionName string
+	returnNames  []string
+	returnCount  int
+	returnID     int
 }
 
 func rewriteTraceFiles(files map[string]string) (map[string]string, traceRecorderSource, error) {
@@ -291,9 +325,181 @@ func rewriteTraceFile(name, body, prefix string) (string, error) {
 		return "", err
 	}
 	if file.Name.Name == "main" {
+		rewriteTraceOutput(file, prefix)
 		instrumentTraceFile(fset, name, prefix, file)
 	}
 	return formatTraceFile(fset, file)
+}
+
+type traceOutputAliases struct {
+	fmt map[string]bool
+	io  map[string]bool
+	os  map[string]bool
+}
+
+func rewriteTraceOutput(file *ast.File, prefix string) {
+	aliases := collectTraceOutputAliases(file)
+	rewriteTraceCalls(file, prefix, aliases)
+	removeUnusedOutputImports(file, aliases)
+}
+
+func collectTraceOutputAliases(file *ast.File) traceOutputAliases {
+	aliases := traceOutputAliases{fmt: map[string]bool{}, io: map[string]bool{}, os: map[string]bool{}}
+	for _, imported := range file.Imports {
+		addTraceOutputAlias(&aliases, imported)
+	}
+	return aliases
+}
+
+func addTraceOutputAlias(aliases *traceOutputAliases, imported *ast.ImportSpec) {
+	path, alias := importPath(imported), traceImportAlias(imported)
+	if path == "" || alias == "." || alias == "_" {
+		return
+	}
+	if path == "fmt" {
+		aliases.fmt[alias] = true
+	} else if path == "io" {
+		aliases.io[alias] = true
+	} else if path == "os" {
+		aliases.os[alias] = true
+	}
+}
+
+func rewriteTraceCalls(file *ast.File, prefix string, aliases traceOutputAliases) {
+	ast.Inspect(file, func(node ast.Node) bool {
+		callExpr, isCall := node.(*ast.CallExpr)
+		if isCall {
+			rewriteTraceCall(callExpr, prefix, aliases)
+		}
+		return true
+	})
+}
+
+func rewriteTraceCall(callExpr *ast.CallExpr, prefix string, aliases traceOutputAliases) {
+	selector, ok := callExpr.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return
+	}
+	pkg, isPackage := selector.X.(*ast.Ident)
+	if isPackage && aliases.fmt[pkg.Name] {
+		rewriteFmtOutput(callExpr, selector, prefix)
+		return
+	}
+	if isPackage && aliases.io[pkg.Name] && selector.Sel.Name == "WriteString" && len(callExpr.Args) == 2 {
+		callExpr.Fun = &ast.Ident{NamePos: selector.Sel.Pos(), Name: prefix + "WriteString"}
+		return
+	}
+	rewriteStdoutWrite(callExpr, selector, prefix, aliases.os)
+}
+
+func rewriteFmtOutput(callExpr *ast.CallExpr, selector *ast.SelectorExpr, prefix string) {
+	outputWrapper, supported := map[string]string{"Print": "Print", "Println": "Println", "Printf": "Printf", "Fprint": "Fprint", "Fprintln": "Fprintln", "Fprintf": "Fprintf"}[selector.Sel.Name]
+	if supported {
+		callExpr.Fun = &ast.Ident{NamePos: selector.Sel.Pos(), Name: prefix + outputWrapper}
+	}
+}
+
+func rewriteStdoutWrite(callExpr *ast.CallExpr, selector *ast.SelectorExpr, prefix string, osAliases map[string]bool) {
+	method, ok := selector.X.(*ast.SelectorExpr)
+	if !ok || method.Sel.Name != "Stdout" || len(callExpr.Args) != 1 {
+		return
+	}
+	osPackage, ok := method.X.(*ast.Ident)
+	if !ok || !osAliases[osPackage.Name] {
+		return
+	}
+	outputWrapper := map[string]string{"Write": "WriteStdout", "WriteString": "WriteStdoutString"}[selector.Sel.Name]
+	if outputWrapper != "" {
+		callExpr.Fun = &ast.Ident{NamePos: selector.Sel.Pos(), Name: prefix + outputWrapper}
+		callExpr.Args = append([]ast.Expr{method}, callExpr.Args...)
+	}
+}
+
+func removeUnusedOutputImports(file *ast.File, aliases traceOutputAliases) {
+	for _, outputAliases := range []map[string]bool{aliases.fmt, aliases.io} {
+		for alias := range outputAliases {
+			if !hasPackageSelector(file, alias) {
+				removeImport(file, alias)
+			}
+		}
+	}
+}
+
+func hasPackageSelector(file *ast.File, alias string) bool {
+	used := false
+	ast.Inspect(file, func(node ast.Node) bool {
+		selector, ok := node.(*ast.SelectorExpr)
+		if !ok {
+			return true
+		}
+		pkg, isPackage := selector.X.(*ast.Ident)
+		used = used || isPackage && pkg.Name == alias
+		return true
+	})
+	return used
+}
+
+func removeImport(file *ast.File, alias string) {
+	file.Decls = filterImportDeclarations(file.Decls, alias)
+	file.Imports = collectImportSpecs(file.Decls)
+}
+
+func filterImportDeclarations(declarations []ast.Decl, alias string) []ast.Decl {
+	filtered := make([]ast.Decl, 0, len(declarations))
+	for _, declaration := range declarations {
+		gen, ok := declaration.(*ast.GenDecl)
+		if !ok || gen.Tok != token.IMPORT {
+			filtered = append(filtered, declaration)
+			continue
+		}
+		gen.Specs = filterImportSpecs(gen.Specs, alias)
+		if len(gen.Specs) > 0 {
+			filtered = append(filtered, gen)
+		}
+	}
+	return filtered
+}
+
+func filterImportSpecs(specs []ast.Spec, alias string) []ast.Spec {
+	filtered := make([]ast.Spec, 0, len(specs))
+	for _, spec := range specs {
+		imported, ok := spec.(*ast.ImportSpec)
+		if !ok || traceImportAlias(imported) != alias {
+			filtered = append(filtered, spec)
+		}
+	}
+	return filtered
+}
+
+func collectImportSpecs(declarations []ast.Decl) []*ast.ImportSpec {
+	var imports []*ast.ImportSpec
+	for _, declaration := range declarations {
+		gen, ok := declaration.(*ast.GenDecl)
+		if !ok || gen.Tok != token.IMPORT {
+			continue
+		}
+		for _, spec := range gen.Specs {
+			if imported, ok := spec.(*ast.ImportSpec); ok {
+				imports = append(imports, imported)
+			}
+		}
+	}
+	return imports
+}
+
+func traceImportAlias(imported *ast.ImportSpec) string {
+	if imported.Name != nil {
+		return imported.Name.Name
+	}
+	return filepath.Base(importPath(imported))
+}
+
+func importPath(imported *ast.ImportSpec) string {
+	path, err := strconv.Unquote(imported.Path.Value)
+	if err != nil {
+		return ""
+	}
+	return path
 }
 
 func instrumentTraceFile(fset *token.FileSet, name, prefix string, file *ast.File) {
@@ -333,15 +539,29 @@ func traceRecorderName(files map[string]string) string {
 }
 
 func (t *traceInstrumenter) function(fn *ast.FuncDecl) {
+	previousFunction, previousReturns, previousReturnCount := t.functionName, t.returnNames, t.returnCount
+	t.functionName = fn.Name.Name
+	t.returnNames = namedResultNames(fn.Type.Results)
+	t.returnCount = resultFieldCount(fn.Type.Results)
 	env := localNames(fn.Recv, fn.Type.Params, fn.Type.Results)
 	t.instrumentBlock(fn.Body, env)
+	t.appendImplicitReturn(fn.Body, t.line(fn.Body.Rbrace))
+	fn.Body.List = append([]ast.Stmt{t.enterAt(t.line(fn.Pos()), env), t.exitCall()}, fn.Body.List...)
+	t.functionName, t.returnNames, t.returnCount = previousFunction, previousReturns, previousReturnCount
 }
 
 func (t *traceInstrumenter) literal(fn *ast.FuncLit, outer map[string]bool) {
+	previousFunction, previousReturns, previousReturnCount := t.functionName, t.returnNames, t.returnCount
+	t.functionName = "func@" + strconv.Itoa(t.line(fn.Type.Func))
+	t.returnNames = namedResultNames(fn.Type.Results)
+	t.returnCount = resultFieldCount(fn.Type.Results)
 	env := cloneNames(outer)
 	addFields(env, fn.Type.Params)
 	addFields(env, fn.Type.Results)
 	t.instrumentBlock(fn.Body, env)
+	t.appendImplicitReturn(fn.Body, t.line(fn.Body.Rbrace))
+	fn.Body.List = append([]ast.Stmt{t.enterAt(t.line(fn.Type.Func), env), t.exitCall()}, fn.Body.List...)
+	t.functionName, t.returnNames, t.returnCount = previousFunction, previousReturns, previousReturnCount
 }
 
 func (t *traceInstrumenter) instrumentBlock(block *ast.BlockStmt, outer map[string]bool) {
@@ -356,6 +576,9 @@ func (t *traceInstrumenter) instrumentList(statements []ast.Stmt, outer map[stri
 	for _, statement := range statements {
 		output = append(output, t.recordCall(statement.Pos(), env), statement)
 		t.instrumentStatement(statement, env)
+		if returned, ok := statement.(*ast.ReturnStmt); ok {
+			output[len(output)-1] = t.instrumentReturn(returned, env)
+		}
 		addStatementNames(env, statement)
 	}
 	return output
@@ -502,11 +725,168 @@ func (t *traceInstrumenter) recordCall(pos token.Pos, env map[string]bool) ast.S
 func (t *traceInstrumenter) recordAt(line int, env map[string]bool) ast.Stmt {
 	names := sortedNames(env)
 	omitted := max(0, len(names)-traceVarLimit)
-	args := []ast.Expr{stringLiteral(t.file), &ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(line)}, &ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(omitted)}}
-	for _, name := range names[:min(len(names), traceVarLimit)] {
+	args := []ast.Expr{t.pointAt(line, "line", omitted, 0)}
+	args = append(args, traceVariableArgs(names, traceVarLimit)...)
+	return &ast.ExprStmt{X: &ast.CallExpr{Fun: &ast.Ident{Name: t.prefix + "Record"}, Args: args}}
+}
+
+func (t *traceInstrumenter) enterAt(line int, env map[string]bool) ast.Stmt {
+	names := sortedNames(env)
+	omitted := max(0, len(names)-traceVarLimit)
+	args := []ast.Expr{t.pointAt(line, "call", omitted, 0)}
+	args = append(args, traceVariableArgs(names, traceVarLimit)...)
+	return &ast.ExprStmt{X: &ast.CallExpr{Fun: &ast.Ident{Name: t.prefix + "Enter"}, Args: args}}
+}
+
+func (t *traceInstrumenter) pointAt(line int, event string, omitted, variableCount int) ast.Expr {
+	fields := []struct {
+		name       string
+		expression ast.Expr
+	}{
+		{"File", stringLiteral(t.file)},
+		{"Line", &ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(line)}},
+		{"Function", stringLiteral(t.functionName)},
+		{"Event", stringLiteral(event)},
+		{"Omitted", &ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(omitted)}},
+		{"VariableCount", &ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(variableCount)}},
+	}
+	point := &ast.CompositeLit{Type: &ast.Ident{Name: t.prefix + "Point"}}
+	for _, field := range fields {
+		point.Elts = append(point.Elts, &ast.KeyValueExpr{Key: &ast.Ident{Name: field.name}, Value: field.expression})
+	}
+	return point
+}
+
+func (t *traceInstrumenter) exitCall() ast.Stmt {
+	return &ast.DeferStmt{Call: &ast.CallExpr{Fun: &ast.Ident{Name: t.prefix + "Exit"}}}
+}
+
+func (t *traceInstrumenter) implicitReturnAt(line int) ast.Stmt {
+	args := []ast.Expr{t.pointAt(line, "return", 0, 0)}
+	for _, name := range t.returnNames {
 		args = append(args, stringLiteral(name), &ast.Ident{Name: name})
 	}
-	return &ast.ExprStmt{X: &ast.CallExpr{Fun: &ast.Ident{Name: t.prefix + "Record"}, Args: args}}
+	return &ast.ExprStmt{X: &ast.CallExpr{Fun: &ast.Ident{Name: t.prefix + "Return"}, Args: args}}
+}
+
+func (t *traceInstrumenter) appendImplicitReturn(block *ast.BlockStmt, line int) {
+	if t.returnCount > 0 && len(t.returnNames) == 0 {
+		return
+	}
+	block.List = append(block.List, t.implicitReturnAt(line), &ast.ReturnStmt{})
+}
+
+func (t *traceInstrumenter) instrumentReturn(node *ast.ReturnStmt, env map[string]bool) ast.Stmt {
+	args := t.returnRecorderArgs(node, env)
+	if len(node.Results) == 0 {
+		args = append(args, namedReturnArgs(t.returnNames)...)
+		return t.recordThenReturn(node, args)
+	}
+	if len(node.Results) == 1 && t.returnCount > 1 {
+		return t.recordThenReturn(node, args)
+	}
+	return t.recordReturnValues(node, args)
+}
+
+func (t *traceInstrumenter) returnRecorderArgs(node *ast.ReturnStmt, env map[string]bool) []ast.Expr {
+	locals := sortedNames(env)
+	localArgs := traceVariableArgs(locals, traceVarLimit)
+	args := []ast.Expr{t.pointAt(t.line(node.Pos()), "return", max(0, len(locals)-traceVarLimit), len(localArgs)/2)}
+	return append(args, localArgs...)
+}
+
+func namedReturnArgs(names []string) []ast.Expr {
+	args := make([]ast.Expr, 0, len(names)*2)
+	for _, name := range names {
+		args = append(args, stringLiteral(name), &ast.Ident{Name: name})
+	}
+	return args
+}
+
+func (t *traceInstrumenter) recordThenReturn(node *ast.ReturnStmt, args []ast.Expr) ast.Stmt {
+	return &ast.BlockStmt{List: []ast.Stmt{t.returnCall(args), node}}
+}
+
+func (t *traceInstrumenter) returnCall(args []ast.Expr) ast.Stmt {
+	return &ast.ExprStmt{X: &ast.CallExpr{Fun: &ast.Ident{Name: t.prefix + "Return"}, Args: args}}
+}
+
+func (t *traceInstrumenter) recordReturnValues(node *ast.ReturnStmt, args []ast.Expr) ast.Stmt {
+	t.returnID++
+	assign, returnVars := t.returnAssignments(node.Results)
+	args = append(args, returnRecorderArgs(returnVars)...)
+	returnStmt := returnStatement(returnVars)
+	return &ast.BlockStmt{List: []ast.Stmt{
+		assign,
+		&ast.ExprStmt{X: &ast.CallExpr{Fun: &ast.Ident{Name: t.prefix + "Return"}, Args: args}},
+		returnStmt,
+	}}
+}
+
+func (t *traceInstrumenter) returnAssignments(expressions []ast.Expr) (*ast.AssignStmt, []*ast.Ident) {
+	assign := &ast.AssignStmt{Tok: token.DEFINE}
+	returnVars := make([]*ast.Ident, len(expressions))
+	for index, expression := range expressions {
+		returnVar := &ast.Ident{Name: t.prefix + "Return" + strconv.Itoa(t.returnID) + "Value" + strconv.Itoa(index)}
+		returnVars[index] = returnVar
+		assign.Lhs = append(assign.Lhs, returnVar)
+		assign.Rhs = append(assign.Rhs, expression)
+	}
+	return assign, returnVars
+}
+
+func returnRecorderArgs(returnVars []*ast.Ident) []ast.Expr {
+	args := make([]ast.Expr, 0, len(returnVars)*2)
+	for index, returnVar := range returnVars {
+		args = append(args, stringLiteral("return"+strconv.Itoa(index+1)), returnVar)
+	}
+	return args
+}
+
+func returnStatement(returnVars []*ast.Ident) *ast.ReturnStmt {
+	statement := &ast.ReturnStmt{}
+	for _, returnVar := range returnVars {
+		statement.Results = append(statement.Results, returnVar)
+	}
+	return statement
+}
+
+func traceVariableArgs(names []string, limit int) []ast.Expr {
+	args := make([]ast.Expr, 0, min(len(names), limit)*2)
+	for _, name := range names[:min(len(names), limit)] {
+		args = append(args, stringLiteral(name), &ast.Ident{Name: name})
+	}
+	return args
+}
+
+func namedResultNames(fields *ast.FieldList) []string {
+	if fields == nil {
+		return nil
+	}
+	var names []string
+	for _, field := range fields.List {
+		for _, name := range field.Names {
+			if name.Name != "_" {
+				names = append(names, name.Name)
+			}
+		}
+	}
+	return names
+}
+
+func resultFieldCount(fields *ast.FieldList) int {
+	if fields == nil {
+		return 0
+	}
+	count := 0
+	for _, field := range fields.List {
+		if len(field.Names) == 0 {
+			count++
+		} else {
+			count += len(field.Names)
+		}
+	}
+	return count
 }
 
 func (t *traceInstrumenter) line(pos token.Pos) int {
@@ -610,8 +990,13 @@ import (
 type __trace__Frame struct {
 	File string ` + "`json:\"file\"`" + `
 	Line int ` + "`json:\"line\"`" + `
+	Func string ` + "`json:\"func\"`" + `
+	Depth int ` + "`json:\"depth\"`" + `
+	Event string ` + "`json:\"event\"`" + `
 	Goroutine int ` + "`json:\"goroutine\"`" + `
 	Variables []__trace__Variable ` + "`json:\"variables\"`" + `
+	Returns []__trace__Variable ` + "`json:\"returns,omitempty\"`" + `
+	Stdout int64 ` + "`json:\"stdout\"`" + `
 	Truncated bool ` + "`json:\"truncated,omitempty\"`" + `
 }
 
@@ -620,18 +1005,101 @@ type __trace__Variable struct {
 	Formatted string ` + "`json:\"value\"`" + `
 }
 
+type __trace__Point struct {
+	File string
+	Line int
+	Function string
+	Event string
+	Omitted int
+	VariableCount int
+}
+
+type __trace__Thread struct {
+	Goroutine int
+	Depth int
+}
+
 var __trace__Stopped atomic.Bool
 var __trace__Mu sync.Mutex
 var __trace__File = __trace__Open()
 var __trace__Frames int
 var __trace__Bytes int
+var __trace__DepthMu sync.Mutex
+var __trace__Depths = map[int]int{}
+var __trace__Stdout int64
 
-func __trace__Record(file string, line int, omitted int, namedLocals ...any) {
+func __trace__Record(point __trace__Point, namedLocals ...any) {
 	if __trace__Stopped.Load() || __trace__File == nil {
 		return
 	}
-	vars, truncated := __trace__Variables(namedLocals, omitted)
-	frame := __trace__Frame{File: file, Line: line, Goroutine: __trace__Goroutine(), Variables: vars, Truncated: truncated}
+	__trace__RecordAt(point, __trace__CurrentThread(), namedLocals...)
+}
+
+func __trace__Enter(point __trace__Point, namedLocals ...any) {
+	if __trace__Stopped.Load() || __trace__File == nil {
+		return
+	}
+	point.Event = "call"
+	__trace__RecordAt(point, __trace__EnterThread(), namedLocals...)
+}
+
+func __trace__EnterThread() __trace__Thread {
+	id := __trace__Goroutine()
+	__trace__DepthMu.Lock()
+	depth, exists := __trace__Depths[id]
+	if exists {
+		depth++
+	}
+	__trace__Depths[id] = depth
+	__trace__DepthMu.Unlock()
+	return __trace__Thread{Goroutine: id, Depth: depth}
+}
+
+func __trace__Exit() {
+	id := __trace__Goroutine()
+	__trace__DepthMu.Lock()
+	if depth, exists := __trace__Depths[id]; exists {
+		if depth == 0 {
+			delete(__trace__Depths, id)
+		} else {
+			__trace__Depths[id] = depth - 1
+		}
+	}
+	__trace__DepthMu.Unlock()
+}
+
+func __trace__Return(point __trace__Point, namedValues ...any) {
+	if __trace__Stopped.Load() || __trace__File == nil {
+		return
+	}
+	thread := __trace__CurrentThread()
+	variableValues := namedValues[:min(len(namedValues), point.VariableCount*2)]
+	returnValues := namedValues[len(variableValues):]
+	returnLimit := min(len(returnValues), __TRACE_VAR_LIMIT__*2)
+	vars, truncated := __trace__Variables(variableValues, point.Omitted)
+	returns, returnTruncated := __trace__Variables(returnValues[:returnLimit], 0)
+	returnTruncated = returnTruncated || returnLimit < len(returnValues)
+	__trace__WriteFrame(__trace__Frame{File: point.File, Line: point.Line, Func: point.Function, Depth: thread.Depth, Event: "return", Goroutine: thread.Goroutine, Variables: vars, Returns: returns, Truncated: truncated || returnTruncated})
+}
+
+
+func __trace__CurrentThread() __trace__Thread {
+	id := __trace__Goroutine()
+	__trace__DepthMu.Lock()
+	depth := __trace__Depths[id]
+	__trace__DepthMu.Unlock()
+	return __trace__Thread{Goroutine: id, Depth: depth}
+}
+
+
+func __trace__RecordAt(point __trace__Point, thread __trace__Thread, namedLocals ...any) {
+	vars, truncated := __trace__Variables(namedLocals, point.Omitted)
+	frame := __trace__Frame{File: point.File, Line: point.Line, Func: point.Function, Depth: thread.Depth, Event: point.Event, Goroutine: thread.Goroutine, Variables: vars, Truncated: truncated}
+	__trace__WriteFrame(frame)
+}
+
+func __trace__WriteFrame(frame __trace__Frame) {
+	frame.Stdout = atomic.LoadInt64(&__trace__Stdout)
 	encoded, err := json.Marshal(frame)
 	if err == nil {
 		__trace__Append(encoded)
@@ -756,6 +1224,54 @@ func __trace__Goroutine() int {
 	id, _ := strconv.Atoi(fields[1])
 	return id
 }
+
+func __trace__WriteOutput(writer io.Writer, formatted string) (int, error) {
+	n, err := io.WriteString(writer, formatted)
+	if output, ok := writer.(*os.File); ok && output == os.Stdout {
+		atomic.AddInt64(&__trace__Stdout, int64(n))
+	}
+	return n, err
+}
+
+func __trace__WriteStdout(writer *os.File, outputBytes []byte) (int, error) {
+	n, err := writer.Write(outputBytes)
+	if writer == os.Stdout {
+		atomic.AddInt64(&__trace__Stdout, int64(n))
+	}
+	return n, err
+}
+
+func __trace__WriteStdoutString(writer *os.File, outputText string) (int, error) {
+	return __trace__WriteOutput(writer, outputText)
+}
+
+func __trace__WriteString(writer io.Writer, outputText string) (int, error) {
+	return __trace__WriteOutput(writer, outputText)
+}
+
+func __trace__Print(arguments ...any) (int, error) {
+	return __trace__WriteOutput(os.Stdout, fmt.Sprint(arguments...))
+}
+
+func __trace__Println(arguments ...any) (int, error) {
+	return __trace__WriteOutput(os.Stdout, fmt.Sprintln(arguments...))
+}
+
+func __trace__Printf(format string, arguments ...any) (int, error) {
+	return __trace__WriteOutput(os.Stdout, fmt.Sprintf(format, arguments...))
+}
+
+func __trace__Fprint(writer io.Writer, arguments ...any) (int, error) {
+	return __trace__WriteOutput(writer, fmt.Sprint(arguments...))
+}
+
+func __trace__Fprintln(writer io.Writer, arguments ...any) (int, error) {
+	return __trace__WriteOutput(writer, fmt.Sprintln(arguments...))
+}
+
+func __trace__Fprintf(writer io.Writer, format string, arguments ...any) (int, error) {
+	return __trace__WriteOutput(writer, fmt.Sprintf(format, arguments...))
+}
 `
 
 func traceHelperSource(prefix string) string {
@@ -767,5 +1283,6 @@ func traceHelperSource(prefix string) string {
 		"__TRACE_VALUE_PREFIX_LIMIT__", strconv.Itoa(traceValueLimit-3),
 		"__TRACE_NAME_LIMIT__", strconv.Itoa(traceNameLimit),
 		"__TRACE_NAME_PREFIX_LIMIT__", strconv.Itoa(traceNameLimit-3),
+		"__TRACE_VAR_LIMIT__", strconv.Itoa(traceVarLimit),
 	).Replace(traceHelperTemplate)
 }

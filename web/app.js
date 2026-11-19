@@ -453,15 +453,19 @@ const ed = $("#code"), hl = $("#highlight"), gutter = $("#gutter");
 let errLines = new Map();
 
 function renderEditor() {
-  hl.innerHTML = highlight(ed.value) + "\n ";
+  const debugState = InlineDebugger.editorState(S.file);
+  hl.innerHTML = InlineDebugger.editorMarkup(ed.value, debugState, highlight);
   const n = ed.value.split("\n").length;
-  let g = "";
-  for (let i = 1; i <= n; i++) {
-    const e = errLines.get(i);
-    g += e ? `<div class="err" title="${esc(e)}">${i}</div>` : `<div>${i}</div>`;
-  }
-  gutter.innerHTML = g;
+  gutter.innerHTML = InlineDebugger.gutterMarkup(n, errLines, InlineDebugger.breakpointLines(S.cur?.id, S.file), debugState.active ? debugState.line : 0);
   syncScroll();
+  if (debugState.active) {
+    const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+    const lineTop = 14 + (debugState.line - 1) * lineHeight;
+    if (lineTop < ed.scrollTop || lineTop + lineHeight > ed.scrollTop + ed.clientHeight) {
+      ed.scrollTop = Math.max(0, lineTop - ed.clientHeight / 2);
+      syncScroll();
+    }
+  }
 }
 function syncScroll() {
   hl.scrollTop = ed.scrollTop; hl.scrollLeft = ed.scrollLeft; gutter.scrollTop = ed.scrollTop;
@@ -493,6 +497,24 @@ function onEdit() {
 window.addEventListener("pagehide", () => { flushSave(); if (store.timer) store.push(); });
 ed.addEventListener("input", onEdit);
 ed.addEventListener("scroll", syncScroll);
+gutter.addEventListener("click", (event) => {
+  const line = Number(event.target.closest("[data-debug-line]")?.dataset.debugLine);
+  if (!line || !S.cur) return;
+  InlineDebugger.toggleBreakpoint(S.cur.id, S.file, line);
+  renderEditor();
+});
+InlineDebugger.bind({
+  requestTrace: (payload, signal) => api("/api/trace", payload, null, signal),
+  getFile: () => S.file,
+  showFile,
+  renderEditor,
+  getBreakpoints: (level) => store.pref("debugBreakpoints")?.[level] || [],
+  saveBreakpoints: (level, breakpoints) => {
+    const saved = { ...(store.pref("debugBreakpoints") || {}) };
+    saved[level] = breakpoints;
+    store.pref("debugBreakpoints", saved);
+  },
+});
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run(); return; }
   if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); insert("\t"); return; }
@@ -1576,19 +1598,21 @@ document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = () => clos
 // One run at a time. Stop (or switching missions) cancels it right away:
 // the request is aborted, which makes the server kill the build or program.
 let runId = 0, runCtl = null;
-let lastTraceRun = null;
 const RUN_TIMEOUT = 150000; // longer than the server's own build + run limits
 function clearTraceRun() {
-  lastTraceRun = null;
-  $("#btn-trace").classList.add("hidden");
+  InlineDebugger.clear();
 }
 function showTraceRun(level, response, payload, sources) {
-  if (!response.traceable) return;
+  if (!response.traceable) {
+    if (level.kind === "lab" && response.phase === "lab") InlineDebugger.unavailable(T("المختبر ده مفيهوش main function للتصحيح.", "This lab has no main function to debug."));
+    return;
+  }
+  const files = new Map(levelFiles(level).map((file) => [file.name, file]));
+  if (!Object.entries(sources).every(([name, code]) => files.has(name) && fileCode(level, files.get(name)) === code)) return;
   const tracePayload = { level: payload.level };
   if (level.kind === "lab") tracePayload.files = { ...payload.files };
   else tracePayload.code = payload.code;
-  lastTraceRun = { payload: tracePayload, sources };
-  $("#btn-trace").classList.remove("hidden");
+  InlineDebugger.start(level.id, tracePayload);
 }
 function runButton(running) {
   const btn = $("#btn-run");
@@ -1665,6 +1689,7 @@ async function run() {
       return;
     }
     lastErrors = [];
+    showTraceRun(level, r, payload, traceSources);
     if (r.phase === "lab") {
       refreshService(level);
       for (const st of r.steps || []) {
@@ -1672,7 +1697,6 @@ async function run() {
         if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-err"));
         if (!st.ok) logErrorHelp(st.tip, st.tipCause, st.tipCheck);
       }
-      showTraceRun(level, r, payload, traceSources);
       finish(level, r.result, r.missing || []);
       return;
     }
@@ -1682,7 +1706,6 @@ async function run() {
     log(T("الدرون شغال…", "Drone running…"), "c-info");
     await new Promise((res) => startPlayback(r.events, res));
     if (me !== runId) return;
-    showTraceRun(level, r, payload, traceSources);
     finish(level, r.result, r.missing || []);
   } catch (e) {
     if (me !== runId) return; // stopped by the player
@@ -1701,7 +1724,6 @@ async function run() {
   }
 }
 $("#btn-run").onclick = run;
-$("#btn-trace").onclick = () => { if (lastTraceRun) TracePanel.open(lastTraceRun); };
 $("#btn-vscode").onclick = openVSCode;
 $("#btn-unlink").onclick = () => {
   linked.delete(S.cur.id); saveLinked();
