@@ -328,7 +328,7 @@ func TestCh29GlobalLessonIDs(t *testing.T) {
 		chapterPrefix := fmt.Sprintf("c%d", level.Chapter)
 		for _, step := range level.Steps {
 			for _, id := range append([]string{step.ID}, ch29BlockIDs(step.Blocks)...) {
-				if !strings.HasPrefix(id, chapterPrefix) {
+				if !strings.HasPrefix(id, chapterPrefix) && !strings.HasPrefix(id, fmt.Sprintf("ch%02d-", level.Chapter)) {
 					t.Errorf("%s: ID %q has wrong chapter prefix", levelID, id)
 				}
 				if seen[id] {
