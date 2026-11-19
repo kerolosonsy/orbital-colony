@@ -303,6 +303,9 @@ body.debug-focus .format-btn, .format-btn:disabled { opacity: .45; }
   direction: ltr; text-align: left;
 }
 .code-wrap pre { overflow: hidden; pointer-events: none; color: var(--paper); }
+/* lines with a compile error get a faint red band */
+.err-bands { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.err-band { position: absolute; left: 0; right: 0; height: 1.65em; background: color-mix(in srgb, var(--err) 13%, transparent); box-shadow: inset 3px 0 var(--err); }
 /* the caret's line: a faint band under the code, hidden while debugging or selecting */
 .caret-line { position: absolute; left: 0; right: 0; height: 1.65em; pointer-events: none; background: color-mix(in srgb, var(--paper) 5%, transparent); display: none; }
 .code-wrap:focus-within .caret-line.on { display: block; }

@@ -483,6 +483,12 @@ function renderEditor() {
 function syncScroll() {
   hl.scrollTop = ed.scrollTop; hl.scrollLeft = ed.scrollLeft; gutter.scrollTop = ed.scrollTop;
   placeCaretLine();
+  placeErrorBands();
+}
+const errBands = $("#err-bands");
+function placeErrorBands() {
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+  errBands.innerHTML = [...errLines.keys()].map((line) => `<div class="err-band" style="top:${14 + (line - 1) * lineHeight - ed.scrollTop}px"></div>`).join("");
 }
 const caretLine = $("#caret-line");
 function placeCaretLine() {
