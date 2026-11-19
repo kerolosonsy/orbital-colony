@@ -206,3 +206,11 @@ Real stdout:
 ```text
 403
 ```
+
+## Playground notes
+
+- **Gin:** Trace one cleaned label through request, handler, registry, and response.
+- **Fiber:** Reuse a byte buffer and watch the saved string stay independent.
+- **OpenAPI:** Cycle number, string, and missing JSON values to inspect a safe type assertion.
+- **Graceful shutdown:** Run two valid schedules so active requests finish in either order before cleanup.
+- **Dock quarantine boss:** Step through generic response metadata and body writing until the response commits.

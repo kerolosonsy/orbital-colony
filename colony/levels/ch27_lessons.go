@@ -63,6 +63,114 @@ func ch27Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	}
 }
 
+type ch27SandboxSpec struct {
+	id     string
+	kind   string
+	text   [2]string
+	config map[string]any
+}
+
+func ch27Pair(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+var ch27SandboxSpecs = map[string]ch27SandboxSpec{
+	"c271": {
+		id: "ch27-signed-pass-playground", kind: "ch27-signed-pass",
+		text: [2]string{"غيّر الرسالة أو المفتاح وشوف ~tag~.", "Change the message or key and watch the tag."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"payload":       ch27Pair("الـpayload", "Payload"),
+				"key":           ch27Pair("المفتاح", "Key"),
+				"tag":           ch27Pair("tag توضيحي", "Toy tag"),
+				"changeMessage": ch27Pair("غيّر الرسالة", "Change message"),
+				"rotateKey":     ch27Pair("بدّل المفتاح", "Rotate key"),
+				"caption":       ch27Pair("الرسالة مقروءة والـtag يتغير.", "The payload stays readable; the tag changes."),
+			},
+			"messages": []string{"crew=Mira", "crew=Vega"},
+			"keys":     []string{"key-A", "key-B"},
+			"tags":     []string{"tag-01", "tag-02", "tag-03", "tag-04"},
+		},
+	},
+	"c272": {
+		id: "ch27-sessions-playground", kind: "ch27-session-lookup",
+		text: [2]string{"بدّل ~ID~ وشوف سجل السيرفر.", "Switch IDs and inspect the server record."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"browser": ch27Pair("مع المتصفح", "Browser holds"),
+				"server":  ch27Pair("نتيجة السيرفر", "Server lookup"),
+				"next":    ch27Pair("بدّل الـID", "Switch ID"),
+			},
+			"lookups": []any{
+				map[string]any{"id": "sess-A7", "result": "Mira", "caption": ch27Pair("السجل ربط الـID بالاسم.", "The record maps the ID to a name.")},
+				map[string]any{"id": "sess-X2", "result": "—", "caption": ch27Pair("مفيش سجل بالـID ده.", "No record matches this ID.")},
+			},
+		},
+	},
+	"c273": {
+		id: "ch27-cors-playground", kind: "ch27-preflight",
+		text: [2]string{"بدّل الطلب وتابع استدعاء الـhandler.", "Switch requests and follow the handler call."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"method":     ch27Pair("الطريقة", "Method"),
+				"stage":      ch27Pair("الفرع", "Path"),
+				"status":     ch27Pair("الرد", "Response"),
+				"innerCalls": ch27Pair("نداءات handler", "Handler calls"),
+				"next":       ch27Pair("الطلب التالي", "Next request"),
+			},
+			"requests": []any{
+				map[string]any{"method": "OPTIONS", "stage": "preflight", "status": "204", "calls": "0", "caption": ch27Pair("الفرع ده ما ناداش handler.", "This branch skipped the handler.")},
+				map[string]any{"method": "GET", "stage": "route", "status": "200", "calls": "1", "caption": ch27Pair("الطلب العادي وصل للـhandler.", "The normal request reached the handler.")},
+			},
+		},
+	},
+	"c274": {
+		id: "ch27-rate-limit-playground", kind: "ch27-client-counts",
+		text: [2]string{"عدّ الطلبات لكل عنوان لوحده.", "Count requests separately for each address."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"client":  ch27Pair("العميل", "Client"),
+				"count":   ch27Pair("الطلبات", "Requests"),
+				"caption": ch27Pair("كل عنوان له عدّاده.", "Each address has its own count."),
+			},
+			"clients": []any{
+				map[string]any{"address": "198.51.100.8", "button": ch27Pair("طلب من A", "Request A")},
+				map[string]any{"address": "198.51.100.9", "button": ch27Pair("طلب من B", "Request B")},
+			},
+		},
+	},
+	"c275": {
+		id: "ch27-short-links-playground", kind: "ch27-base62-index",
+		text: [2]string{"اختار ~index~ وشوف الرمز المقابل.", "Pick an index and see its symbol."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"index":    ch27Pair("index", "Index"),
+				"symbol":   ch27Pair("الرمز", "Symbol"),
+				"previous": ch27Pair("السابق", "Previous"),
+				"next":     ch27Pair("التالي", "Next"),
+				"reset":    ch27Pair("من الأول", "Reset"),
+			},
+			"lookups": []any{
+				map[string]any{"index": "0", "symbol": "0", "caption": ch27Pair("أول خانة تبدأ بصفر.", "The first slot starts at zero.")},
+				map[string]any{"index": "10", "symbol": "a", "caption": ch27Pair("بعد الأرقام تبدأ الحروف.", "Letters follow the digits.")},
+				map[string]any{"index": "61", "symbol": "Z", "caption": ch27Pair("الترتيب يحدد الرمز.", "The order selects the symbol.")},
+			},
+		},
+	},
+}
+
+func ch27SandboxBlock(prefix string, english bool) LessonBlock {
+	spec := ch27SandboxSpecs[prefix]
+	text := spec.text[0]
+	if english {
+		text = spec.text[1]
+	}
+	return LessonBlock{
+		ID: spec.id, Kind: "sandbox", Text: text,
+		Sandbox: &LessonSandbox{Kind: spec.kind, Config: spec.config},
+	}
+}
+
 func ch27BuildLesson(spec ch27LessonSpec) ch27BuiltLesson {
 	arabicTitles := []string{"المهمة", "الفكرة", "جرّب", "خد بالك", "فكّر واختبر", "دورك"}
 	englishTitles := []string{"Mission", "Idea", "Try it", "Watch out", "Think & check", "Your turn"}
@@ -90,6 +198,7 @@ func ch27BuildLesson(spec ch27LessonSpec) ch27BuiltLesson {
 				Blocks: []LessonBlock{
 					ch27Question(prefix+".predict", tryText, copy.options, spec.tryAnswer, copy.feedback),
 					ch27Walkthrough(prefix+".try-reveal", copy.tryReveal, spec.tryCode, spec.tryExampleID, spec.tryImports, spec.tryFrames[language]),
+					ch27SandboxBlock(prefix, language == 1),
 				},
 			},
 			{

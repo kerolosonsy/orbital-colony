@@ -28,6 +28,127 @@ type ch28LessonCopy struct {
 	Hints         []string
 }
 
+type ch28SandboxSpec struct {
+	id     string
+	kind   string
+	text   [2]string
+	config map[string]any
+}
+
+func ch28Pair(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+var ch28SandboxSpecs = map[string]ch28SandboxSpec{
+	"c281": {
+		id: "ch28-gin-playground", kind: "ch28-gin-flow",
+		text: [2]string{"تابع الطلب بين الطبقات.", "Follow a request across layers."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"step":     ch28Pair("الطبقة", "Layer"),
+				"value":    ch28Pair("القيمة", "Value"),
+				"previous": ch28Pair("السابق", "Previous"),
+				"next":     ch28Pair("التالي", "Next"),
+				"reset":    ch28Pair("من الأول", "Reset"),
+			},
+			"frames": []any{
+				map[string]any{"step": "request", "value": "  Vega  ", "caption": ch28Pair("الطلب دخل بقيمة خام.", "The request carries raw input.")},
+				map[string]any{"step": "handler", "value": "Vega", "caption": ch28Pair("الـhandler نظّف المدخل.", "The handler normalized the input.")},
+				map[string]any{"step": "registry", "value": "Vega", "caption": ch28Pair("الـregistry هو صاحب الحالة.", "The registry owns the state.")},
+				map[string]any{"step": "response", "value": "Vega", "caption": ch28Pair("الرد رجّع القيمة النظيفة.", "The response returns the clean value.")},
+			},
+		},
+	},
+	"c282": {
+		id: "ch28-fiber-playground", kind: "ch28-fiber-copy",
+		text: [2]string{"غيّر الـbuffer وراقب النسخة.", "Change the ~buffer~ and watch the copy."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"buffer":  ch28Pair("buffer", "Buffer"),
+				"saved":   ch28Pair("النص المحفوظ", "Saved string"),
+				"reuse":   ch28Pair("أعد استخدام buffer", "Reuse buffer"),
+				"caption": ch28Pair("النسخة المحفوظة مستقلة.", "The saved string stays independent."),
+			},
+			"values": []string{"north", "sorth"},
+		},
+	},
+	"c283": {
+		id: "ch28-openapi-playground", kind: "ch28-json-shape",
+		text: [2]string{"بدّل نوع القيمة وراقب الفحص.", "Switch the value type and inspect the assertion."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"field":    ch28Pair("قيمة depth", "depth value"),
+				"jsonType": ch28Pair("نوع JSON", "JSON type"),
+				"number":   ch28Pair("فحص الرقم", "Number assertion"),
+				"next":     ch28Pair("قيمة تانية", "Next sample"),
+			},
+			"samples": []any{
+				map[string]any{"value": "3", "type": "number", "number": "true", "caption": ch28Pair("الرقم يطابق النوع.", "A number matches the type.")},
+				map[string]any{"value": "\"3\"", "type": "string", "number": "false", "caption": ch28Pair("النص مش رقمًا.", "A string is not a number.")},
+				map[string]any{"value": "—", "type": "missing", "number": "false", "caption": ch28Pair("المفتاح الغايب ملوش قيمة.", "A missing key has no value.")},
+			},
+		},
+	},
+	"c284": {
+		id: "ch28-shutdown-playground", kind: "ch28-shutdown-order",
+		text: [2]string{"شغّل تاني؛ ترتيب الطلبات ممكن يتغير.", "Run again; request order can vary."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"timeline": ch28Pair("تسلسل توضيحي", "Illustrative timeline"),
+				"runAgain": ch28Pair("بدّل الترتيب / شغّل تاني", "Shuffle / run again"),
+				"caption":  ch28Pair("طلبات نشطة بترتيب متغير.", "Active requests may finish in either order."),
+			},
+			"orders": []any{
+				[]any{
+					ch28Pair("الإغلاق بدأ", "Shutdown starts"),
+					ch28Pair("الطلب A خلص", "Request A completes"),
+					ch28Pair("الطلب B خلص", "Request B completes"),
+					ch28Pair("التنضيف بدأ", "Cleanup starts"),
+				},
+				[]any{
+					ch28Pair("الإغلاق بدأ", "Shutdown starts"),
+					ch28Pair("الطلب B خلص", "Request B completes"),
+					ch28Pair("الطلب A خلص", "Request A completes"),
+					ch28Pair("التنضيف بدأ", "Cleanup starts"),
+				},
+			},
+		},
+	},
+	"c28b": {
+		id: "ch28-boss-playground", kind: "ch28-response-commit",
+		text: [2]string{"تابع الرد لحد ما metadata تثبت.", "Follow the response until metadata commits."},
+		config: map[string]any{
+			"labels": map[string]any{
+				"status":   ch28Pair("status", "Status"),
+				"header":   ch28Pair("header", "Header"),
+				"body":     ch28Pair("body", "Body"),
+				"state":    ch28Pair("حالة الرد", "Response state"),
+				"previous": ch28Pair("السابق", "Previous"),
+				"next":     ch28Pair("التالي", "Next"),
+				"reset":    ch28Pair("من الأول", "Reset"),
+			},
+			"frames": []any{
+				map[string]any{"status": "unset", "header": "unset", "body": "—", "state": "open", "caption": ch28Pair("لسه مفيش بيانات اتكتبت.", "Nothing has been written yet.")},
+				map[string]any{"status": "sample", "header": "example/type", "body": "—", "state": "open", "caption": ch28Pair("الـmetadata جاهزة والرد مفتوح.", "Metadata is set; the response is open.")},
+				map[string]any{"status": "sample", "header": "example/type", "body": "ready", "state": "committed", "caption": ch28Pair("كتابة body ثبّتت الرد.", "Writing the body committed the response.")},
+				map[string]any{"status": "sample", "header": "example/type", "body": "ready", "state": "committed", "caption": ch28Pair("تغيير metadata المتأخر ما أثرش.", "A late metadata change had no effect.")},
+			},
+		},
+	},
+}
+
+func ch28SandboxBlock(prefix string, english bool) LessonBlock {
+	spec := ch28SandboxSpecs[prefix]
+	text := spec.text[0]
+	if english {
+		text = spec.text[1]
+	}
+	return LessonBlock{
+		ID: spec.id, Kind: "sandbox", Text: text,
+		Sandbox: &LessonSandbox{Kind: spec.kind, Config: spec.config},
+	}
+}
+
 func ch28Markdown(id, text string) LessonBlock {
 	return LessonBlock{ID: id, Kind: "markdown", Text: text}
 }
@@ -66,6 +187,7 @@ func ch28BuildSteps(prefix string, english bool, lesson ch28LessonCopy) []Lesson
 		{ID: prefix + ".try-step", Title: titles[2], Blocks: []LessonBlock{
 			ch28Question(prefix+".try-predict", questionText, lesson.TryOptions, lesson.TryAnswer, lesson.TryFeedback),
 			ch28Walkthrough(prefix+".try-reveal", lesson.Reveal, lesson.TryCode, lesson.TryImports, lesson.TryID, ch28Frames(lesson.TryStates, lesson.TryCaptions)),
+			ch28SandboxBlock(prefix, english),
 		}},
 		{ID: prefix + ".watch-step", Title: titles[3], Blocks: []LessonBlock{ch28Markdown(prefix+".watch", lesson.Watch)}},
 		{ID: prefix + ".check-step", Title: titles[4], Blocks: []LessonBlock{
