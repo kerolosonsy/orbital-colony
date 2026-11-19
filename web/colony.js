@@ -487,6 +487,7 @@ const Colony = (() => {
       applyCheckResult(kind, r);
     } catch (e) {
       log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
+      if (typeof logServerHint === "function") logServerHint(e);
       Sound.play("error");
     } finally {
       checking = false;
@@ -548,6 +549,7 @@ const Colony = (() => {
       log(T("المستعمرة شغالة.", "Colony running."), "c-ok");
     } catch (e) {
       log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
+      if (typeof logServerHint === "function") logServerHint(e);
     } finally {
       btn.classList.remove("busy");
       runUI();
