@@ -516,7 +516,7 @@ InlineDebugger.bind({
   },
 });
 ed.addEventListener("keydown", (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run(); return; }
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }
   if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); insert("\t"); return; }
   if (e.key === "Enter" && !e.isComposing) {
     e.preventDefault();
@@ -1247,7 +1247,10 @@ function finishPlayback() {
   $("#btn-skip").disabled = true;
   done && done();
 }
-$("#btn-skip").onclick = finishPlayback;
+$("#btn-skip").onclick = () => {
+  if (dbgRun && !dbgRun.revealed) InlineDebugger.finishNow();
+  else finishPlayback();
+};
 
 let lastT = performance.now();
 function frame(now) {
@@ -1614,6 +1617,75 @@ function showTraceRun(level, response, payload, sources) {
   else tracePayload.code = payload.code;
   InlineDebugger.start(level.id, tracePayload);
 }
+// ---------- debug playback ----------
+// For missions that return a single-run trace, Run plays the recorded steps:
+// the debugger walks the code while the map shows the world at each step.
+// The result appears when the last step is reached (or on skip/exit).
+let dbgRun = null;
+function startDebugRun(level, r, paused) {
+  const list = r.events || [];
+  const initAt = list.findIndex((e) => e.op === "init");
+  if (initAt >= 0) setWorld(list[initAt]);
+  dbgRun = { level, r, list, base: initAt + 1, applied: initAt + 1, revealed: false };
+  W.live = true; W.liveStep = 220;
+  $("#btn-skip").disabled = false;
+  InlineDebugger.startWith(level.id, r.trace, {
+    autoplay: !paused,
+    onFrame: (frame, index, total) => { seekMap(frame.events); mapBadge(index, total); },
+    onEnd: () => revealDebugRun(false),
+    onExit: () => revealDebugRun(false),
+    onClear: dropDebugRun,
+  });
+}
+function quietly(fn) {
+  const realLog = log, realPlay = Sound.play, realBurst = burst, fxCount = fx.length;
+  log = () => {}; Sound.play = () => {}; burst = () => {};
+  try { fn(); } finally { log = realLog; Sound.play = realPlay; burst = realBurst; fx.length = fxCount; }
+}
+function seekMap(target) {
+  const run = dbgRun;
+  if (!run || !W) return;
+  const n = Math.max(run.base, Math.min(Number(target) || 0, run.list.length));
+  if (n < run.applied) {
+    // going back: rebuild the world up to the step without sound or logs
+    if (run.base > 0) setWorld(run.list[run.base - 1]);
+    W.live = true; W.liveStep = 220;
+    quietly(() => { for (let i = run.base; i < n; i++) apply(run.list[i]); });
+    for (const d of W.drones.values()) { d.px = d.x; d.py = d.y; }
+  } else {
+    for (let i = run.applied; i < n; i++) apply(run.list[i]);
+  }
+  run.applied = n;
+}
+function mapBadge(index, total) {
+  const badge = $("#debug-map-badge");
+  if (!badge) return;
+  if (index == null) { badge.hidden = true; return; }
+  badge.hidden = false;
+  const icon = InlineDebugger.playing && index < total - 1 ? "▶" : "⏸";
+  badge.textContent = T(`${icon} خطوة ${index + 1} / ${total}`, `${icon} step ${index + 1} / ${total}`);
+}
+function revealDebugRun(silent) {
+  const run = dbgRun;
+  if (!run || run.revealed) return;
+  run.revealed = true;
+  $("#btn-skip").disabled = true;
+  if (silent) return finish(run.level, run.r.result, run.r.missing || [], true);
+  seekMap(run.list.length);
+  finish(run.level, run.r.result, run.r.missing || []);
+}
+function dropDebugRun() {
+  const run = dbgRun;
+  if (!run) return;
+  if (!run.revealed) revealDebugRun(true);
+  // leave the map at the run's end state
+  if (W && S.cur === run.level) quietly(() => { for (let i = run.applied; i < run.list.length; i++) apply(run.list[i]); });
+  if (W) { for (const d of W.drones.values()) { d.px = d.x; d.py = d.y; } W.live = false; }
+  dbgRun = null;
+  mapBadge(null);
+  $("#btn-skip").disabled = true;
+}
+
 function runButton(running) {
   const btn = $("#btn-run");
   btn.classList.toggle("stop", running);
@@ -1636,7 +1708,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && S.running && S.mode !== "colony" && !document.querySelector("dialog[open]")) stopRun();
 });
 
-async function run() {
+async function run(opts = {}) {
   if (S.mode === "colony") { clearTraceRun(); return Colony.toggleRun(); }
   if (S.running) return stopRun();
   clearTraceRun();
@@ -1704,6 +1776,10 @@ async function run() {
     if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => log(l, "c-err"));
     if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
     log(T("الدرون شغال…", "Drone running…"), "c-info");
+    if (r.trace?.available && r.trace.synced && r.trace.frames?.length) {
+      startDebugRun(level, r, !!opts.paused);
+      return;
+    }
     await new Promise((res) => startPlayback(r.events, res));
     if (me !== runId) return;
     finish(level, r.result, r.missing || []);
@@ -1723,7 +1799,8 @@ async function run() {
     }
   }
 }
-$("#btn-run").onclick = run;
+$("#btn-run").onclick = () => run();
+$("#btn-step").onclick = () => run({ paused: true });
 $("#btn-vscode").onclick = openVSCode;
 $("#btn-unlink").onclick = () => {
   linked.delete(S.cur.id); saveLinked();
@@ -1737,8 +1814,11 @@ function banner(text, ok) {
   b.textContent = text; b.className = "banner" + (ok ? " ok" : "");
 }
 
-function finish(level, res, missing = []) {
-  if (S.cur !== level) return;
+// silent: record the result without any UI (the learner left the level or
+// edited the code while a debug playback was still showing the run).
+function finish(level, res, missing = [], silent = false) {
+  if (!silent && S.cur !== level) return;
+  if (silent && (!res.success || S.review)) return;
   if (!res.success) {
     banner(res.message + (res.progress ? ` (${res.progress})` : "") + (missing.length ? " " + missing.join(" ") : ""), false);
     missing.forEach((m) => log("   • " + m, "c-tip"));
@@ -1757,6 +1837,7 @@ function finish(level, res, missing = []) {
   r.stars = Math.max(r.stars, res.stars);
   r.best = r.best ? Math.min(r.best, res.ticks) : res.ticks;
   store.save();
+  if (silent) { updateOverall(); return; }
   $("#lvl-stars").innerHTML = starHTML(r.stars);
   $("#lvl-stars").setAttribute("aria-label", T(`${r.stars} من 3 نجوم`, `${r.stars} of 3 stars`));
   banner(res.message, true);

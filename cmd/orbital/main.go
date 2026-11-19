@@ -287,7 +287,7 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 	if l.Kind == "lab" {
 		resp.Traceable = traceMainPresent(traceProjectFiles(l, req.Code, req.Files))
 	} else if traceLevelSupported(l) {
-		resp.Traceable = resp.Phase == "run"
+		resp.Traceable = resp.Phase == "run" && resp.Trace == nil
 	}
 	if req.Review {
 		resp.Result.Stars = 0

@@ -45,6 +45,8 @@ type traceFrame struct {
 	Variables []traceVariable `json:"variables"`
 	Returns   []traceVariable `json:"returns,omitempty"`
 	Stdout    int64           `json:"stdout"`
+	Sim       int64           `json:"sim,omitempty"`
+	Events    int             `json:"events"`
 	Truncated bool            `json:"truncated,omitempty"`
 }
 
@@ -56,6 +58,9 @@ type traceResponse struct {
 	StdoutTruncated bool         `json:"stdoutTruncated,omitempty"`
 	Truncated       bool         `json:"truncated,omitempty"`
 	Message         string       `json:"message,omitempty"`
+	// Synced is true when every frame's Events count refers to the event
+	// stream of the same run the client replays on the map.
+	Synced bool `json:"synced,omitempty"`
 }
 
 type traceRequest struct {
@@ -997,6 +1002,7 @@ type __trace__Frame struct {
 	Variables []__trace__Variable ` + "`json:\"variables\"`" + `
 	Returns []__trace__Variable ` + "`json:\"returns,omitempty\"`" + `
 	Stdout int64 ` + "`json:\"stdout\"`" + `
+	Sim int64 ` + "`json:\"sim,omitempty\"`" + `
 	Truncated bool ` + "`json:\"truncated,omitempty\"`" + `
 }
 
@@ -1027,6 +1033,7 @@ var __trace__Bytes int
 var __trace__DepthMu sync.Mutex
 var __trace__Depths = map[int]int{}
 var __trace__Stdout int64
+var __trace__SimPath = os.Getenv("ORBITAL_TRACE")
 
 func __trace__Record(point __trace__Point, namedLocals ...any) {
 	if __trace__Stopped.Load() || __trace__File == nil {
@@ -1100,6 +1107,13 @@ func __trace__RecordAt(point __trace__Point, thread __trace__Thread, namedLocals
 
 func __trace__WriteFrame(frame __trace__Frame) {
 	frame.Stdout = atomic.LoadInt64(&__trace__Stdout)
+	if __trace__SimPath != "" {
+		// The colony writes each world event straight to this file, so its
+		// size says how many events happened before this statement.
+		if info, err := os.Stat(__trace__SimPath); err == nil {
+			frame.Sim = info.Size()
+		}
+	}
 	encoded, err := json.Marshal(frame)
 	if err == nil {
 		__trace__Append(encoded)
