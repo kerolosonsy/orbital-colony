@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/trace.css">
 <link rel="stylesheet" href="/static/treeview.css">
 <link rel="stylesheet" href="/static/sandbox/kit.css">
 <link rel="stylesheet" href="/static/sandbox/ch01.css">
@@ -100,6 +101,7 @@
     <button id="btn-test" type="button" class="tool small" title="شغّل اختبارات go test" data-en-title="Run go test"><span data-en="Test">اختبر</span></button>
     <button id="btn-vet" type="button" class="tool small" title="افحص الكود بـ go vet" data-en-title="Run go vet"><span data-en="Vet">افحص</span></button>
   </div>
+  <button id="btn-trace" type="button" class="tool hidden" data-en="Trace" title="تتبّع الكود اللي اشتغل" data-en-title="Trace the code that ran">تتبّع</button>
   <button id="btn-run" class="run" title="Ctrl/⌘ + Enter"><svg class="ico"><use href="#i-play"/></svg><span>Run</span></button>
 </header>
 
@@ -312,6 +314,7 @@
 <script src="/static/sandbox/ch37.js"></script>
 <script src="/static/sandbox/ch38.js"></script>
 <script src="/static/app.js"></script>
+<script src="/static/trace.js"></script>
 <script src="/static/profiles.js"></script>
 <script src="/static/tree.js"></script>
 <script src="/static/treeview.js"></script>
