@@ -2,15 +2,60 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 )
+
+func TestCh09SandboxFixturesMatchLessons(t *testing.T) {
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch09.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]map[string]any
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for _, id := range []string{"9-1-stringer", "9-2-autopilot", "9-3-signals", "9-4-small-plugs", "9-boss-evacuation"} {
+		level := Get(id)
+		for _, block := range level.Steps[2].Blocks {
+			if block.Sandbox == nil {
+				continue
+			}
+			fixture, ok := fixtures[block.Sandbox.Kind]
+			if !ok || !reflect.DeepEqual(block.Sandbox.Config, fixture) {
+				t.Errorf("%s config differs from its JavaScript fixture", block.Sandbox.Kind)
+			}
+			seen[block.Sandbox.Kind] = true
+		}
+	}
+	if len(seen) != len(fixtures) {
+		t.Errorf("found %d chapter 9 sandbox kinds for %d fixtures", len(seen), len(fixtures))
+	}
+}
+
+func ch09ValidateStepsWithoutSandbox(t *testing.T, steps []LessonStep) {
+	t.Helper()
+	filtered := make([]LessonStep, len(steps))
+	for i, step := range steps {
+		filtered[i] = step
+		filtered[i].Blocks = nil
+		for _, block := range step.Blocks {
+			if block.Sandbox == nil {
+				filtered[i].Blocks = append(filtered[i].Blocks, block)
+			}
+		}
+	}
+	validateLessonSteps(t, filtered)
+}
 
 type ch09LessonCopy struct {
 	language string
@@ -64,10 +109,10 @@ func ch09ValidateLessonCopy(t *testing.T, copy ch09LessonCopy) {
 	if len(copy.steps) != 6 || len(copy.titles) != 6 || len(copy.hints) != 3 || len(copy.labels) != 3 {
 		t.Fatalf("got %d steps and %d hints; want six and three", len(copy.steps), len(copy.hints))
 	}
-	validateLessonSteps(t, copy.steps)
+	ch09ValidateStepsWithoutSandbox(t, copy.steps)
 	tryBlocks := copy.steps[2].Blocks
-	if len(tryBlocks) != 2 || tryBlocks[0].Kind != "question" || tryBlocks[1].Kind != "walkthrough" {
-		t.Errorf("Try it must ask for a prediction before its walkthrough")
+	if len(tryBlocks) != 3 || tryBlocks[0].Kind != "question" || tryBlocks[1].Kind != "walkthrough" || tryBlocks[2].Kind != "sandbox" {
+		t.Errorf("Try it must ask, show its walkthrough, then offer one sandbox")
 	}
 	for i, hint := range copy.hints {
 		if strings.HasPrefix(hint, copy.labels[i]+": ") || strings.ContainsAny(strings.TrimSpace(hint), "\n!?؟") {
@@ -80,6 +125,7 @@ func ch09ValidateLessonCopy(t *testing.T, copy ch09LessonCopy) {
 	}
 	t.Logf("learner word count: %d", words)
 	seen := map[string]bool{}
+	sandboxes := 0
 	for i, step := range copy.steps {
 		if step.Title != copy.titles[i] || !strings.HasPrefix(step.ID, copy.prefix) || seen[step.ID] {
 			t.Errorf("step %d title or ID is invalid: %q", i+1, step.ID)
@@ -91,7 +137,10 @@ func ch09ValidateLessonCopy(t *testing.T, copy ch09LessonCopy) {
 			}
 			seen[block.ID] = true
 			if block.Kind == "sandbox" {
-				t.Errorf("%s: chapter 9 lessons do not add sandbox blocks", block.ID)
+				sandboxes++
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch09-") {
+					t.Errorf("%s: sandbox must use a ch09- kind", block.ID)
+				}
 			}
 			if block.Kind == "walkthrough" {
 				for frameIndex, frame := range block.Walkthrough.Frames {
@@ -115,6 +164,9 @@ func ch09ValidateLessonCopy(t *testing.T, copy ch09LessonCopy) {
 				}
 			}
 		}
+	}
+	if sandboxes != 1 {
+		t.Errorf("got %d sandboxes, want exactly one", sandboxes)
 	}
 }
 

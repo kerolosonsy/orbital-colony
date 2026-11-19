@@ -2,16 +2,61 @@ package levels
 
 import (
 	ch10context "context"
+	ch10json "encoding/json"
 	ch10fmt "fmt"
 	ch10os "os"
 	ch10exec "os/exec"
 	ch10filepath "path/filepath"
+	ch10reflect "reflect"
 	ch10regexp "regexp"
 	ch10sort "sort"
 	ch10strings "strings"
 	ch10testing "testing"
 	ch10time "time"
 )
+
+func TestCh10SandboxFixturesMatchLessons(t *ch10testing.T) {
+	body, err := ch10os.ReadFile(ch10filepath.Join("..", "..", "web", "sandbox", "ch10.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]map[string]any
+	if err := ch10json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for _, id := range []string{"10-1-second-drone", "10-2-swarm", "10-3-divide"} {
+		level := Get(id)
+		for _, block := range level.Steps[2].Blocks {
+			if block.Sandbox == nil {
+				continue
+			}
+			fixture, ok := fixtures[block.Sandbox.Kind]
+			if !ok || !ch10reflect.DeepEqual(block.Sandbox.Config, fixture) {
+				t.Errorf("%s config differs from its JavaScript fixture", block.Sandbox.Kind)
+			}
+			seen[block.Sandbox.Kind] = true
+		}
+	}
+	if len(seen) != len(fixtures) {
+		t.Errorf("found %d chapter 10 sandbox kinds for %d fixtures", len(seen), len(fixtures))
+	}
+}
+
+func ch10ValidateStepsWithoutSandbox(t *ch10testing.T, steps []LessonStep) {
+	t.Helper()
+	filtered := make([]LessonStep, len(steps))
+	for i, step := range steps {
+		filtered[i] = step
+		filtered[i].Blocks = nil
+		for _, block := range step.Blocks {
+			if block.Sandbox == nil {
+				filtered[i].Blocks = append(filtered[i].Blocks, block)
+			}
+		}
+	}
+	validateLessonSteps(t, filtered)
+}
 
 func TestCh10Lessons(t *ch10testing.T) {
 	wantTitlesArabic := []string{"المهمة", "الفكرة", "جرّب", "خد بالك", "فكّر واختبر", "دورك"}
@@ -38,8 +83,28 @@ func TestCh10Lessons(t *ch10testing.T) {
 		if len(level.Steps) != 6 || len(level.En.Steps) != 6 {
 			t.Fatalf("%s: expected six steps in both languages", level.ID)
 		}
-		validateLessonSteps(t, level.Steps)
-		validateLessonSteps(t, level.En.Steps)
+		ch10ValidateStepsWithoutSandbox(t, level.Steps)
+		ch10ValidateStepsWithoutSandbox(t, level.En.Steps)
+		for _, steps := range [][]LessonStep{level.Steps, level.En.Steps} {
+			if len(steps[2].Blocks) != 3 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" || steps[2].Blocks[2].Kind != "sandbox" {
+				t.Errorf("%s: Try it must keep its prediction and walkthrough before one sandbox", level.ID)
+			}
+			sandboxes := 0
+			for _, step := range steps {
+				for _, block := range step.Blocks {
+					if block.Kind != "sandbox" {
+						continue
+					}
+					sandboxes++
+					if block.Sandbox == nil || !ch10strings.HasPrefix(block.Sandbox.Kind, "ch10-") {
+						t.Errorf("%s: sandbox must use a ch10- kind", block.ID)
+					}
+				}
+			}
+			if sandboxes != 1 {
+				t.Errorf("%s: got %d sandboxes, want exactly one", level.ID, sandboxes)
+			}
+		}
 		for i, step := range level.Steps {
 			translated := level.En.Steps[i]
 			if step.Title != wantTitlesArabic[i] || translated.Title != wantTitlesEnglish[i] {

@@ -1,1 +1,52 @@
 /* Chapter 09 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch09-stringer,
+.lesson-sandbox.ch09-plan-callback,
+.lesson-sandbox.ch09-type-switch,
+.lesson-sandbox.ch09-trim-space,
+.lesson-sandbox.ch09-map-updates {
+  box-sizing: border-box;
+  max-width: 290px;
+  padding: 0.65rem;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 0.65rem;
+  background: var(--surface, #fff);
+  color: inherit;
+  direction: inherit;
+  text-align: start;
+}
+
+.ch09-sandbox-intro,
+.ch09-sandbox-caption {
+  margin: 0 0 0.45rem;
+  color: var(--muted, #64748b);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.lesson-sandbox.ch09-stringer button,
+.lesson-sandbox.ch09-plan-callback button,
+.lesson-sandbox.ch09-type-switch button,
+.lesson-sandbox.ch09-trim-space button,
+.lesson-sandbox.ch09-map-updates button {
+  max-width: 100%;
+  margin-top: 0.55rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 0.45rem;
+  background: var(--button-bg, #f8fafc);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ch09-sandbox-caption {
+  margin-top: 0.45rem;
+  margin-bottom: 0;
+}
+
+.ch09-stringer .sandbox-kit-value,
+.ch09-trim-space .sandbox-kit-value,
+.ch09-map-updates .sandbox-kit-value {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}

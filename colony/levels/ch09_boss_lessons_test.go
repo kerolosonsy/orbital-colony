@@ -47,6 +47,7 @@ func ch09BossValidateCopy(t *testing.T, language string, steps []LessonStep, hin
 		t.Fatalf("%s: got %d steps and %d hints; want six and three", language, len(steps), len(hints))
 	}
 	seen := map[string]bool{}
+	sandboxes := 0
 	claim := func(id string) {
 		if !strings.HasPrefix(id, "c9b.") || seen[id] {
 			t.Errorf("%s: empty-prefix or duplicate ID %q", language, id)
@@ -66,6 +67,12 @@ func ch09BossValidateCopy(t *testing.T, language string, steps []LessonStep, hin
 				t.Errorf("%s: %s has no learner text", language, block.ID)
 			}
 			words += ch09BossVisibleWords(block.Text)
+			if block.Kind == "sandbox" {
+				sandboxes++
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch09-") {
+					t.Errorf("%s: sandbox must use a ch09- kind", block.ID)
+				}
+			}
 			for _, line := range strings.Split(block.Text, "\n") {
 				if len([]rune(line)) > 140 {
 					t.Errorf("%s: %s has a line over three panel lines", language, block.ID)
@@ -101,10 +108,17 @@ func ch09BossValidateCopy(t *testing.T, language string, steps []LessonStep, hin
 					continue
 				}
 				words += ch09BossValidateFrames(t, language, block)
+			case "sandbox":
+				if block.Sandbox == nil || block.Code != "" || block.Question != nil || block.Walkthrough != nil {
+					t.Errorf("%s: sandbox has an invalid payload", block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed kind %q", language, block.ID, block.Kind)
 			}
 		}
+	}
+	if sandboxes != 1 {
+		t.Errorf("%s: got %d sandboxes, want exactly one", language, sandboxes)
 	}
 	for i, hint := range hints {
 		if strings.TrimSpace(hint) == "" || strings.ContainsAny(hint, "\n!?؟") || !strings.HasSuffix(strings.TrimSpace(hint), ".") {
@@ -120,8 +134,8 @@ func ch09BossValidateCopy(t *testing.T, language string, steps []LessonStep, hin
 	}
 	if len(steps) >= 3 {
 		try := steps[2].Blocks
-		if len(try) != 2 || try[0].Kind != "question" || try[1].Kind != "walkthrough" {
-			t.Errorf("%s: Try it must predict before revealing with a walkthrough", language)
+		if len(try) != 3 || try[0].Kind != "question" || try[1].Kind != "walkthrough" || try[2].Kind != "sandbox" {
+			t.Errorf("%s: Try it must predict, reveal, then offer one sandbox", language)
 		} else if strings.TrimSpace(ch09BossQuestionCode(try[0].Text)) != strings.TrimSpace(try[1].Code) {
 			t.Errorf("%s: prediction code differs from the walkthrough", language)
 		}
@@ -225,6 +239,13 @@ func ch09BossAssertParity(t *testing.T, arabic, english LessonBlock) {
 			if !reflect.DeepEqual(frame, other) {
 				t.Errorf("%s frame %d: execution states differ", arabic.ID, i)
 			}
+		}
+	}
+	if arabic.Sandbox != nil {
+		if english.Sandbox == nil || arabic.Sandbox.Kind != english.Sandbox.Kind {
+			t.Errorf("%s: sandbox identity differs across languages", arabic.ID)
+		} else {
+			sandboxConfigParity(t, arabic.Sandbox.Config, english.Sandbox.Config)
 		}
 	}
 }

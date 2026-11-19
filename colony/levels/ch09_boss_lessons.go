@@ -1,5 +1,19 @@
 package levels
 
+var ch09BossMapSandbox = &LessonSandbox{
+	Kind: "ch09-map-updates",
+	Config: map[string]any{
+		"intro":    ch09Pair("خطوة بخطوة، حدّث قيمة المفتاح.", "Step through updates to one map key."),
+		"button":   ch09Pair("الخطوة التالية", "Next step"),
+		"mapLabel": ch09Pair("الخريطة", "Map"),
+		"steps": []any{
+			map[string]any{"map": ch09Pair("map[]", "map[]"), "caption": ch09Pair("بدأت الخريطة فاضية.", "The map starts empty.")},
+			map[string]any{"map": ch09Pair("map[amber:1]", "map[amber:1]"), "caption": ch09Pair("اتضاف مفتاح جديد.", "A new key is added.")},
+			map[string]any{"map": ch09Pair("map[amber:4]", "map[amber:4]"), "caption": ch09Pair("اتحدّثت قيمة نفس المفتاح.", "The same key is updated.")},
+		},
+	},
+}
+
 var ch09BossArabic = []LessonStep{
 	{
 		ID: "c9b.mission-step", Title: "المهمة",
@@ -29,6 +43,7 @@ var ch09BossArabic = []LessonStep{
 				{Line: 3, Caption: "التحديث زوّد نفس المفتاح.", Variables: []LessonVariable{{Name: "counts", Value: "map[teal:3]"}}},
 				{Line: 4, Caption: "اطبع قيمة المفتاح.", Variables: []LessonVariable{{Name: "counts", Value: "map[teal:3]"}}, Output: "3"},
 			}}},
+			{ID: "c9b.map-sandbox", Kind: "sandbox", Text: "تابع تحديثات key في map صغيرة.", Sandbox: ch09BossMapSandbox},
 		},
 	},
 	{
@@ -90,6 +105,7 @@ var ch09BossEnglish = []LessonStep{
 				{Line: 3, Caption: "The same key increases.", Variables: []LessonVariable{{Name: "counts", Value: "map[teal:3]"}}},
 				{Line: 4, Caption: "Print the key's value.", Variables: []LessonVariable{{Name: "counts", Value: "map[teal:3]"}}, Output: "3"},
 			}}},
+			{ID: "c9b.map-sandbox", Kind: "sandbox", Text: "Step through updates to one map key.", Sandbox: ch09BossMapSandbox},
 		},
 	},
 	{

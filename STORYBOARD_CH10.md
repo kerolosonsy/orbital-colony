@@ -128,6 +128,14 @@ all done
 
 Real stderr: empty.
 
+## Interactive playgrounds
+
+Each sandbox follows the existing prediction and walkthrough in Try it. Data is illustrative. The concurrency playgrounds cycle between valid schedules; no displayed order is guaranteed.
+
+- **10-1:** Step through main and helper completion, then compare another possible order before `Wait` returns.
+- **10-2:** Step through two goroutines and compare different print orders while `Wait` remains last.
+- **10-3:** Inspect three toy task groups and compare possible completion orders.
+
 #### Verified `e10-1-result` — ok
 
 Real stdout:
