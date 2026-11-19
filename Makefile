@@ -12,7 +12,7 @@ OPEN    ?= open
 STAMP    = $(shell date +%Y%m%d-%H%M%S)
 
 .DEFAULT_GOAL := help
-.PHONY: help run start stop restart status logs open build test test-quick check fmt vet stats \
+.PHONY: help run start stop restart status logs open build test test-quick test-web check fmt vet stats \
         backup restore backups players reset-all clean doctor
 
 help: ## اعرض كل الأوامر
@@ -73,7 +73,10 @@ test-quick: ## اختبارات سريعة (أقل من دقيقة)
 	cd colony && go test ./...
 	go test ./cmd/orbital/ -count=1 -run 'TestLevelOrder|TestPreviewHasNoTimers|TestGoalMustHold|TestCompileErrorTips|Profile|Lang|TestLevelsSolvable/(1-1|1-2|3-3)'
 
-check: fmt vet test-quick ## نسّق وافحص وجرّب بسرعة قبل ما تحفظ شغلك
+test-web: ## اختبارات واجهة المتصفح (محتاج Node 20+)
+	node --test web/*.test.js web/sandbox/*.test.js
+
+check: fmt vet test-quick test-web ## نسّق وافحص وجرّب بسرعة قبل ما تحفظ شغلك
 
 fmt: ## نسّق كود Go
 	gofmt -w cmd colony assets.go
@@ -122,6 +125,8 @@ doctor: ## اتأكد إن كل حاجة جاهزة على الجهاز
 	@command -v code >/dev/null && echo "✓ VS Code (code)" || echo "• VS Code: افتحه ومن Command Palette اختار: Shell Command: Install 'code' command in PATH"
 	@command -v gopls >/dev/null && echo "✓ gopls" || echo "• gopls مش متسطب (للـ autocomplete): go install golang.org/x/tools/gopls@latest"
 	@lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1 && echo "• البورت $(PORT) مستخدم دلوقتي" || echo "✓ البورت $(PORT) فاضي"
+	@(cd labdeps && GOPROXY=off GOFLAGS=-mod=mod go build ./... >/dev/null 2>&1) && echo "✓ مكتبات المختبرات جاهزة" || echo "• مكتبات المختبرات مش جاهزة: شغّل make deps مرة وإنت متوصل بالإنترنت"
+	@command -v docker >/dev/null && echo "✓ Docker (لمهمات الخدمات: make services-up)" || echo "• Docker مش متسطب: محتاجه بس لمهمات Postgres/MongoDB/Kafka"
 
 clean: ## امسح ملفات البناء والـ logs (الحفظ مش بيتمسح)
 	rm -f $(BIN) $(LOGFILE)

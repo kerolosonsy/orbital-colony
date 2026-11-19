@@ -36,3 +36,5 @@ Each entry: what changed and why. Numbered in the order they landed.
 32. **Click a panic/test line to jump to the code** — console lines that name a mission file (`main.go:8 +0x1c`, `main_test.go:23: …`) are clickable and select that line in the editor, like compile errors already were.
 33. **Move lines with Alt+↑/↓** — the current line (or every selected line) swaps with the line above/below, caret/selection following it.
 34. **Duplicate lines with Shift+Alt+↑/↓** — copies the touched lines above or below. Both are in the shortcuts sheet and README, tested in `web/editkeys.test.js`.
+35. **`make doctor` checks lab libraries and Docker** — it now says whether `labdeps` builds offline (else: run `make deps` once online) and whether Docker is there for the Postgres/MongoDB/Kafka missions.
+36. **`make test-web`** — runs the browser-side tests (`node --test`, 278 tests), and `make check` now includes them; before, no make target ran the web tests at all.
