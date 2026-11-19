@@ -1,0 +1,90 @@
+{
+  "ch05-params": {
+    "source": { "ar": "قيم للتوضيح", "en": "Illustrative values" },
+    "labels": {
+      "previous": { "ar": "السابق", "en": "Previous" },
+      "next": { "ar": "التالي", "en": "Next" },
+      "reset": { "ar": "من الأول", "en": "Reset" },
+      "call": { "ar": "النداء", "en": "Call" },
+      "inside": { "ar": "جوه الدالة", "en": "Inside function" },
+      "result": { "ar": "النتيجة", "en": "Result" }
+    },
+    "frames": [
+      { "caption": { "ar": "النداء يمرر 2.", "en": "The call passes 2." }, "call": "triple(2)", "inside": "—", "result": "—" },
+      { "caption": { "ar": "n تستقبل القيمة.", "en": "n receives the value." }, "call": "triple(2)", "inside": "2", "result": "—" },
+      { "caption": { "ar": "الـreturn ترجع 6.", "en": "return carries 6." }, "call": "triple(2)", "inside": "2", "result": "6" }
+    ]
+  },
+  "ch05-error-value": {
+    "source": { "ar": "قراءة توضيحية", "en": "Illustrative read" },
+    "labels": {
+      "outcome": { "ar": "حالة error", "en": "Error state" },
+      "present": { "ar": "موجود", "en": "Present" },
+      "absent": { "ar": "nil", "en": "nil" },
+      "value": { "ar": "القيمة الراجعة", "en": "Returned value" },
+      "error": { "ar": "الخطأ", "en": "Error" },
+      "action": { "ar": "التصرف", "en": "Next step" }
+    },
+    "success": {
+      "error": { "ar": "nil", "en": "nil" },
+      "action": { "ar": "استخدم القيمة 12.", "en": "Use value 12." },
+      "caption": { "ar": "مفيش خطأ؛ النتيجة صالحة.", "en": "No error; the result is usable." }
+    },
+    "failure": {
+      "error": { "ar": "sensor", "en": "sensor" },
+      "action": { "ar": "افحص الخطأ الأول.", "en": "Check the error first." },
+      "caption": { "ar": "فيه خطأ؛ سيب القيمة.", "en": "An error is present; skip the value." }
+    },
+    "value": 12
+  },
+  "ch05-wrap": {
+    "source": { "ar": "سبب توضيحي", "en": "Illustrative cause" },
+    "labels": {
+      "format": { "ar": "صيغة التنسيق", "en": "Format" },
+      "wrap": "%w",
+      "plain": "%v",
+      "message": { "ar": "الرسالة", "en": "Message" },
+      "identity": { "ar": "errors.Is", "en": "errors.Is" }
+    },
+    "wrapped": {
+      "message": "bay 2: valve",
+      "identity": "true",
+      "caption": { "ar": "السبب لسه معروف.", "en": "The cause stays identifiable." }
+    },
+    "plain": {
+      "message": "bay 2: valve",
+      "identity": "false",
+      "caption": { "ar": "النص موجود؛ الهوية ضاعت.", "en": "Text remains; identity is lost." }
+    }
+  },
+  "ch05-defer": {
+    "source": { "ar": "حروف تدريبية", "en": "Sample markers" },
+    "labels": {
+      "previous": { "ar": "السابق", "en": "Previous" },
+      "next": { "ar": "التالي", "en": "Next" },
+      "reset": { "ar": "من الأول", "en": "Reset" },
+      "output": { "ar": "الناتج", "en": "Output" }
+    },
+    "frames": [
+      { "caption": { "ar": "مفيش طباعة لسه.", "en": "No output yet." }, "output": "—" },
+      { "caption": { "ar": "النداء الفوري طبع K.", "en": "The immediate call prints K." }, "output": "K" },
+      { "caption": { "ar": "آخر defer طبع J.", "en": "The last defer prints J." }, "output": "KJ" },
+      { "caption": { "ar": "أول defer طبع H.", "en": "The first defer prints H." }, "output": "KJH" }
+    ]
+  },
+  "ch05-closure": {
+    "source": { "ar": "أمر تدريبي", "en": "Sample command" },
+    "labels": {
+      "store": { "ar": "خزّن الدالة", "en": "Store function" },
+      "call": { "ar": "نفّذ النداء", "en": "Call function" },
+      "reset": { "ar": "من الأول", "en": "Reset" },
+      "count": { "ar": "عدد النداءات", "en": "Call count" }
+    },
+    "states": {
+      "idle": { "ar": "لسه مفيش function value.", "en": "No function value stored yet." },
+      "stored": { "ar": "اتخزنت؛ لسه ما اتنفذتش.", "en": "Stored; nothing has run yet." },
+      "called": { "ar": "الـclosure حدّثت العداد.", "en": "The closure updated its counter." }
+    },
+    "initialCount": 0
+  }
+}
