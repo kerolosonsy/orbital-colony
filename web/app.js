@@ -719,6 +719,15 @@ $("#btn-format").onclick = () => { formatEditor(); ed.focus(); };
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }
   if (e.shiftKey && e.altKey && !e.metaKey && !e.ctrlKey && e.code === "KeyF") { e.preventDefault(); formatEditor(); return; }
+  if (e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && e.code === "KeyG") {
+    // go to line, like code editors
+    e.preventDefault();
+    const total = ed.value.split("\n").length;
+    const answer = prompt(T(`روح لسطر (1–${total}):`, `Go to line (1–${total}):`), "");
+    const line = Number.parseInt(answer, 10);
+    if (line >= 1) { jumpToLine(S.file, Math.min(line, total)); const at = ed.selectionStart; ed.setSelectionRange(at, at); }
+    return;
+  }
   if (e.key === "F9" && S.cur) {
     // toggle a breakpoint on the caret's line, like VS Code
     e.preventDefault();
