@@ -1,5 +1,90 @@
 package levels
 
+func ch08Locale(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch08Sandbox(id, text, kind string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+var ch08CopyPointerConfig = map[string]any{
+	"start":   3,
+	"changed": 10,
+	"labels": map[string]any{
+		"caller":  ch08Locale("قيمة x عند المستدعي", "Caller x"),
+		"local":   ch08Locale("نسخة n", "Local copy n"),
+		"noLocal": ch08Locale("لسه مفيش نسخة", "No local copy"),
+		"copy":    ch08Locale("غيّر النسخة", "Change the copy"),
+		"pointer": ch08Locale("اكتب عبر pointer", "Write through pointer"),
+		"reset":   ch08Locale("من الأول", "Reset"),
+	},
+	"captions": map[string]any{
+		"ready":   ch08Locale("x يبدأ بـ3.", "x starts at 3."),
+		"copy":    ch08Locale("n اتغيرت؛ x زي ما هي.", "n changed; x stayed put."),
+		"pointer": ch08Locale("الكتابة عبر p غيّرت x.", "Writing through p changed x."),
+		"reset":   ch08Locale("x رجعت لقيمتها الأولى.", "x returned to its starting value."),
+	},
+}
+
+var ch08ReceiversConfig = map[string]any{
+	"start":  2,
+	"amount": 3,
+	"labels": map[string]any{
+		"caller":    ch08Locale("قيمة g.Value", "Caller g.Value"),
+		"receiver":  ch08Locale("قيمة receiver", "Receiver value"),
+		"notCalled": ch08Locale("لسه ما اتندهش", "Not called yet"),
+		"value":     ch08Locale("Value Add", "Value Add"),
+		"pointer":   ch08Locale("Pointer Add", "Pointer Add"),
+		"reset":     ch08Locale("من الأول", "Reset"),
+	},
+	"captions": map[string]any{
+		"ready":   ch08Locale("g تبدأ بقيمة 2.", "g starts at 2."),
+		"value":   ch08Locale("Value receiver غيّر نسخته.", "Value receiver changed its copy."),
+		"pointer": ch08Locale("Pointer receiver غيّر الأصل.", "Pointer receiver changed the original."),
+		"reset":   ch08Locale("رجعنا للقيم الأولى.", "Starting values restored."),
+	},
+}
+
+var ch08NilGuardConfig = map[string]any{
+	"value": 6,
+	"labels": map[string]any{
+		"target":       ch08Locale("الهدف موجود", "Target present"),
+		"on":           ch08Locale("آه", "yes"),
+		"off":          ch08Locale("لأ", "no"),
+		"pointer":      ch08Locale("المؤشر", "Pointer"),
+		"result":       ch08Locale("نتيجة الفحص", "Guard result"),
+		"nilPointer":   ch08Locale("p = nil", "p = nil"),
+		"valuePointer": ch08Locale("p = &6", "p = &6"),
+		"emptyResult":  ch08Locale("رجوع آمن", "Return safely"),
+	},
+	"captions": map[string]any{
+		"empty": ch08Locale("فحص nil يمنع القراءة.", "The nil check skips reading."),
+		"value": ch08Locale("المؤشر صالح؛ القراءة آمنة.", "Pointer is valid; reading is safe."),
+	},
+}
+
+var ch08CartChainConfig = map[string]any{
+	"nodes": []any{
+		map[string]any{"tag": ch08Locale("red", "red")},
+		map[string]any{"tag": ch08Locale("green", "green")},
+		map[string]any{"tag": ch08Locale("blue", "blue")},
+	},
+	"link": ch08Locale("→", "→"),
+	"labels": map[string]any{
+		"chain":   ch08Locale("السلسلة", "Chain"),
+		"pointer": ch08Locale("مكان p المؤقت", "Temporary p"),
+		"follow":  ch08Locale("اتبع Next", "Follow Next"),
+		"reset":   ch08Locale("من الأول", "Reset"),
+	},
+	"captions": map[string]any{
+		"ready": ch08Locale("p بيبدأ عند head.", "p starts at head."),
+		"moved": ch08Locale("p اتحرك؛ الروابط ثابتة.", "p moved; links stay."),
+		"end":   ch08Locale("مفيش Next بعد العقدة دي.", "No Next link remains."),
+		"reset": ch08Locale("p رجع لأول عقدة.", "p returned to the first node."),
+	},
+}
+
 func ch08Step(id, title string, blocks ...LessonBlock) LessonStep {
 	return LessonStep{ID: id, Title: title, Blocks: blocks}
 }
@@ -124,6 +209,7 @@ var ch08CopyArabic = []LessonStep{
 			ch08Frame(4, "الكتابة عبر p تغيّر x.", "4", ch08Variable("x", "9"), ch08Variable("p", "&x")),
 			ch08Frame(5, "الخرج النهائي: 4 ثم 9.", "4\n9", ch08Variable("x", "9")),
 		),
+		ch08Sandbox("c81.copy-pointer", "قارن نسخة بقيمة اتغيرت.", "ch08-copy-pointer", ch08CopyPointerConfig),
 	),
 	ch08Step("c81.watch-step", "خد بالك",
 		ch08Markdown("c81.watch", `~int~ قيمة، و~*int~ نوع pointer. ~&x~ يجيب العنوان؛ و~*p~ يقرأ القيمة أو يكتب فيها.
@@ -171,6 +257,7 @@ Follow the copy, then check ~x~ after the function returns.`, "e81-copy", ch08Co
 			ch08Frame(4, "Write 9 through p.", "4", ch08Variable("x", "9"), ch08Variable("p", "&x")),
 			ch08Frame(5, "Prints: 4 then 9.", "4\n9", ch08Variable("x", "9")),
 		),
+		ch08Sandbox("c81.copy-pointer", "Compare a copy with its changed caller.", "ch08-copy-pointer", ch08CopyPointerConfig),
 	),
 	ch08Step("c81.watch-step", "Watch out",
 		ch08Markdown("c81.watch", `~int~ is a value; ~*int~ is a pointer type. ~&x~ gets an address; ~*p~ reads or writes there.
@@ -223,6 +310,7 @@ var ch08CargoArabic = []LessonStep{
 			ch08Frame(3, "الحقل الأصلي يزيد.", "", ch08Variable("g.Value", "5"), ch08Variable("receiver.Value", "5")),
 			ch08Frame(8, "الخرج: 5.", "5", ch08Variable("g.Value", "5")),
 		),
+		ch08Sandbox("c82.receivers", "جرّب receiver بالقيمة وبـpointer.", "ch08-receivers", ch08ReceiversConfig),
 	),
 	ch08Step("c82.watch-step", "خد بالك",
 		ch08Markdown("c82.watch", `~func (g Gauge)~ تستقبل نسخة؛ ~func (g *Gauge)~ تستقبل عنوان الـstruct. ده فرق في تعريف receiver.
@@ -273,6 +361,7 @@ Go passes an ordinary variable's address when calling its method.`, "e82-pointer
 			ch08Frame(3, "The original field increases.", "", ch08Variable("g.Value", "5"), ch08Variable("receiver.Value", "5")),
 			ch08Frame(8, "Output: 5.", "5", ch08Variable("g.Value", "5")),
 		),
+		ch08Sandbox("c82.receivers", "Try value and pointer receivers.", "ch08-receivers", ch08ReceiversConfig),
 	),
 	ch08Step("c82.watch-step", "Watch out",
 		ch08Markdown("c82.watch", `~func (g Gauge)~ receives a copy; ~func (g *Gauge)~ receives its address.
@@ -318,6 +407,7 @@ var ch08RadarArabic = []LessonStep{
 			ch08Frame(3, "المؤشر مش nil.", "", ch08Variable("p", "&n")),
 			ch08Frame(6, "نقرأ القيمة 6.", "6", ch08Variable("n", "6"), ch08Variable("p", "&n")),
 		),
+		ch08Sandbox("c83.nil-guard", "بدّل وجود الهدف وشوف الـguard.", "ch08-nil-guard", ch08NilGuardConfig),
 	),
 	ch08Step("c83.watch-step", "خد بالك",
 		ch08Markdown("c83.watch", `~colony.Nearest()~ بيرجّع ~*colony.Point~، أو ~nil~ لما مفيش أهداف. متقرأش ~p.X~ قبل فحص ~p~.
@@ -362,6 +452,7 @@ The guard skips a missing value.`, "e83-nil", ch08NilGuardExample,
 			ch08Frame(3, "The pointer is not nil.", "", ch08Variable("p", "&n")),
 			ch08Frame(6, "Read the value 6.", "6", ch08Variable("n", "6"), ch08Variable("p", "&n")),
 		),
+		ch08Sandbox("c83.nil-guard", "Toggle the target and watch the guard.", "ch08-nil-guard", ch08NilGuardConfig),
 	),
 	ch08Step("c83.watch-step", "Watch out",
 		ch08Markdown("c83.watch", `~colony.Nearest()~ returns a Point pointer or ~nil~ when targets end. Check ~p~ before reading ~p.X~.
@@ -408,6 +499,7 @@ var ch08CartArabic = []LessonStep{
 			ch08Frame(7, "p يتبع Next للوسط.", "red", ch08Variable("p.Tag", "green")),
 			ch08Frame(8, "tag التالي هو green.", "red\ngreen", ch08Variable("p.Tag", "green")),
 		),
+		ch08Sandbox("c84.cart-chain", "اتبع المؤشر المؤقت جوه السلسلة.", "ch08-cart-chain", ch08CartChainConfig),
 	),
 	ch08Step("c84.watch-step", "خد بالك",
 		ch08Markdown("c84.watch", `تغيير المتغير ~p~ يحرك المؤشر المؤقت؛ تغيير ~Head~ أو ~Next~ يغيّر وصلة في القطر.
@@ -456,6 +548,7 @@ Read the next tag.`, "e84-link", ch08LinkExample,
 			ch08Frame(7, "p follows Next to middle.", "red", ch08Variable("p.Tag", "green")),
 			ch08Frame(8, "The next tag is green.", "red\ngreen", ch08Variable("p.Tag", "green")),
 		),
+		ch08Sandbox("c84.cart-chain", "Move a temporary pointer along the chain.", "ch08-cart-chain", ch08CartChainConfig),
 	),
 	ch08Step("c84.watch-step", "Watch out",
 		ch08Markdown("c84.watch", `Moving ~p~ leaves links alone; changing ~Head~ or ~Next~ changes the chain.

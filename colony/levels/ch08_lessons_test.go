@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -79,6 +80,7 @@ func ch08SentenceCount(text string) int {
 func ch08ValidateSteps(t *testing.T, steps []LessonStep, prefix string, titles []string) {
 	t.Helper()
 	seen := map[string]bool{}
+	sandboxCount := 0
 	for i, step := range steps {
 		if step.Title != titles[i] || !strings.HasPrefix(step.ID, prefix) || seen[step.ID] || len(step.Blocks) == 0 {
 			t.Fatalf("invalid step %d: %#v", i, step)
@@ -115,10 +117,21 @@ func ch08ValidateSteps(t *testing.T, steps []LessonStep, prefix string, titles [
 					t.Fatalf("%s: invalid walkthrough payload", block.ID)
 				}
 				ch08ValidateFrames(t, block)
+			case "sandbox":
+				sandboxCount++
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch08-") || len(block.Sandbox.Config) == 0 {
+					t.Fatalf("%s: invalid chapter 8 sandbox payload", block.ID)
+				}
 			default:
 				t.Fatalf("%s: unsupported block kind %q", block.ID, block.Kind)
 			}
 		}
+		if i == 2 && (len(step.Blocks) != 3 || step.Blocks[0].Kind != "question" || step.Blocks[1].Kind != "walkthrough" || step.Blocks[2].Kind != "sandbox") {
+			t.Fatalf("%s: Try it must predict, reveal, then show one sandbox", prefix)
+		}
+	}
+	if sandboxCount != 1 {
+		t.Fatalf("%s: expected exactly one chapter 8 sandbox, got %d", prefix, sandboxCount)
 	}
 }
 
@@ -163,6 +176,62 @@ func ch08ValidateBlockParity(t *testing.T, arabic, english LessonBlock) {
 				t.Fatalf("%s frame %d has mismatched execution", arabic.ID, i)
 			}
 		}
+	}
+	if arabic.Sandbox != nil {
+		if english.Sandbox == nil || arabic.Sandbox.Kind != english.Sandbox.Kind || !reflect.DeepEqual(arabic.Sandbox.Config, english.Sandbox.Config) {
+			t.Fatalf("%s: sandbox config differs across languages", arabic.ID)
+		}
+	}
+}
+
+func TestCh08SandboxConfigsMatchFixtures(t *testing.T) {
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch08.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]any
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+
+	kinds := map[string]bool{}
+	for _, id := range []string{"8-1-copy-bug", "8-2-cargo-runs", "8-3-nil-radar", "8-4-cart-chain"} {
+		level := Get(id)
+		if level == nil || level.En == nil {
+			t.Fatalf("%s: missing bilingual level", id)
+		}
+		for _, steps := range [][]LessonStep{level.Steps, level.En.Steps} {
+			count := 0
+			for stepIndex, step := range steps {
+				for blockIndex, block := range step.Blocks {
+					if block.Sandbox == nil {
+						continue
+					}
+					count++
+					if stepIndex != 2 || blockIndex != len(step.Blocks)-1 {
+						t.Errorf("%s: sandbox must follow the Try it question and walkthrough", id)
+					}
+					kinds[block.Sandbox.Kind] = true
+					body, err := json.Marshal(block.Sandbox.Config)
+					if err != nil {
+						t.Fatal(err)
+					}
+					var normalized map[string]any
+					if err := json.Unmarshal(body, &normalized); err != nil {
+						t.Fatal(err)
+					}
+					if !reflect.DeepEqual(normalized, fixtures[block.Sandbox.Kind]) {
+						t.Errorf("%s: config for %s differs from its JS fixture", id, block.Sandbox.Kind)
+					}
+				}
+			}
+			if count != 1 {
+				t.Errorf("%s: expected one sandbox in each language, got %d", id, count)
+			}
+		}
+	}
+	if len(kinds) != len(fixtures) {
+		t.Errorf("found %d sandbox kinds but %d fixture entries", len(kinds), len(fixtures))
 	}
 }
 
