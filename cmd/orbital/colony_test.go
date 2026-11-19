@@ -463,8 +463,8 @@ func TestColonySymbolsListTheLearnerAPI(t *testing.T) {
 	if find("East", "const") == nil || find("Drone", "type") == nil || find("Spawn", "func") == nil {
 		t.Fatalf("missing East/Drone/Spawn in %d symbols", len(symbols))
 	}
-	if m := find("Move", "method"); m == nil || m.Recv != "Drone" {
-		t.Fatalf("Drone.Move method: %+v", m)
+	if m := find("Move", "method"); m == nil || m.Recv != "Drone" || !strings.HasSuffix(m.Doc, "(this drone)") || strings.HasPrefix(m.Doc, "Move is Move") {
+		t.Fatalf("Drone.Move method should borrow Move's doc: %+v", m)
 	}
 	for _, s := range symbols {
 		if strings.Contains(s.Doc, "\n") {

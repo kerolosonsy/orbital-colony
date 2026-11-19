@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"net/http"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -23,6 +24,8 @@ type apiSymbol struct {
 	Signature string `json:"signature,omitempty"`
 	Doc       string `json:"doc,omitempty"`
 }
+
+var sameAsFunc = regexp.MustCompile(`^(\w+) is \w+ for (this \w+)\.$`)
 
 var (
 	symbolsOnce sync.Once
@@ -74,6 +77,22 @@ func colonySymbols(dir string) []apiSymbol {
 			}
 			for _, m := range t.Methods {
 				add(apiSymbol{Name: m.Name, Kind: "method", Recv: t.Name, Signature: signature(m.Decl), Doc: m.Doc})
+			}
+		}
+		// "Plant is Plant for this drone." says little in a hint: show the
+		// package function's doc for that method instead.
+		funcDocs := map[string]string{}
+		for _, s := range symbolsList {
+			if s.Kind == "func" {
+				funcDocs[s.Name] = s.Doc
+			}
+		}
+		for i, s := range symbolsList {
+			if s.Kind != "method" {
+				continue
+			}
+			if m := sameAsFunc.FindStringSubmatch(s.Doc); m != nil && funcDocs[m[1]] != "" {
+				symbolsList[i].Doc = funcDocs[m[1]] + " (" + m[2] + ")"
 			}
 		}
 		sort.SliceStable(symbolsList, func(i, j int) bool { return symbolsList[i].Name < symbolsList[j].Name })

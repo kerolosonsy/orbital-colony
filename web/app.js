@@ -605,11 +605,16 @@ function loadSymbols() {
 // Inside colony.Name( … ) a hint above the line shows the signature and doc.
 const sigHint = $("#sig-hint");
 function updateSigHint() {
-  const name = !ed.readOnly && document.activeElement === ed && ed.selectionStart === ed.selectionEnd
-    ? Complete.callContext(ed.value, ed.selectionStart) : null;
-  const symbol = name && symbolsReady.find((s) => s.name === name && s.kind === "func");
-  if (!symbol) { if (name && !symbolsReady.length) loadSymbols().then(updateSigHint); sigHint.hidden = true; return; }
-  sigHint.innerHTML = `<b>${esc(symbol.name)}</b>${esc(symbol.signature || "")}` + (symbol.doc ? `<span class="c-doc">${esc(symbol.doc)}</span>` : "");
+  const usable = !ed.readOnly && document.activeElement === ed && ed.selectionStart === ed.selectionEnd;
+  const inCall = usable && /\(/.test(ed.value.slice(ed.value.lastIndexOf("\n", ed.selectionStart - 1) + 1, ed.selectionStart));
+  if (inCall && !symbolsReady.length) {
+    // fetch once; retry only on the next caret move, never in a loop
+    if (!apiSymbols) loadSymbols().then(() => { if (symbolsReady.length) updateSigHint(); });
+    sigHint.hidden = true; return;
+  }
+  const symbol = inCall ? Complete.callSymbol(ed.value, ed.selectionStart, symbolsReady) : null;
+  if (!symbol) { sigHint.hidden = true; return; }
+  sigHint.innerHTML = `<b>${esc((symbol.recv ? symbol.recv + "." : "") + symbol.name)}</b>${esc(symbol.signature || "")}` + (symbol.doc ? `<span class="c-doc">${esc(symbol.doc)}</span>` : "");
   const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
   const row = ed.value.slice(0, ed.selectionStart).split("\n").length - 1;
   sigHint.hidden = false;

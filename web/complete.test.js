@@ -63,3 +63,17 @@ test("memberContext follows colony values to their methods", () => {
   assert.deepEqual(rankMembers(api, "Drone", "").map((s) => s.name), ["Move", "Harvest"]);
   assert.deepEqual(rankMembers(api, "Drone", "ha").map((s) => s.name), ["Harvest"]);
 });
+
+test("callSymbol resolves functions and methods for signature hints", () => {
+  const { callSymbol } = require("./complete.js");
+  const api = [
+    { name: "Spawn", kind: "func", signature: "() *Drone" },
+    { name: "Move", kind: "func", signature: "(dir Direction) bool" },
+    { name: "Move", kind: "method", recv: "Drone", signature: "(dir Direction) bool", doc: "Move is Move for this drone." },
+  ];
+  const a = "colony.Move(";
+  assert.equal(callSymbol(a, a.length, api).kind, "func");
+  const b = "d := colony.Spawn()\nd.Move(colony.";
+  assert.equal(callSymbol(b, b.length, api).recv, "Drone");
+  assert.equal(callSymbol("x.Move(", 7, api), null);
+});
