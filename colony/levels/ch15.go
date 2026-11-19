@@ -84,6 +84,7 @@ func shakerCost(sizes []int) int {
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch15Lesson151.English,
 			Title: "Cave Maze",
 			Goal:  "Reach the crystal by the shortest route through the maze. colony.Grid() gives you the map for free",
 			Lesson: `# BFS: The Shortest Route Through a Maze 🗺️
@@ -148,12 +149,9 @@ func main() {
 	_ = h
 }
 `,
-			Hints: []string{
-				"A Go queue: ~q := []colony.Point{start}~; remove with ~p := q[0]; q = q[1:]~ and add with ~q = append(q, n)~.",
-				"~parent := map[colony.Point]colony.Point{}~: the first time you reach n from p, record ~parent[n] = p~. Do not add n again if it is already in parent.",
-				"To follow the route, compare each next tile with your position: larger x means East, smaller x West, larger y North, smaller y South.",
-			},
+			Hints: ch15Lesson151.EnglishHints,
 		},
+		LessonRevision: 1, Steps: ch15Lesson151.Arabic,
 		ID: "15-1-bfs", Chapter: 15, Title: "متاهة الكهوف",
 		Goal: "وصل للكريستال بأقصر طريق في المتاهة. colony.Grid() بتديك الخريطة ببلاش",
 		Par:  40, Gold: 25, MaxTicks: 400,
@@ -203,11 +201,7 @@ func main() {
 	_ = h
 }
 `,
-		Hints: []string{
-			"queue في Go: ~q := []colony.Point{start}~، تطلّع منها ~p := q[0]; q = q[1:]~، وتضيف ~q = append(q, n)~.",
-			"~parent := map[colony.Point]colony.Point{}~: أول مرة توصل لخانة n من p سجّل ~parent[n] = p~. لو n موجودة في parent متضيفهاش تاني.",
-			"عشان تمشي في الطريق: لكل خانة جاية قارنها بمكانك: x أكبر يبقى East، وأصغر West، وy أكبر North، وأصغر South.",
-		},
+		Hints: ch15Lesson151.ArabicHints,
 		Lesson: `# BFS: أقصر طريق في متاهة 🗺️
 
 **Breadth-First Search** بيستكشف الخريطة **طبقة طبقة**: الأول كل الخانات اللي على بعد 1، وبعدين 2، وبعدين 3… فأول مرة يوصل لخانة، يكون وصلها **بأقصر طريق**.
@@ -252,6 +246,7 @@ slices.Reverse(path) // دلوقتي من البداية للهدف
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch15Lesson152.English,
 			Title: "Line Up the Crystal",
 			Goal:  "Sort crystals from smallest to largest (left to right) using colony.Swap",
 			Lesson: `# Sorting When Every Step Costs 🔢
@@ -303,12 +298,9 @@ func main() {
 	// Sort them, updating sizes too so you remember the order
 }
 `,
-			Hints: []string{
-				"Bubble sort: inspect adjacent pairs and swap when the left is larger than the right. Repeat until a whole pass makes no swaps.",
-				"Keep ~sizes~ in memory consistent with the field: after every Swap, also swap in the slice: ~sizes[i], sizes[i+1] = sizes[i+1], sizes[i]~.",
-				"For more stars, travel back and forth (cocktail sort) instead of returning to the start on each pass.",
-			},
+			Hints: ch15Lesson152.EnglishHints,
 		},
+		LessonRevision: 1, Steps: ch15Lesson152.Arabic,
 		ID: "15-2-sorting", Chapter: 15, Title: "رصّ الكريستال",
 		Goal: "رتّب الكريستال من الأصغر للأكبر (شمال ← يمين) بـ colony.Swap",
 		Par:  70, Gold: 45, MaxTicks: 500,
@@ -360,11 +352,7 @@ func main() {
 	// رتّبهم، وحدّث sizes إنت كمان عشان تفتكر الترتيب
 }
 `,
-		Hints: []string{
-			"Bubble sort: لف على الأزواج المتجاورة، ولو الشمال أكبر من اليمين بدّلهم. كرّر لحد ما لفّة كاملة تعدي من غير ولا تبديل.",
-			"خلّي ~sizes~ في الذاكرة مطابقة للأرض: كل ما تعمل Swap، بدّل في الـ slice كمان: ~sizes[i], sizes[i+1] = sizes[i+1], sizes[i]~.",
-			"للنجوم: الحركة غالية. امشي ذهاب وعودة (cocktail sort) بدل ما ترجع للأول كل لفّة.",
-		},
+		Hints: ch15Lesson152.ArabicHints,
 		Lesson: `# الترتيب: لما كل خطوة بتكلّف 🔢
 
 ~slices.Sort~ بترتب في الذاكرة في لحظة. هنا كل **مقارنة** ببلاش (لو حافظ الأحجام)، بس كل **حركة** وكل **تبديل** بتاخد tick. يعني الخوارزمية اللي **بتقلل التبديلات والمشي** هي اللي تكسب.
@@ -397,6 +385,7 @@ for swapped := true; swapped; {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch15Lesson153.English,
 			Title: "Slippery Ice",
 			Goal:  "Reach the crystal in the least time. Each ice tile costs 4 ticks!",
 			Lesson: `# Dijkstra: The Shortest **Time**, Not the Fewest **Steps** ⛸️
@@ -458,12 +447,9 @@ func main() {
 	// BFS minimizes steps... but not time. You need Dijkstra
 }
 `,
-			Hints: []string{
-				"Dijkstra is like BFS, but each time you choose the unfinished tile with **the lowest cost so far**.",
-				"The simplest version: ~dist map[colony.Point]int~ and ~done map[colony.Point]bool~. Each iteration, find the lowest dist not in done. That is enough for this small map.",
-				"The crystal is at ~colony.Targets()[0]~. If you have a solution for 15-1, reuse its neighbors function and route-following logic.",
-			},
+			Hints: ch15Lesson153.EnglishHints,
 		},
+		LessonRevision: 1, Steps: ch15Lesson153.Arabic,
 		ID: "15-3-dijkstra", Chapter: 15, Title: "الجليد الزلق",
 		Goal: "وصل للكريستال بأقل وقت. الجليد بياخد 4 tick لكل خانة!",
 		Par:  40, Gold: 30, MaxTicks: 500,
@@ -525,11 +511,7 @@ func main() {
 	// BFS بيلاقي أقل عدد خطوات… بس مش أقل وقت. محتاج Dijkstra
 }
 `,
-		Hints: []string{
-			"Dijkstra: زي BFS، بس بدل الـ queue العادية، كل مرة خد الخانة اللي **تكلفتها لحد دلوقتي أقل** من كل اللي لسه متخلصتش.",
-			"أسهل نسخة: ~dist map[colony.Point]int~ و~done map[colony.Point]bool~، وكل لفّة دوّر على أقل dist مش done. ده كفاية للخريطة الصغيرة دي.",
-			"مكان الكريستال في ~colony.Targets()[0]~. ولو عندك حل 15-1، خد منه دالة neighbors ومنطق المشي في الطريق.",
-		},
+		Hints: ch15Lesson153.ArabicHints,
 		Lesson: `# Dijkstra: أقصر **وقت** مش أقصر **طريق** ⛸️
 
 في 15-1 كل خطوة كانت بـ tick واحد، فأقل خطوات = أقل وقت. هنا الجليد بياخد **4 tick**. ساعات تلف 3 خطوات حوالين الجليد وتطلع **أسرع** من إنك تعدّي من فوقه.
@@ -569,7 +551,7 @@ for {
 - BFS عادي: ⭐⭐
 - Dijkstra: ⭐⭐⭐`,
 	})
-	add(&Level{ID: "15-4-deep-probe", Chapter: 15, Title: "المسبار العميق", Goal: "ابحث في الأعماق المرتبة وعدّ المنطقة المتصلة بالقاعدة", Requires: []string{"recursion"}, Bridge: []int{24}, Par: 0, Gold: 0, MaxTicks: 100,
+	add(&Level{LessonRevision: 1, Steps: ch15Lesson154.Arabic, ID: "15-4-deep-probe", Chapter: 15, Title: "المسبار العميق", Goal: "ابحث في الأعماق المرتبة وعدّ المنطقة المتصلة بالقاعدة", Requires: []string{"recursion"}, Bridge: []int{24}, Par: 0, Gold: 0, MaxTicks: 100,
 		Starter: deepProbeStarter, Lesson: `# نص البحث وزيارة الفروع
 
 الأرشيف علّمنا recursion. هنستخدمها دلوقتي للانتشار على خريطة، ومعاها binary search لقائمة أعماق مرتبة. الاتنين بيقلّلوا شغل مكرر بقواعد واضحة.
@@ -621,8 +603,8 @@ seen[colony.Point{X:x,Y:y}]=true // متأخر: الجار ممكن يرجعلك
 اقرأ ~colony.Depths()~ المرتبة تصاعدياً، والهدف ~colony.Reading(0)~. نفّذ binary search في ~depthIndex~ ترجع أول index للهدف أو -1 لو مش موجود.
 
 نفّذ ~flood~ recursive لحساب كل خانة غير Rock متصلة بـ(0,0) شمال/شرق/جنوب/غرب، وعدّ البداية مرة واحدة. ابعت تقرير واحد ~[]int{index,count}~، مثلاً [3 12]. متحصدش ومتعدّش الجيوب المعزولة. مدخلات المهمة فيها تكرارات وهدف ممكن يغيب؛ الدالتين يتعاملوا مع قائمة أو خريطة فاضية بأمان.
-`, Hints: []string{"استخدم مجال [lo,hi) وكمّل ناحية الشمال عند المساواة.", "في flood افحص الحدود والصخر والزيارة قبل عدّ الخانة.", "علّم seen قبل الجيران الأربعة، واجمع نتايجهم مع1."},
-		En: &LevelText{Title: "Deep Probe", Goal: "Search sorted depths and count the region connected to base", Starter: deepProbeStarter, Lesson: `# Halving the Search and Visiting Branches
+`, Hints: ch15Lesson154.ArabicHints,
+		En: &LevelText{LessonRevision: 1, Steps: ch15Lesson154.English, Title: "Deep Probe", Goal: "Search sorted depths and count the region connected to base", Starter: deepProbeStarter, Lesson: `# Halving the Search and Visiting Branches
 
 The archive introduced recursion. Apply it to spreading across a map, alongside binary search over sorted depths. Both avoid repeated work through explicit rules.
 
@@ -673,7 +655,7 @@ Do not count all open terrain: isolated pockets are outside the connected region
 Read sorted ascending ~colony.Depths()~ and target ~colony.Reading(0)~. Implement binary search in ~depthIndex~, returning the first matching index or -1 for a miss.
 
 Implement recursive ~flood~ to count non-Rock cells connected to (0,0) by north/east/south/west steps, counting the start once. Send one ~[]int{index,count}~ report, for example [3 12]. Do not harvest or count isolated pockets. Inputs contain duplicates and may omit the target; both functions must safely handle empty depths or maps.
-`, Hints: []string{"Use [lo,hi) and continue left on equality.", "In flood, check bounds, rock, and visit state before counting.", "Mark seen before the four neighbors, then add their counts plus one."}}, Setup: func(w *sim.World) {
+`, Hints: ch15Lesson154.EnglishHints}, Setup: func(w *sim.World) {
 			w.Init(7+w.Rand.Intn(4), 5+w.Rand.Intn(3), sim.Regolith)
 			w.RockBlocks = true
 			scatterRocks(w, 0.3)
@@ -707,7 +689,7 @@ Implement recursive ~flood~ to count non-Rock cells connected to (0,0) by north/
 				return false, i18n.T("مستني [أول موقع للعمق عدد الخانات المتصلة] من غير حصاد", "Waiting for [first-depth-index connected-tile-count] without harvesting")
 			}
 		}})
-	add(&Level{ID: "15-5-rescue-priority", Chapter: 15, Title: "أولوية الإنقاذ", Goal: "اخدم أعلى أولوية حتى مع وصول موجات استغاثة جديدة", Requires: []string{"sel:heap.Push"}, Bridge: []int{90}, Par: 0, Gold: 0, MaxTicks: 100,
+	add(&Level{LessonRevision: 1, Steps: ch15Lesson155.Arabic, ID: "15-5-rescue-priority", Chapter: 15, Title: "أولوية الإنقاذ", Goal: "اخدم أعلى أولوية حتى مع وصول موجات استغاثة جديدة", Requires: []string{"sel:heap.Push"}, Bridge: []int{90}, Par: 0, Gold: 0, MaxTicks: 100,
 		Starter: rescuePriorityStarter, Lesson: `# طابور بيعيد ترتيب نفسه
 
 الـ FIFO بيحفظ الوصول. الإنقاذ محتاج كل مرة يختار أعلى أولوية من الموجود دلوقتي؛ طلب جديد ممكن يسبق اللي مستني. الـ heap يحافظ على أفضل عنصر في الجذر من غير ترتيب الكل كل مرة.
@@ -760,8 +742,8 @@ request := heap.Pop(q) // ممكن panic لو فاضي
 كمّل ~RescueHeap~: Priority الأكبر يسبق، ثم ID الأصغر. استخدم heap.Push وheap.Pop. ابدأ بالموجة الأولى؛ بعد كل Rescue ناجحة أدخل الموجة الجديدة قبل الاختيار التالي. كرّر لحد ما heap تفضى.
 
 اخدم كل طلب مرة واحدة وابعت عدد اللي اتخدموا بتقرير واحد. طلب غلط أو مكرر يفشّل المهمة حتى لو كملت؛ مفيش تعديل أولوية أو إلغاء في العقد ده، ومفيش goroutines أو انتظار حقيقي.
-`, Hints: []string{"في Less افحص Priority الأول، وID عند التعادل.", "Pop اللي أنت بتكتبها تشيل الآخر؛ heap.Pop هي اللي تختار الأفضل.", "بعد نجاح Rescue اقرأ Arrivals وضيفهم قبل اللفة التالية؛ متقراش الموجة مرتين."},
-		En: &LevelText{Title: "Rescue Priority", Goal: "Serve highest priority as new distress waves arrive", Starter: rescuePriorityStarter, Lesson: `# A Queue That Reorders Itself
+`, Hints: ch15Lesson155.ArabicHints,
+		En: &LevelText{LessonRevision: 1, Steps: ch15Lesson155.English, Title: "Rescue Priority", Goal: "Serve highest priority as new distress waves arrive", Starter: rescuePriorityStarter, Lesson: `# A Queue That Reorders Itself
 
 FIFO preserves arrival order. Rescue must select the highest priority currently waiting; new requests can overtake old ones. A heap retains the best element at its root without sorting everything each time.
 
@@ -813,7 +795,7 @@ Sorting only the initial batch ignores newly arriving priorities. Smaller ID bre
 Complete ~RescueHeap~: larger Priority first, then smaller ID. Use heap.Push and heap.Pop. Enqueue the initial wave; after every successful Rescue enqueue the new wave before selecting again. Continue until the heap is empty.
 
 Serve each request once and report the served count exactly once. An incorrect or duplicate request permanently fails the mission. Priority changes and cancellation are outside this contract; no goroutines or real waiting are needed.
-`, Hints: []string{"In Less, compare Priority first and ID on ties.", "Your Pop method removes the last element; heap.Pop selects the best.", "After successful Rescue, enqueue Arrivals before the next iteration; do not read a wave twice."}}, Setup: func(w *sim.World) {
+`, Hints: ch15Lesson155.EnglishHints}, Setup: func(w *sim.World) {
 			w.Init(5, 3, sim.Regolith)
 			ids := w.Rand.Perm(40)
 			next := 0
