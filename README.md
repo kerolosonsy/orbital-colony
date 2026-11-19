@@ -182,7 +182,7 @@ cd workspace/3-1-long-row && go run .
 
 ```bash
 make check      # fmt + vet + اختبارات سريعة + اختبارات الواجهة
-make test       # كل حاجة، شاملة كل المهمات (حوالي 5 دقايق)
+make test       # كل حاجة، شاملة كل المهمات (حوالي 8 دقايق)
 make test-web   # اختبارات المتصفح بس
 ```
 
