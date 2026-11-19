@@ -431,6 +431,7 @@ async function syncFromWorkspace(force = false) {
     }
   }
   if (changed) {
+    clearTraceRun();
     store.save();
     const pos = ed.scrollTop;
     showFile(S.file);
@@ -478,6 +479,7 @@ function flushSave() {
 }
 function onEdit() {
   if (ed.readOnly) return;
+  clearTraceRun();
   saveFile(S.cur, S.file, ed.value);
   errLines.clear();
   renderEditor();
@@ -1299,6 +1301,7 @@ async function loadLevel(id, review = null) {
   const l = review || S.levels[idx(id)];
   S.review = !!review; S.reviewDraft = {};
   S.cur = l; S.hintsShown = 0;
+  clearTraceRun();
   store.pref("current", id);
   const ch = S.chapters.find((c) => c.n === l.chapter);
   $("#lvl-chapter").textContent = `${sheetCode(l)} · ${ch ? ch.title : ""}`;
@@ -1523,7 +1526,20 @@ document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = () => clos
 // One run at a time. Stop (or switching missions) cancels it right away:
 // the request is aborted, which makes the server kill the build or program.
 let runId = 0, runCtl = null;
+let lastTraceRun = null;
 const RUN_TIMEOUT = 150000; // longer than the server's own build + run limits
+function clearTraceRun() {
+  lastTraceRun = null;
+  $("#btn-trace").classList.add("hidden");
+}
+function showTraceRun(level, response, payload, sources) {
+  if (!response.traceable) return;
+  const tracePayload = { level: payload.level };
+  if (level.kind === "lab") tracePayload.files = { ...payload.files };
+  else tracePayload.code = payload.code;
+  lastTraceRun = { payload: tracePayload, sources };
+  $("#btn-trace").classList.remove("hidden");
+}
 function runButton(running) {
   const btn = $("#btn-run");
   btn.classList.toggle("stop", running);
@@ -1547,8 +1563,9 @@ document.addEventListener("keydown", (e) => {
 });
 
 async function run() {
-  if (S.mode === "colony") return Colony.toggleRun();
+  if (S.mode === "colony") { clearTraceRun(); return Colony.toggleRun(); }
   if (S.running) return stopRun();
+  clearTraceRun();
   previewVersion++;
   if (playback) finishPlayback();
   const me = ++runId;
@@ -1572,6 +1589,9 @@ async function run() {
       payload.files = {};
       for (const f of levelFiles(level)) if (!f.readOnly) payload.files[f.name] = fileCode(level, f);
     } else payload.code = fileCode(level, levelFiles(level)[0]);
+    const traceSources = Object.fromEntries(
+      levelFiles(level).filter((f) => f.name.endsWith(".go")).map((f) => [f.name, fileCode(level, f)]),
+    );
     const r = await api("/api/run", payload, null, ctl.signal);
     if (me !== runId || S.cur !== level) return;
     if (r.phase === "require") {
@@ -1601,6 +1621,7 @@ async function run() {
         if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-err"));
         if (!st.ok) logErrorHelp(st.tip, st.tipCause, st.tipCheck);
       }
+      showTraceRun(level, r, payload, traceSources);
       finish(level, r.result, r.missing || []);
       return;
     }
@@ -1610,6 +1631,7 @@ async function run() {
     log(T("الدرون شغال…", "Drone running…"), "c-info");
     await new Promise((res) => startPlayback(r.events, res));
     if (me !== runId) return;
+    showTraceRun(level, r, payload, traceSources);
     finish(level, r.result, r.missing || []);
   } catch (e) {
     if (me !== runId) return; // stopped by the player
@@ -1628,6 +1650,7 @@ async function run() {
   }
 }
 $("#btn-run").onclick = run;
+$("#btn-trace").onclick = () => { if (lastTraceRun) TracePanel.open(lastTraceRun); };
 $("#btn-vscode").onclick = openVSCode;
 $("#btn-unlink").onclick = () => {
   linked.delete(S.cur.id); saveLinked();

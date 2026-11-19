@@ -39,6 +39,7 @@ type result struct {
 
 type runResponse struct {
 	Phase         string            `json:"phase"` // compile | require | run
+	Traceable     bool              `json:"traceable,omitempty"`
 	CompileErrors []compileError    `json:"compileErrors,omitempty"`
 	CompileOutput string            `json:"compileOutput,omitempty"`
 	Missing       []string          `json:"missing,omitempty"`

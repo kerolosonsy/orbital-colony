@@ -100,6 +100,7 @@ func main() {
 	mux.HandleFunc("GET /api/services", s.services)
 	mux.HandleFunc("GET /api/preview", s.preview)
 	mux.HandleFunc("POST /api/run", s.runCode)
+	mux.HandleFunc("POST /api/trace", s.traceCode)
 	mux.HandleFunc("POST /api/workspace/open", s.workspaceOpen)
 	mux.HandleFunc("GET /api/workspace/files", s.workspaceFiles)
 
@@ -272,6 +273,11 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 		requestError(w, r, err.Error(), 500)
 		return
 	}
+	if l.Kind == "lab" {
+		resp.Traceable = traceMainPresent(traceProjectFiles(l, req.Code, req.Files))
+	} else if traceLevelSupported(l) {
+		resp.Traceable = resp.Phase == "run"
+	}
 	if req.Review {
 		resp.Result.Stars = 0
 		if resp.Result.Success {
@@ -283,4 +289,43 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	writeJSON(w, resp)
+}
+
+func (s *server) traceCode(w http.ResponseWriter, r *http.Request) {
+	r = r.WithContext(withLang(r.Context(), requestLang(r)))
+	req, ok := decodeTraceRequest(w, r)
+	if !ok {
+		return
+	}
+	lvl := levelForLang(levels.Get(req.Level), requestLang(r))
+	if lvl == nil {
+		requestError(w, r, "unknown level", http.StatusNotFound)
+		return
+	}
+	if !traceLevelSupported(lvl) {
+		writeJSON(w, traceUnavailable(requestLang(r)))
+		return
+	}
+	project := traceProjectFiles(lvl, req.Code, req.Files)
+	if !traceImportsAllowed(lvl, req.Code, project, requestLang(r)) {
+		writeJSON(w, traceUnavailable(requestLang(r)))
+		return
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	resp, err := s.run.Trace(r.Context(), lvl, req.Code, req.Files)
+	if err != nil {
+		requestError(w, r, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, resp)
+}
+
+func decodeTraceRequest(w http.ResponseWriter, r *http.Request) (traceRequest, bool) {
+	var req traceRequest
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 256<<10)).Decode(&req); err != nil {
+		requestError(w, r, "bad request", http.StatusBadRequest)
+		return traceRequest{}, false
+	}
+	return req, true
 }
