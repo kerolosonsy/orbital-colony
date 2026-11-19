@@ -105,6 +105,8 @@ const Colony = (() => {
 
   async function enter() {
     if (playback) finishPlayback();
+    // a mission debug session (and its focus layout) must not leak into the colony
+    if (typeof clearTraceRun === "function") clearTraceRun();
     if (!baseDocTitle && typeof document !== "undefined" && typeof document.title === "string") baseDocTitle = document.title;
     S.mode = "colony";
     document.body.classList.add("colony");

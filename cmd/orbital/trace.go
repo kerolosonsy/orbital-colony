@@ -1080,6 +1080,10 @@ func __trace__Return(point __trace__Point, namedValues ...any) {
 		return
 	}
 	thread := __trace__CurrentThread()
+	if !__trace__Acquire(thread.Goroutine) {
+		return
+	}
+	defer __trace__Release(thread.Goroutine)
 	variableValues := namedValues[:min(len(namedValues), point.VariableCount*2)]
 	returnValues := namedValues[len(variableValues):]
 	returnLimit := min(len(returnValues), __TRACE_VAR_LIMIT__*2)
@@ -1099,8 +1103,34 @@ func __trace__CurrentThread() __trace__Thread {
 }
 
 
+// Formatting a value can call the learner's own String/Error methods, which
+// are instrumented too; recording again from inside would recurse forever.
+// While a goroutine is formatting, nested record calls are skipped.
+var __trace__BusyMu sync.Mutex
+var __trace__Busy = map[int]bool{}
+
+func __trace__Acquire(id int) bool {
+	__trace__BusyMu.Lock()
+	defer __trace__BusyMu.Unlock()
+	if __trace__Busy[id] {
+		return false
+	}
+	__trace__Busy[id] = true
+	return true
+}
+
+func __trace__Release(id int) {
+	__trace__BusyMu.Lock()
+	delete(__trace__Busy, id)
+	__trace__BusyMu.Unlock()
+}
+
 func __trace__RecordAt(point __trace__Point, thread __trace__Thread, namedLocals ...any) {
+	if !__trace__Acquire(thread.Goroutine) {
+		return
+	}
 	vars, truncated := __trace__Variables(namedLocals, point.Omitted)
+	__trace__Release(thread.Goroutine)
 	frame := __trace__Frame{File: point.File, Line: point.Line, Func: point.Function, Depth: thread.Depth, Event: point.Event, Goroutine: thread.Goroutine, Variables: vars, Truncated: truncated}
 	__trace__WriteFrame(frame)
 }

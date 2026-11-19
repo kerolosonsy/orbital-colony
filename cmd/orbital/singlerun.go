@@ -6,17 +6,23 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
+	"strings"
+	"time"
 
 	"orbital/colony/levels"
 )
 
-// Single run: for ordinary missions the run the level is scored on is also
-// the debugger trace. The learner's code is instrumented once, built once
-// and executed once, so side effects happen once and the map can follow the
-// debugger frame by frame using the same event stream.
+// Debugger twin: for ordinary missions an instrumented copy of the learner's
+// code builds and runs next to the plain program, with the same seed. The
+// plain program is always the one scored; the twin only supplies debugger
+// frames, and they are attached only when the twin produced exactly the same
+// world events and output, so the map can follow the debugger frame by frame
+// without ever affecting the result.
 //
 // Race-detector levels are excluded (the recorder's lock would add
 // happens-before edges and could hide the race the level is about), and so
@@ -161,4 +167,74 @@ func linkFrameEvents(frames []traceFrame, events []byte) {
 		frames[i].Events = sort.Search(len(ends), func(k int) bool { return ends[k] > sim })
 		frames[i].Sim = 0
 	}
+}
+
+// tracedTwin is the instrumented program running alongside the plain one.
+type tracedTwin struct {
+	cancel    context.CancelFunc
+	done      chan struct{}
+	stdout    *traceStdoutBuffer
+	simPath   string
+	framePath string
+}
+
+func startTracedTwin(ctx context.Context, progPath string, env []string) *tracedTwin {
+	t := &tracedTwin{}
+	if progPath == "" {
+		return t
+	}
+	dir := filepath.Dir(progPath)
+	framePath, ok := createSingleRunTrace(dir)
+	if !ok {
+		return t
+	}
+	t.framePath, t.simPath = framePath, filepath.Join(dir, "twin-events.jsonl")
+	tctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	cmd := exec.CommandContext(tctx, progPath)
+	configureProcess(cmd)
+	cmd.Dir = dir
+	twinEnv := make([]string, 0, len(env)+2)
+	for _, kv := range env {
+		if !strings.HasPrefix(kv, "ORBITAL_TRACE=") && !strings.HasPrefix(kv, "ORBITAL_USER_TRACE=") {
+			twinEnv = append(twinEnv, kv)
+		}
+	}
+	cmd.Env = append(twinEnv, "ORBITAL_TRACE="+t.simPath, "ORBITAL_USER_TRACE="+framePath)
+	t.stdout = &traceStdoutBuffer{}
+	cmd.Stdout, cmd.Stderr = t.stdout, io.Discard
+	t.cancel, t.done = cancel, make(chan struct{})
+	go func() {
+		defer close(t.done)
+		_ = runCommand(cmd)
+	}()
+	return t
+}
+
+func (t *tracedTwin) stop() {
+	if t.done != nil {
+		t.cancel()
+		<-t.done
+	}
+}
+
+// trace waits briefly for the twin (it must not make the learner wait) and
+// returns its frames only when it matched the scored run exactly. A nil
+// result means "no synced trace": the client falls back to the separate
+// debugger request.
+func (t *tracedTwin) trace(plainTook time.Duration, events []byte, stdout string, completed bool, lang string) *traceResponse {
+	if t.done == nil {
+		return nil
+	}
+	grace := max(2*time.Second, 2*plainTook)
+	select {
+	case <-t.done:
+	case <-time.After(grace):
+		t.stop()
+		return nil
+	}
+	sim, err := os.ReadFile(t.simPath)
+	if err != nil || !bytes.Equal(sim, events) || t.stdout.truncated || t.stdout.String() != stdout {
+		return nil
+	}
+	return singleRunTrace(t.framePath, events, stdout, completed, lang)
 }

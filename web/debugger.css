@@ -211,21 +211,24 @@
 /* focus mode: while debugging on desktop the lesson folds into a drawer
    (same as the tablet layout) and the goal stays visible above the code */
 @media (min-width: 1101px) {
-  body.debug-focus .layout { grid-template-columns: minmax(0, 1fr) minmax(400px, 39%); height: calc(100% - 60px - 58px); }
-  body.debug-focus .lesson-panel:not(.colony-panel) {
+  body.debug-focus:not(.colony) .layout { grid-template-columns: minmax(0, 1fr) minmax(400px, 39%); height: calc(100% - 60px - 58px); }
+  body.debug-focus:not(.colony) .lesson-panel:not(.colony-panel) {
     position: fixed; z-index: 15; top: 70px; bottom: 10px; right: 10px; width: min(440px, calc(100% - 20px));
     box-shadow: 0 24px 70px -10px #000c; transform: translateX(calc(100% + 20px)); transition: transform .35s var(--ease);
   }
-  body.debug-focus.lesson-open .lesson-panel:not(.colony-panel) { transform: none; }
-  body.debug-focus #btn-lesson { display: inline-flex; }
-  body.debug-focus .goal-strip {
+  body.debug-focus.lesson-open:not(.colony) .lesson-panel:not(.colony-panel) { transform: none; }
+  body.debug-focus:not(.colony) #btn-lesson { display: inline-flex; }
+  body.debug-focus:not(.colony) .goal-strip {
     display: flex; align-items: center; gap: 10px; margin: 10px 10px 0; padding: 9px 12px;
     background: color-mix(in oklab, var(--regolith) 14%, var(--sheet)); border: 1px solid color-mix(in oklab, var(--regolith) 45%, var(--rule));
     font-weight: 600; font-size: 14.5px; line-height: 1.5; animation: dbg-strip .3s ease-out;
   }
-  body.debug-focus .goal-strip .ico { color: var(--regolith); }
-  body.debug-focus .goal-strip .par { margin: 0 auto 0 0; white-space: nowrap; font-weight: 400; }
+  body.debug-focus:not(.colony) .goal-strip .ico { color: var(--regolith); }
+  body.debug-focus:not(.colony) .goal-strip .par { margin: 0 auto 0 0; white-space: nowrap; font-weight: 400; }
 }
 @keyframes dbg-strip { from { opacity: 0; transform: translateY(-6px); } }
-@media (prefers-reduced-motion: reduce) { body.debug-focus .goal-strip { animation: none; } }
+@media (prefers-reduced-motion: reduce) { body.debug-focus:not(.colony) .goal-strip { animation: none; } }
 .debug-note { margin: 4px 2px 2px !important; color: var(--faint) !important; font-size: 11px; }
+
+/* the colony runs a live, endless program: step-by-step is for missions */
+body.colony #btn-step { display: none; }
