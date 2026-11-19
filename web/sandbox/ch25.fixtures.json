@@ -1,0 +1,357 @@
+{
+  "ch25-atomic-counter": {
+    "labels": {
+      "again": {
+        "ar": "بدّل الترتيب",
+        "en": "Shuffle order"
+      },
+      "load": {
+        "ar": "Load الحالي",
+        "en": "Current Load"
+      },
+      "next": {
+        "ar": "نفّذ atomic.Add",
+        "en": "Run atomic.Add"
+      },
+      "order": {
+        "ar": "ترتيب Add يتغير؛ المجموع ثابت.",
+        "en": "Add order varies; total stays."
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "trace": {
+        "ar": "خطوات Add",
+        "en": "Add steps"
+      },
+      "value": {
+        "ar": "قيمة العداد",
+        "en": "Counter value"
+      }
+    },
+    "orders": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        2,
+        0,
+        1
+      ]
+    ],
+    "workers": [
+      {
+        "add": 1,
+        "name": {
+          "ar": "العامل A",
+          "en": "Worker A"
+        }
+      },
+      {
+        "add": 2,
+        "name": {
+          "ar": "العامل B",
+          "en": "Worker B"
+        }
+      },
+      {
+        "add": 3,
+        "name": {
+          "ar": "العامل C",
+          "en": "Worker C"
+        }
+      }
+    ]
+  },
+  "ch25-closed-drain": {
+    "labels": {
+      "channel": {
+        "ar": "قناة الشغل",
+        "en": "Job channel"
+      },
+      "close": {
+        "ar": "اقفل القناة",
+        "en": "Close channel"
+      },
+      "closed": {
+        "ar": "مقفولة",
+        "en": "Closed"
+      },
+      "drained": {
+        "ar": "الطابور فاضي",
+        "en": "Queue drained"
+      },
+      "empty": {
+        "ar": "مفيش قيم؛ الاستقبال يستنى",
+        "en": "No values; receive waits"
+      },
+      "open": {
+        "ar": "مفتوحة",
+        "en": "Open"
+      },
+      "queued": {
+        "ar": "لسه فيه قيم",
+        "en": "Values remain queued"
+      },
+      "receive": {
+        "ar": "استقبل القيمة",
+        "en": "Receive value"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "values": [
+      4,
+      6
+    ]
+  },
+  "ch25-locked-account": {
+    "balance": 7,
+    "labels": {
+      "again": {
+        "ar": "ترتيب تاني",
+        "en": "Try other order"
+      },
+      "balance": {
+        "ar": "الرصيد",
+        "en": "Balance"
+      },
+      "because": {
+        "ar": "الرصيد مايكفيش",
+        "en": "insufficient balance"
+      },
+      "done": {
+        "ar": "خلصت المعاملات",
+        "en": "Transactions complete"
+      },
+      "history": {
+        "ar": "العمليات",
+        "en": "Operations"
+      },
+      "left": {
+        "ar": "المتبقي",
+        "en": "left"
+      },
+      "next": {
+        "ar": "العملية الجاية",
+        "en": "Next operation"
+      },
+      "order": {
+        "ar": "الترتيب ممكن يتغير.",
+        "en": "Order can vary."
+      },
+      "protected": {
+        "ar": "كل فحص وتعديل جوه Mutex.",
+        "en": "Each check and update holds Mutex."
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "skips": {
+        "ar": "ماخصمش",
+        "en": "skips"
+      },
+      "spends": {
+        "ar": "خصم",
+        "en": "spends"
+      }
+    },
+    "transactions": [
+      {
+        "amount": 4,
+        "worker": {
+          "ar": "العامل A",
+          "en": "Worker A"
+        }
+      },
+      {
+        "amount": 5,
+        "worker": {
+          "ar": "العامل B",
+          "en": "Worker B"
+        }
+      }
+    ]
+  },
+  "ch25-nonblocking-bus": {
+    "capacity": 1,
+    "initial": [
+      "ready"
+    ],
+    "labels": {
+      "attempts": {
+        "ar": "محاولات الإرسال",
+        "en": "Send attempts"
+      },
+      "empty": {
+        "ar": "فاضي",
+        "en": "empty"
+      },
+      "full": {
+        "ar": "ممتلئ؛ اتخطّت",
+        "en": "full; skipped"
+      },
+      "order": {
+        "ar": "الإرسال ما يستناش مساحة.",
+        "en": "A send never waits for space."
+      },
+      "publish": {
+        "ar": "انشر",
+        "en": "Publish"
+      },
+      "queue": {
+        "ar": "الـbuffer",
+        "en": "Buffer"
+      },
+      "receive": {
+        "ar": "اسحب",
+        "en": "Receive"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "sent": {
+        "ar": "اتبعت",
+        "en": "sent"
+      }
+    },
+    "message": "update"
+  },
+  "ch25-race-report": {
+    "initial": 10,
+    "labels": {
+      "again": {
+        "ar": "ترتيب تاني",
+        "en": "Try other order"
+      },
+      "next": {
+        "ar": "الخطوة الجاية",
+        "en": "Next step"
+      },
+      "order": {
+        "ar": "ده ترتيب محتمل واحد.",
+        "en": "This is one possible order."
+      },
+      "read": {
+        "ar": "قرأ",
+        "en": "reads"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "trace": {
+        "ar": "الخطوات",
+        "en": "Trace"
+      },
+      "value": {
+        "ar": "العداد",
+        "en": "Counter"
+      },
+      "write": {
+        "ar": "كتب",
+        "en": "writes"
+      }
+    },
+    "schedules": [
+      [
+        "a-read",
+        "b-read",
+        "a-write",
+        "b-write"
+      ],
+      [
+        "b-read",
+        "a-read",
+        "b-write",
+        "a-write"
+      ]
+    ],
+    "workers": [
+      {
+        "add": 3,
+        "id": "a",
+        "name": {
+          "ar": "العامل A",
+          "en": "Worker A"
+        }
+      },
+      {
+        "add": 5,
+        "id": "b",
+        "name": {
+          "ar": "العامل B",
+          "en": "Worker B"
+        }
+      }
+    ]
+  },
+  "ch25-token-clock": {
+    "capacity": 6,
+    "elapsed": 11,
+    "interval": 5,
+    "labels": {
+      "complete": {
+        "ar": "فترات كاملة",
+        "en": "Complete intervals"
+      },
+      "elapsed": {
+        "ar": "الوقت اللي عدى",
+        "en": "Elapsed seconds"
+      },
+      "order": {
+        "ar": "الوقت الزايد ما يكملش فترة.",
+        "en": "Extra time does not complete an interval."
+      },
+      "tokens": {
+        "ar": "التصاريح",
+        "en": "Permits"
+      }
+    },
+    "max": 19,
+    "min": 0,
+    "tokens": 1
+  },
+  "ch25-ttl-cache": {
+    "age": 0,
+    "labels": {
+      "advance": {
+        "ar": "قدّم الساعة",
+        "en": "Advance clock"
+      },
+      "age": {
+        "ar": "عمر القيمة بالثواني",
+        "en": "Entry age in seconds"
+      },
+      "expired": {
+        "ar": "انتهت",
+        "en": "Expired"
+      },
+      "fresh": {
+        "ar": "لسه صالحة",
+        "en": "Fresh"
+      },
+      "read": {
+        "ar": "اقرأ من الـcache",
+        "en": "Read cache"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "ttl": {
+        "ar": "مدة الصلاحية",
+        "en": "TTL"
+      }
+    },
+    "maxAge": 8,
+    "ttl": 5
+  }
+}

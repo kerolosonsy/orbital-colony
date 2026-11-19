@@ -38,6 +38,137 @@ type ch26BuiltLesson struct {
 	englishHints []string
 }
 
+func ch26Pair(arabic, english string) map[string]string {
+	return map[string]string{"ar": arabic, "en": english}
+}
+
+func ch26Sandbox(prefix, language string) LessonBlock {
+	kind, config := ch26SandboxConfig(prefix)
+	return LessonBlock{ID: prefix + ".sandbox", Kind: "sandbox", Text: ch26SandboxText(prefix, language), Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch26SandboxText(prefix, language string) string {
+	translations := map[string]map[string]string{
+		"c261": ch26Pair("قدّم الخطوات؛ تابع header وstatus وbody.", "Advance the steps; watch header, status, and body."),
+		"c262": ch26Pair("أنشئ سجلًا؛ جرّب ترتيب قفل مختلفًا.", "Create records; try another lock order."),
+		"c263": ch26Pair("قدّم الطلب؛ شوف دخول وخروج الـmiddleware.", "Advance the request through middleware entry and return."),
+		"c264": ch26Pair("قدّم الـerror؛ تابع الوصول للنوع.", "Advance the error; follow its type."),
+		"c265": ch26Pair("اختار المسار؛ راقب المطابقة الدقيقة.", "Choose a route; check exact matching."),
+		"c266": ch26Pair("انسخ البايتات واحدة واحدة؛ وصل لـEOF.", "Copy bytes one at a time; reach EOF."),
+	}
+	return translations[prefix][language]
+}
+
+func ch26SandboxConfig(prefix string) (string, map[string]any) {
+	switch prefix {
+	case "c261":
+		return "ch26-handler-flow", ch26HandlerConfig()
+	case "c262":
+		return "ch26-rest-atomic", ch26RestConfig()
+	case "c263":
+		return "ch26-middleware-order", ch26MiddlewareConfig()
+	case "c264":
+		return "ch26-error-envelope", ch26ErrorConfig()
+	case "c265":
+		return "ch26-static-route", ch26StaticConfig()
+	case "c266":
+		return "ch26-upload-stream", ch26UploadConfig()
+	}
+	return "", nil
+}
+
+func ch26HandlerConfig() map[string]any {
+	return map[string]any{
+		"frames": []any{
+			map[string]any{"caption": ch26Pair("استجابة لسه فاضية.", "Response starts empty."), "header": "—", "status": "—", "body": "—"},
+			map[string]any{"caption": ch26Pair("اتحدد Content-Type.", "Content-Type is set."), "header": "text/plain", "status": "—", "body": "—"},
+			map[string]any{"caption": ch26Pair("اتحدد status قبل الكتابة.", "Status is set before writing."), "header": "application/demo", "status": 207, "body": "—"},
+			map[string]any{"caption": ch26Pair("الـbody اتكتب أخيرًا.", "The body is written last."), "header": "application/demo", "status": 207, "body": "sample"},
+		},
+		"labels": map[string]any{
+			"header": ch26Pair("Header", "Header"), "status": ch26Pair("Status", "Status"),
+			"body": ch26Pair("Body", "Body"), "previous": ch26Pair("اللي قبلها", "Previous"),
+			"next": ch26Pair("الخطوة الجاية", "Next step"), "reset": ch26Pair("من الأول", "Reset"),
+		},
+	}
+}
+
+func ch26RestConfig() map[string]any {
+	return map[string]any{
+		"nextID": 0,
+		"records": []any{
+			map[string]any{"name": ch26Pair("رصيف ألفا", "Quay Alpha")},
+			map[string]any{"name": ch26Pair("رصيف بيتا", "Quay Beta")},
+		},
+		"orders": [][]int{{0, 1}, {1, 0}},
+		"labels": map[string]any{
+			"nextID": ch26Pair("آخر ID", "Last ID"), "records": ch26Pair("السجلات", "Records"),
+			"next": ch26Pair("أنشئ سجلًا", "Create record"), "again": ch26Pair("بدّل ترتيب القفل", "Change lock order"),
+			"reset": ch26Pair("من الأول", "Reset"), "order": ch26Pair("ترتيب طلبات القفل ممكن يتغير.", "Lock request order can vary."),
+		},
+	}
+}
+
+func ch26MiddlewareConfig() map[string]any {
+	outer := ch26Pair("outer →", "outer →")
+	inner := ch26Pair("inner →", "inner →")
+	handler := ch26Pair("handler", "handler")
+	innerReturn := ch26Pair("← inner", "← inner")
+	outerReturn := ch26Pair("← outer", "← outer")
+	return map[string]any{
+		"frames": []any{
+			map[string]any{"caption": ch26Pair("الطلب دخل outer.", "Request enters outer."), "trace": []any{outer}},
+			map[string]any{"caption": ch26Pair("الطلب دخل inner.", "Request enters inner."), "trace": []any{outer, inner}},
+			map[string]any{"caption": ch26Pair("الـhandler نفّذ الطلب.", "Handler runs the request."), "trace": []any{outer, inner, handler}},
+			map[string]any{"caption": ch26Pair("inner رجع الأول.", "Inner returns first."), "trace": []any{outer, inner, handler, innerReturn}},
+			map[string]any{"caption": ch26Pair("outer رجع في الآخر.", "Outer returns last."), "trace": []any{outer, inner, handler, innerReturn, outerReturn}},
+		},
+		"labels": map[string]any{
+			"next": ch26Pair("الخطوة الجاية", "Next step"), "previous": ch26Pair("اللي قبلها", "Previous"),
+			"reset": ch26Pair("من الأول", "Reset"),
+		},
+	}
+}
+
+func ch26ErrorConfig() map[string]any {
+	fault := ch26Pair("*Fault", "*Fault")
+	kind := ch26Pair("Kind: sample", "Kind: sample")
+	load := ch26Pair("load", "load")
+	return map[string]any{
+		"frames": []any{
+			map[string]any{"caption": ch26Pair("الخطأ typed.", "The error has a type."), "chain": []any{fault, kind}, "result": ch26Pair("قبل التغليف", "Before wrapping")},
+			map[string]any{"caption": ch26Pair("اتغلف مع %w.", "Wrapped with %w."), "chain": []any{load, fault, kind}, "result": ch26Pair("النوع لسه جوه السلسلة", "Type remains in the chain")},
+			map[string]any{"caption": ch26Pair("errors.As وصل للنوع.", "errors.As finds the type."), "chain": []any{load, fault, kind}, "result": ch26Pair("لقينا *Fault", "Found *Fault")},
+		},
+		"labels": map[string]any{
+			"chain": ch26Pair("سلسلة الخطأ", "Error chain"), "result": ch26Pair("النتيجة", "Result"),
+			"next": ch26Pair("الخطوة الجاية", "Next step"), "previous": ch26Pair("اللي قبلها", "Previous"),
+			"reset": ch26Pair("من الأول", "Reset"),
+		},
+	}
+}
+
+func ch26StaticConfig() map[string]any {
+	return map[string]any{
+		"allowedPath": "/sample", "nearPath": "/sample/",
+		"labels": map[string]any{
+			"route": ch26Pair("المسار", "Route"), "allowed": ch26Pair("مسموح", "Allowed"),
+			"denied": ch26Pair("مرفوض", "Denied"), "choose": ch26Pair("اختار مسارًا", "Choose a route"),
+		},
+	}
+}
+
+func ch26UploadConfig() map[string]any {
+	return map[string]any{
+		"payload": "sun", "count": 0,
+		"labels": map[string]any{
+			"source": ch26Pair("الملف التوضيحي", "Sample file"), "copied": ch26Pair("بايتات اتنسخت", "Bytes copied"),
+			"staging": ch26Pair("منطقة التجهيز", "Staging area"), "eof": ch26Pair("وصلنا EOF", "Reached EOF"),
+			"next": ch26Pair("اقرأ التالي", "Read next"), "empty": ch26Pair("فاضي", "empty"), "reset": ch26Pair("من الأول", "Reset"),
+		},
+	}
+}
+
 func ch26Markdown(id, text string) LessonBlock {
 	return LessonBlock{ID: id, Kind: "markdown", Text: text}
 }
@@ -72,8 +203,10 @@ func ch26BuildLesson(spec ch26LessonSpec) ch26BuiltLesson {
 	for language, copy := range spec.copies {
 		prefix := spec.prefix
 		titles := arabicTitles
+		languageCode := "ar"
 		if language == 1 {
 			titles = englishTitles
+			languageCode = "en"
 		}
 		tryText := copy.tryPrompt + "\n\n~~~go\n" + spec.tryCode + "\n~~~"
 		steps := []LessonStep{
@@ -90,6 +223,7 @@ func ch26BuildLesson(spec ch26LessonSpec) ch26BuiltLesson {
 				Blocks: []LessonBlock{
 					ch26Question(prefix+".predict", tryText, copy.options, spec.tryAnswer, copy.feedback),
 					ch26Walkthrough(prefix+".try-reveal", copy.tryReveal, spec.tryCode, spec.tryExampleID, spec.tryImports, spec.tryFrames[language]),
+					ch26Sandbox(prefix, languageCode),
 				},
 			},
 			{

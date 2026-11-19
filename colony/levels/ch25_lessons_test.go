@@ -1,6 +1,8 @@
 package levels
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -68,9 +70,10 @@ func TestCh25Lessons(t *testing.T) {
 				}
 			}
 			try := level.Steps[2].Blocks
-			if len(try) != 2 || try[0].Kind != "question" || try[1].Kind != "walkthrough" || ch25QuestionCode(try[0].Text) != try[1].Code {
+			if len(try) != 3 || try[0].Kind != "question" || try[1].Kind != "walkthrough" || try[2].Kind != "sandbox" || ch25QuestionCode(try[0].Text) != try[1].Code {
 				t.Fatal("Try it must predict from code, then reveal the same code")
 			}
+			ch25AssertSandbox(t, tc.id, "ch25-")
 		})
 	}
 }
@@ -133,6 +136,10 @@ func ch25ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 					continue
 				}
 				words += ch25ValidateFrames(t, name, block)
+			case "sandbox":
+				if block.Sandbox == nil || block.Question != nil || block.Walkthrough != nil || block.Code != "" || !strings.HasPrefix(block.Sandbox.Kind, "ch25-") {
+					t.Errorf("%s: %s has invalid sandbox data", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed kind %q", name, block.ID, block.Kind)
 			}
@@ -159,6 +166,106 @@ func ch25ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 		t.Errorf("%s learner text has %d words; want 200–320", name, words)
 	}
 	t.Logf("%s learner-authored words: %d", name, words)
+}
+
+func ch25AssertSandbox(t *testing.T, id, kindPrefix string) {
+	t.Helper()
+	level := Get(id)
+	var arabic, english *LessonSandbox
+	for _, set := range []struct {
+		steps []LessonStep
+		dest  **LessonSandbox
+	}{{level.Steps, &arabic}, {level.En.Steps, &english}} {
+		count := 0
+		for stepIndex, step := range set.steps {
+			for _, block := range step.Blocks {
+				if block.Kind != "sandbox" {
+					continue
+				}
+				count++
+				if stepIndex != 2 || block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, kindPrefix) {
+					t.Errorf("%s: sandbox must be in Try it and use a %s kind", id, kindPrefix)
+				}
+				*set.dest = block.Sandbox
+			}
+		}
+		if count != 1 {
+			t.Errorf("%s: expected exactly one sandbox, got %d", id, count)
+		}
+	}
+	if arabic == nil || english == nil || arabic.Kind != english.Kind || !ch25SameConfigShape(arabic.Config, english.Config) {
+		t.Fatalf("%s: Arabic and English sandbox configs differ in shape or values", id)
+	}
+	fixturePath := filepath.Join("..", "..", "web", "sandbox", "ch25.fixtures.json")
+	body, err := os.ReadFile(fixturePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]json.RawMessage
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	want, ok := fixtures[arabic.Kind]
+	if !ok {
+		t.Fatalf("%s: no JS fixture for kind %q", id, arabic.Kind)
+	}
+	got, err := json.Marshal(arabic.Config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var canonicalGot, canonicalWant any
+	if err := json.Unmarshal(got, &canonicalGot); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(want, &canonicalWant); err != nil {
+		t.Fatal(err)
+	}
+	got, _ = json.Marshal(canonicalGot)
+	want, _ = json.Marshal(canonicalWant)
+	if !bytes.Equal(got, want) {
+		t.Errorf("%s: JS fixture config differs from the lesson config", id)
+	}
+}
+
+func ch25SameConfigShape(arabic, english any) bool {
+	switch left := arabic.(type) {
+	case map[string]any:
+		right, ok := english.(map[string]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for key, value := range left {
+			other, exists := right[key]
+			if !exists || !ch25SameConfigShape(value, other) {
+				return false
+			}
+		}
+		return true
+	case map[string]string:
+		right, ok := english.(map[string]string)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for key := range left {
+			if _, exists := right[key]; !exists {
+				return false
+			}
+		}
+		return true
+	case []any:
+		right, ok := english.([]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for i := range left {
+			if !ch25SameConfigShape(left[i], right[i]) {
+				return false
+			}
+		}
+		return true
+	default:
+		return reflect.DeepEqual(arabic, english)
+	}
 }
 
 func ch25ValidateFrames(t *testing.T, name string, block LessonBlock) int {

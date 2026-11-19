@@ -1,1 +1,59 @@
-/* Chapter 26 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch26-handler-flow,
+.lesson-sandbox.ch26-rest-atomic,
+.lesson-sandbox.ch26-middleware-order,
+.lesson-sandbox.ch26-error-envelope,
+.lesson-sandbox.ch26-static-route,
+.lesson-sandbox.ch26-upload-stream {
+  box-sizing: border-box;
+  inline-size: min(100%, 290px);
+  margin-block: 0.65rem;
+  padding: 0.65rem;
+  border: 1px solid var(--border, #b7c7d4);
+  border-radius: 0.7rem;
+  background: var(--surface, #f7fafc);
+  color: var(--text, #173042);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.lesson-sandbox.ch26-handler-flow button,
+.lesson-sandbox.ch26-rest-atomic button,
+.lesson-sandbox.ch26-middleware-order button,
+.lesson-sandbox.ch26-error-envelope button,
+.lesson-sandbox.ch26-static-route button,
+.lesson-sandbox.ch26-upload-stream button {
+  margin-block: 0.2rem;
+  margin-inline-end: 0.25rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border, #9aafbf);
+  border-radius: 0.45rem;
+  background: var(--surface, #fff);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lesson-sandbox.ch26-handler-flow button:focus-visible,
+.lesson-sandbox.ch26-rest-atomic button:focus-visible,
+.lesson-sandbox.ch26-middleware-order button:focus-visible,
+.lesson-sandbox.ch26-error-envelope button:focus-visible,
+.lesson-sandbox.ch26-static-route button:focus-visible,
+.lesson-sandbox.ch26-upload-stream button:focus-visible {
+  outline: 2px solid var(--accent, #146c94);
+  outline-offset: 2px;
+}
+
+.ch26-frame { min-block-size: 4.5rem; }
+.ch26-frame-state { margin-block-end: 0.35rem; }
+.ch26-row { display: flex; align-items: center; justify-content: space-between; gap: 0.55rem; margin-block: 0.3rem; }
+.ch26-label { font-weight: 600; }
+.ch26-caption,
+.ch26-state { margin-block: 0.3rem; font-weight: 600; }
+.ch26-note { margin-block: 0.4rem; color: var(--muted, #526978); font-size: 0.82rem; }
+.ch26-value { font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.ch26-records,
+.ch26-trace,
+.ch26-chain { margin-block: 0.35rem; padding-inline-start: 1.4rem; }
+.ch26-record,
+.ch26-trace-item,
+.ch26-chain-item { margin-block: 0.15rem; overflow-wrap: anywhere; }

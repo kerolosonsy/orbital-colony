@@ -1,0 +1,389 @@
+{
+  "ch26-error-envelope": {
+    "frames": [
+      {
+        "caption": {
+          "ar": "الخطأ typed.",
+          "en": "The error has a type."
+        },
+        "chain": [
+          {
+            "ar": "*Fault",
+            "en": "*Fault"
+          },
+          {
+            "ar": "Kind: sample",
+            "en": "Kind: sample"
+          }
+        ],
+        "result": {
+          "ar": "قبل التغليف",
+          "en": "Before wrapping"
+        }
+      },
+      {
+        "caption": {
+          "ar": "اتغلف مع %w.",
+          "en": "Wrapped with %w."
+        },
+        "chain": [
+          {
+            "ar": "load",
+            "en": "load"
+          },
+          {
+            "ar": "*Fault",
+            "en": "*Fault"
+          },
+          {
+            "ar": "Kind: sample",
+            "en": "Kind: sample"
+          }
+        ],
+        "result": {
+          "ar": "النوع لسه جوه السلسلة",
+          "en": "Type remains in the chain"
+        }
+      },
+      {
+        "caption": {
+          "ar": "errors.As وصل للنوع.",
+          "en": "errors.As finds the type."
+        },
+        "chain": [
+          {
+            "ar": "load",
+            "en": "load"
+          },
+          {
+            "ar": "*Fault",
+            "en": "*Fault"
+          },
+          {
+            "ar": "Kind: sample",
+            "en": "Kind: sample"
+          }
+        ],
+        "result": {
+          "ar": "لقينا *Fault",
+          "en": "Found *Fault"
+        }
+      }
+    ],
+    "labels": {
+      "chain": {
+        "ar": "سلسلة الخطأ",
+        "en": "Error chain"
+      },
+      "next": {
+        "ar": "الخطوة الجاية",
+        "en": "Next step"
+      },
+      "previous": {
+        "ar": "اللي قبلها",
+        "en": "Previous"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "result": {
+        "ar": "النتيجة",
+        "en": "Result"
+      }
+    }
+  },
+  "ch26-handler-flow": {
+    "frames": [
+      {
+        "body": "—",
+        "caption": {
+          "ar": "استجابة لسه فاضية.",
+          "en": "Response starts empty."
+        },
+        "header": "—",
+        "status": "—"
+      },
+      {
+        "body": "—",
+        "caption": {
+          "ar": "اتحدد Content-Type.",
+          "en": "Content-Type is set."
+        },
+        "header": "text/plain",
+        "status": "—"
+      },
+      {
+        "body": "—",
+        "caption": {
+          "ar": "اتحدد status قبل الكتابة.",
+          "en": "Status is set before writing."
+        },
+        "header": "application/demo",
+        "status": 207
+      },
+      {
+        "body": "sample",
+        "caption": {
+          "ar": "الـbody اتكتب أخيرًا.",
+          "en": "The body is written last."
+        },
+        "header": "application/demo",
+        "status": 207
+      }
+    ],
+    "labels": {
+      "body": {
+        "ar": "Body",
+        "en": "Body"
+      },
+      "header": {
+        "ar": "Header",
+        "en": "Header"
+      },
+      "next": {
+        "ar": "الخطوة الجاية",
+        "en": "Next step"
+      },
+      "previous": {
+        "ar": "اللي قبلها",
+        "en": "Previous"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "status": {
+        "ar": "Status",
+        "en": "Status"
+      }
+    }
+  },
+  "ch26-middleware-order": {
+    "frames": [
+      {
+        "caption": {
+          "ar": "الطلب دخل outer.",
+          "en": "Request enters outer."
+        },
+        "trace": [
+          {
+            "ar": "outer →",
+            "en": "outer →"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "الطلب دخل inner.",
+          "en": "Request enters inner."
+        },
+        "trace": [
+          {
+            "ar": "outer →",
+            "en": "outer →"
+          },
+          {
+            "ar": "inner →",
+            "en": "inner →"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "الـhandler نفّذ الطلب.",
+          "en": "Handler runs the request."
+        },
+        "trace": [
+          {
+            "ar": "outer →",
+            "en": "outer →"
+          },
+          {
+            "ar": "inner →",
+            "en": "inner →"
+          },
+          {
+            "ar": "handler",
+            "en": "handler"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "inner رجع الأول.",
+          "en": "Inner returns first."
+        },
+        "trace": [
+          {
+            "ar": "outer →",
+            "en": "outer →"
+          },
+          {
+            "ar": "inner →",
+            "en": "inner →"
+          },
+          {
+            "ar": "handler",
+            "en": "handler"
+          },
+          {
+            "ar": "← inner",
+            "en": "← inner"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "outer رجع في الآخر.",
+          "en": "Outer returns last."
+        },
+        "trace": [
+          {
+            "ar": "outer →",
+            "en": "outer →"
+          },
+          {
+            "ar": "inner →",
+            "en": "inner →"
+          },
+          {
+            "ar": "handler",
+            "en": "handler"
+          },
+          {
+            "ar": "← inner",
+            "en": "← inner"
+          },
+          {
+            "ar": "← outer",
+            "en": "← outer"
+          }
+        ]
+      }
+    ],
+    "labels": {
+      "next": {
+        "ar": "الخطوة الجاية",
+        "en": "Next step"
+      },
+      "previous": {
+        "ar": "اللي قبلها",
+        "en": "Previous"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    }
+  },
+  "ch26-rest-atomic": {
+    "labels": {
+      "again": {
+        "ar": "بدّل ترتيب القفل",
+        "en": "Change lock order"
+      },
+      "next": {
+        "ar": "أنشئ سجلًا",
+        "en": "Create record"
+      },
+      "nextID": {
+        "ar": "آخر ID",
+        "en": "Last ID"
+      },
+      "order": {
+        "ar": "ترتيب طلبات القفل ممكن يتغير.",
+        "en": "Lock request order can vary."
+      },
+      "records": {
+        "ar": "السجلات",
+        "en": "Records"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "nextID": 0,
+    "orders": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ]
+    ],
+    "records": [
+      {
+        "name": {
+          "ar": "رصيف ألفا",
+          "en": "Quay Alpha"
+        }
+      },
+      {
+        "name": {
+          "ar": "رصيف بيتا",
+          "en": "Quay Beta"
+        }
+      }
+    ]
+  },
+  "ch26-static-route": {
+    "allowedPath": "/sample",
+    "labels": {
+      "allowed": {
+        "ar": "مسموح",
+        "en": "Allowed"
+      },
+      "choose": {
+        "ar": "اختار مسارًا",
+        "en": "Choose a route"
+      },
+      "denied": {
+        "ar": "مرفوض",
+        "en": "Denied"
+      },
+      "route": {
+        "ar": "المسار",
+        "en": "Route"
+      }
+    },
+    "nearPath": "/sample/"
+  },
+  "ch26-upload-stream": {
+    "count": 0,
+    "labels": {
+      "copied": {
+        "ar": "بايتات اتنسخت",
+        "en": "Bytes copied"
+      },
+      "empty": {
+        "ar": "فاضي",
+        "en": "empty"
+      },
+      "eof": {
+        "ar": "وصلنا EOF",
+        "en": "Reached EOF"
+      },
+      "next": {
+        "ar": "اقرأ التالي",
+        "en": "Read next"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      },
+      "source": {
+        "ar": "الملف التوضيحي",
+        "en": "Sample file"
+      },
+      "staging": {
+        "ar": "منطقة التجهيز",
+        "en": "Staging area"
+      }
+    },
+    "payload": "sun"
+  }
+}

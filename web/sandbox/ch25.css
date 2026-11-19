@@ -1,1 +1,51 @@
-/* Chapter 25 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch25-locked-account,
+.lesson-sandbox.ch25-race-report,
+.lesson-sandbox.ch25-token-clock,
+.lesson-sandbox.ch25-nonblocking-bus,
+.lesson-sandbox.ch25-ttl-cache,
+.lesson-sandbox.ch25-atomic-counter,
+.lesson-sandbox.ch25-closed-drain {
+  box-sizing: border-box;
+  inline-size: min(100%, 290px);
+  margin-block: 0.65rem;
+  padding: 0.65rem;
+  border: 1px solid var(--border, #b7c7d4);
+  border-radius: 0.7rem;
+  background: var(--surface, #f7fafc);
+  color: var(--text, #173042);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.lesson-sandbox.ch25-locked-account button,
+.lesson-sandbox.ch25-race-report button,
+.lesson-sandbox.ch25-nonblocking-bus button,
+.lesson-sandbox.ch25-ttl-cache button,
+.lesson-sandbox.ch25-atomic-counter button,
+.lesson-sandbox.ch25-closed-drain button {
+  margin-block: 0.2rem;
+  margin-inline-end: 0.25rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border, #9aafbf);
+  border-radius: 0.45rem;
+  background: var(--surface, #fff);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lesson-sandbox.ch25-locked-account button:focus-visible,
+.lesson-sandbox.ch25-race-report button:focus-visible,
+.lesson-sandbox.ch25-nonblocking-bus button:focus-visible,
+.lesson-sandbox.ch25-ttl-cache button:focus-visible,
+.lesson-sandbox.ch25-atomic-counter button:focus-visible,
+.lesson-sandbox.ch25-closed-drain button:focus-visible,
+.lesson-sandbox.ch25-token-clock input:focus-visible {
+  outline: 2px solid var(--accent, #146c94);
+  outline-offset: 2px;
+}
+
+.ch25-label { font-weight: 600; }
+.ch25-state { margin-block: 0.3rem; font-weight: 600; }
+.ch25-note { margin-block: 0.4rem; color: var(--muted, #526978); font-size: 0.82rem; }
+.ch25-box-row { margin-block: 0.3rem; }
