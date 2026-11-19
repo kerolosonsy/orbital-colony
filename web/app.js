@@ -491,6 +491,7 @@ function placeCaretLine() {
 // The bracket at the caret and its partner get a small box.
 const bracketMarks = [$("#bracket-a"), $("#bracket-b")];
 let charWidth = 0;
+document.fonts?.addEventListener?.("loadingdone", () => { charWidth = 0; }); // re-measure once the code font arrives
 function placeBrackets(lineHeight) {
   const pair = ed.selectionStart === ed.selectionEnd && window.EditKeys?.matchBracket(ed.value, ed.selectionStart);
   bracketMarks.forEach((mark, i) => {

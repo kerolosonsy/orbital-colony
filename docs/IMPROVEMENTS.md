@@ -40,3 +40,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 36. **`make test-web`** — runs the browser-side tests (`node --test`, 278 tests), and `make check` now includes them; before, no make target ran the web tests at all.
 37. **Caret lands on the first compile error** — after a failed build the editor opens the right file and selects the first error's line, so the fix starts there (clicking other errors still works).
 38. **Bracket matching** — with the caret next to `(`/`[`/`{` or its closer, both brackets get a small box; brackets inside strings, runes and comments are ignored. Matcher `EditKeys.matchBracket` is tested; alignment checked in the browser with tabs.
+39. **Favicon** — an inline SVG planet icon, so the tab is recognisable and the browser stops requesting a missing `/favicon.ico` on every load. (Bracket boxes also re-measure the character width once the code font finishes loading.)
