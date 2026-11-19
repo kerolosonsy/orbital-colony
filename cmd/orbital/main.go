@@ -9,6 +9,7 @@ import (
 	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"flag"
 	"io/fs"
 	"log"
@@ -141,6 +142,9 @@ func main() {
 		}
 	}()
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if errors.Is(err, syscall.EADDRINUSE) {
+			log.Fatalf("%s is already in use (is the game already running? try: make status). Pick another port: -addr 127.0.0.1:7778", *addr)
+		}
 		log.Fatal(err)
 	}
 }
