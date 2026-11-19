@@ -423,3 +423,24 @@ func TestFormatCode(t *testing.T) {
 		t.Fatalf("broken code should return an error: %q", got)
 	}
 }
+
+func TestWorkspaceSuggestsGoExtensionWithoutOverwriting(t *testing.T) {
+	ws := &workspace{root: t.TempDir()}
+	custom := filepath.Join(ws.root, ".vscode", "settings.json")
+	if err := os.MkdirAll(filepath.Dir(custom), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(custom, []byte(`{"mine": true}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := ws.ensureEditorSettings(); err != nil {
+		t.Fatal(err)
+	}
+	ext, err := os.ReadFile(filepath.Join(ws.root, ".vscode", "extensions.json"))
+	if err != nil || !strings.Contains(string(ext), "golang.go") {
+		t.Fatalf("extensions.json: %s %v", ext, err)
+	}
+	if got, _ := os.ReadFile(custom); string(got) != `{"mine": true}` {
+		t.Fatalf("player settings were overwritten: %s", got)
+	}
+}

@@ -41,6 +41,29 @@ func (ws *workspace) ensureModule(l *levels.Level) error {
 			return err
 		}
 	}
+	return ws.ensureEditorSettings()
+}
+
+// ensureEditorSettings makes VS Code suggest the Go extension (gopls gives
+// the autocomplete and hover docs) and gofmt on save. Existing files are the
+// player's and are never overwritten.
+func (ws *workspace) ensureEditorSettings() error {
+	dir := filepath.Join(ws.root, ".vscode")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return err
+	}
+	for name, body := range map[string]string{
+		"extensions.json": "{\n  \"recommendations\": [\"golang.go\"]\n}\n",
+		"settings.json":   "{\n  \"[go]\": {\n    \"editor.formatOnSave\": true\n  }\n}\n",
+	} {
+		path := filepath.Join(dir, name)
+		if _, err := os.Stat(path); err == nil {
+			continue
+		}
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
