@@ -565,17 +565,6 @@ function applyEdit(edit) {
 }
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
-    // the game saves as you type; ⌘S/Ctrl+S just confirms it instead of the browser's "Save page"
-    e.preventDefault();
-    if (!ed.readOnly && S.cur) {
-      saveFile(S.cur, S.file, ed.value);
-      clearTimeout(saveTimer); saveTimer = null;
-      store.save(); store.push();
-      $("#save-state").textContent = T("محفوظ", "Saved");
-    }
-    return;
-  }
   if (e.key === "F9" && S.cur) {
     // toggle a breakpoint on the caret's line, like VS Code
     e.preventDefault();
@@ -1817,6 +1806,17 @@ function stopRun(quiet) {
   if (!quiet) { log(T("اتوقف الكود.", "Code stopped."), "c-warn"); Sound.play("fail"); }
 }
 document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+    // the game saves as you type; ⌘S/Ctrl+S just confirms it instead of the browser's "Save page"
+    e.preventDefault();
+    if (!ed.readOnly && S.cur) {
+      saveFile(S.cur, S.file, ed.value);
+      clearTimeout(saveTimer); saveTimer = null;
+      store.save(); store.push();
+      $("#save-state").textContent = T("محفوظ", "Saved");
+    }
+    return;
+  }
   const typing = e.target.closest?.("input, textarea, select, [contenteditable]");
   if (e.key === "?" && !typing && !e.metaKey && !e.ctrlKey && !document.querySelector("dialog[open]")) {
     e.preventDefault();
