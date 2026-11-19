@@ -70,11 +70,87 @@ func main() {
 	}
 }
 
+func TestTraceFramesCaptureFunctionsDepthReturnsStdoutAndPanics(t *testing.T) {
+	code := `package main
+import "fmt"
+import "io"
+import "os"
+func add(x int) (result int) {
+	result = x + 1
+	return
+}
+func recurse(n int) int {
+	if n == 0 { return 0 }
+	return recurse(n-1) + 1
+}
+func pair() (int, int) { return 4, 5 }
+func pairAgain() (int, int) { return pair() }
+func main() {
+	fmt.Print("hello")
+	io.WriteString(os.Stdout, "-io")
+	os.Stdout.WriteString("-direct")
+	value := add(2)
+	depth := recurse(2)
+	first, second := pairAgain()
+	func() { fmt.Println(value, depth, first, second) }()
+	done := make(chan struct{})
+	go func() { fmt.Print("worker"); close(done) }()
+	<-done
+	panic("keep the frames above")
+}`
+	resp := runTraceFixture(t, code)
+	if !resp.Available || resp.Completed || len(resp.Frames) == 0 {
+		t.Fatalf("panic trace response: %+v", resp)
+	}
+	if !strings.HasPrefix(resp.Stdout, "hello-io-direct") {
+		t.Fatalf("trace stdout = %q", resp.Stdout)
+	}
+	mainFrame := frameWithEvent(t, resp.Frames, "main", "call")
+	addFrame := frameWithEvent(t, resp.Frames, "add", "call")
+	if mainFrame.Depth != 0 || addFrame.Depth <= mainFrame.Depth {
+		t.Fatalf("call depths: main=%+v add=%+v", mainFrame, addFrame)
+	}
+	addReturn := frameWithEvent(t, resp.Frames, "add", "return")
+	if variableNamed(addReturn.Returns, "result") != "3" {
+		t.Fatalf("named return values: %+v", addReturn)
+	}
+	recursiveReturn := frameWithEvent(t, resp.Frames, "recurse", "return")
+	if variableNamed(recursiveReturn.Returns, "return1") != "0" {
+		t.Fatalf("explicit return values: %+v", recursiveReturn)
+	}
+	pairReturn := frameWithEvent(t, resp.Frames, "pair", "return")
+	if variableNamed(pairReturn.Returns, "return1") != "4" || variableNamed(pairReturn.Returns, "return2") != "5" {
+		t.Fatalf("multiple return values: %+v", pairReturn)
+	}
+	frameWithEvent(t, resp.Frames, "pairAgain", "return")
+	stdoutFrame := frameAt(t, resp.Frames, sourceLine(code, "value := add(2)"))
+	if stdoutFrame.Stdout != int64(len("hello-io-direct")) {
+		t.Fatalf("stdout offset = %d, want %d (%+v)", stdoutFrame.Stdout, len("hello-io-direct"), stdoutFrame)
+	}
+	var closure, worker *traceFrame
+	for i := range resp.Frames {
+		frame := &resp.Frames[i]
+		if frame.Event == "call" && strings.HasPrefix(frame.Func, "func@") {
+			if frame.Goroutine > 1 {
+				worker = frame
+			} else {
+				closure = frame
+			}
+		}
+	}
+	if closure == nil || worker == nil || worker.Goroutine <= 1 {
+		t.Fatalf("closure/goroutine call frames missing: closure=%+v worker=%+v", closure, worker)
+	}
+	if frameAt(t, resp.Frames, sourceLine(code, `panic("keep the frames above")`)).Event != "line" {
+		t.Fatal("panic line was not retained")
+	}
+}
+
 func TestTraceCapsFramesAndLetsProgramFinish(t *testing.T) {
 	code := `package main
 import "fmt"
 func main() {
-	for i := 0; i < 600; i++ {}
+	for i := 0; i < 1200; i++ {}
 	fmt.Println("finished")
 }`
 	resp := runTraceFixture(t, code)
@@ -239,6 +315,26 @@ func variable(frame traceFrame, name string) string {
 	for _, variable := range frame.Variables {
 		if variable.Name == name {
 			return variable.Formatted
+		}
+	}
+	return ""
+}
+
+func frameWithEvent(t *testing.T, frames []traceFrame, function, event string) traceFrame {
+	t.Helper()
+	for _, frame := range frames {
+		if frame.Func == function && frame.Event == event {
+			return frame
+		}
+	}
+	t.Fatalf("no %s event for function %q in %+v", event, function, frames)
+	return traceFrame{}
+}
+
+func variableNamed(values []traceVariable, name string) string {
+	for _, value := range values {
+		if value.Name == name {
+			return value.Formatted
 		}
 	}
 	return ""

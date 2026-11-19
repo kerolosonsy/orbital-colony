@@ -293,8 +293,6 @@ input[type="checkbox"] { accent-color: var(--regolith); }
   width: 46px; padding: 14px 0; text-align: right; color: #6f679c; overflow: hidden;
   border-right: 1px solid var(--rule); user-select: none; font-variant-numeric: tabular-nums;
 }
-.gutter div { padding-right: 10px; height: 1.65em; }
-.gutter .err { color: var(--ink); background: var(--err); border-radius: 0 4px 4px 0; font-weight: 600; }
 .code-wrap { position: relative; flex: 1; min-width: 0; }
 .code-wrap textarea, .code-wrap pre {
   position: absolute; inset: 0; margin: 0; padding: 14px 16px; border: 0;

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="/static/style.css">
-<link rel="stylesheet" href="/static/trace.css">
+<link rel="stylesheet" href="/static/debugger.css">
 <link rel="stylesheet" href="/static/metrics.css">
 <link rel="stylesheet" href="/static/treeview.css">
 <link rel="stylesheet" href="/static/sandbox/kit.css">
@@ -102,7 +102,6 @@
     <button id="btn-test" type="button" class="tool small" title="شغّل اختبارات go test" data-en-title="Run go test"><span data-en="Test">اختبر</span></button>
     <button id="btn-vet" type="button" class="tool small" title="افحص الكود بـ go vet" data-en-title="Run go vet"><span data-en="Vet">افحص</span></button>
   </div>
-  <button id="btn-trace" type="button" class="tool hidden" data-en="Trace" title="تتبّع الكود اللي اشتغل" data-en-title="Trace the code that ran">تتبّع</button>
   <button id="btn-run" class="run" title="Ctrl/⌘ + Enter"><svg class="ico"><use href="#i-play"/></svg><span>Run</span></button>
 </header>
 
@@ -152,6 +151,33 @@
   <section class="panel editor-panel">
     <div class="panel-head"><div id="file-tabs" class="tabs"></div><span class="save" id="save-state"></span></div>
     <p id="review-notice" class="review-notice hidden" role="status"></p>
+    <div id="debugger-toolbar" class="debugger-toolbar" hidden>
+      <div id="debugger-controls" class="debugger-controls" hidden>
+        <div class="debugger-row">
+          <div class="debugger-group">
+        <button type="button" class="debugger-button debugger-play" data-debug-command="play" aria-label="شغّل خطوة بخطوة" data-en-aria="Play" title="شغّل خطوة بخطوة" data-en-title="Play"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="dbg-ico-play" d="M4.5 3.2v9.6L12.6 8z"/><path class="dbg-ico-pause" d="M4.5 3.5h2.4v9H4.5zM9.1 3.5h2.4v9H9.1z"/></svg></button>
+          </div>
+          <div class="debugger-group">
+        <button type="button" class="debugger-button" data-debug-command="restart" aria-label="من الأول" data-en-aria="Restart" title="من الأول" data-en-title="Restart"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3v4h4"/><path d="M3.9 9.8A4.6 4.6 0 1 0 4.6 5L3.5 7"/></svg></button>
+        <button type="button" class="debugger-button" data-debug-command="back" aria-label="خطوة لورا" data-en-aria="Step back" title="خطوة لورا" data-en-title="Step back"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12.5 3.5v9L6 8z"/><path d="M4 3.5v9"/></svg></button>
+          </div>
+          <div class="debugger-group">
+        <button type="button" class="debugger-button" data-debug-command="into" aria-label="ادخل جوه الدالة" data-en-aria="Step into" title="ادخل جوه الدالة" data-en-title="Step into"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7"/><path d="M5 7l3 3 3-3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+        <button type="button" class="debugger-button is-primary" data-debug-command="over" aria-label="عدّي الدالة" data-en-aria="Step over" title="عدّي الدالة" data-en-title="Step over"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.8 9.5a5.2 5.2 0 0 1 10 -2.2"/><path d="M13.6 3.6l-.6 3.9-3.8-1"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+        <button type="button" class="debugger-button" data-debug-command="out" aria-label="اخرج من الدالة" data-en-aria="Step out" title="اخرج من الدالة" data-en-title="Step out"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10.5v-7"/><path d="M5 6l3-3 3 3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+        <button type="button" class="debugger-button" data-debug-command="go" aria-label="كمّل لحد نقطة توقف" data-en-aria="Continue" title="كمّل لحد نقطة توقف" data-en-title="Continue"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.2v9.6L9.8 8z"/><path d="M11.5 3.5v9"/></svg></button>
+          </div>
+          <div id="debugger-where" class="debugger-where" aria-live="polite"><i class="debugger-pulse" aria-hidden="true"></i><span id="debugger-where-text"></span></div>
+        <button type="button" class="debugger-button debugger-exit" data-debug-command="exit" aria-label="اقفل التتبّع" data-en-aria="Stop debugging" title="اقفل التتبّع" data-en-title="Stop debugging"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+        </div>
+        <div class="debugger-timeline">
+          <svg id="debugger-depth" class="debugger-depth" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <input id="debugger-slider" class="debugger-slider" type="range" min="0" max="0" value="0" aria-label="خطوة التتبّع" data-en-aria="Debug step" disabled>
+          <span id="debugger-counter" class="debugger-counter" aria-live="polite"></span>
+        </div>
+      </div>
+      <span id="debugger-status" class="debugger-status" role="status" aria-live="polite"></span>
+    </div>
     <div class="editor">
       <div class="gutter" id="gutter"></div>
       <div class="code-wrap">
@@ -159,6 +185,20 @@
         <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="الكود" data-en-aria="Code"></textarea>
       </div>
     </div>
+    <section id="debugger-panel" class="debugger-panel" hidden aria-label="لوحة التصحيح" data-en-aria="Debugger panel">
+      <div class="debugger-panel-head" role="tablist" aria-label="تفاصيل التصحيح" data-en-aria="Debug details">
+        <button type="button" class="debugger-tab" data-debug-tab="variables" role="tab" aria-controls="debugger-variables" aria-selected="true">المتغيرات</button>
+        <button type="button" class="debugger-tab" data-debug-tab="stack" role="tab" aria-controls="debugger-stack" aria-selected="false">Call stack</button>
+        <button type="button" class="debugger-tab" data-debug-tab="output" role="tab" aria-controls="debugger-output" aria-selected="false">Output</button>
+        <span id="debugger-order" class="debugger-order" hidden></span>
+        <button type="button" id="debugger-collapse" class="debugger-collapse" aria-label="اقفل اللوحة" data-en-aria="Collapse panel" title="اقفل اللوحة" data-en-title="Collapse panel" aria-expanded="true">⌄</button>
+      </div>
+      <div id="debugger-panel-body" class="debugger-panel-body">
+        <div id="debugger-variables" role="tabpanel" aria-label="المتغيرات" data-en-aria="Variables"></div>
+        <div id="debugger-stack" class="debugger-stack" role="tabpanel" aria-label="Call stack" hidden></div>
+        <pre id="debugger-output" class="debug-output" dir="ltr" role="tabpanel" aria-label="Output" hidden></pre>
+      </div>
+    </section>
   </section>
 
   <section class="panel world-panel">
@@ -340,8 +380,8 @@
 <script src="/static/sandbox/ch37.js"></script>
 <script src="/static/sandbox/ch38.js"></script>
 <script src="/static/errhelp.js"></script>
+<script src="/static/debugger.js"></script>
 <script src="/static/app.js"></script>
-<script src="/static/trace.js"></script>
 <script src="/static/profiles.js"></script>
 <script src="/static/tree.js"></script>
 <script src="/static/treeview.js"></script>
