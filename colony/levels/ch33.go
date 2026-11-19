@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "33-1-retry-client", Chapter: 33, Kind: "lab", Title: "عميل عنيد", Goal: "عيد طلبات رصيف الإمداد اللي فشلت بأمان، بانتظار متزايد ومن غير ما تكرر شحنة مرتين",
+	add(&Level{ID: "33-1-retry-client", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson331Arabic, Title: "عميل عنيد", Goal: "عيد طلبات رصيف الإمداد اللي فشلت بأمان، بانتظار متزايد ومن غير ما تكرر شحنة مرتين",
 		Requires: []string{"iface"}, Bridge: []int{83}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch331Starter}},
 		Lesson: `# عميل عنيد لرصيف الإمداد
@@ -98,8 +98,8 @@ time.Sleep(d) // التست يستنى بجد، والإلغاء مش بيوقف
 قبل الإعادة رقم n (أول إعادة n=1): ~d = Base~ متضاعف n-1 مرة ومحدود بـ ~Max~، و ~half = d/2~، والانتظار ~half + jitter(int64(d-half)+1)~. اقفل الرد الفاشل الأول، وبعدين نادي ~pause.Pause(ctx, wait)~؛ لو رجّع خطأ رجّعه مع ~nil~. بعد آخر محاولة رجّع آخر رد أو آخر خطأ زي ما هو ومن غير ما تقفله. مفيش نوم حقيقي، و ~main~ فاضية.
 
 النجمة التالتة: لو الرد 429 أو 503 وفيه ~Retry-After~ رقم ثواني صحيح غير سالب، الانتظار يبقى الثواني دي محدودة بـ ~Max~، من غير jitter. أي قيمة تانية تمشي على الـ backoff العادي.`,
-		Hints: []string{"ابدأ بـ NewRetrier ودالة replayable: الطريقة، والمفتاح لـ POST وPATCH، وGetBody لو فيه جسم.", "اعمل حلقة n من 1: نادي next.RoundTrip، ارجع فورًا لو الرد مش قابل للإعادة أو لو دي آخر محاولة، وغير كده اقفل الرد واستنى.", "للانتظار: d := p.Base واضربه في 2 لحد n-1 مرة من غير ما يعدّي Max، وبعدين half + jitter(int64(d-half)+1). في المحاولات بعد الأولى خد req.Clone وحط Body من GetBody."},
-		En: &LevelText{Title: "Stubborn Client", Goal: "Retry failed supply-dock requests safely, with growing waits, without ever shipping a cargo twice", Files: []LabFile{{Name: "main.go", Starter: ch331Starter}},
+		Hints: ch33Lesson331HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch33Lesson331English, Title: "Stubborn Client", Goal: "Retry failed supply-dock requests safely, with growing waits, without ever shipping a cargo twice", Files: []LabFile{{Name: "main.go", Starter: ch331Starter}},
 			Lesson: `# A Stubborn Client for the Supply Dock
 
 ## Before you write
@@ -194,7 +194,7 @@ Retries are allowed only for ~GET~, ~HEAD~, ~OPTIONS~, ~PUT~, and ~DELETE~, or f
 Before retry number n (the first retry is n=1): ~d = Base~ doubled n-1 times and capped at ~Max~, ~half = d/2~, and the wait is ~half + jitter(int64(d-half)+1)~. Close the failed response first, then call ~pause.Pause(ctx, wait)~; if it returns an error, return that error with ~nil~. After the last attempt return the last response or the last error as is, without closing it. No real sleeping, and ~main~ stays empty.
 
 Third star: if the response is 429 or 503 with a ~Retry-After~ that is a valid non-negative whole number of seconds, the wait is those seconds capped at ~Max~, with no jitter. Any other value follows the normal backoff.`,
-			Hints: []string{"Start with NewRetrier and a replayable function: the method, the key for POST and PATCH, and GetBody when there is a body.", "Loop n from 1: call next.RoundTrip, return at once if the response is not retryable or this was the last attempt, otherwise close the response and wait.", "For the wait: d := p.Base, doubled up to n-1 times without passing Max, then half + jitter(int64(d-half)+1). On attempts after the first, take req.Clone and set Body from GetBody."}},
+			Hints: ch33Lesson331HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch331Hidden},
 	})
 }
@@ -594,7 +594,7 @@ func TestHiddenBonusRetryHonorsRetryAfter(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "33-2-reverse-proxy", Chapter: 33, Kind: "lab", Title: "الوكيل العكسي", Goal: "وصّل طلبات القاعدة لوحدات الخلف المسموحة بس، بمهلة وسياسة هيدرات وأخطاء واضحة لما وحدة تقع",
+	add(&Level{ID: "33-2-reverse-proxy", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson332Arabic, Title: "الوكيل العكسي", Goal: "وصّل طلبات القاعدة لوحدات الخلف المسموحة بس، بمهلة وسياسة هيدرات وأخطاء واضحة لما وحدة تقع",
 		Requires: []string{"sel:httputil.ReverseProxy"}, Bridge: []int{78}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch332Starter}},
 		Lesson: `# الوكيل العكسي لبوابة القاعدة
@@ -685,8 +685,8 @@ p := &httputil.ReverseProxy{Rewrite: rw, Director: d} // Rewrite و Director م�
 كل طلب عليه مهلة ~timeout~. الوحدة اتأخرت: 504 و ~upstream timeout\n~. الوحدة مش موجودة أو الاتصال فشل: 502 و ~upstream unavailable\n~. كل الأخطاء بـ ~http.Error~؛ مفيش ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: رد من الوحدة كوده 500 أو أكبر ميوصلش للعميل خالص؛ مكانه 502 و ~upstream failed\n~.`,
-		Hints: []string{"ابدأ بالفحص في NewRelay: url.Parse لكل هدف وافحص Scheme وHost وPath وRawQuery، وخزّن نسخة.", "في ServeHTTP دوّر على أطول بادئة بـ strings.HasPrefix، وحطها في السياق مع context.WithTimeout قبل proxy.ServeHTTP.", "في Rewrite: SetURL ثم Out.URL.Path وHeader.Del وHeader.Set ثم SetXForwarded. في ErrorHandler فرّق context.DeadlineExceeded بـ errors.Is."},
-		En: &LevelText{Title: "Reverse Proxy", Goal: "Relay base requests only to allowed backend units, with a timeout, a header policy, and clear errors when a unit is down", Files: []LabFile{{Name: "main.go", Starter: ch332Starter}},
+		Hints: ch33Lesson332HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch33Lesson332English, Title: "Reverse Proxy", Goal: "Relay base requests only to allowed backend units, with a timeout, a header policy, and clear errors when a unit is down", Files: []LabFile{{Name: "main.go", Starter: ch332Starter}},
 			Lesson: `# A Reverse Proxy for the Base Gateway
 
 ## Before you write
@@ -775,7 +775,7 @@ The handler picks the longest prefix that ~r.URL.Path~ starts with; none means 4
 Every request has the ~timeout~ deadline. A late unit gives 504 and ~upstream timeout\n~. A missing unit or failed connection gives 502 and ~upstream unavailable\n~. All errors use ~http.Error~; no ~Report~, and ~main~ stays empty.
 
 Third star: a unit response with code 500 or above never reaches the client; it is replaced by 502 and ~upstream failed\n~.`,
-			Hints: []string{"Start with the checks in NewRelay: url.Parse each target, check Scheme, Host, Path, and RawQuery, and store a copy.", "In ServeHTTP find the longest prefix with strings.HasPrefix, put it in the context together with context.WithTimeout before proxy.ServeHTTP.", "In Rewrite: SetURL, then Out.URL.Path, Header.Del, and Header.Set, then SetXForwarded. In ErrorHandler tell context.DeadlineExceeded apart with errors.Is."}},
+			Hints: ch33Lesson332HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch332Hidden},
 	})
 }
@@ -1003,7 +1003,7 @@ func TestHiddenBonusRelayHidesUnitErrors(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "33-3-load-balancer", Chapter: 33, Kind: "lab", Title: "موزّع الأحمال", Goal: "وزّع طلبات المحطة على مولدات متشابهة بالدور، وشيل المولد المريض، وكمّل لو واحد وقع",
+	add(&Level{ID: "33-3-load-balancer", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson333Arabic, Title: "موزّع الأحمال", Goal: "وزّع طلبات المحطة على مولدات متشابهة بالدور، وشيل المولد المريض، وكمّل لو واحد وقع",
 		Requires: []string{"mutex"}, Bridge: []int{79}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch333Starter}},
 		Lesson: `# موزّع الأحمال على المولدات
@@ -1080,8 +1080,8 @@ http.Error(w, "down", 502); continue // كتبت الرد وبعدين جربت 
 ~(p *Pool) Check(ctx context.Context) int~ يبعت ~GET /healthz~ لكل وحدة بالـ ~transport~ والسياق، يعلّم 200 سليمة وأي حاجة تانية مريضة، ويقفل الجسم، ويرجّع عدد السليمة. ~(p *Pool) Healthy() []string~ يرجّع العناوين السليمة بترتيب الإدخال وبنفس كتابتها. كله آمن للتوازي تحت قفل واحد ومن غير قفل أثناء الشبكة؛ مفيش ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: رد من وحدة كوده 500 أو أكبر يتحسب فشل زي الاتصال المقطوع: الوحدة تتعلم مريضة، والجسم ده ميوصلش للعميل، و ~GET~ يتجرب على اللي بعدها.`,
-		Hints: []string{"ابدأ بـ struct لكل وحدة فيه العنوان والـ URL وhealthy، وقائمة وعدّاد next تحت sync.Mutex.", "pick تلف مرة واحدة من next وتتخطى المريضة واللي اتجربت؛ ServeHTTP تحط struct المحاولة في السياق وتنادي proxy.ServeHTTP، ولو failed تعلّم الوحدة وتكمل لـ GET وHEAD بس.", "في Check انسخ القائمة تحت القفل، وافحص بـ http.NewRequestWithContext وtransport.RoundTrip من غير قفل، وبعدين اقفل لكل نتيجة."},
-		En: &LevelText{Title: "Load Balancer", Goal: "Share station requests across identical generators in turn, drop a sick generator, and keep going when one falls", Files: []LabFile{{Name: "main.go", Starter: ch333Starter}},
+		Hints: ch33Lesson333HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch33Lesson333English, Title: "Load Balancer", Goal: "Share station requests across identical generators in turn, drop a sick generator, and keep going when one falls", Files: []LabFile{{Name: "main.go", Starter: ch333Starter}},
 			Lesson: `# A Load Balancer for the Generators
 
 ## Before you write
@@ -1156,7 +1156,7 @@ Implement ~NewPool(backends []string, transport http.RoundTripper) (*Pool, error
 ~(p *Pool) Check(ctx context.Context) int~ sends ~GET /healthz~ to every unit through ~transport~ with the context, marks 200 as healthy and anything else as sick, closes the body, and returns the healthy count. ~(p *Pool) Healthy() []string~ returns the healthy addresses in input order, spelled as given. Everything is concurrency-safe under one lock, never held during network calls; no ~Report~, and ~main~ stays empty.
 
 Third star: a unit response with code 500 or above counts as a failure just like a dropped connection: the unit is marked sick, that body never reaches the client, and a ~GET~ is tried on the next one.`,
-			Hints: []string{"Start with a struct per unit holding the address, URL, and healthy, plus a list and a next counter under sync.Mutex.", "pick goes around once from next, skipping sick and already-tried units; ServeHTTP puts the attempt struct in the context and calls proxy.ServeHTTP, and if it failed marks the unit and continues only for GET and HEAD.", "In Check copy the list under the lock, probe with http.NewRequestWithContext and transport.RoundTrip without the lock, then lock for each result."}},
+			Hints: ch33Lesson333HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch333Hidden},
 	})
 }
@@ -1448,7 +1448,7 @@ func TestHiddenBonusPoolTreats5xxAsFailure(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "33-4-gateway", Chapter: 33, Kind: "lab", Title: "البوابة", Goal: "ابني بوابة واحدة لخدمات القاعدة: توجيه ومفاتيح طاقم وحد طلبات ورقم لكل طلب، كطبقات فوق بعض",
+	add(&Level{ID: "33-4-gateway", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson334Arabic, Title: "البوابة", Goal: "ابني بوابة واحدة لخدمات القاعدة: توجيه ومفاتيح طاقم وحد طلبات ورقم لكل طلب، كطبقات فوق بعض",
 		Requires: []string{"funcvalue"}, Bridge: []int{91}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch334Starter}},
 		Lesson: `# بوابة القاعدة
@@ -1523,8 +1523,8 @@ id := r.Header.Get("X-Request-ID") // صدّقت رقم العميل: ممكن �
 كل الأخطاء بـ ~http.Error~. آمن للتوازي؛ مفيش نوم أو وقت حقيقي، ومفيش ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: رد 429 فيه ~Retry-After~ بالثواني لحد التصريح الجاي، مقرّبة لفوق، زي 27-4.`,
-		Hints: []string{"ابدأ بـ Chain ونوع Middleware، وبعدين اكتب كل طبقة كـ method بالشكل func(next http.Handler) http.Handler.", "كل طبقة تحط اللي عرفته في السياق بمفتاح خاص: الرقم، والخدمة، واسم الطاقم؛ وRewrite تقراهم من pr.In.Context().", "انقل خزان 27-4: map من مفتاح لـ struct فيه credit وmark تحت sync.Mutex، والمفتاح crew:<name> أو ip:<host> عشان ميتلخبطوش."},
-		En: &LevelText{Title: "Gateway", Goal: "Build one gateway for the base services: routing, crew keys, rate limits, and a number for every request, as stacked layers", Files: []LabFile{{Name: "main.go", Starter: ch334Starter}},
+		Hints: ch33Lesson334HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch33Lesson334English, Title: "Gateway", Goal: "Build one gateway for the base services: routing, crew keys, rate limits, and a number for every request, as stacked layers", Files: []LabFile{{Name: "main.go", Starter: ch334Starter}},
 			Lesson: `# The Base Gateway
 
 ## Before you write
@@ -1597,7 +1597,7 @@ The layers, in exactly this order: (1) ~NextID()~ once per request, its value in
 All errors use ~http.Error~. Concurrency-safe; no sleeping or real time, no ~Report~, and ~main~ stays empty.
 
 Third star: a 429 response carries ~Retry-After~ in seconds until the next permit, rounded up, as in 27-4.`,
-			Hints: []string{"Start with Chain and the Middleware type, then write each layer as a method shaped func(next http.Handler) http.Handler.", "Each layer puts what it learned into the context under a private key: the number, the service, and the crew name; Rewrite reads them from pr.In.Context().", "Port the 27-4 tank: a map from key to a struct with credit and mark under sync.Mutex, keyed crew:<name> or ip:<host> so they never collide."}},
+			Hints: ch33Lesson334HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch334Hidden},
 	})
 }

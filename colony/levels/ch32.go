@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "32-1-websocket", Chapter: 32, Kind: "lab", Title: "بث حي", Goal: "رحّل قراءات الحساسات بـ WebSocket وحلقات بتقف من غير تسريب",
+	add(&Level{ID: "32-1-websocket", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson321Arabic, Title: "بث حي", Goal: "رحّل قراءات الحساسات بـ WebSocket وحلقات بتقف من غير تسريب",
 		Requires: []string{"sel:websocket.Accept"}, Deps: []string{"github.com/coder/websocket"}, Bridge: []int{74}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch321Starter}},
 		Lesson: `# بث قراءات المستعمرة
@@ -66,8 +66,8 @@ for { c.Read(ctx) }          // غلط: تجاهل الخطأ يعمل دورا�
 
 النجمة التالتة: استهلك ~Pulses~ في الكاتب، ونادِ ~Ping~ بسياق النبضة، وابعت نفس الخطأ، حتى ~nil~، مرة واحدة لـ ~Reply~، ووقف الحلقتين لو الـ ping فشل. الـ channel ليها مستهلك واحد وكل ~Reply~ سعتها 1، ومتقفلش قنوات المستدعي. قفل قناة النبض يعطّل الفحص. النداءات المتزامنة مستقلة.
 `,
-		Hints: []string{"افحص الإعدادات والـ Origin قبل websocket.Accept، وبعدها اضبط SetReadLimit.", "خلّي القارئ يبعت رسالة أو خطأ على channel محدود بـ select على الإلغاء؛ الكاتب وحده يرد ويقفل بمبرر.", "عند الخروج الغي السياق واقفل CloseNow واستنى القارئ؛ للنجمة نفّذ Ping من الكاتب وابعت نتيجته لـ Reply."},
-		En: &LevelText{Title: "Live Broadcast", Goal: "Relay sensor readings through WebSocket pumps that stop without leaks", Files: []LabFile{{Name: "main.go", Starter: ch321Starter}},
+		Hints: ch32Lesson321HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch32Lesson321English, Title: "Live Broadcast", Goal: "Relay sensor readings through WebSocket pumps that stop without leaks", Files: []LabFile{{Name: "main.go", Starter: ch321Starter}},
 			Lesson: `# Live Telemetry Relay
 
 ## Before you write
@@ -130,7 +130,7 @@ After acceptance use separate read and write pumps and a bounded inbox, with the
 
 Third star: consume ~Pulses~ in the writer, call ~Ping~ with each pulse's context, send its exact error (including nil) once to ~Reply~, and stop both pumps on ping failure. The channel has one receiver, every ~Reply~ has capacity 1, and caller-owned channels must not be closed. A closed pulse channel disables heartbeats. Concurrent relay calls share no state.
 `,
-			Hints: []string{"Validate options and Origin before websocket.Accept, then set SetReadLimit.", "Have the reader send a message or error through a bounded channel selecting on cancellation; only the writer replies and sends policy closes.", "On exit cancel, CloseNow, and join the reader; for the star call Ping from the writer and acknowledge its result through Reply."}},
+			Hints: ch32Lesson321HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch321Hidden},
 	})
 }
@@ -679,7 +679,7 @@ var BerthControl_ServiceDesc = grpc.ServiceDesc{
 `
 
 func init() {
-	add(&Level{ID: "32-2-grpc-unary", Chapter: 32, Kind: "lab", Title: "gRPC", Goal: "افحص ضغط قطاع بخدمة unary وحارس تصريح وحالات واضحة",
+	add(&Level{ID: "32-2-grpc-unary", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson322Arabic, Title: "gRPC", Goal: "افحص ضغط قطاع بخدمة unary وحارس تصريح وحالات واضحة",
 		Requires: []string{"sel:grpc.NewServer"}, Deps: []string{"google.golang.org/grpc", "google.golang.org/protobuf"}, Bridge: []int{75}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch322Starter}, {Name: "berth.proto", Starter: ch322Protocol0, ReadOnly: true}, {Name: "berth.pb.go", Starter: ch322Protocol1, ReadOnly: true}, {Name: "berth_grpc.pb.go", Starter: ch322Protocol2, ReadOnly: true}},
 		Lesson: `# فحص ضغط القطاع بـ gRPC
@@ -776,8 +776,8 @@ if md.Get("x-colony-key")[0] == key { return next(ctx, req) }
 
 النجمة التالتة: استرجع panic الخدمة في الـ interceptor ورد ~nil~ وخطأ ~Internal~ برسالة ~inspection unavailable~ بالظبط. متعدّلش البروتوكول ولا الملفات المتولّدة المقفولة.
 `,
-		Hints: []string{"ضمّن UnimplementedBerthControlServer بالقيمة، وسجّل تنفيذ Inspect على grpc.NewServer.", "ركّب UnaryInterceptor بيفحص عدد قيم x-colony-key قبل next؛ الخدمة تتحقق من القطاع قبل البحث.", "اربط errors.Is بالحالات، وافحص ctx.Err قبل وبعد البحث؛ للنجمة استخدم defer وrecover وقيم رجوع مسمّاة في الـ interceptor."},
-		En: &LevelText{Title: "gRPC", Goal: "Inspect sector pressure with a unary service, an authentication interceptor, and explicit statuses", Files: []LabFile{{Name: "main.go", Starter: ch322Starter}, {Name: "berth.proto", Starter: ch322Protocol0, ReadOnly: true}, {Name: "berth.pb.go", Starter: ch322Protocol1, ReadOnly: true}, {Name: "berth_grpc.pb.go", Starter: ch322Protocol2, ReadOnly: true}},
+		Hints: ch32Lesson322HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch32Lesson322English, Title: "gRPC", Goal: "Inspect sector pressure with a unary service, an authentication interceptor, and explicit statuses", Files: []LabFile{{Name: "main.go", Starter: ch322Starter}, {Name: "berth.proto", Starter: ch322Protocol0, ReadOnly: true}, {Name: "berth.pb.go", Starter: ch322Protocol1, ReadOnly: true}, {Name: "berth_grpc.pb.go", Starter: ch322Protocol2, ReadOnly: true}},
 			Lesson: `# Inspect a Pressure Sector with gRPC
 
 ## Before you write
@@ -872,7 +872,7 @@ Implement ~NewInspectionServer(key string, lookup PressureLookup) *grpc.Server~.
 
 Third star: recover service panics in the interceptor, returning a nil reply and ~Internal~ with exactly ~inspection unavailable~. Do not edit the read-only protocol or generated files.
 `,
-			Hints: []string{"Embed UnimplementedBerthControlServer by value and register your Inspect implementation on grpc.NewServer.", "Install a UnaryInterceptor checking the count and value of x-colony-key before next; validate the sector before lookup.", "Map errors.Is to status codes and check ctx.Err before and after lookup; for the star use deferred recover and named returns in the interceptor."}},
+			Hints: ch32Lesson322HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch322Hidden},
 	})
 }
@@ -1371,7 +1371,7 @@ var DriftControl_ServiceDesc = grpc.ServiceDesc{
 `
 
 func init() {
-	add(&Level{ID: "32-3-grpc-stream", Chapter: 32, Kind: "lab", Title: "gRPC streaming", Goal: "عاير انحراف المركبة بخطوات وإقرارات مستقلة لكل stream",
+	add(&Level{ID: "32-3-grpc-stream", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson323Arabic, Title: "gRPC streaming", Goal: "عاير انحراف المركبة بخطوات وإقرارات مستقلة لكل stream",
 		Requires: []string{"sel:grpc.NewServer"}, Deps: []string{"google.golang.org/grpc", "google.golang.org/protobuf"}, Bridge: []int{76}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch323Starter}, {Name: "drift.proto", Starter: ch323Protocol0, ReadOnly: true}, {Name: "drift.pb.go", Starter: ch323Protocol1, ReadOnly: true}, {Name: "drift_grpc.pb.go", Starter: ch323Protocol2, ReadOnly: true}},
 		Lesson: `# وصلة معايرة انحراف في الاتجاهين
@@ -1444,8 +1444,8 @@ link.Send(reply); continue // غلط: تجاهلت فشل الإرسال
 
 Stream فاضي أو قفل إرسال بعد خطوات مقبولة يدي EOF نظيف للعميل. مفيش معايرة ولا رد بعد رسالة مرفوضة؛ الردود القديمة تفضل. الـ streams المتزامنة حالتها منفصلة. متعدّلش البروتوكول ولا الملفات المتولّدة المقفولة. مفيش ~Report~ و ~main~ فاضية.
 `,
-		Hints: []string{"ابدأ بإجمالي وتسلسل محليين جوه Calibrate، مش جوه struct الخدمة.", "في كل لفة استقبل، ميّز EOF، افحص الحصة والتسلسل والحدود، وبعدها نادِ المعايرة.", "افحص السياق قبل وبعد المعايرة، وابعت إقرار واحد بالنتيجة؛ أول خطأ Send أو Recv يوقف الحلقة."},
-		En: &LevelText{Title: "gRPC Streaming", Goal: "Calibrate vehicle drift with ordered steps and acknowledgements isolated per stream", Files: []LabFile{{Name: "main.go", Starter: ch323Starter}, {Name: "drift.proto", Starter: ch323Protocol0, ReadOnly: true}, {Name: "drift.pb.go", Starter: ch323Protocol1, ReadOnly: true}, {Name: "drift_grpc.pb.go", Starter: ch323Protocol2, ReadOnly: true}},
+		Hints: ch32Lesson323HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch32Lesson323English, Title: "gRPC Streaming", Goal: "Calibrate vehicle drift with ordered steps and acknowledgements isolated per stream", Files: []LabFile{{Name: "main.go", Starter: ch323Starter}, {Name: "drift.proto", Starter: ch323Protocol0, ReadOnly: true}, {Name: "drift.pb.go", Starter: ch323Protocol1, ReadOnly: true}, {Name: "drift_grpc.pb.go", Starter: ch323Protocol2, ReadOnly: true}},
 			Lesson: `# A Bidirectional Drift Calibration Link
 
 ## Before you write
@@ -1516,7 +1516,7 @@ For each accepted step call ~adjust(stream.Context(), total, delta)~ once, store
 
 An empty stream or a half-close after accepted steps returns clean EOF to the client. No adjustment or reply follows a rejected message; prior replies remain. Simultaneous streams keep separate state. Do not edit the read-only protocol or generated files. No ~Report~; ~main~ stays empty.
 `,
-			Hints: []string{"Keep the running total and expected sequence local to Calibrate, outside the service struct.", "Receive each step, distinguish EOF, check quota, sequence, and bounds, then call the injected adjustment.", "Check context before and after adjustment, send one acknowledgement with its result, and stop on the first Send or Recv error."}},
+			Hints: ch32Lesson323HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch323Hidden},
 	})
 }
@@ -1739,7 +1739,7 @@ func TestHiddenDriftFailureAndCancellation(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "32-4-tls", Chapter: 32, Kind: "lab", Title: "TLS و mTLS", Goal: "جهّز شهادات بوابة الهواء وثقة الطرفين بساعة محقونة",
+	add(&Level{ID: "32-4-tls", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson324Arabic, Title: "TLS و mTLS", Goal: "جهّز شهادات بوابة الهواء وثقة الطرفين بساعة محقونة",
 		Requires: []string{"sel:tls.Config"}, Deps: []string{}, Bridge: []int{84}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch324Starter}},
 		Lesson: `# شهادات بوابة الهواء
@@ -1814,8 +1814,8 @@ server.ClientAuth = tls.RequireAnyClientCert // غلط: بيقبل عميل غي
 
 الطرفين يستخدموا ~MinVersion: tls.VersionTLS13~ و ~Now~ المحقونة في ~Time~. السيرفر يعرض ~Server~. العميل يتحقق بنسخة ~Trust~ وبنفس ~ServerName~ والتحقق القياسي شغّال. ~Client~ غير ~nil~ تتعرض عند العميل. ~ClientTrust~ غير ~nil~ تشغّل ~RequireAndVerifyClientCert~ بنسخة المجموعة؛ ~nil~ تسيب ~NoClientCert~. غياب شهادة عميل في وضع الإلزام يفشل. متعدّلش المدخلات ولا تشارك إعدادات قابلة للتغيير بين النداءات. متعملش callbacks لتجاوز التحقق. التستات بتعمل مصافحات TLS حقيقية بشهادات منتهية ومستقبلية واسم وجهة واستخدام غلط. مفيش شبكة ولا ملفات ولا ~Report~ في حلك و ~main~ فاضية.
 `,
-		Hints: []string{"افحص المدخلات قبل بناء أي إعداد؛ اعمل tls.Config جديد لكل طرف.", "حط الشهادة عند السيرفر وRootCAs وServerName عند العميل، وMinVersion وTime عند الاتنين.", "ClientTrust غير nil معناها RequireAndVerifyClientCert؛ انسخ مجموعات الثقة بـ Clone وسيب التحقق القياسي شغال."},
-		En: &LevelText{Title: "TLS and mTLS", Goal: "Configure airlock certificates and peer trust with an injected verification clock", Files: []LabFile{{Name: "main.go", Starter: ch324Starter}},
+		Hints: ch32Lesson324HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch32Lesson324English, Title: "TLS and mTLS", Goal: "Configure airlock certificates and peer trust with an injected verification clock", Files: []LabFile{{Name: "main.go", Starter: ch324Starter}},
 			Lesson: `# Certificates for the Airlock
 
 ## Before you write
@@ -1888,7 +1888,7 @@ Implement ~ColonyTLS(opts ColonyTLSOptions) (*tls.Config, *tls.Config, error)~, 
 
 Both peers use ~MinVersion: tls.VersionTLS13~ and the injected ~Now~ through ~Time~. The server presents ~Server~. The client verifies using a clone of ~Trust~ and exact ~ServerName~, with standard verification enabled. Non-nil ~Client~ is presented by the client. Non-nil ~ClientTrust~ enables ~RequireAndVerifyClientCert~ with a clone of that pool; nil keeps ~NoClientCert~. A missing client certificate in required mode must fail. Do not mutate input options or share mutable config settings across calls. Do not set custom verification bypasses. The tests use real TLS handshakes, including expired, future, wrong-name, foreign, and wrong-purpose certificates. No network, files, or ~Report~ in your solution; ~main~ is empty.
 `,
-			Hints: []string{"Validate inputs before constructing either configuration; create a new tls.Config for each peer.", "Set the server certificate, client RootCAs and ServerName, and both peers' MinVersion and Time.", "A non-nil ClientTrust selects RequireAndVerifyClientCert; clone trust pools and retain standard verification."}},
+			Hints: ch32Lesson324HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch324Hidden},
 	})
 }
@@ -2135,7 +2135,7 @@ func TestHiddenTLSOptionsAndIsolation(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "32-5-http2", Chapter: 32, Kind: "lab", Title: "HTTP/2", Goal: "خد قراءات متوازية على اتصال TLS واحد بتفاوض h2",
+	add(&Level{ID: "32-5-http2", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson325Arabic, Title: "HTTP/2", Goal: "خد قراءات متوازية على اتصال TLS واحد بتفاوض h2",
 		Requires: []string{"sel:http.Server"}, Deps: []string{}, Bridge: []int{77}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch325Starter}},
 		Lesson: `# بوابة المستعمرة بطلبات متوازية
@@ -2211,8 +2211,8 @@ srv.TLSNextProto = map[string]func(*http.Server, *tls.Conn, http.Handler){} // �
 
 الطلبات المتزامنة مستقلة؛ قراية واقفة متعطّلش إخواتها على نفس اتصال HTTP/2. التستات بتطلب ALPN حقيقي ~h2~ ونسخة HTTP برقم 2 ونفس هوية الاتصال ورجوع HTTP/1.1 ورفض الشهادات غير الموثوقة. مفيش Server Push ولا ~Report~ و ~main~ فاضية.
 `,
-		Hints: []string{"انسخ tls.Config واستبدل NextProtos بقائمة جديدة، واضبط MinVersion ومهل http.Server.", "افصل تحقق المسار والطريقة عن قراية الحساس؛ مرّر r.Context من غير قفل مشترك.", "سيب TLSNextProto كما هي عشان ServeTLS تجهّز HTTP/2؛ التست بيستخدم ForceAttemptHTTP2 وهوية GotConn بدل الوقت."},
-		En: &LevelText{Title: "HTTP/2", Goal: "Read sensors concurrently over one TLS connection negotiated as h2", Files: []LabFile{{Name: "main.go", Starter: ch325Starter}},
+		Hints: ch32Lesson325HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch32Lesson325English, Title: "HTTP/2", Goal: "Read sensors concurrently over one TLS connection negotiated as h2", Files: []LabFile{{Name: "main.go", Starter: ch325Starter}},
 			Lesson: `# Multiplex the Colony Gateway
 
 ## Before you write
@@ -2286,7 +2286,7 @@ Install a handler for ~GET /sectors/NAME~. NAME is 1..16 ASCII lowercase letters
 
 Concurrent requests must remain independent. A blocked read must not block siblings on the same HTTP/2 connection. The tests require actual ALPN ~h2~, HTTP major version 2, shared connection identity, HTTP/1.1 fallback, and rejection of untrusted certificates. No Server Push, ~Report~, or work in ~main~.
 `,
-			Hints: []string{"Clone tls.Config, replace NextProtos with a new slice, and set MinVersion and the http.Server timeouts.", "Validate the route and method before sensor reads; pass r.Context without a shared lock.", "Leave TLSNextProto alone so ServeTLS configures HTTP/2; tests use ForceAttemptHTTP2 and GotConn identity rather than timing."}},
+			Hints: ch32Lesson325HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch325Hidden},
 	})
 }
@@ -2527,7 +2527,7 @@ func TestHiddenMultiplexFallbackAndTrust(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "32-6-ssh", Chapter: 32, Kind: "lab", Title: "SSH", Goal: "نفّذ أوامر فحص الرصيف المحددة بمفتاح مضيف موثوق وإلغاء كامل",
+	add(&Level{ID: "32-6-ssh", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson326Arabic, Title: "SSH", Goal: "نفّذ أوامر فحص الرصيف المحددة بمفتاح مضيف موثوق وإلغاء كامل",
 		Requires: []string{"sel:ssh.NewClientConn", "sel:ssh.FixedHostKey"}, Deps: []string{"golang.org/x/crypto"}, Bridge: []int{81}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch326Starter}},
 		Lesson: `# وصلة SSH بمفتاح رصيف موثوق
@@ -2608,8 +2608,8 @@ session.Run("colony " + input) // غلط: نص بعيد حر بدل اختيار
 
 خروج 0 يرجع النصين و ~ExitCode~ بصفر وخطأ ~nil~. خروج بعيد غير صفر يرجع النصين وكود الخروج وخطأ ~*ssh.ExitError~ الأصلي كسبب. أخطاء المصافحة والتصريح والجلسة والـ I/O التانية ترجع رد صفري وخطأ. الإلغاء في أي مرحلة يرجع رد صفري و ~ctx.Err()~؛ لازم يقفل النقل بسرعة ويوقف الجلسة ويستنى مراقب الإلغاء قبل الرجوع. السياقات والاتصال المحقون لازم يتعاونوا وقت الاتصال. النداءات المتزامنة مستقلة. متقراش اعتمادات الجهاز ولا تطبع مفاتيح أو اعتمادات ولا تنفّذ أوامر محلية. مفيش ~Report~ و ~main~ فاضية.
 `,
-		Hints: []string{"تحقق من الطلب وحوّل enum الأمر لنص ثابت قبل Dial؛ ثبّت HostKeyCallback بـ ssh.FixedHostKey.", "بعد الاتصال شغّل مراقب إلغاء بيقفل النقل، وبعد NewClientConn لف القنوات بـ ssh.NewClient وافتح NewSession.", "التقط stdout وstderr في buffers منفصلة، وافحص ssh.ExitError بـ errors.As؛ أولوية ctx.Err واستنى المراقب عند كل خروج."},
-		En: &LevelText{Title: "SSH", Goal: "Execute allowlisted dock checks with a pinned host key and complete cancellation", Files: []LabFile{{Name: "main.go", Starter: ch326Starter}},
+		Hints: ch32Lesson326HintsArabic,
+		En: &LevelText{LessonRevision: 1, Steps: ch32Lesson326English, Title: "SSH", Goal: "Execute allowlisted dock checks with a pinned host key and complete cancellation", Files: []LabFile{{Name: "main.go", Starter: ch326Starter}},
 			Lesson: `# A Pinned SSH Link to the Dock
 
 ## Before you write
@@ -2688,7 +2688,7 @@ For a valid request, a pre-canceled or expired context returns its error with ze
 
 Exit 0 returns captured strings, ~ExitCode~ 0, and nil error. Nonzero remote exit returns both captured strings, its exit code, and the original ~*ssh.ExitError~ as a cause. Handshake, authentication, session, and other I/O failures return a zero reply and an error. Cancellation at any stage returns a zero reply and ~ctx.Err()~; it must close the transport promptly, stop the session, and join the cancellation watcher before returning. Contexts and injected dialers must cooperate during dialing. Concurrent calls share no state. Do not read machine credentials, log keys or credentials, or execute local commands. No ~Report~; ~main~ is empty.
 `,
-			Hints: []string{"Validate the request and map its command enum to fixed text before Dial; pin HostKeyCallback with ssh.FixedHostKey.", "After dialing start a cancellation watcher that closes the transport, wrap NewClientConn channels with ssh.NewClient, then open NewSession.", "Capture stdout and stderr separately and inspect ssh.ExitError with errors.As; prioritize ctx.Err and join the watcher on every exit."}},
+			Hints: ch32Lesson326HintsEnglish},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch326Hidden},
 	})
 }
