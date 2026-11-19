@@ -1903,6 +1903,8 @@ async function run(opts = {}) {
   $("#banner").classList.add("hidden");
   con.innerHTML = "";
   const level = S.cur;
+  // say something while the real compiler works (labs run go test, which takes longer)
+  log(level.kind === "lab" ? T("بيبني ويشغّل go test…", "Building and running go test…") : T("بيبني الكود…", "Building…"), "c-info");
   try {
     if (isLinked()) await syncFromWorkspace(true);
     else if (!ed.readOnly) saveFile(S.cur, S.file, ed.value);
