@@ -1,0 +1,354 @@
+{
+  "32-1-websocket": {
+    "config": {
+      "eventLabels": {
+        "read": {
+          "ar": "قراءة",
+          "en": "Read"
+        },
+        "write": {
+          "ar": "كتابة",
+          "en": "Write"
+        }
+      },
+      "labels": {
+        "caption": {
+          "ar": "الاتصالين ممكن يختلف ترتيبهم.",
+          "en": "The two pumps can finish in either order."
+        },
+        "events": {
+          "ar": "ترتيب الأحداث",
+          "en": "Event order"
+        },
+        "payload": {
+          "ar": "المحتوى",
+          "en": "Payload"
+        },
+        "run": {
+          "ar": "شغّل تاني",
+          "en": "Run again"
+        },
+        "title": {
+          "ar": "رسائل كاملة",
+          "en": "Whole messages"
+        },
+        "type": {
+          "ar": "النوع",
+          "en": "Type"
+        }
+      },
+      "runs": [
+        [
+          {
+            "kind": "read",
+            "payload": "air",
+            "type": "text"
+          },
+          {
+            "kind": "write",
+            "payload": "map",
+            "type": "binary"
+          }
+        ],
+        [
+          {
+            "kind": "write",
+            "payload": "map",
+            "type": "binary"
+          },
+          {
+            "kind": "read",
+            "payload": "air",
+            "type": "text"
+          }
+        ]
+      ]
+    },
+    "kind": "ch32-message-pumps"
+  },
+  "32-2-grpc-unary": {
+    "config": {
+      "labels": {
+        "empty": {
+          "ar": "لسه مفيش",
+          "en": "None yet"
+        },
+        "initial": {
+          "ar": "طلب واحد ينتج رداً واحداً.",
+          "en": "One request produces one reply."
+        },
+        "pressure": {
+          "ar": "الضغط",
+          "en": "Pressure"
+        },
+        "query": {
+          "ar": "الطلب",
+          "en": "Request"
+        },
+        "reply": {
+          "ar": "الرد",
+          "en": "Reply"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        },
+        "sector": {
+          "ar": "القطاع",
+          "en": "Sector"
+        },
+        "send": {
+          "ar": "ابعت query",
+          "en": "Send query"
+        },
+        "title": {
+          "ar": "طلب ورد",
+          "en": "Request and reply"
+        }
+      },
+      "queries": [
+        {
+          "pressure": 0,
+          "sector": "ring"
+        },
+        {
+          "pressure": -3,
+          "sector": "cove"
+        }
+      ]
+    },
+    "kind": "ch32-unary-rpc"
+  },
+  "32-3-grpc-stream": {
+    "config": {
+      "labels": {
+        "caption": {
+          "ar": "الترتيب يتغير؛ كل stream مرتبة.",
+          "en": "Order varies; each stream stays ordered."
+        },
+        "delta": {
+          "ar": "التغيير",
+          "en": "Delta"
+        },
+        "run": {
+          "ar": "شغّل تاني",
+          "en": "Run again"
+        },
+        "sequence": {
+          "ar": "الخطوة",
+          "en": "Step"
+        },
+        "stream": {
+          "ar": "stream",
+          "en": "Stream"
+        },
+        "title": {
+          "ar": "رسائل كل stream",
+          "en": "Messages per stream"
+        }
+      },
+      "runs": [
+        [
+          {
+            "delta": 4,
+            "sequence": 1,
+            "stream": "A"
+          },
+          {
+            "delta": 2,
+            "sequence": 1,
+            "stream": "B"
+          },
+          {
+            "delta": -2,
+            "sequence": 2,
+            "stream": "A"
+          },
+          {
+            "delta": 3,
+            "sequence": 2,
+            "stream": "B"
+          }
+        ],
+        [
+          {
+            "delta": 2,
+            "sequence": 1,
+            "stream": "B"
+          },
+          {
+            "delta": 4,
+            "sequence": 1,
+            "stream": "A"
+          },
+          {
+            "delta": 3,
+            "sequence": 2,
+            "stream": "B"
+          },
+          {
+            "delta": -2,
+            "sequence": 2,
+            "stream": "A"
+          }
+        ]
+      ]
+    },
+    "kind": "ch32-stream-interleave"
+  },
+  "32-4-tls": {
+    "config": {
+      "labels": {
+        "checks": {
+          "ar": "يتحقق من",
+          "en": "Checks"
+        },
+        "flip": {
+          "ar": "بدّل الطرف",
+          "en": "Switch peer"
+        },
+        "peer": {
+          "ar": "الطرف",
+          "en": "Peer"
+        },
+        "peerPresents": {
+          "ar": "الطرف يعرض",
+          "en": "Peer presents"
+        },
+        "title": {
+          "ar": "هوية الطرف",
+          "en": "Peer identity"
+        }
+      },
+      "sides": [
+        {
+          "expects": "probe.colony",
+          "peer": {
+            "ar": "العميل",
+            "en": "Client"
+          },
+          "presents": "probe.colony"
+        },
+        {
+          "expects": "Colony CA",
+          "peer": {
+            "ar": "السيرفر",
+            "en": "Server"
+          },
+          "presents": "Colony CA"
+        }
+      ]
+    },
+    "kind": "ch32-peer-trust"
+  },
+  "32-5-http2": {
+    "config": {
+      "connectionValue": "TLS",
+      "labels": {
+        "connection": {
+          "ar": "نفس اتصال TLS",
+          "en": "Same TLS connection"
+        },
+        "handshake": {
+          "ar": "مصافحة تانية",
+          "en": "Next handshake"
+        },
+        "offered": {
+          "ar": "المعروض",
+          "en": "Offered"
+        },
+        "reads": {
+          "ar": "اكتمال القراءات",
+          "en": "Read completion order"
+        },
+        "run": {
+          "ar": "شغّل القراءات تاني",
+          "en": "Run reads again"
+        },
+        "selected": {
+          "ar": "اتختار في المصافحة دي",
+          "en": "Selected in this handshake"
+        },
+        "title": {
+          "ar": "تفاوض واتصال",
+          "en": "Negotiation and connection"
+        }
+      },
+      "negotiated": [
+        "h2",
+        "http/1.1"
+      ],
+      "offered": [
+        "h2",
+        "http/1.1"
+      ],
+      "readLabels": {
+        "pressure": {
+          "ar": "قراءة الضغط",
+          "en": "Pressure read"
+        },
+        "wind": {
+          "ar": "قراءة الرياح",
+          "en": "Wind read"
+        }
+      },
+      "readOrders": [
+        [
+          "pressure",
+          "wind"
+        ],
+        [
+          "wind",
+          "pressure"
+        ]
+      ]
+    },
+    "kind": "ch32-alpn-reads"
+  },
+  "32-6-ssh": {
+    "config": {
+      "commands": [
+        {
+          "action": {
+            "ar": "show queue",
+            "en": "show queue"
+          },
+          "choice": "inspect"
+        },
+        {
+          "action": {
+            "ar": "read status",
+            "en": "read status"
+          },
+          "choice": "scan"
+        },
+        {
+          "action": {
+            "ar": "show recent logs",
+            "en": "show recent logs"
+          },
+          "choice": "logs"
+        }
+      ],
+      "labels": {
+        "action": {
+          "ar": "الفعل الثابت",
+          "en": "Fixed action"
+        },
+        "choice": {
+          "ar": "الاختيار",
+          "en": "Choice"
+        },
+        "next": {
+          "ar": "اختيار تاني",
+          "en": "Next choice"
+        },
+        "title": {
+          "ar": "اختيار مسموح",
+          "en": "Allowed choice"
+        }
+      }
+    },
+    "kind": "ch32-ssh-allowlist"
+  }
+}

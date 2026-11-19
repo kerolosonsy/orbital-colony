@@ -32,6 +32,99 @@ func ch31Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	}
 }
 
+func ch31Localized(arabic, english string) map[string]any {
+	return map[string]any{"ar": arabic, "en": english}
+}
+
+func ch31Sandbox(id, text, kind string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+var ch31Sandbox311 = map[string]any{
+	"labels": map[string]any{
+		"title": ch31Localized("الـbuffer", "Buffer"), "chunk": ch31Localized("الجزء الحالي", "Current chunk"),
+		"pending": ch31Localized("لسه مستني الفاصل", "Waiting for delimiter"), "lines": ch31Localized("سطور كاملة", "Complete lines"),
+		"read": ch31Localized("اقرأ chunk", "Read chunk"), "reset": ch31Localized("ابدأ من الأول", "Reset"),
+		"initial": ch31Localized("القراية ممكن تقف قبل نهاية السطر.", "A read can stop before the line ends."), "empty": ch31Localized("لسه مفيش", "None yet"),
+	},
+	"delimiterMark": "↵",
+	"chunks": []any{
+		map[string]any{"text": "sig", "delimiter": false, "caption": ch31Localized("وصل جزء بس.", "Only part arrived.")},
+		map[string]any{"text": "nal", "delimiter": true, "caption": ch31Localized("الفاصل كمّل السطر.", "The delimiter completes the line.")},
+		map[string]any{"text": "air", "delimiter": true, "caption": ch31Localized("السطر التالي مستقل.", "The next line is separate.")},
+	},
+}
+
+var ch31Sandbox312 = map[string]any{
+	"labels": map[string]any{
+		"title": ch31Localized("صناديق البريد", "Mailboxes"), "events": ch31Localized("ترتيب الأحداث", "Event order"),
+		"slow": ch31Localized("صندوق بطيء", "Slow inbox"), "fast": ch31Localized("صندوق تاني", "Another inbox"),
+		"run": ch31Localized("شغّل تاني", "Run again"), "caption": ch31Localized("الترتيب ممكن يتغير؛ المالك يكمل.", "Order can vary; the owner keeps going."),
+	},
+	"capacity":    1,
+	"initialSlow": []string{"air"},
+	"runs": []any{
+		[]any{
+			map[string]any{"recipient": "slow", "message": "map"},
+			map[string]any{"recipient": "fast", "message": "ring"},
+		},
+		[]any{
+			map[string]any{"recipient": "fast", "message": "ring"},
+			map[string]any{"recipient": "slow", "message": "map"},
+		},
+	},
+	"events": map[string]any{
+		"slow": ch31Localized("يتخطى الإرسال؛ الصندوق مليان.", "Skip send; this inbox is full."),
+		"fast": ch31Localized("الإرسال لا ينتظر المستلم.", "The send does not wait for its reader."),
+	},
+}
+
+var ch31Sandbox313 = map[string]any{
+	"labels": map[string]any{
+		"title": ch31Localized("حزم UDP", "UDP packets"), "packet": ch31Localized("الحزمة المستلمة", "Received packet"),
+		"receive": ch31Localized("استقبل الحزمة", "Receive packet"), "reset": ch31Localized("ابدأ من الأول", "Reset"),
+		"initial": ch31Localized("كل datagram يفضل وحدة واحدة.", "Each datagram stays one unit."), "empty": ch31Localized("مفيش لسه", "None yet"),
+	},
+	"packets": []string{"v2|r7|pier", "v2|r8|reef"},
+}
+
+var ch31Sandbox314 = map[string]any{
+	"labels": map[string]any{
+		"title": ch31Localized("ترتيب البايتات", "Byte order"), "wire": ch31Localized("البايتات", "Bytes"),
+		"value": ch31Localized("قيمة الحقل", "Field value"), "remaining": ch31Localized("الباقي", "Remaining"),
+		"swap": ch31Localized("بدّل ترتيب القراءة", "Swap byte order"), "empty": ch31Localized("مفيش", "None"),
+	},
+	"bytes": []int{1, 2, 7},
+	"orders": []any{
+		map[string]any{"name": "BigEndian", "value": 258},
+		map[string]any{"name": "LittleEndian", "value": 513},
+	},
+}
+
+var ch31Sandbox315 = map[string]any{
+	"labels": map[string]any{
+		"title": ch31Localized("نتيجة resolver", "Resolver result"), "case": ch31Localized("الحالة", "Case"),
+		"result": ch31Localized("النتيجة", "Result"), "next": ch31Localized("جرّب حالة", "Next case"),
+		"reset": ch31Localized("ابدأ من الأول", "Reset"),
+	},
+	"outcomes": []any{
+		map[string]any{"name": ch31Localized("قائمة فاضية", "Empty list"), "result": "[]", "caption": ch31Localized("دي إجابة ناجحة.", "This is a successful answer.")},
+		map[string]any{"name": ch31Localized("اسم مش موجود", "Name not found"), "result": "DNSError", "caption": ch31Localized("ده سبب خطأ مختلف.", "This is a different error cause.")},
+		map[string]any{"name": ch31Localized("عنوانين", "Two addresses"), "result": "192.0.2.8 · 2001:db8::8", "caption": ch31Localized("البيانات جاية من resolver.", "The data comes from the resolver.")},
+	},
+}
+
+var ch31Sandbox316 = map[string]any{
+	"labels": map[string]any{
+		"title": ch31Localized("اكتمال الفحوص", "Check completion"), "ports": ch31Localized("المدخل", "Input"),
+		"completion": ch31Localized("انتهت بالترتيب", "Finished in this order"), "slots": ch31Localized("النتائج حسب المدخل", "Results by input"),
+		"run": ch31Localized("شغّل تاني", "Run again"), "caption": ch31Localized("الانتهاء يتغير؛ الخانات ثابتة.", "Completion varies; slots stay put."),
+	},
+	"ports":   []string{"7443", "8443", "9443"},
+	"results": []string{"open", "closed", "open"},
+	"orders":  [][]int{{1, 0, 2}, {2, 1, 0}, {0, 2, 1}},
+}
+
 const ch31ReadChunkCode = `func main() {
 	r := strings.NewReader("signal")
 	chunk := make([]byte, 3)
@@ -72,6 +165,7 @@ var ch31Lesson311Arabic = []LessonStep{
 			"RuneCountInString يعد وحدات Unicode.",
 		}),
 		ch31ByteCount("راقب الفرق بين طول string وعدّ الحروف.", false),
+		ch31Sandbox("c311.playground", "اقرأ الأجزاء وشوف إمتى السطر يكتمل.", "ch31-stream-buffer", ch31Sandbox311),
 	}},
 	{ID: "c311.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c311.watch", "- EOF وسط سطر مش إغلاق نظيف؛ ما تبعتش الجزء الناقص.\n- الكتابة ممكن تكون جزئية؛ تابع الباقي أو أبلغ عن التوقف.")}},
 	{ID: "c311.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -95,6 +189,7 @@ var ch31Lesson311English = []LessonStep{
 			"RuneCountInString counts Unicode runes.",
 		}),
 		ch31ByteCount("Watch the difference between string length and rune count.", true),
+		ch31Sandbox("c311.playground", "Read chunks and watch the line complete.", "ch31-stream-buffer", ch31Sandbox311),
 	}},
 	{ID: "c311.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch31Markdown("c311.watch", "- EOF inside a line is incomplete; do not send its partial bytes.\n- Writes may be partial; continue the remainder or report no progress.")}},
 	{ID: "c311.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -159,6 +254,7 @@ var ch31Lesson312Arabic = []LessonStep{
 			"المسار الجاهز يطبع نتيجة.",
 		}),
 		ch31EmptyMailbox("اتبع اختيار select قبل قراءة الرسالة المطبوعة.", false),
+		ch31Sandbox("c312.playground", "شغّل تاني وشوف الإرسال ما يستناش.", "ch31-mailbox-owner", ch31Sandbox312),
 	}},
 	{ID: "c312.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c312.watch", "- ما تقفلش قناة عضو من برّه مالكها.\n- رد الأمر نقطة مزامنة؛ ابعته بعد ما تخلص أثره.")}},
 	{ID: "c312.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -182,6 +278,7 @@ var ch31Lesson312English = []LessonStep{
 			"The ready case prints a result.",
 		}),
 		ch31EmptyMailbox("Follow the select choice before reading its printed result.", true),
+		ch31Sandbox("c312.playground", "Run again and watch sends keep moving.", "ch31-mailbox-owner", ch31Sandbox312),
 	}},
 	{ID: "c312.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch31Markdown("c312.watch", "- Do not close a member queue outside its owner.\n- Acknowledgement is a sync point; send it after effects finish.")}},
 	{ID: "c312.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -232,6 +329,7 @@ var ch31Lesson313Arabic = []LessonStep{
 			"التقسيم لحقول محتاج خطوة تانية.",
 		}),
 		ch31OnePacket("تابع البايتات وهي بتظهر كنص للحزمة.", false),
+		ch31Sandbox("c313.playground", "استقبل datagram واحدة كل مرة.", "ch31-udp-packets", ch31Sandbox313),
 	}},
 	{ID: "c313.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c313.watch", "- مخزن أكبر ببايت يكشف datagram أطول من الحد.\n- في UDP، short write مش معناه إرسال باقي الحزمة لاحقاً.")}},
 	{ID: "c313.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -255,6 +353,7 @@ var ch31Lesson313English = []LessonStep{
 			"Splitting into fields takes another step.",
 		}),
 		ch31OnePacket("Follow the bytes as they appear in the packet text.", true),
+		ch31Sandbox("c313.playground", "Receive one datagram at a time.", "ch31-udp-packets", ch31Sandbox313),
 	}},
 	{ID: "c313.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch31Markdown("c313.watch", "- A buffer one byte larger detects an oversized datagram.\n- In UDP, a short write does not send a remainder later.")}},
 	{ID: "c313.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -308,6 +407,7 @@ var ch31Lesson314Arabic = []LessonStep{
 			"BigEndian يقرأ الصفر قبل التسعة.",
 		}),
 		ch31Header("اتبع قراءة الحقل، وبعدها طول الجزء المتبقي.", false),
+		ch31Sandbox("c314.playground", "بدّل ترتيب البايتات وشوف قيمة الحقل.", "ch31-byte-order", ch31Sandbox314),
 	}},
 	{ID: "c314.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c314.watch", "- ما تعملش slicing قبل فحص طول الهيدر.\n- فك الطول إلى int قبل جمع حجم الهيدر.")}},
 	{ID: "c314.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -331,6 +431,7 @@ var ch31Lesson314English = []LessonStep{
 			"BigEndian reads the zero before the nine.",
 		}),
 		ch31Header("Follow the field read, then count the remaining bytes.", true),
+		ch31Sandbox("c314.playground", "Swap byte order and watch the field value.", "ch31-byte-order", ch31Sandbox314),
 	}},
 	{ID: "c314.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch31Markdown("c314.watch", "- Never slice before checking header length.\n- Convert the decoded length to int before adding header size.")}},
 	{ID: "c314.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -382,6 +483,7 @@ var ch31Lesson315Arabic = []LessonStep{
 			"بعد النجاح، IsNotFound تفضل true.",
 		}),
 		ch31DNSCause("تابع استخراج النوع، وبعده راية الغياب.", false),
+		ch31Sandbox("c315.playground", "قارن الإجابة الفاضية بخطأ الغياب.", "ch31-dns-outcomes", ch31Sandbox315),
 	}},
 	{ID: "c315.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c315.watch", "- خطأ الغياب في DNS مش زي قائمة عناوين فاضية.\n- رتّب النص canonical، وما تعدلش بيانات resolver.")}},
 	{ID: "c315.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -405,6 +507,7 @@ var ch31Lesson315English = []LessonStep{
 			"After extraction, IsNotFound remains true.",
 		}),
 		ch31DNSCause("Follow the type extraction, then its absence flag.", true),
+		ch31Sandbox("c315.playground", "Compare an empty answer with a missing name.", "ch31-dns-outcomes", ch31Sandbox315),
 	}},
 	{ID: "c315.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch31Markdown("c315.watch", "- A DNS not-found error differs from an empty address list.\n- Sort canonical text, and do not mutate resolver data.")}},
 	{ID: "c315.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -464,6 +567,7 @@ var ch31Lesson316Arabic = []LessonStep{
 			"ده عنوان IPv4 مختلف.",
 		}),
 		ch31JoinHostPort("تابع تركيب عنوان الشبكة قبل طباعته.", false),
+		ch31Sandbox("c316.playground", "أعد التشغيل وقارن الانتهاء بالخانات.", "ch31-result-slots", ch31Sandbox316),
 	}},
 	{ID: "c316.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c316.watch", "- ارفض الخطة كلها قبل العمال أو أي اتصال.\n- استخدم ~IsLoopback~؛ prefix نصي مش تحقق عنوان.")}},
 	{ID: "c316.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -487,6 +591,7 @@ var ch31Lesson316English = []LessonStep{
 			"That is a different IPv4 address.",
 		}),
 		ch31JoinHostPort("Follow address construction before it is printed.", true),
+		ch31Sandbox("c316.playground", "Rerun and compare completion with result slots.", "ch31-result-slots", ch31Sandbox316),
 	}},
 	{ID: "c316.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch31Markdown("c316.watch", "- Reject the whole plan before workers or any connection.\n- Use ~IsLoopback~; a text prefix is not address validation.")}},
 	{ID: "c316.check-step", Title: "Think & check", Blocks: []LessonBlock{

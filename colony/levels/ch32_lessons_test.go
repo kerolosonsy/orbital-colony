@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,6 +16,7 @@ import (
 
 func TestCh32Lessons(t *testing.T) {
 	ids := []string{"32-1-websocket", "32-2-grpc-unary", "32-3-grpc-stream", "32-4-tls", "32-5-http2", "32-6-ssh"}
+	registered := registeredSandboxKinds(t)
 	globalIDs := map[string]string{}
 	for _, level := range All {
 		for _, step := range level.Steps {
@@ -38,6 +40,14 @@ func TestCh32Lessons(t *testing.T) {
 		ch32ValidateCopy(t, id+" Arabic", prefix, level.Steps, level.Hints, arabicTitles)
 		ch32ValidateCopy(t, id+" English", prefix, level.En.Steps, level.En.Hints, englishTitles)
 		ch32CompareCopies(t, id, level.Steps, level.En.Steps)
+		sandbox := level.Steps[2].Blocks[2].Sandbox
+		if sandbox == nil || !strings.HasPrefix(sandbox.Kind, "ch32-") || !registered[sandbox.Kind] {
+			t.Errorf("%s: missing registered chapter 32 sandbox", id)
+		} else if englishSandbox := level.En.Steps[2].Blocks[2].Sandbox; englishSandbox == nil {
+			t.Errorf("%s: missing English sandbox", id)
+		} else {
+			sandboxConfigParity(t, sandbox.Config, englishSandbox.Config)
+		}
 	}
 }
 
@@ -60,6 +70,7 @@ func ch32ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 		t.Fatalf("%s: expected six lesson steps", name)
 	}
 	words := 0
+	sandboxes := 0
 	for i, step := range steps {
 		if step.Title != titles[i] || len(step.Blocks) == 0 {
 			t.Errorf("%s: step %d has wrong title or no blocks", name, i)
@@ -70,6 +81,9 @@ func ch32ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 		words += ch32TextWords(step.Title)
 		for _, block := range step.Blocks {
 			words += ch32TextWords(block.Text)
+			if block.Kind == "sandbox" {
+				sandboxes++
+			}
 			if !strings.HasPrefix(block.ID, prefix+".") || strings.TrimSpace(block.Text) == "" {
 				t.Errorf("%s: %s has wrong prefix or empty text", name, block.ID)
 			}
@@ -107,6 +121,10 @@ func ch32ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 					}
 					words += ch32TextWords(frame.Caption)
 				}
+			case "sandbox":
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch32-") || len(block.Sandbox.Config) == 0 {
+					t.Errorf("%s: %s has invalid sandbox data", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed kind %q", name, block.ID, block.Kind)
 			}
@@ -127,8 +145,11 @@ func ch32ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 			words += ch32TextWords(hint)
 		}
 	}
-	if len(steps[2].Blocks) != 2 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" {
-		t.Errorf("%s: Try it must predict, then reveal", name)
+	if sandboxes != 1 {
+		t.Errorf("%s: expected exactly one sandbox, found %d", name, sandboxes)
+	}
+	if len(steps[2].Blocks) != 3 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" || steps[2].Blocks[2].Kind != "sandbox" {
+		t.Errorf("%s: Try it must predict, reveal, then sandbox", name)
 	} else if strings.TrimSpace(ch32QuestionCode(steps[2].Blocks[0].Text)) != strings.TrimSpace(steps[2].Blocks[1].Code) {
 		t.Errorf("%s: prediction and walkthrough code differ", name)
 	}
@@ -173,6 +194,56 @@ func ch32CompareCopies(t *testing.T, name string, arabic, english []LessonStep) 
 					}
 				}
 			}
+			if block.Sandbox != nil {
+				if other.Sandbox == nil || block.Sandbox.Kind != other.Sandbox.Kind {
+					t.Errorf("%s: sandbox kind differs across languages", block.ID)
+				} else {
+					sandboxConfigParity(t, block.Sandbox.Config, other.Sandbox.Config)
+				}
+			}
+		}
+	}
+}
+
+func TestCh32SandboxFixtures(t *testing.T) {
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch32.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]struct {
+		Kind   string          `json:"kind"`
+		Config json.RawMessage `json:"config"`
+	}
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	ids := []string{"32-1-websocket", "32-2-grpc-unary", "32-3-grpc-stream", "32-4-tls", "32-5-http2", "32-6-ssh"}
+	if len(fixtures) != len(ids) {
+		t.Fatalf("fixture has %d levels; want %d", len(fixtures), len(ids))
+	}
+	for _, id := range ids {
+		fixture, ok := fixtures[id]
+		if !ok {
+			t.Errorf("missing fixture for %s", id)
+			continue
+		}
+		block := Get(id).Steps[2].Blocks[2]
+		if fixture.Kind != block.Sandbox.Kind {
+			t.Errorf("%s: fixture kind %q differs from lesson kind %q", id, fixture.Kind, block.Sandbox.Kind)
+		}
+		actualJSON, err := json.Marshal(block.Sandbox.Config)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var actual, expected any
+		if err := json.Unmarshal(actualJSON, &actual); err != nil {
+			t.Fatal(err)
+		}
+		if err := json.Unmarshal(fixture.Config, &expected); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("%s: JavaScript fixture differs from Go sandbox config", id)
 		}
 	}
 }

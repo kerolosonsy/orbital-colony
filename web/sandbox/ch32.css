@@ -1,1 +1,67 @@
-/* Chapter 32 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch32-sandbox {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 290px;
+  padding: 10px;
+  border: 1px solid var(--line, #cbd5e1);
+  border-radius: 10px;
+  direction: inherit;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.ch32-sandbox .ch32-heading,
+.ch32-sandbox .ch32-label {
+  margin: 0 0 6px;
+  font-weight: 650;
+}
+
+.ch32-sandbox .ch32-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 0;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.ch32-sandbox .ch32-value {
+  min-width: 0;
+  unicode-bidi: isolate;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.ch32-sandbox .ch32-caption {
+  margin: 7px 0;
+  color: var(--muted, #64748b);
+  font-size: .9em;
+}
+
+.ch32-sandbox .ch32-events {
+  margin: 5px 0 8px;
+  padding-inline-start: 22px;
+}
+
+.ch32-sandbox .ch32-event {
+  margin: 3px 0;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.ch32-sandbox .ch32-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ch32-sandbox button {
+  min-height: 34px;
+  max-width: 100%;
+  padding: 5px 9px;
+  white-space: normal;
+}
