@@ -678,11 +678,11 @@ Finish the return and resume path and run the mission; follow each warning.
 2. **Structure:** Work between warnings, return, wait for calm, then resume.
 3. **Specific:** Check `colony.StormWarning()` and `colony.StormClear()` for both signals.
 
-## Later playground ideas
+## Playground implementation notes
 
-- **Scout:** Let learners place a small set of location messages on a channel, then step through receiving, closing, and draining it. Keep the values illustrative and make the sender/receiver roles visible.
-- **Worker pool:** Show a few generic jobs being pulled by multiple workers, with a results counter and a WaitGroup gate that controls when results close. Display one possible assignment at a time and label the worker order as nondeterministic.
-- **Storm:** Provide a warning toggle and a closed/open calm signal; let learners choose between `select` with `default` and a blocking receive, then show whether work continues or pauses.
+- **Scout:** Step through two possible send/receive schedules. Both keep the sender's message order while showing that sends, receives, and close can interleave differently.
+- **Worker pool:** Step through two worker assignments and result arrival orders. The results channel closes only after the simulated WaitGroup finishes.
+- **Storm:** Toggle the warning, calm channel, and blocking/default mode. When both signals are ready, run again to show that either `select` case may win.
 
 ## Example verification
 

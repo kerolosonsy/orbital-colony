@@ -1,5 +1,85 @@
 package levels
 
+func ch11Copy(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch11ChannelEvent(ar, en string, queue []string, received string, closed bool) map[string]any {
+	return map[string]any{"caption": ch11Copy(ar, en), "queue": queue, "received": received, "closed": closed}
+}
+
+var ch11ScoutSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"schedule": ch11Copy("ترتيب ممكن", "One possible schedule"),
+		"queue":    ch11Copy("الرسائل", "Queued messages"), "sender": ch11Copy("المرسل", "Sender"),
+		"receiver": ch11Copy("آخر استقبال", "Last receive"), "empty": ch11Copy("فاضية", "Empty"),
+		"none": ch11Copy("لسه", "None yet"), "open": ch11Copy("مفتوحة", "Open"),
+		"closed": ch11Copy("مقفولة", "Closed"), "next": ch11Copy("الخطوة الجاية", "Next event"),
+		"again": ch11Copy("غيّر الجدولة", "Run another schedule"),
+	},
+	"schedules": []any{
+		map[string]any{"name": ch11Copy("الإرسال ثم الاستقبال", "Send, then receive"), "events": []any{
+			ch11ChannelEvent("القناة بدأت فاضية", "Channel starts empty", []string{}, "", false),
+			ch11ChannelEvent("المرسل بعث 3", "Sender sends 3", []string{"3"}, "", false),
+			ch11ChannelEvent("المرسل بعث 8", "Sender sends 8", []string{"3", "8"}, "", false),
+			ch11ChannelEvent("المرسل قفل القناة", "Sender closes channel", []string{"3", "8"}, "", true),
+			ch11ChannelEvent("المستقبل أخذ 3", "Receiver gets 3", []string{"8"}, "3", true),
+			ch11ChannelEvent("المستقبل أخذ 8", "Receiver gets 8", []string{}, "8", true),
+		}},
+		map[string]any{"name": ch11Copy("استقبال بين الرسائل", "Receive between sends"), "events": []any{
+			ch11ChannelEvent("القناة بدأت فاضية", "Channel starts empty", []string{}, "", false),
+			ch11ChannelEvent("المرسل بعث 3", "Sender sends 3", []string{"3"}, "", false),
+			ch11ChannelEvent("المستقبل أخذ 3", "Receiver gets 3", []string{}, "3", false),
+			ch11ChannelEvent("المرسل بعث 8", "Sender sends 8", []string{"8"}, "3", false),
+			ch11ChannelEvent("المرسل قفل القناة", "Sender closes channel", []string{"8"}, "3", true),
+			ch11ChannelEvent("المستقبل أخذ 8", "Receiver gets 8", []string{}, "8", true),
+		}},
+	},
+}
+
+var ch11PoolSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"schedule": ch11Copy("الجدولة", "Schedule"), "jobs": ch11Copy("طابور المهام", "Jobs"),
+		"results": ch11Copy("النتائج", "Results"), "resultsChannel": ch11Copy("قناة النتائج", "Results channel"),
+		"waitGroup": ch11Copy("WaitGroup", "WaitGroup"), "empty": ch11Copy("فاضي", "Empty"),
+		"waiting": ch11Copy("لسه فيه عمال", "Workers still running"), "done": ch11Copy("العمال خلصوا", "Workers finished"),
+		"open": ch11Copy("مفتوحة", "Open"), "closed": ch11Copy("مقفولة", "Closed"),
+		"next": ch11Copy("الخطوة الجاية", "Next event"), "again": ch11Copy("جدولة تانية", "Run again"),
+	},
+	"schedules": []any{
+		map[string]any{"name": ch11Copy("ترتيب ممكن: A ثم B", "One possible order: A then B"), "events": []any{
+			map[string]any{"caption": ch11Copy("طابور فيه 3 مهام", "Queue has three jobs"), "jobs": []string{"A", "B", "C"}, "results": []string{}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("العامل A سحب A", "Worker A takes A"), "jobs": []string{"B", "C"}, "results": []string{}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("العامل B سحب B", "Worker B takes B"), "jobs": []string{"C"}, "results": []string{"A", "B"}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("العامل A سحب C", "Worker A takes C"), "jobs": []string{}, "results": []string{"A", "B", "C"}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("WaitGroup خلص؛ اقفل results", "WaitGroup done; close results"), "jobs": []string{}, "results": []string{"A", "B", "C"}, "done": true, "closed": true},
+		}},
+		map[string]any{"name": ch11Copy("ترتيب ممكن: B ثم A", "One possible order: B then A"), "events": []any{
+			map[string]any{"caption": ch11Copy("طابور فيه 3 مهام", "Queue has three jobs"), "jobs": []string{"A", "B", "C"}, "results": []string{}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("العامل B سحب A", "Worker B takes A"), "jobs": []string{"B", "C"}, "results": []string{}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("العامل A سحب B", "Worker A takes B"), "jobs": []string{"C"}, "results": []string{"B"}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("العامل B سحب C", "Worker B takes C"), "jobs": []string{}, "results": []string{"B", "A", "C"}, "done": false, "closed": false},
+			map[string]any{"caption": ch11Copy("WaitGroup خلص؛ اقفل results", "WaitGroup done; close results"), "jobs": []string{}, "results": []string{"B", "A", "C"}, "done": true, "closed": true},
+		}},
+	},
+}
+
+var ch11StormSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"warning": ch11Copy("تحذير", "Warning"), "warningEmpty": ch11Copy("مفيش", "Empty"),
+		"warningReady": ch11Copy("جاهز", "Ready"), "calm": ch11Copy("إشارة الهدوء", "Calm signal"),
+		"calmOpen": ch11Copy("مفتوحة", "Open"), "calmClosed": ch11Copy("مقفولة", "Closed"),
+		"mode": ch11Copy("طريقة الانتظار", "Wait mode"), "defaultMode": ch11Copy("select مع default", "select with default"),
+		"blockingMode": ch11Copy("استقبال مستني", "Blocking receive"), "outcome": ch11Copy("النتيجة", "Outcome"),
+		"idle": ch11Copy("اضغط افحص select", "Check select"), "work": ch11Copy("الشغل يكمل", "Work continues"),
+		"wait": ch11Copy("مستني إشارة", "Waiting for a signal"), "return": ch11Copy("ارجع للقاعدة", "Return to base"),
+		"resume":        ch11Copy("العاصفة هديت؛ كمّل", "Storm cleared; resume"),
+		"bothReady":     ch11Copy("الإشارتين جاهزين؛ الاختيار ممكن يختلف", "Both signals ready; choice may vary"),
+		"warningButton": ch11Copy("بدّل التحذير", "Toggle warning"), "calmButton": ch11Copy("بدّل قناة الهدوء", "Toggle calm channel"),
+		"modeButton": ch11Copy("بدّل طريقة select", "Toggle select mode"), "run": ch11Copy("افحص select تاني", "Run select again"),
+	},
+}
+
 const ch11ScoutChannelExample = `found := make(chan int, 2)
 found <- 3
 found <- 8
@@ -119,6 +199,7 @@ var ch11ScoutLessonArabic = []LessonStep{
 					{Line: 6, Caption: "اتطبع 7.", Output: "4\n7"},
 				}},
 			},
+			{ID: "c111.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch11-scout-channel", Config: ch11ScoutSandboxConfig}},
 		},
 	},
 	{
@@ -201,6 +282,7 @@ var ch11ScoutLessonEnglish = []LessonStep{
 					{Line: 6, Caption: "7 prints.", Output: "4\n7"},
 				}},
 			},
+			{ID: "c111.sandbox", Kind: "sandbox", Text: "Try.", Sandbox: &LessonSandbox{Kind: "ch11-scout-channel", Config: ch11ScoutSandboxConfig}},
 		},
 	},
 	{
@@ -278,6 +360,7 @@ var ch11PoolLessonArabic = []LessonStep{
 					"استقبلت a قيمة 2.", "استقبلت b قيمة 3.", "الإجمالي اتطبع.",
 				}),
 			},
+			{ID: "c112.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch11-worker-pool", Config: ch11PoolSandboxConfig}},
 		},
 	},
 	{
@@ -355,6 +438,7 @@ var ch11PoolLessonEnglish = []LessonStep{
 					"a receives 2.", "b receives 3.", "Sum prints.",
 				}),
 			},
+			{ID: "c112.sandbox", Kind: "sandbox", Text: "Try.", Sandbox: &LessonSandbox{Kind: "ch11-worker-pool", Config: ch11PoolSandboxConfig}},
 		},
 	},
 	{
@@ -436,6 +520,7 @@ var ch11StormLessonArabic = []LessonStep{
 					{Line: 5, Caption: "اتطبع safe.", Output: "safe"},
 				}},
 			},
+			{ID: "c113.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch11-storm-select", Config: ch11StormSandboxConfig}},
 		},
 	},
 	{
@@ -517,6 +602,7 @@ var ch11StormLessonEnglish = []LessonStep{
 					{Line: 5, Caption: "safe prints.", Output: "safe"},
 				}},
 			},
+			{ID: "c113.sandbox", Kind: "sandbox", Text: "Try.", Sandbox: &LessonSandbox{Kind: "ch11-storm-select", Config: ch11StormSandboxConfig}},
 		},
 	},
 	{

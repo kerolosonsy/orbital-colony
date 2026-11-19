@@ -1,5 +1,138 @@
 package levels
 
+func ch12Copy(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch12CounterFrame(ar, en, total string, done bool) map[string]any {
+	return map[string]any{"caption": ch12Copy(ar, en), "total": total, "done": done}
+}
+
+func ch12DeadlockFrame(ar, en, drill, cart, status string) map[string]any {
+	return map[string]any{"caption": ch12Copy(ar, en), "drill": drill, "cart": cart, "status": status}
+}
+
+var ch12CounterSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"scenario": ch12Copy("ترتيب ممكن", "One possible schedule"), "total": ch12Copy("الإجمالي", "Shared total"),
+		"mutex": ch12Copy("القفل المشترك", "Shared mutex"), "on": ch12Copy("شغّال", "On"), "off": ch12Copy("مقفول", "Off"),
+		"waitGroup": ch12Copy("WaitGroup", "WaitGroup"), "waiting": ch12Copy("العمال لسه شغالين", "Workers still running"),
+		"done": ch12Copy("الكل خلص", "All workers finished"), "next": ch12Copy("الخطوة الجاية", "Next step"),
+		"again": ch12Copy("ترتيب تاني", "Run again"),
+	},
+	"runs": []any{
+		map[string]any{
+			"name": ch12Copy("قراءتان متداخلتان", "Overlapping reads"),
+			"unlocked": []any{
+				ch12CounterFrame("الإجمالي يبدأ صفر", "Total starts at zero", "0", false),
+				ch12CounterFrame("العامل A قرأ صفر", "Worker A reads zero", "0", false),
+				ch12CounterFrame("العامل B قرأ صفر", "Worker B reads zero", "0", false),
+				ch12CounterFrame("العامل A كتب واحد", "Worker A writes one", "1", false),
+				ch12CounterFrame("العامل B كتب واحد", "Worker B writes one", "1", true),
+			},
+			"locked": []any{
+				ch12CounterFrame("الإجمالي يبدأ صفر", "Total starts at zero", "0", false),
+				ch12CounterFrame("A مسك القفل وقرأ صفر", "A locks and reads zero", "0", false),
+				ch12CounterFrame("A كتب واحد وفتح القفل", "A writes one and unlocks", "1", false),
+				ch12CounterFrame("B قرأ واحد تحت القفل", "B reads one under lock", "1", false),
+				ch12CounterFrame("B كتب اتنين وفتح القفل", "B writes two and unlocks", "2", true),
+			},
+		},
+		map[string]any{
+			"name": ch12Copy("عامل يخلص الأول", "One worker finishes first"),
+			"unlocked": []any{
+				ch12CounterFrame("الإجمالي يبدأ صفر", "Total starts at zero", "0", false),
+				ch12CounterFrame("العامل B قرأ صفر", "Worker B reads zero", "0", false),
+				ch12CounterFrame("العامل B كتب واحد", "Worker B writes one", "1", false),
+				ch12CounterFrame("العامل A قرأ واحد", "Worker A reads one", "1", false),
+				ch12CounterFrame("العامل A كتب اتنين", "Worker A writes two", "2", true),
+			},
+			"locked": []any{
+				ch12CounterFrame("الإجمالي يبدأ صفر", "Total starts at zero", "0", false),
+				ch12CounterFrame("B مسك القفل وقرأ صفر", "B locks and reads zero", "0", false),
+				ch12CounterFrame("B كتب واحد وفتح القفل", "B writes one and unlocks", "1", false),
+				ch12CounterFrame("A قرأ واحد تحت القفل", "A reads one under lock", "1", false),
+				ch12CounterFrame("A كتب اتنين وفتح القفل", "A writes two and unlocks", "2", true),
+			},
+		},
+	},
+}
+
+var ch12RegistrySandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"scenario": ch12Copy("ترتيب كتابة ممكن", "One possible write order"), "sharedLock": ch12Copy("القفل نفسه لكل الكتّاب", "One mutex for every writer"),
+		"shared": ch12Copy("قفل واحد", "One shared lock"),
+		"map":    ch12Copy("السجل", "Map"), "log": ch12Copy("ترتيب التسجيل", "Write log"),
+		"waitGroup": ch12Copy("WaitGroup", "WaitGroup"), "waiting": ch12Copy("لسه فيه كتّاب", "Writers still running"),
+		"done":  ch12Copy("الكتّاب خلصوا؛ القراءة آمنة", "Writers finished; read is safe"),
+		"empty": ch12Copy("فاضي", "Empty"), "start": ch12Copy("السجل بدأ فاضي", "Map starts empty"),
+		"next": ch12Copy("سجّل التالي", "Record next"), "again": ch12Copy("جدولة تانية", "Run again"),
+		"completion": ch12Copy("كل الكتّاب خلصوا بعد Wait", "All writers finish after Wait"),
+	},
+	"writers": []any{
+		map[string]any{"worker": ch12Copy("العامل A", "Worker A"), "key": "amber", "value": "4", "caption": ch12Copy("العامل A سجل amber", "Worker A records amber")},
+		map[string]any{"worker": ch12Copy("العامل B", "Worker B"), "key": "violet", "value": "7", "caption": ch12Copy("العامل B سجل violet", "Worker B records violet")},
+		map[string]any{"worker": ch12Copy("العامل C", "Worker C"), "key": "moss", "value": "2", "caption": ch12Copy("العامل C سجل moss", "Worker C records moss")},
+	},
+	"orders": []any{
+		map[string]any{"name": ch12Copy("A ثم B ثم C", "A, then B, then C"), "sequence": []int{0, 1, 2}},
+		map[string]any{"name": ch12Copy("C ثم A ثم B", "C, then A, then B"), "sequence": []int{2, 0, 1}},
+	},
+}
+
+var ch12DeadlockSandboxConfig = map[string]any{
+	"labels": map[string]any{
+		"schedule": ch12Copy("ترتيب ممكن", "One possible schedule"), "drill": ch12Copy("المثقاب", "Drill lock"),
+		"cart": ch12Copy("العربية", "Cart lock"), "free": ch12Copy("فاضي", "Free"),
+		"workerA": ch12Copy("العامل A", "Worker A"), "workerB": ch12Copy("العامل B", "Worker B"),
+		"status": ch12Copy("الحالة", "State"), "running": ch12Copy("الشغل مكمل", "Work continues"),
+		"cycle": ch12Copy("دورة انتظار", "Wait cycle"), "done": ch12Copy("العاملين خلصوا", "Both workers finished"),
+		"lockOrder": ch12Copy("ترتيب الأقفال", "Lock order"), "mixed": ch12Copy("مختلف", "Different"),
+		"fixed": ch12Copy("موحّد", "Fixed"), "orderButton": ch12Copy("بدّل ترتيب الأقفال", "Toggle lock order"),
+		"next": ch12Copy("الخطوة الجاية", "Next step"), "again": ch12Copy("جدولة تانية", "Run again"),
+	},
+	"mixed": []any{
+		map[string]any{"name": ch12Copy("A أخد القفلين الأول", "A gets both locks first"), "events": []any{
+			ch12DeadlockFrame("مفيش عامل ماسك قفل", "No worker holds a lock", "free", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد المثقاب", "Worker A takes Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد العربية", "Worker A takes Cart", "a", "a", "running"),
+			ch12DeadlockFrame("العامل A فتح القفلين", "Worker A releases both", "free", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد العربية", "Worker B takes Cart", "free", "b", "running"),
+			ch12DeadlockFrame("العامل B أخد المثقاب", "Worker B takes Drill", "b", "b", "running"),
+			ch12DeadlockFrame("العاملين خلصوا", "Both workers finish", "free", "free", "done"),
+		}},
+		map[string]any{"name": ch12Copy("كل واحد ماسك قفل", "Each worker holds one lock"), "events": []any{
+			ch12DeadlockFrame("مفيش عامل ماسك قفل", "No worker holds a lock", "free", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد المثقاب", "Worker A takes Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد العربية", "Worker B takes Cart", "a", "b", "running"),
+			ch12DeadlockFrame("A مستني العربية عند B", "A waits for Cart held by B", "a", "b", "running"),
+			ch12DeadlockFrame("B مستني المثقاب عند A", "B waits for Drill held by A", "a", "b", "cycle"),
+		}},
+	},
+	"fixed": []any{
+		map[string]any{"name": ch12Copy("A يدخل الأول", "A enters first"), "events": []any{
+			ch12DeadlockFrame("مفيش عامل ماسك قفل", "No worker holds a lock", "free", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد المثقاب", "Worker A takes Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل B مستني المثقاب", "Worker B waits for Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد العربية", "Worker A takes Cart", "a", "a", "running"),
+			ch12DeadlockFrame("العامل A فتح القفلين", "Worker A releases both", "free", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد المثقاب", "Worker B takes Drill", "b", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد العربية", "Worker B takes Cart", "b", "b", "running"),
+			ch12DeadlockFrame("العاملين خلصوا", "Both workers finish", "free", "free", "done"),
+		}},
+		map[string]any{"name": ch12Copy("B يدخل الأول", "B enters first"), "events": []any{
+			ch12DeadlockFrame("مفيش عامل ماسك قفل", "No worker holds a lock", "free", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد المثقاب", "Worker B takes Drill", "b", "free", "running"),
+			ch12DeadlockFrame("العامل A مستني المثقاب", "Worker A waits for Drill", "b", "free", "running"),
+			ch12DeadlockFrame("العامل B أخد العربية", "Worker B takes Cart", "b", "b", "running"),
+			ch12DeadlockFrame("العامل B فتح القفلين", "Worker B releases both", "free", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد المثقاب", "Worker A takes Drill", "a", "free", "running"),
+			ch12DeadlockFrame("العامل A أخد العربية", "Worker A takes Cart", "a", "a", "running"),
+			ch12DeadlockFrame("العاملين خلصوا", "Both workers finish", "free", "free", "done"),
+		}},
+	},
+}
+
 const ch12CounterExample = "var mu sync.Mutex\n" +
 	"total := 0\n" +
 	"var wg sync.WaitGroup\n" +
@@ -125,6 +258,7 @@ var ch12Lesson121Arabic = []LessonStep{
 					"قبل التشغيل.", "الإجمالي يبدأ صفر.", "ترتيب ممكن: n=2 يمسك القفل.", "defer هيفتحه عند الخروج.", "الإجمالي صار 2.", "الرجوع يفتح القفل.", "بعده n=3 يدخل.", "الإجمالي صار 5.", "العمال خلصوا.", "يطبع 5.",
 				}),
 			},
+			{ID: "c121.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch12-shared-counter", Config: ch12CounterSandboxConfig}},
 		},
 	},
 	{
@@ -200,6 +334,7 @@ var ch12Lesson121English = []LessonStep{
 					"Before execution.", "Total starts at zero.", "One order: n=2 gets the lock.", "defer unlocks on return.", "Total becomes 2.", "Return releases the lock.", "Then n=3 enters.", "Total becomes 5.", "Workers have finished.", "Prints 5.",
 				}),
 			},
+			{ID: "c121.sandbox", Kind: "sandbox", Text: "Try.", Sandbox: &LessonSandbox{Kind: "ch12-shared-counter", Config: ch12CounterSandboxConfig}},
 		},
 	},
 	{
@@ -272,6 +407,7 @@ var ch12Lesson122Arabic = []LessonStep{
 					"قبل التشغيل.", "السجل فاضي.", "عامل amber مسك القفل.", "اتسجلت قيمته.", "violet مسك القفل بعده.", "بعده اتسجل violet.", "كل الكتّاب خلصوا.", "يطبع 2 7.",
 				}),
 			},
+			{ID: "c122.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch12-registry-lock", Config: ch12RegistrySandboxConfig}},
 		},
 	},
 	{
@@ -344,6 +480,7 @@ var ch12Lesson122English = []LessonStep{
 					"Before execution.", "The log is empty.", "Amber's worker gets the lock.", "Its value is recorded.", "Violet gets the lock next.", "Violet is recorded next.", "All writers finish.", "Prints 2 7.",
 				}),
 			},
+			{ID: "c122.sandbox", Kind: "sandbox", Text: "Try.", Sandbox: &LessonSandbox{Kind: "ch12-registry-lock", Config: ch12RegistrySandboxConfig}},
 		},
 	},
 	{
@@ -416,6 +553,7 @@ var ch12Lesson123Arabic = []LessonStep{
 					"قبل التشغيل.", "العداد يبدأ صفر.", "ترتيب ممكن: الأول يأخذ القفل.", "بعده يأخذ القفل التاني.", "العداد صار 1.", "يفتح القفل التاني.", "العامل التاني يدخل بعده.", "العداد صار 2.", "يطبع 2.",
 				}),
 			},
+			{ID: "c123.sandbox", Kind: "sandbox", Text: "جرّب.", Sandbox: &LessonSandbox{Kind: "ch12-deadlock-order", Config: ch12DeadlockSandboxConfig}},
 		},
 	},
 	{
@@ -488,6 +626,7 @@ var ch12Lesson123English = []LessonStep{
 					"Before execution.", "Counter starts at zero.", "One order: worker one locks.", "Then it gets the second lock.", "Counter becomes 1.", "It releases the second lock.", "Worker two enters next.", "Counter becomes 2.", "Prints 2.",
 				}),
 			},
+			{ID: "c123.sandbox", Kind: "sandbox", Text: "Try.", Sandbox: &LessonSandbox{Kind: "ch12-deadlock-order", Config: ch12DeadlockSandboxConfig}},
 		},
 	},
 	{

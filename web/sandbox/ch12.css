@@ -1,1 +1,41 @@
-/* Chapter 12 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch12-shared-counter,
+.lesson-sandbox.ch12-registry-lock,
+.lesson-sandbox.ch12-deadlock-order {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  padding: 9px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  background: var(--ink);
+  text-align: start;
+}
+
+.ch12-sandbox-caption {
+  margin: 5px 0 8px;
+  color: var(--paper);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  text-align: start;
+  unicode-bidi: plaintext;
+}
+
+.ch12-sandbox-boxes { min-inline-size: 0; }
+
+.ch12-sandbox-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block-start: 8px;
+}
+
+.ch12-sandbox-controls .tool {
+  flex: 1 1 100px;
+  min-inline-size: 0;
+  min-block-size: 38px;
+  height: auto;
+  padding: 5px 8px;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

@@ -2,10 +2,12 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -17,6 +19,7 @@ var ch12StdoutPattern = regexp.MustCompile("(?m)^Real stdout: ([^\\r\\n]+)$")
 var ch12InlineCodePattern = regexp.MustCompile("~[^~]*~")
 
 func TestCh12Lessons(t *testing.T) {
+	fixtures := ch12SandboxFixtures(t)
 	cases := []struct {
 		id       string
 		prefix   string
@@ -59,8 +62,8 @@ func TestCh12Lessons(t *testing.T) {
 			if len(level.Steps) != 6 || len(level.En.Steps) != 6 {
 				t.Fatal("level does not expose six structured steps")
 			}
-			validateLessonSteps(t, item.arabic)
-			validateLessonSteps(t, item.english)
+			validateLessonSteps(t, ch12StepsWithoutSandbox(item.arabic))
+			validateLessonSteps(t, ch12StepsWithoutSandbox(item.english))
 			for _, hints := range [][]string{item.arHints, item.enHints} {
 				for _, hint := range hints {
 					if !ch12OneSentence(hint) {
@@ -108,15 +111,24 @@ func TestCh12Lessons(t *testing.T) {
 				}
 			}
 			for _, steps := range [][]LessonStep{item.arabic, item.english} {
-				if len(steps[2].Blocks) != 2 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" {
-					t.Fatal("Try it must predict first, then reveal with a walkthrough")
+				try := steps[2].Blocks
+				if len(try) != 3 || try[0].Kind != "question" || try[1].Kind != "walkthrough" || try[2].Kind != "sandbox" || try[2].Sandbox == nil {
+					t.Fatal("Try it must keep its question and walkthrough before one sandbox")
 				}
+				sandboxCount := 0
 				for _, step := range steps {
 					for _, block := range step.Blocks {
 						if block.Kind == "sandbox" {
-							t.Fatal("chapter 12 lesson must not add a sandbox kind")
+							sandboxCount++
 						}
 					}
+				}
+				if sandboxCount != 1 || !strings.HasPrefix(try[2].Sandbox.Kind, "ch12-") {
+					t.Fatalf("%s must have exactly one ch12 sandbox", item.id)
+				}
+				fixture, ok := fixtures[try[2].Sandbox.Kind]
+				if !ok || !reflect.DeepEqual(ch12JSONValue(t, try[2].Sandbox.Config), fixture) {
+					t.Fatalf("%s sandbox config differs from its JS fixture", try[2].Sandbox.Kind)
 				}
 			}
 			for lang, content := range map[string]struct {
@@ -131,6 +143,45 @@ func TestCh12Lessons(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ch12StepsWithoutSandbox(steps []LessonStep) []LessonStep {
+	filtered := make([]LessonStep, len(steps))
+	for i, step := range steps {
+		filtered[i].ID, filtered[i].Title = step.ID, step.Title
+		for _, block := range step.Blocks {
+			if block.Kind != "sandbox" {
+				filtered[i].Blocks = append(filtered[i].Blocks, block)
+			}
+		}
+	}
+	return filtered
+}
+
+func ch12SandboxFixtures(t *testing.T) map[string]any {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch12.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fixtures := map[string]any{}
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	return fixtures
+}
+
+func ch12JSONValue(t *testing.T, value any) any {
+	t.Helper()
+	body, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var normalized any
+	if err := json.Unmarshal(body, &normalized); err != nil {
+		t.Fatal(err)
+	}
+	return normalized
 }
 
 func ch12OneSentence(sentence string) bool {
