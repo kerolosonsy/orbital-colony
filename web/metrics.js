@@ -180,7 +180,11 @@
       const row = document.createElement("li");
       const level = byID.get(id);
       const title = document.createElement("strong");
-      title.textContent = `${id} · ${level?.title || id}`;
+      const code = document.createElement("bdi");
+      code.textContent = id;
+      const name = document.createElement("span");
+      name.textContent = ` · ${level?.title || id}`;
+      title.append(code, name);
       const detail = document.createElement("span");
       const failures = failureKinds.reduce((total, kind) => total + entry.failedRuns[kind], 0);
       detail.textContent = T(`درجة ${score} · ${failures} فشل · ${entry.hintCount} تلميح · ${formatActive(entry.activeTimeMs)}`,
