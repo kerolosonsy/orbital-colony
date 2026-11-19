@@ -1420,7 +1420,11 @@ $("#btn-reset").onclick = () => {
   if (!confirm(T("ترجع لكود البداية؟ الكود الحالي هيتمسح.", "Go back to the starter code? Your current code will be erased."))) return;
   const f = levelFiles(S.cur).find((x) => x.name === S.file);
   if (!f || f.readOnly) return;
-  ed.value = f.starter; onEdit();
+  // replace through the edit history so Ctrl/⌘+Z brings the old code back
+  ed.focus();
+  applyEdit({ from: 0, to: ed.value.length, text: f.starter, selStart: 0, selEnd: 0 });
+  if (ed.value !== f.starter) { ed.value = f.starter; onEdit(); }
+  log(T("رجعت لكود البداية. Ctrl/⌘+Z يرجّع كودك.", "Back to the starter code. Ctrl/⌘+Z brings your code back."), "c-info");
 };
 
 let quizAttempt = null;

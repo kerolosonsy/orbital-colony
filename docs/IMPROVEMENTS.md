@@ -24,3 +24,7 @@ Each entry: what changed and why. Numbered in the order they landed.
 20. **Colony tab title fixes** — the mission title is re-captured on every colony entry (it used to restore the title from the very first entry), and the open colony shows `Colony — Orbital Colony`.
 21. **Copy console button** — one click copies the whole console (errors, output) as plain text, with a short "Copied ✓" confirmation.
 22. **Current-line highlight** — a faint band marks the caret's line while editing (hidden while selecting or when the editor is read-only during debugging).
+23. **"Back to starter" is undoable** — the reset goes through the edit history (Ctrl/⌘+Z restores your code) and the console says so; before, it overwrote the textarea and the code was gone.
+24. **Arrow keys step through the lesson** — ← / → move to the previous/next lesson step (mirrored for Arabic RTL) when focus is in the lesson and not on a control, sandbox or walkthrough.
+25. **README covers the new features** — debugger, error explanations, playgrounds/stats, editor helpers, a shortcuts table and mission links.
+26. **`make test` duration is honest** — help text said ~4 minutes; the full suite takes ~15–20.
