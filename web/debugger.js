@@ -466,6 +466,10 @@ const InlineDebugger = (() => {
     else if (event.key === "F10") command = "over";
     else if (event.key === "F11" && event.shiftKey) command = "out";
     else if (event.key === "F11") command = "into";
+    // keys that work without Fn on laptops: Alt+← step back, Alt+→ step, Alt+Space play/pause
+    else if (event.altKey && !event.metaKey && !event.ctrlKey && event.key === "ArrowLeft") command = "back";
+    else if (event.altKey && !event.metaKey && !event.ctrlKey && event.key === "ArrowRight") command = "into";
+    else if (event.altKey && !event.metaKey && !event.ctrlKey && event.code === "Space") command = "play";
     if (command) {
       event.preventDefault();
       commandStep(command);

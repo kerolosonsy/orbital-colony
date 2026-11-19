@@ -50,3 +50,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 46. **Search in the mission index** — a search box (focused when the index opens) filters the 181 missions by sheet code, id, title or chapter name. Numbers are exact: `3-1` shows only sheet 3-1 (not 13-1/23-1) and `3` shows chapter 3; empty results say so. Verified in the browser.
 47. **Enter in the index search opens the mission** — type `2-3` + Enter to jump straight to it (first unlocked match).
 48. **Ctrl/⌘+] and Ctrl/⌘+[** indent / outdent the current line or selection without losing the caret (the VS Code keys; Tab/Shift+Tab still work). Tested; listed in the shortcuts sheet.
+49. **Debugger keys that work on laptops** — F10/F11 need Fn on most Mac keyboards, so while debugging Alt+← steps back, Alt+→ steps forward and Alt+Space plays/pauses. The Step back button finally has a shortcut too. Verified live (1/12 → 3/12 → 2/12).
