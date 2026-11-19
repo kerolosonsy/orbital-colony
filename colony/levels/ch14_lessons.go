@@ -58,6 +58,98 @@ func ch14Walkthrough(id, text string, example ch14LessonExample, arabic bool) Le
 	return LessonBlock{ID: id, Kind: "walkthrough", Text: text, Code: example.Code, Imports: example.Imports, ExampleID: example.ID, Walkthrough: &LessonWalkthrough{Frames: frames}}
 }
 
+func ch14Locale(arabic, english string) map[string]any {
+	return map[string]any{"ar": arabic, "en": english}
+}
+
+func ch14Sandbox(prefix string, arabic bool) LessonBlock {
+	var kind, arabicText, englishText string
+	var config map[string]any
+	switch prefix {
+	case "c141":
+		kind = "ch14-generic-max"
+		arabicText, englishText = "قدّم المقارنة خطوة خطوة مع نوعين من الأرقام.", "Step through comparisons with two number types."
+		config = map[string]any{
+			"frames": []any{
+				map[string]any{"type": ch14Locale("int", "int"), "values": []any{4, 9, 2}, "current": -1, "best": -1, "caption": ch14Locale("ابدأ بأرقام صحيحة.", "Start with integers.")},
+				map[string]any{"type": ch14Locale("int", "int"), "values": []any{4, 9, 2}, "current": 0, "best": 0, "caption": ch14Locale("أول قيمة تبدأ best.", "The first value starts best.")},
+				map[string]any{"type": ch14Locale("int", "int"), "values": []any{4, 9, 2}, "current": 1, "best": 1, "caption": ch14Locale("9 أكبر؛ best اتغيّرت.", "9 is larger; best changes.")},
+				map[string]any{"type": ch14Locale("int", "int"), "values": []any{4, 9, 2}, "current": 2, "best": 1, "caption": ch14Locale("2 أصغر؛ best ثابتة.", "2 is smaller; best stays.")},
+				map[string]any{"type": ch14Locale("float64", "float64"), "values": []any{1.5, 3.25}, "current": 0, "best": 0, "caption": ch14Locale("نداء تاني يستنتج float64.", "Another call infers float64.")},
+				map[string]any{"type": ch14Locale("float64", "float64"), "values": []any{1.5, 3.25}, "current": 1, "best": 1, "caption": ch14Locale("جسم واحد يقارن النوعين.", "One body compares both types.")},
+			},
+			"labels": map[string]any{
+				"previous": ch14Locale("اللي فات", "Previous"), "next": ch14Locale("اللي بعده", "Next"), "reset": ch14Locale("من الأول", "Reset"),
+				"type": ch14Locale("T المستنتج", "Inferred T"), "values": ch14Locale("القيم", "Values"), "current": ch14Locale("الحالية", "Current"), "best": ch14Locale("best", "best"), "none": ch14Locale("—", "—"),
+			},
+		}
+	case "c142":
+		kind = "ch14-stack"
+		arabicText, englishText = "جرّب الإضافة والقراءة والإزالة من آخر الطريق.", "Push, read, and remove the newest route turn."
+		config = map[string]any{
+			"generic":  ch14Locale("Stack[Direction]", "Stack[Direction]"),
+			"examples": []any{map[string]any{"type": ch14Locale("Cell[int]", "Cell[int]"), "value": ch14Locale("12", "12")}, map[string]any{"type": ch14Locale("Cell[string]", "Cell[string]"), "value": ch14Locale("north", "north")}},
+			"initial":  []any{ch14Locale("شمال", "North")},
+			"arrivals": []any{ch14Locale("شرق", "East"), ch14Locale("جنوب", "South")},
+			"labels": map[string]any{
+				"generic": ch14Locale("نوع التخزين", "Generic type"), "cells": ch14Locale("قيم توضيحية", "Illustrative values"), "route": ch14Locale("سجل الطريق", "Route history"), "top": ch14Locale("آخر اتجاه", "Newest turn"), "empty": ch14Locale("مفيش اتجاهات", "No turns"),
+				"push": ch14Locale("أضف اتجاه", "Push turn"), "peek": ch14Locale("اقرأ الآخر", "Read top"), "pop": ch14Locale("شيل الآخر", "Pop top"), "reset": ch14Locale("من الأول", "Reset"),
+				"pushed": ch14Locale("اتضاف اتجاه", "Turn pushed"), "removed": ch14Locale("اتشال اتجاه", "Turn popped"), "resetDone": ch14Locale("رجعنا للبداية", "Back at start"),
+			},
+		}
+	case "c143":
+		kind = "ch14-type-constraints"
+		arabicText, englishText = "بدّل النوع وشوف الـunderlying type يدخل المجموعة.", "Change types and see which underlying types fit."
+		config = map[string]any{
+			"constraint": "~int | ~float64",
+			"types": []any{
+				map[string]any{"name": "Meter", "underlying": "float64", "accepted": true},
+				map[string]any{"name": "Count", "underlying": "int", "accepted": true},
+				map[string]any{"name": "Route", "underlying": "string", "accepted": false},
+			},
+			"labels": map[string]any{
+				"constraint": ch14Locale("Type set", "Type set"), "type": ch14Locale("النوع", "Type"), "underlying": ch14Locale("النوع الأساسي", "Underlying type"),
+				"accepted": ch14Locale("مقبول", "Accepted"), "rejected": ch14Locale("خارج المجموعة", "Outside the set"), "next": ch14Locale("نوع تاني", "Next type"), "reset": ch14Locale("من الأول", "Reset"),
+			},
+		}
+	case "c144":
+		kind = "ch14-queue"
+		arabicText, englishText = "أضف طردًا، اقرأ الأمام، ثم شيله وشوف الترتيب.", "Add a parcel, read the front, then remove it."
+		config = map[string]any{
+			"elementType": ch14Locale("Queue[string]", "Queue[string]"),
+			"initial":     []any{ch14Locale("دواء", "medic"), ch14Locale("أدوات", "tools")},
+			"arrivals":    []any{ch14Locale("وقود", "fuel"), ch14Locale("خريطة", "map")},
+			"labels": map[string]any{
+				"queue": ch14Locale("الطابور", "Queue"), "length": ch14Locale("العدد", "Length"), "front": ch14Locale("الأمام", "Front"), "empty": ch14Locale("فاضي", "empty"), "noRead": ch14Locale("مفيش قيمة للقراءة", "Nothing to read"),
+				"add": ch14Locale("وصل طرد", "Arrive"), "read": ch14Locale("اقرأ الأمام", "Read front"), "depart": ch14Locale("شيل الأمام", "Depart"), "reset": ch14Locale("من الأول", "Reset"),
+				"added": ch14Locale("اتضاف طرد", "Parcel added"), "departed": ch14Locale("خرج أول طرد", "Front departed"), "resetDone": ch14Locale("الطابور رجع", "Queue restored"),
+			},
+		}
+	case "c145":
+		kind = "ch14-recursion"
+		arabicText, englishText = "تابع النداءات لحد حالة التوقف، وشوف الرجوع يركّب النتائج.", "Follow calls to the stopping case, then combine returns."
+		config = map[string]any{
+			"frames": []any{
+				map[string]any{"calls": []string{"total(0)"}, "returned": "—", "caption": ch14Locale("أول نداء يبدأ هنا.", "The first call starts here.")},
+				map[string]any{"calls": []string{"total(0)", "total(1)"}, "returned": "—", "caption": ch14Locale("النداء يتقدم لموضع 1.", "The call advances to index 1.")},
+				map[string]any{"calls": []string{"total(0)", "total(1)", "total(2)"}, "returned": "—", "caption": ch14Locale("وصلنا لآخر قيمة.", "The last value is reached.")},
+				map[string]any{"calls": []string{"total(0)", "total(1)", "total(2)", "total(3)"}, "returned": "0", "caption": ch14Locale("حالة التوقف ترجع صفر.", "The stopping case returns zero.")},
+				map[string]any{"calls": []string{"total(0)", "total(1)", "total(2)"}, "returned": "4", "caption": ch14Locale("4 يضاف بعد الرجوع.", "4 is added on return.")},
+				map[string]any{"calls": []string{"total(0)", "total(1)"}, "returned": "7", "caption": ch14Locale("3 يركب على 4.", "3 combines with 4.")},
+				map[string]any{"calls": []string{"total(0)"}, "returned": "9", "caption": ch14Locale("القيمة رجعت لأول نداء.", "The value returns to the first call.")},
+			},
+			"labels": map[string]any{
+				"previous": ch14Locale("اللي فات", "Previous"), "next": ch14Locale("اللي بعده", "Next"), "reset": ch14Locale("من الأول", "Reset"), "calls": ch14Locale("Call stack", "Call stack"), "returned": ch14Locale("الناتج الراجع", "Returned value"),
+			},
+		}
+	}
+	text := englishText
+	if arabic {
+		text = arabicText
+	}
+	return LessonBlock{ID: prefix + ".sandbox", Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
 func ch14MakeLesson(prefix string, ar, en ch14LessonCopy, idea, try ch14LessonExample, tryAnswer, checkAnswer int) ch14LessonPair {
 	makeSteps := func(copy ch14LessonCopy, arabic bool) []LessonStep {
 		steps := []LessonStep{
@@ -66,6 +158,7 @@ func ch14MakeLesson(prefix string, ar, en ch14LessonCopy, idea, try ch14LessonEx
 			{ID: prefix + ".try-step", Title: "Try it", Blocks: []LessonBlock{
 				ch14Question(prefix+".try-question", copy.TryQuestion+"\n\n~~~go\n"+try.Code+"\n~~~", copy.TryOptions, copy.TryFeedback, tryAnswer),
 				ch14Walkthrough(prefix+".try-reveal", copy.TryReveal, try, arabic),
+				ch14Sandbox(prefix, arabic),
 			}},
 			{ID: prefix + ".watch-step", Title: "Watch out", Blocks: []LessonBlock{ch14Markdown(prefix+".watch", copy.Watch)}},
 			{ID: prefix + ".check-step", Title: "Think & check", Blocks: []LessonBlock{

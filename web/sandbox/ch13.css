@@ -1,1 +1,83 @@
-/* Chapter 13 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch13-sandbox {
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.45rem;
+  width: min(100%, 282px);
+  padding: 0.65rem;
+  border: 1px solid var(--line, #ccd6db);
+  border-radius: 0.65rem;
+  background: var(--surface, #f8fbfc);
+  color: var(--ink, #19323c);
+  font-size: 0.88rem;
+}
+
+.ch13-sandbox p,
+.ch13-sandbox ul {
+  margin: 0;
+}
+
+.ch13-readout,
+.ch13-order,
+.ch13-note {
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.35rem;
+  background: var(--surface-raised, #fff);
+}
+
+.ch13-code,
+.ch13-counter {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+  font-family: var(--mono, monospace);
+}
+
+.ch13-workers {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0;
+  list-style: none;
+}
+
+.ch13-worker {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--line, #ccd6db);
+  border-radius: 0.35rem;
+  background: var(--surface-raised, #fff);
+}
+
+.ch13-worker bdi {
+  font-weight: 700;
+}
+
+.ch13-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ch13-controls button {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.ch13-chain-frame pre {
+  max-width: 100%;
+  overflow-x: auto;
+  direction: ltr;
+  text-align: left;
+}
+
+.ch13-chain-frame .current {
+  display: block;
+  border-inline-start: 3px solid var(--accent, #159879);
+  background: #e9f6f2;
+}
+
+.ch13-counter {
+  white-space: nowrap;
+}
