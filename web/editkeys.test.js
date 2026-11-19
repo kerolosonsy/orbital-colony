@@ -96,3 +96,9 @@ test("Home goes to the first code character, then to the line start", () => {
   assert.equal(type("\t\t|x := 1", "Home"), "|\t\tx := 1");
   assert.equal(type("a\n\tfoo|", "Home"), "a\n\t|foo");
 });
+
+test("Ctrl/⌘+] and Ctrl/⌘+[ indent and outdent", () => {
+  assert.equal(type("x|", "]", { metaKey: true }), "\tx|");
+  assert.equal(type("\tx|", "[", { ctrlKey: true }), "x|");
+  assert.equal(type("[a\nb]", "]", { ctrlKey: true }), "[\ta\n\tb]");
+});

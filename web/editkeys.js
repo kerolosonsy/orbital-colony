@@ -83,6 +83,15 @@
     const next = value[end] || "";
 
     if (mod && (e.key === "/" || e.code === "Slash")) return toggleComment(value, start, end);
+    // Ctrl/⌘+] and Ctrl/⌘+[ indent / outdent the touched lines (VS Code habit)
+    if (mod && !e.altKey && (e.key === "]" || e.key === "[")) {
+      const edit = mapLines(value, start, end, e.key === "]" ? (line) => (line === "" ? line : "\t" + line) : outdent);
+      if (collapsed) {
+        const caret = Math.max(edit.from, start + (edit.text.length - (edit.to - edit.from)));
+        edit.selStart = edit.selEnd = caret;
+      }
+      return edit;
+    }
     // Home jumps to the first code character, then to column 0
     if (e.key === "Home" && !mod && !e.altKey) {
       const ls = lineStart(value, end);
