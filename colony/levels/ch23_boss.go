@@ -2,7 +2,7 @@ package levels
 
 func init() {
 	add(&Level{
-		ID: "23-boss-evidence", Chapter: 23, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: false,
+		ID: "23-boss-evidence", Chapter: 23, Kind: "lab", Boss: true, LessonRevision: 1, Steps: ch23LessonBossArabic, Setup: seededLabRoom, Race: false,
 		Title: "Boss: دليل العاصفة", Goal: "حوّل قراءات CSV لملف JSON مختوم بحفظ ذرّي",
 		Requires: []string{"map", "sel:csv.NewReader", "sel:json.Marshal", "sel:cipher.NewGCM"}, Bridge: []int{17, 18, 25, 30},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
@@ -41,8 +41,8 @@ os.WriteFile(dst, partial, 0644) // destroys the previous report before validati
 
 حوّل ~EvidenceBundle{Captured: at.UTC().Format(time.RFC3339), Samples: samples}~ لـ JSON؛ ~samples~ فاضية مش nil لو مفيش صفوف. مثال صف: ~EvidenceSample{Sensor: "ice", Value: 7}~. شفّر بـ AES-GCM بمفتاح AES صالح، nonce من ~io.ReadFull(entropy, nonce)~، وAAD بالظبط ~[]byte("colony:evidence:v1")~. الملف بايتات ~nonce || ciphertext~. احفظ بملف مؤقت في نفس المجلد ثم Close وRename؛ أي فشل يسيب الملف القديم زي ما هو وينضّف المؤقت. سيب ~main~ فاضية. النجمة التالتة: الملف النهائي صلاحياته 0600 حتى لو استبدل ملف 0644.
 `,
-		Hints: []string{"اقرأ وتحقق واجمع قبل أي كتابة في dst.", "رتّب العينات وحوّل JSON قبل GCM؛ اقرأ nonce كاملة.", "CreateTemp في نفس المجلد ثم Close وRename؛ defer Remove ينضّف الفشل."},
-		En: &LevelText{Title: "Boss: Storm Evidence", Goal: "Turn CSV readings into an authenticated JSON file with atomic replacement", Files: []LabFile{{Name: "main.go", Starter: `package main
+		Hints: []string{"حافظ على المدخلات سليمة قبل أي أثر جانبي.", "قسّم الشغل لمراحل وتأكد من ناتج كل مرحلة.", "راجع ~csv.Reader.Read~ وحدود الموارد عند فشل callback."},
+		En: &LevelText{LessonRevision: 1, Steps: ch23LessonBossEnglish, Title: "Boss: Storm Evidence", Goal: "Turn CSV readings into an authenticated JSON file with atomic replacement", Files: []LabFile{{Name: "main.go", Starter: `package main
 import ("io";"time";"errors")
 type EvidenceSample struct { Sensor string; Value int }
 type EvidenceBundle struct { Captured string; Samples []EvidenceSample }
@@ -78,7 +78,7 @@ Implement ~SealEvidence(in, dst, key, entropy, at) error~ with the starter signa
 
 Marshal ~EvidenceBundle{Captured: at.UTC().Format(time.RFC3339), Samples: samples}~ as JSON; samples is nonnil and empty for no rows. Example row: ~EvidenceSample{Sensor: "ice", Value: 7}~. Encrypt using AES-GCM with a valid AES key, a nonce filled by ~io.ReadFull(entropy, nonce)~, and exact AAD ~[]byte("colony:evidence:v1")~. File bytes are ~nonce || ciphertext~. Write a temporary file in the same directory, Close, then Rename. Every failure preserves the old destination and removes temporary files. Leave ~main~ empty. Third star: the final file has permissions 0600 even when replacing a 0644 file.
 `,
-			Hints: []string{"Read, validate, and aggregate before touching dst.", "Sort samples and encode JSON before GCM; fill the entire nonce.", "CreateTemp in the same directory, Close, then Rename; defer Remove cleans failures."}},
+			Hints: []string{"Validate input before making side effects.", "Split the work into stages and check each result.", "Review ~csv.Reader.Read~ and resource lifetimes when a callback fails."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: `package main
 import (
     "bytes"

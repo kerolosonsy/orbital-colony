@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "23-1-access-codes", Chapter: 23, Kind: "lab", Title: "أكواد الدخول", Goal: "طلّع أكواد للبوابات بفئات مضمونة وعشوائية محقونة",
+	add(&Level{ID: "23-1-access-codes", Chapter: 23, Kind: "lab", LessonRevision: 1, Steps: ch23Lesson231Arabic, Title: "أكواد الدخول", Goal: "طلّع أكواد للبوابات بفئات مضمونة وعشوائية محقونة",
 		Requires: []string{"sel:rand.Read"}, Bridge: []int{10}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch231Starter}},
 		Lesson: `# أكواد بوابات الخزنة
@@ -65,8 +65,8 @@ code[i]=alphabet[b%byte(len(alphabet))] // انحياز، وكمان تجاهل 
 
 النجمة التالتة: كل اختيار حرف أو موضع مزج يستخدم rejection sampling بالحد المذكور. في حالة طول 1 وفئة ~digits~ فقط، المصدر 250 ثم 255 ثم 9 لازم يطلع ~9~، ومصدر 250 ثم EOF لازم يفشل من غير كود جزئي.
 `,
-		Hints: []string{"تحقق من الطول والفئات كلها قبل اختيار أول حرف.", "اختار حرف من كل فئة، كمّل من الاتحاد، وبعدين امزج من الآخر.", "اقرأ بايت واحد بـ ~io.ReadFull~؛ للـ bonus ارفض اللي فوق الحد قبل modulo."},
-		En: &LevelText{Title: "Access Codes", Goal: "Issue gate codes with guaranteed categories and injected randomness", Files: []LabFile{{Name: "main.go", Starter: ch231Starter}},
+		Hints: []string{"استخدم مصدر عشوائية مناسب للأسرار.", "افصل التحقق عن بناء الكود واستهلاك المصدر.", "راجع سلوك ~io.ReadFull~ مع قراءة قصيرة."},
+		En: &LevelText{LessonRevision: 1, Steps: ch23Lesson231English, Title: "Access Codes", Goal: "Issue gate codes with guaranteed categories and injected randomness", Files: []LabFile{{Name: "main.go", Starter: ch231Starter}},
 			Lesson: `# Vault Gate Codes
 
 The gates need temporary secrets, rather than a guessing game. Choosing a random ~source~ is part of correctness. Never log the generated code.
@@ -128,7 +128,7 @@ Success returns exactly length bytes (all characters are ASCII), only from enabl
 
 Third star: use the rejection rule above for every character and shuffle-position choice. For length 1 with only ~digits~, bytes 250, 255, 9 must produce ~9~; 250 followed by EOF must fail without a partial code.
 `,
-			Hints: []string{"Validate length and all category names before drawing.", "Pick one per category, fill from the union, then shuffle backwards.", "Read one byte with ~io.ReadFull~; for the bonus reject bytes beyond the cutoff before modulo."}},
+			Hints: []string{"Use a random source suitable for secrets.", "Separate validation from code construction and source reads.", "Review how ~io.ReadFull~ handles a short read."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch231Hidden},
 	})
 }
@@ -293,7 +293,7 @@ func TestHiddenBonusAccessRejectBiasedTail(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "23-2-sealed-cargo", Chapter: 23, Kind: "lab", Title: "شحنة مختومة", Goal: "شفّر حمولة واربطها ببيان الشحنة مع كشف أي تلاعب",
+	add(&Level{ID: "23-2-sealed-cargo", Chapter: 23, Kind: "lab", LessonRevision: 1, Steps: ch23Lesson232Arabic, Title: "شحنة مختومة", Goal: "شفّر حمولة واربطها ببيان الشحنة مع كشف أي تلاعب",
 		Requires: []string{"sel:cipher.NewGCM"}, Bridge: []int{30}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch232Starter}},
 		Lesson: `# ختم شحنة الخزنة
@@ -360,8 +360,8 @@ n,err:=out.Write(plain)
 if err==nil && n!=len(plain) {err=io.ErrShortWrite}
 ~~~
 `,
-		Hints: []string{"ابنِ AES وبعدها GCM؛ افحص الحدود قبل قراءة nonce.", "اقرأ ~NonceSize~ بايت بـ ~io.ReadFull~ لكل تشفير، وحطهم بعد ~OCV1~.", "ابنِ AAD في slice جديدة؛ افتح بـ ~nil~ destination ومترجعش نص لو التحقق فشل."},
-		En: &LevelText{Title: "Sealed Cargo", Goal: "Encrypt cargo and authenticate its manifest and sealed bytes", Files: []LabFile{{Name: "main.go", Starter: ch232Starter}},
+		Hints: []string{"GCM بيجمع السرية والتحقق من التعديل.", "افصل تجهيز المفتاح والـnonce عن الختم والفتح.", "راجع ~aead.NonceSize()~ ومسار خطأ ~Open~."},
+		En: &LevelText{LessonRevision: 1, Steps: ch23Lesson232English, Title: "Sealed Cargo", Goal: "Encrypt cargo and authenticate its manifest and sealed bytes", Files: []LabFile{{Name: "main.go", Starter: ch232Starter}},
 			Lesson: `# Seal the Vault Cargo
 
 A digest detects different bytes but does not conceal them or prove who wrote them. Vault ~cargo~ needs confidentiality and tamper detection with a caller-supplied raw key. Key management and password derivation are outside this mission.
@@ -425,7 +425,7 @@ n,err:=out.Write(plain)
 if err==nil && n!=len(plain) {err=io.ErrShortWrite}
 ~~~
 `,
-			Hints: []string{"Build AES then GCM; validate bounds before reading a nonce.", "Read ~NonceSize~ bytes with ~ReadFull~ on every seal, placing them after OCV1.", "Build AAD in a fresh slice; Open into ~nil~ and return no plaintext on failure."}},
+			Hints: []string{"GCM combines secrecy with tamper authentication.", "Separate key and nonce setup from sealing and opening.", "Review ~aead.NonceSize()~ and the ~Open~ error path."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch232Hidden},
 	})
 }
@@ -640,7 +640,7 @@ func (w *hiddenCargoWriter) Write(p []byte) (int, error) { w.calls++; return len
 `
 
 func init() {
-	add(&Level{ID: "23-3-content-address", Chapter: 23, Kind: "lab", Title: "عنوان بالمحتوى", Goal: "خزّن قطع الخزنة مضغوطة بعنوان محسوب من نوعها ومحتواها",
+	add(&Level{ID: "23-3-content-address", Chapter: 23, Kind: "lab", LessonRevision: 1, Steps: ch23Lesson233Arabic, Title: "عنوان بالمحتوى", Goal: "خزّن قطع الخزنة مضغوطة بعنوان محسوب من نوعها ومحتواها",
 		Requires: []string{"sel:sha1.New"}, Bridge: []int{97}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch233Starter}},
 		Lesson: `# عنوان القطعة هو بصمتها
@@ -709,8 +709,8 @@ os.WriteFile(existing,newBytes,0600) // غلط: ممكن تمسح دليل تل�
 
 ~ReadVault~ ترفض ID مش 40 حرف من ~0-9a-f~ قبل I/O، وتقرأ القطعة المطلوبة فقط. ارفض zlib بايظة أو ناقصة أو checksum غلط، وغلاف خام فوق 1048640 بايت، وبادئة أو نوع أو طول غير canonical، ومحتوى فوق الحد، وبصمة مختلفة عن الاسم. فشل القراية يرجّع ~"",nil,error~، وفشل الكتابة ~"",error~. لا تعديل للمدخلات ولا للمخزن أثناء القراية، ولا Report. احتفظ بتوقيعات الدوال وملف ~main.go~ للمهمة اللي بعدها.
 `,
-		Hints: []string{"كوّن الغلاف الخام مرة، واحسب بصمته قبل zlib.", "في القراية حدّد حجم الفك، وافحص الغلاف canonical والبصمة قبل رجوع المحتوى.", "لو الاسم موجود استخدم ~ReadVault~ وقارن؛ لو جديد اكتب مؤقت واقفله قبل rename."},
-		En: &LevelText{Title: "Content Address", Goal: "Store compressed vault objects addressed by their kind and content", Files: []LabFile{{Name: "main.go", Starter: ch233Starter}},
+		Hints: []string{"عنوان المحتوى بيتبع البايتات الأصلية ونوع القطعة.", "افصل فك الضغط والتحقق عن التخزين أو الإرجاع.", "راجع ~zlib.Writer.Close~ وحد القراءة قبل فحص envelope."},
+		En: &LevelText{LessonRevision: 1, Steps: ch23Lesson233English, Title: "Content Address", Goal: "Store compressed vault objects addressed by their kind and content", Files: []LabFile{{Name: "main.go", Starter: ch233Starter}},
 			Lesson: `# Address an Object by Its Content
 
 The vault does not allocate increasing crate numbers. An object's address is computed from its kind and content, storing identical objects once. This is a small colony protocol, not a Git repository.
@@ -777,7 +777,7 @@ Create ~vault-objects~ if absent with 0700. File ~id.z~ contains the entire zlib
 
 ~ReadVault~ rejects IDs other than 40 characters from ~0-9a-f~ before I/O and reads only the named object. Reject corrupt or truncated zlib or bad checksums, raw envelopes exceeding 1048640 bytes, noncanonical prefix/kind/length, oversized payloads, and digest mismatches. Read failures return ~"",nil,error~; write failures return ~"",error~. Do not mutate inputs or write during reads. No Report. Keep signatures and ~main.go~ for the following mission.
 `,
-			Hints: []string{"Build the raw envelope once and hash it before zlib.", "Bound decompression and verify the canonical envelope and digest before returning content.", "For existing IDs use ~ReadVault~ and compare; publish new objects through a closed temporary file."}},
+			Hints: []string{"A content address follows raw bytes and object kind.", "Separate decompression and verification from storage or return.", "Review ~zlib.Writer.Close~ and the read limit before checking an envelope."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch233Hidden},
 	})
 }
@@ -967,7 +967,7 @@ func TestHiddenVaultValidationAndIOFailures(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "23-4-snapshot-commit", Chapter: 23, Kind: "lab", Title: "لقطة و commit", Goal: "ابني فهرس شحنات وشجرة مرتبة وcommit ببيانات وقت محقونة",
+	add(&Level{ID: "23-4-snapshot-commit", Chapter: 23, Kind: "lab", LessonRevision: 1, Steps: ch23Lesson234Arabic, Title: "لقطة و commit", Goal: "ابني فهرس شحنات وشجرة مرتبة وcommit ببيانات وقت محقونة",
 		Requires: []string{}, Bridge: []int{97}, Setup: seededLabRoom,
 		CarryFrom: "23-3-content-address",
 		Files:     []LabFile{{Name: "main.go", Starter: ch233Starter}, {Name: "snapshot.go", Starter: ch234Starter}},
@@ -1044,8 +1044,8 @@ stamp.Tick=time.Now().Unix() // غلط: تجاهلت الوقت المحقون
 
 جهّز tree بالسطور المرتبة المذكورة واحسب عنوانها قبل الكتابة. ارفض commit لو شجرتها نفس شجرة الأب، حتى لو الوقت أو الرسالة اختلفوا. كمّل كل التحققات قبل كتابة أي قطعة جديدة. بعدها اكتب tree ثم snapshot بالـ JSON المذكورة؛ ارجع ID snapshot. فشل الكتابة يرجّع string فاضية ويحافظ على سبب خطأ I/O؛ tree نجحت قبل فشل snapshot ممكن تفضل من غير مرجع. الفهرس والمدخلات وكل القطع القديمة ثابتين وقت commit، حتى في الفشل. لا تزامن ولا Git ولا وقت حقيقي ولا Report. كل المخازن الحقيقية داخل ~t.TempDir()~ فقط.
 `,
-		Hints: []string{"اتحقق من الاسم والسعة قبل staging، وعدّل map بعد نجاح التخزين بس.", "رتّب الأسماء وافحص كل ~cargo~ بـ ~ReadVault~؛ حضّر سطور tree من غير كتابة.", "راجع الأب والـ metadata والشجرة غير المتغيرة قبل ~WriteVault~؛ استخدم struct لترتيب JSON."},
-		En: &LevelText{Title: "Snapshot Commit", Goal: "Build a cargo index, canonical tree, and commit with injected metadata", Files: []LabFile{{Name: "main.go", Starter: ch233Starter}, {Name: "snapshot.go", Starter: ch234Starter}},
+		Hints: []string{"الفهرس ربط صريح بين الأسماء وعناوين المحتوى.", "افصل staging عن تجهيز شجرة الـcommit.", "راجع ~fs.ValidPath~ وترتيب حقول ~SupplyCommit~ في JSON."},
+		En: &LevelText{LessonRevision: 1, Steps: ch23Lesson234English, Title: "Snapshot Commit", Goal: "Build a cargo index, canonical tree, and commit with injected metadata", Files: []LabFile{{Name: "main.go", Starter: ch233Starter}, {Name: "snapshot.go", Starter: ch234Starter}},
 			Lesson: `# Snapshot a Flight's Supplies
 
 The crew stages supplies under relative names; an index maps each name to ~cargo~ content. A commit freezes the name tree and links to the previous snapshot without changing old objects. This is a ~cargo~ snapshot, not Git commands or a copy of machine files.
@@ -1118,7 +1118,7 @@ Commits reject empty or oversized indexes, invalid names or conflicts, and missi
 
 Prepare the sorted tree lines and compute their address before writing. Reject a commit whose tree equals its parent's, even with changed metadata. Complete all validation before writing any new objects. Then write tree followed by canonical-JSON snapshot and return the snapshot ID. Write failure returns an empty string and preserves I/O causes; a tree successfully written before snapshot failure may remain unreferenced. Commit never changes the index, inputs, or old objects, including on failure. No concurrency, Git, real time, or Report. Real test stores live only inside ~t.TempDir()~.
 `,
-			Hints: []string{"Validate name and capacity before staging; update the map only after storage succeeds.", "Sort names and verify every ~cargo~ through ~ReadVault~; prepare tree bytes without writing.", "Validate parent, metadata, and changed tree before ~WriteVault~; use a struct for JSON order."}},
+			Hints: []string{"The index explicitly maps names to content addresses.", "Separate staging from preparing a commit tree.", "Review ~fs.ValidPath~ and ~SupplyCommit~ field order in JSON."}},
 		Lab: &Lab{ReqFile: "snapshot.go", Bonus: false, Hidden: ch234Hidden},
 	})
 }

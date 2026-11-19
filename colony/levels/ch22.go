@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "22-1-tree", Chapter: 22, Kind: "lab", Title: "شجرة المخزن", Goal: "اعرض مخزن المستعمرة بشجرة مرتبة وعمق محدود",
+	add(&Level{ID: "22-1-tree", Chapter: 22, Kind: "lab", LessonRevision: 1, Steps: ch22Lesson221Arabic, Title: "شجرة المخزن", Goal: "اعرض مخزن المستعمرة بشجرة مرتبة وعمق محدود",
 		Requires: []string{"recursion", "sel:fs.FS"}, Bridge: []int{24}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch221StarterAr}},
 		Lesson: `# خريطة المخزن
@@ -74,8 +74,8 @@ StoreTree(store,depth,out) // استدعاء نفس المدخلات مش recurs
 اعرض depth-first بترتيب أسماء الإخوة في Go. كل سطر مسافتين لكل مستوى، ثم الاسم المحلي؛ المجلد آخره ~/~. كل سطر ينتهي newline. متقراش مجلد عند حد العمق، ومتغيرش المصدر. استخدم recursion و ~fs.FS~. فشل filesystem أو writer يوقف فوراً بخطأ يحتفظ بالسبب وباسم المسار المتأثر؛ الإخراج السابق ممكن يفضل.
 
 النجمة التالتة: الروابط آخرها ~@~ والملفات الخاصة ~!~، من غير نزول أو فتح. مفيش Report ولا اعتماد على قرص جهازك.
-`, Hints: []string{"تحقق من الجذر، وبعدها اكتب store/ حتى لو مفيش أبناء.", "استخدم fs.ReadDir عشان ترتيب الإخوة؛ path.Join لبناء مسار الطفل.", "مرر المستوى للدالة recursive وافحص حد العمق قبل القراءة؛ افحص خطأ كل كتابة."},
-		En: &LevelText{Title: "Store Tree", Goal: "Render a sorted, depth-limited colony store", Files: []LabFile{{Name: "main.go", Starter: ch221Starter}}, Lesson: `# A Map of the Store
+`, Hints: []string{"النظام المحقون يفصل القراءة عن ملفات جهازك.", "قسّم التفكير بين الجذر والأبناء وحد التوقف.", "راجع ترتيب ~fs.ReadDir~ وفحص ~depth~ قبل متابعة الفرع."},
+		En: &LevelText{LessonRevision: 1, Steps: ch22Lesson221English, Title: "Store Tree", Goal: "Render a sorted, depth-limited colony store", Files: []LabFile{{Name: "main.go", Starter: ch221Starter}}, Lesson: `# A Map of the Store
 
 The crew needs a shelf map without opening every crate. Read an injected filesystem and write to the caller's writer.
 
@@ -145,7 +145,7 @@ Implement ~StoreTree(store fs.FS, depth int, out io.Writer) error~. Both injecte
 Use depth-first traversal with sibling names in Go string order. Each line has two spaces per level, the local name, and ~/~ for directories. End every line with a newline. Never read a directory at the depth boundary or mutate the source. Use recursion and ~fs.FS~. Stop immediately on filesystem or writer errors, preserving the cause and affected path; prior output may remain.
 
 Third star: mark links with ~@~ and other special files with ~!~, without opening or descending into them. No Report or host disk dependency.
-`, Hints: []string{"Validate the root, then print store/ even when it has no children.", "Use fs.ReadDir for sorted siblings and path.Join for child paths.", "Pass the level recursively; check the depth before reading and every write error."}},
+`, Hints: []string{"An injected filesystem separates reads from your machine's files.", "Separate the root, child entries, and stopping boundary.", "Check ~fs.ReadDir~ ordering and ~depth~ before following a branch."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch221Hidden, Bonus: true},
 	})
 }
@@ -314,7 +314,7 @@ func TestHiddenBonusTreeSpecialEntries(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "22-2-organizer", Chapter: 22, Kind: "lab", Title: "المنظّم", Goal: "خطط توزيع صناديق الوارد قبل نقل أي ملف",
+	add(&Level{ID: "22-2-organizer", Chapter: 22, Kind: "lab", LessonRevision: 1, Steps: ch22Lesson222Arabic, Title: "المنظّم", Goal: "خطط توزيع صناديق الوارد قبل نقل أي ملف",
 		Requires: []string{"sel:filepath.WalkDir"}, Bridge: []int{20}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch222StarterAr}},
 		Lesson: `# الوارد يروح للرف الصح
@@ -400,8 +400,8 @@ if err!=nil { /* افتراض إن الوجهة مش موجودة: ممكن perm
 افشل بخطة nil لو مصدرين لنفس الوجهة، أو الوجهة موجودة بأي نوع، أو مجلد الهدف موجود ومش مجلد، أو حصل خطأ مشي أو stat. احتفظ بأسباب أخطاء I/O. ~PlanShelves~ للـ dry-run: مفيش إنشاء أو نقل أو كتابة.
 
 ~OrganizeShelves~ غلاف يستدعي ~ExecuteShelves(root string, rename func(string,string)error) (int,error)~ مع ~os.Rename~. دالة النقل غير nil؛ في النجاح تنقل فعلاً، وفي الفشل متغيرش الملفات. ~ExecuteShelves~ تستخدم ~filepath.WalkDir~ لاكتشاف ملفات الوارد الحقيقي، وتتحقق من الخطة كلها قبل أي تغيير. بعدها تنشئ مجلدات الهدف المطلوبة بس بـ 0700 وتنقل بالدالة المحقونة بترتيب الخطة. ترجع عدد النقلات المكتملة؛ أول فشل يوقف من غير rollback للنقلات السابقة. إعادة التشغيل بعد النجاح خطة فاضية. الجذر غير متغير أثناء العملية، ومجلدات الوجهة الموجودة حقيقية من غير روابط؛ مفيش تزامن أو Report. التستات الحقيقية داخل ~t.TempDir()~ بس.
-`, Hints: []string{"اجمع أسماء الملفات العادية الأول، وبعدها حوّلها لخطة.", "استخدم map للوجهات وافحص stat لكل وجهة ومجلدها قبل أي نقل.", "شارك منطق التصنيف والتحقق بين المشي الافتراضي والحقيقي؛ زوّد العدد بعد Rename الناجحة بس."},
-		En: &LevelText{Title: "The Organizer", Goal: "Plan incoming crate placement before moving files", Files: []LabFile{{Name: "main.go", Starter: ch222Starter}}, Lesson: `# Put Incoming Crates on the Right Shelf
+`, Hints: []string{"الخطة بيانات للمراجعة قبل تغيير الملفات.", "افصل الاكتشاف والتصنيف عن التحقق والتنفيذ.", "راجع خطأ callback في ~fs.WalkDir~ ونوع كل entry."},
+		En: &LevelText{LessonRevision: 1, Steps: ch22Lesson222English, Title: "The Organizer", Goal: "Plan incoming crate placement before moving files", Files: []LabFile{{Name: "main.go", Starter: ch222Starter}}, Lesson: `# Put Incoming Crates on the Right Shelf
 
 Incoming crates live under ~inbox~. Archive shelves are ~records~, ~images~, and ~misc~. A plan is reviewable data: discovery never moves files.
 
@@ -484,7 +484,7 @@ Implement ~PlanShelves(store fs.FS) ([]ShelfMove,error)~ and ~OrganizeShelves(ro
 Return a nil plan on duplicate destinations, any existing destination, an existing shelf that is not a directory, or traversal/stat failure. Preserve I/O causes. PlanShelves is dry-run: never create, move, or write anything.
 
 ~OrganizeShelves~ wraps ~ExecuteShelves(root string, rename func(string,string)error) (int,error)~ with ~os.Rename~. The non-nil callback actually moves files on success and leaves them unchanged on failure. ExecuteShelves discovers real incoming files with ~filepath.WalkDir~ and validates the entire plan before mutation. Then create only required shelf directories with 0700 and move using the injected callback in plan order. Return the number completed; stop at the first failure without rolling back prior moves. Repeating after success yields an empty plan. The tree is stable during execution and existing destination directories are real directories without links. No concurrency or Report. Real tests use only ~t.TempDir()~.
-`, Hints: []string{"Collect regular file names before building the plan.", "Use a destination map and stat every target and parent before moving.", "Share classification and validation between interface and host walks; count only successful renames."}},
+`, Hints: []string{"A plan is reviewable data before files change.", "Separate discovery and classification from validation and execution.", "Check callback errors in ~fs.WalkDir~ and inspect each entry type."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch222Hidden, Bonus: false},
 	})
 }
@@ -751,7 +751,7 @@ func (s hiddenShelfFS) ReadDir(string) ([]fs.DirEntry, error) { return nil, s.er
 `
 
 func init() {
-	add(&Level{ID: "22-3-atomic-save", Chapter: 22, Kind: "lab", Title: "حفظ ذرّي", Goal: "احفظ حزمة المنارة من غير ما تضيّع النسخة السليمة عند الفشل",
+	add(&Level{ID: "22-3-atomic-save", Chapter: 22, Kind: "lab", LessonRevision: 1, Steps: ch22Lesson223Arabic, Title: "حفظ ذرّي", Goal: "احفظ حزمة المنارة من غير ما تضيّع النسخة السليمة عند الفشل",
 		Requires: []string{"defer", "sel:os.Rename"}, Bridge: []int{17}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch223StarterAr}},
 		Lesson: `# آخر حزمة سليمة
@@ -815,8 +815,8 @@ os.Remove(target) // خلق فجوة وخسارة النسخة لو Rename فش�
 أنشئ مؤقت فريد جنب الهدف بصلاحيات CreateTemp الافتراضية، وشغّل write مرة واحدة عليه. اكتب للمؤقت بس، واقفله بنجاح قبل استدعاء rename مرة واحدة من اسم المؤقت للهدف. رجّع أول خطأ إنشاء أو callback أو قفل أو نقل مع الحفاظ على سببه. فشل قبل النقل ميناديش rename، والهدف يفضل كما هو أو غايب لو كان غايب. نجاح النقل ينشر البايتات كاملة، بما فيها حزمة فاضية.
 
 استخدم defer لتنظيف الموارد: اقفل الملف على كل مسار وشيل الاسم المؤقت بعد النجاح أو الفشل لما نظام الملفات يسمح. متحذفش الهدف ولا تنسخ للمكان النهائي بعد فشل النقل. المنادي المحقون لـ rename إما ينقل فعلاً أو يرجع خطأ من غير تغيير ملفات. النجمة التالتة: فشل rename المتكرر يحافظ على الهدف ويشيل المؤقت، ومحاولة لاحقة تنجح من غير بقايا. مفيش Report؛ كل اختبار حقيقي داخل ~t.TempDir()~.
-`, Hints: []string{"أنشئ المؤقت في filepath.Dir(target)، وسجّل تنظيفه بـ defer فوراً.", "مرر المؤقت للـ callback؛ افحص خطأها وخطأ Close قبل Rename.", "SaveRelay تمرر os.Rename؛ الاختبار المحقون يرفض النقل ويثبت إن الهدف القديم ما اتلمسش."},
-		En: &LevelText{Title: "Atomic Save", Goal: "Save a beacon packet without losing the last complete version", Files: []LabFile{{Name: "main.go", Starter: ch223Starter}}, Lesson: `# The Last Complete Packet
+`, Hints: []string{"افصل البايتات الجزئية عن النسخة المنشورة.", "تتبّع إنشاء المؤقت والكتابة والقفل وقرار النقل.", "راجع ~os.CreateTemp~ ودور rename المحقون في ~CommitRelay~."},
+		En: &LevelText{LessonRevision: 1, Steps: ch22Lesson223English, Title: "Atomic Save", Goal: "Save a beacon packet without losing the last complete version", Files: []LabFile{{Name: "main.go", Starter: ch223Starter}}, Lesson: `# The Last Complete Packet
 
 A beacon packet can fail generation after its first bytes. Opening the final file would erase the last complete version too early. Write under a temporary name, then publish after writing and closing succeed.
 
@@ -877,7 +877,7 @@ Implement ~SaveRelay(target string, write func(io.Writer)error) error~ as a wrap
 Create a unique temporary file beside the target using CreateTemp's default permissions and invoke write exactly once on it. Write only to the temporary file and close it successfully before invoking rename exactly once from its name to target. Return the first create, callback, close, or rename error preserving its cause. Failures before rename must not invoke it. The target stays unchanged, or absent if initially absent. Successful rename publishes all bytes, including an empty packet.
 
 Use defer for resource cleanup: close on every path and remove the temporary name after success or failure when the filesystem permits. Never delete the target or copy into it after rename failure. The injected rename either actually moves the file or returns an error without modifying files. Third star: repeated rename failures preserve the target and clean temporary files; a subsequent attempt succeeds without leftovers. No Report. All real tests live inside ~t.TempDir()~.
-`, Hints: []string{"Create the temporary file in filepath.Dir(target) and defer cleanup immediately.", "Give the callback the temporary writer; check its error and Close before Rename.", "SaveRelay passes os.Rename; an injected rejection proves the previous target is untouched."}},
+`, Hints: []string{"Separate partial bytes from the published version.", "Trace temporary creation, writing, closing, and the move decision.", "Review ~os.CreateTemp~ and the injected rename boundary in ~CommitRelay~."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch223Hidden, Bonus: true},
 	})
 }
@@ -1047,7 +1047,7 @@ func TestHiddenBonusRelayFailedRenameCleanupAndRetry(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "22-4-duplicates", Chapter: 22, Kind: "lab", Title: "الملفات المكررة", Goal: "اكتشف نسخ حزم المستعمرة بالحجم وبصمة stream",
+	add(&Level{ID: "22-4-duplicates", Chapter: 22, Kind: "lab", LessonRevision: 1, Steps: ch22Lesson224Arabic, Title: "الملفات المكررة", Goal: "اكتشف نسخ حزم المستعمرة بالحجم وبصمة stream",
 		Requires: []string{"sel:sha256.New", "sel:io.Copy"}, Bridge: []int{25}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch224StarterAr}},
 		Lesson: `# نفس الحزمة في أكتر من رف
@@ -1118,8 +1118,8 @@ if len(buckets[size])>1 { /* غلط: نفس الحجم مش بالضرورة ن�
 رجّع مجموعات بنفس الحجم والبصمة، طول كل مجموعة 2 على الأقل؛ الاسم نسبي slash-separated. رتّب داخل المجموعة تصاعدي بترتيب Go، ورتّب المجموعات حسب أول اسم. الفاضي أو بدون تكرار نجاح بطول صفر. الملفات الفاضية ممكن تتكرر. مفيش حذف أو كتابة أو تغيير للمصدر.
 
 أي فشل walk أو Info أو Open أو Read أو Close يرجع nil,error يحتفظ بالسبب وبالمسار. لو عدد البايتات المقروءة اختلف عن الحجم المسجل، رجّع nil,error. اقفل كل ملف اتفتح، حتى وقت الفشل، ومتفتحش ملفات زيادة بعد أول فشل. مفيش تزامن أو Report؛ التستات على نظام محقون، من غير قرص الجهاز.
-`, Hints: []string{"اجمع map من الحجم لقائمة المسارات قبل فتح المحتوى.", "لكل حجم متكرر، hash جديدة لكل ملف وio.Copy، وبعدها Close وفحص الحجم.", "اجمع حسب البصمة داخل مجموعة الحجم؛ صفّي المجموعات الفردية ورتّب النتيجة كلها."},
-		En: &LevelText{Title: "Duplicate Files", Goal: "Find repeated colony packets using size buckets and streaming hashes", Files: []LabFile{{Name: "main.go", Starter: ch224Starter}}, Lesson: `# One Packet on Several Shelves
+`, Hints: []string{"الحجم يضيّق البحث لكنه مش إثبات للتكرار.", "رتّب الفحص بين metadata والبصمة والتقرير.", "راجع عدد البايتات من ~io.Copy~ وخطأ ~Close~ لكل ملف."},
+		En: &LevelText{LessonRevision: 1, Steps: ch22Lesson224English, Title: "Duplicate Files", Goal: "Find repeated colony packets using size buckets and streaming hashes", Files: []LabFile{{Name: "main.go", Starter: ch224Starter}}, Lesson: `# One Packet on Several Shelves
 
 The archive contains repeated beacon packets. Size is a cheap filter, but equal-size files can differ. Hash candidate groups without loading whole files into memory.
 
@@ -1187,7 +1187,7 @@ Implement ~PacketEchoes(store fs.FS) ([][]string,error)~. The non-nil store must
 Return groups sharing both size and digest, with at least two paths per group. Names are relative slash-separated paths. Sort each group in Go string order and sort groups by their first path. Empty input or no duplicates succeeds with length zero. Empty files may be duplicates. Never delete, write, or mutate the source.
 
 Any walk, Info, Open, Read, or Close failure returns nil,error preserving cause and path. A read byte count different from recorded size also returns nil,error. Close every opened file even on failure and open no further files after the first failure. No concurrency or Report. Tests use injected filesystems without host disk access.
-`, Hints: []string{"Build size-to-path buckets before opening content.", "For repeated sizes, use a fresh hash and io.Copy per file, then Close and verify the byte count.", "Group digests within each size bucket; discard singletons and sort the entire report."}},
+`, Hints: []string{"Size narrows the search but does not prove a duplicate.", "Order the checks around metadata, hashes, and the report.", "Review the byte count from ~io.Copy~ and each file's ~Close~ error."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch224Hidden, Bonus: false},
 	})
 }
