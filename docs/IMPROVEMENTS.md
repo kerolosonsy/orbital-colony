@@ -57,3 +57,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 53. **Opened hints stay open** — hints you revealed for a mission are remembered per player and shown again (silently, no sound or second hint metric) when you come back or reload; before, they vanished and had to be clicked again. Review runs keep starting without hints. Verified by reload in the browser; test extended.
 54. **File tabs keep your place** — switching between files of a lab (or colony) restores each file's caret and scroll position instead of jumping to the top.
 55. **Labs reopen on the file you were editing** — the last open file per multi-file mission is remembered per player (review runs start fresh).
+56. **Caret survives a reload** — the caret and scroll of the open file are saved when the page closes and restored on the next load of the same mission (verified: position 40 → reload → 40).

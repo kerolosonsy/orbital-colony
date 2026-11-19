@@ -541,7 +541,11 @@ function onEdit() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flushSave, 400);
 }
-window.addEventListener("pagehide", () => { flushSave(); if (store.timer) store.push(); });
+window.addEventListener("pagehide", () => {
+  flushSave(); if (store.timer) store.push();
+  // remember where the caret was, to come back to it after a reload
+  try { if (S.cur) localStorage.setItem("orbital.place." + PROFILE, JSON.stringify({ level: S.cur.id, file: S.file, at: ed.selectionStart, top: ed.scrollTop })); } catch {}
+});
 ed.addEventListener("input", onEdit);
 ed.addEventListener("scroll", syncScroll);
 gutter.addEventListener("click", (event) => {
@@ -2066,7 +2070,13 @@ function finish(level, res, missing = [], silent = false) {
   }
   restoreSpeeds();
   updateOverall();
-  loadLevel(id);
+  await loadLevel(id);
+  try {
+    const place = JSON.parse(localStorage.getItem("orbital.place." + PROFILE) || "null");
+    if (place?.level === S.cur?.id && place.file === S.file && place.at <= ed.value.length) {
+      ed.setSelectionRange(place.at, place.at); ed.scrollTop = place.top; syncScroll();
+    }
+  } catch {}
   if (!store.pref("welcomed")) showWelcome();
 })();
 
