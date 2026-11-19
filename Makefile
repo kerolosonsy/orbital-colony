@@ -12,7 +12,7 @@ OPEN    ?= open
 STAMP    = $(shell date +%Y%m%d-%H%M%S)
 
 .DEFAULT_GOAL := help
-.PHONY: help run start stop restart status logs open build test test-quick test-web check fmt vet stats \
+.PHONY: help run start stop restart status logs open build test test-quick test-web check fmt vet lint stats \
         backup restore backups players reset-all clean doctor
 
 help: ## اعرض كل الأوامر
@@ -84,6 +84,12 @@ fmt: ## نسّق كود Go
 vet: ## افحص الكود بـ go vet
 	go vet ./...
 	cd colony && go vet ./...
+
+lint: ## افحص من غير تعديل: gofmt -l و go vet و staticcheck (لو متسطب)
+	@test -z "$$(gofmt -l cmd colony assets.go)" || { echo "محتاج gofmt:"; gofmt -l cmd colony assets.go; exit 1; }
+	@$(MAKE) --no-print-directory vet
+	@if command -v staticcheck >/dev/null; then staticcheck ./cmd/... && cd colony && staticcheck ./...; \
+	else echo "• staticcheck مش متسطب: go install honnef.co/go/tools/cmd/staticcheck@latest"; fi
 
 stats: ## اطبع أكتر 20 ورقة اتعثر فيها اللاعبون
 	go run ./cmd/orbital -stats -saves $(SAVES)
