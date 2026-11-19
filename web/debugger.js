@@ -92,9 +92,21 @@ const InlineDebugger = (() => {
     return text.slice(0, Math.max(0, limit - 1)) + "…";
   }
 
-  function renderInlineValues(variables) {
-    const text = inlineValueText(variables);
-    return text ? `<span class="debug-inline-values">${esc(text)}</span>` : "";
+  function renderInlineValues(variables, changed = new Set()) {
+    const list = (variables || []).slice(0, 5);
+    if (!list.length) return "";
+    let budget = 84;
+    const chips = [];
+    for (const variable of list) {
+      let value = String(variable.value);
+      const room = budget - variable.name.length - 3;
+      if (room <= 1) break;
+      if (value.length > room) value = value.slice(0, Math.max(0, room - 1)) + "…";
+      budget -= variable.name.length + value.length + 3;
+      const cls = changed.has(variable.name) ? "debug-chip is-changed" : "debug-chip";
+      chips.push(`<span class="${cls}"><b>${esc(variable.name)}</b> ${esc(value)}</span>`);
+    }
+    return `<span class="debug-inline-values" aria-hidden="true">${chips.join("")}</span>`;
   }
 
   function editorMarkup(sourceCode, debugState, highlightCode) {
@@ -105,7 +117,9 @@ const InlineDebugger = (() => {
       const variables = debugState.inlineValuesByLine?.[number] || [];
       const openTags = part.open.join("");
       const closeTags = "</span>".repeat(part.close.length);
-      return `<span class="debug-line${active ? " is-current" : ""}" data-debug-line="${number}">${openTags}${part.content}${closeTags}${renderInlineValues(variables)}</span>`;
+      const extra = active ? "" : number === debugState.previousLine ? " is-trail" : "";
+      const changed = active ? new Set(debugState.changed || []) : new Set();
+      return `<span class="debug-line${active ? " is-current" : ""}${extra}" data-debug-line="${number}">${openTags}${part.content}${closeTags}${renderInlineValues(variables, changed)}</span>`;
     }).join("");
   }
 
@@ -144,13 +158,13 @@ const InlineDebugger = (() => {
     return index + 1;
   }
 
-  function gutterMarkup(lineCount, errLines, breakpoints, currentLine) {
+  function gutterMarkup(lineCount, errLines, breakpoints, currentLine, visited = new Set()) {
     const breakSet = breakpoints instanceof Set ? breakpoints : new Set(breakpoints || []);
     let markup = "";
     for (let line = 1; line <= lineCount; line++) {
       const error = errLines.get(line);
       const isBreakpoint = breakSet.has(line);
-      const classes = ["gutter-line", error ? "err" : "", isBreakpoint ? "has-breakpoint" : "", line === currentLine ? "debug-active" : ""].filter(Boolean).join(" ");
+      const classes = ["gutter-line", error ? "err" : "", isBreakpoint ? "has-breakpoint" : "", line === currentLine ? "debug-active" : "", visited.has(line) && line !== currentLine ? "debug-visited" : ""].filter(Boolean).join(" ");
       const label = translate(`السطر ${line}${isBreakpoint ? "، نقطة توقف" : ""}${error ? "، فيه خطأ" : ""}`, `Line ${line}${isBreakpoint ? ", breakpoint" : ""}${error ? ", error" : ""}`);
       markup += `<button type="button" class="${classes}" data-debug-line="${line}" aria-label="${esc(label)}" title="${esc(error || label)}"><span>${line}</span></button>`;
     }
@@ -188,10 +202,14 @@ const InlineDebugger = (() => {
   let responseStdoutBytes = null;
   let lastVariables = new Map();
   let collapsed = false;
+  let playTimer = null;
+  let userCollapsed = false;
+  let lastStdoutOffset = 0;
 
   const labels = {
     restart: ["إعادة من الأول", "Restart"], back: ["خطوة لورا", "Step back"], into: ["ادخل جوه الدالة", "Step into"],
     over: ["عدّي الدالة", "Step over"], out: ["اخرج من الدالة", "Step out"], go: ["كمّل لحد نقطة توقف", "Continue"],
+    play: ["شغّل خطوة بخطوة", "Play"], pause: ["وقّف التشغيل", "Pause"], exit: ["اقفل التتبّع", "Stop debugging"],
     variables: ["المتغيرات", "Variables"], stack: ["Call stack", "Call stack"], output: ["Output", "Output"],
     collapse: ["اقفل اللوحة", "Collapse panel"], expand: ["افتح اللوحة", "Expand panel"],
   };
@@ -202,7 +220,7 @@ const InlineDebugger = (() => {
     bindStepButtons();
     bindTabButtons();
     elements.slider.oninput = () => stepper?.set(elements.slider.value);
-    elements.collapse.onclick = () => setCollapsed(!collapsed);
+    elements.collapse.onclick = () => { userCollapsed = true; setCollapsed(!collapsed); };
     document.addEventListener("keydown", onKeydown);
     setCollapsed(matchMedia("(max-width: 760px)").matches);
   }
@@ -224,7 +242,7 @@ const InlineDebugger = (() => {
   }
 
   function bindStepButtons() {
-    const shortcuts = { into: "F11", over: "F10", out: "Shift+F11", go: "F5" };
+    const shortcuts = { into: "F11", over: "F10", out: "Shift+F11", go: "F5", exit: "Shift+F5" };
     document.querySelectorAll("[data-debug-command]").forEach((button) => {
       const command = button.dataset.debugCommand;
       const shortcut = shortcuts[command];
@@ -290,6 +308,7 @@ const InlineDebugger = (() => {
     elements.toolbar.hidden = false;
     elements.controls.hidden = false;
     elements.panel.hidden = false;
+    if (!userCollapsed) setCollapsed(matchMedia("(max-width: 760px)").matches);
     if (!frames.length) return showEmptyTrace();
     setStatus(traceStatus(response));
     stepper.restart();
@@ -353,6 +372,8 @@ const InlineDebugger = (() => {
   }
 
   function resetSession() {
+    stopPlay();
+    lastStdoutOffset = 0;
     request?.abort();
     request = null;
     session.clear();
@@ -378,6 +399,8 @@ const InlineDebugger = (() => {
       if (command === "exit") clear();
       return;
     }
+    if (command === "play") return togglePlay();
+    stopPlay();
     const breakpoints = callbacks.getBreakpoints?.(levelID) || [];
     if (command === "restart") stepper.restart();
     else if (command === "back") stepper.back();
@@ -402,10 +425,80 @@ const InlineDebugger = (() => {
     }
   }
 
+  function togglePlay() {
+    if (playTimer) return stopPlay();
+    if (stepper.index >= response.frames.length - 1) stepper.restart();
+    setPlaying(true);
+    playTimer = setInterval(() => {
+      const before = stepper.index;
+      const frame = stepper.into();
+      const keys = new Set(callbacks.getBreakpoints?.(levelID) || []);
+      const atBreak = frame && keys.has(breakpointKey(frame.file || "main.go", frame.line));
+      if (stepper.index === before || stepper.index >= response.frames.length - 1 || atBreak) stopPlay();
+    }, 420);
+  }
+
+  function stopPlay() {
+    if (playTimer) clearInterval(playTimer);
+    playTimer = null;
+    setPlaying(false);
+  }
+
+  function setPlaying(on) {
+    if (!elements) return;
+    elements.toolbar.classList.toggle("is-playing", on);
+    const button = document.querySelector('[data-debug-command="play"]');
+    if (button) {
+      const label = translate(...labels[on ? "pause" : "play"]);
+      button.setAttribute("aria-label", label);
+      button.title = label;
+      button.setAttribute("aria-pressed", String(on));
+    }
+  }
+
+  function whereText(frame) {
+    if (!frame) return "";
+    const fn = `<code>${esc(frame.func || "main")}()</code>`;
+    const line = translate(`سطر ${frame.line}`, `line ${frame.line}`);
+    if (frame.event === "call") return translate(`دخلنا ${fn}`, `Entered ${fn}`) + ` · ${line}`;
+    if (frame.event === "return") {
+      const values = (frame.returns || []).map((r) => esc(r.value)).join(", ");
+      return translate(`رجعنا من ${fn}`, `Returned from ${fn}`) + (values ? ` → <code>${values}</code>` : "") + ` · ${line}`;
+    }
+    return `${fn} · ${line}`;
+  }
+
+  function renderTimeline(index) {
+    const svg = document.querySelector("#debugger-depth");
+    if (!svg || !response) return;
+    const frames = response.frames;
+    const n = frames.length;
+    const W = 1000, H = 26;
+    const maxDepth = Math.max(1, ...frames.map((f) => Number(f.depth || 0)));
+    const x = (i) => (n < 2 ? 0 : (i / (n - 1)) * W);
+    const y = (d) => H - 3 - (Number(d || 0) / maxDepth) * (H - 8);
+    if (svg.dataset.frames !== String(n)) {
+      let d = `M0 ${H}`;
+      frames.forEach((f, i) => { d += ` L${x(i).toFixed(1)} ${y(f.depth).toFixed(1)}`; });
+      d += ` L${W} ${H} Z`;
+      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      svg.innerHTML = `<path class="dbg-depth-area" d="${d}"/><g class="dbg-ticks"></g><line class="dbg-cursor" x1="0" x2="0" y1="0" y2="${H}"/>`;
+      svg.dataset.frames = String(n);
+    }
+    const keys = new Set(callbacks.getBreakpoints?.(levelID) || []);
+    svg.querySelector(".dbg-ticks").innerHTML = frames.map((f, i) => keys.has(breakpointKey(f.file || "main.go", f.line)) ? `<rect x="${(x(i) - 1.5).toFixed(1)}" y="0" width="3" height="5"/>` : "").join("");
+    const cursor = svg.querySelector(".dbg-cursor");
+    cursor.setAttribute("x1", x(index).toFixed(1));
+    cursor.setAttribute("x2", x(index).toFixed(1));
+  }
+
   function renderFrame(frame, index) {
     if (!elements || !response) return;
     const total = response.frames.length;
     renderStepControls(index, total);
+    const where = document.querySelector("#debugger-where-text");
+    if (where) where.innerHTML = whereText(frame);
+    renderTimeline(index);
     renderVariables(frame);
     renderStack(frame, index, response.frames);
     renderOutput(frame);
@@ -428,8 +521,12 @@ const InlineDebugger = (() => {
     const outputOffset = Number(frame?.stdout) || 0;
     const capturedBytes = responseStdoutBytes?.length || 0;
     const outputText = stdoutAtOffset(response.stdout, outputOffset, responseStdoutBytes);
-    elements.output.textContent = outputText + (response.stdoutTruncated && outputOffset > capturedBytes
-      ? translate("\n…(الناتج اتقص)", "\n…(output truncated)") : "");
+    const oldText = stdoutAtOffset(response.stdout, Math.min(lastStdoutOffset, outputOffset), responseStdoutBytes);
+    const fresh = outputText.slice(oldText.length);
+    lastStdoutOffset = outputOffset;
+    const tail = response.stdoutTruncated && outputOffset > capturedBytes ? translate("\n…(الناتج اتقص)", "\n…(output truncated)") : "";
+    elements.output.innerHTML = esc(oldText) + (fresh ? `<mark class="debug-fresh">${esc(fresh)}</mark>` : "") + esc(tail);
+    if (!outputText) elements.output.innerHTML = `<span class="debug-empty">${esc(translate("لسه مفيش حاجة اتطبعت.", "Nothing printed yet."))}</span>`;
   }
 
   function flashChangedVariables(frame) {
@@ -447,8 +544,18 @@ const InlineDebugger = (() => {
     else callbacks.renderEditor?.();
   }
 
+  function valueKind(value) {
+    const text = String(value);
+    if (/^-?\d+(\.\d+)?(e[-+]?\d+)?$/i.test(text)) return "num";
+    if (text === "true" || text === "false") return "bool";
+    if (text === "<nil>" || text === "nil") return "nil";
+    if (/^[\[{]|^map\[/.test(text)) return "agg";
+    return "str";
+  }
+
   function renderVariables(frame) {
     const variables = frame?.variables || [];
+    const prior = lastVariables;
     const returns = frame?.returns || [];
     if (!variables.length && !returns.length) {
       elements.variables.innerHTML = `<p>${translate("مفيش متغيرات محلية في الخطوة دي.", "No local variables in this step.")}</p>`;
@@ -456,7 +563,7 @@ const InlineDebugger = (() => {
     }
     const header = `<thead><tr><th>${translate("المتغير", "Variable")}</th><th>${translate("القيمة", "Value")}</th></tr></thead>`;
     elements.variables.innerHTML = (variables.length
-      ? `<table>${header}<tbody>${variables.map((variable) => `<tr data-variable-name="${esc(variable.name)}"><th dir="ltr">${esc(variable.name)}</th><td dir="ltr">${esc(variable.value)}</td></tr>`).join("")}</tbody></table>`
+      ? `<table>${header}<tbody>${variables.map((variable) => `<tr data-variable-name="${esc(variable.name)}"><th dir="ltr">${esc(variable.name)}</th><td dir="ltr"><span class="debug-val debug-val-${valueKind(variable.value)}">${esc(variable.value)}</span>${prior.has(variable.name) && prior.get(variable.name) !== variable.value ? `<s class="debug-was">${esc(prior.get(variable.name))}</s>` : ""}</td></tr>`).join("")}</tbody></table>`
       : "") + (returns.length
       ? `<h4>${translate("قيم الرجوع", "Return values")}</h4><table>${header}<tbody>${returns.map((variable) => `<tr><th dir="ltr">${esc(variable.name)}</th><td dir="ltr">${esc(variable.value)}</td></tr>`).join("")}</tbody></table>`
       : "");
@@ -466,7 +573,7 @@ const InlineDebugger = (() => {
     const entries = callStackAt(frames, index, frameGoroutine(frame));
     const goroutine = frameGoroutine(frame);
     elements.stack.innerHTML = `<p class="debug-goroutine">goroutine ${esc(goroutine)}</p>` + (entries.length
-      ? entries.map((entry) => `<button type="button" class="debug-stack-frame" data-frame-index="${entry.index}"><span>${esc(entry.func)}</span><small dir="ltr">${esc(entry.file)}:${entry.line}</small></button>`).join("")
+      ? entries.map((entry, i) => `<button type="button" class="debug-stack-frame${i === entries.length - 1 ? " is-top" : ""}" style="--depth:${i}" data-frame-index="${entry.index}"><span>${esc(entry.func)}()</span><small dir="ltr">${esc(entry.file)}:${i === entries.length - 1 ? frame.line : entry.line}</small></button>`).reverse().join("")
       : `<p>${translate("مفيش call stack متاح.", "No call stack is available.")}</p>`);
     elements.stack.querySelectorAll("[data-frame-index]").forEach((button) => {
       button.onclick = () => {
@@ -490,12 +597,31 @@ const InlineDebugger = (() => {
     if (!session.active || !stepper?.frame || stepper.frame.file !== file) return { active: false };
     const current = stepper.frame;
     const map = new Map();
+    let callStart = 0;
+    for (let i = stepper.index; i >= 0; i--) {
+      const frame = response.frames[i];
+      if (frame.event === "call" && frame.func === current.func && Number(frame.depth || 0) === Number(current.depth || 0) && frameGoroutine(frame) === frameGoroutine(current)) { callStart = i; break; }
+    }
     const frames = response.frames.slice(0, stepper.index + 1);
-    for (const frame of frames) {
+    for (const frame of frames.slice(callStart)) {
       if (frame.file !== file || frameGoroutine(frame) !== frameGoroutine(current) || frame.func !== current.func || Number(frame.depth || 0) !== Number(current.depth || 0) || frame.event !== "line") continue;
       map.set(frame.line, frame.variables || []);
     }
-    return { active: true, line: current.line, inlineValuesByLine: Object.fromEntries([...map].map(([line, values]) => [line, values])) };
+    const visited = new Set(frames.filter((frame) => frame.file === file && frame.event === "line").map((frame) => frame.line));
+    let previousLine = 0;
+    for (let i = stepper.index - 1; i >= 0; i--) {
+      const frame = response.frames[i];
+      if (frame.file === file && frame.event === "line" && frame.line !== current.line && frameGoroutine(frame) === frameGoroutine(current)) { previousLine = frame.line; break; }
+    }
+    const before = new Map();
+    for (let i = stepper.index - 1; i >= 0; i--) {
+      const frame = response.frames[i];
+      if (frame.func !== current.func || frameGoroutine(frame) !== frameGoroutine(current)) continue;
+      for (const variable of frame.variables || []) if (!before.has(variable.name)) before.set(variable.name, variable.value);
+      if (before.size >= (current.variables || []).length) break;
+    }
+    const changed = (current.variables || []).filter((variable) => before.has(variable.name) && before.get(variable.name) !== variable.value).map((variable) => variable.name);
+    return { active: true, line: current.line, previousLine, visited, changed, inlineValuesByLine: Object.fromEntries([...map].map(([line, values]) => [line, values])) };
   }
 
   function breakpointLines(level, file) {
@@ -506,6 +632,7 @@ const InlineDebugger = (() => {
   function toggleLevelBreakpoint(level, file, line) {
     const current = callbacks.getBreakpoints?.(level) || [];
     callbacks.saveBreakpoints?.(level, toggleBreakpointList(current, file, line));
+    if (stepper && session.active) renderTimeline(stepper.index);
   }
 
   return {

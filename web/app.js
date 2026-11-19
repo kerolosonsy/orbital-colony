@@ -456,7 +456,7 @@ function renderEditor() {
   const debugState = InlineDebugger.editorState(S.file);
   hl.innerHTML = InlineDebugger.editorMarkup(ed.value, debugState, highlight);
   const n = ed.value.split("\n").length;
-  gutter.innerHTML = InlineDebugger.gutterMarkup(n, errLines, InlineDebugger.breakpointLines(S.cur?.id, S.file), debugState.active ? debugState.line : 0);
+  gutter.innerHTML = InlineDebugger.gutterMarkup(n, errLines, InlineDebugger.breakpointLines(S.cur?.id, S.file), debugState.active ? debugState.line : 0, debugState.visited || new Set());
   syncScroll();
   if (debugState.active) {
     const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;

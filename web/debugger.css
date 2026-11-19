@@ -1,66 +1,183 @@
+/* Inline debugger — toolbar, editor marks, bottom panel. */
 .debugger-toolbar {
-  display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 4px 8px;
-  border-bottom: 1px solid var(--rule); background: var(--sheet); direction: rtl;
+  --dbg-accent: var(--star);
+  --dbg-glow: color-mix(in oklab, var(--star) 22%, transparent);
+  position: relative; display: flex; flex-direction: column; gap: 0;
+  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(180deg, var(--sheet) 0%, color-mix(in oklab, var(--sheet) 70%, var(--ink-2)) 100%);
+  direction: ltr;
 }
-:root[dir="ltr"] .debugger-toolbar { direction: ltr; }
-.debugger-controls { display: flex; align-items: center; gap: 5px; width: 100%; min-width: 0; }
+.debugger-toolbar::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--dbg-accent), transparent);
+  opacity: .55;
+}
+.debugger-toolbar.is-playing::before { animation: dbg-scan 1.6s linear infinite; opacity: .9; }
+@keyframes dbg-scan { 0% { transform: translateX(-60%); } 100% { transform: translateX(60%); } }
+
+.debugger-controls { display: flex; flex-direction: column; min-width: 0; }
+.debugger-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px 4px; min-width: 0; }
+.debugger-group {
+  display: inline-flex; align-items: center; gap: 2px; padding: 2px;
+  border: 1px solid var(--rule); border-radius: 6px; background: color-mix(in oklab, var(--ink) 55%, transparent);
+}
 .debugger-button, .debugger-collapse {
-  display: inline-flex; align-items: center; justify-content: center; flex: none; min-width: 30px; height: 28px;
-  padding: 0 7px; border: 1px solid var(--rule); border-radius: 2px; background: var(--sheet-2); color: var(--paper);
-  font: 600 15px/1 var(--sans); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 28px; height: 26px; padding: 0; border: 0; border-radius: 4px;
+  background: transparent; color: var(--paper-2); cursor: pointer;
+  transition: background .15s, color .15s, transform .08s;
 }
-.debugger-button:hover:not(:disabled), .debugger-collapse:hover { background: var(--sheet-3); border-color: var(--rule-strong); }
-.debugger-button:disabled { opacity: .38; cursor: default; }
-.debugger-status { color: var(--muted); font: 12px/1.4 var(--sans); margin-inline-start: auto; }
-.debugger-counter { min-width: 68px; color: var(--paper-2); font: 600 12px var(--mono); text-align: center; direction: ltr; font-variant-numeric: tabular-nums; }
-.debugger-slider { flex: 1; width: auto; min-width: 42px; margin: 0 2px; }
-.debugger-panel { flex: none; max-height: 190px; min-height: 0; border-top: 1px solid var(--rule); background: var(--ink-2); direction: rtl; }
-:root[dir="ltr"] .debugger-panel { direction: ltr; }
-.debugger-panel-head { display: flex; align-items: center; gap: 5px; min-height: 34px; padding: 3px 8px; border-bottom: 1px solid var(--rule); }
-.debugger-tab { padding: 4px 9px; border: 0; border-radius: 2px; background: transparent; color: var(--muted); font: 12px var(--sans); cursor: pointer; }
-.debugger-tab[aria-selected="true"] { background: var(--sheet-3); color: var(--paper); }
-.debugger-order { margin: 0 auto; color: var(--info); font: 11px/1.3 var(--sans); }
-.debugger-collapse { margin-inline-start: auto; min-width: 25px; height: 24px; font-size: 14px; }
-.debugger-panel-body { max-height: 154px; overflow: auto; padding: 5px 9px; color: var(--paper-2); font: 12px/1.5 var(--sans); }
-.debugger-panel-body [hidden] { display: none !important; }
-.debugger-panel.is-collapsed { max-height: 35px; }
-.debugger-panel.is-collapsed .debugger-panel-body { display: none; }
-.debugger-panel-body p { margin: 4px 0; color: var(--muted); }
-.debugger-panel-body table { width: 100%; border-collapse: collapse; }
-.debugger-panel-body th, .debugger-panel-body td { padding: 3px 8px; border-bottom: 1px solid var(--rule); text-align: start; }
-.debugger-panel-body thead th { color: var(--muted); font-weight: 500; }
-.debugger-panel-body tbody th, .debugger-panel-body td { font-family: var(--mono); unicode-bidi: isolate; overflow-wrap: anywhere; }
-.debugger-panel-body tr.changed { animation: debug-value-change .8s ease-out; }
-@keyframes debug-value-change { 0% { background: color-mix(in oklab, var(--regolith) 32%, transparent); } 100% { background: transparent; } }
-.debugger-stack { display: grid; gap: 3px; }
-.debugger-stack .debug-goroutine { margin: 0 0 2px; color: var(--muted); direction: ltr; text-align: start; font: 11px var(--mono); }
-.debug-stack-frame { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 4px 7px; border: 1px solid var(--rule); border-radius: 2px; background: var(--sheet); color: var(--paper); text-align: start; cursor: pointer; }
-.debug-stack-frame:hover { border-color: var(--regolith); }
-.debug-stack-frame span { font-family: var(--mono); }
-.debug-stack-frame small { color: var(--muted); font: 10px var(--mono); }
-.debug-output { min-height: 88px; max-height: 140px; overflow: auto; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--paper); direction: ltr; text-align: left; font: 12px/1.55 var(--mono); }
-.debug-line { display: block; box-sizing: border-box; height: 1.65em; min-width: max-content; white-space: pre; }
-.debug-line.is-current { background: color-mix(in oklab, var(--regolith) 24%, transparent); box-shadow: inset 3px 0 var(--regolith); }
-.debug-inline-values { margin-left: 1.5em; color: var(--muted); font-size: .88em; opacity: .78; }
-.debug-inline-values::before { content: "// "; color: var(--faint); }
+.debugger-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.debugger-button svg circle { fill: currentColor; stroke: none; }
+.debugger-button[data-debug-command="back"] svg path:first-child,
+.debugger-button[data-debug-command="go"] svg path:first-child,
+.debugger-play svg path { fill: currentColor; stroke: none; }
+.debugger-button:hover:not(:disabled), .debugger-collapse:hover { background: var(--sheet-3); color: var(--paper); }
+.debugger-button:active:not(:disabled) { transform: translateY(1px); }
+.debugger-button:focus-visible { outline: 2px solid var(--dbg-accent); outline-offset: 1px; }
+.debugger-button:disabled { opacity: .3; cursor: default; }
+.debugger-button.is-primary { color: var(--dbg-accent); }
+.debugger-play { width: 30px; color: var(--ink); background: var(--dbg-accent); }
+.debugger-play:hover:not(:disabled) { background: color-mix(in oklab, var(--star) 85%, white); color: var(--ink); }
+.debugger-play .dbg-ico-pause { display: none; }
+.is-playing .debugger-play .dbg-ico-play { display: none; }
+.is-playing .debugger-play .dbg-ico-pause { display: inline; }
+.is-playing .debugger-play { box-shadow: 0 0 0 3px var(--dbg-glow); }
+.debugger-exit { margin-inline-start: auto; color: var(--muted); }
+
+.debugger-where {
+  display: inline-flex; align-items: center; gap: 7px; min-width: 0; overflow: hidden;
+  padding: 3px 10px; border-radius: 999px; background: color-mix(in oklab, var(--ink) 60%, transparent);
+  color: var(--paper-2); font: 12px/1.3 var(--sans); white-space: nowrap; text-overflow: ellipsis;
+}
+:root[lang="ar"] .debugger-where, :root:not([lang]) .debugger-where { direction: rtl; }
+.debugger-where code { color: var(--dbg-accent); font: 600 12px var(--mono); direction: ltr; unicode-bidi: isolate; }
+.debugger-pulse { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--dbg-accent); box-shadow: 0 0 0 0 var(--dbg-glow); animation: dbg-pulse 1.8s ease-out infinite; }
+@keyframes dbg-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--star) 55%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
+
+.debugger-timeline { position: relative; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px 6px; }
+.debugger-depth { position: absolute; left: 8px; right: 84px; top: 0; height: 24px; width: calc(100% - 92px); pointer-events: none; }
+.dbg-depth-area { fill: color-mix(in oklab, var(--lichen) 22%, transparent); stroke: color-mix(in oklab, var(--lichen) 70%, transparent); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.dbg-ticks rect { fill: var(--err); }
+.dbg-cursor { stroke: var(--dbg-accent); stroke-width: 2; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 3px var(--star)); }
+.debugger-slider {
+  position: relative; z-index: 1; flex: 1; min-width: 42px; height: 24px; margin: 0;
+  -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;
+}
+.debugger-slider::-webkit-slider-runnable-track { height: 24px; background: transparent; }
+.debugger-slider::-moz-range-track { height: 24px; background: transparent; }
+.debugger-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 24px; border-radius: 3px; background: transparent; }
+.debugger-slider::-moz-range-thumb { width: 12px; height: 24px; border: 0; background: transparent; }
+.debugger-slider:focus-visible { outline: 1px dashed var(--dbg-accent); outline-offset: 2px; }
+.debugger-counter { flex: none; min-width: 68px; color: var(--paper-2); font: 600 12px var(--mono); text-align: end; font-variant-numeric: tabular-nums; }
+
+.debugger-status { color: var(--muted); font: 12px/1.4 var(--sans); padding: 6px 10px; direction: rtl; }
+:root[lang="en"] .debugger-status { direction: ltr; }
+.debugger-status:empty { display: none; }
+
+/* editor marks */
+.debug-line { display: block; box-sizing: border-box; height: 1.65em; min-width: max-content; white-space: pre; transition: background .2s; }
+.debug-line.is-current {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--star) 26%, transparent), color-mix(in oklab, var(--star) 6%, transparent) 70%, transparent);
+  box-shadow: inset 3px 0 var(--star), 0 0 18px -6px var(--star);
+  animation: dbg-land .28s ease-out;
+}
+@keyframes dbg-land { from { background-color: color-mix(in oklab, var(--star) 40%, transparent); } }
+.debug-line.is-trail { background: linear-gradient(90deg, color-mix(in oklab, var(--star) 9%, transparent), transparent 60%); box-shadow: inset 2px 0 color-mix(in oklab, var(--star) 35%, transparent); }
+.debug-inline-values { display: inline-flex; gap: 6px; margin-left: 1.6em; vertical-align: 1px; }
+.debug-chip {
+  display: inline-block; padding: 0 6px; border-radius: 4px; line-height: 1.35em; font-size: .8em;
+  background: color-mix(in oklab, var(--sheet-3) 75%, transparent); color: var(--paper-2);
+  border: 1px solid color-mix(in oklab, var(--rule-strong) 60%, transparent);
+}
+.debug-chip b { color: var(--muted); font-weight: 400; }
+.debug-chip b::after { content: " ="; }
+.debug-line:not(.is-current) .debug-chip { opacity: .55; }
+.debug-chip.is-changed { color: var(--ink); background: var(--star); border-color: var(--star); animation: dbg-pop .35s ease-out; }
+.debug-chip.is-changed b { color: color-mix(in oklab, var(--ink) 70%, var(--star)); }
+@keyframes dbg-pop { 0% { transform: scale(1.25); } 100% { transform: scale(1); } }
+
+/* gutter */
 .gutter-line {
   position: relative; display: block; box-sizing: border-box; width: 100%; height: 1.65em; padding: 0 10px 0 0;
   border: 0; background: transparent; color: inherit; font: inherit; line-height: 1.65em; text-align: right; cursor: pointer;
 }
 .gutter-line:hover { background: color-mix(in oklab, var(--paper) 8%, transparent); }
-.gutter-line:focus-visible { z-index: 1; outline: 1px solid var(--regolith); outline-offset: -1px; }
-.gutter-line.has-breakpoint::before { content: ""; position: absolute; left: 5px; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: var(--err); transform: translateY(-50%); }
-.gutter-line.debug-active { color: var(--regolith); font-weight: 700; }
+.gutter-line:hover::before { content: ""; position: absolute; left: 5px; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: color-mix(in oklab, var(--err) 35%, transparent); transform: translateY(-50%); }
+.gutter-line:focus-visible { z-index: 1; outline: 1px solid var(--star); outline-offset: -1px; }
+.gutter-line.has-breakpoint::before, .gutter-line.has-breakpoint:hover::before {
+  content: ""; position: absolute; left: 5px; top: 50%; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--err); box-shadow: 0 0 6px var(--err); transform: translateY(-50%);
+}
+.gutter-line.debug-visited::after { content: ""; position: absolute; right: 2px; top: 50%; width: 3px; height: 3px; border-radius: 50%; background: color-mix(in oklab, var(--star) 55%, transparent); transform: translateY(-50%); }
+.gutter-line.debug-active { color: var(--star); font-weight: 700; background: color-mix(in oklab, var(--star) 12%, transparent); }
+.gutter-line.debug-active::after {
+  content: ""; position: absolute; right: 0; top: 50%; border: 5px solid transparent; border-right: 0;
+  border-left: 7px solid var(--star); transform: translateY(-50%); filter: drop-shadow(0 0 3px var(--star));
+}
+.gutter-line.debug-active span { margin-right: 6px; }
 .gutter-line.err { color: var(--ink); background: var(--err); border-radius: 0 4px 4px 0; font-weight: 600; }
+
+/* bottom panel */
+.debugger-panel { flex: none; max-height: 200px; min-height: 0; border-top: 1px solid var(--rule); background: var(--ink-2); direction: rtl; }
+:root[lang="en"] .debugger-panel, :root[dir="ltr"] .debugger-panel { direction: ltr; }
+.debugger-panel-head { display: flex; align-items: center; gap: 2px; min-height: 32px; padding: 3px 8px; border-bottom: 1px solid var(--rule); background: var(--sheet); }
+.debugger-tab { position: relative; padding: 5px 10px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); font: 12px var(--sans); cursor: pointer; }
+.debugger-tab:hover { color: var(--paper); }
+.debugger-tab[aria-selected="true"] { color: var(--paper); }
+.debugger-tab[aria-selected="true"]::after { content: ""; position: absolute; inset: auto 8px -4px; height: 2px; border-radius: 2px; background: var(--star); }
+.debugger-order { margin: 0 auto; color: var(--info); font: 11px/1.3 var(--sans); }
+.debugger-collapse { margin-inline-start: auto; width: 26px; height: 24px; font-size: 14px; }
+.debugger-panel-body { max-height: 166px; overflow: auto; padding: 4px 8px 8px; color: var(--paper-2); font: 12px/1.5 var(--sans); }
+.debugger-panel-body [hidden] { display: none !important; }
+.debugger-panel.is-collapsed { max-height: 33px; }
+.debugger-panel.is-collapsed .debugger-panel-body { display: none; }
+.debugger-panel-body p { margin: 6px 2px; color: var(--muted); }
+.debugger-panel-body h4 { margin: 8px 2px 2px; color: var(--muted); font: 600 11px var(--sans); }
+.debugger-panel-body table { width: 100%; border-collapse: collapse; direction: ltr; }
+.debugger-panel-body th, .debugger-panel-body td { padding: 4px 8px; border-bottom: 1px solid color-mix(in oklab, var(--rule) 60%, transparent); text-align: left; }
+.debugger-panel-body thead th { color: var(--faint); font: 500 11px var(--sans); text-transform: none; }
+.debugger-panel-body tbody th { width: 35%; color: var(--paper); font: 600 12px var(--mono); }
+.debugger-panel-body td { font: 12px var(--mono); overflow-wrap: anywhere; }
+.debug-val-num { color: var(--ice); }
+.debug-val-str { color: var(--moss); }
+.debug-val-bool { color: var(--crystal); }
+.debug-val-nil { color: var(--faint); font-style: italic; }
+.debug-val-agg { color: var(--paper-2); }
+.debug-was { margin-left: 10px; color: var(--faint); font-size: 11px; }
+.debug-was::before { content: "← "; text-decoration: none; display: inline-block; }
+.debugger-panel-body tr.changed { animation: debug-value-change 1s ease-out; }
+.debugger-panel-body tr.changed th::before { content: "●"; margin-right: 6px; color: var(--star); font-size: 9px; vertical-align: 1px; }
+@keyframes debug-value-change { 0% { background: color-mix(in oklab, var(--star) 30%, transparent); } 100% { background: transparent; } }
+
+.debugger-stack { display: grid; gap: 4px; padding-top: 4px; direction: ltr; }
+.debugger-stack .debug-goroutine { margin: 0 0 2px; color: var(--faint); text-align: left; font: 11px var(--mono); }
+.debug-stack-frame {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; width: calc(100% - var(--depth, 0) * 14px);
+  margin-left: calc(var(--depth, 0) * 14px); padding: 5px 9px; border: 1px solid var(--rule); border-radius: 5px;
+  background: var(--sheet); color: var(--paper-2); text-align: left; cursor: pointer; transition: border-color .15s;
+}
+.debug-stack-frame:hover { border-color: var(--rule-strong); }
+.debug-stack-frame.is-top { border-color: var(--star); color: var(--paper); box-shadow: inset 3px 0 var(--star); }
+.debug-stack-frame span { font: 600 12px var(--mono); }
+.debug-stack-frame small { color: var(--muted); font: 10px var(--mono); }
+
+.debug-output { min-height: 88px; max-height: 150px; overflow: auto; margin: 0; padding: 6px 4px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--paper-2); direction: ltr; text-align: left; font: 12px/1.55 var(--mono); }
+.debug-fresh { background: color-mix(in oklab, var(--star) 22%, transparent); color: var(--paper); border-radius: 2px; animation: dbg-fresh 1.2s ease-out forwards; }
+@keyframes dbg-fresh { to { background: transparent; } }
+.debug-empty { color: var(--faint); font-family: var(--sans); }
+
 .debugger-toolbar[hidden], .debugger-controls[hidden], .debugger-panel[hidden] { display: none; }
 
+@media (prefers-reduced-motion: reduce) {
+  .debugger-toolbar::before, .debugger-pulse, .debug-line.is-current, .debug-chip.is-changed, .debug-fresh { animation: none !important; }
+}
+
 @media (max-width: 760px) {
-  .debugger-toolbar { flex-wrap: wrap; gap: 4px; min-height: 36px; padding: 4px 5px; }
-  .debugger-controls { gap: 3px; }
-  .debugger-button { min-width: 26px; height: 26px; padding: 0 5px; }
-  .debugger-counter { min-width: 54px; font-size: 12px; }
-  .debugger-status { flex: 1 0 100%; padding-inline: 4px; }
-  .debugger-panel { max-height: 190px; }
-  .debugger-panel-body { max-height: 154px; }
-  .debugger-panel.is-collapsed { max-height: 35px; }
+  .debugger-row { flex-wrap: wrap; gap: 6px; padding: 5px; }
+  .debugger-where { order: 9; flex: 1 0 100%; }
+  .debugger-button { width: 26px; height: 26px; }
+  .debugger-counter { min-width: 54px; }
+  .debugger-depth { right: 70px; width: calc(100% - 78px); }
+  .debugger-panel.is-collapsed { max-height: 33px; }
 }

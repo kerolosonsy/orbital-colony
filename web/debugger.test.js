@@ -49,7 +49,7 @@ test("inline values are readable, escaped, and shortened", () => {
   assert.ok(Debugger.inlineValueText([{ name: "text", value: "x".repeat(120) }], 20).endsWith("…"));
   const markup = Debugger.editorMarkup("x := 1", { active: true, line: 1, inlineValuesByLine: { 1: [{ name: "x", value: "1" }] } }, (line) => line);
   assert.match(markup, /is-current/);
-  assert.match(markup, /x = 1/);
+  assert.match(markup, /<b>x<\/b> 1/);
 });
 
 test("inline rendering preserves multiline syntax highlighting", () => {
