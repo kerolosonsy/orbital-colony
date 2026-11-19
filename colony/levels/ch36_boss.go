@@ -4,6 +4,7 @@ func init() {
 	add(&Level{
 		ID: "36-boss-storm-control", Chapter: 36, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: true,
 		Title: "Boss: درع العاصفة", Goal: "استرجع أوامر الدرع وانشرها بأمان واعرض الجاهزية والمقاييس",
+		LessonRevision: 1, Steps: ch36BossArabicSteps,
 		Requires: []string{"mutex", "iface", "sel:sha256.Sum256", "sel:slog.Logger"}, Bridge: []int{87, 88, 95, 96, 98, 100},
 		Deps: []string{"modernc.org/sqlite"},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
@@ -52,7 +53,7 @@ Flush متسلسلة مع Record على نفس الكائن: اقرا كل pendi
 
 GET ~/livez~ يرجع 200 مستقل عن القاعدة. ~/readyz~ يرجع 200 لو القاعدة متاحة ومفيش pending، وإلا 503. ~/metrics~ يرجع نص بالظبط ~colony_storm_commands_total N~ ثم ~colony_storm_pending P~، كل سطر newline ومن غير labels؛ N عدد كل الصفوف وP الغير منشورة. فشل القاعدة 503 برسالة عامة من غير تفاصيل، وأي مسار تاني 404. مرّر السياق لكل I/O وامنع السباقات. سيب ~main~ فاضية. النجمة التالتة: فقدان ack ثم إعادة فتح القاعدة وإعادة Record وFlush مينشئش أمر جديد أو يكرر أثر المستهلك.
 `,
-		Hints: []string{"خزّن الأمر وعلامة النشر في نفس الصف؛ request ID فريد.", "اقفل Rows قبل استدعاء broker خصوصاً مع حوض اتصال واحد.", "علّم النجاح بعد Publish فقط؛ المقاييس ثابتة ومن غير ID كـ label."},
+		Hints: []string{"الـoutbox يحفظ نية النشر قبل الاعتماد على الشبكة.", "تتبّع ملكية كل أمر من تسجيله لحد التسليم، وخلي الفشل قابل للإعادة.", "ابدأ من Init وRecord وFlush في starter وحدد عمر كل مورد."},
 		En: &LevelText{Title: "Boss: Storm Shield Control", Goal: "Recover durable shield commands, retry delivery, and expose readiness and metrics", Files: []LabFile{{Name: "main.go", Starter: `package main
 import ("context";"database/sql";"errors";"log/slog";"net/http")
 type StormEvent struct { ID string; Delta int; Version int }
@@ -99,7 +100,8 @@ Flush serializes with Record on one instance: read all pending rows by seq, clos
 
 GET ~/livez~ returns 200 independently of storage. ~/readyz~ returns 200 only when storage is available with no pending work, otherwise 503. ~/metrics~ returns exactly ~colony_storm_commands_total N~ then ~colony_storm_pending P~, each followed by newline, without labels; N counts all rows, P unpublished rows. Database failures return 503 with a generic message; other paths return 404. Pass context to I/O and avoid races. Leave ~main~ empty. Third star: lost acknowledgement followed by reopening, repeated Record, and Flush creates no new command or duplicate consumer effect.
 `,
-			Hints: []string{"Store the command and delivery marker together with a unique ID.", "Close Rows before broker calls, especially with a one-connection pool.", "Acknowledge only after Publish succeeds; metrics stay fixed without ID labels."}},
+			LessonRevision: 1, Steps: ch36BossEnglishSteps,
+			Hints: []string{"The outbox preserves the intent to publish before relying on the network.", "Track each command from recording to delivery, and leave failures retryable.", "Start with Init, Record, and Flush in the starter and map each resource's lifetime."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: `package main
 import (
     "bytes"

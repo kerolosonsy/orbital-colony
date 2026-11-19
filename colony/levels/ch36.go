@@ -2,6 +2,7 @@ package levels
 
 func init() {
 	add(&Level{ID: "36-1-metrics", Chapter: 36, Kind: "lab", Title: "العدادات", Goal: "اعرض مقاييس رصيف الهبوط بـ Prometheus بـ labels محدودة وendpoint وتحديث متوازي",
+		LessonRevision: 1, Steps: ch36MetricsArabicSteps,
 		Requires: []string{"sel:prometheus.NewCounterVec", "sel:promhttp.HandlerFor"}, Bridge: []int{96}, Setup: seededLabRoom, Race: true,
 		Deps:  []string{"github.com/prometheus/client_golang"},
 		Files: []LabFile{{Name: "main.go", Starter: ch361Starter}},
@@ -91,8 +92,8 @@ return promhttp.Handler()                   // بيعرض السجل الغلط
 ~RecordLanding(bay string, ok bool, d time.Duration)~ يزوّد العداد واحد بـ ~outcome~ قيمته ~ok~ لو ~ok~ صح و ~aborted~ لو غلط، ويضيف ~d~ بالثواني للمدرّج. أي bay مش من الأربعة بالظبط (حتى ~North~ أو ~""~) يتسجّل ~other~. المدة السالبة تتحسب 0. ~SetQueue(n int)~ يحط المؤشر على n، والسالب 0. ~Handler() http.Handler~ يعرض نفس السجل بـ ~promhttp~. كل الدوال آمنة بالتزامن. ~main~ فاضية.
 
 النجمة التالتة: ~Inflight(bay string) func()~ يزوّد مؤشر ~dock_inflight~ بـ label ~bay~ (بنفس قاعدة ~other~) واحد، ويرجع دالة بتنقّصه واحد أول مرة تتنادى بس؛ النداء التاني مبيعملش حاجة.`,
-		Hints: []string{"ابدأ بـ prometheus.NewCounterVec وNewHistogramVec وNewGauge، وسجّلهم بـ reg.Register ورجّع أول خطأ.", "اعمل دالة صغيرة بتحوّل الـ bay لقيمة من الخمسة، وبعد التسجيل نادي WithLabelValues لكل bay مع ok وaborted عشان السلاسل تظهر بصفر.", "في RecordLanding استخدم max(d, 0).Seconds()، وHandler يرجع promhttp.HandlerFor(reg, promhttp.HandlerOpts{})؛ للنجمة لفّ Dec في sync.Once."},
-		En: &LevelText{Title: "Counters", Goal: "Expose landing dock metrics with Prometheus using bounded labels, an endpoint, and concurrent updates", Files: []LabFile{{Name: "main.go", Starter: ch361Starter}},
+		Hints: []string{"العداد التراكمي غير قياس الحالة الحالية؛ اختار النوع من معنى القيمة.", "رتّب التفكير بين إنشاء المقاييس وتسجيلها ثم تحديثها وعرضها.", "ارجع لتواقيع RecordLanding وSetQueue في starter وحدد أثر كل method."},
+		En: &LevelText{LessonRevision: 1, Steps: ch36MetricsEnglishSteps, Title: "Counters", Goal: "Expose landing dock metrics with Prometheus using bounded labels, an endpoint, and concurrent updates", Files: []LabFile{{Name: "main.go", Starter: ch361Starter}},
 			Lesson: `# Landing Dock Counters
 
 ## Before you write
@@ -179,7 +180,7 @@ Implement ~NewDockMetrics(reg *prometheus.Registry) (*DockMetrics, error)~ regis
 ~RecordLanding(bay string, ok bool, d time.Duration)~ adds one to the counter with ~outcome~ ~ok~ when ~ok~ is true and ~aborted~ when false, and adds ~d~ in seconds to the histogram. Any bay that is not exactly one of the four (even ~North~ or ~""~) is recorded as ~other~. A negative duration counts as 0. ~SetQueue(n int)~ sets the gauge to n, and a negative n to 0. ~Handler() http.Handler~ serves the same registry with ~promhttp~. Every method is safe for concurrent use. Leave ~main~ empty.
 
 Third star: ~Inflight(bay string) func()~ adds one to gauge ~dock_inflight~ with label ~bay~ (same ~other~ rule) and returns a function that subtracts one the first time it is called only; a second call does nothing.`,
-			Hints: []string{"Start with prometheus.NewCounterVec, NewHistogramVec, and NewGauge, register them with reg.Register, and return the first error.", "Write a small function mapping the bay to one of the five, and after registering call WithLabelValues for every bay with ok and aborted so the series appear at zero.", "In RecordLanding use max(d, 0).Seconds(), and Handler returns promhttp.HandlerFor(reg, promhttp.HandlerOpts{}); for the star wrap Dec in a sync.Once."}},
+			Hints: []string{"A cumulative count differs from a current reading; choose a type from what the value means.", "Think in stages: create and register metrics, then update and expose them.", "Use the starter signatures for RecordLanding and SetQueue to map each method's effect."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch361Hidden},
 	})
 }
@@ -461,6 +462,7 @@ func TestHiddenBonusDockInflight(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "36-2-containers", Chapter: 36, Kind: "lab", Title: "مدير الحاويات", Goal: "اكتب أداة سطر أوامر بتعرض وتشغّل وتوقف كبسولات المستعمرة عن طريق interface، بتأكيد قبل الإيقاف ومن غير حذف",
+		LessonRevision: 1, Steps: ch36ContainersArabicSteps,
 		Requires: []string{"iface"}, Bridge: []int{92}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch362Starter}},
 		Lesson: `# مدير كبسولات المستعمرة
@@ -539,8 +541,8 @@ case "rm": rt.(interface{ Remove(string) }) // باب خلفي للحذف
 - أي حاجة تانية، منها ~rm~ و ~delete~ وعدد args غلط و ~stop NAME --yes~: ~usage: podctl list [--running] | start NAME | stop [--yes] NAME\n~ على ~errOut~ والخروج 2، من غير أي نداء على الـ runtime. مفيش حذف خالص.
 
 النجمة التالتة: ~list --running~ يطبع الشغّالة بس بنفس الشكل والترتيب.`,
-		Hints: []string{"اكتب الـ interface بالتلات methods، وابدأ RunPodCtl بـ switch على args[0] وعدد الباقي، وأي حالة مش معروفة ترجع رسالة الاستخدام و 2.", "لـ start و stop نادي List الأول ودوّر بـ slices.IndexFunc؛ لو الحالة هي المطلوبة خلاص اطبع already ورجّع 0.", "في stop من غير --yes اطبع السؤال، واقرا سطر بـ bufio.Scanner، وقارن strings.ToLower(strings.TrimSpace(...)) بـ y و yes بس."},
-		En: &LevelText{Title: "Container Manager", Goal: "Write a command-line tool that lists, starts, and stops colony pods through an interface, confirming before a stop and never deleting", Files: []LabFile{{Name: "main.go", Starter: ch362Starter}},
+		Hints: []string{"الـinterface حد صغير بين قرار الأداة ومحرك الحاويات.", "افصل قراءة الأمر عن فحص الحالة وعن الفعل المطلوب.", "استخدم تواقيع Runtime وRunPodCtl في starter كخريطة لحدود الأوامر."},
+		En: &LevelText{LessonRevision: 1, Steps: ch36ContainersEnglishSteps, Title: "Container Manager", Goal: "Write a command-line tool that lists, starts, and stops colony pods through an interface, confirming before a stop and never deleting", Files: []LabFile{{Name: "main.go", Starter: ch362Starter}},
 			Lesson: `# The Colony Pod Manager
 
 ## Before you write
@@ -617,7 +619,7 @@ Define a ~Runtime~ interface with exactly ~List(ctx context.Context) ([]Pod, err
 - Anything else, including ~rm~, ~delete~, a wrong argument count, and ~stop NAME --yes~: ~usage: podctl list [--running] | start NAME | stop [--yes] NAME\n~ to ~errOut~ and exit 2, with no runtime call at all. There is no deletion.
 
 Third star: ~list --running~ prints only running pods in the same form and order.`,
-			Hints: []string{"Write the interface with the three methods, and start RunPodCtl with a switch on args[0] and the count of the rest; any unknown case prints the usage and returns 2.", "For start and stop call List first and search with slices.IndexFunc; when the state is already the wanted one print already and return 0.", "In stop without --yes print the question, read one line with bufio.Scanner, and compare strings.ToLower(strings.TrimSpace(...)) with y and yes only."}},
+			Hints: []string{"The interface is a small boundary between tool decisions and the container engine.", "Separate command parsing from state lookup and the requested action.", "Use the Runtime and RunPodCtl signatures in the starter to map command boundaries."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch362Hidden},
 	})
 }
@@ -871,6 +873,7 @@ func TestHiddenBonusPodListRunning(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "36-3-ops", Chapter: 36, Kind: "lab", Title: "جاهزية", Goal: "اكتب سجلات slog منظّمة بتخفي الأسرار، وفحص /livez و /readyz مربوط بقاعدة بيانات القاعدة",
+		LessonRevision: 1, Steps: ch36OpsArabicSteps,
 		Requires: []string{"sel:slog.New", "sel:slog.NewJSONHandler"}, Bridge: []int{100}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch363Starter}},
 		Lesson: `# جاهزية القاعدة
@@ -959,8 +962,8 @@ db.Ping(context.Background())               // القاعدة عالقة: الف
 آمن بالتزامن، ومن غير شبكة. ~main~ فاضية.
 
 النجمة التالتة: ~(*Ops).Drain()~ آمنة بالتزامن؛ بعدها ~/readyz~ يرجع 503 و ~draining\n~ من غير ~Ping~ ومن غير سجل ~Warn~، و ~/livez~ يفضل 200.`,
-		Hints: []string{"ابدأ بـ slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: slog.LevelInfo, ReplaceAttr: ...})) وشيل time لما groups فاضية.", "في ReplaceAttr قارن strings.ToLower(a.Key) بالأربع مفاتيح ورجّع slog.String(a.Key, \"[REDACTED]\").", "في ServeHTTP احسب الحالة والجسم الأول، واكتبهم، وبعدين log.Info(\"request\", ...) بـ r.URL.Path؛ للجاهزية context.WithTimeout(r.Context(), 200*time.Millisecond)، وللنجمة atomic.Bool."},
-		En: &LevelText{Title: "Readiness", Goal: "Write structured slog logs that hide secrets, and /livez and /readyz probes tied to the base database", Files: []LabFile{{Name: "main.go", Starter: ch363Starter}},
+		Hints: []string{"فصل الحياة عن الجاهزية يمنع فشل dependency من إعادة تشغيل كل النسخ.", "قسّم logger وفحوص HTTP قبل ربط السجل بالرد.", "ارجع لواجهة Pinger وServeHTTP في starter وحدد أي probe يستدعي Ping."},
+		En: &LevelText{LessonRevision: 1, Steps: ch36OpsEnglishSteps, Title: "Readiness", Goal: "Write structured slog logs that hide secrets, and /livez and /readyz probes tied to the base database", Files: []LabFile{{Name: "main.go", Starter: ch363Starter}},
 			Lesson: `# Base Readiness
 
 ## Before you write
@@ -1047,7 +1050,7 @@ Implement ~NewOps(log *slog.Logger, db Pinger) *Ops~ and ~(*Ops).ServeHTTP~. Bod
 Safe for concurrent use, no network. Leave ~main~ empty.
 
 Third star: ~(*Ops).Drain()~ is safe for concurrent use; after it, ~/readyz~ returns 503 and ~draining\n~ with no ~Ping~ and no ~Warn~ record, and ~/livez~ stays 200.`,
-			Hints: []string{"Start with slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: slog.LevelInfo, ReplaceAttr: ...})) and remove time when groups is empty.", "In ReplaceAttr compare strings.ToLower(a.Key) with the four keys and return slog.String(a.Key, \"[REDACTED]\").", "In ServeHTTP compute the status and body first, write them, then log.Info(\"request\", ...) with r.URL.Path; for readiness use context.WithTimeout(r.Context(), 200*time.Millisecond), and for the star an atomic.Bool."}},
+			Hints: []string{"Keeping liveness separate from readiness stops a dependency failure from restarting every replica.", "Separate logger setup and HTTP probes before connecting logs to replies.", "Use Pinger and ServeHTTP in the starter to decide which probe calls Ping."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch363Hidden},
 	})
 }
