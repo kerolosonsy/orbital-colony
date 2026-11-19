@@ -1392,8 +1392,10 @@ requestAnimationFrame(frame);
 // ---------- levels ----------
 function parText(par, gold, dynamic) {
   $("#goal-strip-par").innerHTML = par > 0 ? `<span class="stars">${starHTML(3)}</span> ${gold} ${T("tick", "ticks")}` : "";
+  // the player's own best, next to the targets it is measured against
+  const best = S.cur && !S.review && S.cur.kind !== "lab" ? rec(S.cur.id).best : 0;
   $("#lvl-par").innerHTML = par > 0
-    ? `<span class="stars">${starHTML(2)}</span> ${par} ${T("tick أو أقل", "ticks or fewer")} · <span class="stars">${starHTML(3)}</span> ${gold} ${T("tick أو أقل", "ticks or fewer")}${dynamic ? T(" (الخريطة دي)", " (this map)") : ""}`
+    ? `<span class="stars">${starHTML(2)}</span> ${par} ${T("tick أو أقل", "ticks or fewer")} · <span class="stars">${starHTML(3)}</span> ${gold} ${T("tick أو أقل", "ticks or fewer")}${dynamic ? T(" (الخريطة دي)", " (this map)") : ""}${best > 0 ? ` · ${T("أحسن رقم ليك", "your best")}: <b>${best}</b>` : ""}`
     : "";
 }
 function idx(id) { return S.levels.findIndex((l) => l.id === id); }
@@ -2040,6 +2042,7 @@ function finish(level, res, missing = [], silent = false) {
   r.best = r.best ? Math.min(r.best, res.ticks) : res.ticks;
   store.save();
   if (silent) { updateOverall(); return; }
+  if (res.par > 0) parText(res.par, res.gold, res.par !== level.par || res.gold !== level.gold);
   $("#lvl-stars").innerHTML = starHTML(r.stars);
   $("#lvl-stars").setAttribute("aria-label", T(`${r.stars} من 3 نجوم`, `${r.stars} of 3 stars`));
   banner(res.message, true);
