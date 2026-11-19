@@ -26,8 +26,8 @@ func main() {
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
 | 1 / 2 | table starts | — | ابدأ بسجل حالات. | Start a case table. |
 | 2 / 5 | two cases | — | الحالتان جاهزتان. | Both cases are ready. |
-| 3 / 6 | tc=small | — | اقرأ الحالة الأولى. | Read the first case. |
-| 4 / 7 | tc=small | `small 2` | اعرض قيمتها. | Print its values. |
+| 3 / 6 | tc=small | — | اقرا الحالة الأولى. | Read the first case. |
+| 4 / 7 | tc=small | `small 2` | اطبع الـvalue بتاعتها. | Print its values. |
 | 5 / 7 | tc=large | `small 2` + `large 4` | نفس الفحص للحالة التالية. | Run the same check again. |
 | 6 / 8 | loop ends | cumulative | خلصت كل الحالات. | Every case has run. |
 
@@ -53,8 +53,8 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | values=[7 4] | — | قيمتان بترتيبهم. | Two ordered values. |
-| 2 / 3 | index 1 | `4` | اقرأ index واحد. | Read index one. |
+| 1 / 2 | values=[7 4] | — | اتنين values بالترتيب. | Two ordered values. |
+| 2 / 3 | index 1 | `4` | اقرا الـindex 1. | Read index one. |
 
 #### Verified e18-1-index — ok
 
@@ -86,9 +86,9 @@ func main() {
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
 | 1 / 1 | Beacon type | — | نوع ببيانات مصدّرة. | A type with an exported field. |
-| 2 / 5 | b={7} | — | القيمة جاهزة للتحويل. | The value is ready. |
+| 2 / 5 | b={7} | — | الـvalue جاهزة للتحويل. | The value is ready. |
 | 3 / 6 | raw JSON bytes | — | حوّلها لصيغة JSON. | Convert it to JSON. |
-| 4 / 7 | output | `{"charge":7} <nil>` | اعرض البايتات والناتج. | Show bytes and error. |
+| 4 / 7 | output | `{"charge":7} <nil>` | اطبع الـbytes والناتج. | Show bytes and error. |
 
 #### Verified e18-2-json — ok
 
@@ -111,8 +111,8 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | raw bytes | — | Marshal ترجع بايتات. | Marshal returns bytes. |
-| 2 / 3 | printed object | `{"hull":3} <nil>` | الناتج object وخطأ nil. | Object output and nil error. |
+| 1 / 2 | raw bytes | — | Marshal بترجّع bytes. | Marshal returns bytes. |
+| 2 / 3 | printed object | `{"hull":3} <nil>` | الناتج object والـerror nil. | Object output and nil error. |
 
 #### Verified e18-2-map — ok
 
@@ -140,9 +140,9 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | reader ready | — | أنشئ reader من نص. | Create a reader from text. |
-| 2 / 3 | row decoded | — | اقرأ record واحدة. | Read one record. |
-| 3 / 4 | fields | `[north 4] <nil>` | اطبع الحقول والخطأ. | Print fields and error. |
+| 1 / 2 | reader ready | — | اعمل reader من نص. | Create a reader from text. |
+| 2 / 3 | row decoded | — | اقرا record واحدة. | Read one record. |
+| 3 / 4 | fields | `[north 4] <nil>` | اطبع الحقول والـerror. | Print fields and error. |
 
 #### Verified e18-3-csv — ok
 
@@ -196,7 +196,7 @@ func main() {
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
 | 1 / 2 | words parsed | — | جزّئ حسب حروف Unicode. | Split using Unicode letters. |
-| 2 / 3 | normalized count | `echo 3` | حوّل أول كلمة واعرض العدد. | Lowercase and print the count. |
+| 2 / 3 | normalized count | `echo 3` | حوّل أول كلمة واطبع العدد. | Lowercase and print the count. |
 
 #### Verified e18-4-unicode — ok
 
@@ -220,7 +220,7 @@ func main() {
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
 | 1 / 2 | lowercase word | — | حوّل الكلمة لحروف صغيرة. | Convert the word to lowercase. |
-| 2 / 3 | output | `echo` | اعرض القيمة الجديدة. | Print the new value. |
+| 2 / 3 | output | `echo` | اطبع الـvalue الجديدة. | Print the new value. |
 
 #### Verified e18-4-lower — ok
 
@@ -272,7 +272,7 @@ func main() {
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
 | 1 / 2 | two splits | — | اقسم على أول فاصلين. | Split on the first two separators. |
-| 2 / 3 | final message | `3 warm|again` | اعرض العدد والجزء الأخير. | Print count and final piece. |
+| 2 / 3 | final message | `3 warm|again` | اطبع العدد والجزء الأخير. | Print count and final piece. |
 
 #### Verified e18-5-limit — ok
 
@@ -304,10 +304,10 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 1 | function takes io.Writer | — | الدالة تستقبل interface. | The function accepts an interface. |
+| 1 / 1 | function takes io.Writer | — | الـfunction بتستقبل interface. | The function accepts an interface. |
 | 2 / 6 | Buffer value | — | Buffer يطبّق io.Writer. | Buffer implements io.Writer. |
 | 3 / 7 | write call | — | اكتب من خلال الحد المشترك. | Write through the shared boundary. |
-| 4 / 8 | result | `ready <nil>` | اعرض النص وخطأ الكتابة. | Print text and write error. |
+| 4 / 8 | result | `ready <nil>` | اطبع النص والـerror اللي رجّعته الكتابة. | Print text and write error. |
 
 #### Verified e18-6-interface — ok
 
@@ -331,7 +331,7 @@ func main() {
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
 | 1 / 2 | normalized name | — | وحّد حالة الأحرف. | Normalize letter case. |
-| 2 / 3 | match | `true` | ابحث واعرض النتيجة. | Search and print the result. |
+| 2 / 3 | match | `true` | ابحث واطبع النتيجة. | Search and print the result. |
 
 #### Verified e18-6-search — ok
 
