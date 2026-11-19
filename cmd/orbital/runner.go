@@ -163,27 +163,26 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	rctx, rcancel := context.WithTimeout(ctx, 10*time.Second)
 	defer rcancel()
 	trace := filepath.Join(dir, "trace.jsonl")
-	progPath := filepath.Join(dir, "prog")
-	if instrumentedProg != "" {
-		progPath = instrumentedProg
-	}
-	prog := exec.CommandContext(rctx, progPath)
+	prog := exec.CommandContext(rctx, filepath.Join(dir, "prog"))
 	configureProcess(prog)
 	prog.Dir = dir
 	prog.Env = append(os.Environ(), "ORBITAL_LANG="+lang, "ORBITAL_LEVEL="+lvl.ID, "ORBITAL_TRACE="+trace)
-	userTrace := ""
-	if instrumentedProg != "" {
-		if path, ok := createSingleRunTrace(dir); ok {
-			userTrace = path
-			prog.Env = append(prog.Env, "ORBITAL_USER_TRACE="+userTrace)
-		}
+	// Both runs get the same world: the plain program is scored, the
+	// instrumented twin only supplies the debugger frames.
+	seed, seeded := ctx.Value(reviewSeedKey{}).(int64)
+	if !seeded && instrumentedProg != "" {
+		seed, seeded = time.Now().UnixNano(), true
 	}
-	if seed, ok := ctx.Value(reviewSeedKey{}).(int64); ok {
+	if seeded {
 		prog.Env = append(prog.Env, "ORBITAL_SEED="+strconv.FormatInt(seed, 10))
 	}
+	twin := startTracedTwin(ctx, instrumentedProg, prog.Env)
+	defer twin.stop()
 	stdout, stderr := &limitedBuffer{max: 64 << 10, lang: contextLang(ctx)}, &limitedBuffer{max: 64 << 10, lang: contextLang(ctx)}
 	prog.Stdout, prog.Stderr = stdout, stderr
+	started := time.Now()
 	runErr := runCommand(prog)
+	plainTook := time.Since(started)
 	resp.Stdout = stdout.String()
 	resp.Stderr = strings.ReplaceAll(stderr.String(), dir+string(os.PathSeparator), "")
 	if errors.Is(rctx.Err(), context.DeadlineExceeded) {
@@ -234,8 +233,8 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	}
 	resp.Result.Progress = progress
 	resp.Result.Ticks = last.T
-	if userTrace != "" {
-		resp.Trace = singleRunTrace(userTrace, data, resp.Stdout, runErr == nil, lang)
+	if instrumentedProg != "" {
+		resp.Trace = twin.trace(plainTook, data, resp.Stdout, runErr == nil, lang)
 	}
 	runtimeTip := errorTipFor(resp.Stderr, tipRuntime, lang)
 	resp.RuntimeTip, resp.RuntimeCause, resp.RuntimeCheck = runtimeTip.Meaning, runtimeTip.Cause, runtimeTip.Check

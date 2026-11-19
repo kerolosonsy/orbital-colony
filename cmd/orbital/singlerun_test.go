@@ -136,3 +136,23 @@ func TestSingleRunSkipsRaceLevels(t *testing.T) {
 		}
 	}
 }
+
+// A String method is called by the recorder while formatting; that must not
+// recurse, and the level must still be scored by the plain run.
+func TestSingleRunStringerDoesNotRecurse(t *testing.T) {
+	r := testRunner(t)
+	code, err := os.ReadFile(filepath.Join("testdata", "solutions", "9-1-stringer.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := r.Run(context.Background(), levels.Get("9-1-stringer"), string(code))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !resp.Result.Success {
+		t.Fatalf("level not solved: %+v", resp.Result)
+	}
+	if resp.Trace == nil || !resp.Trace.Synced || len(resp.Trace.Frames) == 0 {
+		t.Fatalf("expected a synced trace, got %+v", resp.Trace)
+	}
+}
