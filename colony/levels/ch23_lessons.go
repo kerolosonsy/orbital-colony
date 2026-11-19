@@ -1,5 +1,59 @@
 package levels
 
+func ch23SandboxPair(arabic, english string) map[string]string {
+	return map[string]string{"ar": arabic, "en": english}
+}
+
+func ch23SandboxRow(arabic, english, displayValue string) map[string]any {
+	return map[string]any{"label": ch23SandboxPair(arabic, english), "value": displayValue}
+}
+
+func ch23SandboxFrame(arabic, english string, rows ...map[string]any) map[string]any {
+	return map[string]any{"caption": ch23SandboxPair(arabic, english), "rows": rows}
+}
+
+func ch23SandboxConfig(action map[string]string, frames ...map[string]any) map[string]any {
+	return map[string]any{"action": action, "frames": frames}
+}
+
+func ch23Playground(id, kind, description string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: description, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+var ch23ReadFullSandboxConfig = ch23SandboxConfig(ch23SandboxPair("الخطوة التالية", "Next step"),
+	ch23SandboxFrame("ابدأ بمصدر ثابت.", "Start with a fixed source.",
+		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("المخزن", "Buffer", "[_, _]"), ch23SandboxRow("القراءة", "Read", "n=0; waiting")),
+	ch23SandboxFrame("أول بايت وصل.", "The first byte arrived.",
+		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("المخزن", "Buffer", "[9, _]"), ch23SandboxRow("القراءة", "Read", "n=1; still reading")),
+	ch23SandboxFrame("المخزن اكتمل.", "The buffer is full.",
+		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("المخزن", "Buffer", "[9, 4]"), ch23SandboxRow("القراءة", "Read", "n=2; err=nil")))
+
+var ch23AADSandboxConfig = ch23SandboxConfig(ch23SandboxPair("غيّر بيانات الفتح", "Change open data"),
+	ch23SandboxFrame("البيانات المصاحبة متطابقة.", "Associated data matches.",
+		ch23SandboxRow("المحتوى", "Payload", "encrypted"), ch23SandboxRow("وقت الختم", "Seal AAD", "label"), ch23SandboxRow("وقت الفتح", "Open AAD", "label"), ch23SandboxRow("التحقق", "Check", "accepted")),
+	ch23SandboxFrame("البيانات المصاحبة مختلفة.", "Associated data differs.",
+		ch23SandboxRow("المحتوى", "Payload", "encrypted"), ch23SandboxRow("وقت الختم", "Seal AAD", "label"), ch23SandboxRow("وقت الفتح", "Open AAD", "other"), ch23SandboxRow("التحقق", "Check", "rejected")))
+
+var ch23ReadLimitSandboxConfig = ch23SandboxConfig(ch23SandboxPair("وسّع حد القراءة", "Increase read limit"),
+	ch23SandboxFrame("اقرأ جزءًا محدودًا.", "Read a bounded part.",
+		ch23SandboxRow("الحد", "Limit", "2 bytes"), ch23SandboxRow("المقروء", "Read", "pl"), ch23SandboxRow("المتبقي", "Remaining", "4 bytes")),
+	ch23SandboxFrame("اسمح ببايتات أكتر.", "Allow more bytes.",
+		ch23SandboxRow("الحد", "Limit", "4 bytes"), ch23SandboxRow("المقروء", "Read", "plan"), ch23SandboxRow("المتبقي", "Remaining", "2 bytes")),
+	ch23SandboxFrame("اقرأ النص كله.", "Read the whole text.",
+		ch23SandboxRow("الحد", "Limit", "6 bytes"), ch23SandboxRow("المقروء", "Read", "planet"), ch23SandboxRow("المتبقي", "Remaining", "0 bytes")))
+
+var ch23OrderSandboxConfig = ch23SandboxConfig(ch23SandboxPair("ترتيب إضافة تاني", "Another insertion order"),
+	ch23SandboxFrame("ترتيب الإضافة اتغيّر.", "Insertion order changed.",
+		ch23SandboxRow("الإضافة", "Inserted", "[bay/z, bay/a]"), ch23SandboxRow("بعد الترتيب", "Sorted", "[bay/a, bay/z]")),
+	ch23SandboxFrame("النتيجة المرتبة ثابتة.", "The sorted result stays stable.",
+		ch23SandboxRow("الإضافة", "Inserted", "[bay/a, bay/z]"), ch23SandboxRow("بعد الترتيب", "Sorted", "[bay/a, bay/z]")))
+
+var ch23CSVSandboxConfig = ch23SandboxConfig(ch23SandboxPair("السجل التالي", "Next record"),
+	ch23SandboxFrame("اقرأ صف العناوين.", "Read the header row.",
+		ch23SandboxRow("السطر", "Line", "station,reading"), ch23SandboxRow("الحقول", "Fields", "[station] [reading]")),
+	ch23SandboxFrame("كل عمود بقى field.", "Each column is a field.",
+		ch23SandboxRow("السطر", "Line", "sensor-2,7"), ch23SandboxRow("الحقول", "Fields", "[sensor-2] [7]")))
+
 func ch23Markdown(id, text string) LessonBlock {
 	return LessonBlock{ID: id, Kind: "markdown", Text: text}
 }
@@ -121,6 +175,7 @@ var ch23Lesson231Arabic = []LessonStep{
 			"القراءة نجحت ووصلت القيمتين.",
 		}),
 		ch23Walkthrough("c231.readfull-reveal", "تابع قراءة المصدر الثابت لحد امتلاء المكان.", ch23Example231Try, "e231-readfull", []string{"bytes", "fmt", "io"}, ch23Frames231Try),
+		ch23Playground("ch23-read-full", "ch23-read-full", "تابع امتلاء المخزن.", ch23ReadFullSandboxConfig),
 	}},
 	{ID: "c231.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch23Markdown("c231.watch", "- متطبعش الكود السري في log.\n- فشل المصدر يرجّع كود فاضي، مش جزء منه."),
@@ -152,6 +207,7 @@ var ch23Lesson231English = []LessonStep{
 			"The read succeeded and returned both values.",
 		}),
 		ch23Walkthrough("c231.readfull-reveal", "Follow the fixed source until the buffer is full.", ch23Example231Try, "e231-readfull", []string{"bytes", "fmt", "io"}, ch23EnglishFrames(ch23Frames231Try)),
+		ch23Playground("ch23-read-full", "ch23-read-full", "Watch the buffer fill.", ch23ReadFullSandboxConfig),
 	}},
 	{ID: "c231.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch23Markdown("c231.watch", "- Never print the secret code to a log.\n- A source failure returns an empty code, not a partial one."),
@@ -227,6 +283,7 @@ var ch23Lesson232Arabic = []LessonStep{
 			"الـAAD بتفضل مرئية.",
 		}),
 		ch23Walkthrough("c232.aad-reveal", "شوف أثر تغيير البيانات المصاحبة على التحقق.", ch23Example232Try, "e232-aad-check", []string{"crypto/aes", "crypto/cipher", "fmt"}, ch23Frames232Try),
+		ch23Playground("ch23-aad-check", "ch23-aad-check", "بدّل بيانات الفتح.", ch23AADSandboxConfig),
 	}},
 	{ID: "c232.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch23Markdown("c232.watch", "- مثال الـnonce الثابت للتوضيح بس؛ متعيدوش مع المفتاح.\n- افحص أطوال الباكت قبل slicing."),
@@ -258,6 +315,7 @@ var ch23Lesson232English = []LessonStep{
 			"AAD remains visible.",
 		}),
 		ch23Walkthrough("c232.aad-reveal", "See how changing associated data affects authentication.", ch23Example232Try, "e232-aad-check", []string{"crypto/aes", "crypto/cipher", "fmt"}, ch23EnglishFrames(ch23Frames232Try)),
+		ch23Playground("ch23-aad-check", "ch23-aad-check", "Change open data.", ch23AADSandboxConfig),
 	}},
 	{ID: "c232.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch23Markdown("c232.watch", "- The fixed nonce is illustrative only; never reuse it with a key.\n- Check packet lengths before slicing."),
@@ -323,6 +381,7 @@ var ch23Lesson233Arabic = []LessonStep{
 			"القراءة المحدودة وصلت لنهايتها من غير خطأ.",
 		}),
 		ch23Walkthrough("c233.limit-reveal", "شوف حد القراءة وهو بيمنع استهلاك الباقي.", ch23Example233Try, "e233-read-limit", []string{"fmt", "io", "strings"}, ch23Frames233Try),
+		ch23Playground("ch23-read-limit", "ch23-read-limit", "وسّع حد القراءة.", ch23ReadLimitSandboxConfig),
 	}},
 	{ID: "c233.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch23Markdown("c233.watch", "- لازم القراءة توصل EOF عشان checksum يتراجع.\n- افحص طول الفك قبل قبول envelope."),
@@ -354,6 +413,7 @@ var ch23Lesson233English = []LessonStep{
 			"The limited read reaches its end without an error.",
 		}),
 		ch23Walkthrough("c233.limit-reveal", "Watch the reader limit stop before consuming the rest.", ch23Example233Try, "e233-read-limit", []string{"fmt", "io", "strings"}, ch23EnglishFrames(ch23Frames233Try)),
+		ch23Playground("ch23-read-limit", "ch23-read-limit", "Increase the read limit.", ch23ReadLimitSandboxConfig),
 	}},
 	{ID: "c233.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch23Markdown("c233.watch", "- Read to EOF so the checksum is checked.\n- Check the decompressed length before accepting an envelope."),
@@ -414,6 +474,7 @@ var ch23Lesson234Arabic = []LessonStep{
 			"Marshal بيرجع JSON، مش طباعة Go.",
 		}),
 		ch23Walkthrough("c234.json-reveal", "تابع ترتيب المفاتيح من تعريف النوع.", ch23Example234Try, "e234-json-order", []string{"encoding/json", "fmt"}, ch23Frames234Try),
+		ch23Playground("ch23-stable-order", "ch23-stable-order", "بدّل ترتيب الإضافة.", ch23OrderSandboxConfig),
 	}},
 	{ID: "c234.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch23Markdown("c234.watch", "- حدّث الـindex بعد نجاح التخزين بس.\n- بيانات الوقت والرسالة جاية من ~SupplyStamp~."),
@@ -445,6 +506,7 @@ var ch23Lesson234English = []LessonStep{
 			"Marshal returns JSON, not Go formatting.",
 		}),
 		ch23Walkthrough("c234.json-reveal", "Follow the key order from the type definition.", ch23Example234Try, "e234-json-order", []string{"encoding/json", "fmt"}, ch23EnglishFrames(ch23Frames234Try)),
+		ch23Playground("ch23-stable-order", "ch23-stable-order", "Change insertion order.", ch23OrderSandboxConfig),
 	}},
 	{ID: "c234.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch23Markdown("c234.watch", "- Update the index only after storage succeeds.\n- Timestamp and message come from ~SupplyStamp~."),
@@ -504,6 +566,7 @@ var ch23LessonBossArabic = []LessonStep{
 			"فيه سطرين صالحين قبل نهاية المصدر.",
 		}),
 		ch23Walkthrough("c23boss.csv-reveal", "شوف كل قراءة وهي بترجع سجل مستقل.", ch23Example23BossTry, "e23boss-csv-records", []string{"encoding/csv", "fmt", "strings"}, ch23Frames23BossTry),
+		ch23Playground("ch23-csv-records", "ch23-csv-records", "حوّل السطر لحقول.", ch23CSVSandboxConfig),
 	}},
 	{ID: "c23boss.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch23Markdown("c23boss.watch", "- ما تعملش trim للقيم قبل التحقق.\n- مفيش كتابة للهدف قبل اكتمال التحقق."),
@@ -535,6 +598,7 @@ var ch23LessonBossEnglish = []LessonStep{
 			"Two valid rows appear before the source ends.",
 		}),
 		ch23Walkthrough("c23boss.csv-reveal", "Watch each read return a separate record.", ch23Example23BossTry, "e23boss-csv-records", []string{"encoding/csv", "fmt", "strings"}, ch23EnglishFrames(ch23Frames23BossTry)),
+		ch23Playground("ch23-csv-records", "ch23-csv-records", "Split one CSV record.", ch23CSVSandboxConfig),
 	}},
 	{ID: "c23boss.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 		ch23Markdown("c23boss.watch", "- Do not trim values before validation.\n- Do not write the target before validation completes."),

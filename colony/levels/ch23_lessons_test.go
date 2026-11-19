@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -46,7 +47,7 @@ func TestCh23Lessons(t *testing.T) {
 func ch23ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints, titles []string, prefix string, seen map[string]bool) {
 	t.Helper()
 	claim := func(id string) {
-		if id == "" || !strings.HasPrefix(id, prefix) {
+		if id == "" || (!strings.HasPrefix(id, prefix) && !strings.HasPrefix(id, "ch23-")) {
 			t.Errorf("%s: invalid ID %q for prefix %q", name, id, prefix)
 		}
 		if seen != nil && seen[id] {
@@ -57,6 +58,7 @@ func ch23ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 		}
 	}
 	words := 0
+	sandboxCount := 0
 	for i, step := range steps {
 		claim(step.ID)
 		if step.Title != titles[i] || len(step.Blocks) == 0 {
@@ -89,10 +91,18 @@ func ch23ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 					continue
 				}
 				words += ch23ValidateFrames(t, name, block)
+			case "sandbox":
+				sandboxCount++
+				if i != 2 || block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch23-") || block.Sandbox.Config == nil || block.Question != nil || block.Walkthrough != nil || block.Code != "" {
+					t.Errorf("%s: %s has an invalid chapter 23 sandbox", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s has disallowed kind %q", name, block.ID, block.Kind)
 			}
 		}
+	}
+	if sandboxCount != 1 {
+		t.Errorf("%s: expected exactly one sandbox, got %d", name, sandboxCount)
 	}
 	ch23ValidateHints(t, name, hints, &words)
 	if words < 200 || words > 320 {
@@ -130,8 +140,8 @@ func ch23CompareLessonCopies(t *testing.T, id string, arabic, english []LessonSt
 			continue
 		}
 		if i == 2 {
-			if len(step.Blocks) != 2 || step.Blocks[0].Kind != "question" || step.Blocks[1].Kind != "walkthrough" {
-				t.Errorf("%s: Try it must predict, then reveal", id)
+			if len(step.Blocks) != 3 || step.Blocks[0].Kind != "question" || step.Blocks[1].Kind != "walkthrough" || step.Blocks[2].Kind != "sandbox" {
+				t.Errorf("%s: Try it must predict, reveal, then sandbox", id)
 			} else if ch23QuestionCode(step.Blocks[0].Text) != step.Blocks[1].Code {
 				t.Errorf("%s: prediction code differs from its walkthrough", id)
 			}
@@ -161,8 +171,61 @@ func ch23CompareLessonCopies(t *testing.T, id string, arabic, english []LessonSt
 					}
 				}
 			}
+			if block.Sandbox != nil && (translated.Sandbox == nil || block.Sandbox.Kind != translated.Sandbox.Kind || !reflect.DeepEqual(block.Sandbox.Config, translated.Sandbox.Config)) {
+				t.Errorf("%s: sandbox differs across languages for %s", id, block.ID)
+			}
 		}
 	}
+}
+
+func TestCh23SandboxConfigsMatchFixtures(t *testing.T) {
+	fixtures := ch23ReadSandboxFixtures(t)
+	levels := []string{"23-1-access-codes", "23-2-sealed-cargo", "23-3-content-address", "23-4-snapshot-commit", "23-boss-evidence"}
+	if len(fixtures) != len(levels) {
+		t.Fatalf("got %d playground fixtures for %d levels", len(fixtures), len(levels))
+	}
+	for _, id := range levels {
+		level := Get(id)
+		block := level.Steps[2].Blocks[len(level.Steps[2].Blocks)-1]
+		english := level.En.Steps[2].Blocks[len(level.En.Steps[2].Blocks)-1]
+		if block.Kind != "sandbox" || english.Kind != "sandbox" || block.ID != english.ID || block.Sandbox.Kind != english.Sandbox.Kind {
+			t.Fatalf("%s: missing matching bilingual sandbox", id)
+		}
+		fixture, ok := fixtures[block.Sandbox.Kind]
+		if !ok {
+			t.Errorf("%s: no fixture for %s", id, block.Sandbox.Kind)
+			continue
+		}
+		if !reflect.DeepEqual(ch23JSONValue(t, block.Sandbox.Config), fixture) || !reflect.DeepEqual(block.Sandbox.Config, english.Sandbox.Config) {
+			t.Errorf("%s: Go sandbox config differs from its fixture or translation", id)
+		}
+	}
+}
+
+func ch23ReadSandboxFixtures(t *testing.T) map[string]any {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch23.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]any
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	return fixtures
+}
+
+func ch23JSONValue(t *testing.T, input any) any {
+	t.Helper()
+	body, err := json.Marshal(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded any
+	if err := json.Unmarshal(body, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	return decoded
 }
 
 func ch23QuestionCode(text string) string {

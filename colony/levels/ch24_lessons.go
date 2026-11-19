@@ -1,5 +1,63 @@
 package levels
 
+func ch24SandboxPair(arabic, english string) map[string]string {
+	return map[string]string{"ar": arabic, "en": english}
+}
+
+func ch24SandboxRow(arabic, english, displayValue string) map[string]any {
+	return map[string]any{"label": ch24SandboxPair(arabic, english), "value": displayValue}
+}
+
+func ch24SandboxFrame(arabic, english string, rows ...map[string]any) map[string]any {
+	return map[string]any{"caption": ch24SandboxPair(arabic, english), "rows": rows}
+}
+
+func ch24SandboxConfig(action map[string]string, frames ...map[string]any) map[string]any {
+	return map[string]any{"action": action, "frames": frames}
+}
+
+var ch24PingSandboxConfig = ch24SandboxConfig(ch24SandboxPair("ترتيب ممكن تاني", "Another possible order"),
+	ch24SandboxFrame("ترتيب ممكن؛ A تستلم أولًا.", "One possible order; A receives first.",
+		ch24SandboxRow("التسليم", "Handoff", "A → receiver: 4; B waits"), ch24SandboxRow("بعدها", "Then", "B → receiver: 6")),
+	ch24SandboxFrame("ترتيب ممكن؛ B تستلم أولًا.", "One possible order; B receives first.",
+		ch24SandboxRow("التسليم", "Handoff", "B → receiver: 6; A waits"), ch24SandboxRow("بعدها", "Then", "A → receiver: 4")))
+
+var ch24DepotSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترتيبًا ممكنًا تاني", "Show another possible order"),
+	ch24SandboxFrame("ترتيب ممكن: A قبل B؛ السعة ثابتة.", "Possible order: A then B; capacity stays fixed.",
+		ch24SandboxRow("الطابور", "Queue", "[A:4]"), ch24SandboxRow("السعة", "Capacity", "2"), ch24SandboxRow("الطول", "Length", "1")),
+	ch24SandboxFrame("ترتيب ممكن: B قبل A؛ السعة ثابتة.", "Possible order: B then A; capacity stays fixed.",
+		ch24SandboxRow("الطابور", "Queue", "[B:6]"), ch24SandboxRow("السعة", "Capacity", "2"), ch24SandboxRow("الطول", "Length", "1")))
+
+var ch24CrewSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترتيبًا محتملًا تاني", "Show another possible order"),
+	ch24SandboxFrame("B ممكن تخلص قبل A.", "B may finish before A.",
+		ch24SandboxRow("النوع", "Type", "Reply[string]"), ch24SandboxRow("اكتمال العمال", "Worker completion", "B → A"), ch24SandboxRow("ترتيب الردود", "Reply order", "[A:ore, B:iron]")),
+	ch24SandboxFrame("A ممكن تخلص قبل B.", "A may finish before B.",
+		ch24SandboxRow("النوع", "Type", "Reply[string]"), ch24SandboxRow("اكتمال العمال", "Worker completion", "A → B"), ch24SandboxRow("ترتيب الردود", "Reply order", "[A:ore, B:iron]")))
+
+var ch24PipelineSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شوف ترتيبًا ممكنًا تاني", "Show another possible order"),
+	ch24SandboxFrame("ترتيب ممكن: 3 ثم 5.", "Possible order: 3, then 5.",
+		ch24SandboxRow("وصول القيم", "Arrival order", "[3, 5]"), ch24SandboxRow("range", "range", "prints 3, then 5"), ch24SandboxRow("النهاية", "End", "closed and drained")),
+	ch24SandboxFrame("ترتيب وصول تاني ممكن.", "Another arrival order is possible.",
+		ch24SandboxRow("وصول القيم", "Arrival order", "[5, 3]"), ch24SandboxRow("range", "range", "prints 5, then 3"), ch24SandboxRow("النهاية", "End", "closed and drained")))
+
+var ch24BeaconSandboxConfig = ch24SandboxConfig(ch24SandboxPair("بدّل ترتيب الاكتمال", "Change completion order"),
+	ch24SandboxFrame("B ممكن تكتمل قبل A.", "B may finish before A.",
+		ch24SandboxRow("الاكتمال", "Completion", "B → A"), ch24SandboxRow("الردود بالترتيب", "Replies by input", "[A:202, B:timeout]"), ch24SandboxRow("الخطأ", "Error", "timeout ≠ HTTP status")),
+	ch24SandboxFrame("A ممكن تكتمل قبل B.", "A may finish before B.",
+		ch24SandboxRow("الاكتمال", "Completion", "A → B"), ch24SandboxRow("الردود بالترتيب", "Replies by input", "[A:202, B:timeout]"), ch24SandboxRow("الخطأ", "Error", "timeout ≠ HTTP status")))
+
+var ch24ChunkSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترتيبًا ممكنًا تاني", "Show another possible order"),
+	ch24SandboxFrame("ترتيب ممكن: B قبل A.", "Possible order: B before A.",
+		ch24SandboxRow("الاكتمال", "Completion", "B@3 → A@0"), ch24SandboxRow("الكتابة", "Writes", "offsets 3, then 0"), ch24SandboxRow("الملف", "File", "MAPTILE")),
+	ch24SandboxFrame("ترتيب ممكن تاني: A قبل B.", "Another possible order: A before B.",
+		ch24SandboxRow("الاكتمال", "Completion", "A@0 → B@3"), ch24SandboxRow("الكتابة", "Writes", "offsets 0, then 3"), ch24SandboxRow("الملف", "File", "MAPTILE")))
+
+var ch24TilesSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترتيبًا ممكنًا تاني", "Show another possible order"),
+	ch24SandboxFrame("ترتيب ممكن: B تكمل قبل A.", "One possible order: B completes before A.",
+		ch24SandboxRow("الإعدادات", "Config", "A: png 2×1; B: jpeg 3×2"), ch24SandboxRow("pixels", "Pixels", "not decoded"), ch24SandboxRow("اكتمال العمال", "Worker completion", "B → A")),
+	ch24SandboxFrame("اكتمال العمال ممكن يتبدّل.", "Worker completion can vary.",
+		ch24SandboxRow("الإعدادات", "Config", "A: png 2×1; B: jpeg 3×2"), ch24SandboxRow("pixels", "Pixels", "not decoded"), ch24SandboxRow("اكتمال العمال", "Worker completion", "A → B")))
+
 type ch24Copy struct {
 	mission       string
 	idea          string
@@ -13,6 +71,9 @@ type ch24Copy struct {
 	checkOptions  []string
 	checkFeedback []string
 	turn          string
+	sandboxText   string
+	sandboxKind   string
+	sandboxConfig map[string]any
 }
 
 type ch24FrameInfo struct {
@@ -60,6 +121,7 @@ func ch24BuildLesson(prefix string, copy ch24Copy, examples [2]ch24Example, engl
 	try := []LessonBlock{
 		ch24Question(prefix+".try-predict", tryCode, copy.tryOptions, copy.tryFeedback, 1),
 		ch24Walkthrough(prefix+".try-reveal", copy.reveal, examples[1], english),
+		{ID: copy.sandboxKind, Kind: "sandbox", Text: copy.sandboxText, Sandbox: &LessonSandbox{Kind: copy.sandboxKind, Config: copy.sandboxConfig}},
 	}
 	check := ch24Question(prefix+".check-question", copy.checkQuestion, copy.checkOptions, copy.checkFeedback, 1)
 	return []LessonStep{
@@ -118,6 +180,7 @@ var ch24PingArabic = ch24BuildLesson("c241", ch24Copy{
 	checkOptions:  []string{"القيمة 0 بس", "الاستقبال بيرجع ~ok == false~", "إرسال جديد"},
 	checkFeedback: []string{"الصفر ممكن يكون قيمة حقيقية.", "~ok~ بيفرق النهاية عن قيمة صفر عادية.", "الإرسال بعد القفل يسبب panic."},
 	turn:          "ابدأ من التوقيع والـcontext. شغّل التستات بعد ما تحدد ملكية كل قناة ونقطة انتظارها.",
+	sandboxText:   "بدّل ترتيب التسليم.", sandboxKind: "ch24-channel-handoff", sandboxConfig: ch24PingSandboxConfig,
 }, ch24PingExamples, false)
 
 var ch24PingEnglish = ch24BuildLesson("c241", ch24Copy{
@@ -133,6 +196,7 @@ var ch24PingEnglish = ch24BuildLesson("c241", ch24Copy{
 	checkOptions:  []string{"Only the value 0", "The receive returns ~ok == false~", "A new send"},
 	checkFeedback: []string{"Zero can also be a real value.", "~ok~ distinguishes closure from an ordinary zero.", "Sending after close causes a panic."},
 	turn:          "Start from the signature and context. Run the lab checks after mapping each channel owner and wait point.",
+	sandboxText:   "Change the handoff order.", sandboxKind: "ch24-channel-handoff", sandboxConfig: ch24PingSandboxConfig,
 }, ch24PingExamples, true)
 
 var ch24DepotExamples = [2]ch24Example{
@@ -181,6 +245,7 @@ var ch24DepotArabic = ch24BuildLesson("c242", ch24Copy{
 	checkOptions:  []string{"ينتظر مستقبلًا", "يمسح أقدم قيمة", "يوسّع السعة"},
 	checkFeedback: []string{"الإرسال يكمّل لما تتوفر خانة.", "القنوات ما بتحذفش تلقائيًا.", "السعة ما بتتغيرش بعد الإنشاء."},
 	turn:          "جرّب تتبع كل قيمة من المصدر للاستهلاك. راقب مسارات الإلغاء والخطأ كمان.",
+	sandboxText:   "شوف ترتيب وصول تاني.", sandboxKind: "ch24-buffer-queue", sandboxConfig: ch24DepotSandboxConfig,
 }, ch24DepotExamples, false)
 
 var ch24DepotEnglish = ch24BuildLesson("c242", ch24Copy{
@@ -196,6 +261,7 @@ var ch24DepotEnglish = ch24BuildLesson("c242", ch24Copy{
 	checkOptions:  []string{"Waits for a receiver", "Deletes the oldest value", "Grows capacity"},
 	checkFeedback: []string{"The send continues when a slot is free.", "Channels do not delete values automatically.", "Capacity does not change after creation."},
 	turn:          "Trace each value from source to consumption. Review cancellation and error paths too.",
+	sandboxText:   "View another arrival order.", sandboxKind: "ch24-buffer-queue", sandboxConfig: ch24DepotSandboxConfig,
 }, ch24DepotExamples, true)
 
 var ch24CrewExamples = [2]ch24Example{
@@ -242,6 +308,7 @@ var ch24CrewArabic = ch24BuildLesson("c243", ch24Copy{
 	checkOptions:  []string{"عدد العمال", "نوع القيمة داخل Reply", "index المدخل"},
 	checkFeedback: []string{"العمال إعداد منفصل عن نوع البيانات.", "كل استخدام يحدد النوع الفعلي لـT.", "الـindex يحدد ترتيب العنصر."},
 	turn:          "ابدأ بقراءة أنواع ~T~ و~R~ في التوقيع. افحص ملكية كل نتيجة وعمر كل عامل.",
+	sandboxText:   "بدّل اكتمال الردود.", sandboxKind: "ch24-typed-reply", sandboxConfig: ch24CrewSandboxConfig,
 }, ch24CrewExamples, false)
 
 var ch24CrewEnglish = ch24BuildLesson("c243", ch24Copy{
@@ -257,6 +324,7 @@ var ch24CrewEnglish = ch24BuildLesson("c243", ch24Copy{
 	checkOptions:  []string{"The worker count", "The value type inside Reply", "The input index"},
 	checkFeedback: []string{"Worker count is separate from data type.", "Each use chooses the actual type for T.", "The index identifies an item order."},
 	turn:          "Start by reading ~T~ and ~R~ in the signature. Check each result's owner and each worker's lifetime.",
+	sandboxText:   "Change reply completion order.", sandboxKind: "ch24-typed-reply", sandboxConfig: ch24CrewSandboxConfig,
 }, ch24CrewExamples, true)
 
 var ch24PipelineExamples = [2]ch24Example{
@@ -309,6 +377,7 @@ var ch24PipelineArabic = ch24BuildLesson("c244", ch24Copy{
 	checkOptions:  []string{"بعد أول قيمة", "لما القناة تتقفل وتفضى", "بعد عدد ثابت"},
 	checkFeedback: []string{"range يكمل مع القيم المتاحة.", "القفل مع تفريغ القناة ينهي الحلقة.", "عدد الرسائل مش لازم يبقى معروف."},
 	turn:          "ابدأ بتحديد اتجاه القنوات ومن يملك إغلاقها. بعدين تتبع الإلغاء في كل انتظار.",
+	sandboxText:   "بدّل ترتيب وصول القيم.", sandboxKind: "ch24-drain-close", sandboxConfig: ch24PipelineSandboxConfig,
 }, ch24PipelineExamples, false)
 
 var ch24PipelineEnglish = ch24BuildLesson("c244", ch24Copy{
@@ -324,6 +393,7 @@ var ch24PipelineEnglish = ch24BuildLesson("c244", ch24Copy{
 	checkOptions:  []string{"After one value", "When closed and drained", "After a fixed count"},
 	checkFeedback: []string{"range continues while values arrive.", "Closure plus an empty channel ends the loop.", "The message count need not be known."},
 	turn:          "Start by marking channel directions and close owners. Then trace cancellation at every wait.",
+	sandboxText:   "Change value arrival order.", sandboxKind: "ch24-drain-close", sandboxConfig: ch24PipelineSandboxConfig,
 }, ch24PipelineExamples, true)
 
 var ch24BeaconExamples = [2]ch24Example{
@@ -371,6 +441,7 @@ var ch24BeaconArabic = ch24BuildLesson("c245", ch24Copy{
 	checkOptions:  []string{"نتيجة HTTP", "عدد الطلبات", "طول العنوان"},
 	checkFeedback: []string{"status جزء من الرد المستلم.", "الطلبات ما تتحسبش من status.", "طول العنوان معلومة منفصلة."},
 	turn:          "ابدأ من عقد العميل المحقون. تتبع الإلغاء والحد المتزامن قبل قراءة النتائج.",
+	sandboxText:   "بدّل اكتمال الطلبات.", sandboxKind: "ch24-http-result", sandboxConfig: ch24BeaconSandboxConfig,
 }, ch24BeaconExamples, false)
 
 var ch24BeaconEnglish = ch24BuildLesson("c245", ch24Copy{
@@ -386,6 +457,7 @@ var ch24BeaconEnglish = ch24BuildLesson("c245", ch24Copy{
 	checkOptions:  []string{"The HTTP result", "The request count", "The address length"},
 	checkFeedback: []string{"Status is part of the received response.", "Status does not count requests.", "Address length is separate information."},
 	turn:          "Start from the injected client contract. Trace cancellation and the concurrency limit before reading results.",
+	sandboxText:   "Change request completion.", sandboxKind: "ch24-http-result", sandboxConfig: ch24BeaconSandboxConfig,
 }, ch24BeaconExamples, true)
 
 var ch24ChunkExamples = [2]ch24Example{
@@ -441,6 +513,7 @@ var ch24ChunkArabic = ch24BuildLesson("c246", ch24Copy{
 	checkOptions:  []string{"موضع بداية الكتابة", "عدد الـworkers", "حجم الملف النهائي"},
 	checkFeedback: []string{"هو مكان بداية bytes في الوجهة.", "العمال إعداد مستقل.", "الحجم مش هو موضع الكتابة."},
 	turn:          "ابدأ بعقد ~ChartStage~ وعميل HTTP. تتبع كل فشل حتى ~Commit~ أو الإلغاء.",
+	sandboxText:   "بدّل ترتيب وصول الأجزاء.", sandboxKind: "ch24-write-offset", sandboxConfig: ch24ChunkSandboxConfig,
 }, ch24ChunkExamples, false)
 
 var ch24ChunkEnglish = ch24BuildLesson("c246", ch24Copy{
@@ -456,6 +529,7 @@ var ch24ChunkEnglish = ch24BuildLesson("c246", ch24Copy{
 	checkOptions:  []string{"The starting write position", "The worker count", "The final file size"},
 	checkFeedback: []string{"It is where the destination write starts.", "Worker count is a separate setting.", "File size is not the write position."},
 	turn:          "Start from the ~ChartStage~ contract and HTTP client. Trace each failure through ~Commit~ or cancellation.",
+	sandboxText:   "Change chunk arrival order.", sandboxKind: "ch24-write-offset", sandboxConfig: ch24ChunkSandboxConfig,
 }, ch24ChunkExamples, true)
 
 var ch24TilesExamples = [2]ch24Example{
@@ -507,6 +581,7 @@ var ch24TilesArabic = ch24BuildLesson("c247", ch24Copy{
 	checkOptions:  []string{"أبعاد وصيغة الصورة", "كل pixels المفكوكة", "اسم ملف الحفظ"},
 	checkFeedback: []string{"تقدر تفحص الإعدادات قبل فك pixels.", "دي خطوة تانية بعد قراءة config.", "اسم الحفظ يأتي من بيانات البلاطة."},
 	turn:          "ابدأ من ~TileSpec~ وأنواع الرد. تتبع صورة واحدة ذهنيًا قبل مراجعة مسارات التوازي.",
+	sandboxText:   "بدّل اكتمال البلاطات.", sandboxKind: "ch24-image-config", sandboxConfig: ch24TilesSandboxConfig,
 }, ch24TilesExamples, false)
 
 var ch24TilesEnglish = ch24BuildLesson("c247", ch24Copy{
@@ -522,4 +597,5 @@ var ch24TilesEnglish = ch24BuildLesson("c247", ch24Copy{
 	checkOptions:  []string{"Image dimensions and format", "Every decoded pixel", "The saved file name"},
 	checkFeedback: []string{"Inspect settings before decoding pixels.", "That is a later step after reading config.", "The tile data supplies the save name."},
 	turn:          "Start from ~TileSpec~ and the reply types. Trace one tile mentally before reviewing concurrency paths.",
+	sandboxText:   "Change tile completion order.", sandboxKind: "ch24-image-config", sandboxConfig: ch24TilesSandboxConfig,
 }, ch24TilesExamples, true)

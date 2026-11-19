@@ -1,0 +1,450 @@
+{
+  "ch24-buffer-queue": {
+    "action": {
+      "ar": "شغّل ترتيبًا ممكنًا تاني",
+      "en": "Show another possible order"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "ترتيب ممكن: A قبل B؛ السعة ثابتة.",
+          "en": "Possible order: A then B; capacity stays fixed."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الطابور",
+              "en": "Queue"
+            },
+            "value": "[A:4]"
+          },
+          {
+            "label": {
+              "ar": "السعة",
+              "en": "Capacity"
+            },
+            "value": "2"
+          },
+          {
+            "label": {
+              "ar": "الطول",
+              "en": "Length"
+            },
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "ترتيب ممكن: B قبل A؛ السعة ثابتة.",
+          "en": "Possible order: B then A; capacity stays fixed."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الطابور",
+              "en": "Queue"
+            },
+            "value": "[B:6]"
+          },
+          {
+            "label": {
+              "ar": "السعة",
+              "en": "Capacity"
+            },
+            "value": "2"
+          },
+          {
+            "label": {
+              "ar": "الطول",
+              "en": "Length"
+            },
+            "value": "1"
+          }
+        ]
+      }
+    ]
+  },
+  "ch24-channel-handoff": {
+    "action": {
+      "ar": "ترتيب ممكن تاني",
+      "en": "Another possible order"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "ترتيب ممكن؛ A تستلم أولًا.",
+          "en": "One possible order; A receives first."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "التسليم",
+              "en": "Handoff"
+            },
+            "value": "A → receiver: 4; B waits"
+          },
+          {
+            "label": {
+              "ar": "بعدها",
+              "en": "Then"
+            },
+            "value": "B → receiver: 6"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "ترتيب ممكن؛ B تستلم أولًا.",
+          "en": "One possible order; B receives first."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "التسليم",
+              "en": "Handoff"
+            },
+            "value": "B → receiver: 6; A waits"
+          },
+          {
+            "label": {
+              "ar": "بعدها",
+              "en": "Then"
+            },
+            "value": "A → receiver: 4"
+          }
+        ]
+      }
+    ]
+  },
+  "ch24-drain-close": {
+    "action": {
+      "ar": "شوف ترتيبًا ممكنًا تاني",
+      "en": "Show another possible order"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "ترتيب ممكن: 3 ثم 5.",
+          "en": "Possible order: 3, then 5."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "وصول القيم",
+              "en": "Arrival order"
+            },
+            "value": "[3, 5]"
+          },
+          {
+            "label": {
+              "ar": "range",
+              "en": "range"
+            },
+            "value": "prints 3, then 5"
+          },
+          {
+            "label": {
+              "ar": "النهاية",
+              "en": "End"
+            },
+            "value": "closed and drained"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "ترتيب وصول تاني ممكن.",
+          "en": "Another arrival order is possible."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "وصول القيم",
+              "en": "Arrival order"
+            },
+            "value": "[5, 3]"
+          },
+          {
+            "label": {
+              "ar": "range",
+              "en": "range"
+            },
+            "value": "prints 5, then 3"
+          },
+          {
+            "label": {
+              "ar": "النهاية",
+              "en": "End"
+            },
+            "value": "closed and drained"
+          }
+        ]
+      }
+    ]
+  },
+  "ch24-http-result": {
+    "action": {
+      "ar": "بدّل ترتيب الاكتمال",
+      "en": "Change completion order"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "B ممكن تكتمل قبل A.",
+          "en": "B may finish before A."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الاكتمال",
+              "en": "Completion"
+            },
+            "value": "B → A"
+          },
+          {
+            "label": {
+              "ar": "الردود بالترتيب",
+              "en": "Replies by input"
+            },
+            "value": "[A:202, B:timeout]"
+          },
+          {
+            "label": {
+              "ar": "الخطأ",
+              "en": "Error"
+            },
+            "value": "timeout ≠ HTTP status"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "A ممكن تكتمل قبل B.",
+          "en": "A may finish before B."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الاكتمال",
+              "en": "Completion"
+            },
+            "value": "A → B"
+          },
+          {
+            "label": {
+              "ar": "الردود بالترتيب",
+              "en": "Replies by input"
+            },
+            "value": "[A:202, B:timeout]"
+          },
+          {
+            "label": {
+              "ar": "الخطأ",
+              "en": "Error"
+            },
+            "value": "timeout ≠ HTTP status"
+          }
+        ]
+      }
+    ]
+  },
+  "ch24-image-config": {
+    "action": {
+      "ar": "شغّل ترتيبًا ممكنًا تاني",
+      "en": "Show another possible order"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "ترتيب ممكن: B تكمل قبل A.",
+          "en": "One possible order: B completes before A."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الإعدادات",
+              "en": "Config"
+            },
+            "value": "A: png 2×1; B: jpeg 3×2"
+          },
+          {
+            "label": {
+              "ar": "pixels",
+              "en": "Pixels"
+            },
+            "value": "not decoded"
+          },
+          {
+            "label": {
+              "ar": "اكتمال العمال",
+              "en": "Worker completion"
+            },
+            "value": "B → A"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "اكتمال العمال ممكن يتبدّل.",
+          "en": "Worker completion can vary."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الإعدادات",
+              "en": "Config"
+            },
+            "value": "A: png 2×1; B: jpeg 3×2"
+          },
+          {
+            "label": {
+              "ar": "pixels",
+              "en": "Pixels"
+            },
+            "value": "not decoded"
+          },
+          {
+            "label": {
+              "ar": "اكتمال العمال",
+              "en": "Worker completion"
+            },
+            "value": "A → B"
+          }
+        ]
+      }
+    ]
+  },
+  "ch24-typed-reply": {
+    "action": {
+      "ar": "شغّل ترتيبًا محتملًا تاني",
+      "en": "Show another possible order"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "B ممكن تخلص قبل A.",
+          "en": "B may finish before A."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "النوع",
+              "en": "Type"
+            },
+            "value": "Reply[string]"
+          },
+          {
+            "label": {
+              "ar": "اكتمال العمال",
+              "en": "Worker completion"
+            },
+            "value": "B → A"
+          },
+          {
+            "label": {
+              "ar": "ترتيب الردود",
+              "en": "Reply order"
+            },
+            "value": "[A:ore, B:iron]"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "A ممكن تخلص قبل B.",
+          "en": "A may finish before B."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "النوع",
+              "en": "Type"
+            },
+            "value": "Reply[string]"
+          },
+          {
+            "label": {
+              "ar": "اكتمال العمال",
+              "en": "Worker completion"
+            },
+            "value": "A → B"
+          },
+          {
+            "label": {
+              "ar": "ترتيب الردود",
+              "en": "Reply order"
+            },
+            "value": "[A:ore, B:iron]"
+          }
+        ]
+      }
+    ]
+  },
+  "ch24-write-offset": {
+    "action": {
+      "ar": "شغّل ترتيبًا ممكنًا تاني",
+      "en": "Show another possible order"
+    },
+    "frames": [
+      {
+        "caption": {
+          "ar": "ترتيب ممكن: B قبل A.",
+          "en": "Possible order: B before A."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الاكتمال",
+              "en": "Completion"
+            },
+            "value": "B@3 → A@0"
+          },
+          {
+            "label": {
+              "ar": "الكتابة",
+              "en": "Writes"
+            },
+            "value": "offsets 3, then 0"
+          },
+          {
+            "label": {
+              "ar": "الملف",
+              "en": "File"
+            },
+            "value": "MAPTILE"
+          }
+        ]
+      },
+      {
+        "caption": {
+          "ar": "ترتيب ممكن تاني: A قبل B.",
+          "en": "Another possible order: A before B."
+        },
+        "rows": [
+          {
+            "label": {
+              "ar": "الاكتمال",
+              "en": "Completion"
+            },
+            "value": "A@0 → B@3"
+          },
+          {
+            "label": {
+              "ar": "الكتابة",
+              "en": "Writes"
+            },
+            "value": "offsets 0, then 3"
+          },
+          {
+            "label": {
+              "ar": "الملف",
+              "en": "File"
+            },
+            "value": "MAPTILE"
+          }
+        ]
+      }
+    ]
+  }
+}
