@@ -2,7 +2,7 @@ package levels
 
 func init() {
 	add(&Level{
-		ID: "17-boss-rescue-route", Chapter: 17, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: false,
+		ID: "17-boss-rescue-route", Chapter: 17, LessonRevision: 1, Steps: ch17Boss(false), Kind: "lab", Boss: true, Setup: seededLabRoom, Race: false,
 		Title: "Boss: مسار كبسولة الإنقاذ", Goal: "اختار أقصر مسار generic واثبت العقد بتستات وbenchmark",
 		Requires: []string{"tabletest", "benchmark"}, Bridge: []int{24, 27, 28, 29},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
@@ -45,8 +45,12 @@ if len(queue) == 0 { return []T{goal}, true } // invents a route
 
 اكتب table-driven tests في ~main_test.go~ تمسك 3 نسخ غلط: فشل دايماً، نجاح وهمي لوجهة غايبة، واختيار الطريق الأطول. اكتب ~BenchmarkRelayRoutes~ زي 16-3؛ مش مطلوب رقم سرعة معيّن. سيب ~main~ فاضية. النجمة التالتة: عند التعادل، استخدم ترتيب الجيران الأصلي في BFS، وارجع مسار مملوك للمنادي حتى مع إحداثيات 3D كنوع generic.
 `,
-		Hints: []string{"استخدم BFS وخريطة seen عشان الدورات.", "خزّن الأب لكل محطة وارجع المسار بالعكس.", "اختبر نفس الطرفين والغايب وطريقين أطوالهم مختلفة؛ الـ bonus بيختبر التعادل."},
-		En: &LevelText{Title: "Boss: Rescue Capsule Route", Goal: "Find a generic shortest route and prove its contract with tests and a benchmark", Files: []LabFile{{Name: "main.go", Starter: `package main
+		Hints: []string{
+			"~comparable~ تخلي T ينفع مفتاح map لأي نوع يحقق المقارنة.",
+			"اقرأ كل وعد في العقد لوحده قبل ترتيب التنفيذ والتست والـbenchmark.",
+			"ابدأ من ~RelayPath~ وplaceholders في ~main_test.go~ وخلي العقد checklist.",
+		},
+		En: &LevelText{LessonRevision: 1, Steps: ch17Boss(true), Title: "Boss: Rescue Capsule Route", Goal: "Find a generic shortest route and prove its contract with tests and a benchmark", Files: []LabFile{{Name: "main.go", Starter: `package main
 func RelayPath[T comparable](links map[T][]T, start, goal T) ([]T,bool) {
     return nil,false
 }
@@ -86,7 +90,11 @@ Implement ~RelayPath[T comparable](links map[T][]T, start, goal T) ([]T, bool)~ 
 
 Write table-driven tests in ~main_test.go~ catching three mutants: always failing, inventing a route to a missing destination, and choosing a longer route. Write ~BenchmarkRelayRoutes~ as in 16-3; no speed threshold is required. Leave ~main~ empty. Third star: break shortest-path ties using the original BFS neighbor order and return caller-owned paths, including generic 3D coordinate keys.
 `,
-			Hints: []string{"Use BFS and a seen map to terminate cycles.", "Store each station parent and reverse the reconstructed path.", "Test equal endpoints, unreachable goals, and unequal routes; the bonus checks ties."}},
+			Hints: []string{
+				"~comparable~ lets T serve as a map key when its type supports comparison.",
+				"Read each contract promise separately before organizing implementation, tests, and benchmark.",
+				"Start from ~RelayPath~ and the placeholders in ~main_test.go~; use the contract as a checklist.",
+			}},
 		Lab: &Lab{ReqFile: "main_test.go", Bonus: true, Mutants: []Mutant{{Desc: "خرق عقد المسار", Code: `package main
 func RelayPath[T comparable](links map[T][]T, start, goal T) ([]T,bool) {
     return nil,false

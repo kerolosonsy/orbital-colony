@@ -73,6 +73,7 @@ func shortest3D(w *sim.World, start, goal p3) int {
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch17Mission1(true),
 			Title: "Your First Shaft",
 			Goal:  "Dig down, descend, collect 3 iron from the rock, and return to the surface",
 			Lesson: `# Layers: The World Has Depth ⛏️
@@ -115,12 +116,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"You cannot move through underground stone. First call ~colony.Dig(colony.East)~, then ~colony.Move(colony.East)~.",
-				"Repeat digging and moving 3 times, then return West until x = 0.",
-				"~colony.Ascend()~ takes you up if there is a shaft above you; there is one at (0, 0).",
+				"Depth adds a z coordinate; ~colony.Layer()~ reads the drone's current layer.",
+				"Treat opening a shaft, entering it, collecting ore, and returning as separate phases.",
+				"Compare ~colony.Dig~, ~colony.Move~, and ~colony.Ascend~ with the starter's initial shaft.",
 			},
 		},
-		ID: "17-1-first-shaft", Chapter: 17, Title: "أول بير",
+		ID: "17-1-first-shaft", Chapter: 17, LessonRevision: 1, Steps: ch17Mission1(false), Title: "أول بير",
 		Goal: "احفر لتحت، انزل، اجمع 3 حديد من جوه الصخر، واطلع تاني للسطح",
 		Par:  18, Gold: 12, MaxTicks: 120,
 		Setup: func(w *sim.World) {
@@ -156,9 +157,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"تحت الأرض متقدرش تتحرك جوه الصخر. احفر الأول بـ ~colony.Dig(colony.East)~، وبعدين ~colony.Move(colony.East)~.",
-			"كرّر الحفر والحركة 3 مرات، وبعدها ارجع West لحد x = 0.",
-			"~colony.Ascend()~ بتطلعك لو فوقك بير، وده موجود عند (0, 0).",
+			"العمق بيضيف إحداثية z؛ ~colony.Layer()~ بتقرأ الطبقة الحالية للدرون.",
+			"قسّم الشغل لمراحل: فتح البير، النزول، جمع الحديد، والرجوع.",
+			"قارن ~colony.Dig~ و~colony.Move~ و~colony.Ascend~ بالبير اللي الـstarter فتحه.",
 		},
 		Lesson: `# الطبقات: العالم ليه عمق ⛏️
 
@@ -188,6 +189,7 @@ func main() {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch17Mission2(true),
 			Title: "Map the Depths",
 			Goal:  "Count open tunnels on each underground layer and report the counts in one slice, in order",
 			Lesson: `# 3D Arrays: A Slice of Slices of Slices 🧊
@@ -244,12 +246,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"~colony.LayerGrid(z)~ is free; you need not descend. Loop over z from 1 to ~colony.Depth()-1~.",
-				"Within each layer, loop over x and y, using ~if g == colony.Tunnel || g == colony.Shaft { n++ }~.",
-				"Append each count with ~counts = append(counts, n)~, then call ~colony.Report(counts)~.",
+				"A 3D slice uses one index for each dimension: layer, x, then y.",
+				"Inspect one layer's shape before writing loops that visit its columns and rows.",
+				"Use the ~grid[x][y]~ comment beside ~LayerGrid~ in the starter to check your indexes.",
 			},
 		},
-		ID: "17-2-layer-census", Chapter: 17, Title: "خريطة الأعماق",
+		ID: "17-2-layer-census", Chapter: 17, LessonRevision: 1, Steps: ch17Mission2(false), Title: "خريطة الأعماق",
 		Goal: "عدّ الأنفاق المفتوحة في كل طبقة تحت الأرض، وابعتهم في slice واحدة بالترتيب",
 		Par:  0, Gold: 0, MaxTicks: 60,
 		Requires: []string{"slice"},
@@ -298,9 +300,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"~colony.LayerGrid(z)~ ببلاش، ومش محتاج تنزل. لف بحلقة على z من 1 لحد ~colony.Depth()-1~.",
-			"جوه كل طبقة: حلقتين على x وy، و~if g == colony.Tunnel || g == colony.Shaft { n++ }~.",
-			"اجمع العدد في ~counts = append(counts, n)~، وفي الآخر ~colony.Report(counts)~.",
+			"الـ3D slice ليها index لكل بُعد: الطبقة، وبعدها x، وبعدها y.",
+			"افحص شكل layer واحدة قبل ما تكتب loops تمرّ على أعمدتها وصفوفها.",
+			"استخدم تعليق ~grid[x][y]~ جنب ~LayerGrid~ في الـstarter عشان تراجع الـindexes.",
 		},
 		Lesson: `# مصفوفات 3D: slice جوه slice جوه slice 🧊
 
@@ -343,6 +345,7 @@ counts[0]++
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch17Mission3(true),
 			Title: "The Deep Geode",
 			Goal:  "A geode lies on layer 2. Reach it in the fewest steps through the existing tunnels and shafts",
 			Lesson: `# BFS in Three Dimensions 🕳️
@@ -399,12 +402,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Your BFS state becomes ~pos{x, y, z}~ instead of ~colony.Point~. The ~parent~ map can be ~map[pos]pos~.",
-				"Underground, you can stand only on Tunnel or Shaft. On the surface (z = 0), any tile is allowed.",
-				"When following the route: if z increases, use ~Descend()~; if it decreases, use ~Ascend()~; otherwise Move. Finally, call ~colony.Dig(directionToGeode)~.",
+				"BFS still finds shortest equal-cost paths when a node gains a depth coordinate.",
+				"Separate map state, allowed transitions, route reconstruction, and actions in your plan.",
+				"Start with the ~pos~ definition and the shaft-neighbor comments in ~main.go~.",
 			},
 		},
-		ID: "17-3-deep-geode", Chapter: 17, Title: "الجيود العميق",
+		ID: "17-3-deep-geode", Chapter: 17, LessonRevision: 1, Steps: ch17Mission3(false), Title: "الجيود العميق",
 		Goal: "فيه جيود في الطبقة 2. وصله بأقل عدد خطوات عن طريق الأنفاق والآبار الموجودة",
 		Par:  60, Gold: 30, MaxTicks: 400,
 		Setup: func(w *sim.World) {
@@ -478,9 +481,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الحالة في الـ BFS بقت ~pos{x, y, z}~ بدل ~colony.Point~. الـ map بتاعة ~parent~ تقدر تكون ~map[pos]pos~.",
-			"تحت الأرض تقدر تقف على Tunnel أو Shaft بس. على السطح (z = 0) أي خانة.",
-			"لما ترجع بالطريق: لو z زاد يبقى ~Descend()~، ولو قل يبقى ~Ascend()~، وغير كده Move. وفي الآخر ~colony.Dig(اتجاه الجيود)~.",
+			"BFS لسه بيلاقي أقصر طريق بتكلفة واحدة، حتى لو ضفنا العمق لإحداثية النقطة.",
+			"افصل حالة الخريطة، والانتقالات المسموحة، واسترجاع الطريق، والحركة في خطتك.",
+			"ابدأ من تعريف ~pos~ وتعليقات جيران الـshaft في ~main.go~.",
 		},
 		Lesson: `# BFS في 3 أبعاد 🕳️
 
