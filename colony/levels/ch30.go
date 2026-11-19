@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "30-1-cache-aside", Chapter: 30, Kind: "lab", Title: "كاش جانبي", Goal: "سرّع قراية المنارات بـ Redis مع صلاحية وإلغاء آمن للكاش", Setup: seededLabRoom,
+	add(&Level{LessonRevision: 1, Steps: ch30Lesson301Arabic, ID: "30-1-cache-aside", Chapter: 30, Kind: "lab", Title: "كاش جانبي", Goal: "سرّع قراية المنارات بـ Redis مع صلاحية وإلغاء آمن للكاش", Setup: seededLabRoom,
 		Requires: []string{"iface", "mutex", "sel:redis.Nil"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{65}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch301Starter}},
 		Lesson: `# منارات بكاش جانبي
@@ -60,8 +60,8 @@ if err != nil { return Beacon{}, nil } // غلط: عطل المصدر اتحوّ
 
 النجمة التالتة: اعتبر JSON سليم نحوياً لكن ~ID~ مختلف أو ~Charge~ سالبة فساد، واتعامل معاه زي JSON البايظ. مفيش ~Report~ أو خدمات خارج التست.
 `,
-		Hints: []string{"ابدأ بالمفتاح وGet؛ فرّق بين redis.Nil والعطل وإلغاء السياق.", "عند miss اقرا المصدر وبعد النجاح حاول Set بالـ TTL المحقونة؛ متخزنش خطأ.", "احفظ المصدر قبل Del، واحمِ العملية بقفل؛ فشل الحذف يسجل dirty لحد ما الحذف ينجح."},
-		En: &LevelText{Title: "Cache Aside", Goal: "Accelerate beacon reads with Redis, expiry, and safe invalidation", Files: []LabFile{{Name: "main.go", Starter: ch301Starter}},
+		Hints: []string{"الكاش نسخة مؤقتة، والمخزن يفضل المرجع لما القيمة تغيب.", "قسّم قراءة ~Read~ بين hit وmiss، وخلي كتابة ~Write~ تبدأ بالمصدر.", "فرّق بين ~redis.Nil~ وعطل Redis قبل اختيار مسار القراءة."},
+		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson301English, Title: "Cache Aside", Goal: "Accelerate beacon reads with Redis, expiry, and safe invalidation", Files: []LabFile{{Name: "main.go", Starter: ch301Starter}},
 			Lesson: `# Beacons with a cache beside the store
 
 ## Before you write
@@ -117,7 +117,7 @@ Hits return valid JSON without the source. Misses load the source and fill with 
 ~Write~ saves the source first and invalidates after success. Failed deletion returns an error matching ~ErrCacheSync~ and its cause, and marks dirty. Dirty reads load the source first; source failure returns without Redis calls. On success retry deletion: failure keeps dirty and returns the source value without filling, while success clears dirty and attempts filling. A later successful write/deletion also clears dirty. All operations are concurrent-safe, and no stale read may survive a completed write through the same object.
 
 Third star: syntactically valid JSON with mismatched ~ID~ or negative ~Charge~ is also corrupt and follows the malformed-JSON path. No ~Report~ or services outside the test.
-`, Hints: []string{"Start with the key and Get; distinguish redis.Nil, outage, and cancellation.", "On a miss load the source, then try Set with the injected TTL; never cache errors.", "Save before Del and lock each operation; failed deletion marks dirty until deletion succeeds."}},
+`, Hints: []string{"A cache is temporary; the store remains authoritative when a value is missing.", "Separate ~Read~ hit and miss paths, and let ~Write~ begin with the store.", "Distinguish ~redis.Nil~ from a Redis outage before choosing a read path."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch301Hidden},
 	})
 }
@@ -467,7 +467,7 @@ func TestHiddenBonusBeaconSemanticCorruption(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "30-2-documents", Chapter: 30, Kind: "lab", Title: "المستندات", Goal: "احفظ عينات الصخور كمستندات بفهرس فريد وصفحات ومهلة", Setup: seededLabRoom,
+	add(&Level{LessonRevision: 1, Steps: ch30Lesson302Arabic, ID: "30-2-documents", Chapter: 30, Kind: "lab", Title: "المستندات", Goal: "احفظ عينات الصخور كمستندات بفهرس فريد وصفحات ومهلة", Setup: seededLabRoom,
 		Requires: []string{"iface", "sel:mongo.Collection"}, Deps: []string{"go.mongodb.org/mongo-driver/v2"}, Bridge: []int{67}, Race: true, Service: "mongo",
 		Files: []LabFile{{Name: "main.go", Starter: ch302Starter}},
 		Lesson: `# أرشيف عينات على MongoDB
@@ -566,8 +566,8 @@ for cursor.Next(ctx) { } // من غير Close ولا Err
 
 ~NewMongoSamples(collection)~ بتغلّف collection محقونة. ~Init(ctx)~ تنشئ فهرس تصاعدي فريد اسمه ~unique_sample_tag~ على ~tag~، بشكل قابل للتكرار. ~Insert~ و ~Get~ و ~Replace~ و ~Remove~ و ~After~ تنفذ العقد الحقيقي في MongoDB على حقول ~_id~ و ~tag~ و ~mass~ بالـ tags الموجودة. الاستبدال ميعملش upsert، والكتلة صفر تتكتب. ~After~ تعمل فلتر حصري وترتيب وحد على السيرفر وتقفل ~cursor~ وتفحص خطأها النهائي؛ فشل الفك يرجع ~nil,error~. الـ adapter ميطبعش ولا يتحقق تاني: المدخل جاي من الأرشيف صالح. مرّر السياق، وحوّل الفرادة لـ ~ErrSampleDuplicate~ والغياب لـ ~ErrSampleMissing~، وحافظ على باقي الأخطاء. ~Init~ والـ adapter بياخدوا سياق محدود من المنادي. مفيش ~Report~، والاتصال والتنضيف في التست بس.
 `,
-		Hints: []string{"افصل Archive عن MongoSamples بواجهة SampleStore؛ التحقق والتطبيع قبل المخزن.", "اشتق سياق محدود لكل عملية، واطلب limit+1؛ next آخر ID راجع بس لو فيه عنصر إضافي.", "استخدم BSON tags وفهرس unique على tag، وافحص MatchedCount، واقفل cursor وافحص Err."},
-		En: &LevelText{Title: "Documents", Goal: "Store rock samples as documents with a unique index, pagination, and a timeout", Files: []LabFile{{Name: "main.go", Starter: ch302Starter}},
+		Hints: []string{"المستند record من حقول، والفهرس الفريد يحمي القاعدة وقت السباق.", "افصل ~Archive~ عن adapter Mongo، وخلي المؤشر يستخدم IDs مرتبة.", "راجع ~MatchedCount~ و~cursor.Err~ عند التعديل والصفحات."},
+		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson302English, Title: "Documents", Goal: "Store rock samples as documents with a unique index, pagination, and a timeout", Files: []LabFile{{Name: "main.go", Starter: ch302Starter}},
 			Lesson: `# A MongoDB sample archive
 
 ## Before you write
@@ -663,7 +663,7 @@ Keep the starter signatures and empty ~main~. ~SampleStore~ provides ~Insert~, ~
 ~Page(ctx, after, limit)~ rejects ~after < 0~ or limits outside 1..50 as ~ErrSample~ before the store. Call ~After~ once with ~limit+1~ and a bounded context. Return ~([]Sample, next int64, error)~: non-nil empty slices, ~nil, 0, err~ on failure, and the continuation described above. Example: ~rows, next, err := archive.Page(ctx, 0, 2)~, followed by ~archive.Page(ctx, next, 2)~ when next is nonzero.
 
 ~NewMongoSamples(collection)~ wraps an injected collection. ~Init(ctx)~ idempotently creates an ascending unique index named ~unique_sample_tag~ on ~tag~. ~Insert~, ~Get~, ~Replace~, ~Remove~, and ~After~ implement the real MongoDB contract over ~_id~, ~tag~, and ~mass~, using the starter tags. Replacement does not upsert and must write zero mass. ~After~ filters exclusively, sorts and limits on the server, closes the cursor, and checks terminal error; decode failure returns ~nil,error~. The adapter does no further validation or normalization: archive inputs are valid. Forward context, map uniqueness to ~ErrSampleDuplicate~ and absence to ~ErrSampleMissing~, and preserve other errors. ~Init~ and adapter methods receive bounded contexts from their caller. No ~Report~; tests alone connect and clean up.
-`, Hints: []string{"Separate Archive from MongoSamples with SampleStore; validate and normalize before storage.", "Derive a bounded context per operation and fetch limit+1; next is the last returned ID only when an extra exists.", "Use BSON tags and a unique tag index, check MatchedCount, close cursors, and check Err."}},
+`, Hints: []string{"A document is a typed record, and a unique index protects concurrent writes.", "Separate ~Archive~ from the Mongo adapter, and page with ordered IDs.", "Check ~MatchedCount~ and ~cursor.Err~ during replacement and paging."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch302Hidden, HiddenFiles: map[string]string{"mongo_integration_test.go": ch302Integration}},
 	})
 }
@@ -1181,7 +1181,7 @@ func TestHiddenArchiveMongoIntegration(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "30-3-search-index", Chapter: 30, Kind: "lab", Title: "فهرس البحث", Goal: "افهرس نشرات المستعمرة ورتّب نتائجها وصفّحها من غير تكرار", Setup: seededLabRoom,
+	add(&Level{LessonRevision: 1, Steps: ch30Lesson303Arabic, ID: "30-3-search-index", Chapter: 30, Kind: "lab", Title: "فهرس البحث", Goal: "افهرس نشرات المستعمرة ورتّب نتائجها وصفّحها من غير تكرار", Setup: seededLabRoom,
 		Requires: []string{"map"}, Deps: []string{}, Bridge: []int{69}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch303Starter}},
 		Lesson: `# فهرس نشرات المستعمرة
@@ -1248,8 +1248,8 @@ for code := range scores { hits = append(hits, DispatchHit{Dispatch: docs[code]}
 
 النجمة التالتة: نفّذ ~Vocabulary(prefix string, limit int) ([]string, error)~: البادئة بعد trim وlowercase إما فاضية أو حروف وأرقام بس، والحد من 1 لـ 20، وإلا ~nil,ErrSearch~. رجّع كلمات الفهرس المختلفة اللي بتبدأ بالبادئة، مرتبة تصاعدي ومحدودة، وslice فاضية مش ~nil~ لو مفيش. تعديل النتيجة ميغيّرش الفهرس ولا النداءات التالية.
 `,
-		Hints: []string{"قسّم العنوان والجسم بنفس Unicode tokenizer وخزّن postings: كلمة ثم كود ثم وزن.", "اجمع درجات كلمات السؤال المختلفة؛ رتّب بالدرجة تنازلي ثم الكود تصاعدي.", "اقطع الصفحة بعد الترتيب وافحص offset قبل الجمع؛ للنجمة رتّب كلمات الفهرس اللي بتبدأ بالبادئة."},
-		En: &LevelText{Title: "Search Index", Goal: "Index colony dispatches, rank hits, and paginate without duplicates", Files: []LabFile{{Name: "main.go", Starter: ch303Starter}},
+		Hints: []string{"الفهرس المقلوب يربط كل كلمة بالمستندات اللي ظهرت فيها.", "اجمع postings ثم رتّب النتائج قبل ما تقطع الصفحة.", "استخدم ~unicode.IsLetter~ و~sort.Strings~ في مواضعهما."},
+		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson303English, Title: "Search Index", Goal: "Index colony dispatches, rank hits, and paginate without duplicates", Files: []LabFile{{Name: "main.go", Starter: ch303Starter}},
 			Lesson: `# An index for colony dispatches
 
 ## Before you write
@@ -1313,7 +1313,7 @@ Implement ~Search(query string, offset, limit int) ([]DispatchHit, error)~. Norm
 Never mutate inputs, index state, or earlier call results. Mutating a returned hit must not affect another read. Searches on one index are concurrent-safe. No I/O, clock, network, or ~Report~; keep ~main~ empty.
 
 Third star: implement ~Vocabulary(prefix string, limit int) ([]string, error)~. After trimming and lowercasing, prefix must be empty or letters/digits only; limit is 1..20, otherwise ~nil,ErrSearch~. Return distinct indexed terms starting with that prefix in ascending order, capped by limit, with a non-nil empty slice when absent. Mutating the returned slice must not affect the index or future calls.
-`, Hints: []string{"Tokenize titles and bodies with the same Unicode rule; store term-to-code-to-weight postings.", "Sum distinct query terms, then sort score descending and code ascending.", "Slice after sorting and check offset before addition; for the star sort indexed terms matching the prefix."}},
+`, Hints: []string{"An inverted index maps each term to the documents containing it.", "Gather postings and rank results before slicing a page.", "Use ~unicode.IsLetter~ and ~sort.Strings~ where they fit."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch303Hidden},
 	})
 }
@@ -1545,7 +1545,7 @@ func TestHiddenBonusDispatchVocabulary(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "30-4-read-write-split", Chapter: 30, Kind: "lab", Title: "قراءة وكتابة", Goal: "وجّه الكتابة للأصل والقراءة للنسخة مع نافذة قراية لزقة", Setup: seededLabRoom,
+	add(&Level{LessonRevision: 1, Steps: ch30Lesson304Arabic, ID: "30-4-read-write-split", Chapter: 30, Kind: "lab", Title: "قراءة وكتابة", Goal: "وجّه الكتابة للأصل والقراءة للنسخة مع نافذة قراية لزقة", Setup: seededLabRoom,
 		Requires: []string{"iface"}, Deps: []string{}, Bridge: []int{70}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch304Starter}},
 		Lesson: `# مسارين لسجل المرحّلات
@@ -1611,8 +1611,8 @@ ununtil = time.Now().Add(sticky) // ساعة حقيقية وتجديد غلط ل
 
 ادعم نداءات متزامنة على نفس الكائن، ومن غير تسريب حالة جلسة لجلسة تانية. التستات seeded بساعة ومخازن محقونين؛ مفيش شبكة أو ساعة جهاز أو ~Report~.
 `,
-		Hints: []string{"عرّف RelayStore واحتفظ بالمخزنين والساعة المحقونين، والكتابة للأصل مرة واحدة بس.", "بعد نجاح الكتابة سجّل نهاية نافذة للجلسة؛ القراية جوه النافذة للأصل وخارجها للنسخة.", "ميحصلش fallback إلا لـ ErrReplicaUnavailable؛ افحص الإلغاء قبله، واحمِ القرار والنداءات والعلامات بقفل."},
-		En: &LevelText{Title: "Read and Write", Goal: "Route writes to primary and reads to replica with a sticky read window", Files: []LabFile{{Name: "main.go", Starter: ch304Starter}},
+		Hints: []string{"الـreplica ممكن تتأخر عن الـprimary حتى بعد كتابة ناجحة.", "افصل مسار الكتابة عن القراية اللزقة والقراية العادية.", "راجع ~errors.Is~ والساعة المحقونة عند قرار fallback."},
+		En: &LevelText{LessonRevision: 1, Steps: ch30Lesson304English, Title: "Read and Write", Goal: "Route writes to primary and reads to replica with a sticky read window", Files: []LabFile{{Name: "main.go", Starter: ch304Starter}},
 			Lesson: `# Two routes for relay records
 
 ## Before you write
@@ -1675,7 +1675,7 @@ Implement ~NewRelayRouter(primary, replica RelayStore, now func() time.Time, sti
 ~Read(ctx, session, key) (string, error)~ uses the same cancellation/input validation and original context for backends. During the session window read primary only. Otherwise read replica: return its success, return domain errors immediately, and make exactly one primary attempt for errors matching ~ErrReplicaUnavailable~. Cancellation/deadline in the current context after a read, or in the returned error, prevents fallback; the current context's error takes precedence. Every failed read returns empty text and its error. Sticky primary failure never falls back to replica. The exact endpoint is outside the window, and reads never renew it. Example: ~router.Write(ctx, "crew-a", "weather", "clear")~ followed by ~router.Read(ctx, "crew-a", "weather")~ reads primary within the window.
 
 Support concurrent calls on one object and keep sessions isolated. Tests use seeded values, injected time and stores; no network, machine clock, or ~Report~.
-`, Hints: []string{"Define RelayStore and retain the injected stores and clock; write primary exactly once.", "After successful writes record a session endpoint; read primary within the window and replica outside it.", "Fallback only for ErrReplicaUnavailable after checking cancellation; lock decisions, backend calls, and markers."}},
+`, Hints: []string{"A replica can lag behind primary after a successful write.", "Separate writes, sticky reads, and ordinary reads into distinct routes.", "Use ~errors.Is~ and the injected clock when deciding on fallback."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch304Hidden},
 	})
 }
