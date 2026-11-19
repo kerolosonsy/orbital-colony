@@ -40,6 +40,7 @@ type result struct {
 type runResponse struct {
 	Phase         string            `json:"phase"` // compile | require | run
 	Traceable     bool              `json:"traceable,omitempty"`
+	Failure       string            `json:"failure,omitempty"`
 	CompileErrors []compileError    `json:"compileErrors,omitempty"`
 	CompileOutput string            `json:"compileOutput,omitempty"`
 	Missing       []string          `json:"missing,omitempty"`
@@ -137,6 +138,7 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 			}
 		}
 		resp.Result.Message = tr(lang, "البرنامج مااتبناش. صلّح الأخطاء اللي تحت.", "The program did not compile. Fix the errors below.")
+		resp.Failure = "compile"
 		return resp, nil
 	}
 
@@ -252,6 +254,13 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	if len(resp.Missing) > 0 && resp.Result.Success {
 		resp.Result.Success, resp.Result.Stars = false, 0
 		resp.Result.Message = tr(lang, "الدرون خلّص المهمة 👏 بس لازم تحلها باستخدام المفاهيم المطلوبة:", "The drone completed the mission 👏 but your solution must use the required concepts:")
+	}
+	if !resp.Result.Success {
+		if resp.Race || errors.Is(rctx.Err(), context.DeadlineExceeded) || runErr != nil && (strings.Contains(resp.Stderr, "panic:") || strings.Contains(resp.Stderr, "fatal error:")) {
+			resp.Failure = "runtime"
+		} else {
+			resp.Failure = "check"
+		}
 	}
 	return resp, nil
 }

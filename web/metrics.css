@@ -1,0 +1,19 @@
+.metrics-menu-actions { display: flex; align-items: center; gap: 8px; }
+.metrics-sheet { width: min(900px, 100%); padding-bottom: 20px; }
+.metrics-note { padding-inline: 22px; color: var(--muted); margin: 4px 0 18px; }
+.metrics-section { padding: 0 22px 16px; }
+.metrics-section h3 { margin: 0 0 8px; font-size: 16px; }
+.metrics-struggles { list-style: decimal; padding-inline-start: 28px; margin: 0; }
+.metrics-struggles li { padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+.metrics-struggles li strong, .metrics-struggles li span { display: block; }
+.metrics-struggles li strong { font-weight: 600; }
+.metrics-struggles li span, .metrics-chapters p { margin: 2px 0 0; color: var(--paper-2); font-size: 13px; }
+.metrics-chapters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.metrics-chapters article { padding: 10px 12px; border: 1px solid var(--rule); background: var(--ink-2); }
+.metrics-chapters article strong { display: block; }
+.metrics-chapters article p { line-height: 1.7; }
+
+@media (max-width: 760px) {
+  .metrics-menu-actions .tool { padding-inline: 8px; }
+  .metrics-chapters { grid-template-columns: 1fr; }
+}

@@ -3,6 +3,7 @@
 # الإعدادات (تقدر تغيّرها: make start PORT=8080)
 PORT    ?= 7777
 ADDR    ?= 127.0.0.1:$(PORT)
+SAVES   ?= saves
 BIN     := ./orbital
 PIDFILE := .orbital.pid
 LOGFILE := .orbital.log
@@ -11,7 +12,7 @@ OPEN    ?= open
 STAMP    = $(shell date +%Y%m%d-%H%M%S)
 
 .DEFAULT_GOAL := help
-.PHONY: help run start stop restart status logs open build test test-quick check fmt vet \
+.PHONY: help run start stop restart status logs open build test test-quick check fmt vet stats \
         backup restore backups players reset-all clean doctor
 
 help: ## اعرض كل الأوامر
@@ -80,6 +81,9 @@ fmt: ## نسّق كود Go
 vet: ## افحص الكود بـ go vet
 	go vet ./...
 	cd colony && go vet ./...
+
+stats: ## اطبع أكتر 20 ورقة اتعثر فيها اللاعبون
+	go run ./cmd/orbital -stats -saves $(SAVES)
 
 # ---------- الحفظ واللاعبين ----------
 

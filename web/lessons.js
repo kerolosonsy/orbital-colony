@@ -467,7 +467,7 @@ const Lessons = (() => {
     } };
   }
 
-  function open(level) {
+  function open(level, onStepViewed = () => {}) {
     navigationObserver?.disconnect();
     const lessonPanel = $("#lesson-panel");
     lessonPanel.style.removeProperty("--lesson-nav-offset");
@@ -486,6 +486,7 @@ const Lessons = (() => {
       nav.update(index);
       title.textContent = level.steps[index].title;
       body.replaceChildren(...level.steps[index].blocks.map((block) => blockView(block, session)));
+      onStepViewed(level.steps[index].id);
     }
     function navigate(index) {
       session.go(index); render(); title.focus();

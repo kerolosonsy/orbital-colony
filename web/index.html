@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/trace.css">
+<link rel="stylesheet" href="/static/metrics.css">
 <link rel="stylesheet" href="/static/treeview.css">
 <link rel="stylesheet" href="/static/sandbox/kit.css">
 <link rel="stylesheet" href="/static/sandbox/ch01.css">
@@ -190,7 +191,10 @@
   <div class="sheet index-sheet">
     <div class="sheet-head">
       <h2 id="index-title" data-en="Survey index · Kepler-G">فهرس أوراق المسح · كيبلر-ج</h2>
-      <button class="tool" data-close aria-label="قفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+      <div class="metrics-menu-actions">
+        <button id="btn-stats" class="tool" data-en="My stats">إحصائياتي</button>
+        <button class="tool" data-close aria-label="قفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+      </div>
     </div>
     <div id="chapter-list" class="quads"></div>
     <section id="quiz-panel" class="hidden" aria-labelledby="quiz-title">
@@ -198,6 +202,27 @@
       <p id="quiz-score" role="status"></p>
       <div id="quiz-questions"></div>
       <button id="quiz-retry" class="tool" data-en="Try again">جرّب تاني</button>
+    </section>
+  </div>
+</dialog>
+
+<dialog id="metrics" class="overlay hidden" aria-labelledby="metrics-title">
+  <div class="sheet metrics-sheet">
+    <div class="sheet-head">
+      <h2 id="metrics-title" data-en="My stats">إحصائياتي</h2>
+      <div class="metrics-menu-actions">
+        <button id="btn-metrics-export" class="tool" data-en="Export JSON">نزّل JSON</button>
+        <button class="tool" data-close aria-label="قفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+      </div>
+    </div>
+    <p class="metrics-note" data-en="Saved in this profile on this device. Nothing is sent outside your computer.">الأرقام دي محفوظة في بروفايلك على الجهاز ده، ومش بتتبعت لحد.</p>
+    <section class="metrics-section" aria-labelledby="metrics-struggles-title">
+      <h3 id="metrics-struggles-title" data-en="Levels where you struggled most">المهمات اللي احتاجت محاولات أكتر</h3>
+      <ol id="metrics-struggles" class="metrics-struggles"></ol>
+    </section>
+    <section class="metrics-section" aria-labelledby="metrics-chapters-title">
+      <h3 id="metrics-chapters-title" data-en="Chapter summary">ملخص الفصول</h3>
+      <div id="metrics-chapters" class="metrics-chapters"></div>
     </section>
   </div>
 </dialog>
@@ -271,6 +296,7 @@
 </dialog>
 
 <script src="/static/i18n.js"></script>
+<script src="/static/metrics.js"></script>
 <script src="/static/sprites.js"></script>
 <script src="/static/buildings.js"></script>
 <script src="/static/lessons.js"></script>
