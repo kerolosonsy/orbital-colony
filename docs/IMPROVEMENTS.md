@@ -28,3 +28,7 @@ Each entry: what changed and why. Numbered in the order they landed.
 24. **Arrow keys step through the lesson** — ← / → move to the previous/next lesson step (mirrored for Arabic RTL) when focus is in the lesson and not on a control, sandbox or walkthrough.
 25. **README covers the new features** — debugger, error explanations, playgrounds/stats, editor helpers, a shortcuts table and mission links.
 26. **`make test` duration is honest** — help text said ~4 minutes; the full suite takes ~15–20.
+27. **"Server is down" hint** — when the page can't reach the server (fetch fails), the console now says to run `make start` and refresh, instead of only "Failed to fetch".
+28. **"Page is stale after restart" hint** — every restart makes a new API token, so an old tab got `403 missing token` forever. The console now says to refresh the page (Arabic and English messages both detected). Verified live by restarting the server under an open tab.
+29. **Progress upload failures are no longer silent** — if saving progress to the server fails, the console says why once (and the hint is de-duplicated when a run fails at the same moment). The local copy keeps the progress meanwhile.
+30. **Static files revalidate** — `/static/*` is served with `Cache-Control: no-cache` and a content-hash `ETag`, so a rebuilt server is always picked up on refresh while unchanged files come back as cheap `304`s. Test: `TestStaticFilesRevalidate`.

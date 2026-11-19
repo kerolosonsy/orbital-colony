@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"orbital/colony/econ"
@@ -345,5 +346,23 @@ func TestGuardSetsSecurityHeaders(t *testing.T) {
 			!strings.Contains(h.Get("Content-Security-Policy"), "frame-ancestors 'none'") || h.Get("Referrer-Policy") != "no-referrer" {
 			t.Fatalf("%s headers: %v", path, h)
 		}
+	}
+}
+
+func TestStaticFilesRevalidate(t *testing.T) {
+	web := fstest.MapFS{"app.js": {Data: []byte("console.log(1)")}}
+	handler := staticHandler(web)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest("GET", "/app.js", nil))
+	tag := response.Header().Get("ETag")
+	if response.Code != 200 || response.Header().Get("Cache-Control") != "no-cache" || tag == "" {
+		t.Fatalf("first load: %d %v", response.Code, response.Header())
+	}
+	again := httptest.NewRequest("GET", "/app.js", nil)
+	again.Header.Set("If-None-Match", tag)
+	response = httptest.NewRecorder()
+	handler.ServeHTTP(response, again)
+	if response.Code != http.StatusNotModified {
+		t.Fatalf("unchanged file should be 304, got %d", response.Code)
 	}
 }

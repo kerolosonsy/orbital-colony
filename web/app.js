@@ -61,7 +61,13 @@ const store = {
       this.blob.review = saved.review || {};
       this.blob.metrics = LearningMetrics.mergeMetrics(this.blob.metrics, saved.metrics);
       if ($("#missions").open) renderMissions();
-    }).catch(() => {});
+      this.warned = false;
+    }).catch((error) => {
+      // progress stays in the local copy; say once why it isn't reaching the server
+      if (this.warned || typeof logServerHint !== "function") return;
+      this.warned = true;
+      logServerHint(error.message === "403" ? new Error("403 token") : error);
+    });
   },
   pref(k, v) {
     if (v === undefined) return this.blob.prefs[k];
@@ -578,6 +584,26 @@ function log(text, cls = "c-out") {
   const d = document.createElement("div");
   d.className = cls; d.textContent = text;
   appendConsoleNode(d);
+}
+// Two common local situations get a plain next step: the server is not
+// running, or it was restarted (new token) while this tab stayed open.
+function serverHint(error) {
+  const message = String(error?.message || error);
+  if (error instanceof TypeError || /Failed to fetch|NetworkError|Load failed/i.test(message)) {
+    return T("السيرفر شكله مقفول. شغّله بـ make start وبعدين اعمل refresh للصفحة.", "The server seems to be down. Start it with make start, then refresh the page.");
+  }
+  if (/^403\b/.test(message) && /token|رمز الدخول/i.test(message)) {
+    return T("السيرفر اتعمله restart والصفحة دي قديمة. اعمل refresh (⌘R / F5).", "The server was restarted and this page is stale. Refresh it (⌘R / F5).");
+  }
+  return "";
+}
+let lastServerHint = { text: "", at: 0 };
+function logServerHint(error) {
+  const hint = serverHint(error);
+  // a run and a progress upload often fail together: say it once
+  if (!hint || (hint === lastServerHint.text && Date.now() - lastServerHint.at < 10000)) return;
+  lastServerHint = { text: hint, at: Date.now() };
+  log(hint, "c-tip");
 }
 function logErrorHelp(meaning, cause, check) {
   const box = window.ErrorHelp?.render({ meaning, cause, check });
@@ -1830,7 +1856,7 @@ async function run(opts = {}) {
       log(T("السيرفر اتأخر جداً في الرد، فوقّفت الكود. جرّب تاني.", "The server took too long to answer, so the run was stopped. Try again."), "c-err");
       logErrorHelp(T("التشغيل ماخلصش قبل المهلة.", "The run did not finish before its time limit."), T("ممكن يكون فيه انتظار مفتوح أو عملية بطيئة.", "The program may be waiting indefinitely or running slowly."), T("راجع آخر output ونقاط الانتظار.", "Check the last output and the places where the program waits."));
     }
-    else log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
+    else { log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err"); logServerHint(e); }
   } finally {
     clearTimeout(timer);
     if (me === runId) {
@@ -1917,6 +1943,7 @@ function finish(level, res, missing = [], silent = false) {
     Profiles.init();
   } catch (e) {
     log(T("مقدرتش أوصل للسيرفر: ", "Can't reach the server: ") + e.message, "c-err");
+    logServerHint(e);
     return;
   }
   const linkedID = hashLevelID();

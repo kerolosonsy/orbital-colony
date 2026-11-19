@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
@@ -106,7 +107,7 @@ func main() {
 	mux := http.NewServeMux()
 	s.registerProfiles(mux)
 	mux.HandleFunc("GET /{$}", s.index)
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(web)))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", staticHandler(web)))
 	mux.HandleFunc("GET /api/levels", s.levels)
 	mux.HandleFunc("GET /api/services", s.services)
 	mux.HandleFunc("GET /api/preview", s.preview)
@@ -178,6 +179,31 @@ func (s *server) guard(next http.Handler) http.Handler {
 			return
 		}
 		next.ServeHTTP(w, r.WithContext(withLang(r.Context(), requestLang(r))))
+	})
+}
+
+// staticHandler serves the embedded client so a rebuilt server never leaves
+// the browser on old scripts: every request revalidates (no-cache) and a
+// content-hash ETag turns unchanged files into a cheap 304.
+func staticHandler(web fs.FS) http.Handler {
+	etags := map[string]string{}
+	fs.WalkDir(web, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		if body, err := fs.ReadFile(web, path); err == nil {
+			sum := sha256.Sum256(body)
+			etags[path] = `"` + hex.EncodeToString(sum[:8]) + `"`
+		}
+		return nil
+	})
+	files := http.FileServerFS(web)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		if tag, ok := etags[strings.TrimPrefix(r.URL.Path, "/")]; ok {
+			w.Header().Set("ETag", tag)
+		}
+		files.ServeHTTP(w, r)
 	})
 }
 
