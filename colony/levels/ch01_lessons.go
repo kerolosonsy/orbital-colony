@@ -122,14 +122,14 @@ var ch01PlantingSandboxConfig = map[string]any{
 
 var ch01FirstSignalArabic = []LessonStep{
 	{ID: "c11.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch01Markdown("c11.mission", "1. وصّل الدرون للمنارة 📡.\n2. الدرون بيبدأ عند (0,0)، والمنارة شرقًا.\n3. شغّل البرنامج وراقب مكانه بعد كل أمر.\n\nالـstarter بدأ الحركة بالفعل؛ كمل من السطر الموجود.")}},
-	{ID: "c11.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch01Walkthrough("c11.sequence", "Go بتنّفذ أوامر ~main~ بالترتيب من فوق لتحت. كل استدعاء دالة أمر مستقل، وقيمة الاتجاه بتحدد وجهته. المثال للتوضيح وبيطبع رسالتين بالترتيب.",
+	{ID: "c11.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch01Walkthrough("c11.sequence", "Go بتنّفذ أوامر ~main~ بالترتيب من فوق لتحت. كل function call أمر لوحده، والاتجاه اللي بتبعته بيحدد الدرون هيروح فين. المثال للتوضيح وبيطبع رسالتين بالترتيب.",
 		`func main() {
 	fmt.Println("drone ready")
 	fmt.Println("beacon ahead")
 }`,
-		"e11-sequence", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "بدأت دالة main."}, {Line: 2, Caption: "الرسالة الأولى تظهر.", Output: "drone ready"}, {Line: 3, Caption: "الثانية تتبع الأولى.", Output: "drone ready\nbeacon ahead"}})}},
+		"e11-sequence", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "بدأت function ~main~."}, {Line: 2, Caption: "الرسالة الأولى بتظهر.", Output: "drone ready"}, {Line: 3, Caption: "التانية بتيجي بعدها.", Output: "drone ready\nbeacon ahead"}})}},
 	{ID: "c11.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch01Question("c11.predict-order", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tfmt.Println(\"step\")\n\tfmt.Println(\"signal\")\n}\n~~~", []string{"signal ثم step", "step ثم signal", "السطران في نفس الوقت"}, 1, []string{"Go لا تعكس ترتيب السطور.", "السطر الأعلى يطبع أولًا.", "الدالتان هنا بتتنفذا بالتتابع."}),
+		ch01Question("c11.predict-order", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tfmt.Println(\"step\")\n\tfmt.Println(\"signal\")\n}\n~~~", []string{"signal ثم step", "step ثم signal", "السطران في نفس الوقت"}, 1, []string{"Go مش بتعكس ترتيب السطور.", "السطر اللي فوق بيطبع الأول.", "الاستدعاءين هنا بيتنفّذوا ورا بعض."}),
 		ch01Walkthrough("c11.order-reveal", "تابع السطرين وشوف ترتيب ظهور الرسائل.",
 			`func main() {
 	fmt.Println("step")
@@ -174,28 +174,28 @@ var ch01FirstSignalEnglish = []LessonStep{
 
 var ch01FirstHarvestArabic = []LessonStep{
 	{ID: "c12.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch01Markdown("c12.mission", "1. اجمع الطحالب 🌿 من الخانات اللي على اليمين.\n2. لازم الدرون يقف فوق النبات وقت الحصاد.\n3. راقب العداد بعد التشغيل.\n\nالـstarter فيه حركة وحصاد بالفعل؛ افهم ترتيبهم قبل ما تكمل.")}},
-	{ID: "c12.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch01Walkthrough("c12.function-call", "الدالة ممكن تتنادى من غير arguments، بس الأقواس الفاضية لسه مطلوبة. استدعاء الدالة جوه ~main~ يشغّل جسمها. المثال بيوضح دالة تدريب بسيطة.",
+	{ID: "c12.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch01Walkthrough("c12.function-call", "الـfunction ممكن تناديها من غير arguments، بس الأقواس الفاضية لسه مطلوبة. لما تنادي الـfunction جوه ~main~، جسمها بيتنفّذ. المثال بيوضح function تدريب بسيطة.",
 		`func harvest() {
 	fmt.Println("harvest")
 }
 func main() {
 	harvest()
 }`,
-		"e12-call", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "تعريف دالة الحصاد."}, {Line: 5, Caption: "main تستدعي harvest."}, {Line: 2, Caption: "الدالة تطبع رسالة.", Output: "harvest"}})}},
+		"e12-call", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "تعريف function الحصاد."}, {Line: 5, Caption: "main بتنادي harvest."}, {Line: 2, Caption: "الـfunction بتطبع رسالة.", Output: "harvest"}})}},
 	{ID: "c12.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch01Question("c12.predict-order", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tfmt.Println(\"move\")\n\tfmt.Println(\"harvest\")\n}\n~~~", []string{"harvest ثم move", "move ثم harvest", "مفيش ناتج"}, 1, []string{"الترتيب مش بيتعكس.", "الحركة تظهر قبل الحصاد.", "كل استدعاء يطبع سطرًا."}),
+		ch01Question("c12.predict-order", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tfmt.Println(\"move\")\n\tfmt.Println(\"harvest\")\n}\n~~~", []string{"harvest ثم move", "move ثم harvest", "مفيش ناتج"}, 1, []string{"الترتيب مش بيتعكس.", "الحركة بتظهر قبل الحصاد.", "كل استدعاء بيطبع سطر."}),
 		ch01Walkthrough("c12.order-reveal", "شوف إزاي ترتيب الاستدعاءين بيظهر في الناتج.",
 			`func main() {
 	fmt.Println("move")
 	fmt.Println("harvest")
 }`,
-			"e12-order", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "نفّذ الحركة أولًا.", Output: "move"}, {Line: 3, Caption: "الحصاد يأتي بعدها.", Output: "move\nharvest"}}),
+			"e12-order", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "نفّذ الحركة الأول.", Output: "move"}, {Line: 3, Caption: "الحصاد بييجي بعدها.", Output: "move\nharvest"}}),
 		ch01Sandbox("ch01-first-harvest", "حرّك الدرون ثم تابع أثر ~Harvest()~.", "ch01-harvest-call", ch01HarvestSandboxConfig),
 	}},
 	{ID: "c12.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch01Markdown("c12.watch", "- ~Harvest()~ مالهاش argument، لكن لازم تكتب ~()~.\n- الحصاد بيحصل في مكان الدرون الحالي وقت الاستدعاء.")}},
 	{ID: "c12.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch01Markdown("c12.plan", "افصل بين الحركة والفعل: اسأل نفسك الدرون واقف فين قبل كل ~Harvest~.\n\nالعداد بيقيس النباتات اللي اتجمعت، مش عدد الأسطر."),
-		ch01Question("c12.harvest-check", "إيه اللي يحدد الخانة اللي هيحصل عليها الحصاد؟", []string{"مكان الدرون", "اسم الدالة", "عدد الرسائل"}, 0, []string{"الفعل يستخدم المكان الحالي.", "اسم الدالة لا يغيّر المكان.", "الرسائل لا تحدد موقع الدرون."}),
+		ch01Question("c12.harvest-check", "إيه اللي يحدد الخانة اللي هيحصل فيها الحصاد؟", []string{"مكان الدرون", "اسم الدالة", "عدد الرسائل"}, 0, []string{"الفعل بيستخدم الخانة اللي الدرون واقف عليها.", "اسم الـfunction مش بيغيّر المكان.", "الرسائل مش بتحدد مكان الدرون."}),
 	}},
 	{ID: "c12.turn-step", Title: "دورك", Blocks: []LessonBlock{ch01Markdown("c12.turn", "شغّل محاولتك وراقب كل حركة وحصاد في الـConsole. قارن مكان الدرون بعد كل أمر بالطحلب التالي.")}},
 }
@@ -243,13 +243,13 @@ var ch01PlantingArabic = []LessonStep{
 	fmt.Println("prepare")
 	fmt.Println("plant")
 }`,
-			"e13-try", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "التحضير في الأول.", Output: "prepare"}, {Line: 3, Caption: "الزراعة تأتي بعدها.", Output: "prepare\nplant"}}),
+			"e13-try", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "التحضير في الأول.", Output: "prepare"}, {Line: 3, Caption: "الزراعة بتيجي بعدها.", Output: "prepare\nplant"}}),
 		ch01Sandbox("ch01-planting", "تابع حالة الأرض قبل الزراعة.", "ch01-planting-state", ch01PlantingSandboxConfig),
 	}},
 	{ID: "c13.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch01Markdown("c13.watch", "- الطحلب محتاج ~soil~؛ ~regolith~ لسه محتاج تجهيز.\n- الـstarter حرث خانة البداية، فحالتها مختلفة عن الخانات التالية.")}},
 	{ID: "c13.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch01Markdown("c13.plan", "لكل خانة، راجع الأرض والنبتة بعد ما يوصلها الدرون. لو وقفت عند خانة جديدة، اسأل إيه اللي اتغيّر وإيه اللي لسه محتاج خطوة."),
-		ch01Question("c13.ground-check", "إيه اللي لازم يكون جاهز قبل ما الطحلب ينمو؟", []string{"Soil", "رسالة في Console", "إحداثي جديد"}, 0, []string{"الطحلب يحتاج أرضًا من نوع soil.", "الرسالة لا تجهز الأرض.", "تغيير الإحداثي وحده مش كفاية."}),
+		ch01Question("c13.ground-check", "إيه اللي لازم يكون جاهز قبل ما الطحلب ينمو؟", []string{"Soil", "رسالة في Console", "إحداثي جديد"}, 0, []string{"الطحلب محتاج أرض من نوع soil.", "الرسالة مش بتجهّز الأرض.", "تغيير الإحداثي لوحده مش كفاية."}),
 	}},
 	{ID: "c13.turn-step", Title: "دورك", Blocks: []LessonBlock{ch01Markdown("c13.turn", "شغّل محاولتك وراقب حالة الأرض والنبات في كل خانة. استخدم عداد المهمة لتعرف التقدم.")}},
 }

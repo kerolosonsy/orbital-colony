@@ -97,7 +97,7 @@ func main() {
 `,
 		Hints: []string{
 			"المتغير بيحتفظ بقيمة بتتغير عشان تستخدمها بعدين.",
-			"اقرأ كل نوع من المخزن، واحسب من القيم المحفوظة، واختار طريقة إرسال المهمة.",
+			"اقرا كل نوع من المخزن، واحسب من القيم المحفوظة، واختار طريقة إرسال المهمة.",
 			"الـstarter قرأ الطحالب بالفعل؛ بص على ~colony.Count~ للنوع التاني.",
 		},
 		Lesson: `# المتغيرات 📦
@@ -230,7 +230,7 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الدالة ممكن ترجع أكتر من قيمة، وكل متغير يستقبل قيمته بالترتيب.",
+			"function ممكن ترجّع أكتر من value، وكل متغير بياخد الـvalue اللي قصاده بالترتيب.",
 			"استخدم البعدين عشان تفكر في القياسين المطلوبين.",
 			"راجع سطر ~colony.WorldSize()~ الموجود وترتيب التقارير المطلوبة.",
 		},
@@ -276,7 +276,7 @@ func main() {
 	// Build the report described in the lesson.
 }
 `
-	add(&Level{LessonRevision: 1, Steps: ch02CallsignsArabic, ID: "2-3-callsigns", Chapter: 2, Title: "أسماء النداء", Goal: "قارن bytes وrunes وابعت أول وآخر حرف لاسمين",
+	add(&Level{LessonRevision: 1, Steps: ch02CallsignsArabic, ID: "2-3-callsigns", Chapter: 2, Title: "أسماء النداء", Goal: "قارن bytes وrunes وابعت أول وآخر rune لاسمين",
 		Requires: []string{"rune"}, Bridge: []int{6},
 		Par: 0, Gold: 0, MaxTicks: 20,
 		Starter: callsignsStarter, Lesson: `# النص مش عدد bytes بس 📡
@@ -481,7 +481,7 @@ fmt.Println(minutes + count) // مش هيتبني
 اقرأ الكميات بنداءات منفصلة، باستخدام ~int(Cell)~ وباقي أسماء الأنواع. حوّلها لـ Cells واضرب كل كمية في معاملها. ابعت تقرير واحد: إجمالي cells كعدد صحيح. مفيش حلقات ولا parsing ولا أخطاء هنا.`, Hints: []string{
 			"الأنواع المسماة بتدي الأعداد والوحدات معاني مختلفة في Go.",
 			"افصل تعريف الأنواع والثوابت عن قراءة الكميات اللي بتتغير.",
-			"راجع نوع argument في ~CargoAmount~ وحوّل القيم قبل جمعها.",
+			"راجع نوع argument في ~CargoAmount~ وحوّل الـvalues قبل جمعها.",
 		},
 		En: &LevelText{LessonRevision: 1, Steps: ch02UnitsEnglish, Title: "Cargo Units", Goal: "Define cargo kinds and convert three quantities to cells", Starter: unitsStarter, Lesson: `# Named Types and Cargo Units 📦
 

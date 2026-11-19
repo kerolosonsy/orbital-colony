@@ -80,7 +80,7 @@ func main() {
 `,
 		Hints: []string{
 			"كل استدعاء لـ~colony.Move~ بيبعت اتجاه واحد للدرون.",
-			"اقرأ الـstarter من فوق لتحت وحدد مكان الدرون بعد كل أمر.",
+			"اقرا الـstarter من فوق لتحت وحدد مكان الدرون بعد كل أمر.",
 			"ابدأ من السطر الموجود في ~main~ وقارنه بإحداثي المنارة في الهدف.",
 		},
 		Lesson: `# أهلاً يا قائد المستعمرة 🚀
@@ -160,7 +160,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch01FirstHarvestArabic,
 		ID: "1-2-first-harvest", Chapter: 1, Title: "أول حصاد",
-		Goal: "احصد الـ 3 طحالب 🌿",
+		Goal: "احصد 3 طحالب 🌿",
 		Par:  6, Gold: 6, MaxTicks: 40,
 		Setup: func(w *sim.World) {
 			w.Init(5, 2, sim.Regolith)
@@ -185,7 +185,7 @@ func main() {
 		Hints: []string{
 			"~colony.Harvest()~ بتحصد الخانة اللي الدرون واقف عليها حاليًا.",
 			"تابع الحركة والحصاد كأمرين منفصلين حسب ترتيب كتابتهم.",
-			"راجع مكان الدرون بعد أوامر الـstarter قبل ما تضيف استدعاء حصاد تاني.",
+			"راجع مكان الدرون بعد أوامر الـstarter قبل ما تضيف نداء ~colony.Harvest()~ تاني.",
 		},
 		Lesson: `# الأكل أولاً 🌿
 
@@ -259,7 +259,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch01PlantingArabic,
 		ID: "1-3-planting", Chapter: 1, Title: "أرض جديدة",
-		Goal: "ازرع طحالب في الـ 3 خانات اللي على اليمين",
+		Goal: "ازرع طحالب في التلات خانات اللي على اليمين",
 		Par:  9, Gold: 9, MaxTicks: 50,
 		Setup: func(w *sim.World) {
 			w.Init(5, 2, sim.Regolith)

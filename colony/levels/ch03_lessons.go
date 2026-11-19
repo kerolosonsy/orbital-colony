@@ -114,25 +114,25 @@ var ch03ConditionConfig = map[string]any{
 
 var ch03LongRowArabic = []LessonStep{
 	{ID: "c31.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch03Markdown("c31.mission", "1. احصد الـ14 نبتة طحلب في الصف الطويل.\n2. الـstarter بيحرّك شرق 3 مرات ومش بيحصد.\n3. هدف الذهب 28 ticks؛ خلّي كل تكرار يعمل شغل مفيد.")}},
-	{ID: "c31.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch03Walkthrough("c31.loop-trace", "الـfor فيها بداية وشرط وتغيير للعداد.\n\nالجسم بيتكرر طول ما الشرط true. الأرقام هنا للتوضيح.", `func main() {
+	{ID: "c31.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch03Walkthrough("c31.loop-trace", "الـfor loop فيها بداية وشرط وتغيير للعداد.\n\nالجسم بيتكرر طول ما الشرط true. الأرقام هنا للتوضيح.", `func main() {
 	for i := 1; i <= 3; i++ {
 		fmt.Println(i)
 	}
 }`, "e31-loop-counter", []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
 		{Line: 2, Caption: "i تبدأ من 1.", Variables: []LessonVariable{{Name: "i", Value: "1"}}},
-		{Line: 3, Caption: "اطبع أول قيمة.", Variables: []LessonVariable{{Name: "i", Value: "1"}}, Output: "1"},
+		{Line: 3, Caption: "اطبع أول value.", Variables: []LessonVariable{{Name: "i", Value: "1"}}, Output: "1"},
 		{Line: 2, Caption: "اللفة التالية عند 2.", Variables: []LessonVariable{{Name: "i", Value: "2"}}, Output: "1"},
-		{Line: 3, Caption: "اطبع القيمة التانية.", Variables: []LessonVariable{{Name: "i", Value: "2"}}, Output: "1\n2"},
+		{Line: 3, Caption: "اطبع الـvalue التانية.", Variables: []LessonVariable{{Name: "i", Value: "2"}}, Output: "1\n2"},
 		{Line: 2, Caption: "اللفة الأخيرة عند 3.", Variables: []LessonVariable{{Name: "i", Value: "3"}}, Output: "1\n2"},
-		{Line: 3, Caption: "اطبع القيمة الأخيرة.", Variables: []LessonVariable{{Name: "i", Value: "3"}}, Output: "1\n2\n3"},
+		{Line: 3, Caption: "اطبع آخر value.", Variables: []LessonVariable{{Name: "i", Value: "3"}}, Output: "1\n2\n3"},
 		{Line: 2, Caption: "الشرط يقف عند 4.", Variables: []LessonVariable{{Name: "i", Value: "4"}}, Output: "1\n2\n3"},
 	})}},
 	{ID: "c31.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch03Question("c31.predict-loop", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tfor n := 0; n < 2; n++ {\n\t\tfmt.Println(\"step\")\n\t}\n}\n~~~", []string{"step مرة", "step مرتين", "step 3 مرات"}, 1, []string{
-			"الشرط يسمح بلفتين قبل ما يقف.",
-			"العداد 0 ثم 1؛ يعني طباعتين.",
-			"لما n تبقى 2، الشرط يبقى false.",
+			"الشرط بيسمح بلفتين قبل ما يقف.",
+			"العداد 0 وبعدين 1؛ يعني طباعتين.",
+			"لما n تبقى 2، الشرط بيبقى false.",
 		}),
 		ch03Walkthrough("c31.loop-reveal", "تابع العداد مع كل لفة.", `func main() {
 	for n := 0; n < 2; n++ {
@@ -140,7 +140,7 @@ var ch03LongRowArabic = []LessonStep{
 	}
 }`, "e31-loop-reveal", []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
-			{Line: 2, Caption: "العداد يبدأ بصفر.", Variables: []LessonVariable{{Name: "n", Value: "0"}}},
+			{Line: 2, Caption: "العداد بيبدأ بصفر.", Variables: []LessonVariable{{Name: "n", Value: "0"}}},
 			{Line: 3, Caption: "اطبع أول مرة.", Variables: []LessonVariable{{Name: "n", Value: "0"}}, Output: "step"},
 			{Line: 2, Caption: "العداد بقى 1.", Variables: []LessonVariable{{Name: "n", Value: "1"}}, Output: "step"},
 			{Line: 3, Caption: "اطبع المرة التانية.", Variables: []LessonVariable{{Name: "n", Value: "1"}}, Output: "step\nstep"},
@@ -153,8 +153,8 @@ var ch03LongRowArabic = []LessonStep{
 	{ID: "c31.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch03Markdown("c31.plan", "راجع كل لفة: العداد بيتغير؟ والدرون عمل إيه؟\n\nقبل آخر حركة، بص على مكان الدرون عشان ما تطلبش خطوة زيادة."),
 		ch03Question("c31.loop-count", "كام مرة الجسم يشتغل مع ~i := 0; i < 3; i++~؟", []string{"مرتين", "3 مرات", "4 مرات"}, 1, []string{
-			"القيم 0 و1 و2 كلها أقل من 3.",
-			"القيم 0 و1 و2 تحقق الشرط.",
+			"الـvalues 0 و1 و2 كلها أقل من 3.",
+			"الـvalues 0 و1 و2 بتحقق الشرط.",
 			"عند 3 الشرط يبقى false، فالجسم ما يشتغلش.",
 		}),
 	}},
@@ -212,7 +212,7 @@ var ch03LongRowEnglish = []LessonStep{
 
 var ch03FullFieldArabic = []LessonStep{
 	{ID: "c32.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch03Markdown("c32.mission", "1. احصد الطحالب في الحقل كله: 6 صفوف و6 أعمدة.\n2. الـstarter بيحصد الخانة اللي الدرون واقف عليها بس.\n3. هدف الذهب 71 ticks؛ راقب الحركة عند نهاية كل صف.")}},
-	{ID: "c32.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch03Walkthrough("c32.nested-trace", "حلقة جوه حلقة بتقسّم الشغل لمستويين.\n\nالخارجية تختار صف؛ الداخلية تزور عناصره. هنا شبكة تدريب صغيرة.", `func main() {
+	{ID: "c32.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch03Walkthrough("c32.nested-trace", "loop جوه loop بتقسّم الشغل لمستويين.\n\nالـloop الخارجية بتختار صف، والداخلية بتعدّي على خاناته. هنا شبكة تدريب صغيرة.", `func main() {
 	for row := 0; row < 2; row++ {
 		for col := 0; col < 2; col++ {
 			fmt.Println(row, col)
@@ -233,9 +233,9 @@ var ch03FullFieldArabic = []LessonStep{
 	})}},
 	{ID: "c32.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch03Question("c32.predict-nested", "توقّع السطور المطبوعة:\n\n~~~go\nfunc main() {\n\tfor row := 0; row < 2; row++ {\n\t\tfor col := 0; col < 1; col++ {\n\t\t\tfmt.Println(\"row\", row)\n\t\t}\n\t}\n}\n~~~", []string{"row 0 مرة واحدة", "row 0 ثم row 1", "row 0 وrow 1 مرتين"}, 1, []string{
-			"الصف الخارجي له لفتان، حتى لو الداخلية لفة واحدة.",
-			"كل صف يمر مرة واحدة على العمود الوحيد.",
-			"الداخلية لا تضاعف العناصر لما حدها يساوي واحد.",
+			"الـloop الخارجية بتلف مرتين حتى لو الداخلية لفة واحدة.",
+			"كل صف بيعدّي على العمود الوحيد مرة واحدة.",
+			"الـloop الداخلية مش بتكرر العنصر لما حدها يبقى واحد.",
 		}),
 		ch03Walkthrough("c32.nested-reveal", "تابع كل صف واللفة الداخلية.", `func main() {
 	for row := 0; row < 2; row++ {
@@ -258,9 +258,9 @@ var ch03FullFieldArabic = []LessonStep{
 	{ID: "c32.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch03Markdown("c32.watch", "- العداد الداخلي بيرجع للبداية مع كل صف جديد.\n- الشرط الحدّي غلط ممكن يفوّت صف أو يطلب حركة زيادة.")}},
 	{ID: "c32.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch03Markdown("c32.plan", "قسّم التفكير: صف واحد، ثم الانتقال للصف اللي بعده.\n\nراجع مكان البداية والنهاية قبل ما تختار اتجاه الحركة في الصف التالي."),
-		ch03Question("c32.inner-count", "لو الخارجية لها 3 لفات والداخلية 2، كام مرة يشتغل جسم الداخلية؟", []string{"5", "6", "8"}, 1, []string{
-			"الداخلية تعيد لفتاتها بدل جمع الأعداد.",
-			"كل واحدة من 3 لفات خارجية تشغّل لفتين.",
+		ch03Question("c32.inner-count", "لو الخارجية بتلف 3 مرات والداخلية مرتين، كام مرة يشتغل جسم الداخلية؟", []string{"5", "6", "8"}, 1, []string{
+			"الـloop الداخلية بتكرر لفتاتها بدل جمع الأعداد.",
+			"كل لفة من الـloop الخارجية بتشغّل لفتين داخليتين.",
 			"الضرب هنا 3 في 2، مش 4 في 2.",
 		}),
 	}},
@@ -326,7 +326,7 @@ var ch03FullFieldEnglish = []LessonStep{
 
 var ch03EndlessArabic = []LessonStep{
 	{ID: "c33.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch03Markdown("c33.mission", "1. اجمع 30 طحلب من حقل 3×3.\n2. الـstarter فيه loop بشرط، بس جسمها فاضي.\n3. هدف الذهب 140 ticks؛ تابع العدد والوقت مع بعض.")}},
-	{ID: "c33.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch03Walkthrough("c33.condition-loop", "ممكن تكتب for بشرط بس، زي while في لغات تانية.\n\nلازم حاجة جوه الجسم تغيّر الشرط، وإلا الloop تفضل شغالة.", `func main() {
+	{ID: "c33.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch03Walkthrough("c33.condition-loop", "ممكن تكتب for loop بشرط بس، زي while في لغات تانية.\n\nلازم حاجة جوه الجسم تغيّر الشرط، وإلا الـloop هتفضل شغالة.", `func main() {
 	count := 0
 	for count < 3 {
 		count++
@@ -335,22 +335,22 @@ var ch03EndlessArabic = []LessonStep{
 }`, "e33-condition-loop", []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
 		{Line: 2, Caption: "العدد يبدأ بصفر.", Variables: []LessonVariable{{Name: "count", Value: "0"}}},
-		{Line: 3, Caption: "الشرط يسمح باللفة.", Variables: []LessonVariable{{Name: "count", Value: "0"}}},
-		{Line: 4, Caption: "زوّد العدد إلى 1.", Variables: []LessonVariable{{Name: "count", Value: "1"}}},
+		{Line: 3, Caption: "الشرط بيسمح باللفة.", Variables: []LessonVariable{{Name: "count", Value: "0"}}},
+		{Line: 4, Caption: "زوّد العدد لـ1.", Variables: []LessonVariable{{Name: "count", Value: "1"}}},
 		{Line: 5, Caption: "اطبع العدد الحالي.", Variables: []LessonVariable{{Name: "count", Value: "1"}}, Output: "1"},
-		{Line: 3, Caption: "العدد 1 يحقق الشرط.", Variables: []LessonVariable{{Name: "count", Value: "1"}}, Output: "1"},
-		{Line: 4, Caption: "زوّد العدد إلى 2.", Variables: []LessonVariable{{Name: "count", Value: "2"}}, Output: "1"},
+		{Line: 3, Caption: "العدد 1 بيحقق الشرط.", Variables: []LessonVariable{{Name: "count", Value: "1"}}, Output: "1"},
+		{Line: 4, Caption: "زوّد العدد لـ2.", Variables: []LessonVariable{{Name: "count", Value: "2"}}, Output: "1"},
 		{Line: 5, Caption: "اطبع العدد التالي.", Variables: []LessonVariable{{Name: "count", Value: "2"}}, Output: "1\n2"},
-		{Line: 3, Caption: "العدد 2 يحقق الشرط.", Variables: []LessonVariable{{Name: "count", Value: "2"}}, Output: "1\n2"},
-		{Line: 4, Caption: "زوّد العدد إلى 3.", Variables: []LessonVariable{{Name: "count", Value: "3"}}, Output: "1\n2"},
+		{Line: 3, Caption: "العدد 2 بيحقق الشرط.", Variables: []LessonVariable{{Name: "count", Value: "2"}}, Output: "1\n2"},
+		{Line: 4, Caption: "زوّد العدد لـ3.", Variables: []LessonVariable{{Name: "count", Value: "3"}}, Output: "1\n2"},
 		{Line: 5, Caption: "اطبع آخر عدد.", Variables: []LessonVariable{{Name: "count", Value: "3"}}, Output: "1\n2\n3"},
 		{Line: 3, Caption: "الشرط وقف عند 3.", Variables: []LessonVariable{{Name: "count", Value: "3"}}, Output: "1\n2\n3"},
 	})}},
 	{ID: "c33.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch03Question("c33.predict-condition", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tleft := 2\n\tfor left > 0 {\n\t\tfmt.Println(left)\n\t\tleft--\n\t}\n}\n~~~", []string{"2 بس", "2 وبعدها 1", "2 وبعدها 1 وبعدها 0"}, 1, []string{
-			"بعد الطباعة، left بتنقص قبل فحص الشرط تاني.",
-			"الشرط true عند 2 و1، ويتوقف عند صفر.",
-			"عند صفر، جسم loop ما يتنفّذش.",
+			"بعد الطباعة، left بتقل قبل ما نفحص الشرط تاني.",
+			"الشرط true عند 2 و1، وبيقف عند صفر.",
+			"لما توصل لصفر، جسم الـloop مش بيتنفّذ.",
 		}),
 		ch03Walkthrough("c33.condition-reveal", "شوف الشرط بعد كل تحديث.", `func main() {
 	left := 2
@@ -361,10 +361,10 @@ var ch03EndlessArabic = []LessonStep{
 }`, "e33-condition-reveal", []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "left تبدأ عند 2.", Variables: []LessonVariable{{Name: "left", Value: "2"}}},
-			{Line: 3, Caption: "الشرط يسمح باللفة.", Variables: []LessonVariable{{Name: "left", Value: "2"}}},
-			{Line: 4, Caption: "اطبع القيمة 2.", Variables: []LessonVariable{{Name: "left", Value: "2"}}, Output: "2"},
+			{Line: 3, Caption: "الشرط بيسمح باللفة.", Variables: []LessonVariable{{Name: "left", Value: "2"}}},
+			{Line: 4, Caption: "اطبع الـvalue 2.", Variables: []LessonVariable{{Name: "left", Value: "2"}}, Output: "2"},
 			{Line: 5, Caption: "left بقت 1.", Variables: []LessonVariable{{Name: "left", Value: "1"}}, Output: "2"},
-			{Line: 4, Caption: "اطبع القيمة 1.", Variables: []LessonVariable{{Name: "left", Value: "1"}}, Output: "2\n1"},
+			{Line: 4, Caption: "اطبع الـvalue 1.", Variables: []LessonVariable{{Name: "left", Value: "1"}}, Output: "2\n1"},
 			{Line: 5, Caption: "left بقت صفر.", Variables: []LessonVariable{{Name: "left", Value: "0"}}, Output: "2\n1"},
 			{Line: 3, Caption: "الشرط وقف عند صفر.", Variables: []LessonVariable{{Name: "left", Value: "0"}}, Output: "2\n1"},
 		}),
@@ -374,9 +374,9 @@ var ch03EndlessArabic = []LessonStep{
 	{ID: "c33.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch03Markdown("c33.watch", "- لو الشرط ما بيتغيرش، loop مش هتخلص.\n- الطحلب محتاج 8 ticks بعد الزرع؛ بدري عليه يتدمر.")}},
 	{ID: "c33.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch03Markdown("c33.plan", "اتأكد إن كل دورة بتزود التقدم وبتدي الوقت يعدّي.\n\nفي إعداد المهمة ده، ~colony.Count~ قراءة للمخزون؛ أوامر الدرون بتحرك الوقت."),
-		ch03Question("c33.loop-progress", "إيه اللي لازم يحصل عشان شرط loop يتوقف؟", []string{"الشرط يفضل true", "قيمة الشرط تتغير", "نضيف تعليق"}, 1, []string{
+		ch03Question("c33.loop-progress", "إيه اللي لازم يحصل عشان شرط الـloop يقف؟", []string{"الشرط يفضل true", "قيمة الشرط تتغير", "نضيف تعليق"}, 1, []string{
 			"شرط true يخلي الجسم يدخل لفة تانية.",
-			"تغيير القيمة ممكن يخلي الشرط false.",
+			"تغيير الـvalue ممكن يخلي الشرط false.",
 			"التعليق ما بيغيّرش حالة البرنامج.",
 		}),
 	}},
