@@ -152,11 +152,11 @@ func ch34BuildLesson(spec ch34LessonSpec) ([]LessonStep, []LessonStep) {
 var ch34VaultArabic, ch34VaultEnglish = ch34BuildLesson(ch34LessonSpec{
 	prefix: "c341.",
 	mission: [2]string{
-		"ابني مخزن مفاتيح يستخدمه أكتر من goroutine بأمان. خزّن القيم مع صلاحيتها، وخلي القراءة واللقطات تعكس الحالة الحية. ركّز على ملكية البيانات وثبات اللقطة.",
+		"ابني مخزن keys يستخدمه أكتر من goroutine بأمان. خزّن الـvalues مع صلاحيتها، وخلي القراءة واللقطات تعكس الحالة الحية. ركّز على ملكية البيانات وثبات اللقطة.",
 		"Build a key vault that multiple goroutines can use safely. Store values with expiry, and keep reads and snapshots faithful to live state. Focus on data ownership and repeatable snapshots.",
 	},
 	ideaText: [2]string{
-		"الـslice بتحتفظ بمرجع لبايتات مشتركة. لو غيرت المصدر، أي slice بتشاركها ممكن تتأثر. تابع المثال وشوف القيمة وهي بتتغير.",
+		"الـslice بتحتفظ بمرجع لـbytes مشتركة. لو غيرت المصدر، أي slice بتشاركها ممكن تتأثر. تابع المثال وشوف الـvalue وهي بتتغير.",
 		"A slice keeps a reference to shared bytes. Change the source, and another slice may change too. Follow the example to see the value move.",
 	},
 	idea: ch34ExampleSpec{
@@ -169,9 +169,9 @@ var ch34VaultArabic, ch34VaultEnglish = ch34BuildLesson(ch34LessonSpec{
 }`,
 		frames: []ch34FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 2, caption: [2]string{"أنشأنا بايتات المصدر.", "The source bytes exist."}, vars: []LessonVariable{{Name: "value", Value: "[97 105 114]"}}},
+			{line: 2, caption: [2]string{"أنشأنا الـbytes المصدر.", "The source bytes exist."}, vars: []LessonVariable{{Name: "value", Value: "[97 105 114]"}}},
 			{line: 3, caption: [2]string{"الاسمين بيشاوروا لنفس البيانات.", "Both names share the bytes."}, vars: []LessonVariable{{Name: "value", Value: "[97 105 114]"}, {Name: "alias", Value: "[97 105 114]"}}},
-			{line: 4, caption: [2]string{"أول بايت اتغير.", "The first byte changed."}, vars: []LessonVariable{{Name: "value", Value: "[102 105 114]"}, {Name: "alias", Value: "[102 105 114]"}}},
+			{line: 4, caption: [2]string{"أول byte اتغير.", "The first byte changed."}, vars: []LessonVariable{{Name: "value", Value: "[102 105 114]"}, {Name: "alias", Value: "[102 105 114]"}}},
 			{line: 5, caption: [2]string{"الاسمين بيعرضوا نفس التغيير.", "Both names show the change."}, vars: []LessonVariable{{Name: "alias", Value: "[102 105 114]"}}, output: "fir fir"},
 		},
 	},
@@ -182,7 +182,7 @@ var ch34VaultArabic, ch34VaultEnglish = ch34BuildLesson(ch34LessonSpec{
 	question: [2]string{"إيه الناتج؟", "What is printed?"},
 	options:  [2][]string{{"true", "false", "وقت جديد"}, {"true", "false", "A new time"}}, answer: 1,
 	feedback: [2][]string{
-		{"الوقت مش قبل deadline؛ دي مقارنة عكسية.", "Before بيرجع false عند اللحظة نفسها.", "الكود بيقارن قيمتين موجودتين بالفعل."},
+		{"الوقت مش قبل deadline؛ دي مقارنة عكسية.", "Before بيرجع false عند اللحظة نفسها.", "الكود بيقارن values موجودتين بالفعل."},
 		{"That reverses the comparison; now is not before the deadline.", "Before returns false at the deadline itself.", "The code compares two existing time values."},
 	},
 	revealText: [2]string{"عدّي على تكوين deadline، وبعدها راقب المقارنة عند نفس اللحظة.", "Follow the deadline, then watch the comparison at that exact instant."},
@@ -201,7 +201,7 @@ var ch34VaultArabic, ch34VaultEnglish = ch34BuildLesson(ch34LessonSpec{
 		},
 	},
 	watch: [2]string{
-		"الـmap مش آمنة لو goroutines بتقرأ وتكتب من غير تنسيق. والـvalue اللي رجعت من المخزن لازم متكشفش البايتات الداخلية.",
+		"الـmap مش آمنة لو goroutines بتقرأ وتكتب من غير تنسيق. والـvalue اللي رجّعها المخزن لازم متكشفش الـbytes الداخلية.",
 		"A map is unsafe when goroutines read and write without coordination. A returned value must not expose the vault's internal bytes.",
 	},
 	plan: [2]string{
@@ -210,28 +210,28 @@ var ch34VaultArabic, ch34VaultEnglish = ch34BuildLesson(ch34LessonSpec{
 	},
 	checkQuestion: [2]string{"ليه الساعة المحقونة مفيدة هنا؟", "Why is an injected clock useful here?"},
 	checkOptions: [2][]string{
-		{"تخلّي الصلاحية قابلة لإعادة التحقق.", "تمنع كل عمليات الكتابة.", "ترتب مفاتيح الـmap تلقائيًا."},
+		{"تخلّي الصلاحية قابلة لإعادة التحقق.", "تمنع كل عمليات الكتابة.", "ترتب keys الـmap تلقائيًا."},
 		{"It makes expiry behavior repeatable.", "It prevents every write.", "It sorts map keys automatically."},
 	}, checkAnswer: 0,
 	checkFeedback: [2][]string{
-		{"نفس الوقت المدخل يدي نفس قرار الصلاحية.", "الساعة مش قفل للكتابة.", "ترتيب الـmap محتاج معالجة منفصلة."},
+		{"نفس الوقت المدخل يدي نفس قرار الصلاحية.", "الساعة مش lock للكتابة.", "ترتيب الـmap محتاج معالجة منفصلة."},
 		{"The same supplied time gives the same expiry decision.", "A clock does not lock writes.", "Map ordering needs separate handling."},
 	},
 	turn: [2]string{
-		"اقرأ توقيعات ~Vault~ في الـstarter. نفّذ العقد جزء جزء، وشغّل محاولتك بعد ما تراجع الصلاحية والنسخ والتزامن.",
+		"اقرا توقيعات ~Vault~ في الـstarter. نفّذ العقد جزء جزء، وشغّل محاولتك بعد ما تراجع الصلاحية والنسخ والتزامن.",
 		"Read the ~Vault~ signatures in the starter. Work through the contract in pieces, then run your attempt after reviewing expiry, copies, and concurrency.",
 	},
 	hints: [2][3]string{
-		{"الـslice ممكن تشارك backing array؛ وضّح مين يملك البايتات قبل تعديلها.", "قسّم التصميم بين حماية الحالة، وحساب الصلاحية، وحدود نسخ القيم.", "ابدأ من تعريف ~Vault~ وتوقيعات methods في الـstarter، وحدد إمتى القيمة تعتبر حية."},
+		{"الـslice ممكن تشارك backing array؛ وضّح مين يملك الـbytes قبل تعديلها.", "قسّم التصميم بين حماية الحالة، وحساب الصلاحية، وحدود نسخ الـvalues.", "ابدأ من تعريف ~Vault~ وتوقيعات methods في الـstarter، وحدد إمتى الـvalue تعتبر حية."},
 		{"A slice may share a backing array; clarify byte ownership before changing it.", "Separate state protection, expiry decisions, and value-copy boundaries.", "Start at the ~Vault~ type and starter methods, and define when a value is live."},
 	},
 	sandbox: ch34SandboxSpec{
 		id:      "ch34-key-vault",
-		text:    [2]string{"غيّر بايت وشوف الاسم التاني بيتأثر.", "Change one byte and watch its alias."},
-		title:   [2]string{"ملكية البايتات", "Byte ownership"},
-		advance: [2]string{"غيّر أول بايت", "Change first byte"}, reset: [2]string{"من الأول", "Reset"},
+		text:    [2]string{"غيّر byte وشوف الاسم التاني بيتأثر.", "Change one byte and watch its alias."},
+		title:   [2]string{"ملكية الـbytes", "Byte ownership"},
+		advance: [2]string{"غيّر أول byte", "Change first byte"}, reset: [2]string{"من الأول", "Reset"},
 		frames: []ch34SandboxFrame{
-			{caption: [2]string{"الاسمين شايفين نفس البايتات.", "Both names share these bytes."}, leftLabel: [2]string{"المصدر", "Source"}, leftValue: [2]string{"air", "air"}, rightLabel: [2]string{"alias", "Alias"}, rightValue: [2]string{"air", "air"}},
+			{caption: [2]string{"الاسمين شايفين نفس الـbytes.", "Both names share these bytes."}, leftLabel: [2]string{"المصدر", "Source"}, leftValue: [2]string{"air", "air"}, rightLabel: [2]string{"alias", "Alias"}, rightValue: [2]string{"air", "air"}},
 			{caption: [2]string{"التعديل ظهر في الاسمين.", "The edit appears through both names."}, leftLabel: [2]string{"المصدر", "Source"}, leftValue: [2]string{"fir", "fir"}, rightLabel: [2]string{"alias", "Alias"}, rightValue: [2]string{"fir", "fir"}},
 		},
 	},
@@ -244,7 +244,7 @@ var ch34LedgerArabic, ch34LedgerEnglish = ch34BuildLesson(ch34LessonSpec{
 		"Complete an operations ledger that writes a change before updating memory. On open, rebuild state from the log and treat a short tail differently from complete corrupt data.",
 	},
 	ideaText: [2]string{
-		"السجل الثنائي بيتقري على دفعات كاملة. ~io.ReadFull~ بيوضح إذا الداتا كملت أو انتهت في نص القراءة؛ عدد البايتات يفرق.",
+		"السجل الثنائي بيتقري على دفعات كاملة. ~io.ReadFull~ بيوضح لو الداتا كملت أو انتهت في نص القراية؛ عدد الـbytes بيفرق.",
 		"A binary log is read in complete chunks. ~io.ReadFull~ distinguishes a filled read from one that ends early; the byte count matters.",
 	},
 	idea: ch34ExampleSpec{
@@ -257,23 +257,23 @@ var ch34LedgerArabic, ch34LedgerEnglish = ch34BuildLesson(ch34LessonSpec{
 }`,
 		frames: []ch34FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 2, caption: [2]string{"المصدر فيه 3 بايتات.", "The source has three bytes."}, vars: []LessonVariable{{Name: "r", Value: "reader(abc)"}}},
-			{line: 3, caption: [2]string{"البافر طالب 4 بايتات.", "The buffer asks for four bytes."}, vars: []LessonVariable{{Name: "buf", Value: "[0 0 0 0]"}}},
-			{line: 4, caption: [2]string{"اتقرت 3 بايتات بس.", "Only three bytes were read."}, vars: []LessonVariable{{Name: "n", Value: "3"}}},
+			{line: 2, caption: [2]string{"المصدر فيه 3 bytes.", "The source has three bytes."}, vars: []LessonVariable{{Name: "r", Value: "reader(abc)"}}},
+			{line: 3, caption: [2]string{"الـbuffer طالب 4 bytes.", "The buffer asks for four bytes."}, vars: []LessonVariable{{Name: "buf", Value: "[0 0 0 0]"}}},
+			{line: 4, caption: [2]string{"اتقرت 3 bytes بس.", "Only three bytes were read."}, vars: []LessonVariable{{Name: "n", Value: "3"}}},
 			{line: 5, caption: [2]string{"النهاية جات في نص القراءة.", "Input ended during the read."}, vars: []LessonVariable{{Name: "n", Value: "3"}}, output: "3 true"},
 		},
 	},
 	tryText: [2]string{
-		"الكود بيحفظ رقم في 4 بايتات بترتيب big-endian. توقّع الرقم بعد قراءته.",
+		"الكود بيخزّن رقم في 4 bytes بترتيب big-endian. توقّع الرقم بعد ما يتقري.",
 		"The code stores a number in four big-endian bytes. Predict the number after reading them.",
 	},
 	question: [2]string{"إيه الناتج؟", "What is printed?"},
 	options:  [2][]string{{"9", "4", "0"}, {"9", "4", "0"}}, answer: 0,
 	feedback: [2][]string{
-		{"الـencoding والـdecoding استخدموا نفس الترتيب.", "عدد البايتات مش الرقم المخزّن.", "PutUint32 كتب القيمة قبل القراءة."},
+		{"الـencoding والـdecoding استخدموا نفس الترتيب.", "عدد الـbytes مش الرقم المخزّن.", "PutUint32 كتب الـvalue قبل القراية."},
 		{"Encoding and decoding use the same byte order.", "The byte count is not the stored number.", "PutUint32 wrote a value before the read."},
 	},
-	revealText: [2]string{"تابع كتابة الرقم، ثم فكّ البايتات بنفس الـbyte order.", "Follow the number being stored, then decode with the same byte order."},
+	revealText: [2]string{"تابع كتابة الرقم، ثم فكّ الـbytes بنفس الـbyte order.", "Follow the number being stored, then decode with the same byte order."},
 	reveal: ch34ExampleSpec{
 		id: "e342-binary-roundtrip", imports: []string{"encoding/binary", "fmt"},
 		code: `func main() {
@@ -306,7 +306,7 @@ var ch34LedgerArabic, ch34LedgerEnglish = ch34BuildLesson(ch34LessonSpec{
 		{"A complete invalid record cannot be guessed around.", "Trimming is for incomplete trailing data.", "Silently ignoring it loses state."},
 	},
 	turn: [2]string{
-		"ابدأ من بنية ~Ledger~ الفاضية وتوقيعاتها. قسّم الشغل لتسجيل، فتح، واسترجاع، وخلي ~main~ فاضية.",
+		"ابدأ من struct ~Ledger~ الفاضية وتوقيعاتها. قسّم الشغل لتسجيل، فتح، واسترجاع، وخلي ~main~ فاضية.",
 		"Start with the empty ~Ledger~ type and its signatures. Separate writing, opening, and replay, and leave ~main~ empty.",
 	},
 	hints: [2][3]string{
@@ -315,13 +315,13 @@ var ch34LedgerArabic, ch34LedgerEnglish = ch34BuildLesson(ch34LessonSpec{
 	},
 	sandbox: ch34SandboxSpec{
 		id:      "ch34-write-ahead-log",
-		text:    [2]string{"قارن سجل كامل بذيل ناقص وبايت متغير.", "Compare complete, short, and changed records."},
+		text:    [2]string{"قارن سجل كامل بذيل ناقص وbyte متغير.", "Compare complete, short, and changed records."},
 		title:   [2]string{"قراءة السجل", "Reading a record"},
 		advance: [2]string{"الحالة الجاية", "Next case"}, reset: [2]string{"من الأول", "Reset"},
 		frames: []ch34SandboxFrame{
-			{caption: [2]string{"السجل كامل وفحصه مطابق.", "The record is complete and checksum matches."}, leftLabel: [2]string{"البايتات", "Bytes"}, leftValue: [2]string{"01 02 03 04", "01 02 03 04"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"سليم", "intact"}},
-			{caption: [2]string{"الذيل ناقص؛ السجل مش كامل.", "The tail is short; the record is incomplete."}, leftLabel: [2]string{"البايتات", "Bytes"}, leftValue: [2]string{"01 02 03", "01 02 03"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"غير مكتمل", "incomplete"}},
-			{caption: [2]string{"الطول كامل لكن الفحص مختلف.", "The length is complete, but checksum differs."}, leftLabel: [2]string{"البايتات", "Bytes"}, leftValue: [2]string{"01 02 FF 04", "01 02 FF 04"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"تلف", "corrupt"}},
+			{caption: [2]string{"السجل كامل وفحصه مطابق.", "The record is complete and checksum matches."}, leftLabel: [2]string{"الـbytes", "Bytes"}, leftValue: [2]string{"01 02 03 04", "01 02 03 04"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"سليم", "intact"}},
+			{caption: [2]string{"الذيل ناقص؛ السجل مش كامل.", "The tail is short; the record is incomplete."}, leftLabel: [2]string{"الـbytes", "Bytes"}, leftValue: [2]string{"01 02 03", "01 02 03"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"غير مكتمل", "incomplete"}},
+			{caption: [2]string{"الطول كامل لكن الفحص مختلف.", "The length is complete, but checksum differs."}, leftLabel: [2]string{"الـbytes", "Bytes"}, leftValue: [2]string{"01 02 FF 04", "01 02 FF 04"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"تلف", "corrupt"}},
 		},
 	},
 })
@@ -329,11 +329,11 @@ var ch34LedgerArabic, ch34LedgerEnglish = ch34BuildLesson(ch34LessonSpec{
 var ch34CompactionArabic, ch34CompactionEnglish = ch34BuildLesson(ch34LessonSpec{
 	prefix: "c343.",
 	mission: [2]string{
-		"كمّل على دفتر المهمة السابقة. فرّغ حالته لجداول ثابتة مرتبة، وبعدها ادمج الجداول من غير ما قراءة مفتاح ترجع نتيجة قديمة أو ممسوحة.",
+		"كمّل على دفتر المهمة السابقة. فرّغ حالته لجداول ثابتة مرتبة، وبعدها ادمج الجداول من غير ما قراية الـkey ترجع نتيجة قديمة أو ممسوحة.",
 		"Continue the previous ledger. Flush its state into sorted immutable tables, then merge tables without letting a read return an old or deleted value.",
 	},
 	ideaText: [2]string{
-		"الـSSTable بتكون مرتبة عشان البحث الثنائي. ترتيب المفاتيح قبل البحث مهم؛ الترتيب اللي في slice هو اللي بيتغير هنا.",
+		"الـSSTable بتكون مرتبة عشان البحث الثنائي. ترتيب الـkeys قبل البحث مهم؛ الترتيب اللي في slice هو اللي بيتغير هنا.",
 		"An SSTable is sorted so it can be searched efficiently. Sort keys before searching; the slice order changes here.",
 	},
 	idea: ch34ExampleSpec{
@@ -345,22 +345,22 @@ var ch34CompactionArabic, ch34CompactionEnglish = ch34BuildLesson(ch34LessonSpec
 }`,
 		frames: []ch34FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 2, caption: [2]string{"المفاتيح لسه مش مرتبة.", "The keys are not sorted yet."}, vars: []LessonVariable{{Name: "keys", Value: "[fuel air]"}}},
+			{line: 2, caption: [2]string{"الـkeys لسه مش مرتبة.", "The keys are not sorted yet."}, vars: []LessonVariable{{Name: "keys", Value: "[fuel air]"}}},
 			{line: 3, caption: [2]string{"sort رتبت الـslice.", "sort reordered the slice."}, vars: []LessonVariable{{Name: "keys", Value: "[air fuel]"}}},
 			{line: 4, caption: [2]string{"اطبع الترتيب الجديد.", "Print the new order."}, vars: []LessonVariable{{Name: "keys", Value: "[air fuel]"}}, output: "air fuel"},
 		},
 	},
 	tryText: [2]string{
-		"علامة ~Dead~ بتفضل موجودة حتى لو مفيش قيمة حية في المدخل. توقّع قيمة الحقل المطبوع.",
+		"علامة ~Dead~ بتفضل موجودة حتى لو مفيش value حية في المدخل. توقّع الـvalue اللي هتتطبع.",
 		"A ~Dead~ marker stays present even when the entry has no live value. Predict the printed field.",
 	},
 	question: [2]string{"إيه الناتج؟", "What is printed?"},
-	options:  [2][]string{{"true", "false", "القيمة القديمة"}, {"true", "false", "The old value"}}, answer: 0,
+	options:  [2][]string{{"true", "false", "الـvalue القديمة"}, {"true", "false", "The old value"}}, answer: 0,
 	feedback: [2][]string{
-		{"المدخل اتنشأ وعلامة الحذف true.", "القيمة الافتراضية لـbool هي false.", "المثال بيطبع الحقل مش قيمة قديمة."},
+		{"المدخل اتنشأ وعلامة الحذف true.", "الـzero value لـbool هي false.", "المثال بيطبع الحقل مش value قديمة."},
 		{"The entry is created with its delete marker set.", "The zero value of bool is false.", "The example prints a field, not an old value."},
 	},
-	revealText: [2]string{"شوف قيمة العلامة في entry تدريب صغيرة.", "Watch the marker value in one small sample entry."},
+	revealText: [2]string{"شوف value الـmarker في entry تدريب صغيرة.", "Watch the marker value in one small sample entry."},
 	reveal: ch34ExampleSpec{
 		id: "e343-tombstone", imports: []string{"fmt"},
 		code: `type Slot struct {
@@ -372,26 +372,26 @@ func main() {
 }`,
 		frames: []ch34FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 1, caption: [2]string{"النوع بيحفظ حالة المدخل.", "The type stores entry state."}},
+			{line: 1, caption: [2]string{"الـtype بيخزّن حالة الـentry.", "The type stores entry state."}},
 			{line: 4, caption: [2]string{"العلامة موجودة في الحالة.", "The marker is part of the state."}, vars: []LessonVariable{{Name: "slot.Dead", Value: "true"}}},
-			{line: 5, caption: [2]string{"القيمة true بتظهر.", "The value true is printed."}, vars: []LessonVariable{{Name: "slot.Dead", Value: "true"}}, output: "true"},
+			{line: 5, caption: [2]string{"الـvalue true بتظهر.", "The value true is printed."}, vars: []LessonVariable{{Name: "slot.Dead", Value: "true"}}, output: "true"},
 		},
 	},
 	watch: [2]string{
-		"الملفات القديمة ثابتة؛ حذف قيمة من الذاكرة لوحده ممكن يرجعها في القراءة. والـtombstone مايتشالش قبل ما التاريخ الأقدم يبقى مغطى.",
+		"الملفات القديمة ثابتة؛ حذف value من الذاكرة لوحده ممكن يرجعها في القراءة. والـtombstone مايتشالش قبل ما التاريخ الأقدم يبقى مغطى.",
 		"Old tables are immutable; deleting only from memory can resurrect a value. Keep a tombstone until older history is covered.",
 	},
 	plan: [2]string{
-		"فكّر في أولوية الحالة: الذاكرة أولًا ثم الجداول من الأحدث. في الدمج احتفظ بآخر حالة لكل مفتاح، وراجع أثر علامات الحذف.",
+		"فكّر في أولوية الحالة: الذاكرة أولًا ثم الجداول من الأحدث. في الدمج احتفظ بآخر حالة لكل key، وراجع أثر علامات الحذف.",
 		"Think about state precedence: memory first, then tables from newest to oldest. During compaction, preserve each key's latest state and account for deletes.",
 	},
 	checkQuestion: [2]string{"ليه tombstone مهم مع جدول قديم ثابت؟", "Why does a tombstone matter when an old table is immutable?"},
 	checkOptions: [2][]string{
-		{"عشان يمنع رجوع قيمة محذوفة.", "عشان يرتب أسماء الملفات.", "عشان يضغط حجم كل سجل."},
+		{"عشان يمنع رجوع value محذوفة.", "عشان يرتب أسماء الملفات.", "عشان يضغط حجم كل سجل."},
 		{"It prevents a deleted value from returning.", "It sorts file names.", "It compresses every record."},
 	}, checkAnswer: 0,
 	checkFeedback: [2][]string{
-		{"العلامة بتوقف القراءة عند المفتاح المحذوف.", "ترتيب الملفات له خطوة منفصلة.", "علامة الحذف مش خوارزمية ضغط."},
+		{"العلامة بتوقف القراءة عند الـkey المحذوف.", "ترتيب الملفات له خطوة منفصلة.", "علامة الحذف مش خوارزمية ضغط."},
 		{"The marker stops a read at a deleted key.", "File ordering is a separate concern.", "A delete marker is not compression."},
 	},
 	turn: [2]string{
@@ -404,7 +404,7 @@ func main() {
 	},
 	sandbox: ch34SandboxSpec{
 		id:      "ch34-compaction",
-		text:    [2]string{"تابع علامة الحذف قدام قيمة أقدم.", "Trace a tombstone beside an older value."},
+		text:    [2]string{"تابع علامة الحذف قدام value أقدم.", "Trace a tombstone beside an older value."},
 		title:   [2]string{"دمج الأجيال", "Merging generations"},
 		advance: [2]string{"الخطوة الجاية", "Next event"}, reset: [2]string{"من الأول", "Reset"},
 		frames: []ch34SandboxFrame{
@@ -423,7 +423,7 @@ var ch34DepotArabic, ch34DepotEnglish = ch34BuildLesson(ch34LessonSpec{
 		"Split files into chunks and place replicas across storage pods. Reads should survive a missing or damaged copy, and repair should restore missing replicas.",
 	},
 	ideaText: [2]string{
-		"بصمة المحتوى بتدي نفس الاسم لنفس البايتات. تابع hash ثابت مرتين؛ المساواة هنا بتعبر عن بصمة متطابقة.",
+		"بصمة المحتوى بتدي نفس الاسم لنفس الـbytes. تابع hash ثابت مرتين؛ المساواة هنا بتعبر عن بصمة متطابقة.",
 		"A content fingerprint gives the same bytes the same name. Follow one hash twice; equality means matching fingerprints.",
 	},
 	idea: ch34ExampleSpec{
@@ -436,18 +436,18 @@ var ch34DepotArabic, ch34DepotEnglish = ch34BuildLesson(ch34LessonSpec{
 		frames: []ch34FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
 			{line: 2, caption: [2]string{"البصمة الأولى اتعملت.", "The first fingerprint is ready."}},
-			{line: 3, caption: [2]string{"نفس البايتات لها نفس البصمة.", "Same bytes produce the same hash."}},
-			{line: 4, caption: [2]string{"البصمة 32 بايت ومتطابقة.", "The 32-byte hashes match."}, vars: []LessonVariable{{Name: "a == b", Value: "true"}, {Name: "len(a)", Value: "32"}}, output: "true 32"},
+			{line: 3, caption: [2]string{"نفس الـbytes لها نفس البصمة.", "Same bytes produce the same hash."}},
+			{line: 4, caption: [2]string{"البصمة 32 byte ومتطابقة.", "The 32-byte hashes match."}, vars: []LessonVariable{{Name: "a == b", Value: "true"}, {Name: "len(a)", Value: "32"}}, output: "true 32"},
 		},
 	},
 	tryText: [2]string{
-		"بصمة SHA-256 بتتحول لنص hex. توقّع طول النص اللي هيتطبع.",
+		"بصمة SHA-256 بتتحول لـstring hex. توقّع طول الـstring اللي هيتطبع.",
 		"A SHA-256 digest converts to hex text. Predict the length printed.",
 	},
 	question: [2]string{"كام حرف هيظهر؟", "How many characters appear?"},
 	options:  [2][]string{{"32", "64", "حسب اسم الكبسولة"}, {"32", "64", "It depends on the pod name"}}, answer: 1,
 	feedback: [2][]string{
-		{"كل بايت بيتكتب بحرفين hex.", "النص أطول من عدد البايتات.", "الاسم هنا طالع من المحتوى نفسه."},
+		{"كل byte بيتكتب بحرفين hex.", "الـstring أطول من عدد الـbytes.", "الاسم هنا طالع من المحتوى نفسه."},
 		{"Each byte uses two hex characters.", "The text is longer than the byte count.", "This name comes from the content itself."},
 	},
 	revealText: [2]string{"حوّل البصمة لتنسيق hex، وبعدها اطبع طول الاسم.", "Convert the digest to hex, then print the identifier length."},
@@ -461,12 +461,12 @@ var ch34DepotArabic, ch34DepotEnglish = ch34BuildLesson(ch34LessonSpec{
 		frames: []ch34FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
 			{line: 2, caption: [2]string{"حسبنا البصمة.", "The digest was computed."}},
-			{line: 3, caption: [2]string{"حوّلناها لنص hex.", "The digest is now hex text."}},
+			{line: 3, caption: [2]string{"حوّلناها لـstring hex.", "The digest is now hex text."}},
 			{line: 4, caption: [2]string{"طول الاسم 64.", "The identifier length is 64."}, vars: []LessonVariable{{Name: "len(id)", Value: "64"}}, output: "64"},
 		},
 	},
 	watch: [2]string{
-		"وجود نسخة مش كفاية؛ لازم تتأكد إن بايتاتها تطابق بصمتها. فشل كبسولة واحدة مايعنيش إن كل النسخ فشلت.",
+		"وجود نسخة مش كفاية؛ لازم تتأكد إن bytes بتاعتها تطابق بصمتها. فشل كبسولة واحدة مايعنيش إن كل النسخ فشلت.",
 		"A returned copy is not enough; verify its bytes against the fingerprint. One failed pod does not mean every replica failed.",
 	},
 	plan: [2]string{
@@ -479,11 +479,11 @@ var ch34DepotArabic, ch34DepotEnglish = ch34BuildLesson(ch34LessonSpec{
 		{"Treat it as damaged and try another copy.", "Write it to the output immediately.", "Change the name to match it."},
 	}, checkAnswer: 0,
 	checkFeedback: [2][]string{
-		{"نجاح النقل مش دليل سلامة المحتوى.", "التحقق لازم يسبق الكتابة.", "الاسم هو اللي بيثبت البايتات."},
+		{"نجاح النقل مش دليل سلامة المحتوى.", "التحقق لازم يسبق الكتابة.", "الاسم هو اللي بيثبت الـbytes."},
 		{"A successful fetch does not prove intact content.", "Verification comes before writing it out.", "The name is the fingerprint of the bytes."},
 	},
 	turn: [2]string{
-		"اقرأ interface ~Pod~ والعقد اللي على ~Depot~. ابدأ بحركة بيانات واحدة ووسّع التفكير للنسخ والإصلاح؛ ~main~ تفضل فاضية.",
+		"اقرا interface ~Pod~ والعقد اللي على ~Depot~. ابدأ بحركة بيانات واحدة ووسّع التفكير للنسخ والإصلاح؛ ~main~ تفضل فاضية.",
 		"Read the ~Pod~ interface and the ~Depot~ contract. Start with one data flow, then reason about replicas and repair; keep ~main~ empty.",
 	},
 	hints: [2][3]string{
@@ -499,7 +499,7 @@ var ch34DepotArabic, ch34DepotEnglish = ch34BuildLesson(ch34LessonSpec{
 			{caption: [2]string{"النسخ الثلاث سليمة.", "All three copies are intact."}, leftLabel: [2]string{"A / B / C", "A / B / C"}, leftValue: [2]string{"سليمة", "intact"}, rightLabel: [2]string{"قراءة", "Read"}, rightValue: [2]string{"تحقق", "verified"}},
 			{caption: [2]string{"النسخة A بقت تالفة.", "Copy A is now damaged."}, leftLabel: [2]string{"A / B / C", "A / B / C"}, leftValue: [2]string{"تالف / سليم / سليم", "bad / good / good"}, rightLabel: [2]string{"قراءة", "Read"}, rightValue: [2]string{"جرّب نسخة تانية", "try another copy"}},
 			{caption: [2]string{"النسخة B اجتازت التحقق.", "Copy B passed verification."}, leftLabel: [2]string{"القراءة", "Read"}, leftValue: [2]string{"B", "B"}, rightLabel: [2]string{"البصمة", "Fingerprint"}, rightValue: [2]string{"مطابقة", "matches"}},
-			{caption: [2]string{"الإصلاح نسخ بايتات سليمة.", "Repair copied intact bytes."}, leftLabel: [2]string{"A / B / C", "A / B / C"}, leftValue: [2]string{"سليم / سليم / سليم", "good / good / good"}, rightLabel: [2]string{"المصدر", "Source"}, rightValue: [2]string{"B", "B"}},
+			{caption: [2]string{"الإصلاح نسخ bytes سليمة.", "Repair copied intact bytes."}, leftLabel: [2]string{"A / B / C", "A / B / C"}, leftValue: [2]string{"سليم / سليم / سليم", "good / good / good"}, rightLabel: [2]string{"المصدر", "Source"}, rightValue: [2]string{"B", "B"}},
 		},
 	},
 })

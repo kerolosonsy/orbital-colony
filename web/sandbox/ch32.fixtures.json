@@ -74,7 +74,7 @@
           "en": "None yet"
         },
         "initial": {
-          "ar": "طلب واحد ينتج رداً واحداً.",
+          "ar": "request واحدة بتطلع response واحد.",
           "en": "One request produces one reply."
         },
         "pressure": {
@@ -82,11 +82,11 @@
           "en": "Pressure"
         },
         "query": {
-          "ar": "الطلب",
+          "ar": "الـrequest",
           "en": "Request"
         },
         "reply": {
-          "ar": "الرد",
+          "ar": "الـresponse",
           "en": "Reply"
         },
         "reset": {
@@ -102,7 +102,7 @@
           "en": "Send query"
         },
         "title": {
-          "ar": "طلب ورد",
+          "ar": "request وresponse",
           "en": "Request and reply"
         }
       },
@@ -224,7 +224,7 @@
         {
           "expects": "probe.colony",
           "peer": {
-            "ar": "العميل",
+            "ar": "الـclient",
             "en": "Client"
           },
           "presents": "probe.colony"
@@ -232,7 +232,7 @@
         {
           "expects": "Colony CA",
           "peer": {
-            "ar": "السيرفر",
+            "ar": "الـserver",
             "en": "Server"
           },
           "presents": "Colony CA"

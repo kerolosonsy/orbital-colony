@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "34-1-kv-store", Chapter: 34, Kind: "lab", Title: "مخزن مفاتيح", Goal: "ابني خزنة مفاتيح متزامنة بصلاحية ولقطة بترجع زي ما هي",
+	add(&Level{ID: "34-1-kv-store", Chapter: 34, Kind: "lab", Title: "مخزن مفاتيح", Goal: "ابني key vault متزامن بصلاحية ولقطة بترجع زي ما هي",
 		LessonRevision: 1, Steps: ch34LessonArabic["34-1-kv-store"],
 		Requires: []string{"sel:sync.RWMutex"}, Bridge: []int{87}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch341Starter}},
@@ -68,7 +68,7 @@ func (v *Vault) Get(k string) ([]byte, bool) {
 
 كل الدوال آمنة مع goroutines كتير. لقطتين لنفس الحالة لازم يطلعوا نفس البايتات بالظبط مهما كان ترتيب الإدخال (نجمة إضافية). ~main~ فاضية.
 `,
-		Hints: []string{"الـslice ممكن تشارك backing array؛ وضّح مين يملك البايتات قبل تعديلها.", "قسّم التصميم بين حماية الحالة، وحساب الصلاحية، وحدود نسخ القيم.", "ابدأ من تعريف ~Vault~ وتوقيعات methods في الـstarter، وحدد إمتى القيمة تعتبر حية."},
+		Hints: []string{"الـslice ممكن تشارك backing array؛ وضّح مين يملك الـbytes قبل تعديلها.", "قسّم التصميم بين حماية الحالة، وحساب الصلاحية، وحدود نسخ الـvalues.", "ابدأ من تعريف ~Vault~ وتوقيعات methods في الـstarter، وحدد إمتى الـvalue تعتبر حية."},
 		En: &LevelText{Title: "Key Vault", Goal: "Build a concurrent key vault with expiry and a faithful snapshot", LessonRevision: 1, Steps: ch34LessonEnglish["34-1-kv-store"], Files: []LabFile{{Name: "main.go", Starter: ch341Starter}},
 			Lesson: `# The Colony Key Vault
 

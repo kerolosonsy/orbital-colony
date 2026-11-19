@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "35-1-task-queue", Chapter: 35, Kind: "lab", Title: "طابور المهام", Goal: "وزّع مهام الورش على عمّال بـ Redis: عقد إيجار وإعادة محاولة وطابور للمهام الميتة", Setup: seededLabRoom,
+	add(&Level{ID: "35-1-task-queue", Chapter: 35, Kind: "lab", Title: "طابور المهام", Goal: "وزّع مهام الورش على عمّال بـ Redis: leases وإعادة محاولة وdead-letter queue", Setup: seededLabRoom,
 		LessonRevision: 1, Steps: ch35LessonArabic["35-1-task-queue"],
 		Requires: []string{"sel:json.Marshal", "sel:redis.ZRangeBy"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{86}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch351Starter}},
@@ -500,7 +500,7 @@ func TestHiddenBonusQueueRedrive(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "35-2-scheduler", Chapter: 35, Kind: "lab", Title: "المجدول", Goal: "شغّل مهام الصيانة الدورية بطابور أولويات وساعة مزيفة، من غير تداخل وبسياسة واضحة للمواعيد الفايتة", Setup: seededLabRoom,
+	add(&Level{ID: "35-2-scheduler", Chapter: 35, Kind: "lab", Title: "المجدول", Goal: "شغّل مهام الصيانة الدورية بـpriority queue وساعة مزيفة، من غير تداخل وبسياسة واضحة للمواعيد الفايتة", Setup: seededLabRoom,
 		LessonRevision: 1, Steps: ch35LessonArabic["35-2-scheduler"],
 		Requires: []string{"sel:heap.Push"}, Deps: []string{}, Bridge: []int{90}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch352Starter}},
@@ -861,7 +861,7 @@ func TestHiddenSchedulerRandomJumps(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "35-3-redis-lock", Chapter: 35, Kind: "lab", Title: "القفل الموزّع", Goal: "امنع ورشتين يشتغلوا على نفس المفاعل في نفس الوقت بقفل Redis له مالك ومدة، ووضّح حدود أمانه", Setup: seededLabRoom,
+	add(&Level{ID: "35-3-redis-lock", Chapter: 35, Kind: "lab", Title: "القفل الموزّع", Goal: "امنع ورشتين يشتغلوا على نفس المفاعل في نفس الوقت بـRedis lock له مالك ومدة، ووضّح حدود أمانه", Setup: seededLabRoom,
 		LessonRevision: 1, Steps: ch35LessonArabic["35-3-redis-lock"],
 		Requires: []string{"sel:hex.EncodeToString", "sel:io.ReadFull", "sel:redis.NewScript"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{94}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch353Starter}},
@@ -923,7 +923,7 @@ client.SetNX(ctx, key, "locked", 0) // غلط: من غير مدة ومن غير 
 
 النجمة التالتة: ~Extend(ctx, lease, ttl)~ بسكربت مقارنة بيجدد المدة لـ ~ttl~ (~PEXPIRE~ بالمللي ثانية) لو المالك لسه هو؛ غير كده ~ErrNotOwner~، و ~ttl <= 0~ ترجع ~ErrLockKey~.
 `,
-		Hints: []string{"المدة تحرر المفتاح، والـtoken يحدد المالك الحالي.", "افصل مسار الاكتساب عن التحرير، مع حماية التحديثات القديمة.", "ابدأ من ~Lease~ وتوقيعات ~Acquire~ و~Release~ في الـstarter."},
+		Hints: []string{"المدة بتحرر الـkey، والـtoken بيحدد المالك الحالي.", "افصل مسار الاكتساب عن التحرير، مع حماية التحديثات القديمة.", "ابدأ من ~Lease~ وتوقيعات ~Acquire~ و~Release~ في الـstarter."},
 		En: &LevelText{Title: "Distributed Lock", Goal: "Stop two workshops from working on the same reactor at once with a Redis lock that has an owner and a duration, and state its safety limits", LessonRevision: 1, Steps: ch35LessonEnglish["35-3-redis-lock"], Files: []LabFile{{Name: "main.go", Starter: ch353Starter}},
 			Lesson: `# The reactor lock
 
@@ -1287,7 +1287,7 @@ pub.Publish(ctx, e) // غلط: علّمته قبل النشر؛ لو النشر 
 
 ~Handle(e)~ ترجع ~ErrVersion~ لو ~Version~ أقل من ~1~ أو أكبر من ~SchemaVersion~، وخطأ الفك لو JSON بايظ. حدث ~ID~ بتاعه اتعالج يرجع ~false~ و ~nil~ من غير تغيير، والجديد يزوّد إجمالي الصنف ويرجع ~true~. ~Totals~ ترجع نسخة من الإجماليات لكل ~item~. كله آمن بالتزامن.
 `,
-		Hints: []string{"الـoutbox بيحفظ نية النشر مع بيانات الطلب.", "قسّم المسار لكتابة ذرّية، relay مرتب، واستهلاك idempotent.", "ابدأ من ~PlaceOrder~ و~Relay~ و~Handle~ في الـstarter."},
+		Hints: []string{"الـoutbox بيخزّن نية النشر مع بيانات الطلب.", "قسّم المسار لكتابة ذرّية، relay مرتب، واستهلاك idempotent.", "ابدأ من ~PlaceOrder~ و~Relay~ و~Handle~ في الـstarter."},
 		En: &LevelText{Title: "Outbox", Goal: "Record a spare-parts order and its event in one transaction, and relay events with retries to a consumer that never counts twice", LessonRevision: 1, Steps: ch35LessonEnglish["35-4-outbox"], Files: []LabFile{{Name: "main.go", Starter: ch354Starter}},
 			Lesson: `# The depot outbox
 
@@ -1609,7 +1609,7 @@ func TestHiddenConsumerConcurrentDuplicates(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "35-5-kafka", Chapter: 35, Kind: "lab", Title: "الوسيط", Goal: "ابعت قراءات العربات لـ Kafka بمفتاح لكل عربة، واستهلكها بإعادة محاولة و offsets تتأكد بعد النجاح بس وإغلاق مرتب", Setup: seededLabRoom,
+	add(&Level{ID: "35-5-kafka", Chapter: 35, Kind: "lab", Title: "الوسيط", Goal: "ابعت قراءات العربات لـ Kafka بـkey لكل عربة، واستهلكها بإعادة محاولة و offsets تتأكد بعد النجاح بس وإغلاق مرتب", Setup: seededLabRoom,
 		LessonRevision: 1, Steps: ch35LessonArabic["35-5-kafka"],
 		Requires: []string{"sel:context.WithoutCancel", "sel:strconv.Atoi", "sel:kafka.Message"}, Deps: []string{"github.com/segmentio/kafka-go"}, Bridge: []int{98}, Race: true, Service: "kafka",
 		Files: []LabFile{{Name: "main.go", Starter: ch355Starter}},
@@ -1671,7 +1671,7 @@ if err := r.FetchMessage(ctx); err != nil { return 0, err } // غلط: الإل�
 
 ~Consume(ctx, r, h, maxAttempts)~ بتلف: تجيب رسالة، تحوّلها لـ ~Telemetry~ (المفتاح هو ~Rover~)، وتنادي ~h~ لحد ~maxAttempts~ مرة لحد ما ينجح. بعد النجاح بس تعمل commit للرسالة دي بسياق مبيتلغيش وتزوّد العداد. قيمة مش رقم: commit من غير ما تنادي ~h~ ومن غير عد. لو المعالج فشل كل المحاولات ارجع العداد وخطأه من غير commit. إلغاء ~ctx~ (في الجلب أو أثناء المعالجة) يرجع العداد و ~nil~، ورسالة اتلغت معالجتها متتأكدش. خطأ جلب تاني يترجع زي ما هو.
 `,
-		Hints: []string{"المفتاح يربط رسائل العربة بنفس مسار الترتيب.", "افصل تحويل البيانات عن الإرسال، والمعالجة عن commit.", "ابدأ من ~Writer~ و~Reader~، وراجع التعامل مع ~ctx.Err~ في الـstarter."},
+		Hints: []string{"الـkey بيربط رسائل العربة بنفس مسار الترتيب.", "افصل تحويل البيانات عن الإرسال، والمعالجة عن commit.", "ابدأ من ~Writer~ و~Reader~، وراجع التعامل مع ~ctx.Err~ في الـstarter."},
 		En: &LevelText{Title: "Broker", Goal: "Send rover readings to Kafka keyed by rover, and consume them with retries, offsets committed only after success, and a graceful close", LessonRevision: 1, Steps: ch35LessonEnglish["35-5-kafka"], Files: []LabFile{{Name: "main.go", Starter: ch355Starter}},
 			Lesson: `# The rover telemetry broker
 
