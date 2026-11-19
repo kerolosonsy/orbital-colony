@@ -53,6 +53,29 @@
     return edit;
   }
 
+  // Alt+↑/↓ moves the touched lines; Shift+Alt+↑/↓ duplicates them.
+  function moveOrCopyLines(value, start, end, down, copy) {
+    const { from, to } = touchedLines(value, start, end);
+    const block = value.slice(from, to);
+    if (copy) {
+      const text = block + "\n" + block;
+      const shift = down ? block.length + 1 : 0;
+      return { from, to, text, selStart: start + shift, selEnd: end + shift };
+    }
+    if (down) {
+      if (to >= value.length) return null;
+      const nextEnd = lineEnd(value, to + 1);
+      const below = value.slice(to + 1, nextEnd);
+      const shift = below.length + 1;
+      return { from, to: nextEnd, text: below + "\n" + block, selStart: start + shift, selEnd: end + shift };
+    }
+    if (from === 0) return null;
+    const prevStart = lineStart(value, from - 1);
+    const above = value.slice(prevStart, from - 1);
+    const shift = above.length + 1;
+    return { from: prevStart, to, text: block + "\n" + above, selStart: start - shift, selEnd: end - shift };
+  }
+
   function handle(value, start, end, e) {
     const mod = e.metaKey || e.ctrlKey;
     const collapsed = start === end;
@@ -60,6 +83,9 @@
     const next = value[end] || "";
 
     if (mod && (e.key === "/" || e.code === "Slash")) return toggleComment(value, start, end);
+    if (e.altKey && !mod && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+      return moveOrCopyLines(value, start, end, e.key === "ArrowDown", e.shiftKey);
+    }
     if (mod || e.altKey || e.isComposing) return null;
 
     if (e.key === "Tab") {

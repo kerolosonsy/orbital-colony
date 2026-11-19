@@ -69,3 +69,13 @@ test("other keys and modified keys are left to the browser", () => {
   assert.equal(type("x|", "(", { altKey: true }), null);
   assert.equal(type("x|", "Enter", { isComposing: true }), null);
 });
+
+test("Alt+arrows move lines and Shift+Alt+arrows duplicate them", () => {
+  assert.equal(type("a\nb|\nc", "ArrowUp", { altKey: true }), "b|\na\nc");
+  assert.equal(type("a|\nb\nc", "ArrowDown", { altKey: true }), "b\na|\nc");
+  assert.equal(type("a|\nb", "ArrowUp", { altKey: true }), null);
+  assert.equal(type("a\nb|", "ArrowDown", { altKey: true }), null);
+  assert.equal(type("[a\nb]\nc", "ArrowDown", { altKey: true }), "c\n[a\nb]");
+  assert.equal(type("x|", "ArrowDown", { altKey: true, shiftKey: true }), "x\nx|");
+  assert.equal(type("x|", "ArrowUp", { altKey: true, shiftKey: true }), "x|\nx");
+});
