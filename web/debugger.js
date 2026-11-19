@@ -166,7 +166,8 @@ const InlineDebugger = (() => {
       const isBreakpoint = breakSet.has(line);
       const classes = ["gutter-line", error ? "err" : "", isBreakpoint ? "has-breakpoint" : "", line === currentLine ? "debug-active" : "", visited.has(line) && line !== currentLine ? "debug-visited" : ""].filter(Boolean).join(" ");
       const label = translate(`السطر ${line}${isBreakpoint ? "، نقطة توقف" : ""}${error ? "، فيه خطأ" : ""}`, `Line ${line}${isBreakpoint ? ", breakpoint" : ""}${error ? ", error" : ""}`);
-      markup += `<button type="button" class="${classes}" data-debug-line="${line}" aria-label="${esc(label)}" title="${esc(error || label)}"><span>${line}</span></button>`;
+      const tip = error || label + translate(isBreakpoint ? " — دوس تشيلها (F9)" : " — دوس تحط نقطة توقف (F9)", isBreakpoint ? " — click to remove (F9)" : " — click for a breakpoint (F9)");
+      markup += `<button type="button" class="${classes}" data-debug-line="${line}" aria-label="${esc(label)}" title="${esc(tip)}"><span>${line}</span></button>`;
     }
     return markup;
   }
