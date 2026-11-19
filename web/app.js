@@ -799,6 +799,25 @@ function logCompileError(e) {
   button.textContent = `${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`;
   button.onclick = () => jumpToLine(file, line);
   appendConsoleNode(button);
+  // one-click fix for a missing or unused import
+  const fix = window.QuickFix?.fixFor(e.msg);
+  if (fix) {
+    const quick = document.createElement("button");
+    quick.type = "button";
+    quick.className = "tool small c-quickfix";
+    quick.textContent = fix.kind === "add" ? T(`ضيف import "${fix.path}"`, `Add import "${fix.path}"`) : T(`شيل import "${fix.path}"`, `Remove import "${fix.path}"`);
+    quick.onclick = () => {
+      showFile(file);
+      const next = QuickFix.apply(ed.value, fix);
+      quick.disabled = true;
+      if (next == null || ed.readOnly) return;
+      const caret = Math.max(0, ed.selectionStart + next.length - ed.value.length);
+      ed.focus();
+      applyEdit({ from: 0, to: ed.value.length, text: next, selStart: caret, selEnd: caret });
+      quick.textContent += " ✓";
+    };
+    appendConsoleNode(quick);
+  }
 }
 function jumpToLine(file, line) {
   showFile(file);
