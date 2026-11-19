@@ -6,6 +6,8 @@ Four short lessons are authored for the chapter's four labs. Every walkthrough i
 
 Mission: render an injected filesystem as a sorted tree, with recursion bounded by depth. Idea: ~fs.ReadDir~ returns sorted entries. Try: predict a recursive counter's output. Watch out: stop before reading beyond the depth boundary and preserve I/O errors. Think: identify the stopping case and each error boundary. Your turn: begin with the root.
 
+Playground: step through sorted sample entries as traversal depth increases.
+
 <!-- go-example id=e221-fs-readdir imports=fmt,io/fs,testing/fstest outcome=ok -->
 ```go
 func main() {
@@ -53,6 +55,8 @@ Real stdout:
 
 Mission: plan crate destinations before moving files. Idea: a plan is reviewable data; sorting keeps its order stable. Try: predict a normalized extension. Watch out: discovery should not mutate the store. Think: separate discovery, classification, validation, and execution. Your turn: use an injected store and a temporary directory.
 
+Playground: sort an illustrative move list while the store remains unchanged.
+
 <!-- go-example id=e222-sort-plan imports=fmt,slices outcome=ok -->
 ```go
 func main() {
@@ -89,6 +93,8 @@ Real stdout:
 ## 22-3 — Atomic Save
 
 Mission: preserve the last complete packet when generation or publication fails. Idea: stage bytes behind an ~io.Writer~ before publishing. Try: predict the text written to a builder. Watch out: check callback and close errors. Think: follow the temporary file through cleanup and the rename boundary. Your turn: inspect both target and temporary names after failures.
+
+Playground: stage content, publish it, or simulate failure while watching the target.
 
 <!-- go-example id=e223-staging-writer imports=fmt,io,strings outcome=ok -->
 ```go
@@ -127,6 +133,8 @@ packet <nil>
 ## 22-4 — Duplicate Files
 
 Mission: detect duplicate content with bounded-memory reads. Idea: narrow candidates by metadata, then stream each candidate through its own hash. Try: predict equal-size and equal-content comparisons. Watch out: size alone is not proof, and every file needs closing. Think: return no partial report after a read failure. Your turn: inspect stable group order.
+
+Playground: cycle sample file pairs and compare size-filter and content-hash results.
 
 <!-- go-example id=e224-stream-hash imports=crypto/sha256,fmt,io,strings outcome=ok -->
 ```go
