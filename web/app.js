@@ -2056,7 +2056,11 @@ function finish(level, res, missing = [], silent = false) {
   for (let k = 0; k < res.stars; k++) setTimeout(() => Sound.play("star"), 420 + k * 180);
   let text = level.kind === "lab" ? res.message : T(`خلصت في <b>${res.ticks}</b> tick.`, `Done in <b>${res.ticks}</b> ticks.`);
   if (res.par > 0) {
-    if (res.stars < 3) text += T(`<br>النجوم التلاتة محتاجة <b>${res.gold}</b> tick أو أقل. تقدر توصلها؟`, `<br>Three stars need <b>${res.gold}</b> ticks or fewer. Can you get there?`);
+    if (res.stars < 3) {
+      const gap = res.ticks - res.gold;
+      text += T(`<br>النجوم التلاتة محتاجة <b>${res.gold}</b> tick أو أقل`, `<br>Three stars need <b>${res.gold}</b> ticks or fewer`)
+        + (gap > 0 ? T(` (فاضلك توفّر <b>${gap}</b>)`, ` (<b>${gap}</b> to save)`) : "") + T(". تقدر توصلها؟", ". Can you get there?");
+    }
     else text += T("<br>حل مثالي. مفيش أحسن من كده.", "<br>Perfect solution. It doesn't get better than this.");
   }
   if (improved && r.best === res.ticks && res.ticks > 0) text += T(`<br>أحسن رقم ليك: <b>${r.best}</b>`, `<br>Your best: <b>${r.best}</b>`);
