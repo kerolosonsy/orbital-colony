@@ -32,7 +32,7 @@
   // insertion is the text for a symbol and where the caret goes in it:
   // functions get their parentheses, with the caret inside when they take arguments.
   function insertion(symbol) {
-    if (symbol.kind !== "func") return { text: symbol.name, caret: symbol.name.length };
+    if (symbol.kind !== "func" && symbol.kind !== "method") return { text: symbol.name, caret: symbol.name.length };
     const takesArgs = !/^\(\s*\)/.test(symbol.signature || "()");
     const text = symbol.name + "()";
     return { text, caret: takesArgs ? text.length - 1 : text.length };
@@ -57,7 +57,38 @@
     return null;
   }
 
-  const api = { context, rank, insertion, callContext };
+  // memberContext handles "d." where d came from the colony package:
+  // d := colony.Spawn()  →  Spawn returns *Drone  →  list Drone's methods.
+  // Also "var d *colony.Drone" and parameters "d *colony.Drone".
+  function memberContext(value, caret, symbols) {
+    const before = value.slice(value.lastIndexOf("\n", caret - 1) + 1, caret);
+    if (/\/\//.test(before.replace(/"(?:\\.|[^"\\])*"|`[^`]*`/g, '""'))) return null;
+    const match = /(?:^|[^\w.])([A-Za-z_]\w*)\.(\w*)$/.exec(before);
+    if (!match || match[1] === "colony") return null;
+    const name = match[1].replace(/[$]/g, "");
+    const code = value.slice(0, caret);
+    let recv = null;
+    const assigned = [...code.matchAll(new RegExp(`\\b${name}\\s*(?:,\\s*\\w+\\s*)?:?=\\s*colony\\.(\\w+)\\(`, "g"))].pop();
+    if (assigned) {
+      const fn = (symbols || []).find((s) => s.kind === "func" && s.name === assigned[1]);
+      recv = /\)\s*\(?\s*\*?(\w+)/.exec(fn?.signature || "")?.[1] || null;
+    }
+    const typed = [...code.matchAll(new RegExp(`\\b${name}\\s+\\*?colony\\.(\\w+)`, "g"))].pop();
+    if (typed && (!assigned || typed.index > assigned.index)) recv = typed[1];
+    if (!recv || !(symbols || []).some((s) => s.kind === "method" && s.recv === recv)) return null;
+    return { start: caret - match[2].length, prefix: match[2], recv };
+  }
+
+  // rankMembers lists one type's methods, prefix matches first.
+  function rankMembers(symbols, recv, prefix, limit = 12) {
+    const p = prefix.toLowerCase();
+    const methods = (symbols || []).filter((s) => s.kind === "method" && s.recv === recv);
+    const top = methods.filter((s) => s.name.toLowerCase().startsWith(p));
+    const rest = p ? methods.filter((s) => !s.name.toLowerCase().startsWith(p) && s.name.toLowerCase().includes(p)) : [];
+    return top.concat(rest).slice(0, limit);
+  }
+
+  const api = { context, rank, insertion, callContext, memberContext, rankMembers };
   if (typeof window !== "undefined") window.Complete = api;
   if (typeof module !== "undefined") module.exports = api;
 })();

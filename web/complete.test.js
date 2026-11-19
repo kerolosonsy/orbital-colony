@@ -44,3 +44,22 @@ test("callContext finds the colony call the caret is inside", () => {
   assert.equal(callContext("fmt.Println(", 12), null);
   assert.equal(callContext("// colony.Move(", 15), null);
 });
+
+test("memberContext follows colony values to their methods", () => {
+  const { memberContext, rankMembers } = require("./complete.js");
+  const api = [
+    { name: "Spawn", kind: "func", signature: "() *Drone" },
+    { name: "Here", kind: "func", signature: "() *Building" },
+    { name: "Move", kind: "method", recv: "Drone", signature: "(dir Direction) bool" },
+    { name: "Harvest", kind: "method", recv: "Drone", signature: "() bool" },
+    { name: "Take", kind: "method", recv: "Building", signature: "(e Entity, n int) (int, error)" },
+  ];
+  const src = "d := colony.Spawn()\nd.Mo";
+  assert.deepEqual(memberContext(src, src.length, api), { start: src.length - 2, prefix: "Mo", recv: "Drone" });
+  const typed = "func work(b *colony.Building) {\n\tb.";
+  assert.equal(memberContext(typed, typed.length, api).recv, "Building");
+  assert.equal(memberContext("x := 3\nx.", 9, api), null);
+  assert.equal(memberContext("colony.Mo", 9, api), null);
+  assert.deepEqual(rankMembers(api, "Drone", "").map((s) => s.name), ["Move", "Harvest"]);
+  assert.deepEqual(rankMembers(api, "Drone", "ha").map((s) => s.name), ["Harvest"]);
+});

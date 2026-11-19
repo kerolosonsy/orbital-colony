@@ -624,14 +624,23 @@ function closeCompletion() {
   completeBox.hidden = true;
   ed.removeAttribute("aria-activedescendant");
 }
+// where to complete: after "colony." (package names) or after a value that
+// came from colony, like d := colony.Spawn() then "d." (its methods)
+function completionAt(symbols) {
+  const caret = ed.selectionStart;
+  const pkg = Complete.context(ed.value, caret);
+  if (pkg) return { ...pkg, items: () => Complete.rank(symbols, pkg.prefix) };
+  const member = Complete.memberContext(ed.value, caret, symbols);
+  if (member) return { ...member, items: () => Complete.rankMembers(symbols, member.recv, member.prefix) };
+  return null;
+}
 async function updateCompletion(force = false) {
-  const ctx = !ed.readOnly && document.activeElement === ed && ed.selectionStart === ed.selectionEnd
-    ? Complete.context(ed.value, ed.selectionStart) : null;
-  if (!ctx || (!force && ctx.start === dismissedAt)) return closeCompletion();
+  const usable = !ed.readOnly && document.activeElement === ed && ed.selectionStart === ed.selectionEnd;
+  if (!usable || !/[\w.]$/.test(ed.value.slice(0, ed.selectionStart))) return closeCompletion();
   const symbols = await loadSymbols();
-  const fresh = Complete.context(ed.value, ed.selectionStart); // the caret may have moved meanwhile
-  if (!fresh || fresh.start !== ctx.start) return closeCompletion();
-  const items = Complete.rank(symbols, fresh.prefix);
+  const fresh = completionAt(symbols); // after the await: the caret may have moved
+  if (!fresh || (!force && fresh.start === dismissedAt)) return closeCompletion();
+  const items = fresh.items();
   if (!items.length) return closeCompletion();
   completion = { items, index: 0, start: fresh.start };
   renderCompletion();
