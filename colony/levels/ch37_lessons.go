@@ -29,6 +29,81 @@ func ch37Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	}
 }
 
+func ch37Pair(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch37Sandbox(id, text, kind string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch37AtomicConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title":  ch37Pair("تغييرين مع بعض", "Two changes together"),
+			"schema": ch37Pair("schema", "schema"), "ledger": ch37Pair("سجل النسخ", "version ledger"),
+			"fail": ch37Pair("محاكاة فشل", "Simulate failure"), "commit": ch37Pair("محاكاة نجاح", "Simulate commit"), "reset": ch37Pair("ابدأ تاني", "Reset"),
+			"ready": ch37Pair("جاهز لتغيير تجريبي", "Ready for a sample change"), "failed": ch37Pair("فشل؛ الاتنين زي ما هم", "Failed; both values stay"), "committed": ch37Pair("نجاح؛ القيمتين اتحدثوا سوا", "Committed; both values moved"),
+		},
+		"values": map[string]any{"schema": 4, "ledger": 4, "next": 5},
+	}
+}
+
+func ch37SessionConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title":  ch37Pair("التوكن ومخزونه", "Token and stored digest"),
+			"client": ch37Pair("مع العميل", "Client holds"), "store": ch37Pair("المخزن", "Store holds"),
+			"issue": ch37Pair("إصدار جلسة", "Issue session"), "logout": ch37Pair("خروج", "Log out"), "reset": ch37Pair("ابدأ تاني", "Reset"),
+			"empty": ch37Pair("مفيش", "None"), "ready": ch37Pair("مفيش جلسة", "No active session"), "issued": ch37Pair("العميل ماسك التوكن", "Client holds the token"), "ended": ch37Pair("الجلسة اتقفلت", "Session ended"), "cleared": ch37Pair("الحالة اتصفّرت", "Session state cleared"),
+		},
+		"values": map[string]any{"token": "token-amber", "digest": "digest-amber"},
+	}
+}
+
+func ch37CrewConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch37Pair("المفتاح فيه نطاق", "The key includes scope"),
+			"key":   ch37Pair("المفتاح المركّب", "Composite key"), "role": ch37Pair("الدور", "Role"), "choose": ch37Pair("اختار نطاق", "Choose a scope"),
+			"blue": ch37Pair("blue + mira", "blue + mira"), "gold": ch37Pair("gold + mira", "gold + mira"), "red": ch37Pair("red + mira", "red + mira"), "empty": ch37Pair("—", "—"),
+		},
+		"lookups": []any{
+			map[string]any{"key": ch37Pair("blue + mira", "blue + mira"), "role": ch37Pair("مالك", "owner")},
+			map[string]any{"key": ch37Pair("gold + mira", "gold + mira"), "role": ch37Pair("عضو", "member")},
+			map[string]any{"key": ch37Pair("red + mira", "red + mira"), "role": ch37Pair("مش موجود", "not found")},
+		},
+	}
+}
+
+func ch37CursorConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch37Pair("صفحات بمؤشر ثابت", "Pages with a stable marker"),
+			"page":  ch37Pair("الصفحة", "Page"), "cursor": ch37Pair("cursor", "cursor"),
+			"next": ch37Pair("الصفحة الجاية", "Next page"), "reset": ch37Pair("ارجع للبداية", "Back to start"),
+			"ready": ch37Pair("أول صفحة", "First page"), "advanced": ch37Pair("المؤشر اتحرك مع الصفحة", "The marker moved with the page"), "resetStatus": ch37Pair("رجعنا لأول صفحة", "Returned to the first page"),
+		},
+		"pages":   [][]any{{"task-amber", "task-blue"}, {"task-copper", "task-violet"}},
+		"cursors": []string{"start", "after-amber"},
+	}
+}
+
+func ch37OperationsConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title":    ch37Pair("مسار الطلب", "Request path"),
+			"previous": ch37Pair("اللي قبلها", "Previous"), "next": ch37Pair("اللي بعدها", "Next"), "reset": ch37Pair("من الأول", "Reset"),
+		},
+		"frames": []any{
+			map[string]any{"stage": ch37Pair("وصول", "Arrival"), "detail": "GET /v1/tasks?sample=1", "caption": ch37Pair("طلب تجريبي وصل", "A sample request arrived")},
+			map[string]any{"stage": ch37Pair("هوية الطلب", "Request identity"), "detail": "req-42", "caption": ch37Pair("اتضاف request ID", "A request ID was added")},
+			map[string]any{"stage": ch37Pair("الرد", "Response"), "detail": "202 Accepted", "caption": ch37Pair("الرد رجع للعميل", "The response returned to the client")},
+			map[string]any{"stage": ch37Pair("السجل", "Log"), "detail": "GET /v1/tasks · 202", "caption": ch37Pair("السجل فيه path من غير query", "The log keeps the path, not query")},
+		},
+	}
+}
+
 const ch37TransactionExample = `func stage(applied []int, version int, commit bool) []int {
 	if !commit {
 		return applied
@@ -154,6 +229,7 @@ var ch37FoundationArabicSteps = []LessonStep{
 					{Line: 3, Caption: "append تضيف في الآخر.", Output: "[4 5]"},
 				},
 			),
+			ch37Sandbox("c371.atomic-playground", "جرّب فشل أو نجاح، وراقب الاتنين.", "ch37-atomic-ledger", ch37AtomicConfig()),
 		},
 	},
 	{
@@ -219,6 +295,7 @@ var ch37FoundationEnglishSteps = []LessonStep{
 					{Line: 3, Caption: "append adds at the end.", Output: "[4 5]"},
 				},
 			),
+			ch37Sandbox("c371.atomic-playground", "Try failure or commit; watch both values.", "ch37-atomic-ledger", ch37AtomicConfig()),
 		},
 	},
 	{
@@ -297,6 +374,7 @@ var ch37AuthArabicSteps = []LessonStep{
 					{Line: 3, Caption: "اطبع طولها بالـbytes.", Output: "32"},
 				},
 			),
+			ch37Sandbox("c372.session-playground", "بدّل حالة الجلسة وشوف المخزون.", "ch37-session-digest", ch37SessionConfig()),
 		},
 	},
 	{
@@ -359,6 +437,7 @@ var ch37AuthEnglishSteps = []LessonStep{
 					{Line: 3, Caption: "Print its byte length.", Output: "32"},
 				},
 			),
+			ch37Sandbox("c372.session-playground", "Change session state; inspect stored data.", "ch37-session-digest", ch37SessionConfig()),
 		},
 	},
 	{
@@ -437,6 +516,7 @@ var ch37TenantsArabicSteps = []LessonStep{
 					{Line: 4, Caption: "اطلب المفتاح المركب.", Output: "reader"},
 				},
 			),
+			ch37Sandbox("c373.scope-playground", "بدّل نطاق الطاقم وشوف الدور.", "ch37-scoped-membership", ch37CrewConfig()),
 		},
 	},
 	{
@@ -499,6 +579,7 @@ var ch37TenantsEnglishSteps = []LessonStep{
 					{Line: 4, Caption: "Look up the combined key.", Output: "reader"},
 				},
 			),
+			ch37Sandbox("c373.scope-playground", "Change crew scope; inspect the role.", "ch37-scoped-membership", ch37CrewConfig()),
 		},
 	},
 	{
@@ -576,6 +657,7 @@ var ch37TasksArabicSteps = []LessonStep{
 					{Line: 3, Caption: "اطبع الـID الأصلي.", Output: "row-blue"},
 				},
 			),
+			ch37Sandbox("c374.cursor-playground", "حرّك الصفحة وشوف ~cursor~.", "ch37-cursor-pages", ch37CursorConfig()),
 		},
 	},
 	{
@@ -637,6 +719,7 @@ var ch37TasksEnglishSteps = []LessonStep{
 					{Line: 3, Caption: "Print the original ID.", Output: "row-blue"},
 				},
 			),
+			ch37Sandbox("c374.cursor-playground", "Advance a page and inspect ~cursor~.", "ch37-cursor-pages", ch37CursorConfig()),
 		},
 	},
 	{
@@ -715,6 +798,7 @@ var ch37OpsArabicSteps = []LessonStep{
 					{Line: 4, Caption: "اقرأ سبب الإلغاء.", Output: "context canceled"},
 				},
 			),
+			ch37Sandbox("c375.request-playground", "تتبّع طلبًا تجريبيًا مرحلة مرحلة.", "ch37-request-path", ch37OperationsConfig()),
 		},
 	},
 	{
@@ -777,6 +861,7 @@ var ch37OpsEnglishSteps = []LessonStep{
 					{Line: 4, Caption: "Read the cancellation reason.", Output: "context canceled"},
 				},
 			),
+			ch37Sandbox("c375.request-playground", "Trace a sample request through its stages.", "ch37-request-path", ch37OperationsConfig()),
 		},
 	},
 	{

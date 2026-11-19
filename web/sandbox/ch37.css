@@ -1,1 +1,157 @@
-/* Chapter 37 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch37-playground {
+  box-sizing: border-box;
+  width: min(100%, 290px);
+  min-width: 0;
+  margin-block: 10px;
+  padding: 10px;
+  border: 1px solid var(--rule-strong, #5a4f8c);
+  border-radius: 2px;
+  background: var(--sheet, #221d3b);
+  color: var(--paper, #efe7d6);
+}
+
+.ch37-title {
+  margin: 0 0 8px;
+  color: var(--paper, #efe7d6);
+  font-size: 1em;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.ch37-state {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.ch37-data-row {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 4px;
+  border-block-end: 1px solid var(--rule, #3e3666);
+}
+
+.ch37-row-label,
+.ch37-stage {
+  min-width: 0;
+  color: var(--muted, #a69dc2);
+}
+
+.ch37-value {
+  min-width: 0;
+  color: var(--ice, #9fd2cb);
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: var(--cond, "Barlow Condensed", sans-serif);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  text-align: end;
+}
+
+.ch37-status {
+  min-height: 1.45em;
+  margin: 8px 0 0;
+  color: var(--paper-2, #cfc6b2);
+  line-height: 1.4;
+}
+
+.ch37-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 8px 0;
+}
+
+.ch37-playground .ch37-action,
+.ch37-playground .sandbox-kit-controls .tool {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 36px;
+  height: auto;
+  padding: 6px 9px;
+  border: 1px solid var(--rule-strong, #5a4f8c);
+  border-radius: 2px;
+  background: var(--ink-2, #1d1934);
+  color: var(--paper, #efe7d6);
+  font: inherit;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.ch37-playground .ch37-action:hover,
+.ch37-playground .sandbox-kit-controls .tool:hover {
+  border-color: var(--ice, #9fd2cb);
+}
+
+.ch37-playground .ch37-action:focus-visible,
+.ch37-playground .sandbox-kit-controls .tool:focus-visible {
+  outline: 2px solid var(--star, #f2b33d);
+  outline-offset: 2px;
+}
+
+.ch37-playground .ch37-action:disabled,
+.ch37-playground .sandbox-kit-controls .tool:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ch37-cursor-pages .sandbox-kit-log-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-inline-start: 1.4em;
+}
+
+.ch37-cursor-pages .sandbox-kit-log-list li {
+  padding-inline-start: 2px;
+  color: var(--paper, #efe7d6);
+}
+
+.ch37-request-path .sandbox-kit-stepper {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ch37-request-path .sandbox-kit-frame {
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--rule, #3e3666);
+  background: var(--ink-2, #1d1934);
+}
+
+.ch37-frame {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.ch37-stage {
+  margin: 0;
+  font-weight: 600;
+}
+
+.ch37-request-path .sandbox-kit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.ch37-request-path .sandbox-kit-counter {
+  color: var(--muted, #a69dc2);
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lesson-sandbox.ch37-playground * {
+    scroll-behavior: auto;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

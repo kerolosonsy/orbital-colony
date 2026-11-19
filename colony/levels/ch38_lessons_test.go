@@ -23,6 +23,8 @@ func TestCh38Lessons(t *testing.T) {
 		"38-6-vet",
 		"38-7-pprof",
 	}
+	playgroundIDs := []string{"c381.iterator-playground", "c382.set-playground", "c383.once-playground", "c384.group-playground", "c385.builder-playground", "c386.vet-playground", "c387.profile-playground"}
+	playgroundKinds := []string{"ch38-iterator-stop", "ch38-set-labels", "ch38-once-cache", "ch38-errgroup-orders", "ch38-builder-buffer", "ch38-vet-lenses", "ch38-profile-focus"}
 	arabicTitles := []string{"المهمة", "الفكرة", "جرّب", "خد بالك", "فكّر واختبر", "دورك"}
 	englishTitles := []string{"Mission", "Idea", "Try it", "Watch out", "Think & check", "Your turn"}
 	for mission, id := range ids {
@@ -37,6 +39,8 @@ func TestCh38Lessons(t *testing.T) {
 			t.Errorf("%s: expected six steps in both languages", id)
 			continue
 		}
+		ch38AssertPlayground(t, level.Steps, playgroundIDs[mission], playgroundKinds[mission])
+		ch38AssertPlayground(t, level.En.Steps, playgroundIDs[mission], playgroundKinds[mission])
 		ch38ValidateLessonCopy(t, id+" Arabic", level.Steps, level.Hints, arabicTitles, fmt.Sprintf("c38%d.", mission+1))
 		ch38ValidateLessonCopy(t, id+" English", level.En.Steps, level.En.Hints, englishTitles, fmt.Sprintf("c38%d.", mission+1))
 		ch38CheckGlobalIDs(t, level)
@@ -56,6 +60,9 @@ func TestCh38Lessons(t *testing.T) {
 						t.Errorf("%s: question answers or option counts differ", block.ID)
 					}
 				}
+				if block.Kind == "sandbox" && (other.Sandbox == nil || !reflect.DeepEqual(block.Sandbox, other.Sandbox)) {
+					t.Errorf("%s: sandbox config differs between languages", block.ID)
+				}
 				if block.Walkthrough != nil {
 					if other.Walkthrough == nil || block.Code != other.Code || block.ExampleID != other.ExampleID || !reflect.DeepEqual(block.Imports, other.Imports) || len(block.Walkthrough.Frames) != len(other.Walkthrough.Frames) {
 						t.Errorf("%s: walkthrough structures differ", block.ID)
@@ -71,6 +78,31 @@ func TestCh38Lessons(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func ch38AssertPlayground(t *testing.T, steps []LessonStep, wantID, wantKind string) {
+	t.Helper()
+	count := 0
+	for stepIndex, step := range steps {
+		for blockIndex, block := range step.Blocks {
+			if block.Kind != "sandbox" {
+				if block.Sandbox != nil {
+					t.Errorf("%s: non-sandbox block has sandbox data", block.ID)
+				}
+				continue
+			}
+			count++
+			if stepIndex != 2 || blockIndex != len(step.Blocks)-1 {
+				t.Errorf("%s: playground must follow the existing Try it blocks", block.ID)
+			}
+			if block.ID != wantID || block.Sandbox == nil || block.Sandbox.Kind != wantKind || !strings.HasPrefix(block.Sandbox.Kind, "ch38-") || len(block.Sandbox.Config) == 0 {
+				t.Errorf("%s: expected sandbox %q with a ch38- kind and config", block.ID, wantID)
+			}
+		}
+	}
+	if count != 1 {
+		t.Errorf("%s: expected exactly one playground, found %d", wantID, count)
 	}
 }
 
@@ -156,6 +188,10 @@ func ch38ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 					continue
 				}
 				words += ch38ValidateFrames(t, name, block)
+			case "sandbox":
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch38-") || len(block.Sandbox.Config) == 0 || block.Question != nil || block.Walkthrough != nil || block.Code != "" {
+					t.Errorf("%s: %s has invalid sandbox payload", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed block kind %q", name, block.ID, block.Kind)
 			}
@@ -173,8 +209,8 @@ func ch38ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 	}
 	if len(steps) > 2 {
 		try := steps[2]
-		if len(try.Blocks) != 2 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" {
-			t.Errorf("%s: Try it must predict first, then reveal with a walkthrough", name)
+		if len(try.Blocks) != 3 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" || try.Blocks[2].Kind != "sandbox" {
+			t.Errorf("%s: Try it must predict, reveal, then show a playground", name)
 		} else if strings.TrimSpace(ch38QuestionCode(try.Blocks[0].Text)) != strings.TrimSpace(try.Blocks[1].Code) {
 			t.Errorf("%s: prediction code differs from its walkthrough reveal\nquestion=%q\nwalkthrough=%q", name, ch38QuestionCode(try.Blocks[0].Text), try.Blocks[1].Code)
 		}

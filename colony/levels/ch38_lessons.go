@@ -24,6 +24,88 @@ func ch38Walkthrough(id, text, code string, details ch38WalkthroughDetails) Less
 	return LessonBlock{ID: id, Kind: "walkthrough", Text: text, Code: code, Imports: details.Imports, ExampleID: details.ExampleID, Walkthrough: &LessonWalkthrough{Frames: details.Frames}}
 }
 
+func ch38Pair(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch38Sandbox(id, text, kind string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch38IteratorConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch38Pair("المستهلك يوقف", "The consumer can stop"), "values": ch38Pair("القيم المصدر", "Source values"), "consumed": ch38Pair("اتستهلك", "Consumed"),
+			"next": ch38Pair("هات قيمة", "Next value"), "stop": ch38Pair("وقّف", "Stop"), "reset": ch38Pair("ابدأ تاني", "Reset"),
+			"ready": ch38Pair("جاهز للاستهلاك", "Ready to consume"), "read": ch38Pair("قيمة جديدة وصلت", "A new value arrived"), "stopped": ch38Pair("المستهلك وقف", "The consumer stopped"), "cleared": ch38Pair("السجل اتمسح", "The log was cleared"), "ended": ch38Pair("كل القيم وصلت", "All values arrived"),
+		},
+		"values": []int{2, 5, 8, 11},
+	}
+}
+
+func ch38SetConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch38Pair("عضوية وتخطّي صف", "Membership and row skipping"), "row": ch38Pair("الصف", "Row"), "slots": ch38Pair("الخانات", "Slots"), "selected": ch38Pair("الـset", "Set"),
+			"next": ch38Pair("افحص الصف", "Check next row"), "reset": ch38Pair("من الأول", "Reset"),
+			"empty": ch38Pair("—", "—"), "ready": ch38Pair("جاهز لفحص الصفوف", "Ready to inspect rows"), "picked": ch38Pair("قيم جديدة دخلت الـset", "New values joined the set"), "skipped": ch38Pair("الـlabel تخطّى باقي الصف", "The label skipped the rest of this row"), "duplicate": ch38Pair("القيمة موجودة قبل كده", "The value was already present"), "done": ch38Pair("خلصت الصفوف", "All rows were inspected"), "cleared": ch38Pair("الـset اتمسح", "The set was cleared"),
+		},
+		"rows": [][]int{{7, 2}, {0, 5}, {2, 8}, {7}},
+	}
+}
+
+func ch38OnceConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch38Pair("النتيجة الصفرية برضه نتيجة", "Zero is still a result"), "runs": ch38Pair("مرات التهيئة", "Initializer runs"), "value": ch38Pair("القيمة", "Value"),
+			"call": ch38Pair("نادِ الـloader", "Call loader"), "reset": ch38Pair("ابدأ تاني", "Reset"),
+			"ready": ch38Pair("جاهز لأول نداء", "Ready for the first call"), "loaded": ch38Pair("التهيئة اشتغلت", "The initializer ran"), "reused": ch38Pair("رجّع نفس القيمة", "The same result was reused"), "cleared": ch38Pair("العداد رجع للصفر", "The counter returned to zero"), "zero": 0,
+		},
+	}
+}
+
+func ch38ErrgroupConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch38Pair("ترتيب ممكن يتغيّر", "A changing possible order"), "jobs": ch38Pair("ترتيب الإكمال", "Completion order"),
+			"run": ch38Pair("شغّل ترتيب تاني", "Run another sample"), "reset": ch38Pair("ارجع للمثال الأول", "Return to first sample"),
+			"possible": ch38Pair("ده ترتيب ممكن", "One possible order"), "another": ch38Pair("مثال تاني؛ الترتيب مش ثابت", "Another sample; order is not fixed"), "restored": ch38Pair("رجعنا لمثال توضيحي", "Returned to an illustrative sample"),
+		},
+		"orders": [][]string{{"job-amber", "job-blue", "job-copper"}, {"job-blue", "job-amber", "job-copper"}, {"job-copper", "job-blue", "job-amber"}},
+	}
+}
+
+func ch38BuilderConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch38Pair("الـBuilder بيجمع النص", "A Builder collects text"), "buffer": ch38Pair("المحتوى", "Buffer"), "length": ch38Pair("الطول", "Length"),
+			"write": ch38Pair("اكتب الجزء الجاي", "Write next part"), "reset": ch38Pair("فضّي الـbuffer", "Clear buffer"),
+			"empty": ch38Pair("فاضي", "Empty"), "ready": ch38Pair("الـbuffer فاضي", "The buffer is empty"), "written": ch38Pair("النص اتجمع", "Text was collected"), "cleared": ch38Pair("الـbuffer اتمسح", "The buffer was cleared"),
+		},
+		"parts": []string{"echo", "-", "orbit"},
+	}
+}
+
+func ch38VetConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch38Pair("اختبار وسكان المصدر", "Tests and source inspection"), "tests": ch38Pair("سلوك وقت التشغيل", "Runtime behavior"), "vet": ch38Pair("فحص المصدر", "Source inspection"),
+			"runTests": ch38Pair("شغّل فحص السلوك", "Run behavior check"), "runVet": ch38Pair("افحص المصدر", "Inspect source"), "reset": ch38Pair("ابدأ تاني", "Reset"),
+			"ready": ch38Pair("مفيش فحوصات لسه", "No checks have run"), "testsDone": ch38Pair("السلوك اتجرّب", "Behavior was exercised"), "vetDone": ch38Pair("المصدر اتفحص", "Source was inspected"), "bothDone": ch38Pair("الفحصين كل واحد له دور", "Each check adds different evidence"), "cleared": ch38Pair("الفحوصات اتمسحت", "Check results were cleared"), "waiting": ch38Pair("لسه", "Waiting"), "complete": ch38Pair("اتراجع", "Reviewed"),
+		},
+	}
+}
+
+func ch38ProfileConfig() map[string]any {
+	return map[string]any{
+		"labels": map[string]any{
+			"title": ch38Pair("اختار زاوية القياس", "Choose a profiling view"), "focus": ch38Pair("الملف", "Profile"),
+			"cpu": ch38Pair("CPU", "CPU"), "heap": ch38Pair("Heap", "Heap"),
+			"choose": ch38Pair("اختار نوع profile", "Choose a profile type"), "cpuFocus": ch38Pair("وقت التنفيذ فين بيروح", "Where execution time goes"), "heapFocus": ch38Pair("إيه اللي لسه في الذاكرة", "What remains in memory"),
+		},
+	}
+}
+
 var ch38IteratorsArabic = []LessonStep{
 	{ID: "c381.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch38Markdown("c381.mission", "هتكتب iterators بتخلي المستهلك يحدد يكمل ولا يوقف.\n\nحافظ على ترتيب القراءات، وخلي التوقف يحصل فور طلبه.\n\nفرّق بين إنشاء الـSeq واستهلاكها.")}},
 	{ID: "c381.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch38Walkthrough("c381.range-values", "الـiterator ممكن يبقى function بتسلّم قيمة كل مرة.\n\n~slices.Values~ بتحوّل slice لـSeq؛ و~range~ هو اللي يبدأ المرور عليها.\n\nهنا المثال بيقرأ قيمتين بس، وبعدها الحلقة تخلص.", `func main() {
@@ -41,6 +123,7 @@ var ch38IteratorsArabic = []LessonStep{
 		if n == 6 { break }
 	}
 }`, ch38WalkthroughDetails{ExampleID: "e381-break", Imports: []string{"fmt", "slices"}, Frames: []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "القيم بالترتيب."}, {Line: 2, Caption: "range يطلب أول قيمة."}, {Line: 4, Caption: "اطبع 3.", Variables: []LessonVariable{{Name: "n", Value: "3"}}, Output: "3"}, {Line: 4, Caption: "اطبع 6.", Variables: []LessonVariable{{Name: "n", Value: "6"}}, Output: "3\n6"}, {Line: 5, Caption: "break يمنع القيمة التالية.", Variables: []LessonVariable{{Name: "n", Value: "6"}}, Output: "3\n6"}}}),
+		ch38Sandbox("c381.iterator-playground", "جرّب القراءة والإيقاف على قيم توضيحية.", "ch38-iterator-stop", ch38IteratorConfig()),
 	}},
 	{ID: "c381.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch38Markdown("c381.watch", "- إنشاء الـSeq مش معناه إن جسمها اشتغل؛ الاستهلاك بيبدأ مع ~range~.\n- لو ~yield~ رجّعت false، أي yield بعدها تكسر العقد.")}},
 	{ID: "c381.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -67,6 +150,7 @@ var ch38IteratorsEnglish = []LessonStep{
 		if n == 6 { break }
 	}
 }`, ch38WalkthroughDetails{ExampleID: "e381-break", Imports: []string{"fmt", "slices"}, Frames: []LessonFrame{{Line: 0, Caption: "Before execution."}, {Line: 1, Caption: "Values keep their order."}, {Line: 2, Caption: "range asks for the first value."}, {Line: 4, Caption: "Print 3.", Variables: []LessonVariable{{Name: "n", Value: "3"}}, Output: "3"}, {Line: 4, Caption: "Print 6.", Variables: []LessonVariable{{Name: "n", Value: "6"}}, Output: "3\n6"}, {Line: 5, Caption: "break prevents the next value.", Variables: []LessonVariable{{Name: "n", Value: "6"}}, Output: "3\n6"}}}),
+		ch38Sandbox("c381.iterator-playground", "Read sample values, then stop early.", "ch38-iterator-stop", ch38IteratorConfig()),
 	}},
 	{ID: "c381.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch38Markdown("c381.watch", "- Creating a Seq does not run its body; consumption begins with ~range~.\n- After ~yield~ returns false, another yield breaks the iterator contract.")}},
 	{ID: "c381.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -95,6 +179,7 @@ Decks:
 		}
 	}
 }`, ch38WalkthroughDetails{ExampleID: "e382-label", Imports: []string{"fmt"}, Frames: []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "ابدأ main."}, {Line: 3, Caption: "ابدأ الصف الأول."}, {Line: 6, Caption: "اطبع أول خانة.", Variables: []LessonVariable{{Name: "slot", Value: "1"}}, Output: "1"}, {Line: 5, Caption: "الـlabel يتخطّى الصف.", Output: "1"}, {Line: 3, Caption: "ابدأ الصف التالي.", Output: "1"}, {Line: 6, Caption: "اطبع خاناته.", Variables: []LessonVariable{{Name: "slot", Value: "2"}}, Output: "1\n2"}, {Line: 6, Caption: "ثم اطبع الخانة التالية.", Variables: []LessonVariable{{Name: "slot", Value: "3"}}, Output: "1\n2\n3"}}}),
+		ch38Sandbox("c382.set-playground", "افحص صفوفًا صغيرة وراقب العضوية.", "ch38-set-labels", ch38SetConfig()),
 	}},
 	{ID: "c382.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch38Markdown("c382.watch", "- الـmap مش مرتّبة؛ خُد ترتيب النتيجة من المرور على الصفوف.\n- اسم label بيحدد أنهي loop تتخطى؛ اتأكد إنها حلقة محيطة بيك.")}},
 	{ID: "c382.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -123,6 +208,7 @@ Decks:
 		}
 	}
 }`, ch38WalkthroughDetails{ExampleID: "e382-label", Imports: []string{"fmt"}, Frames: []LessonFrame{{Line: 0, Caption: "Before execution."}, {Line: 1, Caption: "Enter main."}, {Line: 3, Caption: "Start the first row."}, {Line: 6, Caption: "Print its first slot.", Variables: []LessonVariable{{Name: "slot", Value: "1"}}, Output: "1"}, {Line: 5, Caption: "The label skips this row.", Output: "1"}, {Line: 3, Caption: "Start the next row.", Output: "1"}, {Line: 6, Caption: "Print its first slot.", Variables: []LessonVariable{{Name: "slot", Value: "2"}}, Output: "1\n2"}, {Line: 6, Caption: "Print its next slot.", Variables: []LessonVariable{{Name: "slot", Value: "3"}}, Output: "1\n2\n3"}}}),
+		ch38Sandbox("c382.set-playground", "Inspect small rows and watch membership.", "ch38-set-labels", ch38SetConfig()),
 	}},
 	{ID: "c382.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch38Markdown("c382.watch", "- A map is unordered; get result order from the row traversal.\n- A label names the loop to skip; check that it encloses the branch.")}},
 	{ID: "c382.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -153,6 +239,7 @@ var ch38OnceArabic = []LessonStep{
 	fmt.Println(load())
 	fmt.Println(load())
 }`, ch38WalkthroughDetails{ExampleID: "e383-lazy", Imports: []string{"fmt", "sync"}, Frames: []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "ابدأ main."}, {Line: 2, Caption: "أنشئ closure مؤجلة."}, {Line: 6, Caption: "اطبع بعد الإنشاء.", Output: "created"}, {Line: 7, Caption: "أول نداء يشغّل load.", Output: "created\nload\neast", Variables: []LessonVariable{{Name: "result", Value: "east"}}}, {Line: 8, Caption: "النداء التالي يرجّع المخزّن.", Output: "created\nload\neast\neast", Variables: []LessonVariable{{Name: "result", Value: "east"}}}}}),
+		ch38Sandbox("c383.once-playground", "نادِ الـloader وراقب عدّاد التهيئة.", "ch38-once-cache", ch38OnceConfig()),
 	}},
 	{ID: "c383.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch38Markdown("c383.watch", "- ماتنسخش ~sync.Once~ بعد أول استخدام؛ خليه مع الحالة اللي بيحميها.\n- الصفر مش علامة موثوقة على إن التحميل لسه ماحصلش.")}},
 	{ID: "c383.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -183,13 +270,14 @@ var ch38OnceEnglish = []LessonStep{
 	fmt.Println(load())
 	fmt.Println(load())
 }`, ch38WalkthroughDetails{ExampleID: "e383-lazy", Imports: []string{"fmt", "sync"}, Frames: []LessonFrame{{Line: 0, Caption: "Before execution."}, {Line: 1, Caption: "Enter main."}, {Line: 2, Caption: "Create a deferred closure."}, {Line: 6, Caption: "Print after construction.", Output: "created"}, {Line: 7, Caption: "First call runs load.", Output: "created\nload\neast", Variables: []LessonVariable{{Name: "result", Value: "east"}}}, {Line: 8, Caption: "Next call returns the cache.", Output: "created\nload\neast\neast", Variables: []LessonVariable{{Name: "result", Value: "east"}}}}}),
+		ch38Sandbox("c383.once-playground", "Call the loader.", "ch38-once-cache", ch38OnceConfig()),
 	}},
 	{ID: "c383.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch38Markdown("c383.watch", "- Do not copy ~sync.Once~ after first use; keep it with the state it protects.\n- Zero is not a reliable signal that loading has not happened.")}},
 	{ID: "c383.check-step", Title: "Think & check", Blocks: []LessonBlock{
 		ch38Markdown("c383.plan", "Decide who owns initialization state and whether each object has its own state.\n\nCheck that callers see the same result after loading completes.\n\nWith ~OnceValue~, creating the closure is not consuming it."),
 		ch38Question("c383.zero-result", "If the result is ~0~, does that prove initialization did not run?", ch38QuestionDetails{Options: []string{"No; value and run state differ", "Yes; zero means no load", "Only when there are no goroutines"}, Answer: 0, Feedback: []string{"Once tracks execution separately from the result.", "A load can validly return the zero value.", "The result does not depend on caller count."}}),
 	}},
-	{ID: "c383.turn-step", Title: "Your turn", Blocks: []LessonBlock{ch38Markdown("c383.turn", "Start with one-time state per instance, then separate the lazy closure. Try a zero result before checking concurrency.")}},
+	{ID: "c383.turn-step", Title: "Your turn", Blocks: []LessonBlock{ch38Markdown("c383.turn", "Start with per-instance state, then separate the lazy closure. Test zero before concurrency.")}},
 }
 
 var ch38ErrgroupArabic = []LessonStep{
@@ -211,6 +299,7 @@ var ch38ErrgroupArabic = []LessonStep{
 	err := group.Wait()
 	fmt.Println(err == nil)
 }`, ch38WalkthroughDetails{ExampleID: "e384-wait", Imports: []string{"fmt", "golang.org/x/sync/errgroup"}, Frames: []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "ابدأ main."}, {Line: 2, Caption: "جهّز group فاضية."}, {Line: 3, Caption: "ابدأ worker واحدة."}, {Line: 4, Caption: "Wait يجمع النتيجة."}, {Line: 5, Caption: "مافيش error.", Variables: []LessonVariable{{Name: "err", Value: "nil"}}, Output: "true"}}}),
+		ch38Sandbox("c384.group-playground", "شغّل أمثلة بترتيب إكمال مختلف.", "ch38-errgroup-orders", ch38ErrgroupConfig()),
 	}},
 	{ID: "c384.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch38Markdown("c384.watch", "- ماتعتمدش على ترتيب goroutines؛ اعتمد على النتيجة بعد ~Wait~.\n- الـcontext بتطلب من الشغل يوقف؛ مش بتقتل worker بالقوة.")}},
 	{ID: "c384.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -239,6 +328,7 @@ var ch38ErrgroupEnglish = []LessonStep{
 	err := group.Wait()
 	fmt.Println(err == nil)
 }`, ch38WalkthroughDetails{ExampleID: "e384-wait", Imports: []string{"fmt", "golang.org/x/sync/errgroup"}, Frames: []LessonFrame{{Line: 0, Caption: "Before execution."}, {Line: 1, Caption: "Enter main."}, {Line: 2, Caption: "Prepare an empty group."}, {Line: 3, Caption: "Start one worker."}, {Line: 4, Caption: "Wait collects its result."}, {Line: 5, Caption: "There is no error.", Variables: []LessonVariable{{Name: "err", Value: "nil"}}, Output: "true"}}}),
+		ch38Sandbox("c384.group-playground", "Run sample jobs with varying orders.", "ch38-errgroup-orders", ch38ErrgroupConfig()),
 	}},
 	{ID: "c384.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch38Markdown("c384.watch", "- Do not rely on goroutine order; rely on the result after ~Wait~.\n- A context asks work to stop; it cannot kill a worker by force.")}},
 	{ID: "c384.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -265,6 +355,7 @@ var ch38AllocsArabic = []LessonStep{
 	values = append(values, 7)
 	fmt.Println(len(values), cap(values))
 }`, ch38WalkthroughDetails{ExampleID: "e385-capacity", Imports: []string{"fmt"}, Frames: []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "ابدأ main."}, {Line: 2, Caption: "الطول صفر والسعة أربعة.", Variables: []LessonVariable{{Name: "values", Value: "[]"}}}, {Line: 3, Caption: "أضف عنصراً واحداً.", Variables: []LessonVariable{{Name: "values", Value: "[7]"}}}, {Line: 4, Caption: "اطبع الطول والسعة.", Variables: []LessonVariable{{Name: "len", Value: "1"}, {Name: "cap", Value: "4"}}, Output: "1 4"}}}),
+		ch38Sandbox("c385.builder-playground", "اجمع أجزاء نص وراقب الـbuffer.", "ch38-builder-buffer", ch38BuilderConfig()),
 	}},
 	{ID: "c385.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch38Markdown("c385.watch", "- Benchmark يقيس التنفيذ المتكرر؛ خَلّي بيانات التجهيز برّه القياس.\n- ~ReportAllocs~ يعرض allocations، لكنه مش ضمان لصحة النتيجة.")}},
 	{ID: "c385.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -291,6 +382,7 @@ var ch38AllocsEnglish = []LessonStep{
 	values = append(values, 7)
 	fmt.Println(len(values), cap(values))
 }`, ch38WalkthroughDetails{ExampleID: "e385-capacity", Imports: []string{"fmt"}, Frames: []LessonFrame{{Line: 0, Caption: "Before execution."}, {Line: 1, Caption: "Enter main."}, {Line: 2, Caption: "Length zero, capacity four.", Variables: []LessonVariable{{Name: "values", Value: "[]"}}}, {Line: 3, Caption: "Append one element.", Variables: []LessonVariable{{Name: "values", Value: "[7]"}}}, {Line: 4, Caption: "Print length and capacity.", Variables: []LessonVariable{{Name: "len", Value: "1"}, {Name: "cap", Value: "4"}}, Output: "1 4"}}}),
+		ch38Sandbox("c385.builder-playground", "Collect text pieces and watch the buffer.", "ch38-builder-buffer", ch38BuilderConfig()),
 	}},
 	{ID: "c385.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch38Markdown("c385.watch", "- A benchmark repeats the measured work; keep setup outside the timed loop.\n- ~ReportAllocs~ reports allocations, but does not prove correctness.")}},
 	{ID: "c385.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -311,6 +403,7 @@ var ch38VetArabic = []LessonStep{
 		ch38Walkthrough("c386.format-reveal", "راجع النوع والـformat قبل الطباعة.", `func main() {
 	fmt.Printf("items=%d\n", 12)
 }`, ch38WalkthroughDetails{ExampleID: "e386-printf", Imports: []string{"fmt"}, Frames: []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "ابدأ main."}, {Line: 2, Caption: "اطبع int باستخدام %d.", Output: "items=12"}}}),
+		ch38Sandbox("c386.vet-playground", "قارن الفحص السلوكي بفحص المصدر.", "ch38-vet-lenses", ch38VetConfig()),
 	}},
 	{ID: "c386.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch38Markdown("c386.watch", "- Receiver بالقيمة بينسخ الـstruct؛ ده خطر لو فيها Mutex مستخدمة.\n- بعد ~WithCancel~ راجع إن كل مسار رجوع يوصل لـcancel.")}},
 	{ID: "c386.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -331,6 +424,7 @@ var ch38VetEnglish = []LessonStep{
 		ch38Walkthrough("c386.format-reveal", "Check the type and format before printing.", `func main() {
 	fmt.Printf("items=%d\n", 12)
 }`, ch38WalkthroughDetails{ExampleID: "e386-printf", Imports: []string{"fmt"}, Frames: []LessonFrame{{Line: 0, Caption: "Before execution."}, {Line: 1, Caption: "Enter main."}, {Line: 2, Caption: "Print int with %d.", Output: "items=12"}}}),
+		ch38Sandbox("c386.vet-playground", "Compare behavior checks with source inspection.", "ch38-vet-lenses", ch38VetConfig()),
 	}},
 	{ID: "c386.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch38Markdown("c386.watch", "- A value receiver copies its struct; that is unsafe with a used Mutex inside.\n- After ~WithCancel~, check that every return path reaches cancel.")}},
 	{ID: "c386.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -354,6 +448,7 @@ var ch38PprofArabic = []LessonStep{
 	_, exists := seen[4]
 	fmt.Println(exists)
 }`, ch38WalkthroughDetails{ExampleID: "e387-set", Imports: []string{"fmt"}, Frames: []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 1, Caption: "ابدأ main."}, {Line: 2, Caption: "set فيها القيمة 4."}, {Line: 3, Caption: "افحص المفتاح."}, {Line: 4, Caption: "النتيجة موجودة.", Variables: []LessonVariable{{Name: "exists", Value: "true"}}, Output: "true"}}}),
+		ch38Sandbox("c387.profile-playground", "بدّل منظور CPU وHeap.", "ch38-profile-focus", ch38ProfileConfig()),
 	}},
 	{ID: "c387.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch38Markdown("c387.watch", "- بعد نجاح ~StartCPUProfile~ لازم توقفها؛ فيه profiler واحدة للـprocess.\n- CPU profile أخذ عينات، والـheap profile كمان له دلالته؛ مافيش حجم ملف مضمون.")}},
 	{ID: "c387.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -377,6 +472,7 @@ var ch38PprofEnglish = []LessonStep{
 	_, exists := seen[4]
 	fmt.Println(exists)
 }`, ch38WalkthroughDetails{ExampleID: "e387-set", Imports: []string{"fmt"}, Frames: []LessonFrame{{Line: 0, Caption: "Before execution."}, {Line: 1, Caption: "Enter main."}, {Line: 2, Caption: "The set contains 4."}, {Line: 3, Caption: "Check the key."}, {Line: 4, Caption: "The result exists.", Variables: []LessonVariable{{Name: "exists", Value: "true"}}, Output: "true"}}}),
+		ch38Sandbox("c387.profile-playground", "Switch between CPU and heap views.", "ch38-profile-focus", ch38ProfileConfig()),
 	}},
 	{ID: "c387.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch38Markdown("c387.watch", "- After ~StartCPUProfile~ succeeds, stop it; a process can have only one CPU profiler.\n- CPU samples and heap samples mean different things; there is no fixed profile size.")}},
 	{ID: "c387.check-step", Title: "Think & check", Blocks: []LessonBlock{
