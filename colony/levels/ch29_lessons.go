@@ -95,12 +95,12 @@ func ch29SandboxFor(prefix string) (string, map[string]any) {
 	switch prefix {
 	case "c291":
 		return "ch29-sql-binding", map[string]any{
-			"intro": ch29TextPair("بدّل المفتاح وشوف نتيجة الربط.", "Change the key and watch binding."),
+			"intro": ch29TextPair("بدّل الـkey وشوف نتيجة الربط.", "Change the key and watch binding."),
 			"query": "SELECT payload FROM beacon WHERE code = ?",
 			"labels": map[string]any{
-				"query": ch29TextPair("استعلام ثابت", "Fixed query"), "parameter": ch29TextPair("القيمة المرتبطة", "Bound value"),
+				"query": ch29TextPair("الـquery الثابت", "Fixed query"), "parameter": ch29TextPair("الـvalue المرتبطة", "Bound value"),
 				"result": ch29TextPair("النتيجة", "Result"), "found": ch29TextPair("صف موجود", "Row found"),
-				"missing": ch29TextPair("مفيش صف مطابق", "No matching row"), "button": ch29TextPair("بدّل المفتاح", "Try another key"),
+				"missing": ch29TextPair("مفيش صف مطابق", "No matching row"), "button": ch29TextPair("بدّل الـkey", "Try another key"),
 			},
 			"rows": []any{
 				map[string]any{"key": ch29TextPair("ridge", "ridge"), "value": ch29TextPair("جاهز", "ready"), "found": true},
@@ -109,11 +109,11 @@ func ch29SandboxFor(prefix string) (string, map[string]any) {
 		}
 	case "c292":
 		return "ch29-migration-boundary", map[string]any{
-			"intro": ch29TextPair("جهّز تغيير المخطط وبعدين احفظه مع النسخة.", "Stage a schema change, then save its version."),
+			"intro": ch29TextPair("جهّز تغيير المخطط وبعدين خزّنه مع النسخة.", "Stage a schema change, then save its version."),
 			"labels": map[string]any{
 				"saved": ch29TextPair("المخطط المحفوظ", "Saved schema"), "version": ch29TextPair("النسخة المحفوظة", "Saved version"),
 				"proposal": ch29TextPair("التغيير المقترح", "Proposed change"), "stage": ch29TextPair("جهّز الترحيل", "Stage migration"),
-				"commit": ch29TextPair("احفظ الاتنين", "Commit both"), "reset": ch29TextPair("ابدأ من الأول", "Reset"),
+				"commit": ch29TextPair("خزّن الاتنين", "Commit both"), "reset": ch29TextPair("ابدأ من الأول", "Reset"),
 				"pending": ch29TextPair("لسه ما اتحفظش", "Not saved yet"), "committed": ch29TextPair("المخطط والنسخة اتحفظوا سوا", "Schema and version saved together"),
 			},
 			"schema": ch29TextPair("crates(label)", "crates(label)"), "nextSchema": ch29TextPair("crates(label, zone)", "crates(label, zone)"),
@@ -121,7 +121,7 @@ func ch29SandboxFor(prefix string) (string, map[string]any) {
 		}
 	case "c293":
 		return "ch29-atomic-transfer", map[string]any{
-			"intro": ch29TextPair("جرّب ترتيبين صالحين لطلبين متزامنين.", "Try two valid orders for concurrent requests."),
+			"intro": ch29TextPair("جرّب ترتيبين صالحين لـrequests متزامنة.", "Try two valid orders for concurrent requests."),
 			"labels": map[string]any{
 				"possibleOrder": ch29TextPair("ترتيب ممكن", "One possible order"), "source": ch29TextPair("المصدر", "Source"),
 				"north": ch29TextPair("خزان الشمال", "North tank"), "south": ch29TextPair("خزان الجنوب", "South tank"),
@@ -130,8 +130,8 @@ func ch29SandboxFor(prefix string) (string, map[string]any) {
 			},
 			"startingBalance": 4,
 			"requests": []any{
-				map[string]any{"name": ch29TextPair("الطلب A", "Request A"), "amount": 3, "target": "north"},
-				map[string]any{"name": ch29TextPair("الطلب B", "Request B"), "amount": 2, "target": "south"},
+				map[string]any{"name": ch29TextPair("الـrequest A", "Request A"), "amount": 3, "target": "north"},
+				map[string]any{"name": ch29TextPair("الـrequest B", "Request B"), "amount": 2, "target": "south"},
 			},
 			"orders": [][]int{{0, 1}, {1, 0}},
 		}
@@ -147,15 +147,15 @@ func ch29SandboxFor(prefix string) (string, map[string]any) {
 		}
 	case "c295":
 		return "ch29-repository-boundary", map[string]any{
-			"intro": ch29TextPair("بدّل التنفيذ وشوف عقد الواجهة ثابت.", "Switch implementations; the interface contract stays fixed."),
+			"intro": ch29TextPair("بدّل التنفيذ وشوف عقد الـinterface ثابت.", "Switch implementations; the interface contract stays fixed."),
 			"labels": map[string]any{
 				"contract": ch29TextPair("عقد التخزين", "Store contract"), "implementation": ch29TextPair("التنفيذ الحالي", "Current implementation"),
 				"call": ch29TextPair("النداء", "Call"), "switch": ch29TextPair("بدّل التنفيذ", "Switch implementation"),
 			},
 			"contract": "Put(label, units)", "call": "Put(\"north\", 3)",
 			"implementations": []any{
-				map[string]any{"name": ch29TextPair("مخزن في الذاكرة", "Memory store"), "effect": ch29TextPair("القيمة وصلت للـfake.", "The value reached the fake.")},
-				map[string]any{"name": ch29TextPair("Repository بـsqlx", "sqlx repository"), "effect": ch29TextPair("الـrepository بيربط الاسم بالقيمة.", "The repository binds name to value.")},
+				map[string]any{"name": ch29TextPair("مخزن في الذاكرة", "Memory store"), "effect": ch29TextPair("الـvalue وصلت للـfake.", "The value reached the fake.")},
+				map[string]any{"name": ch29TextPair("Repository بـsqlx", "sqlx repository"), "effect": ch29TextPair("الـrepository بيربط الاسم بالـvalue.", "The repository binds name to value.")},
 			},
 		}
 	case "c296":
@@ -187,45 +187,45 @@ var ch29SQLiteTryStates = []LessonFrame{
 }
 
 var ch29SQLiteArabic = ch29LessonCopy{
-	Mission: `احفظ صناديق المؤن في SQLite بقيود واستعلامات قابلة للإلغاء.
+	Mission: `خزّن صناديق المؤن في SQLite بقيود والـqueries قابلة للإلغاء.
 
 الـstarter فيه توقيعات CRUD و~*sql.DB~ محقونة؛ سيب main فاضية.`,
-	Idea: `~database/sql~ بيفصل واجهة Go عن الدرايفر.
+	Idea: `~database/sql~ بيفصل الـinterface بتاعة Go عن الدرايفر.
 
-اربط القيم كـarguments، واقرأ الصفوف في متغيرات بعناوين. غياب الصف يظهر كـ~sql.ErrNoRows~.`,
+اربط الـvalues كـarguments، واقرا الصفوف في متغيرات بعناوين. غياب الصف يظهر كـ~sql.ErrNoRows~.`,
 	IdeaCode: `func main() {
 	err := fmt.Errorf("lookup: %w", sql.ErrNoRows)
 	fmt.Println(errors.Is(err, sql.ErrNoRows))
 }`,
 	IdeaImports: []string{"database/sql", "errors", "fmt"}, IdeaID: "e291-error-chain", IdeaStates: ch29SQLiteIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "الخطأ محفوظ في err.", "~errors.Is~ لقت السبب."},
-	TryPrompt:    `إيه اسم argument اللي بترجعه ~sql.Named~؟`,
+	IdeaCaptions: []string{"قبل التشغيل.", "الـerror محفوظ في err.", "~errors.Is~ لقت السبب."},
+	TryPrompt:    `إيه اسم argument اللي بترجّعه ~sql.Named~؟`,
 	TryCode: `func main() {
 	arg := sql.Named("label", "Luna")
 	fmt.Println(arg.Name)
 }`,
 	TryImports: []string{"database/sql", "fmt"}, TryID: "e291-named-arg", TryAnswer: 1,
 	TryOptions:  []string{"Luna", "label", "sql.Named"},
-	TryFeedback: []string{"Luna هي القيمة المربوطة، مش الاسم.", "~sql.NamedArg~ بتحفظ اسم المعامل في ~Name~.", "دي دالة الإنشاء مش قيمة ~Name~."},
+	TryFeedback: []string{"Luna هي الـvalue المربوطة، مش الاسم.", "~sql.NamedArg~ بتحفظ اسم المعامل في ~Name~.", "دي الـfunction اللي بتنشيء الـvalue، مش value ~Name~."},
 	TryStates:   ch29SQLiteTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "argument باسمه label.", "اطبع اسم المعامل."},
-	Reveal:      `شوف الاسم والقيمة منفصلين، وبعدها اطبع الاسم.`,
+	TryCaptions: []string{"قبل التشغيل.", "argument باسمه label.", "اطبع اسم المعامل."},
+	Reveal:      `شوف الاسم والـvalue منفصلين، وبعدها اطبع الاسم.`,
 	Watch: `استخدم placeholders بدل لصق النص في SQL.
 
-اقفل ~Rows~ حتى لو رجعت بدري، وافحص خطأ اللف.`,
+اقفل ~Rows~ حتى لو عملت return بدري، وافحص الـerror اللي ظهر من اللف.`,
 	Plan: `ابدأ بالمخطط والقيود، وبعدها افصل الكتابة عن القراءة.
 
-راجع نتيجة كل نداء بدل ما تعتبر الخطأ صف فاضي. راجع كمان ~Scan~.`,
+راجع نتيجة كل نداء بدل ما تعتبر الـerror صف فاضي. راجع كمان ~Scan~.`,
 	CheckQuestion: `إيه اللي يشير له ~sql.ErrNoRows~ بعد Scan؟`,
-	CheckOptions:  []string{"مفيش صف مطابق", "اتصال القاعدة اتقفل", "الاستعلام نجح من غير أعمدة"}, CheckAnswer: 0,
-	CheckFeedback: []string{"Scan بيستخدم الخطأ ده لما الصف المطلوب غايب.", "إغلاق الاتصال له خطأ تاني.", "الصف ممكن يفضل موجود حتى لو قيمته فاضية."},
-	Turn: `نفّذ وظيفة واحدة كل مرة، وراجع نوع خطأها.
+	CheckOptions:  []string{"مفيش صف مطابق", "اتصال القاعدة اتقفل", "الـquery نجح من غير أعمدة"}, CheckAnswer: 0,
+	CheckFeedback: []string{"Scan بيستخدم الـerror ده لما الصف المطلوب غايب.", "إغلاق الاتصال له الـerror التاني.", "الصف ممكن يفضل موجود حتى لو قيمته فاضية."},
+	Turn: `شغّل الـfunction واحدة كل مرة، وراجع نوع الـerror بتاعها.
 
-ابدأ بتشغيل المحاولة على قاعدة الاختبار المحقونة.`,
+ابدأ بتشغيل المحاولة على قاعدة الـtest المحقونة.`,
 	Hints: []string{
 		`خلي قيود القاعدة تحمي البيانات حتى لو فات تحقق Go.`,
 		`افصل مسارات تنفيذ الأمر عن قراية صف واحد أو مجموعة.`,
-		`راجع ~QueryRowContext~ و~RowsAffected~ عند وظائف CRUD.`,
+		`راجع ~QueryRowContext~ و~RowsAffected~ عند الـfunctions بتاعة CRUD.`,
 	},
 }
 
@@ -280,7 +280,7 @@ var ch29MigrationTryStates = []LessonFrame{
 var ch29MigrationArabic = ch29LessonCopy{
 	Mission: `طوّر مخطط المخزن بترحيلات up/down وسجل نسخ ذري.
 
-الـstarter يديك نوع Migration ودالة واحدة؛ المنادي يملك قاعدة البيانات.`,
+الـstarter يديك نوع Migration والـfunction الواحدة؛ المنادي يملك قاعدة البيانات.`,
 	Idea: `سجل النسخ بيحفظ تاريخ المخطط بعد إعادة التشغيل.
 
 المثال ده بيقلّد فكرة التجهيز؛ قاعدة البيانات نفسها تحتاج ~sql.Tx~ لضم التغيير والسجل.`,
@@ -291,7 +291,7 @@ var ch29MigrationArabic = ch29LessonCopy{
 	fmt.Println(applied, next)
 }`,
 	IdeaImports: []string{"fmt", "slices"}, IdeaID: "e292-staged-list", IdeaStates: ch29MigrationIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "السجل الحالي نسخة واحدة.", "جهّز نسخة للتغيير.", "اطبع الحالي والمجهّز."},
+	IdeaCaptions: []string{"قبل التشغيل.", "السجل الحالي نسخة واحدة.", "جهّز نسخة للتغيير.", "اطبع الحالي والمجهّز."},
 	TryPrompt:    `هل النص ده فاضي بعد ~strings.TrimSpace~؟`,
 	TryCode: `func main() {
 	blank := strings.TrimSpace("   ") == ""
@@ -301,18 +301,18 @@ var ch29MigrationArabic = ch29LessonCopy{
 	TryOptions:  []string{"true", "false", "panic"},
 	TryFeedback: []string{"بعد إزالة المسافات مفيش نص باقي.", "المقارنة بتشوف النص بعد trim.", "~strings.TrimSpace~ ما بتعملش panic للنص ده."},
 	TryStates:   ch29MigrationTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "blank بقت true.", "اطبع النتيجة."},
+	TryCaptions: []string{"قبل التشغيل.", "blank بقت true.", "اطبع النتيجة."},
 	Reveal:      `شيل المسافات، وبعدها راقب نتيجة المقارنة.`,
 	Watch: `الـDown مش backup؛ ممكن يمسح بيانات.
 
 كل خطوة تحفظ أثر المخطط ورقم النسخة مع بعض.`,
-	Plan: `تحقق من المصدر والتاريخ قبل اختيار الاتجاه.
+	Plan: `اتأكد من المصدر والتاريخ قبل اختيار الاتجاه.
 
 فكر في حدود كل خطوة: إيه اللي يتراجع وإيه اللي يفضل محفوظ؟`,
 	CheckQuestion: `لو ترحيل لاحق فشل، إيه المفروض يحصل للخطوة السابقة المحفوظة؟`,
-	CheckOptions:  []string{"تفضل مطبقة", "تتراجع كلها", "تتمسح من السجل فقط"}, CheckAnswer: 0,
-	CheckFeedback: []string{"كل ترحيل ناجح له حفظ مستقل.", "المهمة تحفظ التقدم اللي سبق الخطأ.", "المخطط والسجل لازم يفضلوا متوافقين."},
-	Turn: `اقرأ ترتيب النسخ قبل لمس قاعدة البيانات.
+	CheckOptions:  []string{"تفضل مطبقة", "تتراجع كلها", "تتمسح من السجل بس"}, CheckAnswer: 0,
+	CheckFeedback: []string{"كل ترحيل ناجح له حفظ مستقل.", "المهمة تحفظ التقدم اللي سبق الـerror.", "المخطط والسجل لازم يفضلوا متوافقين."},
+	Turn: `اقرا ترتيب النسخ قبل لمس قاعدة البيانات.
 
 بعدها جرّب اتجاه up وdown على تاريخ صغير.`,
 	Hints: []string{
@@ -373,15 +373,15 @@ var ch29TransferArabic = ch29LessonCopy{
 	Mission: `انقل وحدات أكسجين بين خزانات من غير فقد أو تكرار تحت التزامن.
 
 الـstarter يحدد Move وhook اختيارية بعد الخصم.`,
-	Idea: `التحويل بيغيّر رصيدين وسجل طلب في عملية واحدة.
+	Idea: `التحويل بيغيّر رصيدين وسجل request في عملية واحدة.
 
-المجموع يفضل ثابت؛ المعاملة تخلي أي فشل يرجع التغييرات مع بعض.`,
+المجموع يفضل ثابت؛ الـtransaction بتخلي أي فشل يلغي التغييرات كلها مع بعض.`,
 	IdeaCode: `func main() {
 	from, to, moved := int64(9), int64(2), int64(3)
 	fmt.Println(from+to, from-moved+to+moved)
 }`,
 	IdeaImports: []string{"fmt"}, IdeaID: "e293-conservation", IdeaStates: ch29TransferIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "الأرصدة والكمية واضحة.", "المجموع ثابت بعد النقل."},
+	IdeaCaptions: []string{"قبل التشغيل.", "الأرصدة والكمية واضحة.", "المجموع ثابت بعد النقل."},
 	TryPrompt:    `توقّع هل الرصيد يكفي، والرصيد المتبقي.`,
 	TryCode: `func main() {
 	balance, requested := int64(5), int64(2)
@@ -389,25 +389,25 @@ var ch29TransferArabic = ch29LessonCopy{
 }`,
 	TryImports: []string{"fmt"}, TryID: "e293-balance-check", TryAnswer: 0,
 	TryOptions:  []string{"true 3", "false 7", "true 7"},
-	TryFeedback: []string{"خمسة تكفي لطلب وحدتين؛ يتبقى ثلاثة.", "الرصيد الابتدائي أكبر من الطلب.", "الطرح يقلل رصيد المصدر."},
+	TryFeedback: []string{"الـ5 تكفي لـrequest من وحدتين؛ يتبقى 3.", "الرصيد الابتدائي أكبر من الـrequest.", "الطرح يقلل رصيد المصدر."},
 	TryStates:   ch29TransferTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "المتاح أكبر من المطلوب.", "اطبع الكفاية والباقي."},
-	Reveal:      `قارن الرصيد بالطلب، وبعدها احسب الباقي.`,
-	Watch: `القراءة ثم الكتابة خارج معاملة تفتح سباق.
+	TryCaptions: []string{"قبل التشغيل.", "المتاح أكبر من المطلوب.", "اطبع الكفاية والباقي."},
+	Reveal:      `قارن الرصيد بالـrequest، وبعدها احسب الباقي.`,
+	Watch: `القراية ثم الكتابة برّه الـtransaction تفتح الـrace.
 
 الـhook ممكن يفشل بعد الخصم؛ لازم التغيير كله يتراجع.`,
-	Plan: `راجع المدخلات ومفتاح الطلب قبل تغيير الرصيد.
+	Plan: `راجع المدخلات والـkey بتاع الـrequest قبل تغيير الرصيد.
 
 بعدها افحص أثر الخصم والإضافة، وفكر في الإلغاء والفشل الوسيط.`,
-	CheckQuestion: `لو hook رجّعت خطأ بعد الخصم، إيه الحالة المتوقعة؟`,
-	CheckOptions:  []string{"الرصيدين والسجل زي الأول", "الخصم محفوظ والإضافة ملغية", "الطلب يتسجل رغم الخطأ"}, CheckAnswer: 0,
-	CheckFeedback: []string{"العملية الذرية ترجع كل كتاباتها مع بعض.", "ده يضيّع وحدات لو ما حصلش rollback.", "السجل ما يعلنش عملية ما اكتملتش."},
+	CheckQuestion: `لو hook رجّعت الـerror بعد الخصم، إيه الحالة المتوقعة؟`,
+	CheckOptions:  []string{"الرصيدين والسجل زي الأول", "الخصم محفوظ والإضافة ملغية", "الـrequest يتسجل رغم الـerror"}, CheckAnswer: 0,
+	CheckFeedback: []string{"العملية الذرية بتلغي التغييرات كلها مع بعض عند الفشل.", "ده يضيّع وحدات لو ما حصلش rollback.", "السجل ما يعلنش عملية ما اكتملتش."},
 	Turn: `جرّب مسار نجاح ومسار hook يفشل.
 
-راجع الأرصدة وسجل الطلب بعد كل نتيجة.`,
+راجع الأرصدة وسجل الـrequest بعد كل نتيجة.`,
 	Hints: []string{
-		`التحويل عقده حفظ مجموع الأرصدة وتفرّد الطلب.`,
-		`افصل التحقق والخصم والـhook والإضافة وتسجيل الطلب.`,
+		`التحويل عقده حفظ مجموع الأرصدة وتفرّد الـrequest.`,
+		`افصل التحقق والخصم والـhook والإضافة وتسجيل الـrequest.`,
 		`راجع ~RowsAffected~ و~afterDebit~ جوه ~MoveOxygen~.`,
 	},
 }
@@ -472,32 +472,32 @@ var ch29PoolArabic = ch29LessonCopy{
 	fmt.Println(stats.MaxOpenConnections, stats.InUse, stats.Idle)
 }`,
 	IdeaImports: []string{"database/sql", "fmt"}, IdeaID: "e294-pool-stats", IdeaStates: ch29PoolIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "الحد المضبوط ثلاثة.", "اثنان شغالان وواحد فاضي.", "اطبع اللقطة."},
-	TryPrompt:    `إيه القيمتين اللي بيطبعهم المثال؟`,
+	IdeaCaptions: []string{"قبل التشغيل.", "الحد المضبوط ثلاثة.", "اثنان شغالان وواحد فاضي.", "اطبع اللقطة."},
+	TryPrompt:    `إيه الـvalues اللي بيطبعهم المثال؟`,
 	TryCode: `func main() {
 	stats := sql.DBStats{MaxOpenConnections: 4, Idle: 2}
 	fmt.Println(stats.MaxOpenConnections, stats.Idle)
 }`,
 	TryImports: []string{"database/sql", "fmt"}, TryID: "e294-stats-fields", TryAnswer: 1,
 	TryOptions:  []string{"2 4", "4 2", "4 4"},
-	TryFeedback: []string{"القيم بتتطبع حسب ترتيب الحقول في Println.", "الحد المضبوط أربعة؛ والـidle الحالي اتنين.", "Idle مش نسخة من الحد الأقصى."},
+	TryFeedback: []string{"الـvalues بتتطبع حسب ترتيب الحقول في Println.", "الحد المضبوط أربعة؛ والـidle الحالي اتنين.", "Idle مش نسخة من الحد الأقصى."},
 	TryStates:   ch29PoolTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "الحد أربعة وIdle اتنين.", "اطبع الحقلين."},
-	Reveal:      `اقرأ الحقلين بالترتيب اللي اتبعتوا به.`,
+	TryCaptions: []string{"قبل التشغيل.", "الحد أربعة وIdle اتنين.", "اطبع الحقلين."},
+	Reveal:      `اقرا الحقلين بالترتيب اللي اتبعتوا به.`,
 	Watch: `ما تعتبرش ~WaitDuration~ نتيجة حتمية؛ ده وقت حقيقي متراكم.
 
 ~Rows~ بتحجز سعة لحد ما تتقفل.`,
-	Plan: `تحقق من إعداد الحوض قبل تغييره.
+	Plan: `اتأكد من إعداد الحوض قبل تغييره.
 
-بعد الاستعلام، تابع ~Scan~ والتنظيف وخطأ نهاية اللف.
+بعد الـquery، تابع ~Scan~ والتنظيف والـerror اللي بيطلع من اللف.
 
 افصل الحد الحالي عن الحد المضبوط.`,
-	CheckQuestion: `إيه اللي لازم يحصل لصفوف ~QueryContext~ عند رجوع مبكر؟`,
+	CheckQuestion: `إيه اللي لازم يحصل لصفوف ~QueryContext~ عند return بدري؟`,
 	CheckOptions:  []string{"تتقفل", "تفضل مفتوحة لحد Close للقاعدة", "تتقرأ تاني من البداية"}, CheckAnswer: 0,
-	CheckFeedback: []string{"~Close~ يحرر الاتصال حتى لو ~Scan~ فشل.", "ده ممكن يمنع استعلام تاني من استخدام الحوض.", "~Next~ ما بيرجعش للقيم اللي اتقرت."},
-	Turn: `ابدأ بضبط قيمة max صالحة، وبعدها اقرأ بيانات صغيرة.
+	CheckFeedback: []string{"~Close~ يحرر الاتصال حتى لو ~Scan~ فشل.", "ده ممكن يمنع الـquery التاني من استخدام الحوض.", "~Next~ ما بيرجعش للقيم اللي اتقرت."},
+	Turn: `ابدأ بضبط الـmax على value صالحة، وبعدها اقرا بيانات صغيرة.
 
-راجع سعة الحوض بعد النجاح وبعد خطأ القراءة.`,
+راجع سعة الحوض بعد النجاح وبعد الـerror في القراية.`,
 	Hints: []string{
 		`حوض الاتصالات يدير سعة مشتركة بين قراء متعددين.`,
 		`قسّم الدالتين بين إعداد الحد وقراءة النتائج.`,
@@ -562,7 +562,7 @@ var ch29SQLXArabic = ch29LessonCopy{
 
 تقدر تستخدم fake بسيط لفهم العقد؛ بس SQL الحقيقي محتاج ربط أسماء وstruct tags.
 
-واجهة المجال صغيرة؛ تفاصيل الاتصال تفضل جوه repository.
+الـinterface بتاعة المجال صغيرة؛ تفاصيل الاتصال تفضل جوه الـrepository.
 
 الـdb tag بيربط اسم Go باسم العمود.`,
 	IdeaCode: `type Store interface {
@@ -578,7 +578,7 @@ func main() {
 	_ = store.Put("east", 3)
 }`,
 	IdeaImports: []string{"fmt"}, IdeaID: "e295-interface-store", IdeaStates: ch29SQLXIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "store جاهز بالقيمة.", "Put وصلت للـfake."},
+	IdeaCaptions: []string{"قبل التشغيل.", "store جاهز بالـvalue.", "Put وصلت للـfake."},
 	TryPrompt:    `إيه اللي يظهر كاسم المعامل؟`,
 	TryCode: `func main() {
 	arg := sql.Named("bay", "north")
@@ -586,25 +586,25 @@ func main() {
 }`,
 	TryImports: []string{"database/sql", "fmt"}, TryID: "e295-named-arg", TryAnswer: 0,
 	TryOptions:  []string{"bay", "north", "$1"},
-	TryFeedback: []string{"~Name~ هو bay؛ north هي القيمة.", "north بتتخزن في ~Value~.", "~$1~ صيغة موضعية مش ~Name~."},
+	TryFeedback: []string{"~Name~ هو bay؛ north هي الـvalue.", "north بتتخزن في ~Value~.", "~$1~ صيغة موضعية مش ~Name~."},
 	TryStates:   ch29SQLXTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "الاسم bay والقيمة north.", "اطبع الاسم."},
-	Reveal:      `فرّق بين اسم الـargument والقيمة المرتبطة به.`,
+	TryCaptions: []string{"قبل التشغيل.", "الاسم bay والـvalue north.", "اطبع الاسم."},
+	Reveal:      `فرّق بين اسم الـargument والـvalue المرتبطة به.`,
 	Watch: `الـfake يشرح السلوك، لكنه مش دليل على سلوك PostgreSQL.
 
 مرّر context المنادي، وسيب عمر الحوض للمنادي.
 
-القائمة الفاضية والأخطاء جزء من العقد.
+القائمة الفاضية والـerrors جزء من العقد.
 
-كل استعلام يستقبل context المنادي.
+كل query يستقبل الـcontext بتاع المنادي.
 
 خلي الحدود بين المجال والتخزين باينة.`,
-	Plan: `ابدأ بتحقق طلب المجال، وبعدها راجع repository.
+	Plan: `اتأكد من الـrequest بتاع المجال، وبعدها راجع الـrepository.
 
-خلي سلوك القائمة الفاضية والأخطاء واضح في العقد.`,
+خلي سلوك القائمة الفاضية والـerrors واضح في العقد.`,
 	CheckQuestion: `إيه اللي بيعرفه مستهلك ~StockRation~ عن التخزين؟`,
-	CheckOptions:  []string{"واجهة ~RationStore~", "تفاصيل SQL الداخلية", "اسم جدول PostgreSQL"}, CheckAnswer: 0,
-	CheckFeedback: []string{"الواجهة تحدد عمليات المخزن المتاحة للمستهلك.", "التنفيذ يملك تفاصيل الاستعلام.", "اسم الجدول يخص repository."},
+	CheckOptions:  []string{"الـinterface ~RationStore~", "تفاصيل SQL الداخلية", "اسم جدول PostgreSQL"}, CheckAnswer: 0,
+	CheckFeedback: []string{"الـinterface تحدد عمليات المخزن المتاحة للمستهلك.", "التنفيذ يملك تفاصيل الـquery.", "اسم الجدول يخص repository."},
 	Turn: `نفّذ ~StockRation~ على الحدود اللي في التوقيع.
 
 بعدها راجع ~SQLRations~ على قاعدة يجهزها المنادي.`,
@@ -675,14 +675,14 @@ var ch29GORMTryStates = []LessonFrame{
 var ch29GORMArabic = ch29LessonCopy{
 	Mission: `اربط قباب الزراعة بأحواضها وحمّل العلاقات من غير N+1.
 
-الـstarter يديك model structs ودوال ORM ناقصة.
+الـstarter يديك model structs وfunctions ORM ناقصة.
 
 الاسم والـlabels لازم يبقوا صالحين قبل الحفظ.`,
-	Idea: `الـassociation بتمثلها slice جوه model الأب.
+	Idea: `الـassociation بتمثلها slice جوه الـmodel الأب.
 
-في GORM، tags بتوضح المفاتيح والعلاقة؛ و~Preload~ بيحمّل الأبناء قبل قراءة النتيجة.
+في GORM، الـtags بتوضح الـkeys والعلاقة؛ و~Preload~ بيحمّل الأبناء قبل قراية النتيجة.
 
-المعاملة تمنع حفظ جزء من المجموعة لو ابن فشل.`,
+الـtransaction بتمنع تخزين جزء من المجموعة لو ابن فشل.`,
 	IdeaCode: `type Bed struct{ Label string }
 type Dome struct {
 	Name string
@@ -693,7 +693,7 @@ func main() {
 	fmt.Println(dome.Name, len(dome.Beds))
 }`,
 	IdeaImports: []string{"fmt"}, IdeaID: "e296-association", IdeaStates: ch29GORMIdeaStates,
-	IdeaCaptions: []string{"قبل التنفيذ.", "القبة لها اسم وحوضين.", "اطبع الاسم وعدد الأحواض."},
+	IdeaCaptions: []string{"قبل التشغيل.", "القبة لها اسم وحوضين.", "اطبع الاسم وعدد الأحواض."},
 	TryPrompt:    `إيه label الموجودة في index 1؟`,
 	TryCode: `type Bed struct{ Label string }
 type Dome struct{ Beds []Bed }
@@ -705,16 +705,16 @@ func main() {
 	TryOptions:  []string{"inner", "outer", "empty"},
 	TryFeedback: []string{"index 0 هو inner.", "index 1 هو العنصر التاني outer.", "الـslice فيها عنصرين."},
 	TryStates:   ch29GORMTryStates,
-	TryCaptions: []string{"قبل التنفيذ.", "اقرأ العنصر الثاني.", "اطبع الـlabel."},
+	TryCaptions: []string{"قبل التشغيل.", "اقرا العنصر الثاني.", "اطبع الـlabel."},
 	Reveal:      `الـindex صفر يبدأ بأول عنصر؛ واحد يجيب اللي بعده.`,
-	Watch: `تحميل كل أبناء كل قبة جوه loop يعمل استعلامات كتير.
+	Watch: `تحميل كل أبناء كل قبة جوه الـloop يعمل queries كتير.
 
 slice فاضية مش معناها إن القبة نفسها غايبة.
 
 خلي ترتيب الحقول واضح في النتيجة.`,
-	Plan: `راجع model tags والقيود قبل إنشاء العلاقة.
+	Plan: `راجع الـmodel tags والقيود قبل إنشاء العلاقة.
 
-بعدها فكّر في التحميل والترتيب وتحديث القيم الصفرية.`,
+بعدها فكّر في التحميل والترتيب وتحديث الـzero values.`,
 	CheckQuestion: `لو القبة مفيهاش أحواض، شكل association الأنسب إيه؟`,
 	CheckOptions:  []string{"slice فاضية", "قبة غايبة", "nil دايماً"}, CheckAnswer: 0,
 	CheckFeedback: []string{"القبة موجودة وعلاقتها بس فاضية.", "غياب الأب حالة مختلفة.", "العقد ممكن يطلب نتيجة empty واضحة."},

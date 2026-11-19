@@ -72,7 +72,7 @@ func main() {
 		},
 		LessonRevision: 2, Steps: surveyLessonArabic,
 		ID: "6-1-survey", Chapter: 6, Title: "سجل الكريستال",
-		Goal: "قيس كل الكريستال وابعت أحجامهم بالترتيب في slice واحدة",
+		Goal: "قيس كل الكريستالات وابعت أحجامها بالترتيب في slice واحدة",
 		Par:  15, Gold: 15, MaxTicks: 60,
 		Requires: []string{"slice"},
 		Setup: func(w *sim.World) {
@@ -110,7 +110,7 @@ func main() {
 	// كمّل لحد آخر الصف، وبعدين ابعت sizes كلها بـ colony.Report
 }
 `,
-		Hints: []string{"الـslice سجل بيكبر مع append، مع الاحتفاظ بالأحجام اللي اتسجلت قبله.", "رتّب loop للكريستالات وابعت تقرير واحد بعده؛ افتكر أول قراءة في الـstarter.", "راجع سطر ~append~ اللي فيه ~colony.Measure()~ وشرط الحركة: بتسجل مرة وتتحرك لكريستالة تالية؟"},
+		Hints: []string{"الـslice سجل بيكبر مع append وبيفضل فيه الأحجام اللي اتسجلت قبل كده.", "اعمل loop على الكريستالات وابعت تقرير واحد بعدها؛ افتكر أول قراءة في الـstarter.", "راجع سطر ~append~ اللي فيه ~colony.Measure()~ وشرط الحركة، وتأكد إنك بتسجل مرة واحدة وتتحرك للكريستالة اللي بعدها."},
 		Lesson: `# المهمة
 
 1. قيس الـ8 كريستالات من الشمال لليمين.
@@ -283,7 +283,7 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الحجم قيمة، والـindex مكان.",
+			"الحجم value، والـindex هو المكان.",
 			"قارن الأحجام، ثم خطط الزيارة والحصاد.",
 			"راجع ~slices.Clone~ و~slices.Sort~؛ أي ترتيب يفضل مربوط بالمواقع؟",
 		},
@@ -481,9 +481,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الـmap بتعد كل نوع؛ ~len~ بتعد المفاتيح.",
+			"الـmap بتعد كل نوع؛ ~len~ بتعد الـkeys.",
 			"ابدأ بعدّ الـstarter، وزُر باقي الخانات مرة.",
-			"راجع الـmap وسطر ~colony.GetEntity()~: هل المفتاح متوافق؟",
+			"راجع الـmap وسطر ~colony.GetEntity()~: هل الـkey متوافق؟",
 		},
 		Lesson: `# Maps: قاموس المستعمرة 🗂️
 
@@ -549,7 +549,7 @@ func main() {
 		Starter: stockOrderStarter, LessonRevision: 1, Steps: stockOrderLessonArabic,
 		Lesson: `# ترتيب المخزون
 
-رتّب المواقع بالحجم تنازليًا، وبالموقع الأصغر عند التعادل. استخدم ~slices.SortFunc~ وأرسل المواقع بتقرير واحد، من غير حصاد. راجع الدرس التفاعلي لمعنى علامات المقارنة والتعادل.`, Hints: []string{"فكرة: المقارنة دالة قرار؛ نتيجتها تحدد مين يسبق.", "بنية: افصل قراءات الحجم عن هويات المواقع قبل اختيار ما ستفرزه.", "محدد: راجع معنى نتيجة comparator في ~slices.SortFunc~: السالب والصفر والموجب."},
+رتّب المواقع بالحجم تنازليًا، وبالموقع الأصغر عند التعادل. استخدم ~slices.SortFunc~ وأرسل المواقع بتقرير واحد، من غير حصاد. راجع الدرس التفاعلي لمعنى علامات المقارنة والتعادل.`, Hints: []string{"الـcomparator قاعدة بتحدد مين يسبق؛ نتيجتها بتقول مين ييجي الأول.", "افصل قياسات الحجم عن مواقعها قبل ما تختار هترتّب إيه.", "راجع نتيجة الـcomparator في ~slices.SortFunc~: سالب، صفر، وموجب."},
 		En: &LevelText{Title: "Stock Order", Goal: "Rank crystal positions by descending size and ascending position on ties", Starter: stockOrderStarter, LessonRevision: 1, Steps: stockOrderLessonEnglish, Lesson: `# Stock Order
 
 Rank positions by descending size, then smaller position on ties. Use ~slices.SortFunc~ and report positions once without harvesting. See the interactive lesson for comparator signs and ties.`, Hints: []string{"Concept: a comparator is a decision rule; its result says which item comes first.", "Structure: separate measured sizes from position identities before choosing what to sort.", "Specific: review comparator results in ~slices.SortFunc~: negative, zero, and positive."}},
@@ -597,13 +597,13 @@ func FlipHeat(a [][]float64) ([][]float64, error) { return nil, fmt.Errorf("impl
 func main()                                       {}
 `
 	heatFiles := []LabFile{{Name: "main.go", Starter: heatGridStarter}}
-	add(&Level{ID: "6-5-heat-grid", Chapter: 6, Title: "شبكة الحرارة", Goal: "نفّذ عمليات شبكة الحرارة بـ 2D slices من غير تعديل المدخل",
+	add(&Level{ID: "6-5-heat-grid", Chapter: 6, Title: "شبكة الحرارة", Goal: "نفّذ عمليات شبكة الحرارة بـ2D slices من غير ما تعدّل المدخلات",
 		Requires: []string{"slice"}, Bridge: []int{26},
 		Kind: "lab", Files: heatFiles,
 		Starter: heatGridStarter, LessonRevision: 1, Steps: heatGridLessonArabic,
 		Lesson: `# شبكة الحرارة
 
-دي lab؛ زر Run بيشغّل tests بدل حركة الدرون. اشتغل على الدوال الموجودة في الـstarter. الـgrid صفوف جوه slice؛ الأول row وبعده column. نسخ الـouter لوحدها يسيب الصفوف مشتركة. راجع عقود العمليات في الدرس التفاعلي؛ مفيش ticks ولا Report.`, Hints: []string{"فكرة: ارسم مصدر خلية ناتجة.", "بنية: افصل الشكل عن أبعاد العملية.", "محدد: ~slices.Clone(grid)~ يترك الصفوف مشتركة."},
+دي lab؛ زر Run بيشغّل tests بدل حركة الدرون. اشتغل على الدوال الموجودة في الـstarter. الـgrid صفوف جوه slice؛ الأول row وبعده column. نسخ الـouter لوحدها يسيب الصفوف مشتركة. راجع عقود العمليات في الدرس التفاعلي؛ مفيش ticks ولا Report.`, Hints: []string{"ارسم مصدر الخلية اللي هتطلع.", "افصل شكل الـgrid عن أبعاد كل عملية.", "~slices.Clone(grid)~ بيخلّي الصفوف مشتركة."},
 		En: &LevelText{Title: "Heat Grid", Goal: "Implement heat operations with 2D slices without mutating inputs", Starter: heatGridStarter, LessonRevision: 1, Steps: heatGridLessonEnglish, Lesson: `# Heat Grid
 
 This is a lab; Run tests instead of moving a drone. Work on the starter functions. A grid is rows inside a slice: row first, then column. Cloning only the outer slice leaves rows shared. See the interactive lesson for operation contracts; there are no ticks or Report.`, Hints: []string{"Concept: trace one output cell.", "Structure: separate shape and dimension checks.", "Specific: ~slices.Clone(grid)~ leaves rows shared."}, Files: heatFiles},

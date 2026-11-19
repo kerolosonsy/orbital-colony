@@ -3,7 +3,7 @@
     "frames": [
       {
         "caption": {
-          "ar": "الخطأ typed.",
+          "ar": "الـerror ليه type.",
           "en": "The error has a type."
         },
         "chain": [
@@ -72,7 +72,7 @@
     ],
     "labels": {
       "chain": {
-        "ar": "سلسلة الخطأ",
+        "ar": "سلسلة الـerror",
         "en": "Error chain"
       },
       "next": {
@@ -98,7 +98,7 @@
       {
         "body": "—",
         "caption": {
-          "ar": "استجابة لسه فاضية.",
+          "ar": "الـresponse لسه فاضية.",
           "en": "Response starts empty."
         },
         "header": "—",
@@ -163,7 +163,7 @@
     "frames": [
       {
         "caption": {
-          "ar": "الطلب دخل outer.",
+          "ar": "الـrequest دخل outer.",
           "en": "Request enters outer."
         },
         "trace": [
@@ -175,7 +175,7 @@
       },
       {
         "caption": {
-          "ar": "الطلب دخل inner.",
+          "ar": "الـrequest دخل inner.",
           "en": "Request enters inner."
         },
         "trace": [
@@ -191,7 +191,7 @@
       },
       {
         "caption": {
-          "ar": "الـhandler نفّذ الطلب.",
+          "ar": "الـhandler عالج الـrequest.",
           "en": "Handler runs the request."
         },
         "trace": [
@@ -211,7 +211,7 @@
       },
       {
         "caption": {
-          "ar": "inner رجع الأول.",
+          "ar": "inner رجّع الأول.",
           "en": "Inner returns first."
         },
         "trace": [
@@ -235,7 +235,7 @@
       },
       {
         "caption": {
-          "ar": "outer رجع في الآخر.",
+          "ar": "outer رجّع في الآخر.",
           "en": "Outer returns last."
         },
         "trace": [
@@ -280,11 +280,11 @@
   "ch26-rest-atomic": {
     "labels": {
       "again": {
-        "ar": "بدّل ترتيب القفل",
+        "ar": "بدّل ترتيب الـlock",
         "en": "Change lock order"
       },
       "next": {
-        "ar": "أنشئ سجلًا",
+        "ar": "اعمل سجل",
         "en": "Create record"
       },
       "nextID": {
@@ -292,7 +292,7 @@
         "en": "Last ID"
       },
       "order": {
-        "ar": "ترتيب طلبات القفل ممكن يتغير.",
+        "ar": "ترتيب الـlock requests ممكن يتغير.",
         "en": "Lock request order can vary."
       },
       "records": {
@@ -356,7 +356,7 @@
     "count": 0,
     "labels": {
       "copied": {
-        "ar": "بايتات اتنسخت",
+        "ar": "bytes اتنسخت",
         "en": "Bytes copied"
       },
       "empty": {
@@ -368,7 +368,7 @@
         "en": "Reached EOF"
       },
       "next": {
-        "ar": "اقرأ التالي",
+        "ar": "اقرا التالي",
         "en": "Read next"
       },
       "reset": {

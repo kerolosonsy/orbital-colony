@@ -9,7 +9,7 @@ package levels
 
 func init() {
 	add(&Level{ID: "37-1-schema", Chapter: 37, Kind: "lab",
-		Title: "الأساس", Goal: "ابنِ schema مركز القيادة بترحيلات up/down وrepository خلف interface وسيرفر HTTP صغير", Setup: seededLabRoom,
+		Title: "الأساس", Goal: "ابنِ schema مركز القيادة بترحيلات up/down وrepository خلف interface وHTTP server صغير", Setup: seededLabRoom,
 		LessonRevision: 1, Steps: ch37FoundationArabicSteps,
 		Requires: []string{"sel:sql.ErrNoRows", "defer"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5"}, Bridge: []int{100}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}},
@@ -82,7 +82,7 @@ tx.ExecContext(ctx, m.Up); db.ExecContext(ctx, record) // التسجيل برا 
 
 ~NewServer(s)~: ~GET /healthz~ يرجع 200 و ~{"schema":N}~، أو 503 و ~{"error":"unavailable"}~ لو القاعدة وقعت. ~GET /v1/crews/{crew}/tasks/{task}~ يرجع 200 والمهمة JSON بالمفاتيح ~id, crew_id, title, done, version~، أو 404 و ~{"error":"not_found"}~. كل الردود ~application/json~. النجمة التالتة: مسح طاقم بيمسح مهامه. ~main~ فاضية.
 `,
-		Hints: []string{"اعتبر جدول النسخ وصف لحالة schema اللي اتثبتت.", "اختبر كل migration بالاتجاهين، وخلي repository methods منفصلة عن HTTP.", "ارجع لتواقيع Migrate وNewServer في starter وحدد حدود كل transaction."},
+		Hints: []string{"اعتبر جدول النسخ وصف لحالة schema اللي اتثبتت.", "شغّل الـtest لكل migration في الاتجاهين، وخلي repository methods منفصلة عن HTTP.", "ارجع لتواقيع Migrate وNewServer في starter وحدد حدود كل transaction."},
 		En: &LevelText{Title: "Foundation", Goal: "Build the command-center schema with up/down migrations, a repository behind an interface, and a small HTTP server", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}},
 			Lesson: `# Command Center: Foundation
 
@@ -589,7 +589,7 @@ func TestHiddenBonusCascade(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "37-2-auth", Chapter: 37, Kind: "lab", CarryFrom: "37-1-schema",
-		Title: "بوابة الدخول", Goal: "ضيف تسجيل ودخول بجلسات معتمة متخزّن منها digest بس، وخروج، وإلغاء الجلسات عند تغيير الباسورد", Setup: seededLabRoom,
+		Title: "بوابة الدخول", Goal: "ضيف تسجيل ودخول بـsessions معتمة متخزّن منها digest بس، وخروج، وإلغاء الـsessions عند تغيير الباسورد", Setup: seededLabRoom,
 		LessonRevision: 1, Steps: ch37AuthArabicSteps,
 		Requires: []string{"sel:bcrypt.GenerateFromPassword", "sel:sha256.Sum256"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}},
@@ -636,7 +636,7 @@ http.SetCookie(w, &http.Cookie{Name: "session", Value: token}) // من غير Ht
 
 ~NewAPI(a)~ بيخدم كل مسارات ~NewServer~ كمان، وبيضيف: ~POST /v1/register~ بـ ~{"email","password"}~ يرجع 201 و ~{"id","email"}~، أو 409 ~conflict~، أو 400 ~weak_password~. ~POST /v1/login~ يرجع 204 وكوكي ~session~ بـ ~HttpOnly~ و ~Secure~ و ~SameSite=Lax~ و ~Path=/~ و ~MaxAge~ بثواني ~TTL~. ~GET /v1/me~ بالكوكي يرجع 200 و ~{"id","email"}~. ~POST /v1/logout~ يرجع 204 ويمسح الكوكي (~MaxAge~ سالب). ~POST /v1/password~ بـ ~{"old","new"}~ يرجع 204. أي فشل دخول: 401 و ~{"error":"unauthorized"}~. JSON مكسور: 400 و ~{"error":"bad_request"}~. النجمة التالتة: الجلسة المنتهية تتمسح من القاعدة أول ما حد يحاول يستخدمها.
 `,
-		Hints: []string{"الجلسة تحمل سرًا للعميل؛ قاعدة البيانات تحتاج قيمة مقارنة من غير حفظ السر الخام.", "افصل تحقق كلمة المرور عن إصدار الجلسة ثم عن إلغائها.", "ارجع لتواقيع auth.go وحدد كل دالة بتنشئ أو تستهلك session."},
+		Hints: []string{"الـsession شايلة secret للـclient؛ قاعدة البيانات محتاجة value للمقارنة من غير تخزين السر الخام.", "افصل تحقق كلمة المرور عن إصدار الـsession ثم عن إلغائها.", "ارجع لتواقيع auth.go وحدد كل function بتنشئ أو تستهلك session."},
 		En: &LevelText{Title: "Sign-in Gate", Goal: "Add registration and sign-in with opaque sessions stored only as digests, logout, and session revocation on password change", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}},
 			Lesson: `# Command Center: Sign-in Gate
 
@@ -1069,7 +1069,7 @@ db.ExecContext(ctx, insertMember); db.ExecContext(ctx, insertAudit) // audit ب�
 
 ~NewCommandAPI(c)~ بيخدم كل مسارات ~NewAPI~، وكل المسارات دي محتاجة كوكي ~session~ (من غيرها 401 ~unauthorized~): ~POST /v1/crews~ بـ ~{"name"}~ يرجع 201 و ~{"id","name"}~ (اسم فاضي 400 ~bad_request~). ~POST /v1/crews/{crew}/members~ بـ ~{"email","role"}~ يرجع 201. ~GET /v1/crews/{crew}/audit~ يرجع 200 و ~{"entries":[{"actor","action","target"}]}~. ~GET /v1/crews/{crew}/tasks/{task}~ دلوقتي للأعضاء بس. الأخطاء: 404 ~not_found~، و 403 ~forbidden~، و 400 ~invalid_role~، و 409 ~conflict~.
 `,
-		Hints: []string{"كل صلاحية تخص العضوية داخل الطاقم، مش المستخدم بمعزل عن السياق.", "رتّب خطوات التحقق قبل تنفيذ تغيير العضوية أو كتابة audit.", "ارجع لطرق Crews في starter وحدد مين actor ومين target في كل طلب."},
+		Hints: []string{"كل صلاحية تخص العضوية داخل الطاقم، مش المستخدم بمعزل عن الـcontext.", "رتّب خطوات التحقق قبل تنفيذ تغيير العضوية أو كتابة audit.", "ارجع لـmethods Crews في starter وحدد مين actor ومين target في كل request."},
 		En: &LevelText{Title: "Isolated Crews", Goal: "Add crews with owner/admin/member roles, full isolation between crews (outsiders see not found), escalation prevention, and an audit log", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}},
 			Lesson: `# Command Center: Isolated Crews
 
@@ -1419,7 +1419,7 @@ db.QueryContext(ctx, "SELECT ... LIMIT $1 OFFSET $2", n, page*n) // صفوف ب�
 
 ~GET /v1/crews/{crew}/tasks?limit=&cursor=~: ~limit~ افتراضي 20 ومن 1 لـ 100، و cursor مش base64 صح: 400 ~bad_request~. يرجع 200 و ~{"tasks":[...],"next":"..."}~ بترتيب ~id~، و ~next~ فاضي في آخر صفحة. اللف على كل الصفحات بيرجّع كل مهمة مرة واحدة، حتى لو اتضافت مهام بين الصفحات.
 `,
-		Hints: []string{"فكر في التكرار والتعارض كحالتين مختلفتين من طلبات الشبكة.", "قسّم POST وPATCH وGET pages إلى تدفقات منفصلة قبل مشاركة أجزاء التخزين.", "ارجع إلى NewTaskAPI في starter وحدد البيانات التي تخص كل route."},
+		Hints: []string{"فكّر في التكرار والتعارض كحالتين مختلفتين من network requests.", "قسّم POST وPATCH وGET pages إلى تدفقات منفصلة قبل مشاركة أجزاء التخزين.", "ارجع لـNewTaskAPI في starter وحدد الـdata اللي تخص كل route."},
 		En: &LevelText{Title: "Task Board", Goal: "Add tasks with Idempotency-Key, optimistic versions, and stable cursor pages without duplicates", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}},
 			Lesson: `# Command Center: Task Board
 
@@ -1779,7 +1779,7 @@ func TestHiddenCursorPages(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "37-5-operate", Chapter: 37, Kind: "lab", CarryFrom: "37-4-tasks",
-		Title: "غرفة التشغيل", Goal: "لف الـ API بـ request ID وشكل أخطاء ثابت وmetrics وحد طلبات وسجل من غير أسرار وإغلاق بيصفّي الطلبات الجارية", Setup: seededLabRoom,
+		Title: "غرفة التشغيل", Goal: "لف الـAPI بـrequest ID وشكل error ثابت وmetrics وحد للـrequests وسجل من غير أسرار وإغلاق بيصفّي الـrequests الجارية", Setup: seededLabRoom,
 		LessonRevision: 1, Steps: ch37OpsArabicSteps,
 		Requires: []string{"recover", "mutex"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100, 91, 96}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}, {Name: "ops.go", Starter: ch375Starter}},
@@ -1847,7 +1847,7 @@ srv.Shutdown(ctx) // ctx اللي اتلغى أصلاً: مفيش تصفية خ�
 
 ~Serve(ctx, ln, h, drain)~ تخدم على ~ln~ لحد ما ~ctx~ يتلغي، وبعدها تبطّل تقبل اتصالات وتصفّي الجاري: ~nil~ لو خلص في ~drain~، وخطأ لو لأ (بعد ما تقطع الباقي). النجمة التالتة: ~command_requests_in_flight~ صح وطلب شغال.
 `,
-		Hints: []string{"الـmiddleware يضيف معلومات الطلب حول handler من غير نقل ملكية الرد.", "قسّم عمليات HTTP عن الحالة المحمية بالتزامن وإدارة عمر السيرفر.", "ابدأ من تواقيع Operate وServe في starter وحدد موارد كل واحدة."},
+		Hints: []string{"الـmiddleware بيضيف معلومات الـrequest حوالين handler من غير ما ينقل ملكية الـresponse.", "قسّم HTTP operations عن الحالة المحمية بالتزامن وإدارة عمر الـserver.", "ابدأ من تواقيع Operate وServe في starter وحدد موارد كل function."},
 		En: &LevelText{Title: "Operations Room", Goal: "Wrap the API with request IDs, a fixed error shape, metrics, rate limiting, secret-free logs, and shutdown that drains in-flight requests", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}, {Name: "ops.go", Starter: ch375Starter}},
 			Lesson: `# Command Center: Operations Room
 

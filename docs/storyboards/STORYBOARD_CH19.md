@@ -21,9 +21,9 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | duration parsed | — | اقرأ مدة توضيحية. | Parse an illustrative duration. |
-| 2 / 3 | error checked | — | اتأكد من خطأ parsing. | Check the parse error. |
-| 3 / 7 | duration | `35m0s 35m0s` | اعرض المدة بصيغتها. | Print the canonical duration. |
+| 1 / 2 | duration parsed | — | اقرا مدة توضيحية. | Parse an illustrative duration. |
+| 2 / 3 | error checked | — | اتأكد من error الـparsing. | Check the parse error. |
+| 3 / 7 | duration | `35m0s 35m0s` | اطبع المدة بصيغتها. | Print the canonical duration. |
 
 #### Verified e19-1-duration — ok
 
@@ -47,9 +47,9 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | start | — | وقت البداية قيمة مستقلة. | The start is its own value. |
+| 1 / 2 | start | — | وقت البداية value مستقلة. | The start is its own value. |
 | 2 / 3 | arrival next day | — | Add رجّعت وقت وصول جديد. | Add returns a new arrival. |
-| 3 / 4 | formatted time | `00:15` | اعرض الساعة الجديدة. | Print the new clock time. |
+| 3 / 4 | formatted time | `00:15` | اطبع الساعة الجديدة. | Print the new clock time. |
 
 #### Verified e19-1-add — ok
 
@@ -76,9 +76,9 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | UTC instant | — | أنشئ لحظة بتوقيت UTC. | Create a UTC instant. |
+| 1 / 2 | UTC instant | — | اعمل لحظة بتوقيت UTC. | Create a UTC instant. |
 | 2 / 3 | fixed zone | — | جهّز منطقة توضيحية. | Set an illustrative location. |
-| 3 / 4 | converted view | — | اعرض نفس اللحظة محلياً. | Render the instant locally. |
+| 3 / 4 | converted view | — | اطبع نفس اللحظة محلياً. | Render the instant locally. |
 | 4 / 5 | equal instants | `true 04:00 +0400` | اللحظة ثابتة؛ العرض اتغير. | Same instant, changed view. |
 
 #### Verified e19-2-in — ok
@@ -105,7 +105,7 @@ func main() {
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
 | 1 / 2 | midnight UTC | — | ابدأ بمنتصف الليل UTC. | Start at UTC midnight. |
 | 2 / 3 | same instant | — | حوّل لنفس اللحظة. | Convert the same instant. |
-| 3 / 4 | previous local day | `true 2030-12-31 19:00 -0500` | اعرض اللحظة والتاريخ المحلي. | Print instant and local date. |
+| 3 / 4 | previous local day | `true 2030-12-31 19:00 -0500` | اطبع اللحظة والتاريخ المحلي. | Print instant and local date. |
 
 #### Verified e19-2-date — ok
 
@@ -136,7 +136,7 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | active context | — | جهّز سياق قابل للإلغاء. | Create a cancelable context. |
+| 1 / 2 | active context | — | جهّز context قابل للإلغاء. | Create a cancelable context. |
 | 2 / 4 | select waits | — | راقب إشارة الإلغاء. | Watch for cancellation. |
 | 3 / 8 | default branch | `running` | قبل الإلغاء، البرنامج شغال. | The program is still running. |
 
@@ -162,9 +162,9 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | context created | — | أنشئ context جديد. | Create a new context. |
+| 1 / 2 | context created | — | اعمل context جديد. | Create a new context. |
 | 2 / 3 | canceled | — | نفّذ الإلغاء. | Cancel the context. |
-| 3 / 4 | error value | `context canceled` | اقرأ سبب الإلغاء. | Read the cancellation reason. |
+| 3 / 4 | error value | `context canceled` | اقرا سبب الإلغاء. | Read the cancellation reason. |
 
 #### Verified e19-3-cancel — ok
 
@@ -200,7 +200,7 @@ These frames show one possible schedule. The worker can run before or after main
 | 1 / 2 | counter ready | — | جهّز عدّاد العمال. | Prepare the worker count. |
 | 2 / 4 | goroutine launched | — | ابدأ goroutine واحدة. | Start one goroutine. |
 | 3 / 6 | worker ran | `worker` | العامل يطبع قبل Done. | Worker prints before Done. |
-| 4 / 8 | Wait returned | `worker` | Wait رجعت بعد اكتمال العامل. | Wait returns after completion. |
+| 4 / 8 | Wait returned | `worker` | Wait رجّعت بعد اكتمال العامل. | Wait returns after completion. |
 | 5 / 9 | main continues | `worker` + `ready` | كمل بعد انتهاء العمال. | Continue after the workers. |
 
 #### Verified e19-4-wait — ok
@@ -227,10 +227,10 @@ func main() {
 | Frame / line | State | Output | AR caption | EN caption |
 |---|---|---|---|---|
 | 0 / before 1 | — | — | قبل التشغيل. | Before execution. |
-| 1 / 2 | two reserved slots | — | احجز خانتين للردود. | Reserve two response slots. |
-| 2 / 3 | second reply first | — | الرد التاني وصل الأول. | The second reply arrived first. |
+| 1 / 2 | two reserved slots | — | احجز خانتين للـresponses. | Reserve two response slots. |
+| 2 / 3 | second reply first | — | الـresponse التاني وصل الأول. | The second reply arrived first. |
 | 3 / 4 | first reply next | — | الأول وصل بعده. | The first reply arrived next. |
-| 4 / 5 | request order | `[slow fast]` | اعرض حسب ترتيب الـindex. | Print in index order. |
+| 4 / 5 | request order | `[slow fast]` | اطبع حسب ترتيب الـindex. | Print in index order. |
 
 #### Verified e19-4-slots — ok
 

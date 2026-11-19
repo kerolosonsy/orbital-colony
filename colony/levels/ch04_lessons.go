@@ -110,7 +110,7 @@ var ch04OrderedConfig = map[string]any{
 
 var ch04RipeOnlyArabic = []LessonStep{
 	{ID: "c41.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch04Markdown("c41.mission", "1. اجمع 10 طحالب من غير ما تدمّر نبتة.\n2. الـstarter بيفحص الجاهزية، وجسم الشرط لسه فاضي.\n3. هدف الذهب 55 ticks؛ خليك حريص مع كل حصاد.")}},
-	{ID: "c41.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch04Walkthrough("c41.if-trace", "~if~ بتشغّل جسمها لما الشرط يبقى true.\n\nالقرار هنا على قيمة تدريب، مش فحص المهمة.", `func main() {
+	{ID: "c41.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch04Walkthrough("c41.if-trace", "~if~ بتشغّل جسمها لما الشرط يبقى true.\n\nالقرار هنا على value تدريب، مش فحص المهمة.", `func main() {
 	ready := false
 	if ready {
 		fmt.Println("harvest")
@@ -120,15 +120,15 @@ var ch04RipeOnlyArabic = []LessonStep{
 }`, "e41-if-branch", []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
 		{Line: 2, Caption: "الجاهزية false.", Variables: []LessonVariable{{Name: "ready", Value: "false"}}},
-		{Line: 3, Caption: "اختبر قيمة الشرط."},
+		{Line: 3, Caption: "اختبر الـvalue بتاعة الشرط."},
 		{Line: 5, Caption: "اختار فرع الانتظار.", Variables: []LessonVariable{{Name: "ready", Value: "false"}}},
 		{Line: 6, Caption: "اطبع الانتظار.", Variables: []LessonVariable{{Name: "ready", Value: "false"}}, Output: "wait"},
 	})}},
 	{ID: "c41.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch04Question("c41.predict-if", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tready := true\n\tif ready {\n\t\tfmt.Println(\"ready\")\n\t}\n}\n~~~", []string{"مفيش output", "ready", "false"}, 1, []string{
 			"الجسم بيتنفّذ لأن الشرط true.",
-			"القيمة true بتدخل جسم if وتطبع الكلمة.",
-			"الكود بيطبع نص، مش قيمة الشرط.",
+			"الـvalue true بتدخل جسم if وبتطبع الكلمة.",
+			"الكود بيطبع string، مش الـvalue بتاعة الشرط.",
 		}),
 		ch04Walkthrough("c41.if-reveal", "شوف الفرع اللي بيتنفّذ.", `func main() {
 	ready := true
@@ -206,7 +206,7 @@ var ch04RipeOnlyEnglish = []LessonStep{
 
 var ch04TerrainArabic = []LessonStep{
 	{ID: "c42.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch04Markdown("c42.mission", "1. ازرع كل خانة بنوع النبات اللي يناسب أرضها.\n2. الـstarter عامل ~switch~ لحالتين، ولسه من غير أفعال.\n3. هدف الذهب 60 ticks؛ في خانات محتاجة تعامل مختلف.")}},
-	{ID: "c42.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch04Walkthrough("c42.switch-trace", "لما قيمة واحدة لها اختيارات كتير، ~switch~ بتوضّح الفروع.\n\nGo بتنفّذ case واحدة؛ مش محتاج ~break~.", `func main() {
+	{ID: "c42.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch04Walkthrough("c42.switch-trace", "لما value واحدة يبقى ليها اختيارات كتير، ~switch~ بتوضّح الفروع.\n\nGo بتنفّذ case واحدة؛ مش محتاج ~break~.", `func main() {
 	signal := 2
 	switch signal {
 	case 1:
@@ -218,16 +218,16 @@ var ch04TerrainArabic = []LessonStep{
 	}
 }`, "e42-switch-case", []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
-		{Line: 2, Caption: "قيمة الإشارة 2.", Variables: []LessonVariable{{Name: "signal", Value: "2"}}},
-		{Line: 3, Caption: "قارن القيمة بالحالات."},
+		{Line: 2, Caption: "value الإشارة 2.", Variables: []LessonVariable{{Name: "signal", Value: "2"}}},
+		{Line: 3, Caption: "قارن الـvalue بالحالات."},
 		{Line: 6, Caption: "الحالة المطابقة هي 2.", Variables: []LessonVariable{{Name: "signal", Value: "2"}}},
 		{Line: 7, Caption: "اطبع أمر الحركة.", Variables: []LessonVariable{{Name: "signal", Value: "2"}}, Output: "go"},
 	})}},
 	{ID: "c42.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch04Question("c42.predict-switch", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tcolor := \"amber\"\n\tswitch color {\n\tcase \"blue\":\n\t\tfmt.Println(\"move\")\n\tcase \"amber\":\n\t\tfmt.Println(\"pause\")\n\tdefault:\n\t\tfmt.Println(\"check\")\n\t}\n}\n~~~", []string{"move", "pause", "check"}, 1, []string{
-			"القيمة amber مش هي blue.",
-			"الـcase دي مطابقة لقيمة color.",
-			"default بتشتغل لما مفيش حالة تطابق.",
+			"الـvalue amber مش هي blue.",
+			"الـcase دي مطابقة للـvalue اللي في color.",
+			"default بتشتغل لما مفيش case مطابقة.",
 		}),
 		ch04Walkthrough("c42.switch-reveal", "تابع اختيار الحالة المطابقة.", `func main() {
 	color := "amber"
@@ -241,21 +241,21 @@ var ch04TerrainArabic = []LessonStep{
 	}
 }`, "e42-switch-reveal", []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
-			{Line: 2, Caption: "color قيمتها amber.", Variables: []LessonVariable{{Name: "color", Value: "amber"}}},
+			{Line: 2, Caption: "color الـvalue بتاعتها amber.", Variables: []LessonVariable{{Name: "color", Value: "amber"}}},
 			{Line: 3, Caption: "افحص الحالات بالترتيب."},
 			{Line: 6, Caption: "وصلنا للحالة المطابقة.", Variables: []LessonVariable{{Name: "color", Value: "amber"}}},
 			{Line: 7, Caption: "اطبع pause.", Variables: []LessonVariable{{Name: "color", Value: "amber"}}, Output: "pause"},
 		}),
-		ch04Sandbox("ch04-switch-playground", "اختار قيمة وشوف case المطابقة.", "ch04-switch-case", ch04SwitchConfig, false),
+		ch04Sandbox("ch04-switch-playground", "اختار value وشوف case المطابقة.", "ch04-switch-case", ch04SwitchConfig, false),
 	},
 	},
-	{ID: "c42.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch04Markdown("c42.watch", "- في إعداد المهمة الحالي، مسح ~GetGround~ بياخد tick. خُد القيمة مرة وانت عارف هتستخدمها فين.\n- كل ~case~ بتنتهي لوحدها؛ مفيش fallthrough تلقائي.")}},
+	{ID: "c42.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch04Markdown("c42.watch", "- في إعداد المهمة الحالي، مسح ~GetGround~ بياخد tick. خد الـvalue مرة وإنت عارف هتستخدمها فين.\n- كل ~case~ بتنتهي لوحدها؛ مفيش fallthrough لوحدها.")}},
 	{ID: "c42.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch04Markdown("c42.plan", "لف على الخانات بنفس ترتيب traversal اللي اتعلمته.\n\nلكل خانة، اقرأ الأرض واختار الفرع المناسب؛ سيب الحالة غير المدعومة واضحة."),
+		ch04Markdown("c42.plan", "لف على الخانات بنفس ترتيب traversal اللي اتعلمته.\n\nلكل خانة، اقرا الأرض واختار الفرع المناسب؛ سيب الحالة غير المدعومة واضحة."),
 		ch04Question("c42.switch-default", "إمتى ~default~ بتشتغل؟", []string{"دايماً بعد case", "لو مفيش case مطابقة", "قبل أول case"}, 1, []string{
-			"Go ما بتكملش تلقائياً من case للتانية.",
-			"default هي الفرع الاحتياطي بدون تطابق.",
-			"الاختيار بيتم حسب قيمة switch.",
+			"Go ما بتكملش لوحدها من case للتانية.",
+			"default هو الفرع الاحتياطي لما مفيش تطابق.",
+			"الاختيار بيتحدد حسب الـvalue اللي في switch.",
 		}),
 	}},
 	{ID: "c42.turn-step", Title: "دورك", Blocks: []LessonBlock{ch04Markdown("c42.turn", "كمّل فروع الـswitch في الـstarter. جرّب التشغيل وراجع نوع الأرض والفعل اللي حصل عند كل خانة.")}},
@@ -320,7 +320,7 @@ var ch04TerrainEnglish = []LessonStep{
 
 var ch04CheckpointArabic = []LessonStep{
 	{ID: "c43.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch04Markdown("c43.mission", "1. صنّف قراءات الحساسات وابعت label لكل قراءة.\n2. الـstarter بيعرض أول رقم بس؛ البيانات والترتيب بيتغيروا.\n3. مفيش هدف ticks للذهب هنا؛ المهم العقد والحدود.")}},
-	{ID: "c43.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch04Walkthrough("c43.ordered-bands", "سلسلة ~if / else if~ بتفحص الشروط بالترتيب.\n\nأول شرط true يختار فرعه؛ المثال ده عن مدد توصيل للتوضيح.", `func main() {
+	{ID: "c43.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch04Walkthrough("c43.ordered-bands", "سلسلة ~if / else if~ بتفحص الشروط بالترتيب.\n\nأول شرط true بيختار فرعه؛ المثال ده عن مدد توصيل للتوضيح.", `func main() {
 	hours := 5
 	label := "long"
 	if hours < 3 {
@@ -332,7 +332,7 @@ var ch04CheckpointArabic = []LessonStep{
 }`, "e43-ordered-bands", []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
 		{Line: 2, Caption: "المدة 5 ساعات.", Variables: []LessonVariable{{Name: "hours", Value: "5"}}},
-		{Line: 3, Caption: "label تبدأ long.", Variables: []LessonVariable{{Name: "label", Value: "long"}}},
+		{Line: 3, Caption: "label بتبدأ بـlong.", Variables: []LessonVariable{{Name: "label", Value: "long"}}},
 		{Line: 4, Caption: "5 مش أقل من 3."},
 		{Line: 6, Caption: "5 أقل من 8.", Variables: []LessonVariable{{Name: "hours", Value: "5"}}},
 		{Line: 7, Caption: "اختار تصنيف medium.", Variables: []LessonVariable{{Name: "label", Value: "medium"}}},
@@ -342,9 +342,9 @@ var ch04CheckpointArabic = []LessonStep{
 		ch04Question("c43.predict-boundary", "عند ~level = 4~، إيه اللي يتطبع؟\n\n~~~go\nfunc main() {\n\tlevel := 4\n\tlabel := \"high\"\n\tif level < 4 {\n\t\tlabel = \"low\"\n\t} else {\n\t\tlabel = \"middle\"\n\t}\n\tfmt.Println(label)\n}\n~~~", []string{"low", "middle", "high"}, 1, []string{
 			"4 مش أصغر من 4، فالفرع الأول بيتخطّى.",
 			"الشرط false، فـelse تختار middle.",
-			"label القديمة تتغير في فرع else.",
+			"الـlabel القديمة بتتغير في فرع else.",
 		}),
-		ch04Walkthrough("c43.boundary-reveal", "امشِ مع قيمة الحد.", `func main() {
+		ch04Walkthrough("c43.boundary-reveal", "تابع الـvalue عند الحد.", `func main() {
 	level := 4
 	label := "high"
 	if level < 4 {
@@ -355,22 +355,22 @@ var ch04CheckpointArabic = []LessonStep{
 	fmt.Println(label)
 }`, "e43-boundary-reveal", []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
-			{Line: 2, Caption: "level تساوي 4.", Variables: []LessonVariable{{Name: "level", Value: "4"}}},
+			{Line: 2, Caption: "الـvalue في level هي 4.", Variables: []LessonVariable{{Name: "level", Value: "4"}}},
 			{Line: 4, Caption: "4 مش أقل من 4.", Variables: []LessonVariable{{Name: "level", Value: "4"}}},
 			{Line: 6, Caption: "اختار فرع else.", Variables: []LessonVariable{{Name: "label", Value: "high"}}},
-			{Line: 7, Caption: "حدّث label إلى middle.", Variables: []LessonVariable{{Name: "label", Value: "middle"}}},
+			{Line: 7, Caption: "حدّث label لـmiddle.", Variables: []LessonVariable{{Name: "label", Value: "middle"}}},
 			{Line: 9, Caption: "اطبع التصنيف الجديد.", Variables: []LessonVariable{{Name: "label", Value: "middle"}}, Output: "middle"},
 		}),
 		ch04Sandbox("ch04-ordered-playground", "اضغط وتابع أول شرط مطابق.", "ch04-ordered-branches", ch04OrderedConfig, false),
 	},
 	},
-	{ID: "c43.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch04Markdown("c43.watch", "- الحد لازم يتبع فئة واحدة بس. اختار ~<~ أو ~<=~ بوعي.\n- ~Reading(i)~ بترجع صفر للـindex الغلط؛ خليك جوه العدد.")}},
+	{ID: "c43.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch04Markdown("c43.watch", "- الحد لازم يتبع فئة واحدة بس. اختار ~<~ أو ~<=~ بوعي.\n- ~Reading(i)~ بترجع zero value للـindex الغلط؛ خليك جوه العدد.")}},
 	{ID: "c43.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch04Markdown("c43.plan", "اتبع contract المهمة: قراءة واحدة، قرار واحد، وlabel واحدة في نفس الترتيب.\n\nافصل رفض القيم الخارجة عن المدى عن اختيار الفئة؛ راجع الحالة الحدّية."),
+		ch04Markdown("c43.plan", "اتبع contract المهمة: قراءة واحدة، قرار واحد، وlabel واحدة بنفس الترتيب.\n\nافصل رفض الـvalues اللي برا المدى عن اختيار الفئة؛ راجع الحالة الحدّية."),
 		ch04Question("c43.validate-first", "إيه الأفضل قبل ما تصنّف رقم؟", []string{"تتأكد إنه جوه المدى", "تطبع قيمته", "تختار أي فئة"}, 0, []string{
-			"التحقق يمنع رقم خارج المدى يدخل فئة عادية.",
+			"الفحص بيمنع رقم برا المدى يدخل فئة عادية.",
 			"طباعة الرقم مش فحص للـcontract.",
-			"الاختيار قبل الفحص ممكن يصنّف قيمة مرفوضة.",
+			"الاختيار قبل الفحص ممكن يصنّف value مرفوضة.",
 		}),
 	}},
 	{ID: "c43.turn-step", Title: "دورك", Blocks: []LessonBlock{ch04Markdown("c43.turn", "ابدأ بقراءة مفهرسة واحدة واكتب قرارها بنفسك. بعدين وسّع الشغل لكل القراءات، وشغّل الاختبارات المتاحة في المحرر.")}},

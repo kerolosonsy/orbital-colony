@@ -255,9 +255,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"~switch~ بتبعت قيمة لفرع case واحد مطابق.",
+			"~switch~ بتبعت value لفرع case واحد مطابق.",
 			"خطط لاختيار حسب الأرض في كل خانة، بما فيها الأرض اللي مش مدعومة.",
-			"راجع قيمة ~colony.GetGround()~ وحالات الـswitch الموجودة في الـstarter.",
+			"راجع value ~colony.GetGround()~ وحالات الـswitch الموجودة في الـstarter.",
 		},
 		Lesson: `# switch: اختيارات كتير 🔀
 
@@ -307,7 +307,7 @@ func main() {
 	// Build the report described in the lesson.
 }
 `
-	add(&Level{LessonRevision: 1, Steps: ch04CheckpointArabic, ID: "4-3-checkpoint", Chapter: 4, Title: "بوابة الفحص", Goal: "صنّف قراءات صحيحة مع فحص الحدود والقيم خارج المدى",
+	add(&Level{LessonRevision: 1, Steps: ch04CheckpointArabic, ID: "4-3-checkpoint", Chapter: 4, Title: "بوابة الفحص", Goal: "صنّف القراءات الصحيحة، وخد بالك من الحدود والقيم اللي برا المدى",
 		Requires: []string{"if"}, Bridge: []int{1, 7},
 		Par: 0, Gold: 0, MaxTicks: 100,
 		Starter: checkpointStarter, Lesson: `# بوابة الفحص 🚦
@@ -316,7 +316,7 @@ func main() {
 
 امشِ على القراءات بترتيبها. افحص القيم الخارجة عن المجال قبل اختيار الفئة، وخلي كل حد تابع لفئة واحدة.
 
-ابعت label واحدة لكل قراءة بـ~colony.Report~. راجع العقد والحدود من غير ما تفترض ترتيب ثابت للبيانات.`, Hints: []string{"الحد لازم يتبع فئة واحدة بس.", "افصل فحص المجال عن اختيار الفئة، وحافظ على ترتيب القراءات.", "استخدم ~colony.ReadingCount()~ لحد الحلقة و~colony.Reading(i)~ للقيمة الحالية."},
+ابعت label واحدة لكل قراءة بـ~colony.Report~. راجع العقد والحدود من غير ما تفترض ترتيب ثابت للبيانات.`, Hints: []string{"الحد لازم يتبع فئة واحدة بس.", "افصل فحص المدى عن اختيار الفئة، وخلي ترتيب القراءات زي ما هو.", "استخدم ~colony.ReadingCount()~ لحد الـloop و~colony.Reading(i)~ للـvalue الحالية."},
 		En: &LevelText{LessonRevision: 1, Steps: ch04CheckpointEnglish, Title: "Inspection Checkpoint", Goal: "Classify integer readings, including boundaries and out-of-range values", Starter: checkpointStarter, Lesson: `# Inspection Checkpoint 🚦
 
 Each reading is an integer with a text category. Use ~ReadingCount~ for the number of readings and ~Reading(i)~ for one indexed value.

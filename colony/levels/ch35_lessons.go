@@ -64,14 +64,14 @@ func ch35SandboxConfig(prefix string, language int) map[string]any {
 				ch35Frame("انتهاء الـlease يعيدها.", "Lease expiry returns work.", ch35Row("العامل الجديد", "New worker", "worker-b", "worker-b"), ch35Row("الحالة", "State", "leased تاني", "leased again"), ch35Row("التسليمات", "Deliveries", "2", "2")),
 			},
 			{
-				ch35Frame("العامل التاني كسب السباق.", "Worker B wins this race.", ch35Row("العامل", "Worker", "worker-b", "worker-b"), ch35Row("الحالة", "State", "leased", "leased"), ch35Row("الـack", "Ack", "لسه", "pending")),
+				ch35Frame("العامل التاني كسب الـrace.", "Worker B wins this race.", ch35Row("العامل", "Worker", "worker-b", "worker-b"), ch35Row("الحالة", "State", "leased", "leased"), ch35Row("الـack", "Ack", "لسه", "pending")),
 				ch35Frame("من غير ack، المهمة ترجع.", "Without ack, work returns.", ch35Row("العامل التالي", "Next worker", "worker-a", "worker-a"), ch35Row("الحالة", "State", "ready", "ready"), ch35Row("الترتيب", "Order", "اتغيّر", "changed")),
 			},
 		}
 	case "c352.":
 		variants = [][]ch35SandboxFrame{
 			{
-				ch35Frame("الـheap تحفظ أقرب موعد.", "The heap keeps the nearest job.", ch35Row("الوقت", "Clock", "1", "1"), ch35Row("الجذر", "Root", "relay @ 2", "relay @ 2"), ch35Row("بعده", "Next", "scan @ 4", "scan @ 4")),
+				ch35Frame("الـheap بتخزّن أقرب موعد.", "The heap keeps the nearest job.", ch35Row("الوقت", "Clock", "1", "1"), ch35Row("الجذر", "Root", "relay @ 2", "relay @ 2"), ch35Row("بعده", "Next", "scan @ 4", "scan @ 4")),
 				ch35Frame("بعد الوقت، الجذر يتغير.", "After time moves, the root changes.", ch35Row("الوقت", "Clock", "2", "2"), ch35Row("المستحق", "Due", "relay", "relay"), ch35Row("الجذر التالي", "Next root", "scan @ 4", "scan @ 4")),
 			},
 			{
@@ -86,7 +86,7 @@ func ch35SandboxConfig(prefix string, language int) map[string]any {
 				ch35Frame("المالك الجديد يفضل محمي.", "The new owner stays protected.", ch35Row("المالك", "Owner", "worker-b", "worker-b"), ch35Row("token", "Token", "T-new", "T-new"), ch35Row("محاولة القديم", "Old release", "مرفوضة", "ignored")),
 			},
 			{
-				ch35Frame("العامل B كسب السباق.", "Worker B wins this race.", ch35Row("الترتيب", "Order", "B ثم A", "B then A"), ch35Row("المالك", "Owner", "worker-b", "worker-b"), ch35Row("token", "Token", "T-old", "T-old")),
+				ch35Frame("العامل B كسب الـrace.", "Worker B wins this race.", ch35Row("الترتيب", "Order", "B ثم A", "B then A"), ch35Row("المالك", "Owner", "worker-b", "worker-b"), ch35Row("token", "Token", "T-old", "T-old")),
 				ch35Frame("القديم مايمسحش lock الجديد.", "The old owner cannot clear the new lock.", ch35Row("المالك الجديد", "New owner", "worker-a", "worker-a"), ch35Row("token", "Token", "T-new", "T-new"), ch35Row("محاولة B", "Worker B release", "مرفوضة", "ignored")),
 			},
 		}
@@ -104,7 +104,7 @@ func ch35SandboxConfig(prefix string, language int) map[string]any {
 	case "c355.":
 		variants = [][]ch35SandboxFrame{
 			{
-				ch35Frame("المفتاح يحدد الـpartition.", "The key selects a partition.", ch35Row("partition 0", "partition 0", "rover-7 · offset 4", "rover-7 · offset 4"), ch35Row("partition 1", "partition 1", "rover-9 · offset 8", "rover-9 · offset 8"), ch35Row("المرحلة", "Stage", "fetch", "fetch")),
+				ch35Frame("الـkey يحدد الـpartition.", "The key selects a partition.", ch35Row("partition 0", "partition 0", "rover-7 · offset 4", "rover-7 · offset 4"), ch35Row("partition 1", "partition 1", "rover-9 · offset 8", "rover-9 · offset 8"), ch35Row("المرحلة", "Stage", "fetch", "fetch")),
 				ch35Frame("الـcommit يتأخر بعد retry.", "Commit waits through a retry.", ch35Row("partition 0", "partition 0", "handler نجح", "handler succeeded"), ch35Row("partition 1", "partition 1", "retry", "retry"), ch35Row("الـcommit", "Commit", "لسه", "pending")),
 			},
 			{
@@ -264,11 +264,11 @@ func ch35BuildLesson(spec ch35LessonSpec) ([]LessonStep, []LessonStep) {
 var ch35QueueArabic, ch35QueueEnglish = ch35BuildLesson(ch35LessonSpec{
 	prefix: "c351.",
 	mission: [2]string{
-		"ابني طابور Redis يوزّع مهام الورش على عمّال مستقلين. فكّر في المهمة وهي جاهزة، مستأجرة، مؤكدة، أو محتاجة محاولة تانية.",
+		"ابني Redis queue يوزّع مهام الورش على عمّال مستقلين. فكّر في المهمة وهي جاهزة، مستأجرة، مؤكدة، أو محتاجة محاولة تانية.",
 		"Build a Redis queue that gives workshop tasks to independent workers. Track a task as ready, leased, acknowledged, or waiting for another attempt.",
 	},
 	ideaText: [2]string{
-		"الـlease له نهاية محسوبة من ساعة يقدر الاختبار يتحكم فيها. عند نفس لحظة النهاية، ~Before~ مش بتعتبر الوقت لسه سابقها.",
+		"الـlease له نهاية محسوبة من ساعة يقدر الـtest يتحكم فيها. عند نفس لحظة النهاية، ~Before~ مش بتعتبر الوقت لسه سابقها.",
 		"A lease has a deadline based on a clock the caller can control. At the deadline itself, ~Before~ no longer treats the current time as earlier.",
 	},
 	idea: ch35ExampleSpec{
@@ -288,15 +288,15 @@ var ch35QueueArabic, ch35QueueEnglish = ch35BuildLesson(ch35LessonSpec{
 		},
 	},
 	question: [2]string{
-		"المثال بيسأل الخريطة هل ~pump~ اتشاف قبل كده. توقّع الناتج.",
+		"المثال بيسأل الـmap هل ~pump~ اتشاف قبل كده. توقّع الناتج.",
 		"The map asks whether ~pump~ was seen before. Predict the output.",
 	},
-	options: [2][]string{{"true", "false", "مفتاح مش موجود"}, {"true", "false", "A missing key"}}, answer: 0,
+	options: [2][]string{{"true", "false", "key مش موجود"}, {"true", "false", "A missing key"}}, answer: 0,
 	feedback: [2][]string{
-		{"القيمة true موجودة للمفتاح.", "الخريطة فيها المفتاح بالفعل.", "comma-ok بيرجع القيمة وحالة الوجود."},
+		{"الـvalue true موجودة للـkey.", "الـmap فيها الـkey بالفعل.", "comma-ok بيرجّع الـvalue وحالة وجود الـkey."},
 		{"The key has a stored true value.", "The map already contains this key.", "Comma-ok reports the value and whether it exists."},
 	},
-	revealText: [2]string{"اتبع قراءة الـmap وشوف قيمة الوجود.", "Follow the map lookup and watch its presence result."},
+	revealText: [2]string{"اتبع قراية الـmap وشوف نتيجة وجود الـkey.", "Follow the map lookup and watch its presence result."},
 	reveal: ch35ExampleSpec{
 		id: "e351-map-presence", imports: []string{"fmt"},
 		code: `func main() {
@@ -306,13 +306,13 @@ var ch35QueueArabic, ch35QueueEnglish = ch35BuildLesson(ch35LessonSpec{
 }`,
 		frames: []ch35FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 2, caption: [2]string{"المفتاح اتسجل قبل كده.", "The key is already recorded."}, vars: []LessonVariable{{Name: "seen", Value: "map[pump:true]"}}},
+			{line: 2, caption: [2]string{"الـkey اتسجل قبل كده.", "The key is already recorded."}, vars: []LessonVariable{{Name: "seen", Value: "map[pump:true]"}}},
 			{line: 3, caption: [2]string{"القراءة رجعت حالة الوجود.", "The lookup returns presence."}, vars: []LessonVariable{{Name: "ok", Value: "true"}}},
 			{line: 4, caption: [2]string{"النتيجة true.", "The result is true."}, vars: []LessonVariable{{Name: "ok", Value: "true"}}, output: "true"},
 		},
 	},
 	watch: [2]string{
-		"العامل ممكن يستلم المهمة تاني لو وقع قبل ack؛ خلي تكرار التسليم متوقع. وما تعتمدش على ساعة محلية لحسم سباق بين عمّال.",
+		"العامل ممكن يستلم المهمة تاني لو وقع قبل ack؛ خلي تكرار التسليم متوقع. وما تعتمدش على ساعة محلية لحسم race بين عمّال.",
 		"A worker may receive a task again if it crashes before ack; expect repeated delivery. Do not use a local clock to settle a race between workers.",
 	},
 	plan: [2]string{
@@ -329,11 +329,11 @@ var ch35QueueArabic, ch35QueueEnglish = ch35BuildLesson(ch35LessonSpec{
 		{"Redis lets only one operation change the member.", "Workers' local clocks are not coordinated.", "Goroutine start order is not guaranteed."},
 	},
 	turn: [2]string{
-		"اقرأ أنواع ~Task~ و~Queue~ وتوقيعات methods. اتبع كل انتقال حالة لوحده، وسيب سلوك Redis قابل لإعادة التشغيل بالساعة المحقونة.",
+		"اقرا types ~Task~ و~Queue~ وتوقيعات methods. اتبع كل انتقال حالة لوحده، وسيب سلوك Redis قابل لإعادة التشغيل بالساعة المحقونة.",
 		"Read the ~Task~ and ~Queue~ types and method signatures. Follow each state transition separately, and keep Redis behavior replayable with the injected clock.",
 	},
 	hints: [2][3]string{
-		{"التسليم الموزّع ممكن يتكرر؛ صمّم المستهلك على الأساس ده.", "تابع انتقال المهمة بين الجاهز والمستأجر والمنتهي أو المعاد.", "ابدأ من ~Task~ وطرق ~Queue~ في الـstarter، وراجع ملكية كل lease."},
+		{"التسليم الموزّع ممكن يتكرر؛ صمّم الـconsumer على الأساس ده.", "تابع انتقال المهمة بين الجاهز والمستأجر والمنتهي أو المعاد.", "ابدأ من ~Task~ وmethods ~Queue~ في الـstarter، وراجع ملكية كل lease."},
 		{"Distributed delivery can repeat; design with that in mind.", "Track task movement between ready, leased, finished, or retried states.", "Start at ~Task~ and ~Queue~ methods in the starter, and review lease ownership."},
 	},
 })
@@ -345,7 +345,7 @@ var ch35SchedulerArabic, ch35SchedulerEnglish = ch35BuildLesson(ch35LessonSpec{
 		"Build a maintenance scheduler that selects the next deadline and handles missed runs. Each run begins through ~Tick~, without goroutines or a real clock.",
 	},
 	ideaText: [2]string{
-		"الـheap بيحافظ على أصغر عنصر عند الجذر. مش كل الشريحة مرتبة؛ تابع الرقم اللي تقدر توصله بسرعة.",
+		"الـheap بيحافظ على أصغر عنصر عند الجذر. مش كل الـslice مرتبة؛ تابع الرقم اللي تقدر توصله بسرعة.",
 		"A heap keeps its smallest item at the root. The whole slice is not sorted; follow the value you can reach quickly.",
 	},
 	idea: ch35ExampleSpec{
@@ -363,18 +363,18 @@ func main() {
 }`,
 		frames: []ch35FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 8, caption: [2]string{"القيم لسه slice عادية.", "The values start as a slice."}, vars: []LessonVariable{{Name: "h", Value: "[7 3 5]"}}},
+			{line: 8, caption: [2]string{"الـvalues لسه slice عادية.", "The values start as a slice."}, vars: []LessonVariable{{Name: "h", Value: "[7 3 5]"}}},
 			{line: 9, caption: [2]string{"Init جهزت بنية heap.", "Init establishes the heap."}, vars: []LessonVariable{{Name: "h[0]", Value: "3"}}},
 			{line: 10, caption: [2]string{"الجذر هو الأصغر.", "The root is the smallest."}, vars: []LessonVariable{{Name: "h[0]", Value: "3"}}, output: "3"},
 		},
 	},
-	question: [2]string{"في قيم مواعيد للتوضيح، إيه اللي بترجعه ~slices.Min~؟", "For these sample deadlines, what does ~slices.Min~ return?"},
-	options:  [2][]string{{"2", "9", "الشريحة كلها"}, {"2", "9", "The whole slice"}}, answer: 0,
+	question: [2]string{"في values مواعيد للتوضيح، إيه اللي بترجعه ~slices.Min~؟", "For these sample deadlines, what does ~slices.Min~ return?"},
+	options:  [2][]string{{"2", "9", "الـslice كلها"}, {"2", "9", "The whole slice"}}, answer: 0,
 	feedback: [2][]string{
-		{"Min بترجع أقل قيمة موجودة.", "9 مش أصغر عنصر في المثال.", "Min بترجع قيمة واحدة مش الشريحة."},
+		{"Min بترجّع أقل value موجودة.", "9 مش أصغر عنصر في المثال.", "Min بترجّع value واحدة مش الـslice."},
 		{"Min returns the smallest value present.", "9 is not the smallest item here.", "Min returns one value, not the slice."},
 	},
-	revealText: [2]string{"اقرأ القيم وبعدين تابع أقل قيمة فيهم.", "Read the values, then follow the smallest one."},
+	revealText: [2]string{"اقرا الـvalues وبعدين تابع أقل value فيهم.", "Read the values, then follow the smallest one."},
 	reveal: ch35ExampleSpec{
 		id: "e352-heap-pop", imports: []string{"fmt", "slices"},
 		code: `func main() {
@@ -384,7 +384,7 @@ func main() {
 		frames: []ch35FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
 			{line: 2, caption: [2]string{"دخلنا مواعيد مثال.", "The sample deadlines are loaded."}, vars: []LessonVariable{{Name: "due", Value: "[9 2 6]"}}},
-			{line: 3, caption: [2]string{"اختارنا أقل قيمة.", "The smallest value is selected."}, vars: []LessonVariable{{Name: "due", Value: "[9 2 6]"}}, output: "2"},
+			{line: 3, caption: [2]string{"اختارنا أقل value.", "The smallest value is selected."}, vars: []LessonVariable{{Name: "due", Value: "[9 2 6]"}}, output: "2"},
 		},
 	},
 	watch: [2]string{
@@ -401,7 +401,7 @@ func main() {
 		{"Do not start an overlapping run.", "Start another goroutine immediately.", "Delete the job from the schedule."},
 	}, checkAnswer: 0,
 	checkFeedback: [2][]string{
-		{"حالة running تمنع تداخل نفس المهمة.", "المجدول لا ينشئ goroutines.", "المهمة تفضل موجودة لمواعيد لاحقة."},
+		{"حالة running تمنع تداخل نفس المهمة.", "المجدول مش بيعمل goroutines.", "المهمة تفضل موجودة لمواعيد لاحقة."},
 		{"The running state prevents overlap for that job.", "The scheduler does not create goroutines.", "The job remains for future deadlines."},
 	},
 	turn: [2]string{
@@ -417,11 +417,11 @@ func main() {
 var ch35LockArabic, ch35LockEnglish = ch35BuildLesson(ch35LessonSpec{
 	prefix: "c353.",
 	mission: [2]string{
-		"اعمل قفل Redis له مالك ومدة عشان تمنع ورشتين من تشغيل نفس المفاعل معًا. وضّح كمان إيه اللي القفل ما يضمنوش لو مالكه اتأخر.",
+		"اعمل Redis lock له مالك ومدة عشان تمنع ورشتين من تشغيل نفس المفاعل معًا. وضّح كمان إيه اللي الـlock ما يضمنوش لو مالكه اتأخر.",
 		"Build a Redis lock with an owner and expiry so two workshops do not operate one reactor at once. Also explain what the lock cannot guarantee if its owner pauses.",
 	},
 	ideaText: [2]string{
-		"قيمة القفل بتحدد مالكه. مقارنة token قديم بالمالك الحالي بتكشف إن الإيجار اتنقل؛ تابع نتيجة المقارنة.",
+		"الـlock value بتحدد مالكه. مقارنة token قديم بالمالك الحالي بتكشف إن الـlease اتنقل؛ تابع نتيجة المقارنة.",
 		"The lock value identifies its owner. Comparing an old token with the current owner reveals that the lease changed; follow the comparison.",
 	},
 	idea: ch35ExampleSpec{
@@ -438,13 +438,13 @@ var ch35LockArabic, ch35LockEnglish = ch35BuildLesson(ch35LessonSpec{
 			{line: 4, caption: [2]string{"المالكين مش واحد.", "The owners do not match."}, vars: []LessonVariable{{Name: "stored == myToken", Value: "false"}}, output: "false"},
 		},
 	},
-	question: [2]string{"هل الـtoken المحلي يطابق قيمة القفل؟", "Does the local token match the lock value?"},
-	options:  [2][]string{{"true", "false", "مفيش قفل"}, {"true", "false", "There is no lock"}}, answer: 0,
+	question: [2]string{"هل الـtoken المحلي يطابق الـlock value؟", "Does the local token match the lock value?"},
+	options:  [2][]string{{"true", "false", "مفيش lock"}, {"true", "false", "There is no lock"}}, answer: 0,
 	feedback: [2][]string{
-		{"النصين متساويين حرفيًا.", "القيمة نفسها موجودة في الطرفين.", "المثال بيقارن نصين فقط."},
+		{"الـstrings متساويين حرفيًا.", "نفس الـvalue موجودة في الطرفين.", "المثال بيقارن strings بس."},
 		{"The two strings are identical.", "The same value appears on both sides.", "The example compares two strings."},
 	},
-	revealText: [2]string{"قارن token الطلب بالمالك اللي Redis شايفاه.", "Compare the request token with the owner Redis currently sees."},
+	revealText: [2]string{"قارن token الـrequest بالمالك اللي Redis شايفاه.", "Compare the request token with the owner Redis currently sees."},
 	reveal: ch35ExampleSpec{
 		id: "e353-token-match", imports: []string{"fmt"},
 		code: `func main() {
@@ -454,34 +454,34 @@ var ch35LockArabic, ch35LockEnglish = ch35BuildLesson(ch35LessonSpec{
 }`,
 		frames: []ch35FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 2, caption: [2]string{"القفل يحمل T7.", "The lock holds T7."}, vars: []LessonVariable{{Name: "stored", Value: "T7"}}},
-			{line: 3, caption: [2]string{"الطلب يحمل نفس token.", "The request has the same token."}, vars: []LessonVariable{{Name: "myToken", Value: "T7"}}},
+			{line: 2, caption: [2]string{"الـlock شايل T7.", "The lock holds T7."}, vars: []LessonVariable{{Name: "stored", Value: "T7"}}},
+			{line: 3, caption: [2]string{"الـrequest شايل نفس token.", "The request has the same token."}, vars: []LessonVariable{{Name: "myToken", Value: "T7"}}},
 			{line: 4, caption: [2]string{"المقارنة true.", "The comparison is true."}, vars: []LessonVariable{{Name: "stored == myToken", Value: "true"}}, output: "true"},
 		},
 	},
 	watch: [2]string{
-		"فحص الملكية ثم الحذف كخطوتين يفتح race. والـtoken يمنع مسح قفل غيرك، لكنه ما يمنعش كتابة مالك قديم على المورد.",
+		"فحص الملكية ثم الحذف كخطوتين يفتح race. والـtoken يمنع مسح lock غيرك، بس ما يمنعش كتابة مالك قديم على المورد.",
 		"Checking ownership and deleting in separate steps creates a race. A token prevents deleting another lock, but not stale writes to the resource.",
 	},
 	plan: [2]string{
-		"افصل التحقق عن القراءة من Redis. اتبع طلب الاكتساب من مدخلاته لنتيجته، وبعدها راجع إن التحرير يعتمد على المالك الحالي.",
+		"افصل التحقق عن القراءة من Redis. اتبع عملية الاكتساب من مدخلاته لنتيجته، وبعدها راجع إن التحرير يعتمد على المالك الحالي.",
 		"Separate validation from Redis access. Trace acquisition from its inputs to its result, then check that release depends on the current owner.",
 	},
-	checkQuestion: [2]string{"إزاي تمنع قفل جديد يتأثر بتحرير قديم؟", "How do you keep an old release from affecting a new lock?"},
+	checkQuestion: [2]string{"إزاي تمنع lock جديد يتأثر بتحرير قديم؟", "How do you keep an old release from affecting a new lock?"},
 	checkOptions: [2][]string{
-		{"مقارنة المالك والحذف ذريًا.", "Get وبعده Del منفصلين.", "حذف المفتاح من غير مقارنة."},
+		{"مقارنة المالك والحذف ذريًا.", "Get وبعده Del منفصلين.", "حذف الـkey من غير مقارنة."},
 		{"Compare the owner and delete atomically.", "Run Get and Del separately.", "Delete the key without a comparison."},
 	}, checkAnswer: 0,
 	checkFeedback: [2][]string{
-		{"العملية الواحدة تمنع أمر تاني من التداخل.", "المفتاح ممكن يتغير بين الطلبين.", "ده يمسح قفل مالك جديد."},
+		{"العملية الواحدة تمنع أمر تاني من التداخل.", "الـkey ممكن يتغير بين الـrequests.", "ده يمسح lock مالك جديد."},
 		{"One atomic operation prevents another command from slipping in.", "The key can change between those requests.", "That can delete a new owner's lock."},
 	},
 	turn: [2]string{
-		"اقرأ ~Lease~ وواجهات Redis في الـstarter. جرّب تشرح حد الأمان بكلامك، وخلي تعليق ~fencing~ جزء من التسليم.",
+		"اقرا ~Lease~ وواجهات Redis في الـstarter. جرّب تشرح حد الأمان بكلامك، وخلي تعليق ~fencing~ جزء من التسليم.",
 		"Read ~Lease~ and the Redis-facing starter signatures. Explain the safety limit in your own words, and include the required ~fencing~ comment.",
 	},
 	hints: [2][3]string{
-		{"المدة تحرر المفتاح، والـtoken يحدد المالك الحالي.", "افصل مسار الاكتساب عن التحرير، مع حماية التحديثات القديمة.", "ابدأ من ~Lease~ وتوقيعات ~Acquire~ و~Release~ في الـstarter."},
+		{"المدة بتحرر الـkey، والـtoken بيحدد المالك الحالي.", "افصل مسار الاكتساب عن التحرير، مع حماية التحديثات القديمة.", "ابدأ من ~Lease~ وتوقيعات ~Acquire~ و~Release~ في الـstarter."},
 		{"Expiry frees the key; the token identifies its current owner.", "Separate acquisition from release while guarding against stale updates.", "Start at ~Lease~ and the ~Acquire~ and ~Release~ signatures in the starter."},
 	},
 })
@@ -493,7 +493,7 @@ var ch35OutboxArabic, ch35OutboxEnglish = ch35BuildLesson(ch35LessonSpec{
 		"Record a spare-parts order and its event together, then publish and let the consumer handle duplicates. Each part has a distinct role in preserving state.",
 	},
 	ideaText: [2]string{
-		"JSON اللي مافيهوش field مش بيمسح قيمة بدأت بيها. المثال يبدأ ~Qty~ افتراضيًا، وبعدين يفك payload قديم.",
+		"JSON اللي مافيهوش field مش بيمسح value بدأت بيها. المثال يبدأ ~Qty~ افتراضيًا، وبعدين يفك payload قديم.",
 		"JSON that omits a field does not erase a value you set first. This example starts with a default ~Qty~, then decodes an older payload.",
 	},
 	idea: ch35ExampleSpec{
@@ -511,13 +511,13 @@ func main() {
 			{line: 1, caption: [2]string{"Payload فيها كمية.", "Payload has a quantity field."}},
 			{line: 5, caption: [2]string{"بدأنا بكمية افتراضية.", "A default quantity is set."}, vars: []LessonVariable{{Name: "p.Qty", Value: "1"}}},
 			{line: 6, caption: [2]string{"الـJSON مافيهوش Qty.", "The JSON has no Qty."}, vars: []LessonVariable{{Name: "p.Qty", Value: "1"}}},
-			{line: 7, caption: [2]string{"القيمة الافتراضية فضلت.", "The default value remains."}, vars: []LessonVariable{{Name: "p.Qty", Value: "1"}}, output: "1"},
+			{line: 7, caption: [2]string{"الـvalue الافتراضية فضلت.", "The default value remains."}, vars: []LessonVariable{{Name: "p.Qty", Value: "1"}}, output: "1"},
 		},
 	},
-	question: [2]string{"المستهلك شاف الحدث ~4~ قبل كده. إيه قيمة ~ok~؟", "The consumer has seen event ~4~ before. What is ~ok~?"},
-	options:  [2][]string{{"true", "false", "خطأ من map"}, {"true", "false", "A map error"}}, answer: 0,
+	question: [2]string{"المستهلك شاف الحدث ~4~ قبل كده. إيه value ~ok~؟", "The consumer has seen event ~4~ before. What is ~ok~?"},
+	options:  [2][]string{{"true", "false", "error من map"}, {"true", "false", "A map error"}}, answer: 0,
 	feedback: [2][]string{
-		{"الخريطة فيها القيمة true للمفتاح.", "القيمة المسجلة هي true.", "القراءة بالشكل comma-ok ما بترجعش error."},
+		{"الـmap فيها الـvalue true للـkey.", "الـvalue المسجلة هي true.", "القراية بشكل comma-ok ما بترجّعش error."},
 		{"The map stores true for this key.", "The recorded value is true.", "A comma-ok lookup does not return an error."},
 	},
 	revealText: [2]string{"تابع فحص معرف حدث سبق تسجيله.", "Follow a lookup for an event ID already recorded."},
@@ -536,7 +536,7 @@ func main() {
 		},
 	},
 	watch: [2]string{
-		"الطلب والـoutbox لازم يبقوا في transaction واحدة. والـrelay ممكن يعيد الحدث بعد نجاح النشر؛ المستهلك يتعامل مع duplicate.",
+		"الـrequest والـoutbox لازم يبقوا في transaction واحدة. والـrelay ممكن يعيد الحدث بعد نجاح النشر؛ المستهلك يتعامل مع duplicate.",
 		"The order and outbox row belong in one transaction. A relay may repeat an event after publishing; the consumer handles duplicates.",
 	},
 	plan: [2]string{
@@ -557,7 +557,7 @@ func main() {
 		"Review ~Event~, ~Publisher~, and ~Consumer~ in the starter. Work through each contract separately, and leave ~main~ empty.",
 	},
 	hints: [2][3]string{
-		{"الـoutbox بيحفظ نية النشر مع بيانات الطلب.", "قسّم المسار لكتابة ذرّية، relay مرتب، واستهلاك idempotent.", "ابدأ من ~PlaceOrder~ و~Relay~ و~Handle~ في الـstarter."},
+		{"الـoutbox بيخزّن نية النشر مع بيانات الـrequest.", "قسّم المسار لكتابة ذرّية، relay مرتب، واستهلاك idempotent.", "ابدأ من ~PlaceOrder~ و~Relay~ و~Handle~ في الـstarter."},
 		{"The outbox stores publishing intent with the order data.", "Separate atomic writing, ordered relay, and idempotent consumption.", "Start at ~PlaceOrder~, ~Relay~, and ~Handle~ in the starter."},
 	},
 })
@@ -565,11 +565,11 @@ func main() {
 var ch35KafkaArabic, ch35KafkaEnglish = ch35BuildLesson(ch35LessonSpec{
 	prefix: "c355.",
 	mission: [2]string{
-		"ابعت قراءات العربات لـ Kafka بمفتاح لكل عربة، واستهلك الرسائل مع retry. أكد الـoffset بعد نجاح المعالجة، وتعامل مع الإغلاق من غير ما تخسر الرسالة.",
+		"ابعت قراءات العربات لـ Kafka بـkey لكل عربة، واستهلك الرسائل مع retry. أكّد الـoffset بعد نجاح المعالجة، وتعامل مع الإغلاق من غير ما تخسر الرسالة.",
 		"Send rover readings to Kafka with a key per rover, then consume with retries. Commit the offset after processing succeeds, and shut down without losing a message.",
 	},
 	ideaText: [2]string{
-		"مفتاح Kafka وقيمتها bytes. المفتاح يعرّف مجموعة الرسائل اللي لازم تفضل مرتبة جوه partition واحد.",
+		"Kafka key والـvalue بتاعته bytes. الـkey بيحدد مجموعة الـmessages اللي لازم تفضل مرتبة جوه partition واحد.",
 		"A Kafka key and value are bytes. The key identifies the messages that should stay ordered within one partition.",
 	},
 	idea: ch35ExampleSpec{
@@ -581,18 +581,18 @@ var ch35KafkaArabic, ch35KafkaEnglish = ch35BuildLesson(ch35LessonSpec{
 }`,
 		frames: []ch35FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 2, caption: [2]string{"المفتاح بايتات العربة.", "The key bytes identify a rover."}, vars: []LessonVariable{{Name: "key", Value: "[114 111 118 101 114 45 55]"}}},
-			{line: 3, caption: [2]string{"القيمة بايتات القراءة.", "The value bytes hold a reading."}, vars: []LessonVariable{{Name: "value", Value: "[52 50]"}}},
-			{line: 4, caption: [2]string{"رجعنا النصين للعرض.", "Both byte slices are shown as text."}, vars: []LessonVariable{{Name: "key", Value: "rover-7"}, {Name: "value", Value: "42"}}, output: "rover-7 42"},
+			{line: 2, caption: [2]string{"الـkey هو bytes العربة.", "The key bytes identify a rover."}, vars: []LessonVariable{{Name: "key", Value: "[114 111 118 101 114 45 55]"}}},
+			{line: 3, caption: [2]string{"الـvalue هي bytes القراءة.", "The value bytes hold a reading."}, vars: []LessonVariable{{Name: "value", Value: "[52 50]"}}},
+			{line: 4, caption: [2]string{"رجّعنا الـstrings للعرض.", "Both byte slices are shown as text."}, vars: []LessonVariable{{Name: "key", Value: "rover-7"}, {Name: "value", Value: "42"}}, output: "rover-7 42"},
 		},
 	},
-	question: [2]string{"إيه الناتج عند تحويل نص مش رقمي؟", "What is printed when converting non-numeric text?"},
+	question: [2]string{"إيه الناتج عند تحويل string مش رقمية؟", "What is printed when converting non-numeric text?"},
 	options:  [2][]string{{"0 true", "4 true", "4 false"}, {"0 true", "4 true", "4 false"}}, answer: 0,
 	feedback: [2][]string{
-		{"التحويل الفاشل بيرجع صفر وخطأ.", "النص مش رقم 4.", "فيه error، مش نتيجة ناجحة."},
+		{"التحويل الفاشل بيرجّع صفر وerror.", "الـstring مش رقم 4.", "فيه error، مش نتيجة ناجحة."},
 		{"A failed conversion returns zero and an error.", "The text is not the number 4.", "An error means the conversion did not succeed."},
 	},
-	revealText: [2]string{"راقب تحويل القيمة وفحص error.", "Watch the value conversion and error check."},
+	revealText: [2]string{"راقب تحويل الـvalue وفحص error.", "Watch the value conversion and error check."},
 	reveal: ch35ExampleSpec{
 		id: "e355-invalid-reading", imports: []string{"fmt", "strconv"},
 		code: `func main() {
@@ -601,8 +601,8 @@ var ch35KafkaArabic, ch35KafkaEnglish = ch35BuildLesson(ch35LessonSpec{
 }`,
 		frames: []ch35FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
-			{line: 2, caption: [2]string{"حاولنا فك نص القراءة.", "The reading text is parsed."}, vars: []LessonVariable{{Name: "reading", Value: "0"}}},
-			{line: 3, caption: [2]string{"التحويل فشل؛ الخطأ موجود.", "Parsing failed; an error exists."}, vars: []LessonVariable{{Name: "reading", Value: "0"}, {Name: "err != nil", Value: "true"}}, output: "0 true"},
+			{line: 2, caption: [2]string{"حاولنا نقرا الـstring.", "The reading text is parsed."}, vars: []LessonVariable{{Name: "reading", Value: "0"}}},
+			{line: 3, caption: [2]string{"التحويل فشل؛ الـerror موجود.", "Parsing failed; an error exists."}, vars: []LessonVariable{{Name: "reading", Value: "0"}, {Name: "err != nil", Value: "true"}}, output: "0 true"},
 		},
 	},
 	watch: [2]string{
@@ -610,24 +610,24 @@ var ch35KafkaArabic, ch35KafkaEnglish = ch35BuildLesson(ch35LessonSpec{
 		"A partition preserves its own order, not the whole topic's. ~FetchMessage~ does not commit the message automatically.",
 	},
 	plan: [2]string{
-		"راجع مسار الإرسال منفصل عن الاستهلاك. في الاستهلاك، ميّز الرسالة غير الصالحة عن فشل المعالج وعن إلغاء السياق.",
+		"راجع مسار الإرسال منفصل عن الاستهلاك. في الاستهلاك، ميّز الرسالة غير الصالحة عن فشل الـhandler وعن إلغاء الـcontext.",
 		"Review sending separately from consuming. In the consumer, distinguish invalid messages, handler failures, and context cancellation.",
 	},
 	checkQuestion: [2]string{"بعد ما ينجح handler، بإيه نعمل commit؟", "After the handler succeeds, what should commit use?"},
 	checkOptions: [2][]string{
-		{"سياق ما اتلغاش مع الرسالة.", "سياق ملغي دائمًا.", "من غير context."},
+		{"context ما اتلغاش مع الرسالة.", "context ملغي دائمًا.", "من غير context."},
 		{"A context not canceled with the message.", "A context that is always canceled.", "No context."},
 	}, checkAnswer: 0,
 	checkFeedback: [2][]string{
-		{"المعالجة خلصت، فلازم التأكيد يقدر يكمل.", "ده يمنع commit بعد معالجة ناجحة.", "واجهة commit بتحتاج context."},
+		{"المعالجة خلصت، فلازم التأكيد يقدر يكمل.", "ده يمنع commit بعد معالجة ناجحة.", "method الـcommit بتحتاج context."},
 		{"Processing finished, so confirmation must be able to continue.", "That blocks commit after successful processing.", "The commit API requires a context."},
 	},
 	turn: [2]string{
-		"اقرأ واجهتي ~Writer~ و~Reader~ وتوقيعات ~Send~ و~Consume~. تتبع العداد والـoffset مع كل نتيجة، وسيب ~main~ فاضية.",
+		"اقرا interfaces ~Writer~ و~Reader~ وتوقيعات ~Send~ و~Consume~. تتبع العداد والـoffset مع كل نتيجة، وسيب ~main~ فاضية.",
 		"Read the ~Writer~ and ~Reader~ interfaces and the ~Send~ and ~Consume~ signatures. Track the count and offset outcomes, and leave ~main~ empty.",
 	},
 	hints: [2][3]string{
-		{"المفتاح يربط رسائل العربة بنفس مسار الترتيب.", "افصل تحويل البيانات عن الإرسال، والمعالجة عن commit.", "ابدأ من ~Writer~ و~Reader~، وراجع التعامل مع ~ctx.Err~ في الـstarter."},
+		{"الـkey بيربط رسائل العربة بنفس مسار الترتيب.", "افصل تحويل البيانات عن الإرسال، والمعالجة عن commit.", "ابدأ من ~Writer~ و~Reader~، وراجع التعامل مع ~ctx.Err~ في الـstarter."},
 		{"A key keeps one rover's messages on the same ordering path.", "Separate data conversion from sending, and handling from committing.", "Start at ~Writer~ and ~Reader~, and review ~ctx.Err~ handling in the starter."},
 	},
 })
@@ -639,7 +639,7 @@ var ch35RaftArabic, ch35RaftEnglish = ch35BuildLesson(ch35LessonSpec{
 		"Complete a deterministic in-memory Raft simulation so orbital stations can elect a leader. Track term, role, and messages, and account for partitions.",
 	},
 	ideaText: [2]string{
-		"~iota~ بتدي قيم متتابعة للـRole. تابع الرقم اللي اتخزن لكل اسم في الثوابت.",
+		"~iota~ بتدي values متتابعة للـRole. تابع الرقم اللي اتخزن لكل اسم في الثوابت.",
 		"~iota~ gives Role constants consecutive values. Follow the number assigned to each constant name.",
 	},
 	idea: ch35ExampleSpec{
@@ -656,16 +656,16 @@ func main() {
 		frames: []ch35FrameSpec{
 			{line: 0, caption: [2]string{"قبل التنفيذ.", "Before execution."}},
 			{line: 1, caption: [2]string{"Role نوع رقمي جديد.", "Role is a new numeric type."}},
-			{line: 3, caption: [2]string{"أول قيمة تبدأ من صفر.", "The first value starts at zero."}, vars: []LessonVariable{{Name: "Follower", Value: "0"}}},
-			{line: 4, caption: [2]string{"القيمة التالية تزيد واحد.", "The next constant increments by one."}, vars: []LessonVariable{{Name: "Candidate", Value: "1"}}},
+			{line: 3, caption: [2]string{"أول value بتبدأ من صفر.", "The first value starts at zero."}, vars: []LessonVariable{{Name: "Follower", Value: "0"}}},
+			{line: 4, caption: [2]string{"الـvalue اللي بعدها بتزيد واحد.", "The next constant increments by one."}, vars: []LessonVariable{{Name: "Candidate", Value: "1"}}},
 			{line: 5, caption: [2]string{"كل Role لها رقم.", "Each role has a number."}, vars: []LessonVariable{{Name: "Leader", Value: "2"}}},
-			{line: 8, caption: [2]string{"اطبع القيم بالترتيب.", "Print the values in order."}, output: "0 1 2"},
+			{line: 8, caption: [2]string{"اطبع الـvalues بالترتيب.", "Print the values in order."}, output: "0 1 2"},
 		},
 	},
-	question: [2]string{"بـseed ثابت، إيه قيمة السحب ده؟", "With a fixed seed, what value does this draw?"},
+	question: [2]string{"بـseed ثابت، إيه الـvalue اللي هتطلع من السحب ده؟", "With a fixed seed, what value does this draw?"},
 	options:  [2][]string{{"6", "تتغير كل مرة", "10"}, {"6", "It changes each run", "10"}}, answer: 0,
 	feedback: [2][]string{
-		{"المصدر نفسه والـseed نفسه يعيدوا التسلسل.", "المثال لا يستخدم عشوائية النظام.", "Intn يرجع من المجال المحدد في المثال."},
+		{"المصدر نفسه والـseed نفسه يعيدوا التسلسل.", "المثال مش بيستخدم عشوائية النظام.", "Intn بيرجّع value من المجال المحدد في المثال."},
 		{"The same source and seed reproduce the sequence.", "This example does not use system randomness.", "Intn returns from the range in this example."},
 	},
 	revealText: [2]string{"نفّذ سحبًا من مولّد محلي ببذرة ثابتة.", "Run a draw from a local generator with a fixed seed."},
@@ -686,7 +686,7 @@ func main() {
 		"A message with an older term must not replace newer state. The simulation orders messages from its inputs; there is no goroutine scheduling here.",
 	},
 	plan: [2]string{
-		"افصل تحديث الحالة عن بناء الردود. تابع إمتى المحطة follower أو candidate أو leader، وخلي مصدر العشوائية وتوقيته واضحين.",
+		"افصل تحديث الحالة عن بناء الـresponses. تابع إمتى المحطة follower أو candidate أو leader، وخلي مصدر العشوائية وتوقيته واضحين.",
 		"Separate state updates from reply construction. Track when a station is follower, candidate, or leader, and keep randomness and its timing explicit.",
 	},
 	checkQuestion: [2]string{"وصلت رسالة Term بتاعها أعلى؛ إيه الأولوية؟", "A message arrives with a higher term; what takes priority?"},
@@ -703,7 +703,7 @@ func main() {
 		"Start with ~NewNode~ state and the ~Tick~ and ~Step~ messages. Trace one message at a time, without real time or sleeps.",
 	},
 	hints: [2][3]string{
-		{"الـterm بيميز الحالة الجديدة من رسائل قائد قديم.", "افصل clock tick عن تسليم الرسالة وردها.", "ابدأ من ~State~ و~Tick~ و~Step~، وراجع توقيت سحب timeout في الـstarter."},
+		{"الـterm بيميز الحالة الجديدة من رسائل قائد قديم.", "افصل clock tick عن تسليم الرسالة والـresponse بتاعها.", "ابدأ من ~State~ و~Tick~ و~Step~، وراجع توقيت سحب timeout في الـstarter."},
 		{"A term distinguishes new state from messages by an old leader.", "Separate clock ticks from message delivery and replies.", "Start at ~State~, ~Tick~, and ~Step~, and review timeout draws in the starter."},
 	},
 })
@@ -715,7 +715,7 @@ var ch35ReplicationArabic, ch35ReplicationEnglish = ch35BuildLesson(ch35LessonSp
 		"Extend the election simulation with a command log copied between stations. The leader proposes, followers check consistency, and stations apply the committed prefix in order.",
 	},
 	ideaText: [2]string{
-		"كل Entry فيها command وterm. رقم الخانة يبدأ من واحد، لكن index الشريحة يبدأ من صفر؛ تابع الاتنين في المثال.",
+		"كل Entry فيها command وterm. رقم الخانة يبدأ من واحد، لكن index الـslice يبدأ من صفر؛ تابع الاتنين في المثال.",
 		"Each Entry holds a command and term. Slot numbers start at one, while slice indexes start at zero; follow both in the example.",
 	},
 	idea: ch35ExampleSpec{
@@ -735,10 +735,10 @@ func main() {
 			{line: 7, caption: [2]string{"index 1 يحمل term 2.", "Index 1 carries term 2."}, vars: []LessonVariable{{Name: "len(log)", Value: "2"}, {Name: "log[1].Term", Value: "2"}}, output: "2 2"},
 		},
 	},
-	question: [2]string{"الأمر واحد، لكن الـTerm مختلف. هل الـEntry قيمتين متساويتين؟", "The command is the same, but the term differs. Are the two entries equal?"},
+	question: [2]string{"الأمر واحد، لكن الـTerm مختلف. هل الـEntry values متساويتين؟", "The command is the same, but the term differs. Are the two entries equal?"},
 	options:  [2][]string{{"true", "false", "مش قابلين للمقارنة"}, {"true", "false", "They cannot be compared"}}, answer: 1,
 	feedback: [2][]string{
-		{"كل الحقول تدخل في مقارنة الـstruct.", "اختلاف Term يخلي القيمتين مختلفتين.", "حقول النوع قابلة للمقارنة."},
+		{"كل الحقول تدخل في مقارنة الـstruct.", "اختلاف Term يخلي الـvalues مختلفتين.", "حقول النوع قابلة للمقارنة."},
 		{"Every field participates in struct comparison.", "Different terms make the values different.", "The type's fields are comparable."},
 	},
 	revealText: [2]string{"قارن سجلين في نفس الخانة لهما term مختلف.", "Compare two entries at one slot with different terms."},
@@ -769,21 +769,21 @@ func main() {
 		"افصل الاقتراح، مزامنة سجل المتابع، وتقدم commit. راجع كمان قواعد انتخاب القائد، لأن صلاحية السجل بتأثر على التصويت.",
 		"Separate proposals, follower log matching, and commit progress. Keep election rules too, because log freshness affects voting.",
 	},
-	checkQuestion: [2]string{"المتبع وصلته قيمة Commit أكبر من سجله المطابق. يعمل إيه؟", "A follower receives Commit beyond its matched log. What should it do?"},
+	checkQuestion: [2]string{"المتبع وصلته value Commit أكبر من سجله المطابق. يعمل إيه؟", "A follower receives Commit beyond its matched log. What should it do?"},
 	checkOptions: [2][]string{
 		{"يحد التقدم عند آخر خانة مطابقة.", "يضيف خانات وهمية.", "يقلل commit الحالي."},
 		{"Limit progress to the last matched slot.", "Create placeholder entries.", "Decrease its current commit."},
 	}, checkAnswer: 0,
 	checkFeedback: [2][]string{
-		{"المتابع ماعندوش محتوى يؤكد بعد الخانة دي.", "الفهرس مش بديل عن سجل موجود.", "حالة commit ماينفعش ترجع لورا."},
+		{"المتابع ماعندوش محتوى يؤكد بعد الخانة دي.", "الـindex مش بديل عن سجل موجود.", "حالة commit ماينفعش ترجع لورا."},
 		{"The follower has no content to commit beyond that slot.", "An index cannot replace an actual log entry.", "Commit state must not move backward."},
 	},
 	turn: [2]string{
-		"كمّل على كود الانتخابات في الـstarter. تتبع رسائل Append وردودها، وسيب تحديد الأوامر المؤكدة ناتجًا عن حالة السجل.",
+		"كمّل على كود الانتخابات في الـstarter. تتبع رسائل Append وresponses بتاعتها، وسيب تحديد الأوامر المؤكدة ناتجًا عن حالة السجل.",
 		"Continue from the election code in the starter. Trace Append messages and replies, and derive committed commands from log state.",
 	},
 	hints: [2][3]string{
-		{"الـEntry بتجمع command مع الفترة اللي اتكتب فيها.", "افصل فحص التطابق عن تحديث السجل وتقدم commit.", "ابدأ من ~Msg~ و~Node.Step~ في الـstarter، وراجع معنى ~PrevIndex~ و~PrevTerm~."},
+		{"الـEntry بتجمع command مع الـterm اللي اتكتب فيه.", "افصل فحص التطابق عن تحديث السجل وتقدم commit.", "ابدأ من ~Msg~ و~Node.Step~ في الـstarter، وراجع معنى ~PrevIndex~ و~PrevTerm~."},
 		{"An ~Entry~ groups a command with the term when it was written.", "Separate consistency checks from log updates and commit progress.", "Start at ~Msg~ and ~Node.Step~ in the starter, and review ~PrevIndex~ and ~PrevTerm~."},
 	},
 })

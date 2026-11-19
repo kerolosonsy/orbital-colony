@@ -288,7 +288,7 @@ func main() {
 			},
 		},
 		ID: "16-1-mutants", Chapter: 16, LessonRevision: 1, Steps: ch16Mission1(false), Title: "اصطاد الـ Mutants",
-		Goal:     "اكتب تستات لـ Fuel تمسك كل نسخة متبوّظة منها (6 mutants)",
+		Goal:     "اكتب tests لـ~Fuel~ تمسك كل نسخة متبوّظة منها (6 mutants)",
 		Kind:     "lab",
 		Requires: []string{"tabletest"},
 		Setup:    labRoom,
@@ -471,9 +471,9 @@ func TestMedian(t *testing.T) {
 		},
 		Lab: &Lab{ReqFile: "main_test.go", Buggy: medianBuggy, Hidden: medianHidden},
 		Hints: []string{
-			"افصل القيمة الراجعة عن سؤال هل الدالة حافظت على input بتاع اللي ناداها.",
+			"افصل الـvalue اللي الـfunction بترجّعها عن سؤال هل حافظت على input بتاع اللي ناداها.",
 			"خلّي ملاحظة واحدة تفشل الأول، وبعدها أصلح السلوك مع الحفاظ على الوعدين.",
-			"تتبّع ~Median~ في ~main.go~ حوالين الترتيب والرجوع، وشوف كل سطر بيغيّر أنهي slice.",
+			"تتبّع ~Median~ في ~main.go~ حوالين الترتيب والـreturn، وشوف كل سطر بيغيّر أنهي slice.",
 		},
 		Lesson: `# TDD: الأحمر الأول، بعدين الأخضر 🔴🟢
 
@@ -603,7 +603,7 @@ func TestCountPairs(t *testing.T) {
 			},
 		},
 		ID: "16-3-benchmark", Chapter: 16, LessonRevision: 1, Steps: ch16Mission3(false), Title: "أسرع 100 مرة",
-		Goal:     "CountPairs بطيئة جداً (O(n²)). خليها أسرع من غير ما تبوّظها، واكتب benchmark بنفسك",
+		Goal:     "~CountPairs~ بطيئة جدًا (O(n²)). خليها أسرع من غير ما تبوّظها، واكتب benchmark بنفسك",
 		Kind:     "lab",
 		Requires: []string{"benchmark"},
 		Setup:    labRoom,
@@ -626,7 +626,7 @@ func TestCountPairs(t *testing.T) {
 		Hints: []string{
 			"الـbenchmark بيقيس التشغيل المتكرر؛ لكنه مش دليل على صحة النتيجة.",
 			"افصل فحص الصحة عن السرعة، وقارن التشغيل على نفس البيانات.",
-			"استخدم مكان الـbenchmark في ~main_test.go~ وراجع لفّات ~CountPairs~ الحالية قبل التغيير.",
+			"استعمل الـbenchmark stub في ~main_test.go~ وبص على loops ~CountPairs~ الحالية قبل التغيير.",
 		},
 		Lesson: `# Benchmarks: قيس قبل ما تحسّن ⚡
 
@@ -721,7 +721,7 @@ return frame[3:3+n] // الطول المعلن ممكن يبقى أكبر من �
 `, Hints: []string{
 			"ابدأ بـseeds صغيرة؛ ~go test~ بيشغّلهم قبل fuzz طويل.",
 			"خلّي صلاحية input جاية من العقد، مش من parser نفسه.",
-			"ابدأ من أول قراءة index في parser، وراجع اختبار القبول والرفض مع مدخل ثابت.",
+			"ابدأ من أول قراءة index في parser، وبص على test القبول والرفض مع input ثابت.",
 		},
 		En: &LevelText{LessonRevision: 1, Steps: ch16Mission4(true), Title: "Wild Inputs", Goal: "Write a fuzz target that exposes capsule defects, then repair the parser", Files: []LabFile{{Name: "main.go", Starter: capsuleBuggy, ReadOnly: false}, {Name: "main_test.go", Starter: wildInputsTestStarter}}, Lesson: `# Try Inputs You Would Never Invent
 
@@ -847,9 +847,9 @@ clock.Advance(time.Second)
 
 ~NewLaunchGate(nil,...)~ أو capacity<=0 أو every<=0 ترجع nil,error. ~Take(n<=0)~ ترجع false,error من غير تغيير. التستات لازم تعدّي على التنفيذ الصحيح وتمسك الأربع mutants، وتشتغل من غير انتظار حقيقي. مفيش Report؛ المختبر كمان بيختبر طلبات متزامنة بـ race detector.
 `, Hints: []string{
-			"ساعة جديدة لكل subtest، وخلي helper يفحص القيمة والخطأ مع بعض.",
+			"ساعة جديدة لكل subtest، وخلي helper يفحص الـvalue والـerror مع بعض.",
 			"نظّم السيناريوهات حوالين الوقت والرصيد، وسيب كل واحد يبدأ بحالة مستقلة.",
-			"ابدأ من signatures ~NewLaunchGate~ و~Take~ قبل استخدام ~FakeClock.Advance~ في التست.",
+			"ابدأ من signatures ~NewLaunchGate~ و~Take~ قبل استعمال ~FakeClock.Advance~ في الـtest.",
 		},
 		En: &LevelText{LessonRevision: 1, Steps: ch16Mission5(true), Title: "Fake Clock", Goal: "Test a launch gate using injected time without sleeping", Files: []LabFile{{Name: "main.go", Starter: launchGateImpl, ReadOnly: true}, {Name: "main_test.go", Starter: fakeClockTestStarter}}, Lesson: `# Move Time Instead of Waiting
 

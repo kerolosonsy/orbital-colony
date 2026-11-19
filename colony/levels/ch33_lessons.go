@@ -183,38 +183,38 @@ func ch33TurnStep(spec ch33LessonSpec, language ch33Language) LessonStep {
 
 var ch33Lesson331Arabic, ch33Lesson331English, ch33Lesson331HintsArabic, ch33Lesson331HintsEnglish = ch33BuildLesson(ch33LessonSpec{
 	prefix:  "c331",
-	mission: ch33Pair{ar: "الـclient في المهمة بيلف transport عشان يعالج الفشل بأمان.\nراجع إمتى إعادة الطلب ممكن تكرر أثر على الرصيف.", en: "The client in this mission wraps a transport to handle failures safely.\nThink about when replaying a request could repeat an effect at the dock."},
+	mission: ch33Pair{ar: "الـclient في المهمة بيلف transport عشان يعالج الفشل بأمان.\nراجع إمتى إعادة الـrequest ممكن تكرر أثر على الرصيف.", en: "The client in this mission wraps a transport to handle failures safely.\nThink about when replaying a request could repeat an effect at the dock."},
 	idea: ch33WalkSpec{text: ch33Pair{ar: "الـRequest جسمه stream بيتقري مرة. ~http.NewRequest~ يقدر يحتفظ بطريقة لإعادة جسم بعض أنواع الـReader.", en: "A request body is a stream that is read once. ~http.NewRequest~ can keep a way to recreate bodies from certain Reader types."}, code: `func main() {
 	req, err := http.NewRequest("POST", "https://dock.example/load", strings.NewReader("sample"))
 	fmt.Println(err == nil, req.GetBody != nil)
 }`, exampleID: "e331-replayable-body", imports: []string{"fmt", "net/http", "strings"}, frames: []ch33FrameSpec{
 		{line: 0, caption: ch33Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 2, caption: ch33Pair{ar: "أنشئ طلب بجسم قابل للنسخ.", en: "Create a request with a recreatable body."}, vars: []LessonVariable{{Name: "err", Value: "nil"}, {Name: "req.GetBody", Value: "non-nil"}}},
+		{line: 2, caption: ch33Pair{ar: "جهّز request بجسم ينفع يتبعت تاني.", en: "Create a request with a recreatable body."}, vars: []LessonVariable{{Name: "err", Value: "nil"}, {Name: "req.GetBody", Value: "non-nil"}}},
 		{line: 3, caption: ch33Pair{ar: "افحص الجسم وطريقة إعادته.", en: "Check the body and replay function."}, output: "true true"},
 	}},
-	tryPrompt: ch33Pair{ar: "توقّع قيمة GetBody.", en: "Predict the GetBody value."},
+	tryPrompt: ch33Pair{ar: "توقّع الـvalue اللي هترجعها GetBody.", en: "Predict the GetBody value."},
 	tryCode: `func main() {
 	req, _ := http.NewRequest("POST", "https://dock.example/load", strings.NewReader("x"))
 	fmt.Println(req.GetBody != nil)
 }`, tryExampleID: "e331-getbody-check", tryImports: []string{"fmt", "net/http", "strings"}, tryFrames: []ch33FrameSpec{
 		{line: 0, caption: ch33Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
 		{line: 2, caption: ch33Pair{ar: "NewRequest جهز طريقة النسخ.", en: "NewRequest supplied a replay function."}, vars: []LessonVariable{{Name: "req.GetBody", Value: "non-nil"}}},
-		{line: 3, caption: ch33Pair{ar: "القيمة مش nil.", en: "The function is not nil."}, output: "true"},
+		{line: 3, caption: ch33Pair{ar: "الـfunction مش nil.", en: "The function is not nil."}, output: "true"},
 	},
 	tryOptions: []ch33Pair{{ar: "true", en: "true"}, {ar: "false", en: "false"}, {ar: "nil body", en: "nil body"}}, tryAnswer: 0,
-	tryFeedback: []ch33Pair{{ar: "strings.Reader بيدعم إعادة الجسم.", en: "strings.Reader supports body replay."}, {ar: "NewRequest ملأ GetBody هنا.", en: "NewRequest populated GetBody here."}, {ar: "الطلب له جسم في المثال.", en: "The example request has a body."}},
-	watch:       ch33Pair{ar: "- أثر POST ممكن يتكرر لو اتبعت تاني.\n- اقفل الرد اللي هتسيبه، وسيب الرد النهائي للمستدعي.\nالـtransport بينفذ محاولة؛ سياسة الإعادة مسؤولة عن قرارها.", en: "- Replaying a POST can repeat its effect.\n- Close a response you discard; leave the final response to its caller.\nThe transport performs an attempt; retry policy owns the decision."},
-	plan:        ch33Pair{ar: "حلّل قابلية الإعادة قبل محاولات الشبكة. راجع ملكية الجسم والرد وسياق الانتظار.\n\nخلي الإلغاء يوقف انتظار المحاولة التالية. اختبر قرار الإعادة قبل تعديل الجسم.", en: "Decide whether replay is safe before network attempts. Track body, response, and wait ownership.\n\nLet cancellation stop the next wait. Check replayability before changing the body."},
-	check:       ch33QuestionSpec{text: ch33Pair{ar: "إيه اللي يخلي إعادة POST آمنة من التكرار؟", en: "What can make replaying a POST safe from duplication?"}, options: []ch33Pair{{ar: "مفتاح تكرار يفهمه السيرفر", en: "An idempotency key the server honors"}, {ar: "زيادة عدد المحاولات", en: "More attempts"}, {ar: "إغلاق الاتصال أسرع", en: "Closing the connection sooner"}}, answer: 0, feedback: []ch33Pair{{ar: "السيرفر يقدر يميّز نفس العملية بالمفتاح.", en: "The server can recognize the same operation by its key."}, {ar: "المحاولات الكتير ممكن تكرر الأثر.", en: "More attempts can repeat the effect."}, {ar: "سرعة الإغلاق ما تمنعش تكرار الطلب.", en: "Closing faster does not prevent replay."}}},
-	turn:        ch33Pair{ar: "ابدأ بتصنيف الطلب قبل محاولة الإعادة.\nافحص إغلاق الرد والإلغاء مع حالات الخطأ.", en: "Classify the request before considering replay.\nCheck response closure and cancellation across failures."},
-	hints:       [3]ch33Pair{{ar: "الطلب القابل للإعادة لازم يحافظ على أثره وجسمه.", en: "A replayable request must preserve its effect and body."}, {ar: "افصل قرار إعادة الطلب عن سياسة الانتظار.", en: "Separate the replay decision from the wait policy."}, {ar: "راجع ~http.Request.GetBody~ وملكية ~Response.Body~.", en: "Review ~http.Request.GetBody~ and ownership of ~Response.Body~."}},
+	tryFeedback: []ch33Pair{{ar: "strings.Reader بيدعم إعادة الجسم.", en: "strings.Reader supports body replay."}, {ar: "NewRequest ملأ GetBody هنا.", en: "NewRequest populated GetBody here."}, {ar: "الـrequest له جسم في المثال.", en: "The example request has a body."}},
+	watch:       ch33Pair{ar: "- أثر POST ممكن يتكرر لو اتبعت تاني.\n- اقفل الـresponse اللي هتسيبه، وسيب الـresponse النهائي للمستدعي.\nالـtransport بينفذ محاولة؛ سياسة الإعادة مسؤولة عن قرارها.", en: "- Replaying a POST can repeat its effect.\n- Close a response you discard; leave the final response to its caller.\nThe transport performs an attempt; retry policy owns the decision."},
+	plan:        ch33Pair{ar: "حلّل قابلية الإعادة قبل محاولات الشبكة. راجع ملكية الجسم والـresponse والـcontext بتاع الانتظار.\n\nخلي الإلغاء يوقف انتظار المحاولة التالية. اختبر قرار الإعادة قبل تعديل الجسم.", en: "Decide whether replay is safe before network attempts. Track body, response, and wait ownership.\n\nLet cancellation stop the next wait. Check replayability before changing the body."},
+	check:       ch33QuestionSpec{text: ch33Pair{ar: "إيه اللي يخلي إعادة POST آمنة من التكرار؟", en: "What can make replaying a POST safe from duplication?"}, options: []ch33Pair{{ar: "idempotency key يفهمه الـserver", en: "An idempotency key the server honors"}, {ar: "زيادة عدد المحاولات", en: "More attempts"}, {ar: "إغلاق الاتصال أسرع", en: "Closing the connection sooner"}}, answer: 0, feedback: []ch33Pair{{ar: "الـserver يقدر يميّز نفس العملية بالـkey.", en: "The server can recognize the same operation by its key."}, {ar: "المحاولات الكتير ممكن تكرر الأثر.", en: "More attempts can repeat the effect."}, {ar: "سرعة الإغلاق ما تمنعش تكرار الـrequest.", en: "Closing faster does not prevent replay."}}},
+	turn:        ch33Pair{ar: "ابدأ بتصنيف الـrequest قبل محاولة الإعادة.\nافحص إغلاق الـresponse والإلغاء مع حالات الـerror.", en: "Classify the request before considering replay.\nCheck response closure and cancellation across failures."},
+	hints:       [3]ch33Pair{{ar: "الـrequest القابل للإعادة لازم يحافظ على أثره والـbody بتاعه.", en: "A replayable request must preserve its effect and body."}, {ar: "افصل قرار إعادة الـrequest عن سياسة الانتظار.", en: "Separate the replay decision from the wait policy."}, {ar: "راجع ~http.Request.GetBody~ وملكية ~Response.Body~.", en: "Review ~http.Request.GetBody~ and ownership of ~Response.Body~."}},
 	sandbox: ch33SandboxSpec{
 		id: "ch33-retry-client", kind: "ch33-http-flow",
-		text:    ch33Pair{ar: "تابع جسم الطلب قبل المحاولة وبعدها.", en: "Step through a request body across attempts."},
-		title:   ch33Pair{ar: "جسم الطلب", en: "Request body"},
+		text:    ch33Pair{ar: "تابع جسم الـrequest قبل المحاولة وبعدها.", en: "Step through a request body across attempts."},
+		title:   ch33Pair{ar: "جسم الـrequest", en: "Request body"},
 		advance: ch33Pair{ar: "الخطوة الجاية", en: "Next event"}, reset: ch33Pair{ar: "من الأول", en: "Reset"}, repeat: ch33Pair{ar: "ترتيب تاني", en: "Another order"},
-		runs: []ch33SandboxRun{{label: ch33Pair{ar: "طلب توضيحي", en: "Illustrative request"}, frames: []ch33SandboxFrame{
-			{caption: ch33Pair{ar: "جسم الطلب لسه مقروء.", en: "The request body is ready."}, leftLabel: ch33Pair{ar: "الجسم", en: "Body"}, leftValue: ch33Pair{ar: "stream جاهز", en: "stream: ready"}, rightLabel: ch33Pair{ar: "GetBody", en: "GetBody"}, rightValue: ch33Pair{ar: "موجود", en: "available"}},
+		runs: []ch33SandboxRun{{label: ch33Pair{ar: "request توضيحي", en: "Illustrative request"}, frames: []ch33SandboxFrame{
+			{caption: ch33Pair{ar: "جسم الـrequest لسه مقروء.", en: "The request body is ready."}, leftLabel: ch33Pair{ar: "الجسم", en: "Body"}, leftValue: ch33Pair{ar: "stream جاهز", en: "stream: ready"}, rightLabel: ch33Pair{ar: "GetBody", en: "GetBody"}, rightValue: ch33Pair{ar: "موجود", en: "available"}},
 			{caption: ch33Pair{ar: "المحاولة استهلكت الـstream.", en: "The attempt consumed its stream."}, leftLabel: ch33Pair{ar: "المحاولة", en: "Attempt"}, leftValue: ch33Pair{ar: "اترسلت", en: "sent"}, rightLabel: ch33Pair{ar: "GetBody", en: "GetBody"}, rightValue: ch33Pair{ar: "موجود", en: "available"}},
 			{caption: ch33Pair{ar: "إعادة المحاولة تحتاج جسم جديد.", en: "A retry needs a fresh body."}, leftLabel: ch33Pair{ar: "المحاولة", en: "Attempt"}, leftValue: ch33Pair{ar: "إعادة", en: "replay"}, rightLabel: ch33Pair{ar: "نسخة الجسم", en: "Body copy"}, rightValue: ch33Pair{ar: "جديدة", en: "fresh"}},
 		}}},
@@ -223,8 +223,8 @@ var ch33Lesson331Arabic, ch33Lesson331English, ch33Lesson331HintsArabic, ch33Les
 
 var ch33Lesson332Arabic, ch33Lesson332English, ch33Lesson332HintsArabic, ch33Lesson332HintsEnglish = ch33BuildLesson(ch33LessonSpec{
 	prefix:  "c332",
-	mission: ch33Pair{ar: "الوكيل بيستقبل طلب عام ويختار خدمة خلف من جدول موثوق.\nالتزم بحدود البوابة والهيدرات قبل إرسال الطلب.", en: "The proxy receives a public request and chooses a backend from trusted routes.\nRespect the gateway and header boundaries before forwarding."},
-	idea: ch33WalkSpec{text: ch33Pair{ar: "أي ~http.Handler~ بياخد writer وrequest، ويقرر يكتب رد أو يمرر الطلب.\nالمسار بيتقاس من الطلب الداخل.", en: "An ~http.Handler~ receives a writer and request, then writes a response or forwards work.\nRouting begins with the incoming request."}, code: `func main() {
+	mission: ch33Pair{ar: "الوكيل بيستقبل request عام ويختار خدمة خلف من جدول موثوق.\nالتزم بحدود البوابة والهيدرات قبل إرسال الـrequest.", en: "The proxy receives a public request and chooses a backend from trusted routes.\nRespect the gateway and header boundaries before forwarding."},
+	idea: ch33WalkSpec{text: ch33Pair{ar: "أي ~http.Handler~ بياخد writer وrequest، ويقرر يكتب response أو يمرر الـrequest.\nالمسار بيتقاس من الـrequest الداخل.", en: "An ~http.Handler~ receives a writer and request, then writes a response or forwards work.\nRouting begins with the incoming request."}, code: `func main() {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, r.URL.Path)
 	})
@@ -234,12 +234,12 @@ var ch33Lesson332Arabic, ch33Lesson332English, ch33Lesson332HintsArabic, ch33Les
 	fmt.Println(res.Body.String())
 }`, exampleID: "e332-handler-path", imports: []string{"fmt", "net/http", "net/http/httptest"}, frames: []ch33FrameSpec{
 		{line: 0, caption: ch33Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 2, caption: ch33Pair{ar: "الـhandler يستقبل الطلب.", en: "The handler receives the request."}},
+		{line: 2, caption: ch33Pair{ar: "الـhandler يستقبل الـrequest.", en: "The handler receives the request."}},
 		{line: 5, caption: ch33Pair{ar: "المسار يبدأ بـ hydro.", en: "The path starts with hydro."}, vars: []LessonVariable{{Name: "req.URL.Path", Value: "/hydro/pump"}}},
 		{line: 7, caption: ch33Pair{ar: "نفّذ handler محلي.", en: "Run the handler locally."}},
-		{line: 8, caption: ch33Pair{ar: "اقرأ الرد المسجل.", en: "Read the recorded response."}, output: "/hydro/pump"},
+		{line: 8, caption: ch33Pair{ar: "اقرا الـresponse المسجل.", en: "Read the recorded response."}, output: "/hydro/pump"},
 	}},
-	tryPrompt: ch33Pair{ar: "توقّع المسار اللي يسجله الرد.", en: "Predict the path recorded in the response."},
+	tryPrompt: ch33Pair{ar: "توقّع المسار اللي يسجله الـresponse.", en: "Predict the path recorded in the response."},
 	tryCode: `func main() {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, r.URL.Path)
@@ -250,32 +250,32 @@ var ch33Lesson332Arabic, ch33Lesson332English, ch33Lesson332HintsArabic, ch33Les
 	fmt.Println(res.Body.String())
 }`, tryExampleID: "e332-recorded-handler", tryImports: []string{"fmt", "net/http", "net/http/httptest"}, tryFrames: []ch33FrameSpec{
 		{line: 0, caption: ch33Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 5, caption: ch33Pair{ar: "الطلب جاي بمسار air.", en: "The request carries an air path."}, vars: []LessonVariable{{Name: "req.URL.Path", Value: "/air/valve"}}},
-		{line: 7, caption: ch33Pair{ar: "writer بيسجل الرد.", en: "The recorder stores the response."}},
-		{line: 8, caption: ch33Pair{ar: "اطبع الجسم المسجل.", en: "Print the recorded body."}, output: "/air/valve"},
+		{line: 5, caption: ch33Pair{ar: "الـrequest جاي بمسار air.", en: "The request carries an air path."}, vars: []LessonVariable{{Name: "req.URL.Path", Value: "/air/valve"}}},
+		{line: 7, caption: ch33Pair{ar: "writer بيسجل الـresponse.", en: "The recorder stores the response."}},
+		{line: 8, caption: ch33Pair{ar: "اطبع الـbody المسجل.", en: "Print the recorded body."}, output: "/air/valve"},
 	},
 	tryOptions: []ch33Pair{{ar: "/air/valve", en: "/air/valve"}, {ar: "/hydro/pump", en: "/hydro/pump"}, {ar: "مسار فاضي", en: "An empty path"}}, tryAnswer: 0,
-	tryFeedback: []ch33Pair{{ar: "الطلب التجريبي حدد المسار ده.", en: "The test request sets this path."}, {ar: "ده مسار المثال السابق.", en: "That was the previous example's path."}, {ar: "الـrecorder جمع النص المكتوب.", en: "The recorder captured the written text."}},
-	watch:       ch33Pair{ar: "- ما تاخدش عنوان الـbackend من query العميل.\n- امسح الهيدرات اللي العميل ممكن يزوّرها.\nالمضيف الداخلي يفضل من الإعداد الموثوق.", en: "- Never take a backend address from the client's query.\n- Remove headers that the client could forge.\nKeep backend hosts in trusted configuration."},
-	plan:        ch33Pair{ar: "افصل التحقق من route عن إعادة كتابة الطلب.\nبعدها راجع المهلة، رد الوحدة، ومسار الخطأ.\nالتوجيه وحده مش بديل عن صلاحية الطلب.", en: "Separate route validation from request rewriting.\nThen review the timeout, backend response, and error path.\nRouting alone does not authorize a request."},
-	check:       ch33QuestionSpec{text: ch33Pair{ar: "مين يحدد عناوين الوحدات الخلفية؟", en: "Who should determine backend unit addresses?"}, options: []ch33Pair{{ar: "جدول مسارات موثوق", en: "A trusted route table"}, {ar: "قيمة يرسلها العميل", en: "A value supplied by the client"}, {ar: "هيدر X-Forwarded-For", en: "The X-Forwarded-For header"}}, answer: 0, feedback: []ch33Pair{{ar: "الجدول يحدّد الوجهات المسموحة.", en: "The table defines allowed destinations."}, {ar: "عنوان العميل ممكن يفتح وصول داخلي.", en: "A client URL could expose internal services."}, {ar: "الهيدر بيوصف المصدر، مش الوجهة.", en: "That header describes the source, not the destination."}}},
+	tryFeedback: []ch33Pair{{ar: "الـrequest التجريبي حدد المسار ده.", en: "The test request sets this path."}, {ar: "ده مسار المثال السابق.", en: "That was the previous example's path."}, {ar: "الـrecorder جمع النص المكتوب.", en: "The recorder captured the written text."}},
+	watch:       ch33Pair{ar: "- ما تاخدش عنوان الـbackend من query الـclient.\n- امسح الهيدرات اللي الـclient ممكن يزوّرها.\nالمضيف الداخلي يفضل من الإعداد الموثوق.", en: "- Never take a backend address from the client's query.\n- Remove headers that the client could forge.\nKeep backend hosts in trusted configuration."},
+	plan:        ch33Pair{ar: "افصل التحقق من route عن إعادة كتابة الـrequest.\nبعدها راجع المهلة، response الوحدة، ومسار الـerror.\nالتوجيه وحده مش بديل عن صلاحية الـrequest.", en: "Separate route validation from request rewriting.\nThen review the timeout, backend response, and error path.\nRouting alone does not authorize a request."},
+	check:       ch33QuestionSpec{text: ch33Pair{ar: "مين يحدد عناوين الوحدات الخلفية؟", en: "Who should determine backend unit addresses?"}, options: []ch33Pair{{ar: "جدول مسارات موثوق", en: "A trusted route table"}, {ar: "value يرسلها الـclient", en: "A value supplied by the client"}, {ar: "هيدر X-Forwarded-For", en: "The X-Forwarded-For header"}}, answer: 0, feedback: []ch33Pair{{ar: "الجدول يحدّد الوجهات المسموحة.", en: "The table defines allowed destinations."}, {ar: "عنوان الـclient ممكن يفتح وصول داخلي.", en: "A client URL could expose internal services."}, {ar: "الهيدر بيوصف المصدر، مش الوجهة.", en: "That header describes the source, not the destination."}}},
 	turn:        ch33Pair{ar: "ابدأ بالوجهات الموثوقة وسلوك handler.\nجرّب مسار معروف ومسار مرفوض من غير وحدة حقيقية.", en: "Start with trusted targets and handler behavior.\nTry a known route and a rejected route without a real unit."},
-	hints:       [3]ch33Pair{{ar: "Reverse proxy يستقبل طلب ويرجّع رد backend عبر بوابة واحدة.", en: "A reverse proxy receives a request and returns a backend response through one gateway."}, {ar: "افصل جدول الوجهات عن الطلب الوارد وراجع قواعد الهيدرات.", en: "Separate trusted targets from incoming requests and review header rules."}, {ar: "راجع ~httputil.ProxyRequest.SetURL~ و~ReverseProxy.Rewrite~.", en: "Review ~httputil.ProxyRequest.SetURL~ and ~ReverseProxy.Rewrite~."}},
+	hints:       [3]ch33Pair{{ar: "Reverse proxy يستقبل request ويرجّع response من backend عبر بوابة واحدة.", en: "A reverse proxy receives a request and returns a backend response through one gateway."}, {ar: "افصل جدول الوجهات عن الـrequest الوارد وراجع قواعد الهيدرات.", en: "Separate trusted targets from incoming requests and review header rules."}, {ar: "راجع ~httputil.ProxyRequest.SetURL~ و~ReverseProxy.Rewrite~.", en: "Review ~httputil.ProxyRequest.SetURL~ and ~ReverseProxy.Rewrite~."}},
 	sandbox: ch33SandboxSpec{
 		id: "ch33-reverse-proxy", kind: "ch33-http-flow",
 		text:    ch33Pair{ar: "شوف المسار اللي بيوصل للـhandler.", en: "Watch the path received by a handler."},
 		title:   ch33Pair{ar: "المسار الوارد", en: "Incoming path"},
-		advance: ch33Pair{ar: "طلب تاني", en: "Next request"}, reset: ch33Pair{ar: "من الأول", en: "Reset"}, repeat: ch33Pair{ar: "ترتيب تاني", en: "Another order"},
-		runs: []ch33SandboxRun{{label: ch33Pair{ar: "طلبات محلية للتوضيح", en: "Illustrative local requests"}, frames: []ch33SandboxFrame{
-			{caption: ch33Pair{ar: "الـhandler استقبل المسار.", en: "The handler received this path."}, leftLabel: ch33Pair{ar: "الطلب", en: "Request"}, leftValue: ch33Pair{ar: "/hydro/pump", en: "/hydro/pump"}, rightLabel: ch33Pair{ar: "المسجل", en: "Recorded"}, rightValue: ch33Pair{ar: "/hydro/pump", en: "/hydro/pump"}},
-			{caption: ch33Pair{ar: "طلب تاني له مساره.", en: "Another request carries its path."}, leftLabel: ch33Pair{ar: "الطلب", en: "Request"}, leftValue: ch33Pair{ar: "/air/valve", en: "/air/valve"}, rightLabel: ch33Pair{ar: "المسجل", en: "Recorded"}, rightValue: ch33Pair{ar: "/air/valve", en: "/air/valve"}},
+		advance: ch33Pair{ar: "request تاني", en: "Next request"}, reset: ch33Pair{ar: "من الأول", en: "Reset"}, repeat: ch33Pair{ar: "ترتيب تاني", en: "Another order"},
+		runs: []ch33SandboxRun{{label: ch33Pair{ar: "requests محلية للتوضيح", en: "Illustrative local requests"}, frames: []ch33SandboxFrame{
+			{caption: ch33Pair{ar: "الـhandler استقبل المسار.", en: "The handler received this path."}, leftLabel: ch33Pair{ar: "الـrequest", en: "Request"}, leftValue: ch33Pair{ar: "/hydro/pump", en: "/hydro/pump"}, rightLabel: ch33Pair{ar: "المسجل", en: "Recorded"}, rightValue: ch33Pair{ar: "/hydro/pump", en: "/hydro/pump"}},
+			{caption: ch33Pair{ar: "request تاني له مساره.", en: "Another request carries its path."}, leftLabel: ch33Pair{ar: "الـrequest", en: "Request"}, leftValue: ch33Pair{ar: "/air/valve", en: "/air/valve"}, rightLabel: ch33Pair{ar: "المسجل", en: "Recorded"}, rightValue: ch33Pair{ar: "/air/valve", en: "/air/valve"}},
 		}}},
 	},
 })
 
 var ch33Lesson333Arabic, ch33Lesson333English, ch33Lesson333HintsArabic, ch33Lesson333HintsEnglish = ch33BuildLesson(ch33LessonSpec{
 	prefix:  "c333",
-	mission: ch33Pair{ar: "المهمة بتوزّع الطلبات على وحدات متشابهة وتراقب صحتها.\nالحالة المشتركة محتاجة تفضل سليمة تحت طلبات متزامنة.", en: "The mission distributes requests across similar units and tracks their health.\nShared state must stay correct under concurrent requests."},
+	mission: ch33Pair{ar: "المهمة بتوزّع الـrequests على وحدات متشابهة وتراقب صحتها.\nالحالة المشتركة محتاجة تفضل سليمة تحت requests متزامنة.", en: "The mission distributes requests across similar units and tracks their health.\nShared state must stay correct under concurrent requests."},
 	idea: ch33WalkSpec{text: ch33Pair{ar: "Mutex بيحمي قراءة وتحديث الحالة كعملية واحدة.\nالمثال يبيّن العداد من غير goroutines أو افتراض ترتيب متزامن.", en: "A mutex protects reading and updating shared state as one operation.\nThis example shows a counter without goroutines or assumptions about concurrent order."}, code: `type Counter struct { mu sync.Mutex; next int }
 func (c *Counter) Take() int {
 	c.mu.Lock()
@@ -293,9 +293,9 @@ func main() {
 		{line: 10, caption: ch33Pair{ar: "العداد يبدأ بصفر.", en: "The counter starts at zero."}, vars: []LessonVariable{{Name: "c.next", Value: "0"}}},
 		{line: 11, caption: ch33Pair{ar: "أول نداء يرجع صفر.", en: "The first call returns zero."}, vars: []LessonVariable{{Name: "c.next", Value: "1"}}},
 		{line: 11, caption: ch33Pair{ar: "النداء التاني يرجع واحد.", en: "The second call returns one."}, vars: []LessonVariable{{Name: "c.next", Value: "2"}}},
-		{line: 11, caption: ch33Pair{ar: "اطبع القيمتين.", en: "Print both values."}, vars: []LessonVariable{{Name: "c.next", Value: "2"}}, output: "0 1"},
+		{line: 11, caption: ch33Pair{ar: "اطبع الـvalues.", en: "Print both values."}, vars: []LessonVariable{{Name: "c.next", Value: "2"}}, output: "0 1"},
 	}},
-	tryPrompt: ch33Pair{ar: "توقّع أول قيمتين للعداد.", en: "Predict the first two counter values."},
+	tryPrompt: ch33Pair{ar: "توقّع أول values للعداد.", en: "Predict the first two counter values."},
 	tryCode: `func main() {
 	mu := sync.Mutex{}
 	next := 4
@@ -306,17 +306,17 @@ func main() {
 }`, tryExampleID: "e333-locked-update", tryImports: []string{"fmt", "sync"}, tryFrames: []ch33FrameSpec{
 		{line: 0, caption: ch33Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
 		{line: 2, caption: ch33Pair{ar: "الحالة تبدأ عند 4.", en: "The state starts at 4."}, vars: []LessonVariable{{Name: "next", Value: "4"}}},
-		{line: 3, caption: ch33Pair{ar: "القفل اتاخد.", en: "The lock is held."}, vars: []LessonVariable{{Name: "next", Value: "4"}}},
-		{line: 4, caption: ch33Pair{ar: "زود القيمة مرة.", en: "Increment the value once."}, vars: []LessonVariable{{Name: "next", Value: "5"}}},
-		{line: 6, caption: ch33Pair{ar: "اطبع القيمة الجديدة.", en: "Print the updated value."}, vars: []LessonVariable{{Name: "next", Value: "5"}}, output: "5"},
+		{line: 3, caption: ch33Pair{ar: "الـlock اتاخد.", en: "The lock is held."}, vars: []LessonVariable{{Name: "next", Value: "4"}}},
+		{line: 4, caption: ch33Pair{ar: "زوّد الـvalue مرة.", en: "Increment the value once."}, vars: []LessonVariable{{Name: "next", Value: "5"}}},
+		{line: 6, caption: ch33Pair{ar: "اطبع الـvalue الجديدة.", en: "Print the updated value."}, vars: []LessonVariable{{Name: "next", Value: "5"}}, output: "5"},
 	},
 	tryOptions: []ch33Pair{{ar: "5", en: "5"}, {ar: "4", en: "4"}, {ar: "0", en: "0"}}, tryAnswer: 0,
-	tryFeedback: []ch33Pair{{ar: "التحديث زوّد 4 بواحد.", en: "The update added one to 4."}, {ar: "الطباعة بعد التحديث.", en: "Printing happens after the update."}, {ar: "next اتبدأت بقيمة 4.", en: "next started at 4."}},
-	watch:       ch33Pair{ar: "- ماتمسكش القفل وانت مستني الشبكة.\n- نتيجة الفحص والـbody محتاجين تنظيف واضح.\nفحص الصحة يقدر يرجّع وحدة سليمة للخدمة.\nحدّث الصحة بعد ما نتيجة الشبكة تبقى معروفة.", en: "- Do not hold a lock while waiting on the network.\n- Health results and response bodies need clear cleanup.\nA health check can bring a recovered unit back.\nUpdate health after the network result is known."},
+	tryFeedback: []ch33Pair{{ar: "التحديث زوّد 4 بواحد.", en: "The update added one to 4."}, {ar: "الطباعة بعد التحديث.", en: "Printing happens after the update."}, {ar: "next بدأت بـvalue 4.", en: "next started at 4."}},
+	watch:       ch33Pair{ar: "- ماتمسكش الـlock وانت مستني الشبكة.\n- نتيجة الفحص والـbody محتاجين تنظيف واضح.\nفحص الصحة يقدر يرجّع وحدة سليمة للخدمة.\nحدّث الصحة بعد ما نتيجة الشبكة تبقى معروفة.", en: "- Do not hold a lock while waiting on the network.\n- Health results and response bodies need clear cleanup.\nA health check can bring a recovered unit back.\nUpdate health after the network result is known."},
 	plan:        ch33Pair{ar: "راجع تحديث الحالة، اختيار الوحدة، ثم فحص الصحة.\nاستخدم -race كدليل إضافي على الحالة المشتركة.", en: "Review state updates, unit selection, then health checks.\nUse -race as additional evidence about shared state."},
-	check:       ch33QuestionSpec{text: ch33Pair{ar: "فين تعمل طلب health check بطيء؟", en: "Where should a slow health check run?"}, options: []ch33Pair{{ar: "برّه القفل", en: "Outside the lock"}, {ar: "والقفل ماسك طول الشبكة", en: "While holding the lock across the network call"}, {ar: "في fmt.Println", en: "Inside fmt.Println"}}, answer: 0, feedback: []ch33Pair{{ar: "الشبكة ممكن تتأخر؛ خلي الطلبات التانية تكمل.", en: "Network calls can wait; let other requests proceed."}, {ar: "القفل الطويل يوقف تحديثات واختيارات تانية.", en: "A long-held lock blocks other updates and picks."}, {ar: "الطباعة مش مكان فحص الصحة.", en: "Printing is not a health check."}}},
-	turn:        ch33Pair{ar: "ابدأ بحالة صغيرة وتتبّع قفلها.\nبعدها راجع فشل وحدة وتعافيها من غير انتظار دوري.", en: "Start with small state and trace its lock.\nThen inspect unit failure and recovery without a periodic timer."},
-	hints:       [3]ch33Pair{{ar: "Mutex بيحمي الحالة المشتركة من التحديثات المتداخلة.", en: "A mutex protects shared state from overlapping updates."}, {ar: "افصل قرار الاختيار عن طلبات health check على الشبكة.", en: "Separate selection decisions from network health checks."}, {ar: "راجع ~sync.Mutex~ و~http.NewRequestWithContext~ و~RoundTrip~.", en: "Review ~sync.Mutex~, ~http.NewRequestWithContext~, and ~RoundTrip~."}},
+	check:       ch33QuestionSpec{text: ch33Pair{ar: "فين تعمل request health check بطيء؟", en: "Where should a slow health check run?"}, options: []ch33Pair{{ar: "برّه الـlock", en: "Outside the lock"}, {ar: "والـlock ماسك طول الشبكة", en: "While holding the lock across the network call"}, {ar: "في fmt.Println", en: "Inside fmt.Println"}}, answer: 0, feedback: []ch33Pair{{ar: "الشبكة ممكن تتأخر؛ خلي الـrequests التانية تكمل.", en: "Network calls can wait; let other requests proceed."}, {ar: "الـlock الطويل يوقف تحديثات واختيارات تانية.", en: "A long-held lock blocks other updates and picks."}, {ar: "الطباعة مش مكان فحص الصحة.", en: "Printing is not a health check."}}},
+	turn:        ch33Pair{ar: "ابدأ بحالة صغيرة وتتبّع lock الحالة.\nبعدها راجع فشل وحدة وتعافيها من غير انتظار دوري.", en: "Start with small state and trace its lock.\nThen inspect unit failure and recovery without a periodic timer."},
+	hints:       [3]ch33Pair{{ar: "Mutex بيحمي الحالة المشتركة من التحديثات المتداخلة.", en: "A mutex protects shared state from overlapping updates."}, {ar: "افصل قرار الاختيار عن health check requests على الشبكة.", en: "Separate selection decisions from network health checks."}, {ar: "راجع ~sync.Mutex~ و~http.NewRequestWithContext~ و~RoundTrip~.", en: "Review ~sync.Mutex~, ~http.NewRequestWithContext~, and ~RoundTrip~."}},
 	sandbox: ch33SandboxSpec{
 		id: "ch33-load-balancer", kind: "ch33-http-flow",
 		text:    ch33Pair{ar: "بدّل ترتيب تحديثات goroutines وشوف العداد.", en: "Switch possible goroutine orders and watch the counter."},
@@ -324,14 +324,14 @@ func main() {
 		advance: ch33Pair{ar: "الحدث الجاي", en: "Next event"}, reset: ch33Pair{ar: "من الأول", en: "Reset"}, repeat: ch33Pair{ar: "ترتيب محتمل تاني", en: "Another possible order"},
 		runs: []ch33SandboxRun{
 			{label: ch33Pair{ar: "ترتيب محتمل: A ثم B", en: "One possible order: A then B"}, frames: []ch33SandboxFrame{
-				{caption: ch33Pair{ar: "العداد محمي بقفل.", en: "The counter is protected by a lock."}, leftLabel: ch33Pair{ar: "القيمة", en: "Value"}, leftValue: ch33Pair{ar: "0", en: "0"}, rightLabel: ch33Pair{ar: "التالي", en: "Next"}, rightValue: ch33Pair{ar: "A", en: "A"}},
-				{caption: ch33Pair{ar: "A حدّثت الحالة.", en: "A updated the shared state."}, leftLabel: ch33Pair{ar: "القيمة", en: "Value"}, leftValue: ch33Pair{ar: "1", en: "1"}, rightLabel: ch33Pair{ar: "التالي", en: "Next"}, rightValue: ch33Pair{ar: "B", en: "B"}},
-				{caption: ch33Pair{ar: "B حدّثت الحالة.", en: "B updated the shared state."}, leftLabel: ch33Pair{ar: "القيمة", en: "Value"}, leftValue: ch33Pair{ar: "2", en: "2"}, rightLabel: ch33Pair{ar: "الحالة", en: "State"}, rightValue: ch33Pair{ar: "محمية", en: "protected"}},
+				{caption: ch33Pair{ar: "العداد محمي بـlock.", en: "The counter is protected by a lock."}, leftLabel: ch33Pair{ar: "الـvalue", en: "Value"}, leftValue: ch33Pair{ar: "0", en: "0"}, rightLabel: ch33Pair{ar: "التالي", en: "Next"}, rightValue: ch33Pair{ar: "A", en: "A"}},
+				{caption: ch33Pair{ar: "A حدّثت الحالة.", en: "A updated the shared state."}, leftLabel: ch33Pair{ar: "الـvalue", en: "Value"}, leftValue: ch33Pair{ar: "1", en: "1"}, rightLabel: ch33Pair{ar: "التالي", en: "Next"}, rightValue: ch33Pair{ar: "B", en: "B"}},
+				{caption: ch33Pair{ar: "B حدّثت الحالة.", en: "B updated the shared state."}, leftLabel: ch33Pair{ar: "الـvalue", en: "Value"}, leftValue: ch33Pair{ar: "2", en: "2"}, rightLabel: ch33Pair{ar: "الحالة", en: "State"}, rightValue: ch33Pair{ar: "محمية", en: "protected"}},
 			}},
 			{label: ch33Pair{ar: "ترتيب محتمل: B ثم A", en: "Another possible order: B then A"}, frames: []ch33SandboxFrame{
-				{caption: ch33Pair{ar: "العداد محمي بقفل.", en: "The counter is protected by a lock."}, leftLabel: ch33Pair{ar: "القيمة", en: "Value"}, leftValue: ch33Pair{ar: "0", en: "0"}, rightLabel: ch33Pair{ar: "التالي", en: "Next"}, rightValue: ch33Pair{ar: "B", en: "B"}},
-				{caption: ch33Pair{ar: "B حدّثت الحالة.", en: "B updated the shared state."}, leftLabel: ch33Pair{ar: "القيمة", en: "Value"}, leftValue: ch33Pair{ar: "1", en: "1"}, rightLabel: ch33Pair{ar: "التالي", en: "Next"}, rightValue: ch33Pair{ar: "A", en: "A"}},
-				{caption: ch33Pair{ar: "A حدّثت الحالة.", en: "A updated the shared state."}, leftLabel: ch33Pair{ar: "القيمة", en: "Value"}, leftValue: ch33Pair{ar: "2", en: "2"}, rightLabel: ch33Pair{ar: "الحالة", en: "State"}, rightValue: ch33Pair{ar: "محمية", en: "protected"}},
+				{caption: ch33Pair{ar: "العداد محمي بـlock.", en: "The counter is protected by a lock."}, leftLabel: ch33Pair{ar: "الـvalue", en: "Value"}, leftValue: ch33Pair{ar: "0", en: "0"}, rightLabel: ch33Pair{ar: "التالي", en: "Next"}, rightValue: ch33Pair{ar: "B", en: "B"}},
+				{caption: ch33Pair{ar: "B حدّثت الحالة.", en: "B updated the shared state."}, leftLabel: ch33Pair{ar: "الـvalue", en: "Value"}, leftValue: ch33Pair{ar: "1", en: "1"}, rightLabel: ch33Pair{ar: "التالي", en: "Next"}, rightValue: ch33Pair{ar: "A", en: "A"}},
+				{caption: ch33Pair{ar: "A حدّثت الحالة.", en: "A updated the shared state."}, leftLabel: ch33Pair{ar: "الـvalue", en: "Value"}, leftValue: ch33Pair{ar: "2", en: "2"}, rightLabel: ch33Pair{ar: "الحالة", en: "State"}, rightValue: ch33Pair{ar: "محمية", en: "protected"}},
 			}},
 		},
 	},
@@ -339,8 +339,8 @@ func main() {
 
 var ch33Lesson334Arabic, ch33Lesson334English, ch33Lesson334HintsArabic, ch33Lesson334HintsEnglish = ch33BuildLesson(ch33LessonSpec{
 	prefix:  "c334",
-	mission: ch33Pair{ar: "البوابة تجمع طبقات مشتركة قبل الطلب اللي رايح للخدمة.\nترتيب الطبقات يحدد إيه اللي يحصل للطلب المرفوض.", en: "The gateway composes shared layers before forwarding to a service.\nLayer order determines what happens to a rejected request."},
-	idea: ch33WalkSpec{text: ch33Pair{ar: "Middleware بتلف handler. تقدر تجهز الرد قبل ما تنادي الطبقة اللي بعدها.\n\nسياق الطلب ينقل قيمة محتاجاها الطبقة اللي جوه في السلسلة. والطبقة ممكن ترفض الطلب وتوقف السلسلة.", en: "Middleware wraps a handler. It can set a response before calling the next layer.\n\nRequest context carries values inward. A layer can reject and stop the chain."}, code: `func main() {
+	mission: ch33Pair{ar: "البوابة تجمع طبقات مشتركة قبل الـrequest اللي رايح للخدمة.\nترتيب الطبقات يحدد إيه اللي يحصل للـrequest المرفوض.", en: "The gateway composes shared layers before forwarding to a service.\nLayer order determines what happens to a rejected request."},
+	idea: ch33WalkSpec{text: ch33Pair{ar: "Middleware بتلف handler. تقدر تجهز الـresponse قبل ما تنادي الطبقة اللي بعدها.\n\nالـrequest context بينقل value محتاجاها الطبقة اللي جوه في السلسلة. والطبقة ممكن ترفض الـrequest وتوقف السلسلة.", en: "Middleware wraps a handler. It can set a response before calling the next layer.\n\nRequest context carries values inward. A layer can reject and stop the chain."}, code: `func main() {
 	stamp := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("X-Lesson", "ready")
@@ -357,7 +357,7 @@ var ch33Lesson334Arabic, ch33Lesson334English, ch33Lesson334HintsArabic, ch33Les
 		{line: 4, caption: ch33Pair{ar: "الطبقة بتحط هيدر.", en: "The layer adds a header."}},
 		{line: 5, caption: ch33Pair{ar: "بعدها تنادي handler اللي بعدها.", en: "Then it calls the next handler."}},
 		{line: 10, caption: ch33Pair{ar: "شغّل السلسلة محليًا.", en: "Run the chain locally."}},
-		{line: 11, caption: ch33Pair{ar: "اقرأ الهيدر والجسم.", en: "Read the header and body."}, output: "ready ok"},
+		{line: 11, caption: ch33Pair{ar: "اقرا الـheader والـbody.", en: "Read the header and body."}, output: "ready ok"},
 	}},
 	tryPrompt: ch33Pair{ar: "توقّع الهيدر والجسم.", en: "Predict the header and body."},
 	tryCode: `func main() {
@@ -372,39 +372,39 @@ var ch33Lesson334Arabic, ch33Lesson334English, ch33Lesson334HintsArabic, ch33Les
 		{line: 0, caption: ch33Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
 		{line: 3, caption: ch33Pair{ar: "الـhandler جهز الهيدر.", en: "The handler sets a header."}},
 		{line: 4, caption: ch33Pair{ar: "اكتب الجسم.", en: "Write the body."}},
-		{line: 7, caption: ch33Pair{ar: "سجل الطلب والرد.", en: "Record the request and response."}},
+		{line: 7, caption: ch33Pair{ar: "سجّل الـrequest والـresponse.", en: "Record the request and response."}},
 		{line: 8, caption: ch33Pair{ar: "اطبع الحقلين.", en: "Print both values."}, output: "on done"},
 	},
 	tryOptions: []ch33Pair{{ar: "on done", en: "on done"}, {ar: "done on", en: "done on"}, {ar: "فاضي فاضي", en: "empty empty"}}, tryAnswer: 0,
 	tryFeedback: []ch33Pair{{ar: "الهيدر والجسم اتحضروا قبل الطباعة.", en: "The header and body were set before printing."}, {ar: "الـfmt.Println بتعرض الهيدر الأول.", en: "fmt.Println prints the header first."}, {ar: "الـhandler كتب الاتنين.", en: "The handler wrote both values."}},
-	watch:       ch33Pair{ar: "- ترتيب الطبقات سياسة للبوابة.\n- امسح الأسرار والهيدرات الموثوقة اللي جايه من العميل.", en: "- Layer order is gateway policy.\n- Strip secrets and trusted headers supplied by the client."},
-	plan:        ch33Pair{ar: "تتبّع الطلب من أول طبقة لحد الـproxy.\nاختبر الرفض قبل الشبكة، وبعدها راجع الهيدرات المرسلة.", en: "Trace a request from the first layer to the proxy.\nCheck rejection before networking, then inspect forwarded headers."},
-	check:       ch33QuestionSpec{text: ch33Pair{ar: "إمتى handler ملفوفة بتشغّل اللي بعدها؟", en: "When does a wrapped handler run the next handler?"}, options: []ch33Pair{{ar: "لما تنادي ~next.ServeHTTP~", en: "When it calls ~next.ServeHTTP~"}, {ar: "وقت تعريف الدالة بس", en: "Only when the function is defined"}, {ar: "بعد ما request يختفي", en: "After the request disappears"}}, answer: 0, feedback: []ch33Pair{{ar: "النداء بيمرر الطلب للطبقة الداخلية.", en: "The call passes the request to the inner layer."}, {ar: "التعريف لوحده مش بيشغلها.", en: "Defining a function does not run it."}, {ar: "الـhandler شغالة أثناء الطلب.", en: "The handler runs during the request."}}},
+	watch:       ch33Pair{ar: "- ترتيب الطبقات سياسة للبوابة.\n- امسح الأسرار والهيدرات الموثوقة اللي جايه من الـclient.", en: "- Layer order is gateway policy.\n- Strip secrets and trusted headers supplied by the client."},
+	plan:        ch33Pair{ar: "تتبّع الـrequest من أول طبقة لحد الـproxy.\nاختبر الرفض قبل الشبكة، وبعدها راجع الهيدرات المرسلة.", en: "Trace a request from the first layer to the proxy.\nCheck rejection before networking, then inspect forwarded headers."},
+	check:       ch33QuestionSpec{text: ch33Pair{ar: "إمتى handler ملفوفة بتشغّل اللي بعدها؟", en: "When does a wrapped handler run the next handler?"}, options: []ch33Pair{{ar: "لما تنادي ~next.ServeHTTP~", en: "When it calls ~next.ServeHTTP~"}, {ar: "وقت تعريف الـfunction بس", en: "Only when the function is defined"}, {ar: "بعد ما request يختفي", en: "After the request disappears"}}, answer: 0, feedback: []ch33Pair{{ar: "النداء بيمرر الـrequest للطبقة الداخلية.", en: "The call passes the request to the inner layer."}, {ar: "التعريف لوحده مش بيشغّلها.", en: "Defining a function does not run it."}, {ar: "الـhandler شغالة أثناء الـrequest.", en: "The handler runs during the request."}}},
 	turn:        ch33Pair{ar: "ابنِ طبقة واحدة وجربها محليًا.\nبعدها راجع ترتيب الرفض والهيدرات قبل توصيلها للخدمات.", en: "Build one layer and run it locally.\nThen review rejection order and headers before connecting services."},
-	hints:       [3]ch33Pair{{ar: "Middleware هي دالة بتلف ~http.Handler~ تاني.", en: "Middleware is a function that wraps another ~http.Handler~."}, {ar: "ارسم القيم اللي تعرفها كل طبقة وإيه اللي بعدها محتاجاه.", en: "Map what each layer learns and what the next layer needs."}, {ar: "راجع ~http.HandlerFunc~ و~Request.WithContext~ و~Chain~.", en: "Review ~http.HandlerFunc~, ~Request.WithContext~, and ~Chain~."}},
+	hints:       [3]ch33Pair{{ar: "Middleware هي function بتلف ~http.Handler~ تاني.", en: "Middleware is a function that wraps another ~http.Handler~."}, {ar: "ارسم الـvalues اللي تعرفها كل طبقة وإيه اللي بعدها محتاجاه.", en: "Map what each layer learns and what the next layer needs."}, {ar: "راجع ~http.HandlerFunc~ و~Request.WithContext~ و~Chain~.", en: "Review ~http.HandlerFunc~, ~Request.WithContext~, and ~Chain~."}},
 	sandbox: ch33SandboxSpec{
 		id: "ch33-gateway", kind: "ch33-http-flow",
-		text:    ch33Pair{ar: "تابع الطلب وهو بيعدي من طبقات البوابة.", en: "Follow a request through gateway layers."},
+		text:    ch33Pair{ar: "تابع الـrequest وهو بيعدي من طبقات البوابة.", en: "Follow a request through gateway layers."},
 		title:   ch33Pair{ar: "طبقات البوابة", en: "Gateway layers"},
 		advance: ch33Pair{ar: "الطبقة الجاية", en: "Next layer"}, reset: ch33Pair{ar: "من الأول", en: "Reset"}, repeat: ch33Pair{ar: "ترتيب تاني", en: "Another order"},
-		runs: []ch33SandboxRun{{label: ch33Pair{ar: "طلب توضيحي", en: "Illustrative request"}, frames: []ch33SandboxFrame{
-			{caption: ch33Pair{ar: "الطلب وصل للبوابة.", en: "The request reached the gateway."}, leftLabel: ch33Pair{ar: "المسار", en: "Path"}, leftValue: ch33Pair{ar: "/hydro/pump", en: "/hydro/pump"}, rightLabel: ch33Pair{ar: "الطبقة", en: "Layer"}, rightValue: ch33Pair{ar: "identity", en: "identity"}},
-			{caption: ch33Pair{ar: "طبقة أضافت سياقًا.", en: "A layer added request context."}, leftLabel: ch33Pair{ar: "السياق", en: "Context"}, leftValue: ch33Pair{ar: "crew key", en: "crew key"}, rightLabel: ch33Pair{ar: "الطبقة", en: "Layer"}, rightValue: ch33Pair{ar: "rate check", en: "rate check"}},
-			{caption: ch33Pair{ar: "الطلب وصل للمعالج الداخلي.", en: "The request reached the inner handler."}, leftLabel: ch33Pair{ar: "السياق", en: "Context"}, leftValue: ch33Pair{ar: "ready", en: "ready"}, rightLabel: ch33Pair{ar: "الطبقة", en: "Layer"}, rightValue: ch33Pair{ar: "proxy", en: "proxy"}},
+		runs: []ch33SandboxRun{{label: ch33Pair{ar: "request توضيحي", en: "Illustrative request"}, frames: []ch33SandboxFrame{
+			{caption: ch33Pair{ar: "الـrequest وصل للبوابة.", en: "The request reached the gateway."}, leftLabel: ch33Pair{ar: "المسار", en: "Path"}, leftValue: ch33Pair{ar: "/hydro/pump", en: "/hydro/pump"}, rightLabel: ch33Pair{ar: "الطبقة", en: "Layer"}, rightValue: ch33Pair{ar: "identity", en: "identity"}},
+			{caption: ch33Pair{ar: "طبقة أضافت context.", en: "A layer added request context."}, leftLabel: ch33Pair{ar: "الـcontext", en: "Context"}, leftValue: ch33Pair{ar: "crew key", en: "crew key"}, rightLabel: ch33Pair{ar: "الطبقة", en: "Layer"}, rightValue: ch33Pair{ar: "rate check", en: "rate check"}},
+			{caption: ch33Pair{ar: "الـrequest وصل للـhandler الداخلي.", en: "The request reached the inner handler."}, leftLabel: ch33Pair{ar: "الـcontext", en: "Context"}, leftValue: ch33Pair{ar: "ready", en: "ready"}, rightLabel: ch33Pair{ar: "الطبقة", en: "Layer"}, rightValue: ch33Pair{ar: "proxy", en: "proxy"}},
 		}}},
 	},
 })
 
 var ch33Lesson33BossArabic, ch33Lesson33BossEnglish, ch33Lesson33BossHintsArabic, ch33Lesson33BossHintsEnglish = ch33BuildLesson(ch33LessonSpec{
 	prefix:  "c33boss",
-	mission: ch33Pair{ar: "ده تجميع لأدوات اتعلمتها قبل كده في وصلة واحدة.\nابدأ من العقد المكتوب، وحدد مين يملك الاتصال والرد في كل خروج.", en: "This checkpoint combines tools you have already learned in one relay.\nStart from the written contract and track who owns the connection and response on every exit."},
-	idea: ch33WalkSpec{text: ch33Pair{ar: "~io.ReadFull~ بتملا الـbuffer المطلوب أو بترجع خطأ.\nالـlength اللي في header لازم يتقري قبل المحتوى.", en: "~io.ReadFull~ fills the requested buffer or returns an error.\nRead a header length before its content."}, code: `func main() {
+	mission: ch33Pair{ar: "ده تجميع لأدوات اتعلمتها قبل كده في وصلة واحدة.\nابدأ من العقد المكتوب، وحدد مين يملك الاتصال والـresponse في كل خروج.", en: "This checkpoint combines tools you have already learned in one relay.\nStart from the written contract and track who owns the connection and response on every exit."},
+	idea: ch33WalkSpec{text: ch33Pair{ar: "~io.ReadFull~ بتملا الـbuffer المطلوب أو بترجع error.\nالـlength اللي في header لازم يتقري قبل المحتوى.", en: "~io.ReadFull~ fills the requested buffer or returns an error.\nRead a header length before its content."}, code: `func main() {
 	frame := []byte{0, 3, 'i', 'c', 'e'}
 	length := binary.BigEndian.Uint16(frame[:2])
 	fmt.Println(length, string(frame[2:]))
 }`, exampleID: "e33boss-frame-length", imports: []string{"encoding/binary", "fmt"}, frames: []ch33FrameSpec{
 		{line: 0, caption: ch33Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 2, caption: ch33Pair{ar: "الإطار يبدأ بطول بايتين.", en: "The frame begins with two length bytes."}, vars: []LessonVariable{{Name: "frame", Value: "[0 3 105 99 101]"}}},
+		{line: 2, caption: ch33Pair{ar: "الإطار بيبدأ بطول 2 bytes.", en: "The frame begins with two length bytes."}, vars: []LessonVariable{{Name: "frame", Value: "[0 3 105 99 101]"}}},
 		{line: 3, caption: ch33Pair{ar: "BigEndian تقرا الرقم.", en: "BigEndian reads the number."}, vars: []LessonVariable{{Name: "length", Value: "3"}}},
 		{line: 4, caption: ch33Pair{ar: "اعرض الطول والاسم.", en: "Print length and station."}, vars: []LessonVariable{{Name: "length", Value: "3"}}, output: "3 ice"},
 	}},
@@ -416,26 +416,26 @@ var ch33Lesson33BossArabic, ch33Lesson33BossEnglish, ch33Lesson33BossHintsArabic
 	fmt.Println(n)
 }`, tryExampleID: "e33boss-big-endian", tryImports: []string{"encoding/binary", "fmt"}, tryFrames: []ch33FrameSpec{
 		{line: 0, caption: ch33Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 2, caption: ch33Pair{ar: "header مساحته بايتين.", en: "header has two bytes."}, vars: []LessonVariable{{Name: "header", Value: "[0 0]"}}},
+		{line: 2, caption: ch33Pair{ar: "الـheader مساحته 2 bytes.", en: "header has two bytes."}, vars: []LessonVariable{{Name: "header", Value: "[0 0]"}}},
 		{line: 3, caption: ch33Pair{ar: "اكتب الطول للتوضيح.", en: "Set an illustrative length."}, vars: []LessonVariable{{Name: "header", Value: "[0 5]"}}},
-		{line: 4, caption: ch33Pair{ar: "اقرأه كـuint16.", en: "Read it as uint16."}, vars: []LessonVariable{{Name: "n", Value: "5"}}},
+		{line: 4, caption: ch33Pair{ar: "اقراه كـuint16.", en: "Read it as uint16."}, vars: []LessonVariable{{Name: "n", Value: "5"}}},
 		{line: 5, caption: ch33Pair{ar: "اطبع الرقم.", en: "Print the number."}, vars: []LessonVariable{{Name: "n", Value: "5"}}, output: "5"},
 	},
 	tryOptions: []ch33Pair{{ar: "5", en: "5"}, {ar: "1280", en: "1280"}, {ar: "0", en: "0"}}, tryAnswer: 0,
-	tryFeedback: []ch33Pair{{ar: "البايت الأعلى جه قبل الأقل.", en: "The high byte comes before the low byte."}, {ar: "ده ترتيب little-endian.", en: "That is little-endian order."}, {ar: "الـheader اتملأ بقيمة 5.", en: "The header contains the value 5."}},
-	watch:       ch33Pair{ar: "- ما تحجزش محتوى قبل التحقق من طوله.\n- كل رد HTTP له body لازم يتقفل في مساره.", en: "- Do not allocate content before validating its length.\n- Every HTTP response body needs closure on its path."},
-	plan:        ch33Pair{ar: "قسّم العمل لقراءة، تحقق، طلب HTTP، ثم رد.\nبعد كل خطوة اسأل مين يملك المورد لو حصل خطأ.", en: "Split the work into reading, validation, an HTTP request, then a reply.\nAt each step ask who owns the resource if an error occurs."},
-	check:       ch33QuestionSpec{text: ch33Pair{ar: "إمتى ~io.ReadFull~ بترجع من غير ما تكمل؟", en: "When does ~io.ReadFull~ return before filling the buffer?"}, options: []ch33Pair{{ar: "لما يحصل خطأ أو نهاية مبكرة", en: "When an error or early EOF occurs"}, {ar: "بعد أول بايت دايمًا", en: "Always after the first byte"}, {ar: "لما المحتوى يبقى UTF-8", en: "When the content is UTF-8"}}, answer: 0, feedback: []ch33Pair{{ar: "المصدر ممكن يقف قبل المطلوب.", en: "The source can stop before the requested bytes arrive."}, {ar: "هي بتحاول تملا الـbuffer كله.", en: "It tries to fill the entire buffer."}, {ar: "UTF-8 مش شرط لقراءة البايتات.", en: "UTF-8 is unrelated to reading bytes."}}},
-	turn:        ch33Pair{ar: "اعتبر العقد خريطة ملكية للمدخلات والمخرجات.\nاستخدم أخطاء صغيرة لتتبع كل حد من غير ما تبني النظام كله مرة واحدة.", en: "Treat the contract as an ownership map for inputs and outputs.\nUse small error cases to trace each boundary before assembling the relay."},
-	hints:       [3]ch33Pair{{ar: "اقرأ إطارات الشبكة كأطوال محددة قبل محتواها.", en: "Read network frames as bounded lengths before their contents."}, {ar: "ارسم سلسلة الملكية من net.Conn لحد HTTP body والرد.", en: "Trace ownership from net.Conn through the HTTP body and reply."}, {ar: "راجع ~binary.BigEndian~ و~io.ReadFull~ و~NewRequestWithContext~.", en: "Review ~binary.BigEndian~, ~io.ReadFull~, and ~NewRequestWithContext~."}},
+	tryFeedback: []ch33Pair{{ar: "الـbyte الأعلى جه قبل الأقل.", en: "The high byte comes before the low byte."}, {ar: "ده ترتيب little-endian.", en: "That is little-endian order."}, {ar: "الـheader اتملأ بـvalue 5.", en: "The header contains the value 5."}},
+	watch:       ch33Pair{ar: "- ما تحجزش محتوى قبل التحقق من طوله.\n- كل response HTTP له body لازم يتقفل في مساره.", en: "- Do not allocate content before validating its length.\n- Every HTTP response body needs closure on its path."},
+	plan:        ch33Pair{ar: "قسّم العمل لقراءة، تحقق، request HTTP، ثم response.\nبعد كل خطوة اسأل مين يملك المورد لو حصل error.", en: "Split the work into reading, validation, an HTTP request, then a reply.\nAt each step ask who owns the resource if an error occurs."},
+	check:       ch33QuestionSpec{text: ch33Pair{ar: "إمتى ~io.ReadFull~ بترجع من غير ما تكمل؟", en: "When does ~io.ReadFull~ return before filling the buffer?"}, options: []ch33Pair{{ar: "لما يحصل error أو نهاية مبكرة", en: "When an error or early EOF occurs"}, {ar: "بعد أول byte دايمًا", en: "Always after the first byte"}, {ar: "لما المحتوى يبقى UTF-8", en: "When the content is UTF-8"}}, answer: 0, feedback: []ch33Pair{{ar: "المصدر ممكن يقف قبل المطلوب.", en: "The source can stop before the requested bytes arrive."}, {ar: "هي بتحاول تملا الـbuffer كله.", en: "It tries to fill the entire buffer."}, {ar: "UTF-8 مش شرط لقراية الـbytes.", en: "UTF-8 is unrelated to reading bytes."}}},
+	turn:        ch33Pair{ar: "اعتبر العقد خريطة ملكية للمدخلات والمخرجات.\nاستخدم errors صغيرة لتتبع كل حد من غير ما تبني النظام كله مرة واحدة.", en: "Treat the contract as an ownership map for inputs and outputs.\nUse small error cases to trace each boundary before assembling the relay."},
+	hints:       [3]ch33Pair{{ar: "اقرا أطوال إطارات الشبكة المحددة قبل محتواها.", en: "Read network frames as bounded lengths before their contents."}, {ar: "ارسم سلسلة الملكية من net.Conn لحد HTTP body والـresponse.", en: "Trace ownership from net.Conn through the HTTP body and reply."}, {ar: "راجع ~binary.BigEndian~ و~io.ReadFull~ و~NewRequestWithContext~.", en: "Review ~binary.BigEndian~, ~io.ReadFull~, and ~NewRequestWithContext~."}},
 	sandbox: ch33SandboxSpec{
 		id: "ch33-survey-frame", kind: "ch33-http-flow",
-		text:    ch33Pair{ar: "اقرأ الطول قبل بيانات الإطار.", en: "Read a frame length before its payload."},
+		text:    ch33Pair{ar: "اقرا الطول قبل بيانات الإطار.", en: "Read a frame length before its payload."},
 		title:   ch33Pair{ar: "إطار توضيحي", en: "Illustrative frame"},
 		advance: ch33Pair{ar: "الجزء الجاي", en: "Next part"}, reset: ch33Pair{ar: "من الأول", en: "Reset"}, repeat: ch33Pair{ar: "ترتيب تاني", en: "Another order"},
-		runs: []ch33SandboxRun{{label: ch33Pair{ar: "بايتات للتوضيح", en: "Illustrative bytes"}, frames: []ch33SandboxFrame{
-			{caption: ch33Pair{ar: "الهيدر بايتين.", en: "The header has two bytes."}, leftLabel: ch33Pair{ar: "الهيدر", en: "Header"}, leftValue: ch33Pair{ar: "00 03", en: "00 03"}, rightLabel: ch33Pair{ar: "المحتوى", en: "Payload"}, rightValue: ch33Pair{ar: "لسه", en: "waiting"}},
-			{caption: ch33Pair{ar: "اتقرا الطول بالترتيب الكبير.", en: "The big-endian length was read."}, leftLabel: ch33Pair{ar: "الطول", en: "Length"}, leftValue: ch33Pair{ar: "3", en: "3"}, rightLabel: ch33Pair{ar: "المحتوى", en: "Payload"}, rightValue: ch33Pair{ar: "بعده", en: "next"}},
+		runs: []ch33SandboxRun{{label: ch33Pair{ar: "bytes للتوضيح", en: "Illustrative bytes"}, frames: []ch33SandboxFrame{
+			{caption: ch33Pair{ar: "الـheader فيه 2 bytes.", en: "The header has two bytes."}, leftLabel: ch33Pair{ar: "الـheader", en: "Header"}, leftValue: ch33Pair{ar: "00 03", en: "00 03"}, rightLabel: ch33Pair{ar: "المحتوى", en: "Payload"}, rightValue: ch33Pair{ar: "لسه", en: "waiting"}},
+			{caption: ch33Pair{ar: "الطول اتقرا بترتيب big-endian.", en: "The big-endian length was read."}, leftLabel: ch33Pair{ar: "الطول", en: "Length"}, leftValue: ch33Pair{ar: "3", en: "3"}, rightLabel: ch33Pair{ar: "المحتوى", en: "Payload"}, rightValue: ch33Pair{ar: "بعده", en: "next"}},
 			{caption: ch33Pair{ar: "المحتوى اتقرا بعد الطول.", en: "The payload follows its length."}, leftLabel: ch33Pair{ar: "الطول", en: "Length"}, leftValue: ch33Pair{ar: "3", en: "3"}, rightLabel: ch33Pair{ar: "المحتوى", en: "Payload"}, rightValue: ch33Pair{ar: "ice", en: "ice"}},
 		}}},
 	},

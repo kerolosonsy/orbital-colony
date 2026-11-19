@@ -4,7 +4,7 @@ func init() {
 	add(&Level{
 		ID: "9-boss-evacuation", Chapter: 9, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: false,
 		LessonRevision: 1, Steps: ch09BossArabic,
-		Title: "Boss: شحنة الإخلاء", Goal: "اجمع شحنة إخلاء بتصاريح ومن غير نتائج جزئية",
+		Title: "Boss: شحنة الإخلاء", Goal: "اجمع شحنة إخلاء باستخدام التصاريح، ومن غير ما ترجّع results جزئية",
 		Requires: []string{"map", "struct", "iface", "range"}, Bridge: []int{5, 11, 22},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
 
@@ -45,7 +45,7 @@ if err != nil { return map[string]int{}, nil }
 
 النجمة التالتة: افحص صلاحية كل الصفوف قبل أول نداء للتصريح، وحافظ على أسماء Unicode زي ما هي.
 `,
-		Hints: []string{"الـstruct بيربط بيانات، والـinterface يحدد سلوك بالـmethod المطلوبة.", "فكّر في المدخل والنتيجة ومسارات الخطأ كمسؤوليات منفصلة.", "راجع توقيع ~Pack~ وتعريف ~ErrManifest~ في ~main.go~ وانت بتراجع مسارات الرجوع."},
+		Hints: []string{"الـstruct بتجمع البيانات، والـinterface بتحدد السلوك المطلوب بالـmethods.", "افصل بين الـinput والـresult ومسارات الـerror.", "راجع توقيع ~Pack~ وتعريف ~ErrManifest~ في ~main.go~ وانت بتراجع كل مسارات الـreturn."},
 		En: &LevelText{LessonRevision: 1, Steps: ch09BossEnglish, Title: "Boss: Evacuation Cargo", Goal: "Assemble cleared evacuation cargo without partial results", Files: []LabFile{{Name: "main.go", Starter: `package main
 
 import "errors"

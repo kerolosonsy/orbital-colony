@@ -3,7 +3,7 @@
     "start": 3,
     "changed": 10,
     "labels": {
-      "caller": { "ar": "قيمة x عند المستدعي", "en": "Caller x" },
+      "caller": { "ar": "الـvalue بتاعة x عند اللي نادى الـfunction", "en": "Caller x" },
       "local": { "ar": "نسخة n", "en": "Local copy n" },
       "noLocal": { "ar": "لسه مفيش نسخة", "en": "No local copy" },
       "copy": { "ar": "غيّر النسخة", "en": "Change the copy" },
@@ -14,25 +14,25 @@
       "ready": { "ar": "x يبدأ بـ3.", "en": "x starts at 3." },
       "copy": { "ar": "n اتغيرت؛ x زي ما هي.", "en": "n changed; x stayed put." },
       "pointer": { "ar": "الكتابة عبر p غيّرت x.", "en": "Writing through p changed x." },
-      "reset": { "ar": "x رجعت لقيمتها الأولى.", "en": "x returned to its starting value." }
+      "reset": { "ar": "x رجعت للـvalue الأصلية بتاعتها.", "en": "x returned to its starting value." }
     }
   },
   "ch08-receivers": {
     "start": 2,
     "amount": 3,
     "labels": {
-      "caller": { "ar": "قيمة g.Value", "en": "Caller g.Value" },
-      "receiver": { "ar": "قيمة receiver", "en": "Receiver value" },
+      "caller": { "ar": "الـvalue بتاعة g.Value", "en": "Caller g.Value" },
+      "receiver": { "ar": "value receiver", "en": "Receiver value" },
       "notCalled": { "ar": "لسه ما اتندهش", "en": "Not called yet" },
       "value": { "ar": "Value Add", "en": "Value Add" },
       "pointer": { "ar": "Pointer Add", "en": "Pointer Add" },
       "reset": { "ar": "من الأول", "en": "Reset" }
     },
     "captions": {
-      "ready": { "ar": "g تبدأ بقيمة 2.", "en": "g starts at 2." },
+      "ready": { "ar": "g بتبدأ بالـvalue 2.", "en": "g starts at 2." },
       "value": { "ar": "Value receiver غيّر نسخته.", "en": "Value receiver changed its copy." },
       "pointer": { "ar": "Pointer receiver غيّر الأصل.", "en": "Pointer receiver changed the original." },
-      "reset": { "ar": "رجعنا للقيم الأولى.", "en": "Starting values restored." }
+      "reset": { "ar": "رجعنا للـvalues الأصلية.", "en": "Starting values restored." }
     }
   },
   "ch08-nil-guard": {
@@ -41,15 +41,15 @@
       "target": { "ar": "الهدف موجود", "en": "Target present" },
       "on": { "ar": "آه", "en": "yes" },
       "off": { "ar": "لأ", "en": "no" },
-      "pointer": { "ar": "المؤشر", "en": "Pointer" },
+      "pointer": { "ar": "الـpointer", "en": "Pointer" },
       "result": { "ar": "نتيجة الفحص", "en": "Guard result" },
       "nilPointer": { "ar": "p = nil", "en": "p = nil" },
       "valuePointer": { "ar": "p = &6", "en": "p = &6" },
-      "emptyResult": { "ar": "رجوع آمن", "en": "Return safely" }
+      "emptyResult": { "ar": "رجّع بأمان", "en": "Return safely" }
     },
     "captions": {
       "empty": { "ar": "فحص nil يمنع القراءة.", "en": "The nil check skips reading." },
-      "value": { "ar": "المؤشر صالح؛ القراءة آمنة.", "en": "Pointer is valid; reading is safe." }
+      "value": { "ar": "الـpointer صالح؛ القراية آمنة.", "en": "Pointer is valid; reading is safe." }
     }
   },
   "ch08-cart-chain": {

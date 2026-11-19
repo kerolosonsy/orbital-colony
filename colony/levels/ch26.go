@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch26Lesson261.arabic, ID: "26-1-first-server", Chapter: 26, Kind: "lab", Title: "أول سيرفر", Goal: "ابني صفحة القاعدة ونبض الجاهزية بحدود سيرفر واضحة",
+	add(&Level{LessonRevision: 1, Steps: ch26Lesson261.arabic, ID: "26-1-first-server", Chapter: 26, Kind: "lab", Title: "أول سيرفر", Goal: "ابني صفحة القاعدة ونبض الجاهزية بحدود الـserver واضحة",
 		Requires: []string{"sel:http.Server"}, Bridge: []int{46}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch261Starter}},
 		Lesson: `# أول بوابة HTTP للقاعدة
@@ -72,7 +72,7 @@ w.WriteHeader(500) // الحالة اتثبتت خلاص
 نفّذ ~GatewayServer(addr string,h http.Handler) *http.Server~ يحفظ العنوان والـ handler المحقونين؛ حدود الثواني بالترتيب: ~ReadHeaderTimeout=2~ و ~ReadTimeout=5~ و ~WriteTimeout=8~ و ~IdleTimeout=30~، و ~MaxHeaderBytes=16384~. متشغّلوش، وسيب ~main~ فاضية؛ مفيش ~Report~.
 
 النجمة التالتة: خطأ ~Execute~ يرجع 500 و ~page unavailable\n~ بنص عادي من غير أي جزء من الصفحة.`,
-		Hints: []string{"افصل اختيار المسار عن اختيار طريقة الطلب.", "جهّز handler صغيرًا واختبره بمسجل داخل الذاكرة.", "راجع ~ResponseRecorder~ قبل إضافة إعدادات السيرفر."},
+		Hints: []string{"افصل اختيار المسار عن اختيار الـmethod بتاع الـrequest.", "جهّز handler صغير واختبره بمسجل جوه الذاكرة.", "راجع ~ResponseRecorder~ قبل إضافة إعدادات الـserver."},
 		En: &LevelText{LessonRevision: 1, Steps: ch26Lesson261.english, Title: "First Server", Goal: "Build the base page and readiness pulse with explicit server limits", Files: []LabFile{{Name: "main.go", Starter: ch261Starter}},
 			Lesson: `# The Base's First HTTP Gateway
 
@@ -284,7 +284,7 @@ for _, b := range berths { list = append(list,b) } // قراية خريطة من
 ~GET /berths/ID~ يرجع 200 والعنصر. ~PUT~ لنفس المسار يستبدل الحقلين بنفس التحقق ويحفظ ID ويرجع 200 والعنصر؛ ~DELETE~ يحذف ويرجع 204 بجسم فاضي. العنصر الغائب يرجع 404 و ~unknown berth\n~. خطأ JSON أو نوع أو تحقق أو رقم غير موجب أو غير قياسي يرجع 400 و ~invalid berth\n~. حدد الشكل والطريقة ثم تحقق الجسم قبل البحث عن عنصر ~PUT~. حد الجسم في الإنشاء والتحديث 4096 بايت شاملة المسافات؛ الأكبر 413 و ~too large\n~. الفاضي و ~null~ والمصفوفة مرفوضين؛ مفيش شرط على content type الداخل.
 
 المسارات الحرفية بس؛ رقم غير صالح في جزء واحد بعد ~/berths/~ هو 400، والجزء الفاضي أو أجزاء زيادة أو مسار غريب 404. الطرق غير المدعومة 405 و ~use route methods\n~ و ~Allow: GET, POST~ للمجموعة أو ~Allow: DELETE, GET, PUT~ للعنصر. أي ~HEAD~ جسمه فاضي. الردود الناجحة ذات الجسم ~application/json~، والأخطاء ~text/plain; charset=utf-8~. الفشل ميغيرش الحالة. الـ query تتجاهلها. مفيش شبكة أو وقت أو ~Report~، و ~main~ فاضية.`,
-		Hints: []string{"عامل الهوية كحالة مستقلة عن عدد السجلات الحالية.", "خلي القراءة والتعديل ضمن حدود القفل نفسه.", "راجع نسخة القائمة قبل فرزها أو ترميزها."},
+		Hints: []string{"عامل الهوية كحالة مستقلة عن عدد السجلات الحالية.", "خلي القراءة والتعديل ضمن حدود الـlock نفسه.", "راجع نسخة القائمة قبل فرزها أو ترميزها."},
 		En: &LevelText{LessonRevision: 1, Steps: ch26Lesson262.english, Title: "REST", Goal: "Manage colony berths with concurrent CRUD and stable IDs", Files: []LabFile{{Name: "main.go", Starter: ch262Starter}},
 			Lesson: `# A Berth Registry over HTTP
 
@@ -509,7 +509,7 @@ func TestHiddenBerthsParallelRequests(t *testing.T) {
 `
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch26Lesson263.arabic, ID: "26-3-router", Chapter: 26, Kind: "lab", Title: "الراوتر", Goal: "اربط أرصفة بباراميترات وسلسلة middleware وهوية لكل طلب",
+	add(&Level{LessonRevision: 1, Steps: ch26Lesson263.arabic, ID: "26-3-router", Chapter: 26, Kind: "lab", Title: "الراوتر", Goal: "اربط أرصفة بباراميترات وسلسلة middleware وهوية لكل request",
 		Requires: []string{"funcvalue"}, Bridge: []int{48}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch263Starter}},
 		Lesson: `# راوتر صغير وسلسلة بوابات
@@ -568,7 +568,7 @@ ctx := context.WithValue(context.Background(), "id", id) // ضيّع إلغاء 
 نفّذ ~Param(r *http.Request,name string) string~ من سياق الطلب؛ الغائب نص فاضي. لو مفيش نمط مطابق: 404 و ~no route\n~. لو النمط موجود بس الطريقة مختلفة: 405 و ~wrong method\n~ و ~Allow~ مرتّبة أبجدياً من غير تكرار ومفصولة بـ ~, ~. الأخطاء ~text/plain; charset=utf-8~، و ~HEAD~ فيها من غير جسم؛ مفيش GET ضمني لـ HEAD.
 
 لف كل الردود بالسلسلة؛ أول middleware خارجي، والترتيب قبل handler للأمام وبعده بالعكس. نفّذ ~WithRequestID(nextID func() string) Middleware~ بمصدر غير ~nil~ يرجع ID غير فاضي صالح للهيدر؛ نداء واحد لكل طلب حتى 404/405، تجاهل هيدر العميل، حط ~X-Request-ID~، ومرّر نفس القيمة في السياق. ~RequestID(r *http.Request) string~ ترجع القيمة أو فاضي. حافظ على سياق الأب ومتغيّرش الطلب الأصلي؛ params ما تتسربش بين الطلبات. مفيش شبكة أو ~Report~، و ~main~ فاضية.`,
-		Hints: []string{"قارن أجزاء المسار مع النمط قبل تقرير الطريقة.", "ركّب السلسلة من الداخل للخارج عشان أول عنصر يبقى خارجيًا.", "راجع مفاتيح context الخاصة وWithContext على نسخة الطلب."},
+		Hints: []string{"قارن أجزاء المسار مع النمط قبل ما تحدد الـmethod.", "ركّب السلسلة من الداخل للخارج عشان أول عنصر يبقى خارجيًا.", "راجع keys الـcontext الخاصة وWithContext على نسخة الـrequest."},
 		En: &LevelText{LessonRevision: 1, Steps: ch26Lesson263.english, Title: "The Router", Goal: "Route parameterized docks through middleware with per-request identity", Files: []LabFile{{Name: "main.go", Starter: ch263Starter}},
 			Lesson: `# A Small Router and a Middleware Chain
 
@@ -770,7 +770,7 @@ func TestHiddenRouterChainOrderShortCircuitAndSnapshot(t *testing.T) {
 `
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch26Lesson264.arabic, ID: "26-4-envelope", Chapter: 26, Kind: "lab", Title: "الظرف", Goal: "وحّد ردود المنارات واربط أنواع الأخطاء بحالات آمنة",
+	add(&Level{LessonRevision: 1, Steps: ch26Lesson264.arabic, ID: "26-4-envelope", Chapter: 26, Kind: "lab", Title: "الظرف", Goal: "وحّد responses المنارات واربط أنواع الـerrors بحالات آمنة",
 		Requires: []string{"errtype"}, Bridge: []int{49}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch264Starter}},
 		Lesson: `# ظرف واحد لكل رد منارة
@@ -821,7 +821,7 @@ if err.Error() == "missing" { w.WriteHeader(404) } // النص مش هوية ا�
 النجاح: 200 و ~{"data":{"name":"...","charge":70},"error":null}~ بقيم المصدر كما هي. الخطأ: ~data:null~ و ~error~ كائن فيه ~code~ و ~message~ فقط. ~*RelayFault~ حتى لو ملفوف: ~invalid~ يعطي 400 و ~invalid / invalid relay~؛ ~missing~ يعطي 404 و ~missing / relay missing~؛ ~blocked~ يعطي 409 و ~blocked / relay blocked~. أي نوع أو تصنيف آخر يعطي 500 و ~internal / relay unavailable~. تجاهل أي بيانات رجعت جنب خطأ؛ ممنوع تسريب السبب أو wrapper.
 
 شكل مسار غير مطابق: 404 بنفس ظرف ~missing~ من غير callback. طريقة غير GET لمسار مطابق: 405 و ~Allow: GET~ وظرف ~method / use GET~ من غير callback. كل الردود ~application/json~، والحقلين موجودين دائماً، و ~HEAD~ من غير جسم. اختبر المسار قبل الطريقة. مفيش شبكة أو وقت أو ~Report~؛ ~main~ فاضية.`,
-		Hints: []string{"فرّق بين نوع الخطأ ونص التشخيص اللي يحمله.", "خلّي بيانات الرد والخطأ اختيارية من غير إخفاء الحقول.", "ابدأ بـerrors.As قبل اختيار التصنيف العام."},
+		Hints: []string{"فرّق بين نوع الـerror ونص التشخيص اللي يحمله.", "خلّي بيانات الـresponse والـerror اختيارية من غير إخفاء الحقول.", "ابدأ بـerrors.As قبل اختيار التصنيف العام."},
 		En: &LevelText{LessonRevision: 1, Steps: ch26Lesson264.english, Title: "The Envelope", Goal: "Unify relay responses and map typed errors to safe HTTP statuses", Files: []LabFile{{Name: "main.go", Starter: ch264Starter}},
 			Lesson: `# One Envelope for Every Relay Response
 
@@ -999,7 +999,7 @@ func TestHiddenEnvelopeRejectsRoutesWithoutFetching(t *testing.T) {
 `
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch26Lesson265.arabic, ID: "26-5-static", Chapter: 26, Kind: "lab", Title: "ملفات ثابتة", Goal: "اخدم خرائط مضمّنة من غير كشف مجلدات وبكاش حتمي",
+	add(&Level{LessonRevision: 1, Steps: ch26Lesson265.arabic, ID: "26-5-static", Chapter: 26, Kind: "lab", Title: "ملفات ثابتة", Goal: "اخدم خرائط مضمّنة من غير كشف مجلدات وبـcache حتمي",
 		Requires: []string{"sel:http.FileServer"}, Bridge: []int{52}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch265Starter}, {Name: "site/panel.html", Starter: `<!doctype html><title>Orbital Console</title><h1>Dock charts</h1>
 `, ReadOnly: true}, {Name: "site/charts/notice.txt", Starter: `Airlock inspections: deck 7.
@@ -1060,7 +1060,7 @@ w.Header().Set("ETag", fmt.Sprint(time.Now())) // مش بصمة المحتوى
 أي مسار تاني، بما فيه المجلدات و ~..~ والشرطات encoded وأي ~RawPath~ مختلف، يرجع 404 بجسم ~site/missing.html~ ونوع HTML و ~Cache-Control: no-store~؛ ~HEAD~ من غير جسم. افحص المسار قبل الطريقة. طريقة غير GET/HEAD لمسار معروف ترجع 405 و ~Allow: GET, HEAD~ و ~read only\n~ بنوع نص عادي و ~no-store~. تجاهل query، ومتعملش listing أو redirect أو قراءة من قرص الجهاز. الطلب الأصلي يفضل ثابت. كل القراءات آمنة بالتزامن؛ مفيش شبكة أو ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: ~If-None-Match~ لو مساوي البصمة بالظبط على مسار صالح مع GET/HEAD يرجع 304 و ~ETag~ و ~Cache-Control~ بس من غير جسم أو ~Content-Type~ أو ~Content-Length~. النجمة وweak tag وقايمة tags وأي قيمة مختلفة ترجع الرد الكامل. تجاهل ~If-Modified-Since~؛ صفحة 404 عمرها ما تتحول لـ 304.`,
-		Hints: []string{"عامل كل مسار عام كاختيار صريح من قائمة قصيرة.", "اقرأ المحتوى من filesystem بدل مسار الجهاز.", "قارن ~RawPath~ قبل إعادة كتابة ~URL~."},
+		Hints: []string{"عامل كل مسار عام كاختيار صريح من قائمة قصيرة.", "اقرا المحتوى من filesystem بدل مسار الجهاز.", "قارن ~RawPath~ قبل إعادة كتابة ~URL~."},
 		En: &LevelText{LessonRevision: 1, Steps: ch26Lesson265.english, Title: "Static Files", Goal: "Serve embedded charts without directory disclosure and with deterministic caching", Files: []LabFile{{Name: "main.go", Starter: ch265Starter}, {Name: "site/panel.html", Starter: `<!doctype html><title>Orbital Console</title><h1>Dock charts</h1>
 `, ReadOnly: true}, {Name: "site/charts/notice.txt", Starter: `Airlock inspections: deck 7.
 `, ReadOnly: true}, {Name: "site/charts/sector.json", Starter: `{"sector":"Kepler","docks":7}
@@ -1332,7 +1332,7 @@ io.ReadAll(r.Body) // ذاكرة غير محدودة قبل تطبيق الحد
 بعد التحقق وقبل النشر، افحص إلغاء السياق. نادِ ~NextID~ مرة تحت قفل النشر؛ لازم يرجع 16 حرف lowercase hex. خطأ المصدر أو token غلط أو خطأ نظام الملفات 500؛ ملف نهائي موجود 409. احفظ بايتات الملف بالظبط باسم ~TOKEN.png~ داخل الجذر من خلال ملف مؤقت ثم rename؛ امسح المؤقت عند أي فشل. المصدر مش بيتنده لطلب مرفوض قبل مرحلة النشر، والملفات الموجودة لا تتغير. طلبات نفس الـ handler متزامنة بأمان، والمصدر مش لازم يحمي نفسه؛ ممنوع كائنين يكتبوا نفس الجذر.
 
 النجاح 201 و ~TOKEN.png\n~. رسائل الأخطاء: 400 ~invalid scan\n~؛ 409 ~scan exists\n~؛ 413 ~scan too large\n~؛ 415 للتوقيع المرفوض ~PNG required\n~؛ 500 ~scan unavailable\n~. كلها ~text/plain; charset=utf-8~ من غير أسباب داخلية. مسار مختلف 404 و ~unknown upload\n~، وطريقة غير POST للمسار المعروف 405 و ~Allow: POST~ و ~use POST\n~. ~HEAD~ جسمه فاضي، والـ query تتجاهلها. مفيش serving للرفع أو شبكة أو وقت أو ~Report~؛ ~main~ فاضية.`,
-		Hints: []string{"فكّر في كل جزء كقارئ له نهاية وخطأ محتمل.", "افصل ملف مؤقت عن الاسم النهائي المنشور.", "ابدأ تطبيق ~MaxBytesReader~ قبل إنشاء ~MultipartReader~."},
+		Hints: []string{"فكّر في كل جزء كقارئ له نهاية وerror محتمل.", "افصل ملف مؤقت عن الاسم النهائي المنشور.", "ابدأ تطبيق ~MaxBytesReader~ قبل إنشاء ~MultipartReader~."},
 		En: &LevelText{LessonRevision: 1, Steps: ch26Lesson266.english, Title: "File Upload", Goal: "Stream cargo scans with size limits, safe storage, and failure cleanup", Files: []LabFile{{Name: "main.go", Starter: ch266Starter}},
 			Lesson: `# Safely Upload a Cargo Scan
 

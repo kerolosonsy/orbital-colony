@@ -39,14 +39,14 @@ func ch21StationSandboxConfig() map[string]any {
 			"flag": ch21Pair("Flag -details", "Flag -details"), "off": ch21Pair("false", "false"), "on": ch21Pair("true", "true"),
 			"toggle": ch21Pair("بدّل الـflag", "Toggle flag"), "lookup": ch21Pair("مصدر البيئة", "Environment lookup"),
 			"environment": ch21Pair("os.LookupEnv", "os.LookupEnv"),
-			"name":        ch21Pair("الاسم", "Name"), "presence": ch21Pair("الوجود", "Presence"), "value": ch21Pair("القيمة", "Value"),
+			"name":        ch21Pair("الاسم", "Name"), "presence": ch21Pair("الوجود", "Presence"), "value": ch21Pair("الـvalue", "Value"),
 			"present": ch21Pair("موجود", "Present"), "missing": ch21Pair("غايب", "Missing"), "next": ch21Pair("الحالة الجاية", "Next state"),
 			"caption": ch21Pair("الـflag تبدأ false.", "The flag starts false."),
 		},
 		"states": []any{
 			map[string]any{"label": ch21Pair("اسم غايب", "Missing name"), "value": ch21Pair("مش موجود", "Not set"), "present": false},
-			map[string]any{"label": ch21Pair("قيمة فاضية", "Empty value"), "value": ch21Pair("\"\"", "\"\""), "present": true},
-			map[string]any{"label": ch21Pair("قيمة موجودة", "Present value"), "value": ch21Pair("crew-7", "crew-7"), "present": true},
+			map[string]any{"label": ch21Pair("value فاضية", "Empty value"), "value": ch21Pair("\"\"", "\"\""), "present": true},
+			map[string]any{"label": ch21Pair("value موجودة", "Present value"), "value": ch21Pair("crew-7", "crew-7"), "present": true},
 		},
 	}
 }
@@ -54,7 +54,7 @@ func ch21StationSandboxConfig() map[string]any {
 func ch21CommandsSandboxConfig() map[string]any {
 	return map[string]any{
 		"labels": map[string]any{
-			"caption": ch21Pair("كل Scan تكشف سطرًا واحدًا.", "Each Scan exposes one line."),
+			"caption": ch21Pair("كل Scan بتعرض سطر واحد.", "Each Scan exposes one line."),
 			"current": ch21Pair("السطر الحالي", "Current line"), "written": ch21Pair("سطور وصلت للـwriter", "Lines sent to writer"),
 			"previous": ch21Pair("السابق", "Previous"), "next": ch21Pair("التالي", "Next"), "reset": ch21Pair("من الأول", "Reset"),
 		},
@@ -74,7 +74,7 @@ func ch21DepthSandboxConfig() map[string]any {
 			"varied": ch21Pair("سحبات توضيحية", "Sample random draws"), "draw": ch21Pair("اسحب index", "Draw index"),
 			"bound": ch21Pair("الحد exclusive", "Exclusive bound"), "index": ch21Pair("index", "index"), "selected": ch21Pair("الاسم المختار", "Selected label"),
 			"calls": ch21Pair("عدد النداءات", "Calls"), "none": ch21Pair("لسه مفيش اختيار", "No choice yet"),
-			"caption": ch21Pair("المصدر يرجع index أصغر من الحد.", "The source returns an index below the bound."),
+			"caption": ch21Pair("المصدر بيرجّع index أصغر من الحد.", "The source returns an index below the bound."),
 		},
 		"choices":      []any{ch21Pair("amber", "amber"), ch21Pair("cyan", "cyan"), ch21Pair("violet", "violet")},
 		"fixedResults": []int{1, 1, 1}, "variedResults": []int{0, 2, 1},
@@ -84,9 +84,9 @@ func ch21DepthSandboxConfig() map[string]any {
 func ch21DuelSandboxConfig() map[string]any {
 	return map[string]any{
 		"labels": map[string]any{
-			"caption": ch21Pair("اسم النوع يفصل القيمة عن النص.", "A named type separates value from text."),
-			"command": ch21Pair("نص الأمر", "Command text"), "named": ch21Pair("القيمة المسماة", "Named value"),
-			"ordinal": ch21Pair("قيمة iota", "iota value"), "next": ch21Pair("أمر توضيحي تاني", "Next example command"),
+			"caption": ch21Pair("الـnamed type بيفصل الـvalue عن النص.", "A named type separates value from text."),
+			"command": ch21Pair("نص الأمر", "Command text"), "named": ch21Pair("الـnamed value", "Named value"),
+			"ordinal": ch21Pair("value بتاعة iota", "iota value"), "next": ch21Pair("أمر توضيحي تاني", "Next example command"),
 		},
 		"commands": []any{
 			map[string]any{"text": ch21Pair("idle", "idle"), "name": ch21Pair("LampMode.idle", "LampMode.idle"), "ordinal": 0},
@@ -99,7 +99,7 @@ func ch21DuelSandboxConfig() map[string]any {
 var ch21StationArabic = []LessonStep{
 	{ID: "c211.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch21Markdown("c211.mission", "1. جهّز تقرير ثابت بين الأجهزة.\n2. خلي بيانات النظام توصل من برّه.\n3. الـstarter فيه نوع اللقطة؛ ركّز على فصل المصدر عن التقرير.")}},
 	{ID: "c211.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-		ch21Markdown("c211.boundary", "الـflag اختيار جاي من المستخدم. ~FlagSet~ بتجمع تعريفاته، و~Bool~ بترجع pointer لقيمته.\n\nالبيئة حاجة تانية: function value تسأل عن اسم، والـbool بيفرق بين الغياب والقيمة الفاضية.\n\nاجمع بيانات الجهاز الحقيقي عند ~main~؛ التقرير يستقبل قيم جاهزة."),
+		ch21Markdown("c211.boundary", "الـflag اختيار جاي من المستخدم. ~FlagSet~ بتجمع تعريفاته، و~Bool~ بترجّع pointer للـvalue.\n\nالبيئة حاجة تانية: function value تسأل عن اسم، والـbool بيفرق بين الغياب والـvalue الفاضية.\n\nاجمع بيانات الجهاز الحقيقي عند ~main~؛ التقرير يستقبل values جاهزة."),
 		ch21Walkthrough("c211.flags-example", "تابع parser محلي؛ نتيجة الـflag pointer، و~NArg~ بتعدّ البواقي.", `func main() {
 	fs := flag.NewFlagSet("probe", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
@@ -109,18 +109,18 @@ var ch21StationArabic = []LessonStep{
 }`, "e211-local-flag", []string{"flag", "fmt", "io"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 2, Caption: "ابدأ parser محلي."},
-			{Line: 4, Caption: "سجّل flag بقيمة افتراضية."},
+			{Line: 4, Caption: "ابدأ الـflag بـdefault value."},
 			{Line: 5, Caption: "حلّل اختيار المثال."},
-			{Line: 6, Caption: "القيمة true والبواقي صفر.", Variables: []LessonVariable{{Name: "active", Value: "true"}}, Output: "true 0"},
+			{Line: 6, Caption: "الـvalue true والبواقي صفر.", Variables: []LessonVariable{{Name: "active", Value: "true"}}, Output: "true 0"},
 		}),
 	}},
 	{ID: "c211.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch21Question("c211.predict-flag", "توقّع الناتج بعد parsing:\n\n~~~go\nfunc main() {\n\tfs := flag.NewFlagSet(\"probe\", flag.ContinueOnError)\n\tfs.SetOutput(io.Discard)\n\tactive := fs.Bool(\"active\", false, \"show details\")\n\t_ = fs.Parse([]string{\"-active\"})\n\tfmt.Println(*active, fs.NArg())\n}\n~~~", []string{"true 0", "false 0", "true 1"}, 0, []string{
 			"الاختيار اتقري ومفيش argument فاضل.",
-			"الـflag اتبعتت بقيمة true.",
+			"الـflag اتبعتت بـvalue true.",
 			"الـparser استهلك الـflag المعروفة.",
 		}),
-		ch21Walkthrough("c211.flag-reveal", "شوف القيمة اللي الـflag سجلتها بعد التحليل.", `func main() {
+		ch21Walkthrough("c211.flag-reveal", "شوف الـvalue اللي الـflag سجلتها بعد التحليل.", `func main() {
 	fs := flag.NewFlagSet("probe", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	active := fs.Bool("active", false, "show details")
@@ -129,22 +129,22 @@ var ch21StationArabic = []LessonStep{
 }`, "e211-flag-reveal", []string{"flag", "fmt", "io"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 2, Caption: "parser جديد للاستدعاء."},
-			{Line: 4, Caption: "القيمة تبدأ false."},
+			{Line: 4, Caption: "الـvalue بتبدأ false."},
 			{Line: 5, Caption: "active بقت مفعّلة."},
-			{Line: 6, Caption: "اطبع القيمة والبواقي.", Variables: []LessonVariable{{Name: "active", Value: "true"}}, Output: "true 0"},
+			{Line: 6, Caption: "اطبع الـvalue والبواقي.", Variables: []LessonVariable{{Name: "active", Value: "true"}}, Output: "true 0"},
 		}),
-		ch21SandboxBlock("c211.playground", "ch21-flags-env", "بدّل الـflag وقارن الاسم الغايب بالقيمة الفاضية.", ch21StationSandboxConfig()),
+		ch21SandboxBlock("c211.playground", "ch21-flags-env", "بدّل الـflag وقارن الاسم الغايب بالـvalue الفاضية.", ch21StationSandboxConfig()),
 	}},
-	{ID: "c211.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c211.watch", "- pointer من ~Bool~ بيتقري بـ~*value~.\n- القيمة الفاضية مش دليل إن اسم البيئة غايب.")}},
+	{ID: "c211.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c211.watch", "- الـpointer اللي من ~Bool~ بيتقري بـ~*value~.\n- الـvalue الفاضية مش دليل إن اسم البيئة غايب.")}},
 	{ID: "c211.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch21Markdown("c211.plan", "قبل أول output، حدّد إيه اللي ممكن يرفض الطلب.\n\nراجع حالات الـflag: متبعتة، أو متسابِة على default.\n\nإمتى التقرير يحتاج يسأل عن اسم البيئة؟"),
-		ch21Question("c211.presence-check", "إيه اللي يفرّق بين اسم غايب وقيمة فاضية؟", []string{"النص بس", "النص ومعاه bool", "طباعة النص"}, 1, []string{
-			"النص الفاضي ممكن يبقى قيمة موجودة.",
+		ch21Markdown("c211.plan", "قبل أول output، حدّد إيه اللي ممكن يرفض الـrequest.\n\nراجع حالات الـflag: متبعتة، أو متسابِة على default.\n\nإمتى التقرير يحتاج يسأل عن اسم البيئة؟"),
+		ch21Question("c211.presence-check", "إيه اللي يفرّق بين اسم غايب وvalue فاضية؟", []string{"النص بس", "النص ومعاه bool", "طباعة النص"}, 1, []string{
+			"النص الفاضي ممكن يبقى value موجودة.",
 			"الـbool بيوضح هل الاسم موجود.",
 			"الطباعة مش بتكشف وجود الاسم.",
 		}),
 	}},
-	{ID: "c211.turn-step", Title: "دورك", Blocks: []LessonBlock{ch21Markdown("c211.turn", "اكتب التقرير على writer محقون. ابدأ بقيم ثابتة، وراجع إن المصدر الحقيقي متجمع عند حدود البرنامج.")}},
+	{ID: "c211.turn-step", Title: "دورك", Blocks: []LessonBlock{ch21Markdown("c211.turn", "اكتب التقرير على writer محقون. ابدأ بـvalues ثابتة، وراجع إن المصدر الحقيقي متجمع عند حدود البرنامج.")}},
 }
 
 var ch21StationEnglish = []LessonStep{
@@ -199,9 +199,9 @@ var ch21StationEnglish = []LessonStep{
 }
 
 var ch21CommandsArabic = []LessonStep{
-	{ID: "c212.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch21Markdown("c212.mission", "1. شغّل أمر واحد أو سيل سطور.\n2. افصل الواجهة عن سجل الطلبات.\n3. الـstarter جاهز لحدود البرنامج؛ كمّل المنطق القابل للاختبار.")}},
+	{ID: "c212.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch21Markdown("c212.mission", "1. شغّل أمر واحد أو سيل سطور.\n2. افصل الـinterface عن سجل الـrequests.\n3. الـstarter جاهز لحدود البرنامج؛ كمّل منطق نقدر نعمله test.")}},
 	{ID: "c212.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-		ch21Markdown("c212.stream", "~io.Reader~ و~io.Writer~ من 9-4 بيفصلوا المنطق عن التيرمنال. الاختبار يقدر يمرر نص ويلمّ الناتج في الذاكرة.\n\nلما المدخل سطور، ~Scanner~ بيدي السطر الحالي. parsing الأمر ومعالجة حالته مسؤوليتين مختلفتين.\n\nاستخدم ~interface~ عند مكان الاستهلاك عشان التنفيذ يبقى قابل للاستبدال."),
+		ch21Markdown("c212.stream", "~io.Reader~ و~io.Writer~ من 9-4 بيفصلوا المنطق عن التيرمنال. الـtest يقدر يمرر نص ويلمّ الناتج في الذاكرة.\n\nلما المدخل سطور، ~Scanner~ بيدي السطر الحالي. parsing الأمر ومعالجة حالته مسؤوليتين مختلفتين.\n\nاستخدم ~interface~ عند مكان الاستهلاك عشان التنفيذ يبقى قابل للاستبدال."),
 		ch21Walkthrough("c212.scanner-example", "الـScanner يقرأ كل سطر من reader بالتتابع.", `func main() {
 	scanner := bufio.NewScanner(strings.NewReader("check bay"))
 	for scanner.Scan() {
@@ -210,7 +210,7 @@ var ch21CommandsArabic = []LessonStep{
 }`, "e212-scan-lines", []string{"bufio", "fmt", "strings"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 2, Caption: "جهّز سطر من الذاكرة."},
-			{Line: 3, Caption: "اقرأ السطر الأول."},
+			{Line: 3, Caption: "اقرا السطر الأول."},
 			{Line: 4, Caption: "اطبع النص المقروء.", Output: "check bay"},
 		}),
 	}},
@@ -233,12 +233,12 @@ var ch21CommandsArabic = []LessonStep{
 		}),
 		ch21SandboxBlock("c212.playground", "ch21-reader-lines", "قدّم Scanner سطرًا؛ راقب ما وصل للـwriter.", ch21CommandsSandboxConfig()),
 	}},
-	{ID: "c212.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c212.watch", "- افحص عدد الكلمات قبل ما تستخدم index."), ch21Markdown("c212.watch-detail", "- خطأ الأمر غير خطأ القراءة أو الكتابة؛ كل واحد له تصرف مختلف.")}},
+	{ID: "c212.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c212.watch", "- افحص عدد الكلمات قبل ما تستخدم index."), ch21Markdown("c212.watch-detail", "- error الأمر غير error القراءة أو الكتابة؛ كل واحد له تصرف مختلف.")}},
 	{ID: "c212.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch21Markdown("c212.plan", "ابدأ بحدود واضحة: مصدر الأمر، تفسيره، ثم تحديث الحالة.\n\nخلي رسالة النتيجة مكتوبة في writer محقون.\n\nلو command بايظ، هل ده فشل نقل ولا رفض منطق؟"),
+		ch21Markdown("c212.plan", "ابدأ بحدود واضحة: مصدر الأمر، تفسيره، ثم تحديث الحالة.\n\nخلي رسالة النتيجة مكتوبة في writer محقون.\n\nلو command بايظ، هل ده error نقل ولا رفض منطق؟"),
 		ch21Question("c212.failure-kind", "مين يوقف الجلسة فورًا؟", []string{"أمر غير معروف", "فشل writer", "سطر فاضي"}, 1, []string{
 			"رفض الأمر بيتسجل ويتعالج كطلب.",
-			"من غير writer مفيش قناة نكمل بيها.",
+			"من غير writer مفيش channel نكمل بيها.",
 			"السطر الفاضي مدخل مرفوض.",
 		}),
 	}},
@@ -295,7 +295,7 @@ var ch21CommandsEnglish = []LessonStep{
 var ch21DepthArabic = []LessonStep{
 	{ID: "c213.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch21Markdown("c213.mission", "1. وجّه المسبار بتخمينات محدودة.\n2. استقبل الاختيار العشوائي من برّه.\n3. الـstarter محدد reader وwriter؛ ركّز على حدود اللعبة.")}},
 	{ID: "c213.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-		ch21Markdown("c213.random-source", "زي ما اتعلمت في 5-5، function value تقدر تبعتها كـdependency. هنا المصدر بياخد حد exclusive ويرجّع index أصغر منه.\n\nاختيار ثابت في الاختبار يخلّي walkthrough قابل للتكرار. في التشغيل الحقيقي، الـadapter يقدر يوصّل بمصدر عشوائي.\n\nخلي الاختيار عند الحد، وخلي قواعد اللعبة تستهلك نتيجة واضحة."),
+		ch21Markdown("c213.random-source", "زي ما اتعلمت في 5-5، function value تقدر تبعتها كـdependency. هنا المصدر بياخد حد exclusive وبيرجّع index أصغر منه.\n\nاختيار ثابت في الـtest يخلّي walkthrough قابل للتكرار. في التشغيل الحقيقي، الـadapter يقدر يوصّل بمصدر عشوائي.\n\nخلي الاختيار عند الحد، وخلي قواعد اللعبة تستهلك نتيجة واضحة."),
 		ch21Walkthrough("c213.draw-example", "اختيار ثابت يحدد عنصرًا في قائمة صغيرة.", `func pick(labels []string, draw func(int) int) string {
 	return labels[draw(len(labels))]
 }
@@ -304,14 +304,14 @@ func main() {
 	fmt.Println(pick([]string{"amber", "cyan", "violet"}, fixed))
 }`, "e213-injected-pick", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 5, Caption: "المصدر الثابت يرجع index 1.", Variables: []LessonVariable{{Name: "fixed", Value: "returns 1"}}},
+			{Line: 5, Caption: "المصدر الثابت بيرجّع index 1.", Variables: []LessonVariable{{Name: "fixed", Value: "returns 1"}}},
 			{Line: 6, Caption: "العنصر الثاني هو cyan.", Output: "cyan"},
 		}),
 	}},
 	{ID: "c213.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch21Question("c213.predict-pick", "توقّع ناتج المثال:\n\n~~~go\nfunc pick(labels []string, draw func(int) int) string {\n\treturn labels[draw(len(labels))]\n}\nfunc main() {\n\tfixed := func(n int) int { return 1 }\n\tfmt.Println(pick([]string{\"amber\", \"cyan\", \"violet\"}, fixed))\n}\n~~~", []string{"amber", "cyan", "violet"}, 1, []string{
-			"الـcallback بيرجع index صفر.",
-			"الـcallback بيرجع index واحد.",
+			"الـcallback بيرجّع index صفر.",
+			"الـcallback بيرجّع index واحد.",
 			"القائمة فيها عنصرين بعد index واحد.",
 		}),
 		ch21Walkthrough("c213.pick-reveal", "تابع الحد اللي وصل للمصدر والاختيار الناتج.", `func pick(labels []string, draw func(int) int) string {
@@ -322,16 +322,16 @@ func main() {
 	fmt.Println(pick([]string{"amber", "cyan", "violet"}, fixed))
 }`, "e213-pick-reveal", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 5, Caption: "المصدر الثابت يرجع 1.", Variables: []LessonVariable{{Name: "fixed", Value: "returns 1"}}},
+			{Line: 5, Caption: "المصدر الثابت بيرجّع 1.", Variables: []LessonVariable{{Name: "fixed", Value: "returns 1"}}},
 			{Line: 6, Caption: "اطبع الاسم المختار.", Output: "cyan"},
 		}),
 		ch21SandboxBlock("c213.playground", "ch21-injected-draw", "بدّل مصدر الاختيار وراقب الـindex والاسم.", ch21DepthSandboxConfig()),
 	}},
 	{ID: "c213.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c213.watch", "- افحص نتيجة المصدر قبل استخدامها كـindex."), ch21Markdown("c213.watch-detail", "- متعتمدش على random global جوه منطق تقدر تختبره.")}},
 	{ID: "c213.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch21Markdown("c213.plan", "قسّم التفكير: جهّز مصدر الاختيار، اقرأ التخمين، ثم حدّث حالة الجولة.\n\nخلي I/O واضح من خلال reader وwriter.\n\nإيه فايدة callback ثابت في الاختبار؟"),
+		ch21Markdown("c213.plan", "قسّم التفكير: جهّز مصدر الاختيار، اقرا التخمين، ثم حدّث حالة الجولة.\n\nخلي I/O واضح من خلال reader وwriter.\n\nإيه فايدة callback ثابت في الـtest؟"),
 		ch21Question("c213.fixed-source", "إيه اللي يضيفه مصدر ثابت؟", []string{"نتيجة قابلة للتكرار", "عشوائية أقوى", "حالة مشتركة"}, 0, []string{
-			"نفس الاستدعاء يقدر يكرر نفس المسار.",
+			"نفس الاستدعاء يقدر يكرّر نفس المسار.",
 			"الثبات مش بيحسن العشوائية.",
 			"الحقن بيساعد على تجنب الحالة المشتركة.",
 		}),
@@ -387,10 +387,10 @@ func main() {
 }
 
 var ch21DuelArabic = []LessonStep{
-	{ID: "c214.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch21Markdown("c214.mission", "1. حوّل أوامر النص لقيم مناورة مسماة.\n2. احسب الجولة بمصدر عشوائية محقون.\n3. الـstarter فيه أنواع ناقصة؛ كمّل قواعد سهلة المراجعة.")}},
+	{ID: "c214.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch21Markdown("c214.mission", "1. حوّل أوامر النص لـnamed values للمناورة.\n2. احسب الجولة بمصدر عشوائية محقون.\n3. الـstarter فيه أنواع ناقصة؛ كمّل قواعد سهلة المراجعة.")}},
 	{ID: "c214.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-		ch21Markdown("c214.named-values", "الـnamed type و~iota~ من 2-4 بيرتبوا قيم ليها معنى بدل strings متفرقة. مجموعة constants بتعمل قاموس صغير.\n\nحوّل النص لقيمة بعد التحقق عند الحد. جوه القاعدة، استخدم النوع المسمى وخلي input بعيد عن حساب النتيجة.\n\nالفصل ده يسهل مراجعة الحالات واحدة واحدة."),
-		ch21Walkthrough("c214.enum-example", "~iota~ بترقم قيم النوع بالترتيب.", `type LampMode int
+		ch21Markdown("c214.named-values", "الـnamed type و~iota~ من 2-4 بيرتبوا values ليها معنى بدل strings متفرقة. مجموعة constants بتعمل قاموس صغير.\n\nحوّل النص لـvalue بعد التحقق عند الحد. جوه القاعدة، استخدم النوع المسمى وخلي input بعيد عن حساب النتيجة.\n\nالفصل ده يسهل مراجعة الحالات واحدة واحدة."),
+		ch21Walkthrough("c214.enum-example", "~iota~ بترقّم values النوع بالترتيب.", `type LampMode int
 const (
 	idle LampMode = iota
 	scan
@@ -402,16 +402,16 @@ func main() {
 }`, "e214-iota-values", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 2, Caption: "ابدأ مجموعة constants."},
-			{Line: 4, Caption: "القيمة التانية رقمها 1."},
-			{Line: 8, Caption: "mode تحفظ scan."},
-			{Line: 9, Caption: "اطبع القيمة الرقمية.", Output: "1"},
+			{Line: 4, Caption: "الـvalue التانية رقمها 1."},
+			{Line: 8, Caption: "الـmode بتخزّن scan."},
+			{Line: 9, Caption: "اطبع الـnumeric value.", Output: "1"},
 		}),
 	}},
 	{ID: "c214.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch21Question("c214.predict-mode", "توقّع الناتج:\n\n~~~go\ntype LampMode int\nconst (\n\tidle LampMode = iota\n\tscan\n\trelay\n)\nfunc main() {\n\tmode := scan\n\tfmt.Println(int(mode))\n}\n~~~", []string{"0", "1", "2"}, 1, []string{
-			"idle هي أول قيمة ورقمها صفر.",
+			"idle هي أول value ورقمها صفر.",
 			"scan تيجي بعد idle مباشرة.",
-			"relay هي القيمة التالتة.",
+			"relay هي الـvalue التالتة.",
 		}),
 		ch21Walkthrough("c214.mode-reveal", "امشِ من أول constant لحد الطباعة.", `type LampMode int
 const (
@@ -425,18 +425,18 @@ func main() {
 }`, "e214-mode-reveal", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 2, Caption: "الثوابت بتبدأ من صفر."},
-			{Line: 4, Caption: "scan قيمتها واحد."},
-			{Line: 8, Caption: "اختار القيمة المسماة."},
+			{Line: 4, Caption: "scan الـvalue بتاعتها واحد."},
+			{Line: 8, Caption: "اختار الـnamed value."},
 			{Line: 9, Caption: "الناتج الرقمي هو 1.", Output: "1"},
 		}),
-		ch21SandboxBlock("c214.playground", "ch21-maneuver-values", "مرّر أوامر توضيحية وشوف القيمة المسماة.", ch21DuelSandboxConfig()),
+		ch21SandboxBlock("c214.playground", "ch21-maneuver-values", "مرّر أوامر توضيحية وشوف الـnamed value.", ch21DuelSandboxConfig()),
 	}},
 	{ID: "c214.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch21Markdown("c214.watch", "- متحوّلش نص غير موثوق للنوع قبل ما تتحقق منه."), ch21Markdown("c214.watch-detail", "- parsing وقرار الجولة مرحلتين؛ خليك واضح في الحد بينهم.")}},
 	{ID: "c214.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch21Markdown("c214.plan", "امشِ في خطين: طبّع المدخل وتحقق منه، وبعدها طبّق قاعدة الجولة.\n\nفكّر في كل زوج قيم بالترتيب، مش في كل قيمة لوحدها.\n\nلو عكست اللاعب والمنافس، إيه اللي لازم تراجعه؟"),
+		ch21Markdown("c214.plan", "امشِ في خطين: طبّع المدخل وتحقق منه، وبعدها طبّق قاعدة الجولة.\n\nفكّر في كل زوج values بالترتيب، مش في كل value لوحدها.\n\nلو عكست اللاعب والمنافس، إيه اللي لازم تراجعه؟"),
 		ch21Question("c214.parse-boundary", "فين يتحول نص الأمر لنوع مسمى؟", []string{"عند حد الإدخال", "داخل الطباعة", "بعد تحديث النتيجة"}, 0, []string{
 			"تحقق من النص قبل وصوله لقواعد اللعب.",
-			"الطباعة تعرض النتيجة فقط.",
+			"الطباعة بتعرض النتيجة بس.",
 			"الحالة تتحدث بعد القرار.",
 		}),
 	}},

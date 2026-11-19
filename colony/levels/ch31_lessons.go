@@ -44,7 +44,7 @@ var ch31Sandbox311 = map[string]any{
 	"labels": map[string]any{
 		"title": ch31Localized("الـbuffer", "Buffer"), "chunk": ch31Localized("الجزء الحالي", "Current chunk"),
 		"pending": ch31Localized("لسه مستني الفاصل", "Waiting for delimiter"), "lines": ch31Localized("سطور كاملة", "Complete lines"),
-		"read": ch31Localized("اقرأ chunk", "Read chunk"), "reset": ch31Localized("ابدأ من الأول", "Reset"),
+		"read": ch31Localized("اقرا chunk", "Read chunk"), "reset": ch31Localized("ابدأ من الأول", "Reset"),
 		"initial": ch31Localized("القراية ممكن تقف قبل نهاية السطر.", "A read can stop before the line ends."), "empty": ch31Localized("لسه مفيش", "None yet"),
 	},
 	"delimiterMark": "↵",
@@ -75,14 +75,14 @@ var ch31Sandbox312 = map[string]any{
 	},
 	"events": map[string]any{
 		"slow": ch31Localized("يتخطى الإرسال؛ الصندوق مليان.", "Skip send; this inbox is full."),
-		"fast": ch31Localized("الإرسال لا ينتظر المستلم.", "The send does not wait for its reader."),
+		"fast": ch31Localized("الإرسال ما يستناش المستلم.", "The send does not wait for its reader."),
 	},
 }
 
 var ch31Sandbox313 = map[string]any{
 	"labels": map[string]any{
-		"title": ch31Localized("حزم UDP", "UDP packets"), "packet": ch31Localized("الحزمة المستلمة", "Received packet"),
-		"receive": ch31Localized("استقبل الحزمة", "Receive packet"), "reset": ch31Localized("ابدأ من الأول", "Reset"),
+		"title": ch31Localized("UDP packets", "UDP packets"), "packet": ch31Localized("الـpacket المستلمة", "Received packet"),
+		"receive": ch31Localized("استقبل الـpacket", "Receive packet"), "reset": ch31Localized("ابدأ من الأول", "Reset"),
 		"initial": ch31Localized("كل datagram يفضل وحدة واحدة.", "Each datagram stays one unit."), "empty": ch31Localized("مفيش لسه", "None yet"),
 	},
 	"packets": []string{"v2|r7|pier", "v2|r8|reef"},
@@ -90,8 +90,8 @@ var ch31Sandbox313 = map[string]any{
 
 var ch31Sandbox314 = map[string]any{
 	"labels": map[string]any{
-		"title": ch31Localized("ترتيب البايتات", "Byte order"), "wire": ch31Localized("البايتات", "Bytes"),
-		"value": ch31Localized("قيمة الحقل", "Field value"), "remaining": ch31Localized("الباقي", "Remaining"),
+		"title": ch31Localized("ترتيب الـbytes", "Byte order"), "wire": ch31Localized("الـbytes", "Bytes"),
+		"value": ch31Localized("الـvalue بتاعة الحقل", "Field value"), "remaining": ch31Localized("الباقي", "Remaining"),
 		"swap": ch31Localized("بدّل ترتيب القراءة", "Swap byte order"), "empty": ch31Localized("مفيش", "None"),
 	},
 	"bytes": []int{1, 2, 7},
@@ -109,7 +109,7 @@ var ch31Sandbox315 = map[string]any{
 	},
 	"outcomes": []any{
 		map[string]any{"name": ch31Localized("قائمة فاضية", "Empty list"), "result": "[]", "caption": ch31Localized("دي إجابة ناجحة.", "This is a successful answer.")},
-		map[string]any{"name": ch31Localized("اسم مش موجود", "Name not found"), "result": "DNSError", "caption": ch31Localized("ده سبب خطأ مختلف.", "This is a different error cause.")},
+		map[string]any{"name": ch31Localized("اسم مش موجود", "Name not found"), "result": "DNSError", "caption": ch31Localized("ده سبب error مختلف.", "This is a different error cause.")},
 		map[string]any{"name": ch31Localized("عنوانين", "Two addresses"), "result": "192.0.2.8 · 2001:db8::8", "caption": ch31Localized("البيانات جاية من resolver.", "The data comes from the resolver.")},
 	},
 }
@@ -136,7 +136,7 @@ func ch31ReadChunk(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c311.reader-chunk", text, ch31ReadChunkCode, "e311-reader-chunk", []string{"fmt", "strings"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
 		{Line: 2, Caption: ch31Caption("القارئ فيه stream.", "The reader holds a stream.", english)},
-		{Line: 3, Caption: ch31Caption("المخزن يطلب ثلاث بايتات.", "The buffer asks for three bytes.", english)},
+		{Line: 3, Caption: ch31Caption("الـbuffer بيطلب 3 bytes.", "The buffer asks for three bytes.", english)},
 		{Line: 4, Caption: ch31Caption("القراءة ملأت الجزء.", "The read fills that chunk.", english), Variables: []LessonVariable{{Name: "n", Value: "3"}, {Name: "chunk", Value: "[115 105 103]"}}},
 		{Line: 5, Caption: ch31Caption("اطبع الجزء المقروء.", "Print the bytes read.", english), Variables: []LessonVariable{{Name: "n", Value: "3"}}, Output: "sig"},
 	})
@@ -150,33 +150,33 @@ const ch31ByteCountCode = `func main() {
 func ch31ByteCount(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c311.byte-count", text, ch31ByteCountCode, "e311-byte-count", []string{"fmt", "unicode/utf8"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch31Caption("الحرف يحتل بايتين.", "The character uses two bytes.", english), Variables: []LessonVariable{{Name: "word", Value: "é"}}},
-		{Line: 3, Caption: ch31Caption("قارن البايتات بالـrunes.", "Compare bytes and runes.", english), Variables: []LessonVariable{{Name: "word", Value: "é"}}, Output: "2 1"},
+		{Line: 2, Caption: ch31Caption("الحرف بياخد 2 bytes.", "The character uses two bytes.", english), Variables: []LessonVariable{{Name: "word", Value: "é"}}},
+		{Line: 3, Caption: ch31Caption("قارن الـbytes بالـrunes.", "Compare bytes and runes.", english), Variables: []LessonVariable{{Name: "word", Value: "é"}}, Output: "2 1"},
 	})
 }
 
 var ch31Lesson311Arabic = []LessonStep{
-	{ID: "c311.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c311.mission", "1. رجّع سطور المنارة كاملة وبالترتيب.\n2. احترم حد المحتوى بالبايت.\n3. خلّي ملكية الاتصال واضحة.")}},
-	{ID: "c311.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31ReadChunk("TCP بيقدم stream بايتات؛ القراية الواحدة ممكن ترجع جزء من الرسالة.\n\nالبروتوكول هو اللي يحدد الفاصل. احتفظ بالبايتات لحد ما تعرف إن الإطار اكتمل.\n\nالـdeadline مطلق ومحقون، و~net.Conn~ محتاج مالك يقفله.\n\nالحد هنا بايتات محتوى، فالحرف المرئي مش دايماً بايت واحد.", false)}},
+	{ID: "c311.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c311.mission", "1. رجّع سطور المنارة كاملة وبالترتيب.\n2. احترم حد المحتوى بالـbyte.\n3. خلّي ملكية الاتصال واضحة.")}},
+	{ID: "c311.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31ReadChunk("TCP بيقدم stream من الـbytes؛ القراية الواحدة ممكن ترجّع جزء من الرسالة.\n\nالبروتوكول هو اللي بيحدد الفاصل. خزّن الـbytes لحد ما تعرف إن الإطار اكتمل.\n\nالـdeadline مطلق ومحقون، و~net.Conn~ محتاج مالك يقفله.\n\nالحد هنا bytes المحتوى، فالحرف المرئي مش دايماً byte واحد.", false)}},
 	{ID: "c311.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch31Question("c311.predict-bytes", "كام بايت وكم rune في النص؟\n\n~~~go\nfunc main() {\n\tword := \"é\"\n\tfmt.Println(len(word), utf8.RuneCountInString(word))\n}\n~~~", []string{"2 1", "1 1", "2 2"}, 0, []string{
-			"الحرف UTF-8 له بايتان وrune واحدة.",
-			"len للنص بيعد البايتات.",
+		ch31Question("c311.predict-bytes", "كام byte وكم rune في النص؟\n\n~~~go\nfunc main() {\n\tword := \"é\"\n\tfmt.Println(len(word), utf8.RuneCountInString(word))\n}\n~~~", []string{"2 1", "1 1", "2 2"}, 0, []string{
+			"حرف UTF-8 بيستخدم 2 bytes وrune واحدة.",
+			"len للنص بيعد الـbytes.",
 			"RuneCountInString يعد وحدات Unicode.",
 		}),
 		ch31ByteCount("راقب الفرق بين طول string وعدّ الحروف.", false),
-		ch31Sandbox("c311.playground", "اقرأ الأجزاء وشوف إمتى السطر يكتمل.", "ch31-stream-buffer", ch31Sandbox311),
+		ch31Sandbox("c311.playground", "اقرا الأجزاء وشوف إمتى السطر يكتمل.", "ch31-stream-buffer", ch31Sandbox311),
 	}},
 	{ID: "c311.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c311.watch", "- EOF وسط سطر مش إغلاق نظيف؛ ما تبعتش الجزء الناقص.\n- الكتابة ممكن تكون جزئية؛ تابع الباقي أو أبلغ عن التوقف.")}},
 	{ID: "c311.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch31Markdown("c311.plan", "افصل التملك عن النقل: تحقق من الحد، اضبط الموعد، وبعدها عالج الإطار.\n\nاسأل إيه اللي اتكتب بالفعل قبل أي خطأ، ومين يقفل الاتصال عند كل خروج."),
-		ch31Question("c311.eof", "EOF بعد محتوى من غير newline معناه إيه؟", []string{"إطار ناقص", "سطر كامل", "تجاهل كل الخطأ"}, 0, []string{
+		ch31Markdown("c311.plan", "افصل التملك عن النقل: اتأكد من الحد، اضبط الموعد، وبعدها عالج الإطار.\n\nاسأل إيه اللي اتكتب بالفعل قبل ما يحصل أي error، ومين يقفل الاتصال عند كل خروج."),
+		ch31Question("c311.eof", "EOF بعد محتوى من غير newline معناه إيه؟", []string{"إطار ناقص", "سطر كامل", "تجاهل كل الـerror"}, 0, []string{
 			"المحتوى لسه ما وصلش للفاصل.",
 			"الفاصل جزء من تعريف الإطار.",
 			"سبب النقل لازم يفضل ظاهراً.",
 		}),
 	}},
-	{ID: "c311.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c311.turn", "ابدأ بحالة قراءة واحدة؛ بعدها راجع الإغلاق والردود السابقة.")}},
+	{ID: "c311.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c311.turn", "ابدأ بحالة قراءة واحدة؛ بعدها راجع الإغلاق والـresponses السابقة.")}},
 }
 
 var ch31Lesson311English = []LessonStep{
@@ -245,27 +245,27 @@ func ch31EmptyMailbox(text string, english bool) LessonBlock {
 }
 
 var ch31Lesson312Arabic = []LessonStep{
-	{ID: "c312.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c312.mission", "1. خلّي حلقة واحدة تملك خريطة الأعضاء.\n2. ابعت الرسائل من غير تعطيل الباقيين.\n3. اقفل الصناديق عند الخروج.")}},
-	{ID: "c312.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31FullMailbox("القناة صندوق بريد؛ المالك الواحد يحافظ على حالة الأعضاء من غير قفل للخريطة.\n\n~select~ مع ~default~ يجرب إرسالاً فورياً. لو الصندوق مليان، المسار يكمل بدل ما يستنى.\n\nفي المهمة، الامتلاء معناه فصل العضو البطيء؛ الرسالة ممكن تفضل مقروءة قبل ما القناة تخلص.\n\nالمنتج يملك قناة الأوامر؛ الغرفة تملك صندوق العضو المقبول.", false)}},
+	{ID: "c312.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c312.mission", "1. خلّي الـloop الواحدة تملك الـmap بتاعة الأعضاء.\n2. ابعت الرسائل من غير ما تعطل الباقيين.\n3. اقفل الصناديق عند الخروج.")}},
+	{ID: "c312.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31FullMailbox("الـchannel صندوق بريد؛ المالك الواحد بيحافظ على حالة الأعضاء من غير الـlock اللي حوالين الـmap.\n\n~select~ مع ~default~ بيجرب إرسال فوري. لو الصندوق مليان، الـloop بتكمل بدل ما تستنى.\n\nفي المهمة، الامتلاء معناه فصل العضو البطيء؛ الرسالة ممكن تفضل مقروءة قبل ما الـchannel تخلص.\n\nالمنتج بيملك الـchannel بتاعة الأوامر؛ الغرفة بتملك صندوق العضو المقبول.", false)}},
 	{ID: "c312.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch31Question("c312.predict-send", "والصندوق فاضي، إيه اللي يطبع؟\n\n~~~go\nfunc main() {\n\tmail := make(chan string, 1)\n\tselect {\n\tcase mail <- \"ping\":\n\t\tfmt.Println(\"sent\")\n\tdefault:\n\t\tfmt.Println(\"full\")\n\t}\n}\n~~~", []string{"sent", "full", "لا شيء"}, 0, []string{
+		ch31Question("c312.predict-send", "والصندوق فاضي، إيه اللي يطبع؟\n\n~~~go\nfunc main() {\n\tmail := make(chan string, 1)\n\tselect {\n\tcase mail <- \"ping\":\n\t\tfmt.Println(\"sent\")\n\tdefault:\n\t\tfmt.Println(\"full\")\n\t}\n}\n~~~", []string{"sent", "full", "مفيش حاجة"}, 0, []string{
 			"الإرسال متاح في السعة الفاضية.",
 			"default يشتغل لو الإرسال مش جاهز.",
 			"المسار الجاهز يطبع نتيجة.",
 		}),
-		ch31EmptyMailbox("اتبع اختيار select قبل قراءة الرسالة المطبوعة.", false),
+		ch31EmptyMailbox("اتبع select قبل قراءة الرسالة المطبوعة.", false),
 		ch31Sandbox("c312.playground", "شغّل تاني وشوف الإرسال ما يستناش.", "ch31-mailbox-owner", ch31Sandbox312),
 	}},
-	{ID: "c312.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c312.watch", "- ما تقفلش قناة عضو من برّه مالكها.\n- رد الأمر نقطة مزامنة؛ ابعته بعد ما تخلص أثره.")}},
+	{ID: "c312.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c312.watch", "- ما تقفلش الـchannel بتاعة عضو من برّه مالكها.\n- الـresponse بتاع الأمر نقطة مزامنة؛ ابعته بعد ما تخلص أثره.")}},
 	{ID: "c312.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch31Markdown("c312.plan", "رتّب الحالة حول owner loop: أمر واحد، تحقق، تحديث، ثم رد.\n\nوقت النهاية، حدّد مين بيقفل كل قناة. راجع إن العضو البطيء ما يعطلش الإرسال لغيره."),
+		ch31Markdown("c312.plan", "رتّب الحالة حوالين الـowner loop: استقبل أمر واحد، اتأكد منه، حدّث الحالة، وبعدها رجّع الـresponse.\n\nوقت النهاية، حدّد مين بيقفل كل الـchannels. راجع إن العضو البطيء ما يعطلش الإرسال لغيره."),
 		ch31Question("c312.channel-owner", "مين يقفل صندوق عضو انضم بنجاح؟", []string{"الغرفة المالكة", "العضو القارئ", "أي مرسل"}, 0, []string{
 			"نفس المالك مسؤول عن الإرسال والإغلاق.",
-			"المشترك يقرأ فقط حسب العقد.",
+			"المشترك بيقرا حسب العقد بس.",
 			"ملكية الإغلاق ماينفعش تتشارك عشوائياً.",
 		}),
 	}},
-	{ID: "c312.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c312.turn", "ابدأ بحلقة المالك، وبعدها أضف كل انتقال حالة لوحده.")}},
+	{ID: "c312.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c312.turn", "ابدأ بـloop المالك، وبعدها أضف كل انتقال حالة لوحده.")}},
 }
 
 var ch31Lesson312English = []LessonStep{
@@ -301,7 +301,7 @@ func ch31PacketFields(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c313.packet-fields", text, ch31PacketFieldsCode, "e313-packet-fields", []string{"fmt", "strings"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
 		{Line: 2, Caption: ch31Caption("قسّم datagram واحدة.", "Split one datagram.", english)},
-		{Line: 3, Caption: ch31Caption("اقرأ حقول محددة.", "Read selected fields.", english), Variables: []LessonVariable{{Name: "fields", Value: "[v2 r7 pier]"}}},
+		{Line: 3, Caption: ch31Caption("اقرا حقول محددة.", "Read selected fields.", english), Variables: []LessonVariable{{Name: "fields", Value: "[v2 r7 pier]"}}},
 		{Line: 4, Caption: ch31Caption("اطبع أول وآخر حقل.", "Print the first and last fields.", english), Variables: []LessonVariable{{Name: "fields", Value: "[v2 r7 pier]"}}, Output: "v2 pier"},
 	})
 }
@@ -314,33 +314,33 @@ const ch31OnePacketCode = `func main() {
 func ch31OnePacket(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c313.one-packet", text, ch31OnePacketCode, "e313-one-packet", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch31Caption("بايتات packet واحدة.", "Bytes of one packet.", english), Variables: []LessonVariable{{Name: "packet", Value: "[118 50 124 114 55 124 112 105 101 114]"}}},
-		{Line: 3, Caption: ch31Caption("اعرض النص التوضيحي.", "Show the illustrative text.", english), Variables: []LessonVariable{{Name: "packet", Value: "[118 50 124 114 55 124 112 105 101 114]"}}, Output: "v2|r7|pier"},
+		{Line: 2, Caption: ch31Caption("الـbytes بتاعة packet واحدة.", "Bytes of one packet.", english), Variables: []LessonVariable{{Name: "packet", Value: "[118 50 124 114 55 124 112 105 101 114]"}}},
+		{Line: 3, Caption: ch31Caption("اطبع النص التوضيحي.", "Show the illustrative text.", english), Variables: []LessonVariable{{Name: "packet", Value: "[118 50 124 114 55 124 112 105 101 114]"}}, Output: "v2|r7|pier"},
 	})
 }
 
 var ch31Lesson313Arabic = []LessonStep{
-	{ID: "c313.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c313.mission", "1. افتح listener محلياً عند الطلب.\n2. افك packet واحدة بحد واضح.\n3. رد لمصدر الإرسال الفعلي.")}},
-	{ID: "c313.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31PacketFields("UDP ينقل datagrams منفصلة؛ نجاح الإرسال مش تأكيد وصول.\n\nقسّم الحزمة بعد التحقق من شكلها، واحتفظ بعنوان المصدر اللي رجع مع القراءة.\n\nالفاصل بين codec والنقل يخلي الترميز قابل للتجربة من غير socket.\n\nالموعد deadline مطلق. المصنع وحده يفتح الاتصال، واللي ناداه هو اللي يقفله.", false)}},
+	{ID: "c313.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c313.mission", "1. افتح listener محلي عند الـrequest.\n2. فك packet واحدة بحد واضح.\n3. رجّع response لمصدر الإرسال الفعلي.")}},
+	{ID: "c313.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31PacketFields("UDP بينقل datagrams منفصلة؛ نجاح الإرسال مش تأكيد وصول.\n\nقسّم الـpacket بعد ما تتأكد من شكلها، واحتفظ بعنوان المصدر اللي رجّعته القراية.\n\nالفاصل بين الـcodec والنقل بيخلي الترميز قابل للتجربة من غير الـsocket.\n\nالـdeadline مطلق. المصنع وحده بيفتح الاتصال، واللي ناداه هو اللي بيقفله.", false)}},
 	{ID: "c313.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch31Question("c313.predict-packet", "إيه اللي يطبعه تحويل packet لstring؟\n\n~~~go\nfunc main() {\n\tpacket := []byte(\"v2|r7|pier\")\n\tfmt.Println(string(packet))\n}\n~~~", []string{"v2|r7|pier", "[118 50 124 114 55 124 112 105 101 114]", "v2 pier"}, 0, []string{
-			"string تعرض محتوى البايتات كنص.",
-			"دي صيغة slice البايتات قبل التحويل.",
+			"الـstring بتعرض محتوى الـbytes كنص.",
+			"دي صيغة الـslice بتاعة الـbytes قبل التحويل.",
 			"التقسيم لحقول محتاج خطوة تانية.",
 		}),
-		ch31OnePacket("تابع البايتات وهي بتظهر كنص للحزمة.", false),
+		ch31OnePacket("تابع الـbytes وهي بتظهر كنص للـpacket.", false),
 		ch31Sandbox("c313.playground", "استقبل datagram واحدة كل مرة.", "ch31-udp-packets", ch31Sandbox313),
 	}},
-	{ID: "c313.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c313.watch", "- مخزن أكبر ببايت يكشف datagram أطول من الحد.\n- في UDP، short write مش معناه إرسال باقي الحزمة لاحقاً.")}},
+	{ID: "c313.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c313.watch", "- مخزن أكبر بـbyte يكشف datagram أطول من الحد.\n- في UDP، short write مش معناه إرسال باقي الحزمة بعدين.")}},
 	{ID: "c313.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch31Markdown("c313.plan", "افصل التحقق من النص عن التعامل مع socket. ارفض شكل الطلب قبل بناء الرد.\n\nبعدها راجع عنوان الرد والموعد والملكية: الدالة المستعيرة لا تقفل الاتصال."),
-		ch31Question("c313.reply-address", "عنوان الرد ييجي منين؟", []string{"عنوان ReadFrom", "حقل داخل النص", "عنوان افتراضي"}, 0, []string{
+		ch31Markdown("c313.plan", "افصل التحقق من النص عن التعامل مع الـsocket. ارفض شكل الـrequest قبل بناء الـresponse.\n\nبعدها راجع عنوان الـresponse والموعد والملكية: الـfunction المستعارة ما تقفلش الاتصال."),
+		ch31Question("c313.reply-address", "عنوان الـresponse ييجي منين؟", []string{"عنوان ReadFrom", "حقل داخل النص", "عنوان افتراضي"}, 0, []string{
 			"ReadFrom يعطي عنوان المرسل الفعلي.",
-			"النص لا يثبت عنوان النقل.",
-			"العنوان الافتراضي ممكن يرد لطرف غلط.",
+			"النص مش دليل على عنوان النقل.",
+			"العنوان الافتراضي ممكن يبعت الـresponse لطرف غلط.",
 		}),
 	}},
-	{ID: "c313.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c313.turn", "ابدأ بتوقيع codec؛ بعدها صِل طلباً واحداً بالنقل المحقون.")}},
+	{ID: "c313.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c313.turn", "ابدأ بتوقيع codec؛ بعدها صِل request واحد بالنقل المحقون.")}},
 }
 
 var ch31Lesson313English = []LessonStep{
@@ -376,9 +376,9 @@ const ch31BigEndianCode = `func main() {
 func ch31BigEndian(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c314.big-endian", text, ch31BigEndianCode, "e314-big-endian", []string{"encoding/binary", "fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch31Caption("البايتات محفوظة بالترتيب.", "Bytes stay in order.", english), Variables: []LessonVariable{{Name: "wire", Value: "[1 2]"}}},
+		{Line: 2, Caption: ch31Caption("الـbytes محفوظة بالترتيب.", "Bytes stay in order.", english), Variables: []LessonVariable{{Name: "wire", Value: "[1 2]"}}},
 		{Line: 3, Caption: ch31Caption("BigEndian يقرأ الرقم.", "BigEndian reads the number.", english), Variables: []LessonVariable{{Name: "n", Value: "258"}}},
-		{Line: 4, Caption: ch31Caption("اطبع القيمة العددية.", "Print the numeric value.", english), Variables: []LessonVariable{{Name: "n", Value: "258"}}, Output: "258"},
+		{Line: 4, Caption: ch31Caption("اطبع الـvalue العددية.", "Print the numeric value.", english), Variables: []LessonVariable{{Name: "n", Value: "258"}}, Output: "258"},
 	})
 }
 
@@ -391,29 +391,29 @@ const ch31HeaderCode = `func main() {
 func ch31Header(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c314.header-length", text, ch31HeaderCode, "e314-header-length", []string{"encoding/binary", "fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch31Caption("الإطار فيه بايتات.", "The frame contains bytes.", english)},
-		{Line: 3, Caption: ch31Caption("اقرأ الحقل الأول.", "Read the first field.", english), Variables: []LessonVariable{{Name: "n", Value: "9"}}},
-		{Line: 4, Caption: ch31Caption("الباقي بايت واحد.", "One byte remains.", english), Variables: []LessonVariable{{Name: "n", Value: "9"}}, Output: "9 1"},
+		{Line: 2, Caption: ch31Caption("الإطار فيه bytes.", "The frame contains bytes.", english)},
+		{Line: 3, Caption: ch31Caption("اقرا الحقل الأول.", "Read the first field.", english), Variables: []LessonVariable{{Name: "n", Value: "9"}}},
+		{Line: 4, Caption: ch31Caption("الباقي byte واحد.", "One byte remains.", english), Variables: []LessonVariable{{Name: "n", Value: "9"}}, Output: "9 1"},
 	})
 }
 
 var ch31Lesson314Arabic = []LessonStep{
 	{ID: "c314.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c314.mission", "1. فك إطارات التليمتري المحفوظة.\n2. راجع الطول قبل قراءة الحقول.\n3. اكتب fuzz test لعقد parser.")}},
-	{ID: "c314.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31BigEndian("الـbinary frame بيانات مرتبة، مش نص مفصول بعلامة.\n\n~binary.BigEndian~ يقرأ البايت الأعلى أولاً. اعمل حدود slice بعد ما تتأكد إن الهيدر موجود.\n\nالطول المعلن لازم يطابق الشكل كله. والـpayload الناتجة تملك نسخة مستقلة.\n\nراجع كمان ترتيب الأخطاء؛ خطأ النوع له أولوية بعد سلامة البنية.", false)}},
+	{ID: "c314.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31BigEndian("الـbinary frame بيانات مرتبة، مش نص مفصول بعلامة.\n\n~binary.BigEndian~ بيقرا الـbyte الأعلى الأول. اعمل حدود الـslice بعد ما تتأكد إن الهيدر موجود.\n\nالطول المعلن لازم يطابق الشكل كله. والـpayload الناتجة تملك نسخة مستقلة.\n\nراجع كمان ترتيب الـerrors؛ الـerror بتاع النوع له أولوية بعد سلامة البنية.", false)}},
 	{ID: "c314.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch31Question("c314.predict-header", "بعد قراءة الرقم، كام بايت باقي؟\n\n~~~go\nfunc main() {\n\twire := []byte{0, 9, 7}\n\tn := binary.BigEndian.Uint16(wire[:2])\n\tfmt.Println(n, len(wire[2:]))\n}\n~~~", []string{"9 1", "9 2", "2304 1"}, 0, []string{
-			"أول بايتين يمثلوا 9 وواحد يفضل.",
-			"slice المتبقية تبدأ بعد البايتين.",
+		ch31Question("c314.predict-header", "بعد قراية الرقم، كام byte باقي؟\n\n~~~go\nfunc main() {\n\twire := []byte{0, 9, 7}\n\tn := binary.BigEndian.Uint16(wire[:2])\n\tfmt.Println(n, len(wire[2:]))\n}\n~~~", []string{"9 1", "9 2", "2304 1"}, 0, []string{
+			"أول 2 bytes فيهم الرقم 9، ويفضل byte واحد.",
+			"الـslice الباقية بتبدأ بعد أول 2 bytes.",
 			"BigEndian يقرأ الصفر قبل التسعة.",
 		}),
 		ch31Header("اتبع قراءة الحقل، وبعدها طول الجزء المتبقي.", false),
-		ch31Sandbox("c314.playground", "بدّل ترتيب البايتات وشوف قيمة الحقل.", "ch31-byte-order", ch31Sandbox314),
+		ch31Sandbox("c314.playground", "بدّل ترتيب الـbytes وشوف الـvalue بتاعة الحقل.", "ch31-byte-order", ch31Sandbox314),
 	}},
 	{ID: "c314.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c314.watch", "- ما تعملش slicing قبل فحص طول الهيدر.\n- فك الطول إلى int قبل جمع حجم الهيدر.")}},
 	{ID: "c314.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch31Markdown("c314.plan", "قسّم parser لمراحل تحقق صغيرة قبل الوصول للبيانات.\n\nصمّم oracle مستقل في fuzzing؛ تكرار نفس حساب parser ممكن يكرر نفس الغلط."),
 		ch31Question("c314.ownership", "تعديل payload الناتجة المفروض يعمل إيه؟", []string{"ما يغيرش wire", "يغير wire", "يغير ترتيب الهيدر"}, 0, []string{
-			"النتيجة تملك نسخة منفصلة من البايتات.",
+			"النتيجة تملك نسخة منفصلة من الـbytes.",
 			"المشاركة تكشف تغيير المدخل.",
 			"الترتيب جزء من البيانات الأصلية.",
 		}),
@@ -467,7 +467,7 @@ const ch31DNSCauseCode = `func main() {
 func ch31DNSCause(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c315.dns-cause", text, ch31DNSCauseCode, "e315-dns-cause", []string{"errors", "fmt", "net"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch31Caption("الخطأ يحمل نوعه.", "The error carries its type.", english), Variables: []LessonVariable{{Name: "cause.IsNotFound", Value: "true"}}},
+		{Line: 2, Caption: ch31Caption("الـerror يحمل نوعه.", "The error carries its type.", english), Variables: []LessonVariable{{Name: "cause.IsNotFound", Value: "true"}}},
 		{Line: 3, Caption: ch31Caption("جهّز هدف النوع.", "Prepare a type target.", english)},
 		{Line: 4, Caption: ch31Caption("As يستخرج السبب.", "As extracts the cause.", english), Variables: []LessonVariable{{Name: "dns.IsNotFound", Value: "true"}}, Output: "true true"},
 	})
@@ -475,26 +475,26 @@ func ch31DNSCause(text string, english bool) LessonBlock {
 
 var ch31Lesson315Arabic = []LessonStep{
 	{ID: "c315.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c315.mission", "1. اجمع عناوين من resolver محقون.\n2. صنّفها ورتّبها بشكل ثابت.\n3. ميّز غياب الاسم عن إجابة فاضية.")}},
-	{ID: "c315.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31IPv4("واجهة resolver هي حد الشبكة؛ الاختبارات ما تسألش DNS الجهاز.\n\n~net.IP~ بتتحول لتمثيل canonical. جرّب ~To4~ قبل ~To16~ عشان العنوان mapped يتحسب IPv4.\n\nإجابة عناوين فاضية نجاح؛ الغياب سبب خطأ مختلف.\n\nنفس ~context~ واسم الاستعلام يمشوا للنداءات بالترتيب.", false)}},
+	{ID: "c315.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31IPv4("الـinterface بتاعة resolver هي حد الشبكة؛ الـtests ما بتسألش DNS الجهاز.\n\n~net.IP~ بتتحول لتمثيل canonical. جرّب ~To4~ قبل ~To16~ عشان العنوان mapped يتحسب IPv4.\n\nإجابة عناوين فاضية نجاح؛ الغياب سببه error مختلف.\n\nنفس الـcontext واسم الـquery يمشوا للنداءات بالترتيب.", false)}},
 	{ID: "c315.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch31Question("c315.predict-as", "هل ~errors.As~ يستخرج DNS error؟\n\n~~~go\nfunc main() {\n\tcause := &net.DNSError{IsNotFound: true}\n\tvar dns *net.DNSError\n\tfmt.Println(errors.As(cause, &dns), dns.IsNotFound)\n}\n~~~", []string{"true true", "false false", "true false"}, 0, []string{
-			"As يملأ المؤشر بالنوع المطابق.",
-			"الخطأ من النوع المطلوب بالفعل.",
+			"As بيملأ الـpointer بالنوع المطابق.",
+			"الـerror من النوع المطلوب بالفعل.",
 			"بعد النجاح، IsNotFound تفضل true.",
 		}),
 		ch31DNSCause("تابع استخراج النوع، وبعده راية الغياب.", false),
-		ch31Sandbox("c315.playground", "قارن الإجابة الفاضية بخطأ الغياب.", "ch31-dns-outcomes", ch31Sandbox315),
+		ch31Sandbox("c315.playground", "قارن الإجابة الفاضية بالـerror بتاع الغياب.", "ch31-dns-outcomes", ch31Sandbox315),
 	}},
-	{ID: "c315.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c315.watch", "- خطأ الغياب في DNS مش زي قائمة عناوين فاضية.\n- رتّب النص canonical، وما تعدلش بيانات resolver.")}},
+	{ID: "c315.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c315.watch", "- الـerror بتاع الغياب في DNS مش زي قائمة عناوين فاضية.\n- رتّب النص canonical، وما تعدلش بيانات resolver.")}},
 	{ID: "c315.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch31Markdown("c315.plan", "ابدأ بالمدخل والسياق، وبعده نداء العناوين ثم alias.\n\nصنّف كل IP، طبّع الاسم، واجمع النتيجة بعد نجاح كل المراحل. أي فشل يرجع نتيجة صفرية."),
+		ch31Markdown("c315.plan", "ابدأ بالمدخل والـcontext، وبعده نداء العناوين ثم alias.\n\nصنّف كل IP، طبّع الاسم، واجمع النتيجة بعد نجاح كل المراحل. أي فشل يرجّع نتيجة صفرية."),
 		ch31Question("c315.address-order", "العنوان IPv4-mapped يتبع أي عائلة؟", []string{"IPv4", "IPv6", "عائلتين"}, 0, []string{
 			"To4 يصنفه كعنوان IPv4.",
-			"التمثيل المكتوب وحده لا يحدد الفئة.",
+			"التمثيل المكتوب لوحده مش بيحدد الفئة.",
 			"كل عنوان يظهر في عائلة واحدة.",
 		}),
 	}},
-	{ID: "c315.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c315.turn", "ابدأ بفصل أخطاء الإدخال عن أخطاء resolver.")}},
+	{ID: "c315.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c315.turn", "ابدأ بفصل الـerrors بتاعة الإدخال عن الـerrors بتاعة resolver.")}},
 }
 
 var ch31Lesson315English = []LessonStep{
@@ -532,7 +532,7 @@ func ch31JoinHostPort(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c316.join-host-port", text, ch31JoinHostPortCode, "e316-join-host-port", []string{"fmt", "net"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
 		{Line: 2, Caption: ch31Caption("العنوان IPv6 محلي.", "The IPv6 host is loopback.", english), Variables: []LessonVariable{{Name: "host", Value: "::1"}}},
-		{Line: 3, Caption: ch31Caption("احفظ المنفذ كنص.", "Keep the port as text.", english), Variables: []LessonVariable{{Name: "host", Value: "::1"}, {Name: "port", Value: "7443"}}},
+		{Line: 3, Caption: ch31Caption("خزّن المنفذ كنص.", "Keep the port as text.", english), Variables: []LessonVariable{{Name: "host", Value: "::1"}, {Name: "port", Value: "7443"}}},
 		{Line: 4, Caption: ch31Caption("JoinHostPort يضيف الأقواس.", "JoinHostPort adds brackets.", english), Variables: []LessonVariable{{Name: "address", Value: "[::1]:7443"}}},
 		{Line: 5, Caption: ch31Caption("اطبع عنوان الاتصال.", "Print the network address.", english), Variables: []LessonVariable{{Name: "address", Value: "[::1]:7443"}}, Output: "[::1]:7443"},
 	})
@@ -549,7 +549,7 @@ const ch31ResultSlotsCode = `func main() {
 func ch31ResultSlots(text string, english bool) LessonBlock {
 	return ch31Walkthrough("c316.result-slots", text, ch31ResultSlotsCode, "e316-result-slots", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch31Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch31Caption("الفهرس يحفظ الترتيب.", "The index preserves order.", english)},
+		{Line: 2, Caption: ch31Caption("الـindex يحفظ الترتيب.", "The index preserves order.", english)},
 		{Line: 3, Caption: ch31Caption("خانة لكل عنصر.", "A slot for each item.", english), Variables: []LessonVariable{{Name: "states", Value: "[ ]"}}},
 		{Line: 4, Caption: ch31Caption("اكتب نتيجة العنصر الثاني.", "Store the second result.", english), Variables: []LessonVariable{{Name: "states", Value: "[ closed]"}}},
 		{Line: 5, Caption: ch31Caption("اكتب نتيجة الأول.", "Store the first result.", english), Variables: []LessonVariable{{Name: "states", Value: "[open closed]"}}},
@@ -559,10 +559,10 @@ func ch31ResultSlots(text string, english bool) LessonBlock {
 
 var ch31Lesson316Arabic = []LessonStep{
 	{ID: "c316.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch31Markdown("c316.mission", "1. افحص منافذ loopback المسموح بها.\n2. حدّ التوازي قبل تشغيل العمال.\n3. رجّع النتائج بترتيب المدخل.")}},
-	{ID: "c316.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31ResultSlots("فحص المنفذ محاولة فتح بس؛ ما تبعتش بيانات أو تعمل retry.\n\nتحقق من العنوان الرقمي والخطة كلها قبل أي dial. استخدم callback محقون عشان الاختبار ما يفتحش شبكة حقيقية.\n\nالعامل يكتب في خانة index تخصه؛ ترتيب انتهاء المحاولات ما يغيّرش ترتيب النتائج.\n\nاقفل كل connection راجعة قبل اكتمال العامل.", false)}},
+	{ID: "c316.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch31ResultSlots("فحص المنفذ محاولة فتح بس؛ ما تبعتش بيانات أو تعمل retry.\n\nاتأكد من العنوان الرقمي والخطة كلها قبل أي dial. استخدم callback محقون عشان الـtest ما يفتحش شبكة حقيقية.\n\nالعامل بيكتب في خانة الـindex بتاعته؛ ترتيب انتهاء المحاولات ما بيغيّرش ترتيب النتائج.\n\nاقفل كل connection راجعة قبل ما العامل يخلص.", false)}},
 	{ID: "c316.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch31Question("c316.predict-address", "إيه صيغة عنوان IPv6 مع المنفذ؟\n\n~~~go\nfunc main() {\n\thost := \"::1\"\n\tport := \"7443\"\n\taddress := net.JoinHostPort(host, port)\n\tfmt.Println(address)\n}\n~~~", []string{"[::1]:7443", "::1:7443", "127.0.0.1:7443"}, 0, []string{
-			"الدالة تضيف الأقواس حول IPv6.",
+			"الـfunction تضيف الأقواس حول IPv6.",
 			"الصيغة دي ملتبسة من غير الأقواس.",
 			"ده عنوان IPv4 مختلف.",
 		}),
@@ -571,11 +571,11 @@ var ch31Lesson316Arabic = []LessonStep{
 	}},
 	{ID: "c316.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch31Markdown("c316.watch", "- ارفض الخطة كلها قبل العمال أو أي اتصال.\n- استخدم ~IsLoopback~؛ prefix نصي مش تحقق عنوان.")}},
 	{ID: "c316.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch31Markdown("c316.plan", "افصل فشل الإعداد عن فشل منفذ: الأول يوقف العملية، والتاني يسجل في خانته.\n\nراجع عدد العمال النشطين، وقفل الاتصالات، ثم ترتيب النتيجة مقارنة بالمدخل."),
+		ch31Markdown("c316.plan", "افصل فشل الإعداد عن فشل منفذ: الأول يوقف العملية، والتاني بيتسجل في خانته.\n\nراجع عدد العمال النشطين، وإغلاق الـconnections، ثم ترتيب النتيجة مقارنة بالمدخل."),
 		ch31Question("c316.worker-bound", "إيه اللي يحدد أقصى عمل متزامن؟", []string{"عدد workers المسموح", "عدد كل المنافذ", "سرعة الساعة"}, 0, []string{
 			"حد العمال يقيّد المحاولات المتزامنة.",
 			"إطلاق عامل لكل منفذ قد يتجاوز الحد.",
-			"الساعة لا تتحكم في التوازي.",
+			"الساعة مش هي اللي بتتحكم في التوازي.",
 		}),
 	}},
 	{ID: "c316.turn-step", Title: "دورك", Blocks: []LessonBlock{ch31Markdown("c316.turn", "ابدأ بالتحقق قبل العمال، ثم راجع كل نتيجة في مكانها.")}},

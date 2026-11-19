@@ -82,6 +82,7 @@ func readProgress(path string) (progressSave, error) {
 	if save["progress"] != nil {
 		setReview(save, reviewData(save))
 	}
+	migrateLearningMetrics(save)
 	return save, nil
 }
 func saveProgress(path string, save progressSave) error {

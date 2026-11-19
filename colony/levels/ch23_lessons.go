@@ -22,11 +22,11 @@ func ch23Playground(id, kind, description string, config map[string]any) LessonB
 
 var ch23ReadFullSandboxConfig = ch23SandboxConfig(ch23SandboxPair("الخطوة التالية", "Next step"),
 	ch23SandboxFrame("ابدأ بمصدر ثابت.", "Start with a fixed source.",
-		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("المخزن", "Buffer", "[_, _]"), ch23SandboxRow("القراءة", "Read", "n=0; waiting")),
-	ch23SandboxFrame("أول بايت وصل.", "The first byte arrived.",
-		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("المخزن", "Buffer", "[9, _]"), ch23SandboxRow("القراءة", "Read", "n=1; still reading")),
-	ch23SandboxFrame("المخزن اكتمل.", "The buffer is full.",
-		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("المخزن", "Buffer", "[9, 4]"), ch23SandboxRow("القراءة", "Read", "n=2; err=nil")))
+		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("الـbuffer", "Buffer", "[_, _]"), ch23SandboxRow("القراءة", "Read", "n=0; waiting")),
+	ch23SandboxFrame("أول byte وصل.", "The first byte arrived.",
+		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("الـbuffer", "Buffer", "[9, _]"), ch23SandboxRow("القراءة", "Read", "n=1; still reading")),
+	ch23SandboxFrame("الـbuffer بقى مليان.", "The buffer is full.",
+		ch23SandboxRow("المصدر", "Source", "[9, 4]"), ch23SandboxRow("الـbuffer", "Buffer", "[9, 4]"), ch23SandboxRow("القراءة", "Read", "n=2; err=nil")))
 
 var ch23AADSandboxConfig = ch23SandboxConfig(ch23SandboxPair("غيّر بيانات الفتح", "Change open data"),
 	ch23SandboxFrame("البيانات المصاحبة متطابقة.", "Associated data matches.",
@@ -35,11 +35,11 @@ var ch23AADSandboxConfig = ch23SandboxConfig(ch23SandboxPair("غيّر بيان�
 		ch23SandboxRow("المحتوى", "Payload", "encrypted"), ch23SandboxRow("وقت الختم", "Seal AAD", "label"), ch23SandboxRow("وقت الفتح", "Open AAD", "other"), ch23SandboxRow("التحقق", "Check", "rejected")))
 
 var ch23ReadLimitSandboxConfig = ch23SandboxConfig(ch23SandboxPair("وسّع حد القراءة", "Increase read limit"),
-	ch23SandboxFrame("اقرأ جزءًا محدودًا.", "Read a bounded part.",
+	ch23SandboxFrame("اقرا جزء محدود.", "Read a bounded part.",
 		ch23SandboxRow("الحد", "Limit", "2 bytes"), ch23SandboxRow("المقروء", "Read", "pl"), ch23SandboxRow("المتبقي", "Remaining", "4 bytes")),
-	ch23SandboxFrame("اسمح ببايتات أكتر.", "Allow more bytes.",
+	ch23SandboxFrame("اسمح بـbytes أكتر.", "Allow more bytes.",
 		ch23SandboxRow("الحد", "Limit", "4 bytes"), ch23SandboxRow("المقروء", "Read", "plan"), ch23SandboxRow("المتبقي", "Remaining", "2 bytes")),
-	ch23SandboxFrame("اقرأ النص كله.", "Read the whole text.",
+	ch23SandboxFrame("اقرا النص كله.", "Read the whole text.",
 		ch23SandboxRow("الحد", "Limit", "6 bytes"), ch23SandboxRow("المقروء", "Read", "planet"), ch23SandboxRow("المتبقي", "Remaining", "0 bytes")))
 
 var ch23OrderSandboxConfig = ch23SandboxConfig(ch23SandboxPair("ترتيب إضافة تاني", "Another insertion order"),
@@ -49,7 +49,7 @@ var ch23OrderSandboxConfig = ch23SandboxConfig(ch23SandboxPair("ترتيب إض�
 		ch23SandboxRow("الإضافة", "Inserted", "[bay/a, bay/z]"), ch23SandboxRow("بعد الترتيب", "Sorted", "[bay/a, bay/z]")))
 
 var ch23CSVSandboxConfig = ch23SandboxConfig(ch23SandboxPair("السجل التالي", "Next record"),
-	ch23SandboxFrame("اقرأ صف العناوين.", "Read the header row.",
+	ch23SandboxFrame("اقرا صف العناوين.", "Read the header row.",
 		ch23SandboxRow("السطر", "Line", "station,reading"), ch23SandboxRow("الحقول", "Fields", "[station] [reading]")),
 	ch23SandboxFrame("كل عمود بقى field.", "Each column is a field.",
 		ch23SandboxRow("السطر", "Line", "sensor-2,7"), ch23SandboxRow("الحقول", "Fields", "[sensor-2] [7]")))
@@ -85,45 +85,45 @@ func ch23Walkthrough(id, text, code, exampleID string, imports []string, frames 
 
 func ch23EnglishFrames(frames []LessonFrame) []LessonFrame {
 	translations := map[string]string{
-		"قبل التنفيذ.":                        "Before run.",
-		"مساحة بايتات للتوضيح.":               "Illustrative byte buffer.",
-		"المصدر يملأ المساحة.":                "The source fills the buffer.",
-		"اطبع الحالة من غير السر.":            "Print status without the secret.",
-		"مصدر ثابت للتجربة.":                  "Fixed source for the demo.",
-		"جهّز مكان القراءة.":                  "Prepare the read buffer.",
-		"املأ البايتين حتى لو القراءة قصيرة.": "Fill both bytes despite short reads.",
-		"القيم وصلت كاملة.":                   "Both values arrived.",
-		"مفتاح صالح للتوضيح.":                 "Valid demo key.",
-		"كوّن AEAD.":                          "Build the AEAD.",
-		"طول nonce والـtag.":                  "Nonce and tag lengths.",
-		"أنشئ cipher بمفتاح صالح.":            "Create a cipher with a valid key.",
-		"أضف تحقق GCM.":                       "Add GCM authentication.",
-		"جهّز nonce مناسبة.":                  "Prepare a matching nonce.",
-		"الختم يشمل البيانات المصاحبة.":       "The seal covers associated data.",
-		"افتح ببيانات مصاحبة مختلفة.":         "Open with different associated data.",
-		"فشل التحقق ظاهر.":                    "Authentication failure is visible.",
-		"محتوى خام للتوضيح.":                  "Illustrative raw content.",
-		"بصمة المحتوى الخام.":                 "Hash the raw content.",
-		"ضغط نفس البايتات.":                   "Compress the same bytes.",
-		"إقفال zlib يكمل stream.":             "Closing zlib completes the stream.",
-		"بصمة البايتات المضغوطة.":             "Hash the compressed bytes.",
-		"المضغوط مختلف عن الخام.":             "Compressed differs from raw.",
-		"حد القراءة بثلاث بايتات.":            "Limit the read to three bytes.",
-		"اقرأ الجزء المحدود.":                 "Read the limited portion.",
-		"النتيجة قصيرة ومكتملة.":              "The short result is complete.",
-		"ترتيب إضافة للتوضيح.":                "Insertion order for the demo.",
-		"رتّب الأسماء.":                       "Sort the names.",
-		"اعرض ترتيب ثابت.":                    "Show stable ordering.",
-		"الـstruct يحدد الترتيب.":             "The struct defines the order.",
-		"حوّل القيمة لـJSON.":                 "Encode the value as JSON.",
-		"المفاتيح بنفس ترتيب الحقول.":         "Keys follow the field order.",
-		"قراءات للتوضيح.":                     "Illustrative readings.",
-		"ثبّت ترتيب العرض.":                   "Make display order stable.",
-		"الترتيب بقى ثابت.":                   "Ordering is now stable.",
-		"قارئ CSV يحفظ شكل الحقول.":           "CSV reader keeps field structure.",
-		"اقرأ العنوان كسجل.":                  "Read the header as a record.",
-		"اقرأ السطر اللي بعده.":               "Read the next row.",
-		"CSV رجّع الحقول والأخطاء.":           "CSV returned fields and errors.",
+		"قبل التنفيذ.":                          "Before run.",
+		"مساحة bytes للتوضيح.":                  "Illustrative byte buffer.",
+		"المصدر بيملأ الـbuffer.":               "The source fills the buffer.",
+		"اطبع الحالة من غير السر.":              "Print status without the secret.",
+		"مصدر ثابت للتجربة.":                    "Fixed source for the demo.",
+		"جهّز مكان القراءة.":                    "Prepare the read buffer.",
+		"املأ الـ2 bytes حتى لو القراءة قصيرة.": "Fill both bytes despite short reads.",
+		"الـvalues وصلت كاملة.":                 "Both values arrived.",
+		"key صالح للتوضيح.":                     "Valid demo key.",
+		"كوّن AEAD.":                            "Build the AEAD.",
+		"طول nonce والـtag.":                    "Nonce and tag lengths.",
+		"اعمل cipher بـkey صالح.":               "Create a cipher with a valid key.",
+		"ضيف تحقق GCM.":                         "Add GCM authentication.",
+		"جهّز nonce مناسب.":                     "Prepare a matching nonce.",
+		"الختم يشمل البيانات المصاحبة.":         "The seal covers associated data.",
+		"افتح ببيانات مصاحبة مختلفة.":           "Open with different associated data.",
+		"فشل التحقق ظاهر.":                      "Authentication failure is visible.",
+		"محتوى خام للتوضيح.":                    "Illustrative raw content.",
+		"hash المحتوى الخام.":                   "Hash the raw content.",
+		"اضغط نفس الـbytes.":                    "Compress the same bytes.",
+		"إقفال zlib يكمل stream.":               "Closing zlib completes the stream.",
+		"hash الـcompressed bytes.":             "Hash the compressed bytes.",
+		"المضغوط مختلف عن الخام.":               "Compressed differs from raw.",
+		"حد القراءة بـ3 bytes.":                 "Limit the read to three bytes.",
+		"اقرا الجزء المحدود.":                   "Read the limited portion.",
+		"النتيجة قصيرة ومكتملة.":                "The short result is complete.",
+		"ترتيب إضافة للتوضيح.":                  "Insertion order for the demo.",
+		"رتّب الأسماء.":                         "Sort the names.",
+		"اطبع ترتيب ثابت.":                      "Show stable ordering.",
+		"الـstruct بيحدد الترتيب.":              "The struct defines the order.",
+		"حوّل الـvalue لـJSON.":                 "Encode the value as JSON.",
+		"الـkeys بنفس ترتيب الـfields.":         "Keys follow the field order.",
+		"قراءات للتوضيح.":                       "Illustrative readings.",
+		"ثبّت ترتيب العرض.":                     "Make display order stable.",
+		"الترتيب بقى ثابت.":                     "Ordering is now stable.",
+		"CSV reader بيحفظ شكل الـfields.":       "CSV reader keeps field structure.",
+		"اقرا العنوان كسجل.":                    "Read the header as a record.",
+		"اقرا السطر اللي بعده.":                 "Read the next row.",
+		"CSV رجّع الـfields والـerrors.":        "CSV returned fields and errors.",
 	}
 	translated := make([]LessonFrame, len(frames))
 	for i, frame := range frames {
@@ -148,8 +148,8 @@ const ch23Example231Try = `func main() {
 
 var ch23Frames231Idea = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
-	{Line: 2, Caption: "مساحة بايتات للتوضيح."},
-	{Line: 3, Caption: "المصدر يملأ المساحة."},
+	{Line: 2, Caption: "مساحة bytes للتوضيح."},
+	{Line: 3, Caption: "المصدر بيملأ الـbuffer."},
 	{Line: 4, Caption: "اطبع الحالة من غير السر.", Output: "true true"},
 }
 
@@ -157,35 +157,35 @@ var ch23Frames231Try = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
 	{Line: 2, Caption: "مصدر ثابت للتجربة."},
 	{Line: 3, Caption: "جهّز مكان القراءة."},
-	{Line: 4, Caption: "املأ البايتين حتى لو القراءة قصيرة."},
-	{Line: 5, Caption: "القيم وصلت كاملة.", Output: "2 [9 4] <nil>"},
+	{Line: 4, Caption: "املأ الـ2 bytes حتى لو القراءة قصيرة."},
+	{Line: 5, Caption: "الـvalues وصلت كاملة.", Output: "2 [9 4] <nil>"},
 }
 
 var ch23Lesson231Arabic = []LessonStep{
 	{ID: "c231.mission-step", Title: "المهمة", Blocks: []LessonBlock{
-		ch23Markdown("c231.mission", "أكواد الدخول محتاجة عشوائية مناسبة للأسرار، واختبارات تقدر تعيدها.\n\nالـstarter فيه ~IssueAccess~؛ افصل مصدر البايتات عن قرار اختيار الحروف."),
+		ch23Markdown("c231.mission", "أكواد الدخول محتاجة عشوائية مناسبة للأسرار، وtests تقدر تعيدها.\n\nالـstarter فيه ~IssueAccess~؛ افصل مصدر الـbytes عن قرار اختيار الحروف."),
 	}},
 	{ID: "c231.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-		ch23Walkthrough("c231.random-trace", "~crypto/rand~ للمصدر الحقيقي؛ ~math/rand~ مش مناسب للأسرار.\n\nالـreader المحقون يخلي السلوك قابل للتكرار في الاختبار، وخطأ القراءة لازم يوقف الاستخدام.", ch23Example231Idea, "e231-random-read", []string{"crypto/rand", "fmt"}, ch23Frames231Idea),
+		ch23Walkthrough("c231.random-trace", "~crypto/rand~ للمصدر الحقيقي؛ ~math/rand~ مش مناسب للأسرار.\n\nالـreader المحقون يخلي السلوك قابل للتكرار في الـtest، وerror القراءة لازم يوقف الاستخدام.", ch23Example231Idea, "e231-random-read", []string{"crypto/rand", "fmt"}, ch23Frames231Idea),
 	}},
 	{ID: "c231.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch23QuestionExample("c231.readfull-predict", "توقّع الناتج لما المصدر يسلّم بايتين.", ch23Example231Try, []string{"2 [9 4] <nil>", "1 [9 0] EOF", "0 [0 0] <nil>"}, 0, []string{
-			"الـreader فيه البايتين المطلوبين.",
+		ch23QuestionExample("c231.readfull-predict", "توقّع الناتج لما المصدر يسلّم 2 bytes.", ch23Example231Try, []string{"2 [9 4] <nil>", "1 [9 0] EOF", "0 [0 0] <nil>"}, 0, []string{
+			"الـreader فيه الـ2 bytes المطلوبين.",
 			"ReadFull كملت العدد المطلوب.",
-			"القراءة نجحت ووصلت القيمتين.",
+			"القراءة نجحت ورجّعت الـ2 values.",
 		}),
 		ch23Walkthrough("c231.readfull-reveal", "تابع قراءة المصدر الثابت لحد امتلاء المكان.", ch23Example231Try, "e231-readfull", []string{"bytes", "fmt", "io"}, ch23Frames231Try),
-		ch23Playground("ch23-read-full", "ch23-read-full", "تابع امتلاء المخزن.", ch23ReadFullSandboxConfig),
+		ch23Playground("ch23-read-full", "ch23-read-full", "تابع امتلاء الـbuffer.", ch23ReadFullSandboxConfig),
 	}},
 	{ID: "c231.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 		ch23Markdown("c231.watch", "- متطبعش الكود السري في log.\n- فشل المصدر يرجّع كود فاضي، مش جزء منه."),
 	}},
 	{ID: "c231.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch23Markdown("c231.plan", "راجع الطلب قبل استهلاك المصدر. بعد كده فكّر إزاي تضمن كل الفئات المطلوبة، وإزاي تخلّي نفس المصدر المحقون يتحكم في كل اختيار."),
+		ch23Markdown("c231.plan", "راجع الـrequest قبل استهلاك المصدر. بعد كده فكّر إزاي تضمن كل الفئات المطلوبة، وإزاي تخلّي نفس المصدر المحقون يتحكم في كل اختيار."),
 		ch23Question("c231.reader-question", "إيه اللي يكمل قراءة قصيرة؟", []string{"io.ReadFull", "fmt.Println", "time.Now"}, 0, []string{
-			"الأداة دي بتكمل لحد امتلاء الـbuffer أو خطأ.",
+			"الأداة دي بتكمل لحد امتلاء الـbuffer أو error.",
 			"الطباعة مش قراءة من المصدر.",
-			"الوقت مش بديل عن بايتات العشوائية.",
+			"الوقت مش بديل عن bytes عشوائية.",
 		}),
 	}},
 	{ID: "c231.turn-step", Title: "دورك", Blocks: []LessonBlock{
@@ -254,16 +254,16 @@ const ch23Example232Try = `func main() {
 
 var ch23Frames232Idea = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
-	{Line: 2, Caption: "مفتاح صالح للتوضيح."},
+	{Line: 2, Caption: "key صالح للتوضيح."},
 	{Line: 5, Caption: "كوّن AEAD."},
 	{Line: 10, Caption: "طول nonce والـtag.", Output: "12 16"},
 }
 
 var ch23Frames232Try = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
-	{Line: 2, Caption: "أنشئ cipher بمفتاح صالح."},
-	{Line: 5, Caption: "أضف تحقق GCM."},
-	{Line: 9, Caption: "جهّز nonce مناسبة."},
+	{Line: 2, Caption: "اعمل cipher بـkey صالح."},
+	{Line: 5, Caption: "ضيف تحقق GCM."},
+	{Line: 9, Caption: "جهّز nonce مناسب."},
 	{Line: 10, Caption: "الختم يشمل البيانات المصاحبة."},
 	{Line: 11, Caption: "افتح ببيانات مصاحبة مختلفة."},
 	{Line: 13, Caption: "فشل التحقق ظاهر.", Output: "true"},
@@ -271,10 +271,10 @@ var ch23Frames232Try = []LessonFrame{
 
 var ch23Lesson232Arabic = []LessonStep{
 	{ID: "c232.mission-step", Title: "المهمة", Blocks: []LessonBlock{
-		ch23Markdown("c232.mission", "الشحنة محتاجة سرية وكشف أي تعديل. الـstarter فيه واجهات الختم والفتح؛ المفتاح والـmanifest والـnonce لازم يتعاملوا كمدخلات مختلفة."),
+		ch23Markdown("c232.mission", "الشحنة محتاجة سرية وكشف أي تعديل. الـstarter فيه واجهات الختم والفتح؛ الـkey والـmanifest والـnonce لازم يتعاملوا كمدخلات مختلفة."),
 	}},
 	{ID: "c232.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-		ch23Walkthrough("c232.aead-trace", "~AES-GCM~ بيرجع AEAD للتشفير والتحقق. الـnonce مش سر، لكن لازم يبقى جديد مع نفس المفتاح؛ والـAAD بتتراجع من غير ما تتشفّر.", ch23Example232Idea, "e232-gcm-shape", []string{"crypto/aes", "crypto/cipher", "fmt"}, ch23Frames232Idea),
+		ch23Walkthrough("c232.aead-trace", "~AES-GCM~ بيرجّع AEAD للتشفير والتحقق. الـnonce مش سر، لكن لازم يبقى جديد مع نفس الـkey؛ والـAAD بتتراجع من غير ما تتشفّر.", ch23Example232Idea, "e232-gcm-shape", []string{"crypto/aes", "crypto/cipher", "fmt"}, ch23Frames232Idea),
 	}},
 	{ID: "c232.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch23QuestionExample("c232.aad-predict", "إيه اللي يحصل لو الـAAD اختلفت عند الفتح؟", ch23Example232Try, []string{"يرجع النص عادي", "التحقق يفشل", "الـAAD تتشفر تلقائي"}, 1, []string{
@@ -286,14 +286,14 @@ var ch23Lesson232Arabic = []LessonStep{
 		ch23Playground("ch23-aad-check", "ch23-aad-check", "بدّل بيانات الفتح.", ch23AADSandboxConfig),
 	}},
 	{ID: "c232.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
-		ch23Markdown("c232.watch", "- مثال الـnonce الثابت للتوضيح بس؛ متعيدوش مع المفتاح.\n- افحص أطوال الباكت قبل slicing."),
+		ch23Markdown("c232.watch", "- مثال الـnonce الثابت للتوضيح بس؛ متعيدوش مع الـkey.\n- افحص أطوال الباكت قبل slicing."),
 	}},
 	{ID: "c232.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch23Markdown("c232.plan", "فرّق بين بناء cipher، تجهيز nonce، والختم. عند الفتح، الخطأ معناه إن النص مش موثوق؛ مفيش كتابة قبل نجاح التحقق."),
+		ch23Markdown("c232.plan", "فرّق بين بناء cipher، تجهيز nonce، والختم. عند الفتح، الـerror معناه إن النص مش موثوق؛ مفيش كتابة قبل نجاح التحقق."),
 		ch23Question("c232.aad-question", "الـAAD بتعمل إيه؟", []string{"تتشفّر وتفضل مخفية", "تفضل ظاهرة وتدخل في التحقق", "تختار طول المفتاح"}, 1, []string{
-			"الـAAD لا تتشفّر.",
+			"الـAAD مش بتتشفّر.",
 			"تغييرها يغيّر نتيجة التحقق.",
-			"طول المفتاح يخص AES.",
+			"طول الـkey يخص AES.",
 		}),
 	}},
 	{ID: "c232.turn-step", Title: "دورك", Blocks: []LessonBlock{
@@ -353,32 +353,32 @@ const ch23Example233Try = `func main() {
 var ch23Frames233Idea = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
 	{Line: 2, Caption: "محتوى خام للتوضيح."},
-	{Line: 3, Caption: "بصمة المحتوى الخام."},
-	{Line: 5, Caption: "ضغط نفس البايتات."},
+	{Line: 3, Caption: "hash المحتوى الخام."},
+	{Line: 5, Caption: "اضغط نفس الـbytes."},
 	{Line: 7, Caption: "إقفال zlib يكمل stream."},
-	{Line: 8, Caption: "بصمة البايتات المضغوطة."},
+	{Line: 8, Caption: "hash الـcompressed bytes."},
 	{Line: 9, Caption: "المضغوط مختلف عن الخام.", Output: "false true"},
 }
 
 var ch23Frames233Try = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
-	{Line: 2, Caption: "حد القراءة بثلاث بايتات."},
-	{Line: 3, Caption: "اقرأ الجزء المحدود."},
+	{Line: 2, Caption: "حد القراءة بـ3 bytes."},
+	{Line: 3, Caption: "اقرا الجزء المحدود."},
 	{Line: 4, Caption: "النتيجة قصيرة ومكتملة.", Output: "abc <nil>"},
 }
 
 var ch23Lesson233Arabic = []LessonStep{
 	{ID: "c233.mission-step", Title: "المهمة", Blocks: []LessonBlock{
-		ch23Markdown("c233.mission", "الخزنة تضغط القطع، لكن عنوان المحتوى لازم يعرّف البايتات الأصلية ونوع القطعة.\n\nالـstarter فيه قراءة وكتابة؛ خليك واضح بين الصيغة الخام وصيغة التخزين."),
+		ch23Markdown("c233.mission", "الخزنة تضغط القطع، لكن عنوان المحتوى لازم يعرّف الـbytes الأصلية ونوع القطعة.\n\nالـstarter فيه قراءة وكتابة؛ خليك واضح بين الصيغة الخام وصيغة التخزين."),
 	}},
 	{ID: "c233.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
 		ch23Walkthrough("c233.content-trace", "اضغط البيانات للتخزين، لكن البصمة تخص التمثيل الخام. لازم ~zlib.Writer.Close~ يكمّل stream؛ نجاح Write لوحده مش كفاية.", ch23Example233Idea, "e233-compress-hash", []string{"bytes", "compress/zlib", "crypto/sha1", "fmt"}, ch23Frames233Idea),
 	}},
 	{ID: "c233.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch23QuestionExample("c233.limit-predict", "توقّع الجزء اللي هيوصل للقارئ.", ch23Example233Try, []string{"abcdef", "abc", "خطأ EOF"}, 1, []string{
-			"القارئ محدود قبل نهاية النص.",
-			"الحد يسمح بأول ثلاثة بايتات.",
-			"القراءة المحدودة وصلت لنهايتها من غير خطأ.",
+		ch23QuestionExample("c233.limit-predict", "توقّع الجزء اللي هيوصل للـreader.", ch23Example233Try, []string{"abcdef", "abc", "خطأ EOF"}, 1, []string{
+			"الـreader محدود قبل نهاية النص.",
+			"الحد يسمح بأول 3 bytes.",
+			"القراءة المحدودة وصلت لنهايتها من غير error.",
 		}),
 		ch23Walkthrough("c233.limit-reveal", "شوف حد القراءة وهو بيمنع استهلاك الباقي.", ch23Example233Try, "e233-read-limit", []string{"fmt", "io", "strings"}, ch23Frames233Try),
 		ch23Playground("ch23-read-limit", "ch23-read-limit", "وسّع حد القراءة.", ch23ReadLimitSandboxConfig),
@@ -387,7 +387,7 @@ var ch23Lesson233Arabic = []LessonStep{
 		ch23Markdown("c233.watch", "- لازم القراءة توصل EOF عشان checksum يتراجع.\n- افحص طول الفك قبل قبول envelope."),
 	}},
 	{ID: "c233.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch23Markdown("c233.plan", "افصل التحقق من المدخلات عن التخزين. عند القراءة، فك الضغط ضمن حد، وبعدها راجع التمثيل والهوية قبل إرجاع المحتوى."),
+		ch23Markdown("c233.plan", "افصل التحقق من المدخلات عن التخزين. عند القراءة، فك الضغط ضمن حد، وبعدها راجع التمثيل والهوية قبل ما ترجّع المحتوى."),
 		ch23Question("c233.identity-question", "إيه اللي يثبت هوية القطعة؟", []string{"البايتات المضغوطة بس", "النوع والـpayload الخام", "اسم الملف على الجهاز"}, 1, []string{
 			"محتوى مضغوط ممكن يتغير مع نفس البيانات.",
 			"العنوان مبني على نوع ومحتوى القطعة.",
@@ -450,30 +450,30 @@ var ch23Frames234Idea = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
 	{Line: 2, Caption: "ترتيب إضافة للتوضيح."},
 	{Line: 3, Caption: "رتّب الأسماء."},
-	{Line: 4, Caption: "اعرض ترتيب ثابت.", Output: "bay/a, bay/z"},
+	{Line: 4, Caption: "اطبع ترتيب ثابت.", Output: "bay/a, bay/z"},
 }
 
 var ch23Frames234Try = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
-	{Line: 1, Caption: "الـstruct يحدد الترتيب."},
-	{Line: 6, Caption: "حوّل القيمة لـJSON."},
-	{Line: 7, Caption: "المفاتيح بنفس ترتيب الحقول.", Output: "{\"Tick\":3,\"Message\":\"ready\"} <nil>"},
+	{Line: 1, Caption: "الـstruct بيحدد الترتيب."},
+	{Line: 6, Caption: "حوّل الـvalue لـJSON."},
+	{Line: 7, Caption: "الـkeys بنفس ترتيب الـfields.", Output: "{\"Tick\":3,\"Message\":\"ready\"} <nil>"},
 }
 
 var ch23Lesson234Arabic = []LessonStep{
 	{ID: "c234.mission-step", Title: "المهمة", Blocks: []LessonBlock{
-		ch23Markdown("c234.mission", "بعد تخزين القطع، جهّز index وcommit قابلين لإعادة البناء.\n\nالـstarter معرّف فيه أنواع الفهرس والوقت؛ البيانات اللي تدخل لازم تفضل تحت سيطرة المنادي."),
+		ch23Markdown("c234.mission", "بعد تخزين القطع، جهّز index وcommit قابلين لإعادة البناء.\n\nالـstarter معرّف فيه types الـindex والوقت؛ البيانات اللي تدخل لازم تفضل تحت سيطرة المنادي."),
 	}},
 	{ID: "c234.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
 		ch23Walkthrough("c234.tree-trace", "الـmap مفيدة للربط، لكن ترتيب iteration مش ثابت. حوّل الأسماء لقائمة مرتبة قبل بناء تمثيل حتمي؛ نفس المحتوى يدي نفس الشجرة.", ch23Example234Idea, "e234-stable-order", []string{"fmt", "slices", "strings"}, ch23Frames234Idea),
 	}},
 	{ID: "c234.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch23QuestionExample("c234.json-predict", "توقّع شكل JSON اللي بيرجعه Marshal.", ch23Example234Try, []string{`{"Message":"ready","Tick":3} <nil>`, `{"Tick":3,"Message":"ready"} <nil>`, "Stamp{3 ready} <nil>"}, 1, []string{
-			"Marshal مش بيبدل ترتيب الحقول في struct.",
-			"المفاتيح ماشية حسب ترتيب الحقول.",
-			"Marshal بيرجع JSON، مش طباعة Go.",
+		ch23QuestionExample("c234.json-predict", "توقّع شكل JSON اللي بيرجّعه Marshal.", ch23Example234Try, []string{`{"Message":"ready","Tick":3} <nil>`, `{"Tick":3,"Message":"ready"} <nil>`, "Stamp{3 ready} <nil>"}, 1, []string{
+			"Marshal مش بيبدل ترتيب الـfields في struct.",
+			"الـkeys ماشية حسب ترتيب الـfields.",
+			"Marshal بيرجّع JSON، مش طباعة Go.",
 		}),
-		ch23Walkthrough("c234.json-reveal", "تابع ترتيب المفاتيح من تعريف النوع.", ch23Example234Try, "e234-json-order", []string{"encoding/json", "fmt"}, ch23Frames234Try),
+		ch23Walkthrough("c234.json-reveal", "تابع ترتيب الـkeys من تعريف النوع.", ch23Example234Try, "e234-json-order", []string{"encoding/json", "fmt"}, ch23Frames234Try),
 		ch23Playground("ch23-stable-order", "ch23-stable-order", "بدّل ترتيب الإضافة.", ch23OrderSandboxConfig),
 	}},
 	{ID: "c234.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
@@ -482,9 +482,9 @@ var ch23Lesson234Arabic = []LessonStep{
 	{ID: "c234.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch23Markdown("c234.plan", "افصل staging عن إنشاء snapshot. افحص كل مرجع قبل الكتابة، وخلي ترتيب الشجرة مستقل عن ترتيب إضافة الشحنات."),
 		ch23Question("c234.order-question", "ليه نرتب أسماء الـindex؟", []string{"لتثبيت نتيجة الشجرة", "لتغيير IDs القديمة", "لترتيب قراءة الملفات على الجهاز"}, 0, []string{
-			"الترتيب الثابت يجعل نفس الفهرس ينتج نفس الشجرة.",
-			"الترتيب لا يعيد كتابة القطع القديمة.",
-			"الأسماء labels وليست أوامر قراءة للجهاز.",
+			"الترتيب الثابت بيخلّي نفس الـindex يطلع نفس الشجرة.",
+			"الترتيب مش بيعيد كتابة القطع القديمة.",
+			"الأسماء labels، مش أوامر قراءة للجهاز.",
 		}),
 	}},
 	{ID: "c234.turn-step", Title: "دورك", Blocks: []LessonBlock{
@@ -546,10 +546,10 @@ var ch23Frames23BossIdea = []LessonFrame{
 
 var ch23Frames23BossTry = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
-	{Line: 2, Caption: "قارئ CSV يحفظ شكل الحقول."},
-	{Line: 3, Caption: "اقرأ العنوان كسجل."},
-	{Line: 4, Caption: "اقرأ السطر اللي بعده."},
-	{Line: 5, Caption: "CSV رجّع الحقول والأخطاء.", Output: "station sensor-2 7 <nil> <nil>"},
+	{Line: 2, Caption: "CSV reader بيحفظ شكل الـfields."},
+	{Line: 3, Caption: "اقرا العنوان كسجل."},
+	{Line: 4, Caption: "اقرا السطر اللي بعده."},
+	{Line: 5, Caption: "CSV رجّع الـfields والـerrors.", Output: "station sensor-2 7 <nil> <nil>"},
 }
 
 var ch23LessonBossArabic = []LessonStep{
@@ -560,27 +560,27 @@ var ch23LessonBossArabic = []LessonStep{
 		ch23Walkthrough("c23boss.order-trace", "المهمة تركيبة من مهارات سابقة: سجلات واضحة، ترتيب ثابت، بيانات وقت محقونة، وموارد ليها عمر.\n\nماتبدأش النشر وإنت لسه بتعالج المدخلات.", ch23Example23BossIdea, "e23boss-stable-order", []string{"fmt", "slices"}, ch23Frames23BossIdea),
 	}},
 	{ID: "c23boss.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch23QuestionExample("c23boss.csv-predict", "توقّع الحقول اللي بيرجعها قارئ CSV.", ch23Example23BossTry, []string{"station sensor-2 7 <nil> <nil>", "station,reading sensor-2,7", "sensor-2 7 EOF"}, 0, []string{
-			"كل سجل بيتحول لقيم منفصلة.",
-			"الفواصل مش جزء من الحقول الراجعة.",
+		ch23QuestionExample("c23boss.csv-predict", "توقّع الـfields اللي بيرجّعها CSV reader.", ch23Example23BossTry, []string{"station sensor-2 7 <nil> <nil>", "station,reading sensor-2,7", "sensor-2 7 EOF"}, 0, []string{
+			"كل record بيتحوّل لـvalues منفصلة.",
+			"الفواصل مش جزء من الـfields الراجعة.",
 			"فيه سطرين صالحين قبل نهاية المصدر.",
 		}),
-		ch23Walkthrough("c23boss.csv-reveal", "شوف كل قراءة وهي بترجع سجل مستقل.", ch23Example23BossTry, "e23boss-csv-records", []string{"encoding/csv", "fmt", "strings"}, ch23Frames23BossTry),
+		ch23Walkthrough("c23boss.csv-reveal", "شوف كل قراءة وهي بترجّع record مستقل.", ch23Example23BossTry, "e23boss-csv-records", []string{"encoding/csv", "fmt", "strings"}, ch23Frames23BossTry),
 		ch23Playground("ch23-csv-records", "ch23-csv-records", "حوّل السطر لحقول.", ch23CSVSandboxConfig),
 	}},
 	{ID: "c23boss.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
-		ch23Markdown("c23boss.watch", "- ما تعملش trim للقيم قبل التحقق.\n- مفيش كتابة للهدف قبل اكتمال التحقق."),
+		ch23Markdown("c23boss.watch", "- ما تعملش trim للـvalues قبل التحقق.\n- مفيش كتابة للهدف قبل اكتمال التحقق."),
 	}},
 	{ID: "c23boss.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch23Markdown("c23boss.plan", "قسّم الشغل لمراحل صغيرة وافحص نتيجة كل مرحلة. خلّي ترتيب التقرير ثابت، واستخدم القيم المحقونة بدل الساعة أو العشوائية العامة."),
+		ch23Markdown("c23boss.plan", "قسّم الشغل لمراحل صغيرة وافحص نتيجة كل مرحلة. خلّي ترتيب التقرير ثابت، واستخدم الـvalues المحقونة بدل الساعة أو العشوائية العامة."),
 		ch23Question("c23boss.time-question", "إيه اللي يثبت وقت التقرير؟", []string{"الوقت الممرر للدالة", "وقت تشغيل الجهاز", "آخر تعديل للملف"}, 0, []string{
-			"القيمة المحقونة تخلي النتيجة قابلة للتكرار.",
+			"الـvalue المحقونة تخلي النتيجة قابلة للتكرار.",
 			"وقت الجهاز ممكن يختلف بين التشغيلات.",
 			"وقت الملف مش metadata التقرير المطلوبة.",
 		}),
 	}},
 	{ID: "c23boss.turn-step", Title: "دورك", Blocks: []LessonBlock{
-		ch23Markdown("c23boss.turn", "ابدأ بقراءة CSV، وبعدها راجع كل مرحلة قبل فتح الملف النهائي."),
+		ch23Markdown("c23boss.turn", "ابدأ بإنك تقرا CSV، وبعدها راجع كل مرحلة قبل فتح الملف النهائي."),
 	}},
 }
 

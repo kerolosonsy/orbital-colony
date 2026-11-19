@@ -19,7 +19,7 @@ async function api(path, body, method, signal) {
 // Each player profile keeps mission, quiz and lesson progress in separate fields.
 // localStorage holds a copy so a failed upload is never lost.
 const store = {
-  blob: { progress: {}, prefs: {}, quizScores: {}, lessons: {} }, timer: null,
+  blob: { progress: {}, prefs: {}, quizScores: {}, lessons: {}, metrics: {} }, timer: null,
   cacheKey: "orbital.p." + PROFILE,
   async load() {
     let b = null, online = true;
@@ -30,7 +30,8 @@ const store = {
     const legacy = !b?.progress && PROFILE === "default" && online && this.legacy();
     if (legacy) b = legacy;
     const lessons = b?.lessons && typeof b.lessons === "object" && !Array.isArray(b.lessons) ? b.lessons : {};
-    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {}, review: b?.review || {}, lessons };
+    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {}, review: b?.review || {}, lessons,
+      metrics: LearningMetrics.normalizeMetrics(b?.metrics) };
     if (legacy) {
       await this.push();
       for (const k of ["orbital.progress.v1", "orbital.current", "orbital.welcomed", "orbital.linked"]) localStorage.removeItem(k);
@@ -57,6 +58,7 @@ const store = {
       if (!response.ok) throw new Error(String(response.status));
       const saved = await response.json();
       this.blob.review = saved.review || {};
+      this.blob.metrics = LearningMetrics.mergeMetrics(this.blob.metrics, saved.metrics);
       if ($("#missions").open) renderMissions();
     }).catch(() => {});
   },
@@ -65,6 +67,7 @@ const store = {
     this.blob.prefs[k] = v; this.save();
   },
 };
+LearningMetrics.bind(store);
 const S = { chapters: [], levels: [], cur: null, progress: {}, hintsShown: 0, running: false };
 const rec = (id) => (S.progress[id] ||= { stars: 0, best: 0, code: null });
 
@@ -431,6 +434,7 @@ async function syncFromWorkspace(force = false) {
     }
   }
   if (changed) {
+    clearTraceRun();
     store.save();
     const pos = ed.scrollTop;
     showFile(S.file);
@@ -478,6 +482,7 @@ function flushSave() {
 }
 function onEdit() {
   if (ed.readOnly) return;
+  clearTraceRun();
   saveFile(S.cur, S.file, ed.value);
   errLines.clear();
   renderEditor();
@@ -513,13 +518,36 @@ ed.addEventListener("keydown", (e) => {
 
 // ---------- console ----------
 const con = $("#console");
+function appendConsoleNode(node) {
+  con.appendChild(node);
+  if (con.childElementCount > 400) con.firstChild.remove();
+  con.scrollTop = con.scrollHeight;
+}
 function log(text, cls = "c-out") {
   text = String(text).replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, "");
   const d = document.createElement("div");
   d.className = cls; d.textContent = text;
-  con.appendChild(d);
-  if (con.childElementCount > 400) con.firstChild.remove();
-  con.scrollTop = con.scrollHeight;
+  appendConsoleNode(d);
+}
+function logErrorHelp(meaning, cause, check) {
+  const box = window.ErrorHelp?.render({ meaning, cause, check });
+  if (box) appendConsoleNode(box);
+}
+function logCompileError(e) {
+  const line = Math.max(1, Number(e.line) || 1);
+  const file = firstErrorFile([e], levelFiles(S.cur), S.file);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "c-error-line";
+  button.textContent = `${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`;
+  button.onclick = () => {
+    showFile(file);
+    const lines = ed.value.split("\n");
+    const start = Math.min(ed.value.length, lines.slice(0, line - 1).reduce((n, value) => n + value.length + 1, 0));
+    ed.focus();
+    ed.setSelectionRange(start, Math.min(ed.value.length, start + (lines[line - 1] || "").length));
+  };
+  appendConsoleNode(button);
 }
 
 // ---------- flip digits: changed characters roll in, like a counter ----------
@@ -1276,6 +1304,8 @@ async function loadLevel(id, review = null) {
   const l = review || S.levels[idx(id)];
   S.review = !!review; S.reviewDraft = {};
   S.cur = l; S.hintsShown = 0;
+  clearTraceRun();
+  LearningMetrics.openLevel(store, id);
   store.pref("current", id);
   const ch = S.chapters.find((c) => c.n === l.chapter);
   $("#lvl-chapter").textContent = `${sheetCode(l)} · ${ch ? ch.title : ""}`;
@@ -1285,7 +1315,8 @@ async function loadLevel(id, review = null) {
   $("#goal-strip-text").innerHTML = inline(l.goal);
   refreshService(l);
   parText(l.par, l.gold, false);
-  Lessons.open(l);
+  Lessons.open(l, (stepID) => LearningMetrics.recordStepViewed(store, id, stepID));
+  LearningMetrics.recordLessonOpened(store, id);
   $("#hint-list").innerHTML = "";
   $("#btn-hint").disabled = !l.hints?.length;
   $("#btn-hint").querySelector("span").textContent = T(`تلميح (${l.hints?.length || 0})`, `Hint (${l.hints?.length || 0})`);
@@ -1318,7 +1349,9 @@ $("#btn-hint").onclick = () => {
   if (S.hintsShown >= l.hints.length) return;
   const d = document.createElement("div");
   d.className = "hint";
+  const hintIndex = S.hintsShown;
   const hintText = inline(l.hints[S.hintsShown++].replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, ""));
+  LearningMetrics.recordHint(store, l.id, hintIndex);
   const hintLabel = l.steps?.length ? [T("الفكرة", "Concept"), T("التنظيم", "Structure"), T("ركّز هنا", "Specific")][S.hintsShown - 1] : "";
   d.innerHTML = hintLabel ? `<strong>${hintLabel}</strong><div>${hintText}</div>` : hintText;
   Sound.play("hint");
@@ -1493,14 +1526,70 @@ document.querySelectorAll("dialog.overlay").forEach((overlay) => {
     if (!overlay.open) overlay.classList.add("hidden");
   });
 });
+async function refreshLearningStats() {
+  let saved = null;
+  try {
+    saved = await api(`/api/profiles/${PROFILE}/metrics`);
+  } catch (error) {
+    if (!(error instanceof Error)) throw error;
+    // The profile's local save remains usable while the localhost API is offline.
+  }
+  if (saved) {
+    store.blob.metrics = LearningMetrics.mergeMetrics(store.blob.metrics, saved);
+    store.save();
+  }
+  LearningMetrics.renderStats({ struggles: $("#metrics-struggles"), chapters: $("#metrics-chapters") }, store.blob.metrics,
+    { levels: S.levels, chapters: S.chapters });
+}
+
 $("#btn-missions").onclick = () => { renderMissions(); showOverlay("#missions"); };
+$("#btn-stats").onclick = async () => {
+  closeOverlay($("#missions"));
+  showOverlay("#metrics");
+  LearningMetrics.renderStats({ struggles: $("#metrics-struggles"), chapters: $("#metrics-chapters") }, store.blob.metrics,
+    { levels: S.levels, chapters: S.chapters });
+  await refreshLearningStats();
+};
+$("#btn-metrics-export").onclick = () => {
+  const blob = new Blob([JSON.stringify(LearningMetrics.normalizeMetrics(store.blob.metrics), null, 2)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "orbital-learning-metrics.json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  const url = link.href;
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+};
+function countLessonInteraction(event) {
+  const target = event.target.closest("button, select, input");
+  if (!target || !target.closest(".lesson-walkthrough, .lesson-sandbox")) return;
+  if (event.type === "click" && target.tagName !== "BUTTON") return;
+  if (event.type === "change" && target.tagName === "BUTTON") return;
+  if (S.cur) LearningMetrics.recordInteraction(store, S.cur.id);
+}
+$("#lesson").addEventListener("click", countLessonInteraction);
+$("#lesson").addEventListener("change", countLessonInteraction);
 document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = () => closeOverlay(b.closest("dialog"))));
 
 // ---------- run ----------
 // One run at a time. Stop (or switching missions) cancels it right away:
 // the request is aborted, which makes the server kill the build or program.
 let runId = 0, runCtl = null;
+let lastTraceRun = null;
 const RUN_TIMEOUT = 150000; // longer than the server's own build + run limits
+function clearTraceRun() {
+  lastTraceRun = null;
+  $("#btn-trace").classList.add("hidden");
+}
+function showTraceRun(level, response, payload, sources) {
+  if (!response.traceable) return;
+  const tracePayload = { level: payload.level };
+  if (level.kind === "lab") tracePayload.files = { ...payload.files };
+  else tracePayload.code = payload.code;
+  lastTraceRun = { payload: tracePayload, sources };
+  $("#btn-trace").classList.remove("hidden");
+}
 function runButton(running) {
   const btn = $("#btn-run");
   btn.classList.toggle("stop", running);
@@ -1524,8 +1613,9 @@ document.addEventListener("keydown", (e) => {
 });
 
 async function run() {
-  if (S.mode === "colony") return Colony.toggleRun();
+  if (S.mode === "colony") { clearTraceRun(); return Colony.toggleRun(); }
   if (S.running) return stopRun();
+  clearTraceRun();
   previewVersion++;
   if (playback) finishPlayback();
   const me = ++runId;
@@ -1549,8 +1639,12 @@ async function run() {
       payload.files = {};
       for (const f of levelFiles(level)) if (!f.readOnly) payload.files[f.name] = fileCode(level, f);
     } else payload.code = fileCode(level, levelFiles(level)[0]);
+    const traceSources = Object.fromEntries(
+      levelFiles(level).filter((f) => f.name.endsWith(".go")).map((f) => [f.name, fileCode(level, f)]),
+    );
     const r = await api("/api/run", payload, null, ctl.signal);
     if (me !== runId || S.cur !== level) return;
+    LearningMetrics.recordRun(store, level.id, r);
     if (r.phase === "require") {
       finish(level, r.result, r.missing || []);
       return;
@@ -1561,35 +1655,41 @@ async function run() {
       Sound.play("error");
       if (lastErrors.length) {
         for (const e of lastErrors) {
-          log(`${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`, "c-err");
-          if (e.tip) log(`   ${e.tip}`, "c-tip");
+          logCompileError(e);
+          logErrorHelp(e.tip, e.tipCause, e.tipCheck);
         }
         showFile(firstErrorFile(lastErrors, levelFiles(level), S.file));
       } else log(r.compileOutput, "c-err");
+      if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
       banner(r.result.message, false);
       return;
     }
     lastErrors = [];
     if (r.phase === "lab") {
       refreshService(level);
-      if (r.runtimeTip) log(r.runtimeTip, "c-tip");
       for (const st of r.steps || []) {
         log(`${st.ok ? T("نجح:", "Passed:") : T("فشل:", "Failed:")} ${st.title}`, st.ok ? "c-ok" : "c-err");
-        if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-out"));
+        if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-err"));
+        if (!st.ok) logErrorHelp(st.tip, st.tipCause, st.tipCheck);
       }
+      showTraceRun(level, r, payload, traceSources);
       finish(level, r.result, r.missing || []);
       return;
     }
     if (r.stdout) { log("fmt output:", "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => log(l)); }
     if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => log(l, "c-err"));
-    if (r.runtimeTip) log(r.runtimeTip, "c-tip");
+    if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
     log(T("الدرون شغال…", "Drone running…"), "c-info");
     await new Promise((res) => startPlayback(r.events, res));
     if (me !== runId) return;
+    showTraceRun(level, r, payload, traceSources);
     finish(level, r.result, r.missing || []);
   } catch (e) {
     if (me !== runId) return; // stopped by the player
-    if (ctl.signal.aborted) log(T("السيرفر اتأخر جداً في الرد، فوقّفت الكود. جرّب تاني.", "The server took too long to answer, so the run was stopped. Try again."), "c-err");
+    if (ctl.signal.aborted) {
+      log(T("السيرفر اتأخر جداً في الرد، فوقّفت الكود. جرّب تاني.", "The server took too long to answer, so the run was stopped. Try again."), "c-err");
+      logErrorHelp(T("التشغيل ماخلصش قبل المهلة.", "The run did not finish before its time limit."), T("ممكن يكون فيه انتظار مفتوح أو عملية بطيئة.", "The program may be waiting indefinitely or running slowly."), T("راجع آخر output ونقاط الانتظار.", "Check the last output and the places where the program waits."));
+    }
     else log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
   } finally {
     clearTimeout(timer);
@@ -1601,6 +1701,7 @@ async function run() {
   }
 }
 $("#btn-run").onclick = run;
+$("#btn-trace").onclick = () => { if (lastTraceRun) TracePanel.open(lastTraceRun); };
 $("#btn-vscode").onclick = openVSCode;
 $("#btn-unlink").onclick = () => {
   linked.delete(S.cur.id); saveLinked();

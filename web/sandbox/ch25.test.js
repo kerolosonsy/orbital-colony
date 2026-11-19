@@ -34,7 +34,7 @@ const languages = [
   ["ch25-nonblocking-bus", "Buffer", "الـbuffer"],
   ["ch25-ttl-cache", "Advance clock", "قدّم الساعة"],
   ["ch25-atomic-counter", "Current Load", "Load الحالي"],
-  ["ch25-closed-drain", "Job channel", "قناة الشغل"],
+  ["ch25-closed-drain", "Job channel", "الـchannel بتاعة الشغل"],
 ];
 
 test("chapter 25 fixtures cover every registered kind and both languages", () => {

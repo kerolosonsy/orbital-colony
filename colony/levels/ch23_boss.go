@@ -41,7 +41,7 @@ os.WriteFile(dst, partial, 0644) // destroys the previous report before validati
 
 حوّل ~EvidenceBundle{Captured: at.UTC().Format(time.RFC3339), Samples: samples}~ لـ JSON؛ ~samples~ فاضية مش nil لو مفيش صفوف. مثال صف: ~EvidenceSample{Sensor: "ice", Value: 7}~. شفّر بـ AES-GCM بمفتاح AES صالح، nonce من ~io.ReadFull(entropy, nonce)~، وAAD بالظبط ~[]byte("colony:evidence:v1")~. الملف بايتات ~nonce || ciphertext~. احفظ بملف مؤقت في نفس المجلد ثم Close وRename؛ أي فشل يسيب الملف القديم زي ما هو وينضّف المؤقت. سيب ~main~ فاضية. النجمة التالتة: الملف النهائي صلاحياته 0600 حتى لو استبدل ملف 0644.
 `,
-		Hints: []string{"حافظ على المدخلات سليمة قبل أي أثر جانبي.", "قسّم الشغل لمراحل وتأكد من ناتج كل مرحلة.", "راجع ~csv.Reader.Read~ وحدود الموارد عند فشل callback."},
+		Hints: []string{"حافظ على المدخلات سليمة قبل أي أثر جانبي.", "قسّم الشغل لمراحل واتأكد من ناتج كل مرحلة.", "راجع ~csv.Reader.Read~ وحدود الموارد عند فشل callback."},
 		En: &LevelText{LessonRevision: 1, Steps: ch23LessonBossEnglish, Title: "Boss: Storm Evidence", Goal: "Turn CSV readings into an authenticated JSON file with atomic replacement", Files: []LabFile{{Name: "main.go", Starter: `package main
 import ("io";"time";"errors")
 type EvidenceSample struct { Sensor string; Value int }

@@ -4,12 +4,12 @@
     "kind": "ch29-sql-binding",
     "config": {
       "intro": {
-        "ar": "بدّل المفتاح وشوف نتيجة الربط.",
+        "ar": "بدّل الـkey وشوف نتيجة الربط.",
         "en": "Change the key and watch binding."
       },
       "labels": {
         "button": {
-          "ar": "بدّل المفتاح",
+          "ar": "بدّل الـkey",
           "en": "Try another key"
         },
         "found": {
@@ -21,11 +21,11 @@
           "en": "No matching row"
         },
         "parameter": {
-          "ar": "القيمة المرتبطة",
+          "ar": "الـvalue المرتبطة",
           "en": "Bound value"
         },
         "query": {
-          "ar": "استعلام ثابت",
+          "ar": "الـquery الثابت",
           "en": "Fixed query"
         },
         "result": {
@@ -65,12 +65,12 @@
     "kind": "ch29-migration-boundary",
     "config": {
       "intro": {
-        "ar": "جهّز تغيير المخطط وبعدين احفظه مع النسخة.",
+        "ar": "جهّز تغيير المخطط وبعدين خزّنه مع النسخة.",
         "en": "Stage a schema change, then save its version."
       },
       "labels": {
         "commit": {
-          "ar": "احفظ الاتنين",
+          "ar": "خزّن الاتنين",
           "en": "Commit both"
         },
         "committed": {
@@ -118,7 +118,7 @@
     "kind": "ch29-atomic-transfer",
     "config": {
       "intro": {
-        "ar": "جرّب ترتيبين صالحين لطلبين متزامنين.",
+        "ar": "جرّب ترتيبين صالحين لـrequests متزامنة.",
         "en": "Try two valid orders for concurrent requests."
       },
       "labels": {
@@ -169,7 +169,7 @@
         {
           "amount": 3,
           "name": {
-            "ar": "الطلب A",
+            "ar": "الـrequest A",
             "en": "Request A"
           },
           "target": "north"
@@ -177,7 +177,7 @@
         {
           "amount": 2,
           "name": {
-            "ar": "الطلب B",
+            "ar": "الـrequest B",
             "en": "Request B"
           },
           "target": "south"
@@ -234,7 +234,7 @@
       "implementations": [
         {
           "effect": {
-            "ar": "القيمة وصلت للـfake.",
+            "ar": "الـvalue وصلت للـfake.",
             "en": "The value reached the fake."
           },
           "name": {
@@ -244,7 +244,7 @@
         },
         {
           "effect": {
-            "ar": "الـrepository بيربط الاسم بالقيمة.",
+            "ar": "الـrepository بيربط الاسم بالـvalue.",
             "en": "The repository binds name to value."
           },
           "name": {
@@ -254,7 +254,7 @@
         }
       ],
       "intro": {
-        "ar": "بدّل التنفيذ وشوف عقد الواجهة ثابت.",
+        "ar": "بدّل التنفيذ وشوف عقد الـinterface ثابت.",
         "en": "Switch implementations; the interface contract stays fixed."
       },
       "labels": {

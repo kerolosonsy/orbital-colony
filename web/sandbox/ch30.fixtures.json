@@ -5,7 +5,7 @@
     "config": {
       "cachePresent": false,
       "intro": {
-        "ar": "اقرأ مرة مع cache miss، وبعدها جرّب hit.",
+        "ar": "اقرا مرة مع الـcache miss، وبعدها جرّب الـhit.",
         "en": "Read through a cache miss, then try a hit."
       },
       "key": {
@@ -14,19 +14,19 @@
       },
       "labels": {
         "cache": {
-          "ar": "الكاش",
+          "ar": "الـcache",
           "en": "Cache"
         },
         "cacheSource": {
-          "ar": "الكاش",
+          "ar": "الـcache",
           "en": "Cache"
         },
         "evict": {
-          "ar": "امسح من الكاش",
+          "ar": "امسح من الـcache",
           "en": "Evict cache"
         },
         "filled": {
-          "ar": "الكاش اتملأ",
+          "ar": "الـcache اتملأ",
           "en": "Cache filled"
         },
         "hit": {
@@ -34,7 +34,7 @@
           "en": "Hit"
         },
         "key": {
-          "ar": "المفتاح",
+          "ar": "الـkey",
           "en": "Key"
         },
         "miss": {
@@ -42,7 +42,7 @@
           "en": "Miss"
         },
         "read": {
-          "ar": "اقرأ",
+          "ar": "اقرا",
           "en": "Read"
         },
         "result": {
@@ -235,7 +235,7 @@
           "en": "Read route"
         },
         "tick": {
-          "ar": "دقيقة",
+          "ar": "الـtick",
           "en": "minute"
         },
         "write": {
@@ -253,12 +253,12 @@
     "config": {
       "before": 7,
       "intro": {
-        "ar": "احفظ الاقتراح، وبعدها جرّب فشل الكاش.",
+        "ar": "خزّن الاقتراح، وبعدها جرّب فشل الـcache.",
         "en": "Commit the proposal, then simulate a cache failure."
       },
       "labels": {
         "cache": {
-          "ar": "الكاش",
+          "ar": "الـcache",
           "en": "Cache"
         },
         "commit": {
@@ -274,7 +274,7 @@
           "en": "Proposed debit"
         },
         "failCache": {
-          "ar": "حاكي فشل الكاش",
+          "ar": "حاكي فشل الـcache",
           "en": "Simulate cache failure"
         },
         "fresh": {
@@ -294,7 +294,7 @@
           "en": "Saved in database"
         },
         "savedBoundary": {
-          "ar": "القاعدة اتثبتت قبل الكاش.",
+          "ar": "القاعدة اتثبتت قبل الـcache.",
           "en": "The database committed before cache work."
         },
         "warning": {

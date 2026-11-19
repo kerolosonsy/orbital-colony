@@ -27,7 +27,7 @@ var surveyLessonArabic = []LessonStep{
 			{
 				ID:   "c61.v2.mission",
 				Kind: "markdown",
-				Text: "1. قيس الـ8 كريستالات من الشمال لليمين.\n2. احفظ أحجامهم بالترتيب في slice واحدة.\n3. ابعت الـslice كلها مرة واحدة بـ~colony.Report~.\n\nالـstarter قاس أول كريستالة وحفظها فعلًا.\n\nالذهب: **15 ticks أو أقل**.",
+				Text: "1. قيس الـ8 كريستالات من الشمال لليمين.\n2. خزّن أحجامهم بالترتيب في slice واحدة.\n3. ابعت الـslice كلها مرة واحدة بـ~colony.Report~.\n\nالـstarter قاس أول كريستالة وخزّنها فعلًا.\n\nالذهب: **15 ticks أو أقل**.",
 			},
 		},
 	},
@@ -38,7 +38,7 @@ var surveyLessonArabic = []LessonStep{
 			{
 				ID:        "c61.v2.trace",
 				Kind:      "walkthrough",
-				Text:      "تخيل الـslice صندوق، وكل حجم جديد بيتحط في آخره بـ~append~.",
+				Text:      "تخيّل الـslice صندوق، وكل حجم جديد بيتحط في آخره بـ~append~.",
 				Code:      surveyExample,
 				Imports:   []string{"fmt"},
 				ExampleID: "e61-crystal-log-v2",
@@ -67,7 +67,7 @@ var surveyLessonArabic = []LessonStep{
 					SourceLabel: "أحجام للتوضيح، مش بيانات المهمة.",
 					AppendLabel: "ضيف الحجم الجاي",
 					ResetLabel:  "من الأول",
-					DoneText:    "اكتمل السجل: 8 أحجام بالترتيب.",
+					DoneText:    "السجل اكتمل: 8 أحجام بالترتيب.",
 				},
 			},
 		},
@@ -79,7 +79,7 @@ var surveyLessonArabic = []LessonStep{
 			{
 				ID:   "c61.v2.watch",
 				Kind: "markdown",
-				Text: "- احتفظ بنتيجة ~append~: ~sizes = append(...)~.\n- أرقام الـindex من 0 لحد ~len(sizes)-1~؛ براها يحصل panic.",
+				Text: "- خزّن الـvalue اللي رجعتها ~append~: ~sizes = append(...)~.\n- أرقام الـindex من 0 لحد ~len(sizes)-1~؛ براها يحصل panic.",
 			},
 		},
 	},
@@ -90,22 +90,22 @@ var surveyLessonArabic = []LessonStep{
 			{
 				ID:   "c61.v2.plan",
 				Kind: "markdown",
-				Text: "التكرار محتاج loop.\n\nلكل كريستالة: قيس، ضيف، واتجه للي بعدها.\n\nالتقرير مرة واحدة بعد الـloop؛ أول قراءة موجودة فعلًا.",
+				Text: "التكرار محتاج loop.\n\nلكل كريستالة: قيس، ضيف، واتجه للي بعدها.\n\nابعت التقرير مرة واحدة بعد الـloop؛ أول قراءة موجودة فعلًا.",
 			},
 			{
 				ID:   "c61.v2.q-create",
 				Kind: "question",
-				Text: "عشان السجل يتجمع، تنشئ الـslice فين؟",
+				Text: "علشان السجل يتجمع، تعمل الـslice فين؟",
 				Question: &LessonQuestion{
 					Options: []string{
 						"قبل الـloop",
-						"جوه كل لفة",
+						"جوه كل loop",
 						"بعد الـloop",
 					},
 					Answer: 0,
 					Feedback: []string{
-						"سجل واحد قبل الـloop يحتفظ بكل القراءات.",
-						"إنشاءها كل لفة يبدأ سجل فاضي تاني.",
+						"خزّن سجل واحد قبل الـloop علشان يحتفظ بكل القراءات.",
+						"لو عملتها كل loop، هتبدأ بسجل فاضي من جديد.",
 						"السجل لازم يبقى موجود قبل تجميع القراءات.",
 					},
 				},
@@ -123,8 +123,8 @@ var surveyLessonArabic = []LessonStep{
 					Answer: 1,
 					Feedback: []string{
 						"len بتعد الموجود؛ مش بتضيف قراءة.",
-						"append بتضيف في الآخر؛ احتفظ بالناتج.",
-						"make بتنشىء slice، مش بتضيف للسجل الحالي.",
+						"append بتضيف في الآخر؛ خزّن الـvalue اللي رجعتها.",
+						"make بتعمل slice جديدة، مش بتضيف للسجل الحالي.",
 					},
 				},
 			},
@@ -142,7 +142,7 @@ var surveyLessonArabic = []LessonStep{
 					Feedback: []string{
 						"8 حركات تحاول تعدّي آخر كريستالة.",
 						"6 حركات تسيبك قبل الأخيرة بمسافة.",
-						"8 قياسات + 7 حركات = 15 ticks؛ Report=0 وبافتراض مفيش تكلفة تانية.",
+						"8 قياسات + 7 حركات = 15 ticks؛ Report=0 بافتراض مفيش تكلفة تانية.",
 					},
 				},
 			},
@@ -336,19 +336,19 @@ var topThreeLessonArabic = []LessonStep{
 		ID: "c62.v1.mission-step", Title: "المهمة",
 		Blocks: []LessonBlock{{
 			ID: "c62.v1.mission", Kind: "markdown",
-			Text: "1. الـstarter قاس العشرة وسجل الحجم حسب index؛ الدرون عند x=9.\n2. اختار أكبر 3؛ حمولة الدرون 3، وبعدها احصدهم.\n3. هدف الذهب بيتغير حسب المواقع؛ شوف المعروض.",
+			Text: "1. الـstarter قاس العشرة وخزّن حجم كل واحدة حسب index؛ الدرون عند x=9.\n2. اختار أكبر 3؛ حمولة الدرون 3، وبعدها احصدهم.\n3. هدف الذهب بيتغير حسب المواقع؛ شوف المعروض.",
 		}},
 	},
 	{
 		ID: "c62.v1.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{{
 			ID: "c62.v1.trace", Kind: "walkthrough",
-			Text: "في slice تدريب، range بتدي index وقيمة؛ Clone تنسخ، وSort ترتب.",
+			Text: "في slice للتدريب، range بتدي index والـvalue؛ Clone بتنسخ وSort بترتّب.",
 			Code: topThreeExample, Imports: []string{"fmt", "slices"}, ExampleID: "e62-range-clone-sort",
 			Walkthrough: topThreeTrace([]string{
-				"قبل التشغيل.", "أحجام للتوضيح؛ كل index ثابت.", "range أعطت أول index وقيمة.", "طبعناهم مع بعض.",
-				"index التالي وقيمته.", "آخر عنصر في range.", "طبعنا آخر زوج.", "اللفة خلصت.",
-				"Clone عملت slice جديدة.", "Sort رتبت النسخة بس.", "ترتيب الأصل فضل زي ما هو.", "النسخة المرتبة اتطبعت.",
+				"قبل التشغيل.", "أحجام للتوضيح؛ كل index ثابت.", "range ادّت أول index وvalue.", "طبعناهم مع بعض.",
+				"الـindex اللي بعده والـvalue بتاعته.", "آخر عنصر في range.", "طبعنا آخر زوج.", "الـloop خلصت.",
+				"Clone عملت slice جديدة.", "Sort رتّبت النسخة بس.", "ترتيب الأصل فضل زي ما هو.", "النسخة المرتبة اتطبعت.",
 			}),
 		}},
 	},
@@ -371,7 +371,7 @@ var topThreeLessonArabic = []LessonStep{
 		ID: "c62.v1.watch-step", Title: "خد بالك",
 		Blocks: []LessonBlock{{
 			ID: "c62.v1.watch", Kind: "markdown",
-			Text: "- `b := a` بيشارك العناصر؛ Sort على b يغيّر a.\n- Sort تغيّر القيم، مش أماكن الكريستالات.\n- Measure وMove وHarvest: tick لكل أمر؛ Report والحساب: صفر.",
+			Text: "- `b := a` بيشارك العناصر؛ Sort على b بيغيّر a.\n- Sort بتغيّر الـvalues، مش أماكن الكريستالات.\n- Measure وMove وHarvest: tick لكل أمر؛ Report والحساب: صفر.",
 		}},
 	},
 	{
@@ -379,9 +379,9 @@ var topThreeLessonArabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{ID: "c62.v1.plan", Kind: "markdown", Text: "القياسات جاهزة. اختار الثلاثة، وخطط الزيارة."},
 			{
-				ID: "c62.v1.q-index", Kind: "question", Text: "في `[6, 1, 9, 3]`، أنهي index فيه أكبر قيمة؟",
+				ID: "c62.v1.q-index", Kind: "question", Text: "في `[6, 1, 9, 3]`، أنهي index فيه أكبر value؟",
 				Question: &LessonQuestion{Options: []string{"0", "2", "3"}, Answer: 1, Feedback: []string{
-					"index 0 فيه 6، مش الأكبر.", "صح، القيمة 9 عند index 2.", "index 3 فيه 3.",
+					"index 0 فيه 6، مش أكبر value.", "صح، الـvalue 9 عند index 2.", "index 3 فيه 3.",
 				}},
 			},
 			{
@@ -389,7 +389,7 @@ var topThreeLessonArabic = []LessonStep{
 				Question: &LessonQuestion{Options: []string{
 					"عشان ترتيب الأحجام الأصلي يفضل محفوظ.", "عشان ننقل الكريستالات لمواقع جديدة.", "عشان نزود سعة الـslice.",
 				}, Answer: 0, Feedback: []string{
-					"صح؛ النسخة تسيب ترتيب الأصل زي ما هو.", "Sort تغيّر القيم، مش العالم.", "Clone مش بتضمن سعة أكبر.",
+					"صح؛ النسخة بتسيب ترتيب الأصل زي ما هو.", "Sort بتغيّر الـvalues، مش العالم.", "Clone مش بتضمن سعة أكبر.",
 				}},
 			},
 			{
@@ -511,18 +511,18 @@ var censusLessonArabic = []LessonStep{
 		ID: "c63.v1.mission-step", Title: "المهمة",
 		Blocks: []LessonBlock{{
 			ID: "c63.v1.mission", Kind: "markdown",
-			Text: "1. عدّ moss وlichen وcrystal في خريطة 6×4 وابعت map الأعداد.\n2. عدّ empty اختياري؛ الـstarter سجّل خانة البداية بالفعل.\n3. الذهب 47 ticks؛ والـpar هو 60.",
+			Text: "1. عدّ moss وlichen وcrystal في شبكة 6×4 وابعت map الأعداد.\n2. عدّ empty اختياري؛ الـstarter سجّل خانة البداية بالفعل.\n3. الذهب 47 ticks؛ والـpar هو 60.",
 		}},
 	},
 	{
 		ID: "c63.v1.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{{
 			ID: "c63.v1.trace", Kind: "walkthrough",
-			Text: "الـmap بتربط key بعدد؛ القراية الغايبة ترجع صفر، وcomma-ok توضّح وجود المفتاح.",
+			Text: "الـmap بتربط key بـvalue؛ قراءة الـkey اللي مش موجود بترجّع zero value، وcomma-ok بتقولك لو الـkey موجود.",
 			Code: censusExample, Imports: []string{"fmt"}, ExampleID: "e63-map-count",
 			Walkthrough: censusTrace([]string{
-				"قبل التنفيذ.", "map فاضية؛ len=0.", "أول عدّ لـmoss بقى 1.", "نفس المفتاح؛ len زي ما هي.",
-				"مفتاح جديد؛ len بقت 2.", "قراية المفتاح الغايب رجعت صفر.", "ok بتقول إن المفتاح غايب.", "الخرج بيعرض مفتاحين.",
+				"قبل التنفيذ.", "الـmap فاضية؛ len=0.", "أول عدّ لـmoss بقى 1.", "نفس الـkey؛ len زي ما هي.",
+				"key جديد؛ len بقت 2.", "قراءة الـkey الغايب رجّعت zero value.", "ok بتقول إن الـkey مش موجود.", "الخرج بيعرض keyين.",
 			}),
 		}},
 	},
@@ -530,11 +530,11 @@ var censusLessonArabic = []LessonStep{
 		ID: "c63.v1.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{{
 			ID: "c63.v1.map-playground", Kind: "sandbox",
-			Text: "اضغط نوعًا؛ عدّاده يزيد. جرّب قراءة مفتاح مش موجود.",
+			Text: "اضغط نوع؛ عدّاده يزيد. جرّب تقرا key مش موجود.",
 			Sandbox: &LessonSandbox{
 				Kind: "map-count", Kinds: []string{"moss", "lichen", "crystal"}, MissingKey: "spore",
 				SourceLabel:      "أنواع للتوضيح، مش بيانات المهمة.",
-				MissingReadLabel: "اقرأ مفتاح غايب: spore", ResetLabel: "من الأول",
+				MissingReadLabel: "اقرا key غايب: spore", ResetLabel: "من الأول",
 				MapOrderLabel: "الجدول للعرض بس؛ ترتيب range على map مش مضمون.",
 			},
 		}},
@@ -543,7 +543,7 @@ var censusLessonArabic = []LessonStep{
 		ID: "c63.v1.watch-step", Title: "خد بالك",
 		Blocks: []LessonBlock{{
 			ID: "c63.v1.watch", Kind: "markdown",
-			Text: "- الكتابة على map nil تعمل panic؛ جهّزها الأول، وrange ترتيبها مش مضمون.\n- GetEntity وMove وHarvest كل واحد 1 tick، حتى Move الفاشلة؛ Report وWorldSize والحساب 0.",
+			Text: "- الكتابة على map nil تعمل panic؛ جهّزها الأول، وrange ترتيبها مش مضمون.\n- GetEntity وMove وHarvest كل واحد 1 tick، حتى Move الفاشلة؛ Report وWorldSize والحساب مفيش عليهم ticks.",
 		}},
 	},
 	{
@@ -551,21 +551,21 @@ var censusLessonArabic = []LessonStep{
 		Blocks: []LessonBlock{
 			{ID: "c63.v1.plan", Kind: "markdown", Text: "جهّز map، وزُر الخانات وعدّ الأنواع، وبعدها ابعت التقرير."},
 			{
-				ID: "c63.v1.q-missing", Kind: "question", Text: "لو المفتاح `crystal` مش موجود، إيه نتيجة comma-ok؟",
+				ID: "c63.v1.q-missing", Kind: "question", Text: "لو الـkey `crystal` مش موجود، إيه نتيجة comma-ok؟",
 				Question: &LessonQuestion{Options: []string{"0, false", "0, true", "nil, false"}, Answer: 0, Feedback: []string{
-					"صح؛ القيمة صفر وok=false لأن المفتاح غايب.", "ok=true معناها إن المفتاح موجود.", "قيمة int الافتراضية هي صفر، مش nil.",
+					"صح؛ الـvalue صفر وok=false لأن الـkey مش موجود.", "ok=true معناها إن الـkey موجود.", "الـzero value للـint هي صفر، مش nil.",
 				}},
 			},
 			{
 				ID: "c63.v1.q-len", Kind: "question", Text: "لو map فيها moss=4 وlichen=2، كام `len(counts)`؟",
 				Question: &LessonQuestion{Options: []string{"6", "2", "4"}, Answer: 1, Feedback: []string{
-					"6 هو مجموع القيم؛ len مش بتجمعها.", "صح؛ len بتعد المفتاحين.", "4 قيمة moss، مش عدد المفاتيح.",
+					"6 هو مجموع الـvalues؛ len مش بتجمعها.", "صح؛ len بتعد الـkeys.", "4 هي value moss، مش عدد الـkeys.",
 				}},
 			},
 			{
-				ID: "c63.v1.q-ticks", Kind: "question", Text: "بافتراض GetEntity مرة لكل 24 خانة و23 حركة بلا تكلفة أخرى، كام tick؟",
+				ID: "c63.v1.q-ticks", Kind: "question", Text: "بافتراض GetEntity مرة لكل 24 خانة و23 حركة من غير تكلفة تانية، كام tick؟",
 				Question: &LessonQuestion{Options: []string{"47", "48", "60"}, Answer: 0, Feedback: []string{
-					"صح؛ 24 قراءة + 23 حركة = 47، وReport والحساب مجانيان.", "في زيارة 24 خانة، فيه 23 حركة بس.", "60 هو par، مش تقدير المسار المذكور.",
+					"صح؛ 24 قراءة + 23 حركة = 47، وReport والحساب مش عليهم تكلفة.", "في زيارة 24 خانة، فيه 23 حركة بس.", "60 هو par، مش تقدير المسار ده.",
 				}},
 			},
 		},

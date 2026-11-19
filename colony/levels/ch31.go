@@ -3,7 +3,7 @@ package levels
 import "orbital/colony/i18n"
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch31Lesson311Arabic, ID: "31-1-echo", Chapter: 31, Kind: "lab", Title: "الصدى", Goal: "رجّع سطور منارة الاستغاثة بحد بايتات وموعد نهائي",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson311Arabic, ID: "31-1-echo", Chapter: 31, Kind: "lab", Title: "الصدى", Goal: "رجّع سطور منارة الاستغاثة بحد bytes وموعد نهائي",
 		Requires: []string{"sel:net.Conn"}, Bridge: []int{71}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch311Starter}},
 		Lesson: `# صدى منارة الاستغاثة
@@ -77,7 +77,7 @@ c.Write(buf[:n]) // غلط: قراية TCP مش بالضرورة سطر كامل
 
 نهاية نظيفة ترجع ~nil~؛ نهاية وسط سطر ترجع ~io.ErrUnexpectedEOF~. أخطاء النقل والموعد تتحفظ بـ ~errors.Is~. اتعامل مع الكتابة الجزئية ومن غير تقدم زي الشرح. مفيش goroutines داخل الدالة أو ~Report~؛ ~main~ فاضية.
 `,
-		Hints: []string{"TCP stream محتاج framing عشان يحدد نهاية الرسالة.", "افصل ملكية الاتصال عن حد السطر والكتابة.", "راجع ~bufio.Reader~ و~io.ErrShortWrite~ عند التعامل مع البايتات."},
+		Hints: []string{"TCP stream محتاج framing عشان يحدد نهاية الرسالة.", "افصل ملكية الاتصال عن حد السطر والكتابة.", "راجع ~bufio.Reader~ و~io.ErrShortWrite~ عند التعامل مع الـbytes."},
 		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson311English, Title: "Echo", Goal: "Echo distress-beacon lines with a byte limit and deadline", Files: []LabFile{{Name: "main.go", Starter: ch311Starter}},
 			Lesson: `# Distress Beacon Echo
 
@@ -307,7 +307,7 @@ func TestHiddenBeaconPipe(t *testing.T) {
 `
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch31Lesson312Arabic, ID: "31-2-chat", Chapter: 31, Kind: "lab", Title: "غرفة الراديو", Goal: "شغّل قلب غرفة الراديو بمالك واحد وعزل العميل البطيء",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson312Arabic, ID: "31-2-chat", Chapter: 31, Kind: "lab", Title: "غرفة الراديو", Goal: "شغّل قلب غرفة الراديو بمالك واحد وعزل الـclient البطيء",
 		Requires: []string{"chan", "select"}, Bridge: []int{72}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch312Starter}},
 		Lesson: `# غرفة راديو المستعمرة
@@ -375,7 +375,7 @@ for _, mailbox := range members {
 
 النجمة التالتة: حافظ على نفس العقد مع منتجين متزامنين للأوامر؛ كل رسالة من كل منتج توصل مرة واحدة، من غير فرض ترتيب بين المنتجين.
 `,
-		Hints: []string{"مالك واحد لحالة الغرفة يقلل مشاركة الخريطة.", "عالج كل أمر ثم أرسل رده، وحدد مالك كل قناة.", "استخدم ~select~ و~default~ لتجنب انتظار صندوق ممتلئ."},
+		Hints: []string{"مالك واحد لحالة الغرفة يقلل مشاركة الـmap.", "عالج كل أمر وبعدها ابعت الـresponse، وحدد مالك كل channel.", "استخدم ~select~ و~default~ لتجنب انتظار صندوق ممتلئ."},
 		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson312English, Title: "Radio Room", Goal: "Run a single-owner radio hub that isolates slow crew members", Files: []LabFile{{Name: "main.go", Starter: ch312Starter}},
 			Lesson: `# Colony Radio Room
 
@@ -665,7 +665,7 @@ func TestHiddenBonusRadioConcurrentProducers(t *testing.T) {
 `
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch31Lesson313Arabic, ID: "31-3-discovery", Chapter: 31, Kind: "lab", Title: "اكتشاف الجيران", Goal: "رد على حزمة تعريف جار واحدة ببروتوكول UDP محدود",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson313Arabic, ID: "31-3-discovery", Chapter: 31, Kind: "lab", Title: "اكتشاف الجيران", Goal: "رجّع response على packet تعريف جار واحدة ببروتوكول UDP محدود",
 		Requires: []string{"sel:net.ListenPacket"}, Bridge: []int{73}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch313Starter}},
 		Lesson: `# حزمة تعريف من رصيف قريب
@@ -725,7 +725,7 @@ pc.WriteTo(buf[:n], peer)
 
 نفّذ ~AnswerNeighbor(pc net.PacketConn, station string, deadline time.Time) error~. الاتصال غير ~nil~ ومملوك للمنادي. افحص اسم المحطة قبل I/O، واضبط الموعد مرة، واقرا حزمة واحدة بمخزن 65. الطلب البايظ يرجع ~ErrNeighborPacket~ من غير إرسال. الطلب السليم يترد عليه مرة بعنوان المصدر من ~ReadFrom~ وبنفس الكود. رجّع أخطاء الموعد والقراية والكتابة زي ما هي، والكتابة القصيرة ~io.ErrShortWrite~. متقفلش الاتصال ولا تعمل goroutines أو تقرا وقت حقيقي. ~main~ فاضية؛ مفيش ~Report~.
 `,
-		Hints: []string{"UDP يحافظ على حدود packet، ومش stream زي TCP.", "افصل codec عن socket، واحتفظ بعنوان المرسل.", "ابدأ من ~net.PacketConn.ReadFrom~ في مسار الرد."},
+		Hints: []string{"UDP يحافظ على حدود packet، ومش stream زي TCP.", "افصل codec عن socket، واحتفظ بعنوان المرسل.", "ابدأ من ~net.PacketConn.ReadFrom~ في مسار الـresponse."},
 		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson313English, Title: "Neighbor Discovery", Goal: "Answer one bounded UDP neighbor-discovery packet", Files: []LabFile{{Name: "main.go", Starter: ch313Starter}},
 			Lesson: `# A Neighboring Dock's Discovery Packet
 
@@ -995,7 +995,7 @@ func TestHiddenNeighborLoopback(t *testing.T) {
 `
 
 func init() {
-	add(&Level{LessonRevision: 1, Steps: ch31Lesson314Arabic, ID: "31-4-frames", Chapter: 31, Kind: "lab", Title: "إطارات binary", Goal: "فك إطارات تليمتري محفوظة بحدود واضحة واختبار fuzz",
+	add(&Level{LessonRevision: 1, Steps: ch31Lesson314Arabic, ID: "31-4-frames", Chapter: 31, Kind: "lab", Title: "إطارات binary", Goal: "فك إطارات تليمتري محفوظة بحدود واضحة وtest fuzz",
 		Requires: []string{"fuzz", "sel:binary.BigEndian"}, Bridge: []int{85}, Race: false, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch314Starter}, {Name: "main_test.go", Starter: ch314TestStarter}},
 		Lesson: `# إطارات التليمتري المحفوظة
@@ -1051,7 +1051,7 @@ return Radiogram{Payload: wire[8:8+length]}, nil // alias ومن غير فحص �
 
 اكتب ~FuzzRadiogram(f *testing.F)~ في ~main_test.go~ مع seeds المذكورة وبناء seed واحدة على الأقل بـ ~binary.BigEndian~. اثبت عدم الـ panic وعدم تعديل المدخل والقبول الصحيح ونسخ المحتوى، وشغّل نفس الاختبارات ضد التلات mutants: endian غلط، نوع مجهول مقبول، و payload بتشارك المدخل. التستات لازم ترفض التلاتة وتعدّي على حلك.
 `,
-		Hints: []string{"الإطار الثنائي يعلن طول payload وترتيب البايتات.", "تحقق من شكل الهيدر قبل أي slicing أو نوع.", "استخدم ~binary.BigEndian.Uint16~ بعد فحص الحدود."},
+		Hints: []string{"الـbinary frame بيعلن طول payload وترتيب الـbytes.", "اتأكد من شكل الـheader قبل ما تعمل الـslice أو تفحص النوع.", "استخدم ~binary.BigEndian.Uint16~ بعد ما تتأكد من الحدود."},
 		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson314English, Title: "Binary Frames", Goal: "Parse offline telemetry frames with bounds checks and fuzzing", Files: []LabFile{{Name: "main.go", Starter: ch314Starter}, {Name: "main_test.go", Starter: ch314TestStarter}},
 			Lesson: `# Archived Telemetry Frames
 
@@ -1377,7 +1377,7 @@ return AddressCard{A: []string{ips[0].String()}}, nil // ترتيب وفحص ن�
 
 النجمة التالتة: شيل تكرار العناوين بعد التحويل canonical، بما فيها IPv4-mapped وكتابات IPv6 المختلفة لنفس العنوان، من غير تعديل إجابة resolver.
 `,
-		Hints: []string{"غياب DNS خطأ، لكن قائمة عناوين فاضية ممكن تكون نجاح.", "مرّر نفس السياق للـresolver وصنّف بعد كل نداء.", "جرّب ~net.IP.To4~ قبل ~To16~، واستخدم ~errors.As~ لأخطاء DNS."},
+		Hints: []string{"لو DNS رجّع error، بس قائمة العناوين الفاضية ممكن تبقى نجاح.", "مرّر نفس الـcontext للـresolver وصنّف بعد كل نداء.", "جرّب ~net.IP.To4~ قبل ~To16~، واستخدم ~errors.As~ عشان تصنّف الـerrors بتاعة DNS."},
 		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson315English, Title: "Address Directory", Goal: "Build deterministic dock address cards through an injected resolver", Files: []LabFile{{Name: "main.go", Starter: ch315Starter}},
 			Lesson: `# Dock Address Directory
 
@@ -1704,7 +1704,7 @@ if strings.HasPrefix(host, "127") {
 
 شغّل عدد عوامل يساوي الأصغر بين عدد المنافذ و ~Workers~، وكل منفذ يتحاول مرة واحدة بـ ~tcp~ والعنوان والمدة المحددين. استخدم ~go~ و ~net.DialTimeout~ كافتراضي قابل للحقن. النتائج بنفس ترتيب ~ports~، وكلها تظهر بعد اكتمال العمال وقفل كل اتصال. فشل منفذ يرجع في خانة ~Err~ وميرجعش خطأ عام؛ الإعداد البايظ وحده خطأ عام. حافظ على causes بـ ~errors.Is~، وصنّف زي الشرح. ممنوع DNS أو فحص أي جهاز خارجي أو ~Report~؛ ~main~ فاضية.
 `,
-		Hints: []string{"حد التوازي يقيّد محاولات dial النشطة.", "تحقق من الخطة كلها قبل العمال، وخزّن النتيجة في خانة index.", "استخدم ~net.ParseIP~ و~net.JoinHostPort~ بدل تركيب العنوان يدوياً."},
+		Hints: []string{"حد التوازي يقيّد محاولات dial النشطة.", "اتأكد من الخطة كلها قبل العمال، وخزّن النتيجة في خانة الـindex.", "استخدم ~net.ParseIP~ و~net.JoinHostPort~ بدل تركيب العنوان يدويًا."},
 		En: &LevelText{LessonRevision: 1, Steps: ch31Lesson316English, Title: "Port Check", Goal: "Check registered local dock ports with bounded concurrent injected dialing", Files: []LabFile{{Name: "main.go", Starter: ch316Starter}},
 			Lesson: `# Check Docks on Your Own Machine
 

@@ -126,16 +126,16 @@ func ch15MakeLesson(prefix string, ar, en ch15LessonCopy, idea, try ch15LessonEx
 var ch15Lesson151 = ch15MakeLesson("c151",
 	ch15LessonCopy{
 		Mission:     "وصل للكريستال بأقصر طريق في متاهة الصخور. الخريطة بتتغير، والـstarter بيعرضها من ~colony.Grid()~ وبيحدد الهدف.\n\nخطط الطريق الأول، وبعدها امشِ عليه واحصد الكريستال.",
-		Idea:        "BFS تستخدم queue من نوع FIFO. كل مرة توسّع الخانات المكتشفة عند مسافة واحدة، وبعدها تنتقل للطبقة اللي بعدها.\n\nلو كل حركة بنفس التكلفة، أول وصول لخانة بيكون بأقصر عدد خطوات. خزّن مين وصّلك للخانة عشان تقدر ترجع للطريق.",
+		Idea:        "BFS بتستخدم queue من نوع FIFO. كل مرة بتوسع الخانات المكتشفة على نفس المسافة، وبعدها بتروح للمسافة اللي بعدها.\n\nلو كل حركة بنفس التكلفة، أول وصول لخانة بيكون بأقل عدد خطوات. خزّن مين وصّلك للخانة عشان تعرف ترجع للطريق.",
 		TryQuestion: "توقّع إيه اللي بيتشال وإيه اللي يفضل:",
-		TryReveal:   "الـqueue بتحافظ على ترتيب الدخول، وبعدها تضيف الاكتشاف الجديد.",
+		TryReveal:   "الـqueue بتحافظ على ترتيب الدخول، وبعدها بتضيف الاكتشاف الجديد.",
 		Watch:       "- الصخر ~colony.Rock~ حاجز؛ ما تضفوش كجار صالح.\n- ~grid[x][y]~ معناها X قبل Y.\n- علّم الخانة وقت اكتشافها عشان ما تدخلش الـqueue أكتر من مرة.",
-		Think:       "BFS مناسبة لما الهدف أقل عدد حركات وكل حركة متساوية. لو التكاليف اختلفت، أول زيارة مش بالضرورة الأرخص.\n\nبعد بناء الطريق، اقرأ كل خطوة بالنسبة لموضعك الحالي، مش للإحداثيات لوحدها.",
+		Think:       "BFS مناسبة لما الهدف أقل عدد حركات وكل حركة بنفس التكلفة. لو التكاليف اختلفت، أول زيارة مش لازم تكون الأرخص.\n\nبعد ما تبني الطريق، اقرا كل خطوة بالنسبة لمكانك الحالي، مش للإحداثيات لوحدها.",
 		Check:       "إيه فايدة تسجيل الخانة عند اكتشافها؟",
-		Turn:        "ابدأ برسم قائمة الخانات اللي هتفحصها، وبعدها أضف تسجيل السابق لكل واحدة. شغّل البرنامج على خريطة جديدة وراقب الطريق قبل التنفيذ.",
-		TryOptions:  []string{"north و[east]", "east و[north]", "north و[]"}, TryFeedback: []string{"أول قيمة تخرج، وeast تفضل في الطابور.", "north وصلت الأول، فبتتسحب قبل east.", "east بتفضل بعد سحب north."},
-		CheckOptions: []string{"عشان ما نعيدش اكتشافها", "عشان نحرك الدرون", "عشان نرتب الحروف"}, CheckFeedback: []string{"تسجيل الاكتشاف يمنع التكرار في الجولات التالية.", "الخريطة بتسجل مواقع، مش بتنقل الدرون.", "الترتيب هنا مسافة الوصول، مش الحروف."},
-		Hints: []string{"BFS تضمن أقصر طريق لما كل خطوة لها نفس التكلفة.", "استخدم queue للاكتشافات وخريطة parent لمسار الوصول.", "راجع أبعاد ~Grid()~ وشرط الجدار قبل ضم الجيران."},
+		Turn:        "ابدأ برسم قائمة الخانات اللي هتفحصها، وبعدها ضيف تسجيل السابق لكل واحدة. شغّل البرنامج على خريطة جديدة وتابع الطريق قبل التنفيذ.",
+		TryOptions:  []string{"north و[east]", "east و[north]", "north و[]"}, TryFeedback: []string{"أول value تخرج، وeast تفضل في الـqueue.", "north وصلت الأول، فبتتسحب قبل east.", "east بتفضل بعد سحب north."},
+		CheckOptions: []string{"عشان ما نعيدش اكتشافها", "عشان نحرك الدرون", "عشان نرتب الحروف"}, CheckFeedback: []string{"تسجيل الاكتشاف يمنع التكرار في الجولات اللي بعدها.", "الخريطة بتسجل مواقع، مش بتنقل الدرون.", "الترتيب هنا حسب مسافة الوصول، مش الحروف."},
+		Hints: []string{"BFS تضمن أقصر طريق لما كل خطوة لها نفس التكلفة.", "استعمل queue للاكتشافات وmap للـparent عشان تسجل الطريق.", "بص على أبعاد ~Grid()~ وشرط الجدار قبل ما تضيف الجيران."},
 	},
 	ch15LessonCopy{
 		Mission:     "Find the crystal by the shortest route through the rock maze. The starter reads the changing map with ~colony.Grid()~ and identifies the goal.",
@@ -157,14 +157,14 @@ var ch15Lesson151 = ch15MakeLesson("c151",
 	queue = append(queue, "C")
 	fmt.Println(current, queue)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 2, Arabic: "A وصلت أولًا.", English: "A arrived first."}, {Line: 3, Arabic: "اقرأ أول عنصر.", English: "Read the first item."}, {Line: 4, Arabic: "أزل A من المقدمة.", English: "Remove A from the front."}, {Line: 5, Arabic: "C تنضم في الآخر.", English: "C joins at the end."}, {Line: 6, Arabic: "اطبع الحالة الجديدة.", English: "Print the new state."}, {Line: 7, Arabic: "A خرجت وB بقيت.", English: "A left and B remains.", Output: "A [B C]"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 2, Arabic: "A وصلت الأول.", English: "A arrived first."}, {Line: 3, Arabic: "اقرا أول عنصر.", English: "Read the first item."}, {Line: 4, Arabic: "شيل A من الأول.", English: "Remove A from the front."}, {Line: 5, Arabic: "C تدخل في الآخر.", English: "C joins at the end."}, {Line: 6, Arabic: "اطبع الحالة الجديدة.", English: "Print the new state."}, {Line: 7, Arabic: "A خرجت وB فضلت.", English: "A left and B remains.", Output: "A [B C]"}}},
 	ch15LessonExample{ID: "e15-1-try", Imports: []string{"fmt"}, Code: `func main() {
 	queue := []string{"north", "east"}
 	first := queue[0]
 	queue = queue[1:]
 	fmt.Println(first, queue)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "north وصلت الأول.", English: "north arrived first."}, {Line: 3, Arabic: "اقرأ المقدمة.", English: "Read the front."}, {Line: 4, Arabic: "اقص أول عنصر.", English: "Slice off the first item."}, {Line: 5, Arabic: "اعرض الباقي.", English: "Show what remains."}, {Line: 6, Arabic: "east لسه موجودة.", English: "east is still queued.", Output: "north [east]"}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "north وصلت الأول.", English: "north arrived first."}, {Line: 3, Arabic: "اقرا أول عنصر.", English: "Read the front."}, {Line: 4, Arabic: "شيل أول عنصر.", English: "Slice off the first item."}, {Line: 5, Arabic: "اطبع الباقي.", English: "Show what remains."}, {Line: 6, Arabic: "east لسه في الـqueue.", English: "east is still queued.", Output: "north [east]"}},
 		Sandbox: ch15LessonSandbox(
 			ch15SandboxFrame("A في أول الطابور.", "A waits at the front.",
 				ch15SandboxRowFor("الطابور", "Queue", "A", "B"),
@@ -182,16 +182,16 @@ var ch15Lesson151 = ch15MakeLesson("c151",
 var ch15Lesson152 = ch15MakeLesson("c152",
 	ch15LessonCopy{
 		Mission:     "رتّب أحجام الكريستال من الأصغر للأكبر، من الشمال لليمين. الـstarter قاس الصف كله بالفعل وخزّن الأحجام في ~sizes~.\n\nلازم ترتيب الذاكرة يفضل مطابق للصف بعد كل تبديل.",
-		Idea:        "قارن كل زوج متجاور، وبدّله لما يكون اليسار أكبر. التبديل يصلّح inversion واحدة في الصف.\n\nفي المهمة، ~colony.Swap~ يبدل الكريستال مع الجار من غير ما يحرك الدرون، وبيكلف tick واحدة حسب توثيق API؛ بافتراض سرعة المهمة العادية.",
+		Idea:        "قارن كل زوج جنب بعض، وبدّله لما الشمال يكون أكبر. التبديل يصلّح inversion واحدة في الصف.\n\nفي المهمة، ~colony.Swap~ بتبدّل الكريستال مع الجار من غير ما تحرك الـdrone، وبتكلف tick واحدة حسب توثيق الـAPI وعلى سرعة المهمة العادية.",
 		TryQuestion: "توقّع نتيجة تبديل الزوج:",
 		TryReveal:   "قارن أول قيمتين، وبعد التبديل اطبع الـslice الجديدة.",
-		Watch:       "- حدّث ~sizes~ بالتزامن مع التبديل على الخريطة.\n- حركة الدرون تحدد مكانك بالنسبة للزوج المطلوب.\n- لفة من غير تبديل معناها إن الترتيب اكتمل.",
-		Think:       "التبديل المحلي يصلّح زوجًا واحدًا؛ كرر الفحص لأن حركة واحدة ممكن تكشف inversion تانية.\n\nالدرجة تعتمد على ticks، ففكّر كمان في طريقة المرور على الصف بدل العودة لنقطة البداية دائمًا.",
+		Watch:       "- حدّث ~sizes~ مع التبديل على الخريطة.\n- حركة الـdrone بتحدد مكانك بالنسبة للزوج المطلوب.\n- loop من غير تبديل معناها إن الترتيب اكتمل.",
+		Think:       "التبديل المحلي بيصلّح زوج واحد؛ كرر الفحص لأن حركة واحدة ممكن تكشف inversion تانية.\n\nالدرجة بتعتمد على ticks، ففكّر كمان في طريقة المرور على الصف بدل ما ترجع لنقطة البداية كل مرة.",
 		Check:       "بعد تبديل crystalين متجاورين، إيه اللي لازم يتحدث؟",
-		Turn:        "شغّل القياس الموجود، ثم اكتب خطوة مقارنة وتبديل صغيرة. بعد كل تبديل، قارن السجل بالصف الفعلي قبل ما توسع الخوارزمية.",
-		TryOptions:  []string{"[3 1]", "[1 3]", "[1 1]"}, TryFeedback: []string{"الزوج لسه تنازلي قبل التبديل.", "القيمتين يتبدلوا ويبقوا تصاعديين.", "التبديل يغير المكان مش القيمة."},
-		CheckOptions: []string{"الأرض فقط", "sizes فقط", "الأرض و~sizes~"}, CheckFeedback: []string{"لوحدها تخلي سجل المقاسات قديمًا.", "الخريطة مش هتعكس الترتيب الجديد.", "لازم الذاكرة والصف يفضلوا متطابقين."},
-		Hints: []string{"ابدأ بمقارنة زوج متجاور وحدد هل ترتيبهما صحيح.", "حافظ على تطابق قيم ~sizes~ مع مواضع الكريستال.", "افحص سطر ~colony.Swap~ واتجاه الجار الذي يبدّله الـAPI."},
+		Turn:        "شغّل القياس الموجود، وبعدها اكتب خطوة مقارنة وتبديل صغيرة. بعد كل تبديل، طابق السجل مع الصف الفعلي قبل ما توسع الخوارزمية.",
+		TryOptions:  []string{"[3 1]", "[1 3]", "[1 1]"}, TryFeedback: []string{"الزوج لسه تنازلي قبل التبديل.", "الـvalues بتتبدل وبتبقى تصاعدية.", "التبديل بيغير المكان مش الـvalue."},
+		CheckOptions: []string{"الأرض فقط", "sizes فقط", "الأرض و~sizes~"}, CheckFeedback: []string{"لوحدها تخلي سجل المقاسات قديم.", "الخريطة مش هتعكس الترتيب الجديد.", "لازم الذاكرة والصف يفضلوا متطابقين."},
+		Hints: []string{"ابدأ بمقارنة زوج جنب بعض وحدد هل ترتيبهما صحيح.", "خلي قيم ~sizes~ مطابقة لمواضع الكريستال.", "بص على سطر ~colony.Swap~ واتجاه الجار اللي بيبدّله الـAPI."},
 	},
 	ch15LessonCopy{
 		Mission:     "Sort crystals from smallest to largest, left to right. The starter measured the row into ~sizes~.\n\nKeep memory aligned with the crystals after each swap.",
@@ -213,7 +213,7 @@ var ch15Lesson152 = ch15MakeLesson("c152",
 	}
 	fmt.Println(sizes)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 2, Arabic: "القيم تبدأ 5 و2.", English: "The values start as 5 and 2."}, {Line: 3, Arabic: "اليسار أكبر من اليمين.", English: "The left value is larger."}, {Line: 4, Arabic: "بدّل القيمتين معًا.", English: "Swap both values."}, {Line: 5, Arabic: "الزوج بقى تصاعديًا.", English: "The pair is now ascending."}, {Line: 6, Arabic: "اطبع slice بعد التعديل.", English: "Print the changed slice."}, {Line: 7, Arabic: "القيمة الثالثة لم تتحرك.", English: "The third value did not move.", Output: "[2 5 4]"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 2, Arabic: "الـvalues تبدأ 5 و2.", English: "The values start as 5 and 2."}, {Line: 3, Arabic: "الشمال أكبر من اليمين.", English: "The left value is larger."}, {Line: 4, Arabic: "بدّل الـvalues مع بعض.", English: "Swap both values."}, {Line: 5, Arabic: "الزوج بقى مرتب تصاعدي.", English: "The pair is now ascending."}, {Line: 6, Arabic: "اطبع الـslice بعد التعديل.", English: "Print the changed slice."}, {Line: 7, Arabic: "الـvalue التالتة ما اتحركتش.", English: "The third value did not move.", Output: "[2 5 4]"}}},
 	ch15LessonExample{ID: "e15-2-try", Imports: []string{"fmt"}, Code: `func main() {
 	sizes := []int{3, 1}
 	if sizes[0] > sizes[1] {
@@ -221,7 +221,7 @@ var ch15Lesson152 = ch15MakeLesson("c152",
 	}
 	fmt.Println(sizes)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "3 أكبر من 1.", English: "3 is greater than 1."}, {Line: 3, Arabic: "شرط التبديل صحيح.", English: "The swap condition is true."}, {Line: 4, Arabic: "بدّل العنصرين.", English: "Swap the two elements."}, {Line: 5, Arabic: "slice بقت مرتبة.", English: "The slice is now ordered."}, {Line: 6, Arabic: "اطبع النتيجة.", English: "Print the result."}, {Line: 7, Arabic: "الناتج هو [1 3].", English: "The output is [1 3].", Output: "[1 3]"}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "3 أكبر من 1.", English: "3 is greater than 1."}, {Line: 3, Arabic: "شرط التبديل اتحقق.", English: "The swap condition is true."}, {Line: 4, Arabic: "بدّل العنصرين.", English: "Swap the two elements."}, {Line: 5, Arabic: "الـslice بقت مرتبة.", English: "The slice is now ordered."}, {Line: 6, Arabic: "اطبع النتيجة.", English: "Print the result."}, {Line: 7, Arabic: "الناتج هو [1 3].", English: "The output is [1 3].", Output: "[1 3]"}},
 		Sandbox: ch15LessonSandbox(
 			ch15SandboxFrame("قارن زوجًا متجاورًا.", "Compare one adjacent pair.",
 				ch15SandboxRowFor("الأحجام", "Sizes", "4", "1", "3"),
@@ -235,17 +235,17 @@ var ch15Lesson152 = ch15MakeLesson("c152",
 
 var ch15Lesson153 = ch15MakeLesson("c153",
 	ch15LessonCopy{
-		Mission:     "وصل للكريستال بأقل وقت، مش بأقل عدد خطوات. كل خانة Ice بتكلف 4 ticks حسب قاعدة المهمة والـstarter.\n\nالمسار الأقصر ممكن يخسّرك وقت لو عدى على جليد كتير.",
-		Idea:        "BFS ترتب الوصول بعدد الحركات، لكن Dijkstra تقارن التكلفة التراكمية. كل طريق يجمع تكلفة الخانات اللي دخلها.\n\nاختار أقل مسافة معروفة بين الخانات اللي ما خلصتش؛ حدّث مسافة الجار لو لقيت طريقًا أرخص.",
+		Mission:     "وصل للكريستال بأقل وقت، مش بأقل عدد خطوات. كل خانة Ice بتكلف 4 ticks حسب قاعدة المهمة والـstarter.\n\nالمسار الأقصر ممكن يضيّع وقت لو عدى على جليد كتير.",
+		Idea:        "BFS بترتب الوصول بعدد الحركات، لكن Dijkstra بتقارن التكلفة التراكمية. كل طريق بيجمع تكلفة الخانات اللي دخلها.\n\nاختار أقل مسافة معروفة بين الخانات اللي لسه ما خلصتش؛ حدّث مسافة الجار لو لقيت طريق أرخص.",
 		TryQuestion: "توقّع كلفة الطريقين بالترتيب:",
 		TryReveal:   "الجليد يرفع كلفة الدخول، حتى لو الخطوات أقل.",
-		Watch:       "- خزّن كلفة الطريق كله، مش عدد الخانات فقط.\n- حدّث الأب لما تتحسن المسافة.\n- تكلفة الجليد تخص الدخول للخانة؛ استخدم ~cost~ الموجودة في الـstarter.",
-		Think:       "قارن مجموع الكلفة، مش طول المسار. نقطة أبعد ممكن تبقى أرخص لو أرضها أسهل.\n\nDijkstra هنا تتعامل مع تكاليف غير سالبة؛ الخريطة صغيرة، وتقدر تبدأ من غير heap.",
-		Check:       "لو أول طريق لزيارة خانة كلفته 8، وبعدها لقيت طريقًا بكلفة 5، أنهي قيمة تحتفظ بها؟",
-		Turn:        "استخدم الـstarter عشان تقرأ نوع الأرض وكلفة الدخول. جرّب رسم طريقين على خريطة مختلفة، وبعدها راقب ترتيب اختيار الخانات.",
-		TryOptions:  []string{"6 و4", "4 و6", "6 و5"}, TryFeedback: []string{"الطريق الأول يدخل جليدًا، والتاني أرضه عادية.", "المطلوب كلفة العبور الأول وبعدها الالتفاف.", "الأرض العادية مجموعها أربعة مش خمسة."},
-		CheckOptions: []string{"8", "5", "الاتنين"}, CheckFeedback: []string{"دي مسافة أقدم وأغلى من المسار الجديد.", "احتفظ بأقل كلفة معروفة للخانة.", "المسافة مش بتجمع المسارين مع بعض."},
-		Hints: []string{"Dijkstra تختار حسب مجموع الكلفة، مش عدد الحركات.", "احتفظ بأفضل مسافة معروفة وبعلامة للخانات المنتهية.", "راجع دالة ~cost~ ومكان الهدف في ~Targets()[0]~."},
+		Watch:       "- خزّن تكلفة الطريق كله، مش عدد الخانات بس.\n- حدّث الـparent لما المسافة تتحسن.\n- تكلفة الجليد تخص دخول الخانة؛ استعمل ~cost~ الموجودة في الـstarter.",
+		Think:       "قارن مجموع التكلفة، مش طول المسار. نقطة أبعد ممكن تبقى أرخص لو أرضها أسهل.\n\nDijkstra هنا بتتعامل مع تكاليف مش سالبة؛ الخريطة صغيرة، وتقدر تبدأ من غير heap.",
+		Check:       "لو أول طريق لخانة كلفته 8، وبعدها لقيت طريق بكلفة 5، أنهي value تفضل؟",
+		Turn:        "استعمل الـstarter عشان تقرا نوع الأرض وتكلفة الدخول. جرّب ترسم طريقين على خريطة مختلفة، وبعدها تابع ترتيب اختيار الخانات.",
+		TryOptions:  []string{"6 و4", "4 و6", "6 و5"}, TryFeedback: []string{"الطريق الأول بيدخل جليد، والتاني أرضه عادية.", "المطلوب تكلفة العبور الأول وبعدها الالتفاف.", "الأرض العادية مجموعها أربعة مش خمسة."},
+		CheckOptions: []string{"8", "5", "الاتنين"}, CheckFeedback: []string{"دي مسافة أقدم وأغلى من المسار الجديد.", "خلي أقل تكلفة معروفة للخانة.", "المسافة مش بتجمع المسارين مع بعض."},
+		Hints: []string{"Dijkstra بتختار حسب مجموع التكلفة، مش عدد الحركات.", "خلي أفضل مسافة معروفة ومعاها علامة للخانات اللي خلصت.", "بص على function ~cost~ ومكان الهدف في ~Targets()[0]~."},
 	},
 	ch15LessonCopy{
 		Mission:     "Reach the crystal in the least time. Each Ice tile costs 4 ticks under the mission rule and starter.\n\nA short route may be slower across ice.",
@@ -271,7 +271,7 @@ func main() {
 	detour := enterCost(false) + enterCost(false) + enterCost(false)
 	fmt.Println(through, detour)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 1, Arabic: "احسب تكلفة دخول خانة.", English: "Calculate one entry cost."}, {Line: 2, Arabic: "الجليد يكلف 4.", English: "Ice costs 4."}, {Line: 4, Arabic: "الأرض العادية تكلف 1.", English: "Ordinary ground costs 1."}, {Line: 7, Arabic: "اجمع طريق الجليد.", English: "Add the ice route."}, {Line: 8, Arabic: "اجمع طريق الالتفاف.", English: "Add the detour."}, {Line: 9, Arabic: "قارن مجموع الطريقين.", English: "Compare both route totals."}, {Line: 10, Arabic: "الالتفاف أرخص هنا.", English: "The detour costs less here.", Output: "5 3"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 1, Arabic: "احسب تكلفة دخول خانة.", English: "Calculate one entry cost."}, {Line: 2, Arabic: "الجليد تكلفته 4.", English: "Ice costs 4."}, {Line: 4, Arabic: "الأرض العادية تكلفتها 1.", English: "Ordinary ground costs 1."}, {Line: 7, Arabic: "اجمع تكلفة طريق الجليد.", English: "Add the ice route."}, {Line: 8, Arabic: "اجمع تكلفة الالتفاف.", English: "Add the detour."}, {Line: 9, Arabic: "قارن مجموع الطريقين.", English: "Compare both route totals."}, {Line: 10, Arabic: "الالتفاف أرخص هنا.", English: "The detour costs less here.", Output: "5 3"}}},
 	ch15LessonExample{ID: "e15-3-try", Imports: []string{"fmt"}, Code: `func enterCost(ice bool) int {
 	if ice {
 		return 4
@@ -283,7 +283,7 @@ func main() {
 	around := enterCost(false) + enterCost(false) + enterCost(false) + enterCost(false)
 	fmt.Println(through, around)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "دخول الجليد يساوي 4.", English: "Entering ice costs 4."}, {Line: 4, Arabic: "الخانة العادية تساوي 1.", English: "An ordinary tile costs 1."}, {Line: 7, Arabic: "المسار الأول يدخل جليدًا.", English: "The first route enters ice."}, {Line: 8, Arabic: "المسار الثاني كله عادي.", English: "The second route is ordinary."}, {Line: 9, Arabic: "اطبع المجموعين.", English: "Print both totals."}, {Line: 10, Arabic: "النتيجة 6 و4.", English: "The result is 6 and 4.", Output: "6 4"}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 2, Arabic: "دخول الجليد تكلفته 4.", English: "Entering ice costs 4."}, {Line: 4, Arabic: "الخانة العادية تكلفتها 1.", English: "An ordinary tile costs 1."}, {Line: 7, Arabic: "المسار الأول بيدخل جليد.", English: "The first route enters ice."}, {Line: 8, Arabic: "المسار التاني كله عادي.", English: "The second route is ordinary."}, {Line: 9, Arabic: "اطبع المجموعين.", English: "Print both totals."}, {Line: 10, Arabic: "الناتج 6 و4.", English: "The result is 6 and 4.", Output: "6 4"}},
 		Sandbox: ch15LessonSandbox(
 			ch15SandboxFrame("المجموعين بيبدأوا من صفر.", "Both totals start at zero.",
 				ch15SandboxRowFor("عبر الجليد", "Through ice", "0"),
@@ -304,16 +304,16 @@ func main() {
 var ch15Lesson154 = ch15MakeLesson("c154",
 	ch15LessonCopy{
 		Mission:     "دور على أول index للعمق أو -1 لو مش موجود، وبعدها عدّ الخانات المفتوحة المتصلة بالقاعدة. الـstarter بيبعت النتيجتين.\n\nالقائمة مرتبة، والخريطة فيها صخور وجيوب معزولة.",
-		Idea:        "Binary search تقلّل مجال البحث كل خطوة. المجال ~[lo, hi)~؛ لو القيمة الوسطى أصغر من الهدف، استبعدها وما قبلها.\n\nفي المثال راقب منتصف المجال وحدوده بعد مقارنة واحدة. دي خطوة توضيحية، مش نتيجة البحث بالكامل.",
+		Idea:        "Binary search بتقلل مجال البحث كل خطوة. المجال ~[lo, hi)~؛ لو الـvalue الوسطى أصغر من الهدف، شيلها وكل اللي قبلها.\n\nفي المثال تابع منتصف المجال وحدوده بعد مقارنة واحدة. دي خطوة توضيحية، مش نتيجة البحث بالكامل.",
 		TryQuestion: "توقّع عدد الخانات المفتوحة في الخط المتصل:",
-		TryReveal:   "الاستدعاء يتوقف عند نهاية الشريحة أو أول خانة مقفولة.",
+		TryReveal:   "الـrecursive function بتقف عند نهاية الـslice أو أول خانة مقفولة.",
 		Watch:       "- عند المساواة، كمّل شمال عشان تلاقي أول تكرار.\n- ~Grid~ مفهرسة ~grid[x][y]~، والصخر حاجز.\n- علّم الخانة قبل الجيران، وخلي المدخلات الفاضية تقف بأمان.",
-		Think:       "البحث الثنائي يتعامل مع بيانات مرتبة؛ افحص الحدود قبل قراءة index. الفيضان يعد المنطقة من (0,0) بس، مش كل الأرض المفتوحة.\n\nالخانة المعزولة مش جزء من المنطقة المتصلة حتى لو كانت مش صخر.",
+		Think:       "البحث الثنائي بيتعامل مع بيانات مرتبة؛ بص على الحدود قبل ما تقرا index. الـflood بيعد المنطقة من (0,0) بس، مش كل الأرض المفتوحة.\n\nالخانة المعزولة مش جزء من المنطقة المتصلة حتى لو ما كانتش صخر.",
 		Check:       "إمتى تعلّم الخانة visited في recursion؟",
-		Turn:        "اشتغل على كل دالة لوحدها. راجع أنواع القيم في ~main~، وبعد التشغيل قارن الـindex والعدد بالخريطة.",
+		Turn:        "اشتغل على كل function لوحدها. بص على types الـvalues في ~main~، وبعد التشغيل طابق الـindex والعدد مع الخريطة.",
 		TryOptions:  []string{"1", "2", "3"}, TryFeedback: []string{"أول خانة مفتوحة تتحسب مرة واحدة.", "الخانتان المفتوحتان المتتاليتان تدخلان في العدد.", "الخانة المقفولة توقف السلسلة."},
 		CheckOptions: []string{"بعد زيارة كل الجيران", "قبل استدعاء الجيران", "مش محتاج علامة"}, CheckFeedback: []string{"جار تاني ممكن يرجع للخانة قبل تعليمها.", "العلامة المبكرة تمنع إعادة الزيارة.", "الشبكة فيها دوائر، فبدونها recursion تكرر نفسها."},
-		Hints: []string{"الترتيب التصاعدي يسمح بالتخلص من نصف مجال البحث.", "استخدم مجال half-open للبحث وmap مستقلة للخانات المزارة.", "راجع ترتيب استدعاء ~depthIndex~ و~flood~ قبل ~colony.Report~ في ~main~."},
+		Hints: []string{"الترتيب التصاعدي يسمح بالتخلص من نص مجال البحث كل مرة.", "استعمل مجال half-open للبحث وmap لوحدها للخانات المزارة.", "بص على ترتيب نداء ~depthIndex~ و~flood~ قبل ~colony.Report~ في ~main~."},
 	},
 	ch15LessonCopy{
 		Mission:     "Find the first depth index or -1 when missing, then count open tiles connected to base. The starter reports both results.\n\nDepths are sorted; the map has rocks and isolated pockets.",
@@ -338,7 +338,7 @@ var ch15Lesson154 = ch15MakeLesson("c154",
 	}
 	fmt.Println(lo, hi)
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 2, Arabic: "المجال يبدأ كاملًا.", English: "The range starts full."}, {Line: 3, Arabic: "اختر المنتصف بأمان.", English: "Choose the midpoint safely."}, {Line: 4, Arabic: "القيمة الوسطى هي 5.", English: "The middle value is 5."}, {Line: 5, Arabic: "5 أصغر من الهدف.", English: "5 is below the target."}, {Line: 6, Arabic: "حرّك الحد الأدنى.", English: "Move the lower bound."}, {Line: 8, Arabic: "الحدود الجديدة 2 و3.", English: "The new bounds are 2 and 3."}, {Line: 9, Arabic: "اعرض المجال المتبقي.", English: "Show the remaining range.", Output: "5 0 3\n2 3"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 2, Arabic: "المجال يبدأ كاملًا.", English: "The range starts full."}, {Line: 3, Arabic: "اختار المنتصف بأمان.", English: "Choose the midpoint safely."}, {Line: 4, Arabic: "الـvalue الوسطى هي 5.", English: "The middle value is 5."}, {Line: 5, Arabic: "5 أصغر من الهدف.", English: "5 is below the target."}, {Line: 6, Arabic: "حرّك الحد الأدنى.", English: "Move the lower bound."}, {Line: 8, Arabic: "الحدود الجديدة 2 و3.", English: "The new bounds are 2 and 3."}, {Line: 9, Arabic: "اطبع المجال المتبقي.", English: "Show the remaining range.", Output: "5 0 3\n2 3"}}},
 	ch15LessonExample{ID: "e15-4-try", Imports: []string{"fmt"}, Code: `func run(open []bool, i int) int {
 	if i >= len(open) || !open[i] {
 		return 0
@@ -368,17 +368,17 @@ func main() {
 
 var ch15Lesson155 = ch15MakeLesson("c155",
 	ch15LessonCopy{
-		Mission:     "اخدم طلب الإنقاذ الأعلى أولوية حتى مع وصول موجات جديدة. لو الأولوية اتعادلت، الـID الأصغر يسبق.\n\nابدأ بالدفعة الحالية، واستخدم ~Rescue~، وابعث عدد الطلبات المخدومة مرة واحدة.",
-		Idea:        "الـheap بتحافظ على أفضل عنصر عند الجذر حسب ~Less~. الحزمة بتصلح ترتيبها عند ~heap.Push~ و~heap.Pop~.\n\nالمثال heap لأرقام صغيرة، فالأقل يخرج الأول. مهمة الإنقاذ محتاجة قاعدة ترتيب مختلفة، مع كسر التعادل بالـID.",
+		Mission:     "اخدم طلب الإنقاذ الأعلى أولوية حتى مع وصول موجات جديدة. لو الأولوية اتعادلت، الـID الأصغر يسبق.\n\nابدأ بالدفعة الحالية، واستعمل ~Rescue~، وابعث عدد الطلبات اللي اتخدمت مرة واحدة.",
+		Idea:        "الـheap بتحافظ على أفضل عنصر عند الجذر حسب ~Less~. الـpackage بتصلّح ترتيبها عند ~heap.Push~ و~heap.Pop~.\n\nالمثال heap لأرقام صغيرة، فالأقل بيخرج الأول. مهمة الإنقاذ محتاجة قاعدة ترتيب مختلفة، مع كسر التعادل بالـID.",
 		TryQuestion: "في المثال، إيه الرقم اللي ~heap.Pop~ هترجعه؟",
-		TryReveal:   "الحزمة تختار الجذر حسب Less قبل إخراج العنصر.",
-		Watch:       "- استدعِ ~heap.Push~ و~heap.Pop~ من الحزمة؛ methods وحدها ما تصلحش الترتيب.\n- افحص Len قبل الإزالة.\n- موجة جديدة ممكن تسبق طلبات قديمة حسب الأولوية.",
+		TryReveal:   "الـpackage بتختار الجذر حسب ~Less~ قبل ما تخرج العنصر.",
+		Watch:       "- نادِ ~heap.Push~ و~heap.Pop~ من الـpackage؛ الـmethods لوحدها ما بتصلحش الترتيب.\n- بص على ~Len~ قبل الإزالة.\n- موجة جديدة ممكن تسبق طلبات قديمة حسب الأولوية.",
 		Think:       "المقارنة تحدد ترتيب كل عنصر، والـheap تحافظ عليه مع الإضافة والإزالة. ما تخلطش ترتيب الوصول بأولوية الخدمة.\n\nبعد إنقاذ ناجح، بيانات وصول جديدة تبقى جزءًا من الاختيار التالي.",
-		Check:       "مين يقرر أي قيمة تخرج أولًا من heap؟",
-		Turn:        "راجع methods الموجودة، ثم اضبط قاعدة المقارنة حسب عقد الإنقاذ. شغّل البرنامج وراقب كل Rescue ودفعة الوصول التالية قبل التقرير النهائي.",
-		TryOptions:  []string{"7", "2", "4"}, TryFeedback: []string{"7 مش الأقل في heap المثال.", "Less رتبت الأصغر ليكون أول عنصر.", "4 ما دخلش في heap المثال."},
-		CheckOptions: []string{"ترتيب الوصول", "Less", "آخر عنصر في الشريحة"}, CheckFeedback: []string{"الـheap تعيد الترتيب حسب قاعدتها.", "Less تحدد أي عنصر أولى.", "Pop تزيل طرف الشريحة بعد ترتيب الحزمة."},
-		Hints: []string{"~Less~ في heap تعبر عن أولوية كل عنصر مقارنة بالآخر.", "خلي الحزمة تدير الإضافة والإزالة عشان تحافظ على ترتيب heap.", "افحص ~RescueArrivals()~ بعد نجاح ~Rescue~ وقبل الاختيار التالي."},
+		Check:       "مين يقرر أنهي value تخرج الأول من heap؟",
+		Turn:        "بص على الـmethods الموجودة، وبعدها ظبّط قاعدة المقارنة حسب عقد الإنقاذ. شغّل البرنامج وتابع كل ~Rescue~ ودفعة الوصول اللي بعدها قبل التقرير النهائي.",
+		TryOptions:  []string{"7", "2", "4"}, TryFeedback: []string{"7 مش الأقل في heap المثال.", "~Less~ بترتب الأصغر عشان يبقى أول عنصر.", "4 ما دخلش في heap المثال."},
+		CheckOptions: []string{"ترتيب الوصول", "Less", "آخر عنصر في الـslice"}, CheckFeedback: []string{"الـheap بتعيد الترتيب حسب قاعدتها.", "~Less~ بتحدد أنهي عنصر أولى.", "~Pop~ بتشيل آخر الـslice بعد ترتيب الـpackage."},
+		Hints: []string{"~Less~ في heap بتحدد أولوية كل عنصر مقارنة بالباقي.", "خلي الـpackage تدير الإضافة والإزالة عشان تحافظ على ترتيب الـheap.", "بص على ~RescueArrivals()~ بعد نجاح ~Rescue~ وقبل الاختيار اللي بعده."},
 	},
 	ch15LessonCopy{
 		Mission:     "Serve the highest-priority request as new waves arrive; smaller ID breaks ties.\n\nStart with current arrivals and report the number served once.",
@@ -410,7 +410,7 @@ func main() {
 	heap.Push(q, 2)
 	fmt.Println(heap.Pop(q).(int))
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 1, Arabic: "Scores تخزن أرقامًا.", English: "Scores stores integers."}, {Line: 3, Arabic: "الأصغر له أولوية.", English: "The smaller value has priority."}, {Line: 5, Arabic: "Push تغيّر طول slice.", English: "Push changes the slice length."}, {Line: 8, Arabic: "Pop تزيل الطرف.", English: "Pop removes the end."}, {Line: 13, Arabic: "ابدأ heap فاضية.", English: "Start with an empty heap."}, {Line: 14, Arabic: "أضف الرقم الأول.", English: "Add the first number."}, {Line: 15, Arabic: "أضف الرقم الثاني.", English: "Add the second number."}, {Line: 16, Arabic: "الحزمة تختار الأصغر.", English: "The package selects the smaller value.", Output: "2"}, {Line: 17, Arabic: "الناتج النهائي هو 2.", English: "The final output is 2.", Output: "2"}}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "قبل التنفيذ.", English: "Before execution."}, {Line: 1, Arabic: "Scores بتخزّن أرقام.", English: "Scores stores integers."}, {Line: 3, Arabic: "الأصغر أولى.", English: "The smaller value has priority."}, {Line: 5, Arabic: "Push بتغيّر طول الـslice.", English: "Push changes the slice length."}, {Line: 8, Arabic: "Pop بتشيل الطرف.", English: "Pop removes the end."}, {Line: 13, Arabic: "ابدأ بـheap فاضية.", English: "Start with an empty heap."}, {Line: 14, Arabic: "ضيف أول رقم.", English: "Add the first number."}, {Line: 15, Arabic: "ضيف تاني رقم.", English: "Add the second number."}, {Line: 16, Arabic: "الـpackage بتختار الأصغر.", English: "The package selects the smaller value.", Output: "2"}, {Line: 17, Arabic: "الناتج النهائي 2.", English: "The final output is 2.", Output: "2"}}},
 	ch15LessonExample{ID: "e15-5-try", Imports: []string{"container/heap", "fmt"}, Code: `type Scores []int
 func (s Scores) Len() int { return len(s) }
 func (s Scores) Less(i, j int) bool { return s[i] < s[j] }
@@ -428,7 +428,7 @@ func main() {
 	heap.Push(q, 3)
 	fmt.Println(heap.Pop(q).(int))
 }`,
-		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 3, Arabic: "الأصغر يتقدم في المثال.", English: "The smaller value comes first."}, {Line: 13, Arabic: "ابدأ heap فاضية.", English: "Start with an empty heap."}, {Line: 14, Arabic: "أضف 6 أولًا.", English: "Add 6 first."}, {Line: 15, Arabic: "أضف 3 بعده.", English: "Add 3 next."}, {Line: 16, Arabic: "اطبع العنصر الأصغر.", English: "Print the smaller item.", Output: "3"}, {Line: 17, Arabic: "الناتج النهائي 3.", English: "The final output is 3.", Output: "3"}},
+		Frames: []ch15LessonFrame{{Line: 0, Arabic: "ابدأ قبل أول سطر.", English: "Start before the first line."}, {Line: 3, Arabic: "الأصغر بييجي الأول في المثال.", English: "The smaller value comes first."}, {Line: 13, Arabic: "ابدأ بـheap فاضية.", English: "Start with an empty heap."}, {Line: 14, Arabic: "ضيف 6 الأول.", English: "Add 6 first."}, {Line: 15, Arabic: "ضيف 3 بعده.", English: "Add 3 next."}, {Line: 16, Arabic: "اطبع العنصر الأصغر.", English: "Print the smaller item.", Output: "3"}, {Line: 17, Arabic: "الناتج النهائي 3.", English: "The final output is 3.", Output: "3"}},
 		Sandbox: ch15LessonSandbox(
 			ch15SandboxFrame("الـheap لسه فاضية.", "The heap starts empty.",
 				ch15SandboxRowFor("العناصر", "Items", "—"),

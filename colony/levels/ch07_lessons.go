@@ -15,12 +15,12 @@ func ch07Sandbox(id, text, kind string, config map[string]any) LessonBlock {
 
 var ch07PointFieldsConfig = map[string]any{
 	"fields": []any{
-		map[string]any{"name": ch07Locale("X", "X"), "value": 3, "read": ch07Locale("اقرأ X", "Read X"), "caption": ch07Locale("قرأنا X من النقطة.", "Read X from the point.")},
-		map[string]any{"name": ch07Locale("Y", "Y"), "value": 1, "read": ch07Locale("اقرأ Y", "Read Y"), "caption": ch07Locale("قرأنا Y من النقطة.", "Read Y from the point.")},
+		map[string]any{"name": ch07Locale("X", "X"), "value": 3, "read": ch07Locale("اقرا X", "Read X"), "caption": ch07Locale("قرينا X من النقطة.", "Read X from the point.")},
+		map[string]any{"name": ch07Locale("Y", "Y"), "value": 1, "read": ch07Locale("اقرا Y", "Read Y"), "caption": ch07Locale("قرينا Y من النقطة.", "Read Y from the point.")},
 	},
 	"labels": map[string]any{
 		"object":  ch07Locale("حقول Point", "Point fields"),
-		"output":  ch07Locale("القيمة المقروءة", "Read value"),
+		"output":  ch07Locale("الـvalue اللي اتقرت", "Read value"),
 		"waiting": ch07Locale("اختار حقل تقراه.", "Choose a field to read."),
 	},
 }
@@ -36,7 +36,7 @@ var ch07NavPointerConfig = map[string]any{
 	"captions": map[string]any{
 		"ready":   ch07Locale("Nav لسه عند 2.", "Nav starts at 2."),
 		"updated": ch07Locale("الـpointer receiver غيّر الأصل.", "Pointer receiver changed the original."),
-		"reset":   ch07Locale("رجعنا لقيمة Nav الأصلية.", "Nav returned to its starting value."),
+		"reset":   ch07Locale("رجعنا للـvalue الأصلية بتاعة Nav.", "Nav returned to its starting value."),
 	},
 }
 
@@ -74,7 +74,7 @@ var ch07EmbeddedPackConfig = map[string]any{
 
 var ch07RangeQuestionsConfig = map[string]any{
 	"questions": []any{
-		map[string]any{"index": 0, "prompt": ch07Locale("نوع التربة؟", "Soil type?"), "choices": 2, "caption": ch07Locale("range بيدي index وقيمة.", "range gives an index and value.")},
+		map[string]any{"index": 0, "prompt": ch07Locale("نوع التربة؟", "Soil type?"), "choices": 2, "caption": ch07Locale("range بيدي index وvalue.", "range gives an index and value.")},
 		map[string]any{"index": 1, "prompt": ch07Locale("اتجاه الريح؟", "Wind direction?"), "choices": 0, "caption": ch07Locale("راجع Choices قبل أي index.", "Check Choices before indexing.")},
 	},
 	"labels": map[string]any{
@@ -114,13 +114,13 @@ func ch07Walkthrough(id, text, code string, exampleID string, frames []LessonFra
 var ch07WaypointsArabic = []LessonStep{
 	{
 		ID: "c71.mission-step", Title: "المهمة",
-		Blocks: []LessonBlock{ch07Markdown("c71.mission", "عدّي على نقاط التفتيش حسب ترتيب ~colony.Waypoints()~.\n\nكل نقطة ~colony.Point~ فيها الإحداثيين ~X~ و~Y~.\n\nالـstarter فيه دالة وصول ناقصة، ووصل لأول نقطة بالفعل.")},
+		Blocks: []LessonBlock{ch07Markdown("c71.mission", "عدّي على نقاط التفتيش حسب ترتيب ~colony.Waypoints()~.\n\nكل نقطة ~colony.Point~ فيها الإحداثيين ~X~ و~Y~.\n\nالـstarter فيه function وصول ناقصة، ووصل لأول نقطة بالفعل.")},
 	},
 	{
 		ID: "c71.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{ch07Walkthrough(
 			"c71.point-example",
-			"الـstruct اسم واحد بيجمع fields مرتبطة. كل نقطة قيمة واحدة، و~p.X~ يقرأ الإحداثي X.\n\nالـuppercase في اسم field بيخليه exported للـpackages التانية.\n\nكل عنصر في الـslice نقطة كاملة. في loop، ~i~ هو index القائمة و~p~ قيمة النقطة.\n\nأسماء الحقول لازم تطابق التعريف. الحروف الكبيرة جزء من الاسم، وهي كمان بتخلي field متاحة برّه package.\n\nاتجاه الوصول يتحدد من الإحداثيين.",
+			"الـstruct بتجمع fields مرتبطة تحت اسم واحد. كل نقطة عبارة عن value واحدة، و~p.X~ بيقرا الإحداثي X.\n\nالـuppercase في اسم field بيخليه exported للـpackages التانية.\n\nكل عنصر في الـslice نقطة كاملة. في loop، ~i~ هو index العنصر و~p~ هي الـvalue اللي عند الـindex ده.\n\nأسماء الحقول لازم تطابق التعريف. الحروف الكبيرة جزء من الاسم، وهي كمان بتخلي field متاحة برّه package.\n\nاتجاه الوصول يتحدد من الإحداثيين.",
 			`type Point struct { X, Y int }
 func main() {
 	p := Point{X: 3, Y: 1}
@@ -131,7 +131,7 @@ func main() {
 				{Line: 0, Caption: "قبل التنفيذ."},
 				{Line: 1, Caption: "النوع يجمع الإحداثيين."},
 				{Line: 3, Caption: "p فيها X=3 وY=1.", Variables: []LessonVariable{{Name: "p", Value: "{3 1}"}}},
-				{Line: 4, Caption: "اقرأ field من النقطة.", Variables: []LessonVariable{{Name: "p", Value: "{3 1}"}}, Output: "3 1"},
+				{Line: 4, Caption: "اقرا field من النقطة.", Variables: []LessonVariable{{Name: "p", Value: "{3 1}"}}, Output: "3 1"},
 			},
 		)},
 	},
@@ -140,7 +140,7 @@ func main() {
 		Blocks: []LessonBlock{
 			ch07Question("c71.predict-field", "توقّع الناتج:\n\n~~~go\ntype Point struct { X, Y int }\nfunc main() {\n\tp := Point{X: 2, Y: 1}\n\tfmt.Println(p.X)\n}\n~~~", []string{"1", "2", "{2 1}"}, 1, []string{
 				"ده حقل Y، مش الحقل المطلوب.",
-				"قيمة الحقل X هي 2.",
+				"الـvalue في الحقل X هي 2.",
 				"الطباعة طلبت field واحدة، مش النقطة كلها.",
 			}),
 			ch07Walkthrough(
@@ -159,7 +159,7 @@ func main() {
 					{Line: 4, Caption: "الناتج هو X.", Variables: []LessonVariable{{Name: "p", Value: "{2 1}"}}, Output: "2"},
 				},
 			),
-			ch07Sandbox("c71.point-fields", "اضغط field وشوف قيمتها.", "ch07-point-fields", ch07PointFieldsConfig),
+			ch07Sandbox("c71.point-fields", "اضغط field وشوف الـvalue بتاعتها.", "ch07-point-fields", ch07PointFieldsConfig),
 		},
 	},
 	{
@@ -169,9 +169,9 @@ func main() {
 	{
 		ID: "c71.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch07Markdown("c71.plan", "فكّر بالمراحل: اقرأ القائمة، حدّد نقطة الوصول، اختر اتجاه الحركة، ثم راجع مكان الدرون.\n\nالإحداثي ممكن يزيد أو يقل حسب مكان النقطة. راجع نقطة البداية كمان."),
+			ch07Markdown("c71.plan", "فكّر بالمراحل: اقرا الـslice، حدّد نقطة الوصول، اختر اتجاه الحركة، ثم راجع مكان الدرون.\n\nالإحداثي ممكن يزيد أو يقل حسب مكان النقطة. راجع نقطة البداية كمان."),
 			ch07Question("c71.range-index", "في ~for i, p := range points~، ~i~ بيمثل إيه؟", []string{"ترتيب النقطة في الـslice", "إحداثي X", "عدد حركات الدرون"}, 0, []string{
-				"range بيدي index العنصر وقيمته.",
+				"range بيدي index العنصر والـvalue اللي عنده.",
 				"إحداثي X موجود جوه p.",
 				"عدد الحركات بيتحدد من المسافة.",
 			}),
@@ -258,13 +258,13 @@ func main() {
 var ch07NavigationArabic = []LessonStep{
 	{
 		ID: "c72.mission-step", Title: "المهمة",
-		Blocks: []LessonBlock{ch07Markdown("c72.mission", "احصد كريستالات ~colony.Targets()~ بس.\n\nفي كريستالات تانية للتشتيت؛ سيبها حتى لو عدّيت عليها.\n\nالـstarter فيه ~Nav~ و~GoTo~ ناقصة، وبيبدأ من قائمة الأهداف.")},
+		Blocks: []LessonBlock{ch07Markdown("c72.mission", "احصد كريستالات ~colony.Targets()~ بس.\n\nفي كريستالات تانية للتشتيت؛ سيبها حتى لو عدّيت عليها.\n\nالـstarter فيه ~Nav~ و~GoTo~ ناقصة، وبيبدأ بـslice الأهداف.")},
 	},
 	{
 		ID: "c72.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{ch07Walkthrough(
 			"c72.pointer-method",
-			"الـmethod بتجمع السلوك مع النوع. الـpointer receiver يغيّر نفس قيمة Nav، فحالة الموقع تفضل معاك.\n\nالـreceiver بييجي قبل اسم الـmethod في التعريف.\n\nالنداء بـ~nav.Step()~ يبيّن إن السلوك تابع للنوع، والـpointer يخلي التعديل على القيمة الأصلية.",
+			"الـmethod بتجمع السلوك مع النوع. الـpointer receiver بيعدّل نفس الـvalue بتاعة Nav، فحالة الموقع تفضل معاك.\n\nالـreceiver بييجي قبل اسم الـmethod في التعريف.\n\nالنداء بـ~nav.Step()~ يبيّن إن السلوك تابع للنوع، والـpointer يخلي التعديل على الـvalue الأصلية.",
 			`type Nav struct { X int }
 func (n *Nav) Step() { n.X++ }
 func main() {
@@ -286,13 +286,13 @@ func main() {
 		ID: "c72.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{
 			ch07Question("c72.predict-receiver", "توقّع الناتج بعد ~g.Add()~:\n\n~~~go\ntype Gauge struct { N int }\nfunc (g *Gauge) Add() { g.N++ }\nfunc main() {\n\tg := Gauge{N: 4}\n\tg.Add()\n\tfmt.Println(g.N)\n}\n~~~", []string{"4", "5", "0"}, 1, []string{
-				"الـpointer receiver يغيّر القيمة الأصلية.",
+				"الـpointer receiver يغيّر الـvalue الأصلية.",
 				"الزيادة ترفع N من 4 إلى 5.",
-				"Gauge تبدأ بـ4، مش بالقيمة الصفرية.",
+				"Gauge بتبدأ بـ4، مش بالـzero value.",
 			}),
 			ch07Walkthrough(
 				"c72.receiver-reveal",
-				"تابع قيمة Gauge قبل النداء وبعده.",
+				"تابع الـvalue بتاعة Gauge قبل النداء وبعده.",
 				`type Gauge struct { N int }
 func (g *Gauge) Add() { g.N++ }
 func main() {
@@ -304,11 +304,11 @@ func main() {
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التنفيذ."},
 					{Line: 4, Caption: "Gauge تبدأ عند 4.", Variables: []LessonVariable{{Name: "g.N", Value: "4"}}},
-					{Line: 5, Caption: "Add زوّدت القيمة.", Variables: []LessonVariable{{Name: "g.N", Value: "5"}}},
+					{Line: 5, Caption: "Add زوّدت الـvalue.", Variables: []LessonVariable{{Name: "g.N", Value: "5"}}},
 					{Line: 6, Caption: "الناتج هو 5.", Variables: []LessonVariable{{Name: "g.N", Value: "5"}}, Output: "5"},
 				},
 			),
-			ch07Sandbox("c72.nav-pointer", "حرّك Nav وشوف القيمة الأصلية.", "ch07-nav-pointer", ch07NavPointerConfig),
+			ch07Sandbox("c72.nav-pointer", "حرّك Nav وشوف الـvalue الأصلية.", "ch07-nav-pointer", ch07NavPointerConfig),
 		},
 	},
 	{
@@ -318,9 +318,9 @@ func main() {
 	{
 		ID: "c72.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch07Markdown("c72.plan", "مراحل التفكير: خُد هدف من القائمة، حدّد الوصول له، نفّذ الحصاد المقصود، ثم تابع الهدف التالي.\n\nخلّي تمثيل المكان مواكب للحركة. قارن الهدف بالموقع الحالي، مش بأول الخريطة كل مرة.\n\nالحركة الفعلية هي المرجع؛ راجع قيم Nav بعد نداءات الحركة. راجع موقع الدرون بعد الحركة مباشرة في كل خطوة."),
-			ch07Question("c72.receiver-kind", "method بتغيّر حقول ~Nav~؛ أنهي receiver يناسبها؟", []string{"~Nav~ بالقيمة", "~*Nav~ بالـpointer", "الموضوعان زي بعض"}, 1, []string{
-				"value receiver يشتغل على نسخة من القيمة.",
+			ch07Markdown("c72.plan", "مراحل التفكير: خُد هدف من الـslice، حدّد الوصول له، نفّذ الحصاد المقصود، ثم تابع الهدف التالي.\n\nخلّي تمثيل المكان مواكب للحركة. قارن الهدف بالموقع الحالي، مش بأول الخريطة كل مرة.\n\nالحركة الفعلية هي المرجع؛ راجع الـvalues بتاعة Nav بعد نداءات الحركة. راجع موقع الدرون بعد الحركة مباشرة في كل خطوة."),
+			ch07Question("c72.receiver-kind", "method بتغيّر حقول ~Nav~؛ أنهي receiver يناسبها؟", []string{"~Nav~ بالـvalue", "~*Nav~ بالـpointer", "الموضوعان زي بعض"}, 1, []string{
+				"الـvalue receiver بيشتغل على نسخة من الـvalue.",
 				"pointer receiver يقدر يعدّل Nav نفسها.",
 				"الـreceiver بيغيّر سلوك التعديل.",
 			}),
@@ -489,7 +489,7 @@ func main() {
 			ch07Question("c73.greedy-guarantee", "هل أقرب هدف دلوقتي يضمن أقصر مسار كامل؟", []string{"أيوه، دايماً", "لأ، مش مضمون", "بس لو الأهداف عشوائية"}, 1, []string{
 				"قرار واحد محلي مش كفاية لضمان المسار كله.",
 				"الاختيار المحلي قد يترك ترتيباً أطول بعده.",
-				"عشوائية ترتيب القائمة لا تعطي ضماناً.",
+				"ترتيب الـslice عشوائي، وده مش ضمان.",
 			}),
 		},
 	},
@@ -592,13 +592,13 @@ func main() {
 var ch07CompositeArabic = []LessonStep{
 	{
 		ID: "c74.mission-step", Title: "المهمة",
-		Blocks: []LessonBlock{ch07Markdown("c74.mission", "اقرأ إجمالي الفاتورة وعدد الطاقم من ~colony.Invoice()~.\n\nاستخدم ~Ledger~ embedded جوه ~CrewUnit~، وmethod ترجع slice بالأنصبة.\n\nابعت التقرير مرة واحدة، وحافظ على إجمالي الـcents.")},
+		Blocks: []LessonBlock{ch07Markdown("c74.mission", "اقرا إجمالي الفاتورة وعدد الطاقم من ~colony.Invoice()~.\n\nاستخدم ~Ledger~ embedded جوه ~CrewUnit~، وmethod بترجّع slice بالأنصبة.\n\nابعت التقرير مرة واحدة، وحافظ على إجمالي الـcents.")},
 	},
 	{
 		ID: "c74.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{ch07Walkthrough(
 			"c74.embedding-method",
-			"الـembedding يخلّي field النوع الداخلي ظاهرة بالاسم مباشرة. method القراءة تقدر تستخدم الحقل المرقّى.\n\nالنوع الخارجي لسه شايل قيمة النوع الداخلي؛ ده مش inheritance ولا copy منفصلة.\n\nلو field names اتعارضت، المسار الكامل يوضح أي قيمة تقصد.\n\nالـvalue receiver يستقبل نسخة؛ يناسب method قراءة زي Count.\n\nما تعتمدش عليه لحفظ تعديل على الأصل.",
+			"الـembedding بيخلّي fields النوع الداخلي ظاهرة بالاسم مباشرة. method القراءة تقدر تستخدم الحقل المرقّى.\n\nالنوع الخارجي لسه شايل الـvalue بتاعة النوع الداخلي؛ ده مش inheritance ولا copy منفصلة.\n\nلو field names اتعارضت، المسار الكامل يوضح أنهي value تقصد.\n\nالـvalue receiver بيستقبل نسخة؛ يناسب method قراءة زي Count.\n\nما تعتمدش عليه لحفظ تعديل على الأصل.",
 			`type Cargo struct { Units int }
 type Ship struct { Cargo }
 func (s Ship) Count() int { return s.Units }
@@ -610,16 +610,16 @@ func main() {
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
 				{Line: 2, Caption: "Ship يضم Cargo بالـembedding."},
-				{Line: 4, Caption: "Count تقرأ القيمة المرقّاة."},
+				{Line: 4, Caption: "Count بتقرا الـvalue المرقّاة."},
 				{Line: 6, Caption: "ship فيها 3 وحدات.", Variables: []LessonVariable{{Name: "ship.Units", Value: "3"}}},
-				{Line: 7, Caption: "الـmethod تطبع 3.", Variables: []LessonVariable{{Name: "ship.Units", Value: "3"}}, Output: "3"},
+				{Line: 7, Caption: "الـmethod بتطبع 3.", Variables: []LessonVariable{{Name: "ship.Units", Value: "3"}}, Output: "3"},
 			},
 		)},
 	},
 	{
 		ID: "c74.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{
-			ch07Question("c74.predict-promoted", "توقّع ناتج ~fmt.Println(r.Items)~:\n\n~~~go\ntype Pack struct { Items int }\ntype Rover struct { Pack }\nfunc main() {\n\tr := Rover{Pack: Pack{Items: 4}}\n\tfmt.Println(r.Items)\n}\n~~~", []string{"0", "4", "خطأ compile"}, 1, []string{
+			ch07Question("c74.predict-promoted", "توقّع ناتج ~fmt.Println(r.Items)~:\n\n~~~go\ntype Pack struct { Items int }\ntype Rover struct { Pack }\nfunc main() {\n\tr := Rover{Pack: Pack{Items: 4}}\n\tfmt.Println(r.Items)\n}\n~~~", []string{"0", "4", "compile error"}, 1, []string{
 				"Rover فيه Pack، وItems مش صفر.",
 				"Items field مضمّنة ومقروءة باسم مباشر.",
 				"الـembedding يسمح بقراءة field المرقّاة.",
@@ -651,11 +651,11 @@ func main() {
 	{
 		ID: "c74.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch07Markdown("c74.plan", "فكّر بالمراحل: اقرأ القيم، مثّلها بأنواع واضحة، اجمع المنطق في method، ثم راجع المجموع النهائي.\n\nجرّب أيضاً حالة إجمالي صفر وفرد واحد."),
+			ch07Markdown("c74.plan", "فكّر بالمراحل: اقرا الـvalues، مثّلها بأنواع واضحة، اجمع المنطق في method، ثم راجع المجموع النهائي.\n\nجرّب كمان حالة إجمالي صفر وفرد واحد."),
 			ch07Question("c74.remainder", "ما معنى ~17 % 5~؟", []string{"ناتج القسمة 3", "الباقي 2", "الناتج 3.4"}, 1, []string{
 				"القسمة الصحيحة تستخدم / للحصول على 3.",
 				"عامل % يعيد المتبقي بعد القسمة.",
-				"Go لا يحوّل القسمة الصحيحة لعشرية هنا.",
+				"Go مش بيحوّل القسمة الصحيحة لرقم عشري هنا.",
 			}),
 		},
 	},
@@ -750,7 +750,7 @@ var ch07CrewExamArabic = []LessonStep{
 		ID: "c75.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{ch07Walkthrough(
 			"c75.question-struct",
-			"كل Question struct فيها prompt وslice اختيارات. range بيدي index السؤال وقيمة منه.\n\nالـindex بيحدد رقم السؤال الأصلي، والـChoices لها indexes خاصة بيها.\n\nترتيب الاختيارات بيتغير؛ اقرأ النصوص بدل ما تفترض رقم ثابت. رقم الاختيار يبدأ من صفر.",
+			"الـstruct بتاعة Question فيها prompt وslice اختيارات. range بيدي index السؤال والـvalue بتاعته.\n\nالـindex بيحدد رقم السؤال الأصلي، والـChoices لها indexes خاصة بيها.\n\nترتيب الاختيارات بيتغير؛ اقرا النصوص بدل ما تفترض رقم ثابت. رقم الاختيار بيبدأ من صفر.",
 			`type Question struct {
 	Prompt string
 	Choices []string
@@ -765,7 +765,7 @@ func main() {
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
 				{Line: 1, Caption: "Question تجمع prompt واختيارات."},
-				{Line: 6, Caption: "القائمة فيها سؤال واحد."},
+				{Line: 6, Caption: "الـslice فيها سؤال واحد."},
 				{Line: 7, Caption: "i هو index السؤال.", Variables: []LessonVariable{{Name: "i", Value: "0"}, {Name: "q.Prompt", Value: "ground?"}}},
 				{Line: 8, Caption: "للسؤال اختياران.", Variables: []LessonVariable{{Name: "i", Value: "0"}, {Name: "q.Prompt", Value: "ground?"}}, Output: "0 ground? 2"},
 			},
@@ -775,13 +775,13 @@ func main() {
 		ID: "c75.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{
 			ch07Question("c75.predict-range", "توقّع سطور الطباعة:\n\n~~~go\nfunc main() {\n\tlabels := []string{\"A\", \"B\"}\n\tfor i, label := range labels {\n\t\tfmt.Println(i, label)\n\t}\n}\n~~~", []string{"0 A ثم 1 B", "1 A ثم 2 B", "A ثم B بلا أرقام"}, 0, []string{
-				"index يبدأ من صفر، وبيرافق قيمة كل عنصر.",
+				"index بيبدأ من صفر، وبيمشي مع الـvalue بتاعة كل عنصر.",
 				"index مش بيبدأ من واحد.",
-				"range تقدر ترجع index والقيمة معاً.",
+				"range بيرجّع الـindex والـvalue مع بعض.",
 			}),
 			ch07Walkthrough(
 				"c75.range-reveal",
-				"تابع index والقيمة في كل لفة.",
+				"تابع الـindex والـvalue في كل لفة.",
 				`func main() {
 	labels := []string{"A", "B"}
 	for i, label := range labels {
@@ -801,15 +801,15 @@ func main() {
 	},
 	{
 		ID: "c75.watch-step", Title: "خد بالك",
-		Blocks: []LessonBlock{ch07Markdown("c75.watch", "- افحص ~len(q.Choices)~ قبل أي index؛ القائمة ممكن تكون فاضية.\n- ~Answer(i, choice)~ ترجع صلاحية الأرقام، مش صحة المعلومة.")},
+		Blocks: []LessonBlock{ch07Markdown("c75.watch", "- افحص ~len(q.Choices)~ قبل أي index؛ الـslice ممكن تكون فاضية.\n- ~Answer(i, choice)~ بترجّع صلاحية الأرقام، مش صحة المعلومة.")},
 	},
 	{
 		ID: "c75.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch07Markdown("c75.plan", "مراحل التفكير: اقرأ بيانات السؤال، قرر هل هو قابل للإجابة، اختار من بياناته، ثم سجّل النتيجة واحسب النسبة.\n\nاحتفظ بالـindex الأصلي من range."),
-			ch07Question("c75.empty-choices", "سؤال اختياراته فاضية؛ إيه التصرف الآمن؟", []string{"اقرأ ~Choices[0]~", "تخطّى السؤال", "اعتبر الإجابة صحيحة"}, 1, []string{
+			ch07Markdown("c75.plan", "مراحل التفكير: اقرا بيانات السؤال، قرر هل ينفع يتجاوب، اختار من بياناته، ثم سجّل النتيجة واحسب النسبة.\n\nاحتفظ بالـindex الأصلي من range."),
+			ch07Question("c75.empty-choices", "سؤال اختياراته فاضية؛ إيه التصرف الآمن؟", []string{"اقرا ~Choices[0]~", "تخطّى السؤال", "اعتبر الإجابة صحيحة"}, 1, []string{
 				"مفيش عنصر عند index صفر في slice فاضية.",
-				"التخطي يمنع الفهرسة وإرسال إجابة غير موجودة.",
+				"التخطي يمنع استخدام الـindex لإرسال إجابة مش موجودة.",
 				"السؤال الفاضي ماقدّمش إجابة نقارنها.",
 			}),
 		},

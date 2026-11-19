@@ -87,7 +87,7 @@
     "frames": [
       {
         "caption": {
-          "ar": "اقرأ صف العناوين.",
+          "ar": "اقرا صف العناوين.",
           "en": "Read the header row."
         },
         "rows": [
@@ -152,7 +152,7 @@
           },
           {
             "label": {
-              "ar": "المخزن",
+              "ar": "الـbuffer",
               "en": "Buffer"
             },
             "value": "[_, _]"
@@ -168,7 +168,7 @@
       },
       {
         "caption": {
-          "ar": "أول بايت وصل.",
+          "ar": "أول byte وصل.",
           "en": "The first byte arrived."
         },
         "rows": [
@@ -181,7 +181,7 @@
           },
           {
             "label": {
-              "ar": "المخزن",
+              "ar": "الـbuffer",
               "en": "Buffer"
             },
             "value": "[9, _]"
@@ -197,7 +197,7 @@
       },
       {
         "caption": {
-          "ar": "المخزن اكتمل.",
+          "ar": "الـbuffer بقى مليان.",
           "en": "The buffer is full."
         },
         "rows": [
@@ -210,7 +210,7 @@
           },
           {
             "label": {
-              "ar": "المخزن",
+              "ar": "الـbuffer",
               "en": "Buffer"
             },
             "value": "[9, 4]"
@@ -234,7 +234,7 @@
     "frames": [
       {
         "caption": {
-          "ar": "اقرأ جزءًا محدودًا.",
+          "ar": "اقرا جزء محدود.",
           "en": "Read a bounded part."
         },
         "rows": [
@@ -263,7 +263,7 @@
       },
       {
         "caption": {
-          "ar": "اسمح ببايتات أكتر.",
+          "ar": "اسمح بـbytes أكتر.",
           "en": "Allow more bytes."
         },
         "rows": [
@@ -292,7 +292,7 @@
       },
       {
         "caption": {
-          "ar": "اقرأ النص كله.",
+          "ar": "اقرا النص كله.",
           "en": "Read the whole text."
         },
         "rows": [

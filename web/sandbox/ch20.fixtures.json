@@ -25,7 +25,7 @@
     ],
     "labels": {
       "valid": {"ar": "سليم", "en": "valid"},
-      "invalid": {"ar": "فيه خطأ", "en": "invalid"},
+      "invalid": {"ar": "فيه error", "en": "invalid"},
       "causes": {"ar": "الأسباب بالترتيب", "en": "Causes in order"}
     }
   },
@@ -34,13 +34,13 @@
     "frames": [
       {"cursor": "0", "token": {"ar": "لسه مفيش", "en": "not yet"}, "offset": "—", "caption": {"ar": "ابدأ من أول byte.", "en": "Start at the first byte."}},
       {"cursor": "4", "token": "name go_2", "offset": "0", "caption": {"ar": "استهلك الاسم بالكامل.", "en": "Consume the whole name."}},
-      {"cursor": "6", "token": ">", "offset": "5", "caption": {"ar": "تخطّى المسافة واحفظ الرمز.", "en": "Skip space; keep the symbol."}},
+      {"cursor": "6", "token": ">", "offset": "5", "caption": {"ar": "تخطّى المسافة وخزّن الرمز.", "en": "Skip space; keep the symbol."}},
       {"cursor": "8", "token": "number 7", "offset": "7", "caption": {"ar": "سجّل بداية الرقم بالـbyte.", "en": "Record the number's byte offset."}},
       {"cursor": "8", "token": "eof", "offset": "8", "caption": {"ar": "EOF بعد آخر byte.", "en": "EOF follows the final byte."}}
     ],
     "labels": {
       "source": {"ar": "النص", "en": "Input"},
-      "cursor": {"ar": "المؤشر", "en": "Cursor"},
+      "cursor": {"ar": "الـindex", "en": "Cursor"},
       "token": {"ar": "آخر token", "en": "Current token"},
       "offset": {"ar": "offset", "en": "Offset"},
       "previous": {"ar": "السابق", "en": "Previous"},
@@ -53,11 +53,11 @@
       {"expression": "4 + 2 * 3", "value": {"ar": "لسه ما اتحسبتش", "en": "not evaluated"}, "caption": {"ar": "ابدأ بالتعبير كامل.", "en": "Start with the full expression."}},
       {"expression": "2 * 3", "value": "6", "caption": {"ar": "الضرب يرتبط أقوى.", "en": "Multiplication binds more tightly."}},
       {"expression": "4 + 6", "value": "10", "caption": {"ar": "اجمع بعد تقييم الضرب.", "en": "Add after evaluating multiplication."}},
-      {"expression": "10", "value": "10", "caption": {"ar": "التعبير رجّع قيمة.", "en": "The expression returns a value."}}
+      {"expression": "10", "value": "10", "caption": {"ar": "الـexpression رجّع الـvalue.", "en": "The expression returns a value."}}
     ],
     "labels": {
       "expression": {"ar": "التعبير", "en": "Expression"},
-      "value": {"ar": "القيمة", "en": "Value"},
+      "value": {"ar": "الـvalue", "en": "Value"},
       "previous": {"ar": "السابق", "en": "Previous"},
       "next": {"ar": "التالي", "en": "Next"},
       "reset": {"ar": "من الأول", "en": "Reset"}

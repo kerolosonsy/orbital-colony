@@ -10,7 +10,7 @@
         "en": "Current Load"
       },
       "next": {
-        "ar": "نفّذ atomic.Add",
+        "ar": "شغّل atomic.Add",
         "en": "Run atomic.Add"
       },
       "order": {
@@ -26,7 +26,7 @@
         "en": "Add steps"
       },
       "value": {
-        "ar": "قيمة العداد",
+        "ar": "الـvalue بتاعة العداد",
         "en": "Counter value"
       }
     },
@@ -69,11 +69,11 @@
   "ch25-closed-drain": {
     "labels": {
       "channel": {
-        "ar": "قناة الشغل",
+        "ar": "الـchannel بتاعة الشغل",
         "en": "Job channel"
       },
       "close": {
-        "ar": "اقفل القناة",
+        "ar": "اقفل الـchannel",
         "en": "Close channel"
       },
       "closed": {
@@ -81,11 +81,11 @@
         "en": "Closed"
       },
       "drained": {
-        "ar": "الطابور فاضي",
+        "ar": "الـqueue فاضي",
         "en": "Queue drained"
       },
       "empty": {
-        "ar": "مفيش قيم؛ الاستقبال يستنى",
+        "ar": "مفيش values؛ الاستقبال يستنى",
         "en": "No values; receive waits"
       },
       "open": {
@@ -93,11 +93,11 @@
         "en": "Open"
       },
       "queued": {
-        "ar": "لسه فيه قيم",
+        "ar": "لسه فيه values",
         "en": "Values remain queued"
       },
       "receive": {
-        "ar": "استقبل القيمة",
+        "ar": "استقبل الـvalue",
         "en": "Receive value"
       },
       "reset": {
@@ -126,7 +126,7 @@
         "en": "insufficient balance"
       },
       "done": {
-        "ar": "خلصت المعاملات",
+        "ar": "خلصت الـtransactions",
         "en": "Transactions complete"
       },
       "history": {
@@ -327,7 +327,7 @@
         "en": "Advance clock"
       },
       "age": {
-        "ar": "عمر القيمة بالثواني",
+        "ar": "عمر الـvalue بالثواني",
         "en": "Entry age in seconds"
       },
       "expired": {
@@ -339,7 +339,7 @@
         "en": "Fresh"
       },
       "read": {
-        "ar": "اقرأ من الـcache",
+        "ar": "اقرا من الـcache",
         "en": "Read cache"
       },
       "reset": {

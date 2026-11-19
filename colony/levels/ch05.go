@@ -75,7 +75,7 @@ func main() {
 			},
 		},
 		ID: "5-1-functions", Chapter: 5, LessonRevision: 1, Steps: ch05FunctionsArabic, Title: "اكتبها مرة",
-		Goal: "احصد الـ 3 صفوف (24 طحلب) باستخدام دالة إنت كاتبها",
+		Goal: "احصد التلات صفوف (24 طحلب) باستخدام function إنت كاتبها",
 		Par:  65, Gold: 49, MaxTicks: 300,
 		Requires: []string{"func"},
 		Setup: func(w *sim.World) {
@@ -106,7 +106,7 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الـparameters بتنقل المدخلات المتغيرة لدالة واحدة قابلة لإعادة الاستخدام.",
+			"الـparameters بتنقل المدخلات المتغيرة لـfunction واحدة تقدر تستخدمها أكتر من مرة.",
 			"افصل شغل الصف المتكرر عن الانتقالات في main.",
 			"راجع توقيع ~harvestRow~ وخلي كل نداء يطابق أنواع الـparameters.",
 		},
@@ -265,7 +265,7 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الـerror الراجع بيقولك إذا العملية طلعت نتيجة ينفع تستخدمها.",
+			"الـerror الراجع بيقولك لو العملية رجّعت value ينفع تستخدمها.",
 			"افصل معالجة الفشل عن تسجيل الكريستال اللي اتجمع بنجاح.",
 			"راجع النتيجتين من ~TryHarvest~ وقارن الأسباب بـ~errors.Is~.",
 		},
@@ -329,7 +329,7 @@ func main() {
 	// Build the report described in the lesson.
 }
 `
-	add(&Level{ID: "5-3-fault-log", Chapter: 5, LessonRevision: 1, Steps: ch05FaultArabic, Title: "سجل الأعطال", Goal: "لف الأعطال وابعت كل كود وبعدهم سجل الأسباب",
+	add(&Level{ID: "5-3-fault-log", Chapter: 5, LessonRevision: 1, Steps: ch05FaultArabic, Title: "سجل الأعطال", Goal: "لفّ كل error وابعت كوده، وبعدها ابعت سجل الأسباب",
 		Requires: []string{"errwrap"}, Bridge: []int{2, 14},
 		Par: 0, Gold: 0, MaxTicks: 100,
 		Starter: faultLogStarter, Lesson: `# الخطأ يحتفظ بسببه 🧰
@@ -386,7 +386,7 @@ wrapped := fmt.Errorf("relay: %v", cause)
 ## المهمة
 افحص كل الوحدات. لكل error لفّه بصيغة ~fmt.Errorf("bay %d: %w", i, err)~. اتأكد بـ ~errors.Is~ إن السبب محفوظ، وابعت ~colony.FaultCode(wrapped)~ كتقرير فوراً، من غير index أو بادئة.
 
-جمّع بـ ~all = errors.Join(all, wrapped)~. بعد الحلقة ابعت ~all~ نفسه كتقرير أخير لو مش nil؛ Report هيعرضه كنص متعدد السطور. في كل تشغيل فيه وحدات سليمة وعطلين على الأقل، ومفيش تقارير للوحدات السليمة.`, Hints: []string{"~%w~ يضيف سياقًا للخطأ مع الاحتفاظ بسببه الأصلي.", "افصل الوحدات السليمة عن الأعطال، وحافظ على ترتيب المرور.", "راجع ~colony.FaultCode~ لقراءة الكود من خطأ ملفوف."},
+جمّع بـ ~all = errors.Join(all, wrapped)~. بعد الحلقة ابعت ~all~ نفسه كتقرير أخير لو مش nil؛ Report هيعرضه كنص متعدد السطور. في كل تشغيل فيه وحدات سليمة وعطلين على الأقل، ومفيش تقارير للوحدات السليمة.`, Hints: []string{"~%w~ بيضيف context للـerror وبيحافظ على السبب الأصلي.", "افصل الوحدات السليمة عن الـerrors، وخلي ترتيب المرور زي ما هو.", "راجع ~colony.FaultCode~ علشان تقرأ الكود من error ملفوف."},
 		En: &LevelText{LessonRevision: 1, Steps: ch05FaultEnglish, Title: "Fault Log", Goal: "Wrap faults, report each code, then the combined causes", Starter: faultLogStarter, Lesson: `# Keep the Cause Inside the Error 🧰
 
 Crystal Storm taught us that errors are values and ~errors.Is~ recognizes known causes. Now add the fault location without losing the original cause.
@@ -549,7 +549,7 @@ func attempt() {
 النداء ده مش هيمسك panic اللي بعدها. وكمان لو أخّرت ~Undock~ لآخر main، المحاولات مش هتتفك واحدة واحدة. سجّل التنضيف جوه دالة المحاولة بعد Dock مباشرة.
 
 ## المهمة
-كرّر عدد ~DrillAttempts()~ من المحاولات. كل واحدة تعمل Dock وDrill، وتضمن Undock مرة واحدة مع النجاح أو panic. بعد ما الكل يخلص، اتحرك East مرة واحدة، وابعت تقرير واحد ~ready:N~، حيث N عدد المحاولات اللي قريته. متبعتش تقارير تانية؛ رسائل التشخيص ينفع تطبعها بـ Println.`, Hints: []string{"~defer~ ينفذ التنضيف عند خروج function حتى لو حصل panic.", "خلّي المحاولة بحدود واضحة عشان اللي بيناديها يقدر يكمل.", "راجع موضع ~recover~ داخل الـdeferred function وسطر Dock في starter."},
+كرّر عدد ~DrillAttempts()~ من المحاولات. كل واحدة تعمل Dock وDrill، وتضمن Undock مرة واحدة مع النجاح أو panic. بعد ما الكل يخلص، اتحرك East مرة واحدة، وابعت تقرير واحد ~ready:N~، حيث N عدد المحاولات اللي قريته. متبعتش تقارير تانية؛ رسائل التشخيص ينفع تطبعها بـ Println.`, Hints: []string{"~defer~ بينفّذ التنضيف لما الـfunction تخلص، حتى لو حصل panic.", "خلّي كل محاولة جوه حدود واضحة علشان اللي بيناديها يقدر يكمل.", "راجع مكان ~recover~ جوه الـdeferred function وسطر Dock في الـstarter."},
 		En: &LevelText{LessonRevision: 1, Steps: ch05UndockEnglish, Title: "Undocking", Goal: "Undock after every drill attempt and continue after panic", Starter: undockStarter, Lesson: `# Even When Drilling Fails 🔧
 
 Some faults do not return errors: ~Drill~ can ~panic~, interrupting normal execution. The drone needs a small safety boundary that guarantees cleanup and lets the mission continue.
@@ -646,7 +646,7 @@ func main() {
 	// Build the report described in the lesson.
 }
 `
-	add(&Level{ID: "5-5-command-table", Chapter: 5, LessonRevision: 1, Steps: ch05CommandArabic, Title: "لوحة الأوامر", Goal: "اختار دوال الأوامر ومرّرها وعدّ الناجح بـ closure",
+	add(&Level{ID: "5-5-command-table", Chapter: 5, LessonRevision: 1, Steps: ch05CommandArabic, Title: "لوحة الأوامر", Goal: "اختار command functions ومرّرها وعدّ المعروف منها بـclosure",
 		Requires: []string{"funcvalue"}, Bridge: []int{11},
 		Par: 10, Gold: 10, MaxTicks: 30,
 		Starter: commandTableStarter, Lesson: `# الدالة ممكن تبقى قيمة 🎛️
@@ -721,7 +721,7 @@ run(beep()) // غلط
 ## المهمة
 اكتب دالة بتاخد اسم الأمر وترجّع ~func()~، واختار جواها بـ switch: ~moss~ تبعت ~moss=N~ من ~Count(Moss)~، و~crystal~ تبعت ~crystal=N~، و~wait~ تعمل ~colony.Wait()~ وبعدين تبعت ~wait~.
 
-مرّر الدوال لدالة تنفيذ. استخدم closure واحدة بتلتقط عدّاد الأوامر المعروفة، ومرّرها للتنفيذ بعد كل أمر معروف. للأمر المجهول، حتى الفاضي، ابعت error بصيغة ~unknown:command~ وكمّل من غير زيادة العدّاد. النتيجة تقرير لكل أمر بالترتيب، وبعدهم تقرير أخير بالعدّاد كعدد صحيح. التكرارات كلها بتتنفّذ؛ شيل مسافات الأطراف، لكن ~WAIT~ مش ~wait~.`, Hints: []string{"اسم الدالة من غير أقواس هو قيمة ممكن تخزينها وتمريرها.", "افصل اختيار الأمر عن لحظة التنفيذ، وخلي النوع متوافقًا.", "راجع ~Order(i)~ ونطاق المتغير اللي الـclosure محتاجة تفتكره."},
+مرّر الـfunctions لـfunction تنفيذ. استخدم closure واحدة بتلتقط عدّاد الأوامر المعروفة، ومرّرها للتنفيذ بعد كل أمر معروف. للأمر المجهول، حتى الفاضي، ابعت error بصيغة ~unknown:command~ وكمّل من غير ما تزود العدّاد. النتيجة تقرير لكل أمر بالترتيب، وبعدهم تقرير أخير بالعدّاد كعدد صحيح. كل التكرارات بتتنفّذ؛ شيل مسافات الأطراف، لكن ~WAIT~ مش ~wait~.`, Hints: []string{"اسم الـfunction من غير أقواس هو value تقدر تخزّنها وتمرّرها.", "افصل اختيار الأمر عن وقت التنفيذ، وخلي النوع متوافق.", "راجع ~Order(i)~ ونطاق المتغير اللي الـclosure محتاجة تفتكره."},
 		En: &LevelText{LessonRevision: 1, Steps: ch05CommandEnglish, Title: "Command Table", Goal: "Choose and pass command functions, counting valid commands with a closure", Starter: commandTableStarter, Lesson: `# A Function Can Be a Value 🎛️
 
 A function does not have to run when you choose it. You can store it, pass it to another function, or return it. The command panel will choose work first and execute it later.

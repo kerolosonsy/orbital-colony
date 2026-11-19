@@ -88,7 +88,7 @@ return out.String(),nil // Ignores an open state at EOF
 Implement ~RenderBulletin(source string) (string,error)~ using strings.Builder. Only ~[alert]text[/alert]~ becomes <strong>text</strong> and ~[code]text[/code]~ becomes <code>text</code>. Content may be empty; recognized tags cannot nest, including inside code. Mismatched or unexpected closes and EOF inside a tag return "",error without partial HTML. All other syntax is literal. Apply html.EscapeString exactly once to every user-text fragment. Newlines outside tags become ~<br>
 ~; inside tags retain literal newlines. Preserve all other whitespace and bytes; add no trailing newline. Empty input returns "",nil. The third star covers large Unicode multiline text without a Scanner limit. No Report.
 `, Hints: []string{"Track plain text or tag content as state.", "Write your HTML and escape each user-text fragment once.", "At EOF, check for an open tag before returning output."}, Files: []LabFile{{Name: "main.go", Starter: bulletinStarter}}}, Kind: "lab", Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: bulletinStarterAr}}, Lab: &Lab{ReqFile: "main.go", Hidden: bulletinHidden, Bonus: true}})
-	add(&Level{ID: "20-2-validators", Chapter: 20, LessonRevision: 1, Steps: ch20ValidatorArabic, Title: "المدققين", Goal: "افحص بطاقة الطاقم واجمع الأخطاء مع الاحتفاظ بأسبابها", Requires: []string{"errwrap"}, Bridge: []int{14},
+	add(&Level{ID: "20-2-validators", Chapter: 20, LessonRevision: 1, Steps: ch20ValidatorArabic, Title: "المدققين", Goal: "افحص بطاقة الطاقم واجمع الـerrors مع الاحتفاظ بأسبابها", Requires: []string{"errwrap"}, Bridge: []int{14},
 		Lesson: `# بطاقة الطاقم تتراجع كلها
 
 ## قبل ما تكتب
@@ -133,7 +133,7 @@ regexp.MustCompile("[0-9]+").MatchString(phone) // substring مش عقد كام�
 
 ## المهمة
 نفّذ CheckAddress وCheckRadio وCheckLaunchDate: كل واحدة (string) error ومستقلة؛ الصالح nil والباطل خطأ ملفوف حوالين ErrAddress أو ErrRadio أو ErrLaunchDate. العنوان @ واحدة، local غير فاضي ومسموح Unicode من غير unicode.IsSpace؛ domain مطابق ~[A-Za-z0-9]+(\.[A-Za-z0-9]+)+~ بالكامل. مفيش trim ولا قواعد RFC إضافية. الراديو + وبعدها7 لـ12 رقم ASCII بالظبط من غير فواصل. التاريخ صالح ومطابق تماماً ~2006/01/02~. ValidateCrewCard(CrewCard) error تجمع التلات فحوص بـerrors.Join حتى لو أكتر من حقل فشل. InvalidFields(error) []string تستخدم errors.Is وترجع كل التصنيفات المعروفة مرة واحدة بترتيب ~address,radio,launchDate~؛ nil أو خطأ غريب يرجع طول0. مدخلات العنوان UTF-8 صالحة؛ نص الخطأ حر، السبب جزء من العقد. مفيش Report.
-`, Hints: []string{"خلي كل validator تفحص حقل واحد وترجع sentinel السبب.", "استخدم %w وJoin، وبعدها errors.Is للتصنيف.", "افحص الحقول بالترتيب الثابت المعلن."},
+`, Hints: []string{"خلي كل validator تفحص حقل واحد وترجّع sentinel السبب.", "استخدم %w وJoin، وبعدها errors.Is للتصنيف.", "افحص الحقول بالترتيب الثابت المعلن."},
 		En: &LevelText{LessonRevision: 1, Steps: ch20ValidatorEnglish, Title: "Validators", Goal: "Validate a crew enrollment card and aggregate classified causes", Lesson: `# Review the Whole Crew Card
 
 ## Before you write
@@ -179,7 +179,7 @@ regexp.MustCompile("[0-9]+").MatchString(phone) // Substring, not whole contract
 ## Your mission
 Implement independent ~CheckAddress~, ~CheckRadio~, and ~CheckLaunchDate~, each (string) error: valid input returns nil; invalid input wraps ErrAddress, ErrRadio, or ErrLaunchDate respectively. Address has exactly one @, a nonempty Unicode local part without unicode.IsSpace, and a domain matching ~[A-Za-z0-9]+(\.[A-Za-z0-9]+)+~ in full. No trimming or additional RFC rules. Radio is + followed by exactly 7 through 12 ASCII digits without separators. Date is real and exactly matches ~2006/01/02~. ~ValidateCrewCard(CrewCard) error~ joins all three checks with errors.Join even when several fail. ~InvalidFields(error) []string~ uses errors.Is to return every known classification once in order ~address,radio,launchDate~; nil and unrelated errors yield length zero. Address inputs are valid UTF-8. Error wording is free; causes are part of the contract. No Report.
 `, Hints: []string{"Give each validator one field and its sentinel cause.", "Use %w and Join, then errors.Is for classification.", "Check fields in their declared fixed order."}, Files: []LabFile{{Name: "main.go", Starter: crewCardStarter}}}, Kind: "lab", Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: crewCardStarterAr}}, Lab: &Lab{ReqFile: "main.go", Hidden: crewCardHidden}})
-	add(&Level{ID: "20-3-lexer", Chapter: 20, LessonRevision: 1, Steps: ch20LexerArabic, Title: "مقطّع الأوامر", Goal: "قطّع لغة طيران صغيرة مع مواقع أخطاء دقيقة", Requires: []string{"struct", "switch"}, Bridge: []int{93},
+	add(&Level{ID: "20-3-lexer", Chapter: 20, LessonRevision: 1, Steps: ch20LexerArabic, Title: "مقطّع الأوامر", Goal: "قطّع لغة طيران صغيرة مع offsets دقيقة للـerrors", Requires: []string{"struct", "switch"}, Bridge: []int{93},
 		Lesson: `# قبل ما الدرون يفهم الأمر
 
 ## قبل ما تكتب
@@ -229,7 +229,7 @@ i++ // تجاهل byte مجهولة بدل تشخيصها
 
 ## المهمة
 نفّذ ~LexFlight(source string) ([]CommandToken,error)~. المصدر أكبر من4096 بايت يرجّع nil,*CommandError عند4096 قبل القراية. الأسماء ~[a-z][a-z0-9_]*~؛ كل الأسماء حتى let وthrust والاتجاهات Kind ~name~. سلسلة أرقام قيمة عشرية0..1000 ونوع ~number~ مع Text الأصلية بما فيها أصفار البداية. الرموز ~+ - * / ( ) = ;~ كل واحدة Kind وText نفس الرمز. تجاهل space وtab وCR وLF ASCII بس؛ مفيش comments. ضيف eof واحدة ~CommandToken{Kind:"eof",Text:"",Offset:len(source)}~. كل offsets بايت من صفر. byte مجهولة حتى uppercase أوUnicode أوUTF-8 بايظة ترجّع nil,*CommandError في أول byte؛ الرقم الباطل أوoverflow عند بدايته. Message مش فاضية. الـlexer مش بتفرض قواعد الجمل؛ مسموح number جنب name. مفيش تنفيذ ولا Report.
-`, Hints: []string{"امشِ على المصدر بمؤشر byte واحد.", "احفظ بداية ونص كل run كامل.", "استخدم ParseInt وافحص error قبل قبول الرقم."},
+`, Hints: []string{"امشِ على المصدر بـindex للـbyte.", "خزّن بداية ونص كل run بالكامل.", "استخدم ParseInt وافحص error قبل قبول الرقم."},
 		En: &LevelText{LessonRevision: 1, Steps: ch20LexerEnglish, Title: "Command Lexer", Goal: "Tokenize a tiny flight language with precise error offsets", Lesson: `# Before the Drone Understands
 
 ## Before you write
@@ -393,7 +393,7 @@ left=left+right // تطبيق الجمع فوراً ضيّع أولوية الض
 ~nil~ drive خطأ قبل parsing. مفيش ~Report~؛ المختبر يحرك الدرون الحقيقي بـadapter.
 
 النجمة التالتة شجر unary وأقواس عميقة وأخطاء المدى الوسيط.
-`, Hints: []string{"خلي قواعد الـgrammar تفصل مستويات الأولوية.", "ابني AST قبل التقييم، وكل node تحقق FlightExpr.", "خلي primary تنادي نفسها للعلامة الأحادية، واحفظ operator في AST."},
+`, Hints: []string{"خلي قواعد الـgrammar تفصل مستويات الأولوية.", "ابني AST قبل التقييم، وكل node تحقق FlightExpr.", "خلي primary تنادي نفسها للعلامة الأحادية، وخزّن الـoperator في AST."},
 		En: &LevelText{LessonRevision: 1, Steps: ch20EvaluatorEnglish, Title: "Flight Evaluator", Goal: "Interpret flight programs with precedence and variables and move the real drone", Lesson: `# From Text to Real Movement
 
 ## Before you write

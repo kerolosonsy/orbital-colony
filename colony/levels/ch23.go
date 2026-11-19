@@ -360,7 +360,7 @@ n,err:=out.Write(plain)
 if err==nil && n!=len(plain) {err=io.ErrShortWrite}
 ~~~
 `,
-		Hints: []string{"GCM بيجمع السرية والتحقق من التعديل.", "افصل تجهيز المفتاح والـnonce عن الختم والفتح.", "راجع ~aead.NonceSize()~ ومسار خطأ ~Open~."},
+		Hints: []string{"GCM بيجمع السرية والتحقق من التعديل.", "افصل تجهيز الـkey والـnonce عن الختم والفتح.", "راجع ~aead.NonceSize()~ ومسار error ~Open~."},
 		En: &LevelText{LessonRevision: 1, Steps: ch23Lesson232English, Title: "Sealed Cargo", Goal: "Encrypt cargo and authenticate its manifest and sealed bytes", Files: []LabFile{{Name: "main.go", Starter: ch232Starter}},
 			Lesson: `# Seal the Vault Cargo
 
@@ -709,7 +709,7 @@ os.WriteFile(existing,newBytes,0600) // غلط: ممكن تمسح دليل تل�
 
 ~ReadVault~ ترفض ID مش 40 حرف من ~0-9a-f~ قبل I/O، وتقرأ القطعة المطلوبة فقط. ارفض zlib بايظة أو ناقصة أو checksum غلط، وغلاف خام فوق 1048640 بايت، وبادئة أو نوع أو طول غير canonical، ومحتوى فوق الحد، وبصمة مختلفة عن الاسم. فشل القراية يرجّع ~"",nil,error~، وفشل الكتابة ~"",error~. لا تعديل للمدخلات ولا للمخزن أثناء القراية، ولا Report. احتفظ بتوقيعات الدوال وملف ~main.go~ للمهمة اللي بعدها.
 `,
-		Hints: []string{"عنوان المحتوى بيتبع البايتات الأصلية ونوع القطعة.", "افصل فك الضغط والتحقق عن التخزين أو الإرجاع.", "راجع ~zlib.Writer.Close~ وحد القراءة قبل فحص envelope."},
+		Hints: []string{"عنوان المحتوى بيتبع الـbytes الأصلية ونوع القطعة.", "خلي فك الضغط والتحقق خطوة مستقلة قبل ما تخزّن أو ترجّع الـcontent.", "راجع ~zlib.Writer.Close~ وحد القراءة قبل فحص envelope."},
 		En: &LevelText{LessonRevision: 1, Steps: ch23Lesson233English, Title: "Content Address", Goal: "Store compressed vault objects addressed by their kind and content", Files: []LabFile{{Name: "main.go", Starter: ch233Starter}},
 			Lesson: `# Address an Object by Its Content
 
@@ -1044,7 +1044,7 @@ stamp.Tick=time.Now().Unix() // غلط: تجاهلت الوقت المحقون
 
 جهّز tree بالسطور المرتبة المذكورة واحسب عنوانها قبل الكتابة. ارفض commit لو شجرتها نفس شجرة الأب، حتى لو الوقت أو الرسالة اختلفوا. كمّل كل التحققات قبل كتابة أي قطعة جديدة. بعدها اكتب tree ثم snapshot بالـ JSON المذكورة؛ ارجع ID snapshot. فشل الكتابة يرجّع string فاضية ويحافظ على سبب خطأ I/O؛ tree نجحت قبل فشل snapshot ممكن تفضل من غير مرجع. الفهرس والمدخلات وكل القطع القديمة ثابتين وقت commit، حتى في الفشل. لا تزامن ولا Git ولا وقت حقيقي ولا Report. كل المخازن الحقيقية داخل ~t.TempDir()~ فقط.
 `,
-		Hints: []string{"الفهرس ربط صريح بين الأسماء وعناوين المحتوى.", "افصل staging عن تجهيز شجرة الـcommit.", "راجع ~fs.ValidPath~ وترتيب حقول ~SupplyCommit~ في JSON."},
+		Hints: []string{"الـindex بيربط الأسماء بعناوين المحتوى بشكل واضح.", "افصل staging عن تجهيز شجرة الـcommit.", "راجع ~fs.ValidPath~ وترتيب fields ~SupplyCommit~ في JSON."},
 		En: &LevelText{LessonRevision: 1, Steps: ch23Lesson234English, Title: "Snapshot Commit", Goal: "Build a cargo index, canonical tree, and commit with injected metadata", Files: []LabFile{{Name: "main.go", Starter: ch233Starter}, {Name: "snapshot.go", Starter: ch234Starter}},
 			Lesson: `# Snapshot a Flight's Supplies
 

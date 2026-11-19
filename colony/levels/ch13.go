@@ -95,7 +95,7 @@ func main() {
 			},
 		},
 		ID: "13-1-recall", Chapter: 13, LessonRevision: 1, Steps: ch131RecallArabic, Title: "أمر الرجوع",
-		Goal: "اشتغل بـ 3 درونات لحد ما القاعدة تلغي المهمة (ctx.Done)، وبعدها الكل يرجع (0, 0) في الوقت",
+		Goal: "شغّل 3 drones لحد ما القاعدة تلغي المهمة من خلال ~ctx.Done()~، وبعدها رجّعهم للقاعدة عند (0, 0) قبل انتهاء الوقت",
 		Par:  0, Gold: 0, MaxTicks: 400,
 		Requires: []string{"sel:context.Context"},
 		Setup: func(w *sim.World) {
@@ -162,8 +162,8 @@ func main() {
 `,
 		Hints: []string{
 			"الـcontext بيوصل إشارة الإلغاء؛ وكل worker لازم يلاحظها.",
-			"افصل بحث كل worker عن طريق الرجوع وعن الانتظار في main.",
-			"راجع ~ctx.Done()~ و~d.Position()~ جوه دالة work في الـstarter.",
+			"افصل بحث كل worker عن رجوعه وعن الانتظار في ~main~.",
+			"بص على ~ctx.Done()~ و~d.Position()~ جوه function ~work~ في الـstarter.",
 		},
 		Lesson: `# context: إزاي تقول لكل الشغل "بطّل" 📣
 
@@ -266,7 +266,7 @@ func main() {
 			},
 		},
 		ID: "13-2-timeouts", Chapter: 13, LessonRevision: 1, Steps: ch132TimeoutArabic, Title: "الفحص العميق",
-		Goal: "افحص كل كريستال بـ DeepScan، واحصد بس اللي نقاؤه 50% أو أكتر. وفيه فحوصات بتعلّق للأبد!",
+		Goal: "بص على كل كريستال بـ~DeepScan~، واحصد بس اللي نقاوتها 50% أو أكتر؛ فيه scans بتعلّق للأبد!",
 		Par:  70, Gold: 50, MaxTicks: 400,
 		Requires: []string{"sel:context.WithTimeout"},
 		Setup: func(w *sim.World) {
@@ -341,8 +341,8 @@ func main() {
 `,
 		Hints: []string{
 			"الـtimeout بيحد عملية ممكن تفضل مستنية للأبد.",
-			"استخدم child context للفحص ونضّفه لما النداء يخلص.",
-			"راجع ~colony.DeepScan~ وفرّق ~context.DeadlineExceeded~ عن النجاح.",
+			"استعمل child context للفحص ونضّفه لما النداء يخلص.",
+			"بص على ~colony.DeepScan~ وفرّق ~context.DeadlineExceeded~ عن النجاح.",
 		},
 		Lesson: `# timeouts: متستناش للأبد ⏱️
 
@@ -489,7 +489,7 @@ func main() {
 			},
 		},
 		ID: "13-3-first-wins", Chapter: 13, LessonRevision: 1, Steps: ch133FirstWinsArabic, Title: "الكريستال الأسطوري",
-		Goal: "3 درونات بيدوّروا على كريستال حجمه 10. أول ما واحد يلاقيه، الباقي يبطّلوا. الكل يرجع (0, 0)",
+		Goal: "3 drones بيدوروا على كريستال حجمه 10. أول ما واحد يلاقيه، الباقي يوقفوا بحثهم؛ رجّع الكل عند (0, 0)",
 		Par:  60, Gold: 40, MaxTicks: 400,
 		Requires: []string{"sel:context.WithCancel"},
 		Setup: func(w *sim.World) {
@@ -601,9 +601,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"دالة cancel واحدة تقدر تبلغ كل worker مشارك نفس الـcontext.",
+			"function ~cancel~ واحدة تقدر تبلغ كل worker مشارك نفس الـcontext.",
 			"خلي فحص الإلغاء جوه loop البحث لكل worker.",
-			"راجع ~context.WithCancel~ ومكان ما ~search~ بتعلن النجاح.",
+			"بص على ~context.WithCancel~ ومكان ما ~search~ بتعلن النجاح.",
 		},
 		Lesson: `# WithCancel: أول واحد يكسب 🏆
 
@@ -648,7 +648,7 @@ err := g.Wait() // أول error بيلغي الباقي
 
 ده النمط اللي هتستخدمه في الشغل لما تبعت كذا request في نفس الوقت.`,
 	})
-	add(&Level{ID: "13-4-chain-of-command", Chapter: 13, LessonRevision: 1, Steps: ch134ChainArabic, Title: "سلسلة القيادة", Goal: "عدّي context عبر القيادة والوسيط والمسبار ورجّع سبب التوقف", Requires: []string{"sel:context.Context", "select"}, Bridge: []int{41}, Par: 50, Gold: 30, MaxTicks: 300,
+	add(&Level{ID: "13-4-chain-of-command", Chapter: 13, LessonRevision: 1, Steps: ch134ChainArabic, Title: "سلسلة القيادة", Goal: "مرّر الـcontext عبر القيادة والـrelay والـprobe، ورجّع سبب التوقف", Requires: []string{"sel:context.Context", "select"}, Bridge: []int{41}, Par: 50, Gold: 30, MaxTicks: 300,
 		Starter: chainOfCommandStarter, Lesson: `# نفس الأمر لآخر السلسلة
 
 الـ context مش إعداد ثابت للجهاز؛ هو عمر عملية واحدة. لو وسيط قطع السلسلة، المسبار هيفضل شغال بعد ما القيادة وقّفت المهمة.
@@ -705,7 +705,7 @@ err := next(context.Background()) // فقد إلغاء الأب وموعده
 كمّل ~command(ctx) → relay(ctx) → probe(ctx)~، كل واحدة تستقبل context.Context كأول parameter. سجّل بالترتيب command.enter ثم relay.enter ثم probe.enter، وبعد رجوع المسبار probe.exit ثم relay.exit ثم command.exit. ممنوع ctx في struct.
 
 نفّذ السلسلة مرتين زي main: أب ملغي بـ WithCancel، وبعدين أب بـ WithTimeout ومدته ~colony.Ticks(colony.Reading(0))~. المسبار ينتظر Done بـ select ويرجع Err، والوسيط والقيادة يرجّعوا نفس الخطأ. سجل كل حدود الدخول والخروج حتى لو ملغي مسبقاً. بعد التحقق إن السببين Canceled وDeadlineExceeded ابعت تقرير واحد بالنص ~canceled deadline~. التحقق بيراجع الأثر والموعد وحالة السياق، مش النص لوحده.
-`, Hints: []string{"الـcontext بيحمل عمر العملية وسبب توقفها.", "خلّي كل مستوى يحافظ على القيمة اللي استلمها ويرجع نتيجة اللي بعده.", "راجع parameter ~ctx~ في relay ونداء ~probe~ في الـstarter."},
+`, Hints: []string{"الـcontext بيحمل عمر العملية وسبب توقفها.", "خلي كل مستوى يحافظ على الـvalue اللي استلمها ويرجّع نتيجة اللي بعده.", "بص على parameter ~ctx~ في ~relay~ ونداء ~probe~ في الـstarter."},
 		En: &LevelText{LessonRevision: 1, Steps: ch134ChainEnglish, Title: "Chain of Command", Goal: "Pass context through command, relay, and probe and return the stop reason", Starter: chainOfCommandStarter, Lesson: `# One Order Through the Whole Chain
 
 A context describes one operation's lifetime, rather than permanent device configuration. If a relay breaks the chain, the probe can continue after command has stopped the mission.

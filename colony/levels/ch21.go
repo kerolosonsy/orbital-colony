@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "21-1-sysinfo", Chapter: 21, Kind: "lab", Title: "حالة المحطة", Goal: "اقرأ flags واعرض لقطة نظام محقونة وبيئة مسموحة بس",
+	add(&Level{ID: "21-1-sysinfo", Chapter: 21, Kind: "lab", Title: "حالة المحطة", Goal: "اقرا flags واعرض لقطة نظام محقونة وبيئة مسموحة بس",
 		Requires: []string{"sel:flag.NewFlagSet"}, Bridge: []int{9}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: stationInfoStarterAr}},
 		Lesson: `# تقرير محطة من غير مفاجآت

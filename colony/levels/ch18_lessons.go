@@ -105,31 +105,31 @@ func ch18SandboxConfig(mode string) map[string]any {
 }
 
 var ch18MissionLogArabic = []LessonStep{
-	{ID: "c181.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c181.mission", "الكود في ~main.go~ جاهز؛ شغلك في ~main_test.go~.\n\nاكتب table-driven tests تثبت إن سجل الطلعات بيحافظ على هويتها وترتيبها.\n\nكل حالة تبقى مستقلة، والاختبار يثبت السلوك مش عدد العناصر بس.")}},
+	{ID: "c181.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c181.mission", "الكود في ~main.go~ جاهز؛ شغلك في ~main_test.go~.\n\nاكتب table-driven tests تثبت إن سجل الطلعات بيحافظ على هويتها وترتيبها.\n\nكل حالة تبقى مستقلة، والـtest يثبت السلوك مش عدد العناصر بس.")}},
 	{ID: "c181.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch18Walkthrough("c181.idea-table", "الـtable بتجمع بيانات حالات مختلفة؛ loop واحدة تشغّل نفس الفحص على كل حالة.", ch18MissionLogTableCode, "e18-1-table", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
 		{Line: 2, Caption: "ابدأ بسجل حالات."},
 		{Line: 5, Caption: "الحالتان جاهزتان."},
-		{Line: 6, Caption: "اقرأ الحالة الأولى.", Variables: []LessonVariable{{Name: "tc", Value: "{small 2}"}}},
-		{Line: 7, Caption: "اعرض قيمتها.", Variables: []LessonVariable{{Name: "tc", Value: "{small 2}"}}, Output: "small 2"},
+		{Line: 6, Caption: "اقرا الحالة الأولى.", Variables: []LessonVariable{{Name: "tc", Value: "{small 2}"}}},
+		{Line: 7, Caption: "اطبع الـvalue بتاعتها.", Variables: []LessonVariable{{Name: "tc", Value: "{small 2}"}}, Output: "small 2"},
 		{Line: 7, Caption: "نفس الفحص للحالة التالية.", Variables: []LessonVariable{{Name: "tc", Value: "{large 4}"}}, Output: "small 2\nlarge 4"},
 		{Line: 8, Caption: "خلصت كل الحالات.", Output: "small 2\nlarge 4"},
 	})}},
 	{ID: "c181.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch18Question("c181.try-index", "توقّع الناتج:\n\n~~~go\n"+ch18LogIndexCode+"\n~~~", []string{"7", "4", "2"}, 1, []string{"الـindex صفر شايل 7.", "الـindex واحد شايل 4.", "الطول اتنين، مش قيمة العنصر."}),
+		ch18Question("c181.try-index", "توقّع الناتج:\n\n~~~go\n"+ch18LogIndexCode+"\n~~~", []string{"7", "4", "2"}, 1, []string{"الـindex صفر فيه 7.", "الـindex واحد فيه 4.", "الطول اتنين، مش الـvalue بتاعة العنصر."}),
 		ch18Walkthrough("c181.try-reveal", "تابع الـslice وبعدها قراءة الـindex.", ch18LogIndexCode, "e18-1-index", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
-			{Line: 2, Caption: "قيمتان بترتيبهم.", Variables: []LessonVariable{{Name: "values", Value: "[7 4]"}}},
-			{Line: 3, Caption: "اقرأ index واحد.", Variables: []LessonVariable{{Name: "values", Value: "[7 4]"}}, Output: "4"},
+			{Line: 2, Caption: "اتنين values بالترتيب.", Variables: []LessonVariable{{Name: "values", Value: "[7 4]"}}},
+			{Line: 3, Caption: "اقرا الـindex 1.", Variables: []LessonVariable{{Name: "values", Value: "[7 4]"}}, Output: "4"},
 		}),
 		ch18Sandbox("c181.sandbox", "ch18-slice-index", "غيّر index.", "Move the index.", "index", false),
 	}},
-	{ID: "c181.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c181.watch", "حالات مستقلة بتمنع test يأثر على اللي بعده.\n\nقارن القيم والأخطاء والترتيب؛ الطول لوحده مش كفاية.")}},
+	{ID: "c181.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c181.watch", "حالات مستقلة بتمنع الـtest يأثر على اللي بعده.\n\nقارن الـvalues والـerrors والترتيب؛ الطول لوحده مش كفاية.")}},
 	{ID: "c181.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch18Markdown("c181.plan", "حوّل كل سلوك في العقد لنتيجة تقدر تلاحظها.\n\nخلي البيانات تختلف، وخلي خطوات الفحص مشتركة."),
-		ch18Question("c181.check-state", "إزاي تثبت إن العملية الفاشلة ما غيّرتش السجل؟", []string{"قارن الحالة قبلها وبعدها", "افحص عدد العناصر بس", "افحص نص الخطأ بس"}, 0, []string{"المقارنة بتكشف أي تعديل في البيانات.", "نفس العدد ممكن يخفي تغيير المحتوى.", "نص الخطأ مش دليل على ثبات السجل."}),
+		ch18Question("c181.check-state", "إزاي تثبت إن العملية الفاشلة ما غيّرتش السجل؟", []string{"قارن الحالة قبلها وبعدها", "افحص عدد العناصر بس", "افحص نص الخطأ بس"}, 0, []string{"المقارنة بتكشف أي تعديل في البيانات.", "نفس العدد ممكن يخفي تغيير المحتوى.", "نص الـerror مش دليل على ثبات السجل."}),
 	}},
-	{ID: "c181.turn-step", Title: "دورك", Blocks: []LessonBlock{ch18Markdown("c181.turn", "ابدأ بحالة صغيرة، شغّل tests، وبعدها زوّد حالة تكشف سلوك مختلف.")}},
+	{ID: "c181.turn-step", Title: "دورك", Blocks: []LessonBlock{ch18Markdown("c181.turn", "ابدأ بحالة صغيرة، شغّل الـtests، وبعدها زوّد حالة تكشف سلوك مختلف.")}},
 }
 
 var ch18MissionLogEnglish = []LessonStep{
@@ -161,24 +161,24 @@ var ch18MissionLogEnglish = []LessonStep{
 }
 
 var ch18BlackBoxArabic = []LessonStep{
-	{ID: "c182.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c182.mission", "نفّذ حفظ وقراءة بيانات الصندوق بصيغة JSON.\n\nخلي أخطاء الملف أو المحتوى واضحة، وما تمسحش دليل مشكلة حصلت قبل كده.\n\nالـtag بتوصل اسم Go بمفتاح JSON. الاسم في Go بيفضل زي ما هو.")}},
-	{ID: "c182.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch18Walkthrough("c182.idea-json", "~Marshal~ بتحوّل قيمة Go لبايتات JSON؛ أسماء الحقول على السلك مش لازم تبقى نفس الأسماء في Go.", ch18BlackBoxJSONCode, "e18-2-json", []string{"encoding/json", "fmt"}, []LessonFrame{
+	{ID: "c182.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c182.mission", "خزّن بيانات الصندوق واقراها بصيغة JSON.\n\nخلي الـerrors اللي من الملف أو المحتوى واضحة، وما تمسحش دليل مشكلة حصلت قبل كده.\n\nالـtag بتوصل اسم Go بـkey JSON. الاسم في Go بيفضل زي ما هو.")}},
+	{ID: "c182.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch18Walkthrough("c182.idea-json", "~Marshal~ بتحوّل Go value لـJSON bytes؛ أسماء الحقول على السلك مش لازم تبقى نفس الأسماء في Go.", ch18BlackBoxJSONCode, "e18-2-json", []string{"encoding/json", "fmt"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
 		{Line: 1, Caption: "نوع ببيانات مصدّرة."},
-		{Line: 5, Caption: "القيمة جاهزة للتحويل.", Variables: []LessonVariable{{Name: "b", Value: "{7}"}}},
+		{Line: 5, Caption: "الـvalue جاهزة للتحويل.", Variables: []LessonVariable{{Name: "b", Value: "{7}"}}},
 		{Line: 6, Caption: "حوّلها لصيغة JSON."},
-		{Line: 7, Caption: "اعرض البايتات والناتج.", Output: "{\"charge\":7} <nil>"},
+		{Line: 7, Caption: "اطبع الـbytes والناتج.", Output: "{\"charge\":7} <nil>"},
 	})}},
 	{ID: "c182.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch18Question("c182.try-json", "توقّع الناتج:\n\n~~~go\n"+ch18BlackBoxMapCode+"\n~~~", []string{"{\"hull\":3} <nil>", "hull=3", "خطأ"}, 0, []string{"Marshal بترجع JSON وخطأ nil هنا.", "المكتبة بترجع JSON، مش صيغة key=value.", "القيمة دي صالحة للتحويل."}),
+		ch18Question("c182.try-json", "توقّع الناتج:\n\n~~~go\n"+ch18BlackBoxMapCode+"\n~~~", []string{"{\"hull\":3} <nil>", "hull=3", "خطأ"}, 0, []string{"Marshal بترجّع JSON والـerror هنا nil.", "المكتبة بترجّع JSON، مش صيغة key=value.", "الـvalue دي صالحة للتحويل."}),
 		ch18Walkthrough("c182.try-reveal", "شوف إزاي map واحدة بتطلع object في JSON.", ch18BlackBoxMapCode, "e18-2-map", []string{"encoding/json", "fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
-			{Line: 2, Caption: "Marshal ترجع بايتات."},
-			{Line: 3, Caption: "الناتج object وخطأ nil.", Output: "{\"hull\":3} <nil>"},
+			{Line: 2, Caption: "Marshal بترجّع bytes."},
+			{Line: 3, Caption: "الناتج object والـerror nil.", Output: "{\"hull\":3} <nil>"},
 		}),
 		ch18Sandbox("c182.sandbox", "ch18-json-marshal", "جرّب Marshal.", "Try Marshal.", "json", false),
 	}},
-	{ID: "c182.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c182.watch", "~Unmarshal~ محتاجة pointer عشان تملا القيمة.\n\nفرّق بين JSON سليمة ومعناها، وافحص كل خطأ قبل استخدام الناتج.")}},
+	{ID: "c182.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c182.watch", "~Unmarshal~ محتاجة pointer عشان تملا الـvalue.\n\nفرّق بين JSON سليمة ومعناها، وبص على كل error قبل ما تستخدم الناتج.")}},
 	{ID: "c182.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch18Markdown("c182.plan", "افصل التحقق عن التحويل والملف.\n\nراجع الحالة قبل ما تحفظ، وخلي القراية ما تغيّرش المصدر."),
 		ch18Question("c182.check-slice", "إيه الفرق بين slice ناقصة وواحدة موجودة وفاضية؟", []string{"الأولى nil والتانية مش nil", "الاتنين nil", "الطول مختلف"}, 0, []string{"JSON null والغياب ممكن ينتجوا nil.", "الـslice الفاضية المهيأة مش nil.", "الاتنين طولهم صفر."}),
@@ -213,12 +213,12 @@ var ch18BlackBoxEnglish = []LessonStep{
 }
 
 var ch18CargoArabic = []LessonStep{
-	{ID: "c183.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c183.mission", "اقرأ manifest CSV من ~io.Reader~ واجمع بياناته.\n\nاستخدم parser يحافظ على الحقول المقتبسة؛ أي مشكلة في المحتوى أو المصدر تمنع تقرير ناقص.")}},
+	{ID: "c183.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c183.mission", "اقرا manifest CSV من ~io.Reader~ واجمع بياناته.\n\nاستعمل parser يحافظ على الحقول المقتبسة؛ أي مشكلة في المحتوى أو المصدر تمنع تقرير ناقص.")}},
 	{ID: "c183.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch18Walkthrough("c183.idea-csv", "كل ~Read~ بترجع record كاملة؛ الـCSV parser بيتولى فك الحقول.", ch18CargoCSVCode, "e18-3-csv", []string{"encoding/csv", "fmt", "strings"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
-		{Line: 2, Caption: "أنشئ reader من نص."},
-		{Line: 3, Caption: "اقرأ record واحدة."},
-		{Line: 4, Caption: "اطبع الحقول والخطأ.", Output: "[north 4] <nil>"},
+		{Line: 2, Caption: "اعمل reader من نص."},
+		{Line: 3, Caption: "اقرا record واحدة."},
+		{Line: 4, Caption: "اطبع الحقول والـerror.", Output: "[north 4] <nil>"},
 	})}},
 	{ID: "c183.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch18Question("c183.try-csv", "توقّع الناتج:\n\n~~~go\n"+ch18CargoQuotedCode+"\n~~~", []string{"[west upper 4] <nil>", "[west, upper 4] <nil>", "خطأ parsing"}, 1, []string{"الـcomma جوه quotes ما بتقسمش الحقل.", "الـparser حافظ على الـcomma داخل الاسم.", "السطر صالح بصيغة CSV."}),
@@ -230,12 +230,12 @@ var ch18CargoArabic = []LessonStep{
 		}),
 		ch18Sandbox("c183.sandbox", "ch18-csv-quoted-field", "بدّل الصف.", "Switch rows.", "csv", false),
 	}},
-	{ID: "c183.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c183.watch", "~io.EOF~ نهاية طبيعية بعد الـheader؛ أي error تاني يوقف الملف.\n\nعدّ records، مش السطور الظاهرة، واحتفظ بسبب أخطاء القراءة.")}},
+	{ID: "c183.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c183.watch", "~io.EOF~ نهاية طبيعية بعد الـheader؛ أي error تاني يوقف الملف.\n\nعدّ records، مش السطور الظاهرة، وخلي سبب الـerrors اللي بتحصل وقت القراءة.")}},
 	{ID: "c183.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch18Markdown("c183.plan", "اقرأ schema الأول، وبعدها عالج record record.\n\nالـheader بيحدد شكل البيانات قبل صفوف الشحنة. حدّث إجمالي محلي؛ ما ترجعش نجاح جزئي بعد فشل."),
-		ch18Question("c183.check-eof", "إمتى ~io.EOF~ معناها إن الملف خلص طبيعي؟", []string{"بعد قراءة الـheader والـrecords", "قبل وجود header", "كل ما يظهر record غلط"}, 0, []string{"الـEOF بعد البيانات علامة نهاية القراءة.", "قبل الـheader مفيش schema صالحة.", "record غلط بيرجع خطأ منفصل."}),
+		ch18Markdown("c183.plan", "اقرا schema الأول، وبعدها عالج record record.\n\nالـheader بيحدد شكل البيانات قبل صفوف الشحنة. حدّث إجمالي محلي؛ ما ترجعش نجاح جزئي بعد فشل."),
+		ch18Question("c183.check-eof", "إمتى ~io.EOF~ معناها إن الملف خلص طبيعي؟", []string{"بعد قراءة الـheader والـrecords", "قبل وجود header", "كل ما يظهر record غلط"}, 0, []string{"الـEOF بعد البيانات علامة نهاية القراءة.", "قبل الـheader مفيش schema صالحة.", "record غلط بيرجع error لوحده."}),
 	}},
-	{ID: "c183.turn-step", Title: "دورك", Blocks: []LessonBlock{ch18Markdown("c183.turn", "ابدأ بقراءة header، وبعدها جرّب record صحيحة ومصدر يطلع خطأ.")}},
+	{ID: "c183.turn-step", Title: "دورك", Blocks: []LessonBlock{ch18Markdown("c183.turn", "ابدأ واقرا header، وبعدها جرّب record سليمة وsource يطلع error.")}},
 }
 
 var ch18CargoEnglish = []LessonStep{
@@ -265,23 +265,23 @@ var ch18CargoEnglish = []LessonStep{
 }
 
 var ch18SignalArabic = []LessonStep{
-	{ID: "c184.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c184.mission", "حوّل stream الإشارات لقائمة كلمات مرتبة حسب التكرار.\n\nالتعامل مع Unicode وثبات ترتيب التعادل جزء من النتيجة؛ ما تخزنش كل النص لمجرد العد.\n\nالـpunctuation والـemoji فواصل بين الكلمات.\n\nوحّد حالة الحروف قبل العد؛ Echo وECHO يبقوا نفس الكلمة.\n\nالـmap ما بتضمنش ترتيب، فحدد قاعدة واضحة للتعادل.")}},
+	{ID: "c184.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c184.mission", "حوّل stream الإشارات لقائمة كلمات مرتبة حسب التكرار.\n\nالتعامل مع Unicode وثبات ترتيب التعادل جزء من النتيجة؛ ما تخزّنش كل النص لمجرد العد.\n\nالـpunctuation والـemoji فواصل بين الكلمات.\n\nوحّد حالة الحروف قبل العد؛ Echo وECHO يبقوا نفس الكلمة.\n\nالـmap ما بتضمنش ترتيب، فحدد قاعدة واضحة للتعادل.")}},
 	{ID: "c184.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch18Walkthrough("c184.idea-words", "~FieldsFunc~ بتقسّم حسب شرط على rune؛ وبعدها ~ToLower~ توحّد شكل الكلمة.", ch18SignalUnicodeCode, "e18-4-unicode", []string{"fmt", "strings", "unicode"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
 		{Line: 2, Caption: "جزّئ حسب حروف Unicode."},
 		{Line: 2, Caption: "الكلمات اتجمعت."},
-		{Line: 3, Caption: "حوّل أول كلمة واعرض العدد.", Output: "echo 3"},
+		{Line: 3, Caption: "حوّل أول كلمة واطبع العدد.", Output: "echo 3"},
 	})}},
 	{ID: "c184.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch18Question("c184.try-lower", "توقّع الناتج:\n\n~~~go\n"+ch18SignalLowerCode+"\n~~~", []string{"Echo", "echo", "ECHO"}, 1, []string{"الحرف الكبير بيتحوّل لصغير.", "ToLower بتوحّد الحروف لحالة صغيرة.", "الدالة ما بتحوّلش لحروف كبيرة."}),
+		ch18Question("c184.try-lower", "توقّع الناتج:\n\n~~~go\n"+ch18SignalLowerCode+"\n~~~", []string{"Echo", "echo", "ECHO"}, 1, []string{"الحرف الكبير بيتحوّل لصغير.", "ToLower بتوحّد الحروف لحالة صغيرة.", "الـfunction ما بتحوّلش لحروف كبيرة."}),
 		ch18Walkthrough("c184.try-reveal", "شوف تطبيق ToLower على كلمة للتوضيح.", ch18SignalLowerCode, "e18-4-lower", []string{"fmt", "strings"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "حوّل الكلمة لحروف صغيرة."},
-			{Line: 3, Caption: "اعرض القيمة الجديدة.", Output: "echo"},
+			{Line: 3, Caption: "اطبع الـvalue الجديدة.", Output: "echo"},
 		}),
 		ch18Sandbox("c184.sandbox", "ch18-unicode-words", "افصل وحوّل.", "Split and lowercase.", "unicode", false),
 	}},
-	{ID: "c184.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c184.watch", "استخدم ~unicode.IsLetter~ و~IsDigit~ على rune، مش byte.\n\n~Scanner.Buffer~ لازم تتظبط قبل أول ~Scan~؛ افحص ~Err~ بعد الحلقة.")}},
+	{ID: "c184.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c184.watch", "استعمل ~unicode.IsLetter~ و~IsDigit~ على rune، مش byte.\n\n~Scanner.Buffer~ لازم تتظبط قبل أول ~Scan~؛ بص على ~Err~ بعد الـloop.")}},
 	{ID: "c184.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch18Markdown("c184.plan", "عدّ الكلمات في map، وبعدها حوّل النتائج لـslice عشان ترتّبها.\n\nالتعادل محتاج معيار ثابت غير العدد."),
 		ch18Question("c184.check-order", "هل ترتيب ~range~ على map ثابت؟", []string{"مش مضمون", "حسب إدخال المفاتيح", "أبجدي دايماً"}, 0, []string{"ترتيب map ما ينفعش تعتمد عليه.", "Go ما بتحفظش ترتيب إدخال map.", "الترتيب الأبجدي محتاج sorting."}),
@@ -326,16 +326,16 @@ var ch18RecorderArabic = []LessonStep{
 		ch18Walkthrough("c185.try-reveal", "امشِ مع حد القطع وشوف الجزء الأخير.", ch18RecorderLimitCode, "e18-5-limit", []string{"fmt", "strings"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "اقسم على أول فاصلين."},
-			{Line: 3, Caption: "اعرض العدد والجزء الأخير.", Output: "3 warm|again"},
+			{Line: 3, Caption: "اطبع العدد والجزء الأخير.", Output: "3 warm|again"},
 		}),
 		ch18Sandbox("c185.sandbox", "ch18-splitn-limit", "زوّد الحد.", "Raise the limit.", "splitn", false),
 	}},
 	{ID: "c185.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c185.watch", "عدّ records بشكل مستقل عن sequence المكتوبة جوه السطر.\n\nالـrecord الغلط له تشخيص؛ ~Scanner.Err~ مشكلة في المصدر كله.")}},
 	{ID: "c185.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch18Markdown("c185.plan", "خلي تحليل كل record واضح لوحده.\n\nبعد الحلقة، افحص حالة الـscanner قبل اعتبار الملخص صالح."),
-		ch18Question("c185.check-error", "إيه اللي يفرّق خطأ record عن خطأ قراءة المصدر؟", []string{"مكان ظهور الخطأ", "وجود message بس", "طول السطر"}, 0, []string{"خطأ المصدر بيظهر من ~Scanner.Err~ بعد القراءة.", "الـmessage مش بتحدد مرحلة الفشل.", "طول السطر لوحده مش كفاية."}),
+		ch18Markdown("c185.plan", "خلي تحليل كل record واضح لوحده.\n\nبعد الـloop، بص على حالة الـscanner قبل اعتبار الملخص صالح."),
+		ch18Question("c185.check-error", "إيه اللي يفرّق error في record عن error في قراءة المصدر؟", []string{"مكان ظهور الخطأ", "وجود message بس", "طول السطر"}, 0, []string{"error المصدر بيظهر من ~Scanner.Err~ بعد القراءة.", "الـmessage مش بتحدد مرحلة الفشل.", "طول السطر لوحده مش كفاية."}),
 	}},
-	{ID: "c185.turn-step", Title: "دورك", Blocks: []LessonBlock{ch18Markdown("c185.turn", "ابدأ بـSplitN لرسالة توضيحية، وبعدها جرّب stream سليمة وأخرى فيها خطأ قراءة.")}},
+	{ID: "c185.turn-step", Title: "دورك", Blocks: []LessonBlock{ch18Markdown("c185.turn", "ابدأ بـSplitN لرسالة توضيحية، وبعدها جرّب stream سليمة وأخرى فيها error قراءة.")}},
 }
 
 var ch18RecorderEnglish = []LessonStep{
@@ -366,26 +366,26 @@ var ch18CrewArabic = []LessonStep{
 	{ID: "c186.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch18Markdown("c186.mission", "كمّل دليل الطاقم: تسجيل، بحث، وحفظ من خلال interface صغيرة.\n\nحافظ على السجلات الأصلية وخلي النتائج مرتبة من غير ربط الدليل بمخزن واحد.\n\nوتأكد إن التغييرات ما بتتسربش.")}},
 	{ID: "c186.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch18Walkthrough("c186.idea-interface", "الـinterface بتوصف السلوك المطلوب؛ أي نوع يطبّق methods المناسبة يقدر يستخدمها caller.", ch18CrewWriterCode, "e18-6-interface", []string{"bytes", "fmt", "io"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
-		{Line: 1, Caption: "الدالة تستقبل interface."},
+		{Line: 1, Caption: "الـfunction بتستقبل interface."},
 		{Line: 6, Caption: "Buffer يطبّق io.Writer."},
 		{Line: 7, Caption: "اكتب من خلال الحد المشترك."},
-		{Line: 8, Caption: "اعرض النص وخطأ الكتابة.", Output: "ready <nil>"},
+		{Line: 8, Caption: "اطبع النص والـerror اللي رجّعته الكتابة.", Output: "ready <nil>"},
 	})}},
 	{ID: "c186.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch18Question("c186.try-search", "توقّع الناتج:\n\n~~~go\n"+ch18CrewSearchCode+"\n~~~", []string{"false", "true", "pilot"}, 1, []string{"النص lot موجود جوه pilot.", "Contains بترجع true لما النص موجود.", "الطباعة بتعرض نتيجة مش الاسم."}),
 		ch18Walkthrough("c186.try-reveal", "جرّب Contains على نسخة بحروف موحّدة.", ch18CrewSearchCode, "e18-6-search", []string{"fmt", "strings"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "وحّد حالة الأحرف."},
-			{Line: 3, Caption: "ابحث واعرض النتيجة.", Output: "true"},
+			{Line: 3, Caption: "ابحث واطبع النتيجة.", Output: "true"},
 		}),
 		ch18Sandbox("c186.sandbox", "ch18-normalized-search", "جرّب البحث.", "Try the search.", "search", false),
 	}},
-	{ID: "c186.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c186.watch", "افحص البيانات قبل تعديل الـslice، وسيب النص الأصلي زي ما اتسجل.\n\nرتّب نسخة للعرض، وتعامل مع خطأ التخزين كجزء من النتيجة.")}},
+	{ID: "c186.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch18Markdown("c186.watch", "افحص البيانات قبل تعديل الـslice، وسيب النص الأصلي زي ما اتسجل.\n\nرتّب نسخة للعرض، وتعامل مع error التخزين كجزء من النتيجة.")}},
 	{ID: "c186.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch18Markdown("c186.plan", "افصل منطق الدليل عن طريقة التخزين.\n\nراجع إن المخزن يستقبل نسخة مستقلة وإن البحث ما يغيّرش السجلات."),
-		ch18Question("c186.check-store", "لو ~Save~ رجّعت error، تعمل إيه؟", []string{"ترجّعه للـcaller", "تتجاهله وتكمل", "تمسح سجل الطاقم"}, 0, []string{"الـcaller محتاج يعرف إن الحفظ فشل.", "تجاهل الخطأ يخفي فشل التخزين.", "مسح السجل مش بيعالج فشل الحفظ."}),
+		ch18Question("c186.check-store", "لو ~Save~ رجّعت error، تعمل إيه؟", []string{"ترجّعه للـcaller", "تتجاهله وتكمل", "تمسح سجل الطاقم"}, 0, []string{"الـcaller محتاج يعرف إن الحفظ فشل.", "تجاهل الـerror بيخفي فشل التخزين.", "مسح السجل مش بيعالج فشل الحفظ."}),
 	}},
-	{ID: "c186.turn-step", Title: "دورك", Blocks: []LessonBlock{ch18Markdown("c186.turn", "ابدأ بتسجيل قيمة واحدة، جرّب بحث مختلف، وبعدها افحص نسخة تصل للمخزن.")}},
+	{ID: "c186.turn-step", Title: "دورك", Blocks: []LessonBlock{ch18Markdown("c186.turn", "ابدأ بتخزين value واحدة، جرّب بحث مختلف، وبعدها افحص نسخة تصل للمخزن.")}},
 }
 
 var ch18CrewEnglish = []LessonStep{

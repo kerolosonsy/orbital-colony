@@ -13,9 +13,12 @@ import (
 )
 
 type labStep struct {
-	Title  string `json:"title"`
-	OK     bool   `json:"ok"`
-	Output string `json:"output,omitempty"`
+	Title    string `json:"title"`
+	OK       bool   `json:"ok"`
+	Output   string `json:"output,omitempty"`
+	Tip      string `json:"tip,omitempty"`
+	TipCause string `json:"tipCause,omitempty"`
+	TipCheck string `json:"tipCheck,omitempty"`
 }
 
 var benchLine = regexp.MustCompile(`(?m)^(BenchmarkHidden\w+)-?\d*\s+\d+\s+([\d.]+) ns/op`)
@@ -57,6 +60,12 @@ func (r *runner) goTest(ctx context.Context, lvl *levels.Level, files map[string
 	cmd.Stdout, cmd.Stderr = out, out
 	runErr := runCommand(cmd)
 	text := strings.ReplaceAll(out.String(), dir+string(os.PathSeparator), "")
+	if tctx.Err() != nil {
+		if text != "" {
+			text += "\n"
+		}
+		text += tctx.Err().Error()
+	}
 	return runErr == nil && !strings.Contains(text, "WARNING: DATA RACE"), dependencyHint(text, contextLang(ctx)), nil
 }
 
@@ -70,7 +79,8 @@ func (r *runner) RunLab(ctx context.Context, lvl *levels.Level, edited map[strin
 	resp := &runResponse{Phase: "lab"}
 	if lvl.Service != "" {
 		if err := checkService(ctx, lvl.Service); err != nil {
-			resp.Steps = []labStep{{Title: tr(lang, "الخدمة المطلوبة", "Required service"), Output: err.Error()}}
+			tip := errorTipFor(err.Error(), tipRuntime|tipLab, lang)
+			resp.Steps = []labStep{{Title: tr(lang, "الخدمة المطلوبة", "Required service"), Output: err.Error(), Tip: tip.Meaning, TipCause: tip.Cause, TipCheck: tip.Check}}
 			resp.Result.Message = tr(lang, "شغّل `make services-up` وبعدين جرّب تاني.", "Run `make services-up`, then try again.")
 			return resp, nil
 		}
@@ -104,12 +114,16 @@ func (r *runner) RunLab(ctx context.Context, lvl *levels.Level, edited map[strin
 		return m
 	}
 	add := func(title string, ok bool, out string) bool {
+		tip := errorTipFor(out, tipRuntime|tipLab, lang)
 		if strings.Contains(out, "WARNING: DATA RACE") {
 			ok = false
 			resp.Race = true
-			resp.RuntimeTip = runtimeTipFor(out, lang)
+			resp.RuntimeTip, resp.RuntimeCause, resp.RuntimeCheck = tip.Meaning, tip.Cause, tip.Check
 		}
-		resp.Steps = append(resp.Steps, labStep{title, ok, strings.TrimSpace(out)})
+		if !ok && resp.RuntimeTip == "" && tip.Meaning != "" {
+			resp.RuntimeTip, resp.RuntimeCause, resp.RuntimeCheck = tip.Meaning, tip.Cause, tip.Check
+		}
+		resp.Steps = append(resp.Steps, labStep{Title: title, OK: ok, Output: strings.TrimSpace(out), Tip: tip.Meaning, TipCause: tip.Cause, TipCheck: tip.Check})
 		return ok
 	}
 	lab := lvl.Lab
@@ -121,6 +135,7 @@ func (r *runner) RunLab(ctx context.Context, lvl *levels.Level, edited map[strin
 	}
 	if isBuildFailure(out) {
 		resp.Phase = "compile"
+		resp.Failure = "compile"
 		resp.CompileOutput = out
 		for _, line := range strings.Split(out, "\n") {
 			if ce, ok := parseCompileLine(line, lang); ok {

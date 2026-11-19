@@ -364,6 +364,14 @@ canvas#world { position: absolute; inset: 0; width: 100%; height: 100%; }
 .c-report { color: var(--ice); }
 .c-ok { color: var(--ok); font-weight: 600; }
 .c-warn { color: var(--warn); }
+.console .c-error-line { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: transparent; color: var(--err); text-align: start; font: inherit; cursor: pointer; }
+.console .c-error-line:hover { text-decoration: underline; text-underline-offset: 2px; }
+.console .c-error-line:focus-visible { outline: 2px solid var(--star); outline-offset: 2px; }
+.err-help { margin: 3px 0 7px; padding: 5px 9px; border-block: 1px solid color-mix(in oklab, var(--star) 38%, var(--rule)); background: color-mix(in oklab, var(--star) 8%, var(--ink)); color: var(--paper); font: 12px/1.55 var(--sans); unicode-bidi: plaintext; }
+.err-help summary { color: var(--star); cursor: pointer; font-weight: 650; }
+.err-help summary:focus-visible { outline: 2px solid var(--star); outline-offset: 2px; }
+.err-help-body p { margin: 4px 0 0; }
+.err-help-body strong { color: var(--star); font-weight: 650; }
 
 /* ---------- overlays ---------- */
 .overlay {

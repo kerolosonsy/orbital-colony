@@ -4,7 +4,7 @@ Short bilingual practice for the six database labs. Each lesson has six steps; p
 
 ## 29-1 — SQLite CRUD
 
-AR: افصل قيم SQL عن نص الاستعلام، وتعامل مع غياب الصف كخطأ واضح. EN: Bind SQL values separately and treat a missing row as a clear error.
+AR: افصل الـvalues بتاعة SQL عن نص الـquery، وتعامل مع غياب الصف كـerror واضح. EN: Bind SQL values separately and treat a missing row as a clear error.
 
 <!-- go-example id=e291-error-chain imports=database/sql,errors,fmt outcome=ok -->
 ```go
@@ -46,7 +46,7 @@ func main() {
 
 ## 29-3 — Atomic transfer
 
-AR: حافظ على مجموع الأرصدة، وخلي الخصم والإضافة وتسجيل الطلب عملية واحدة. EN: Preserve the balance total; debit, credit, and request recording form one operation.
+AR: حافظ على مجموع الأرصدة، وخلي الخصم والإضافة وتسجيل الـrequest عملية واحدة. EN: Preserve the balance total; debit, credit, and request recording form one operation.
 
 <!-- go-example id=e293-conservation imports=fmt outcome=ok -->
 ```go
@@ -66,7 +66,7 @@ func main() {
 
 ## 29-4 — Connection pool
 
-AR: فرّق بين حد الحوض وحالته الحالية، واقفل الصفوف عند كل رجوع. EN: Distinguish a pool limit from its current state, and close rows on every return.
+AR: فرّق بين حد الحوض وحالته الحالية، واقفل الصفوف عند كل return. EN: Distinguish a pool limit from its current state, and close rows on every return.
 
 <!-- go-example id=e294-pool-stats imports=database/sql,fmt outcome=ok -->
 ```go
@@ -86,7 +86,7 @@ func main() {
 
 ## 29-5 — sqlx repository
 
-AR: الواجهة بتفصل المجال عن قاعدة البيانات، والـnamed argument بيفصل الاسم عن القيمة. EN: An interface separates domain logic from storage; a named argument separates name from value.
+AR: الـinterface بتفصل المجال عن قاعدة البيانات، والـnamed argument بيفصل الاسم عن الـvalue. EN: An interface separates domain logic from storage; a named argument separates name from value.
 
 <!-- go-example id=e295-interface-store imports=fmt outcome=ok -->
 ```go

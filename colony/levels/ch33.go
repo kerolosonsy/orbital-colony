@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "33-1-retry-client", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson331Arabic, Title: "عميل عنيد", Goal: "عيد طلبات رصيف الإمداد اللي فشلت بأمان، بانتظار متزايد ومن غير ما تكرر شحنة مرتين",
+	add(&Level{ID: "33-1-retry-client", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson331Arabic, Title: "عميل عنيد", Goal: "عيد الـrequests اللي فشلت لرصيف الإمداد بأمان، بانتظار متزايد ومن غير ما تكرر شحنة مرتين",
 		Requires: []string{"iface"}, Bridge: []int{83}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch331Starter}},
 		Lesson: `# عميل عنيد لرصيف الإمداد
@@ -594,7 +594,7 @@ func TestHiddenBonusRetryHonorsRetryAfter(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "33-2-reverse-proxy", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson332Arabic, Title: "الوكيل العكسي", Goal: "وصّل طلبات القاعدة لوحدات الخلف المسموحة بس، بمهلة وسياسة هيدرات وأخطاء واضحة لما وحدة تقع",
+	add(&Level{ID: "33-2-reverse-proxy", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson332Arabic, Title: "الوكيل العكسي", Goal: "وصّل الـrequests لوحدات الخلف المسموحة بس، بمهلة وسياسة هيدرات وerrors واضحة لما وحدة تقع",
 		Requires: []string{"sel:httputil.ReverseProxy"}, Bridge: []int{78}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch332Starter}},
 		Lesson: `# الوكيل العكسي لبوابة القاعدة
@@ -1003,7 +1003,7 @@ func TestHiddenBonusRelayHidesUnitErrors(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "33-3-load-balancer", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson333Arabic, Title: "موزّع الأحمال", Goal: "وزّع طلبات المحطة على مولدات متشابهة بالدور، وشيل المولد المريض، وكمّل لو واحد وقع",
+	add(&Level{ID: "33-3-load-balancer", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson333Arabic, Title: "موزّع الأحمال", Goal: "وزّع requests المحطة على مولدات متشابهة بالدور، وشيل المولد المريض، وكمّل لو واحد وقع",
 		Requires: []string{"mutex"}, Bridge: []int{79}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch333Starter}},
 		Lesson: `# موزّع الأحمال على المولدات
@@ -1448,7 +1448,7 @@ func TestHiddenBonusPoolTreats5xxAsFailure(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "33-4-gateway", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson334Arabic, Title: "البوابة", Goal: "ابني بوابة واحدة لخدمات القاعدة: توجيه ومفاتيح طاقم وحد طلبات ورقم لكل طلب، كطبقات فوق بعض",
+	add(&Level{ID: "33-4-gateway", Chapter: 33, Kind: "lab", LessonRevision: 1, Steps: ch33Lesson334Arabic, Title: "البوابة", Goal: "ابني بوابة واحدة لخدمات القاعدة: توجيه وcrew keys وحد للـrequests ورقم لكل request، كطبقات فوق بعض",
 		Requires: []string{"funcvalue"}, Bridge: []int{91}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch334Starter}},
 		Lesson: `# بوابة القاعدة

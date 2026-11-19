@@ -47,7 +47,7 @@
         "events": [
           {
             "caption": {
-              "ar": "القناة بدأت فاضية",
+              "ar": "الـchannel بدأت فاضية",
               "en": "Channel starts empty"
             },
             "closed": false,
@@ -79,7 +79,7 @@
           },
           {
             "caption": {
-              "ar": "المرسل قفل القناة",
+              "ar": "المرسل قفل الـchannel",
               "en": "Sender closes channel"
             },
             "closed": true,
@@ -119,7 +119,7 @@
         "events": [
           {
             "caption": {
-              "ar": "القناة بدأت فاضية",
+              "ar": "الـchannel بدأت فاضية",
               "en": "Channel starts empty"
             },
             "closed": false,
@@ -159,7 +159,7 @@
           },
           {
             "caption": {
-              "ar": "المرسل قفل القناة",
+              "ar": "المرسل قفل الـchannel",
               "en": "Sender closes channel"
             },
             "closed": true,
@@ -192,7 +192,7 @@
         "en": "Blocking receive"
       },
       "bothReady": {
-        "ar": "الإشارتين جاهزين؛ الاختيار ممكن يختلف",
+        "ar": "الإشارتين جاهزين؛ والـselect ممكن يختار بينهم",
         "en": "Both signals ready; choice may vary"
       },
       "calm": {
@@ -200,7 +200,7 @@
         "en": "Calm signal"
       },
       "calmButton": {
-        "ar": "بدّل قناة الهدوء",
+        "ar": "بدّل الـchannel بتاعة الهدوء",
         "en": "Toggle calm channel"
       },
       "calmClosed": {
@@ -288,7 +288,7 @@
         "en": "Empty"
       },
       "jobs": {
-        "ar": "طابور المهام",
+        "ar": "الـqueue بتاعة المهام",
         "en": "Jobs"
       },
       "next": {
@@ -304,7 +304,7 @@
         "en": "Results"
       },
       "resultsChannel": {
-        "ar": "قناة النتائج",
+        "ar": "الـchannel بتاعة النتائج",
         "en": "Results channel"
       },
       "schedule": {
@@ -325,7 +325,7 @@
         "events": [
           {
             "caption": {
-              "ar": "طابور فيه 3 مهام",
+              "ar": "الـqueue فيها 3 مهام",
               "en": "Queue has three jobs"
             },
             "closed": false,
@@ -403,7 +403,7 @@
         "events": [
           {
             "caption": {
-              "ar": "طابور فيه 3 مهام",
+              "ar": "الـqueue فيها 3 مهام",
               "en": "Queue has three jobs"
             },
             "closed": false,

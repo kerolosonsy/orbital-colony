@@ -110,7 +110,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch11ScoutLessonArabic,
 		ID: "11-1-scout", Chapter: 11, Title: "الكشّاف",
-		Goal: "الكشّاف يقيس ويبعت مكان الكريستال الكبير (5 فأكتر) في channel، وإنت تحصده",
+		Goal: "الكشّاف يقيس ويبعت مكان الكريستال الكبير (5 فأكتر) في الـchannel، وإنت تحصده",
 		Par:  40, Gold: 30, MaxTicks: 300,
 		Requires: []string{"chan", "go"},
 		Setup: func(w *sim.World) {
@@ -171,7 +171,7 @@ func main() {
 `,
 		Hints: []string{
 			"الـchannel بتنقل قيمة من goroutine للتانية؛ و~close~ بيعلن النهاية.",
-			"جهّز إرسال الأماكن، واستقبلها، واحصد، واستنى القناة تخلص.",
+			"جهّز إرسال الأماكن، واستقبلها، واحصد، واستنى الـchannel تتقفل.",
 			"راجع ~x := <-found~؛ إيه اللي يحصل بعد أول استقبال؟",
 		},
 		Lesson: `# Channels: goroutines بتكلّم بعض 📨
@@ -312,7 +312,7 @@ func main() {
 		},
 		LessonRevision: 1, Steps: ch11PoolLessonArabic,
 		ID: "11-2-worker-pool", Chapter: 11, Title: "طابور الشغل",
-		Goal: "3 عمّال بياخدوا الأهداف من channel واحدة، وبيبعتوا اللي جمعوه. ابعت المجموع",
+		Goal: "3 عمّال بياخدوا الأهداف من الـchannel الواحدة، وبيبعتوا اللي جمعوه. ابعت المجموع",
 		Par:  70, Gold: 50, MaxTicks: 500,
 		Requires: []string{"chan", "go"},
 		Setup: func(w *sim.World) {
@@ -383,9 +383,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"كل worker يقدر يسحب الشغل التالي من channel مشتركة.",
-			"شغّل العمال، وابعت الأهداف، واجمع النتائج، واقفل القنوات في وقتها.",
-			"راجع توقيع ~worker~؛ أسهم القنوات بتوضح مين يستقبل ومين يبعت.",
+			"كل worker يقدر يسحب الشغل التالي من الـchannel المشتركة.",
+			"شغّل العمال، وابعت الأهداف، واجمع النتائج، واقفل الـchannels في وقتها.",
+			"راجع توقيع ~worker~؛ أسهم الـchannels بتوضح مين يستقبل ومين يبعت.",
 		},
 		Lesson: `# Worker pool: الطابور الذكي 🏗️
 
@@ -562,8 +562,8 @@ func main() {
 }
 `,
 		Hints: []string{
-			"~select~ تتعامل مع حالة channel الجاهزة، و~default~ تكمّل فورًا.",
-			"اشتغل بين الإنذارات، ارجع، استنى الهدوء، وبعدها استأنف.",
+			"~select~ تتعامل مع حالة الـchannel الجاهزة، و~default~ تكمّل فورًا.",
+			"اشتغل بين الإنذارات، ارجع، استنى الهدوء، وبعدها كمّل.",
 			"راجع ~colony.StormWarning()~ و~colony.StormClear()~ لإشارات التحذير والهدوء.",
 		},
 		Lesson: `# select: استنى أكتر من حاجة 🌪️

@@ -24,6 +24,8 @@ function fixture({ blob, review = false, lang = "en" } = {}) {
       disconnect() { this.disconnected = true; }
     },
     document: { body, createElement, querySelector: (selector) => roots["#lesson"].querySelector(selector) },
+    LearningMetrics: { recordHint() {}, recordStepViewed() {}, recordLessonOpened() {}, recordInteraction() {},
+      normalizeMetrics: (metrics) => metrics || {}, mergeMetrics: (a, b) => b || a || {} },
     $: (selector) => roots[selector], ed: editor, store, S: { review }, T: (ar, en) => lang === "en" ? en : ar, Sound: { play() {} },
   });
   vm.runInContext(app.slice(app.indexOf("const esc ="), app.indexOf("// ---------- files ----------")), context);
@@ -447,7 +449,8 @@ test("profile loading retains lesson records, defaults legacy saves, and rejects
   const start = app.indexOf("const store ="), end = app.indexOf("const S =");
   for (const lessons of [undefined, null, "bad", [], { survey: { revision: 1, step: "practice", answers: { question: 0 } } }]) {
     const saved = { progress: { survey: { stars: 2 } }, prefs: {}, quizScores: { 6: 5 }, review: { due: true }, lessons };
-    const context = vm.createContext({ PROFILE: "player", api: async () => saved });
+    const context = vm.createContext({ PROFILE: "player", api: async () => saved,
+      LearningMetrics: { bind() {}, normalizeMetrics: (metrics) => metrics || {} } });
     vm.runInContext(app.slice(start, end), context);
     await vm.runInContext("store.load()", context);
     const loaded = JSON.parse(vm.runInContext("JSON.stringify(store.blob)", context));

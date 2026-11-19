@@ -50,7 +50,7 @@
           "en": "Waiting for delimiter"
         },
         "read": {
-          "ar": "اقرأ chunk",
+          "ar": "اقرا chunk",
           "en": "Read chunk"
         },
         "reset": {
@@ -70,7 +70,7 @@
       "capacity": 1,
       "events": {
         "fast": {
-          "ar": "الإرسال لا ينتظر المستلم.",
+          "ar": "الإرسال ما يستناش المستلم.",
           "en": "The send does not wait for its reader."
         },
         "slow": {
@@ -144,11 +144,11 @@
           "en": "Each datagram stays one unit."
         },
         "packet": {
-          "ar": "الحزمة المستلمة",
+          "ar": "الـpacket المستلمة",
           "en": "Received packet"
         },
         "receive": {
-          "ar": "استقبل الحزمة",
+          "ar": "استقبل الـpacket",
           "en": "Receive packet"
         },
         "reset": {
@@ -156,7 +156,7 @@
           "en": "Reset"
         },
         "title": {
-          "ar": "حزم UDP",
+          "ar": "UDP packets",
           "en": "UDP packets"
         }
       },
@@ -188,15 +188,15 @@
           "en": "Swap byte order"
         },
         "title": {
-          "ar": "ترتيب البايتات",
+          "ar": "ترتيب الـbytes",
           "en": "Byte order"
         },
         "value": {
-          "ar": "قيمة الحقل",
+          "ar": "الـvalue بتاعة الحقل",
           "en": "Field value"
         },
         "wire": {
-          "ar": "البايتات",
+          "ar": "الـbytes",
           "en": "Bytes"
         }
       },
@@ -251,7 +251,7 @@
         },
         {
           "caption": {
-            "ar": "ده سبب خطأ مختلف.",
+            "ar": "ده سبب error مختلف.",
             "en": "This is a different error cause."
           },
           "name": {
