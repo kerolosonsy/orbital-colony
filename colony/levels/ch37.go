@@ -10,6 +10,7 @@ package levels
 func init() {
 	add(&Level{ID: "37-1-schema", Chapter: 37, Kind: "lab",
 		Title: "الأساس", Goal: "ابنِ schema مركز القيادة بترحيلات up/down وrepository خلف interface وسيرفر HTTP صغير", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch37FoundationArabicSteps,
 		Requires: []string{"sel:sql.ErrNoRows", "defer"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5"}, Bridge: []int{100}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}},
 		Lesson: `# مركز القيادة: الأساس
@@ -81,7 +82,7 @@ tx.ExecContext(ctx, m.Up); db.ExecContext(ctx, record) // التسجيل برا 
 
 ~NewServer(s)~: ~GET /healthz~ يرجع 200 و ~{"schema":N}~، أو 503 و ~{"error":"unavailable"}~ لو القاعدة وقعت. ~GET /v1/crews/{crew}/tasks/{task}~ يرجع 200 والمهمة JSON بالمفاتيح ~id, crew_id, title, done, version~، أو 404 و ~{"error":"not_found"}~. كل الردود ~application/json~. النجمة التالتة: مسح طاقم بيمسح مهامه. ~main~ فاضية.
 `,
-		Hints: []string{"ابدأ بـ Migrations وSchemaVersion؛ جرّب Migrate لـ 3 ثم 0 ثم 3 تاني.", "اعمل دالة خطوة واحدة: BeginTx، defer Rollback، Exec للـ SQL، Exec لسطر النسخة، Commit.", "استخدم $1 في كل الاستعلامات وON CONFLICT DO NOTHING مع RowsAffected؛ في CreateTask اتأكد من الطاقم الأول جوه نفس الـ transaction."},
+		Hints: []string{"اعتبر جدول النسخ وصف لحالة schema اللي اتثبتت.", "اختبر كل migration بالاتجاهين، وخلي repository methods منفصلة عن HTTP.", "ارجع لتواقيع Migrate وNewServer في starter وحدد حدود كل transaction."},
 		En: &LevelText{Title: "Foundation", Goal: "Build the command-center schema with up/down migrations, a repository behind an interface, and a small HTTP server", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}},
 			Lesson: `# Command Center: Foundation
 
@@ -152,7 +153,8 @@ Fill ~Migrations~ with versions ~1, 2, 3~ in order (no gaps): ~users(id, email, 
 
 ~NewServer(s)~: ~GET /healthz~ returns 200 and ~{"schema":N}~, or 503 and ~{"error":"unavailable"}~ if the database is down. ~GET /v1/crews/{crew}/tasks/{task}~ returns 200 and the task as JSON with keys ~id, crew_id, title, done, version~, or 404 and ~{"error":"not_found"}~. Every reply is ~application/json~. Third star: deleting a crew deletes its tasks. Leave ~main~ empty.
 `,
-			Hints: []string{"Start with Migrations and SchemaVersion; try Migrate to 3, then 0, then 3 again.", "Write a single-step helper: BeginTx, defer Rollback, Exec the SQL, Exec the ledger row, Commit.", "Use $1 in every query and ON CONFLICT DO NOTHING with RowsAffected; in CreateTask check the crew first inside the same transaction."}},
+			LessonRevision: 1, Steps: ch37FoundationEnglishSteps,
+			Hints: []string{"Treat the version table as a description of the schema state that actually committed.", "Exercise each migration in both directions, and keep repository methods separate from HTTP.", "Use the Migrate and NewServer signatures in the starter to map transaction boundaries."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch371Hidden},
 	})
 }
@@ -588,6 +590,7 @@ func TestHiddenBonusCascade(t *testing.T) {
 func init() {
 	add(&Level{ID: "37-2-auth", Chapter: 37, Kind: "lab", CarryFrom: "37-1-schema",
 		Title: "بوابة الدخول", Goal: "ضيف تسجيل ودخول بجلسات معتمة متخزّن منها digest بس، وخروج، وإلغاء الجلسات عند تغيير الباسورد", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch37AuthArabicSteps,
 		Requires: []string{"sel:bcrypt.GenerateFromPassword", "sel:sha256.Sum256"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}},
 		Lesson: `# مركز القيادة: بوابة الدخول
@@ -633,7 +636,7 @@ http.SetCookie(w, &http.Cookie{Name: "session", Value: token}) // من غير Ht
 
 ~NewAPI(a)~ بيخدم كل مسارات ~NewServer~ كمان، وبيضيف: ~POST /v1/register~ بـ ~{"email","password"}~ يرجع 201 و ~{"id","email"}~، أو 409 ~conflict~، أو 400 ~weak_password~. ~POST /v1/login~ يرجع 204 وكوكي ~session~ بـ ~HttpOnly~ و ~Secure~ و ~SameSite=Lax~ و ~Path=/~ و ~MaxAge~ بثواني ~TTL~. ~GET /v1/me~ بالكوكي يرجع 200 و ~{"id","email"}~. ~POST /v1/logout~ يرجع 204 ويمسح الكوكي (~MaxAge~ سالب). ~POST /v1/password~ بـ ~{"old","new"}~ يرجع 204. أي فشل دخول: 401 و ~{"error":"unauthorized"}~. JSON مكسور: 400 و ~{"error":"bad_request"}~. النجمة التالتة: الجلسة المنتهية تتمسح من القاعدة أول ما حد يحاول يستخدمها.
 `,
-		Hints: []string{"ابدأ بترحيل 4 ودالة digest(token) string بـ sha256 وhex.", "Login: UserByEmail ثم bcrypt.CompareHashAndPassword؛ الغياب والغلط نفس ErrBadCredentials.", "ChangePassword: UPDATE للهاش وDELETE لجلسات المستخدم في نفس الـ transaction؛ وفي Authenticate امسح الصف المنتهي للنجمة."},
+		Hints: []string{"الجلسة تحمل سرًا للعميل؛ قاعدة البيانات تحتاج قيمة مقارنة من غير حفظ السر الخام.", "افصل تحقق كلمة المرور عن إصدار الجلسة ثم عن إلغائها.", "ارجع لتواقيع auth.go وحدد كل دالة بتنشئ أو تستهلك session."},
 		En: &LevelText{Title: "Sign-in Gate", Goal: "Add registration and sign-in with opaque sessions stored only as digests, logout, and session revocation on password change", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}},
 			Lesson: `# Command Center: Sign-in Gate
 
@@ -678,7 +681,8 @@ Add migration 4: ~sessions(digest TEXT PRIMARY KEY, user_id ..., expires_at BIGI
 
 ~NewAPI(a)~ serves every ~NewServer~ route too, and adds: ~POST /v1/register~ with ~{"email","password"}~ returns 201 and ~{"id","email"}~, or 409 ~conflict~, or 400 ~weak_password~. ~POST /v1/login~ returns 204 and a ~session~ cookie with ~HttpOnly~, ~Secure~, ~SameSite=Lax~, ~Path=/~, and ~MaxAge~ of ~TTL~ in seconds. ~GET /v1/me~ with the cookie returns 200 and ~{"id","email"}~. ~POST /v1/logout~ returns 204 and clears the cookie (negative ~MaxAge~). ~POST /v1/password~ with ~{"old","new"}~ returns 204. Every sign-in failure: 401 and ~{"error":"unauthorized"}~. Malformed JSON: 400 and ~{"error":"bad_request"}~. Third star: an expired session is deleted from the database as soon as someone tries to use it.
 `,
-			Hints: []string{"Start with migration 4 and a digest(token) string helper using sha256 and hex.", "Login: UserByEmail, then bcrypt.CompareHashAndPassword; missing and wrong both return ErrBadCredentials.", "ChangePassword: UPDATE the hash and DELETE the user's sessions in one transaction; for the star, delete the expired row in Authenticate."}},
+			LessonRevision: 1, Steps: ch37AuthEnglishSteps,
+			Hints: []string{"A session gives the client a secret; the database needs a comparable value without the raw secret.", "Separate password verification from session creation and revocation.", "Use the auth.go signatures to find each function that creates or consumes a session."}},
 		Lab: &Lab{ReqFile: "auth.go", Bonus: true, Hidden: ch372Hidden},
 	})
 }
@@ -1018,6 +1022,7 @@ func TestHiddenBonusExpiredSessionDeleted(t *testing.T) {
 func init() {
 	add(&Level{ID: "37-3-tenants", Chapter: 37, Kind: "lab", CarryFrom: "37-2-auth",
 		Title: "الأطقم المعزولة", Goal: "ضيف أطقم بأدوار owner/admin/member، وعزل كامل بين الأطقم (الغريب يشوف not found)، ومنع التصعيد، وسجل audit", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch37TenantsArabicSteps,
 		Requires: []string{"sel:sql.ErrNoRows", "map"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}},
 		Lesson: `# مركز القيادة: الأطقم المعزولة
@@ -1064,7 +1069,7 @@ db.ExecContext(ctx, insertMember); db.ExecContext(ctx, insertAudit) // audit ب�
 
 ~NewCommandAPI(c)~ بيخدم كل مسارات ~NewAPI~، وكل المسارات دي محتاجة كوكي ~session~ (من غيرها 401 ~unauthorized~): ~POST /v1/crews~ بـ ~{"name"}~ يرجع 201 و ~{"id","name"}~ (اسم فاضي 400 ~bad_request~). ~POST /v1/crews/{crew}/members~ بـ ~{"email","role"}~ يرجع 201. ~GET /v1/crews/{crew}/audit~ يرجع 200 و ~{"entries":[{"actor","action","target"}]}~. ~GET /v1/crews/{crew}/tasks/{task}~ دلوقتي للأعضاء بس. الأخطاء: 404 ~not_found~، و 403 ~forbidden~، و 400 ~invalid_role~، و 409 ~conflict~.
 `,
-		Hints: []string{"ابدأ بترحيل 5 وRole؛ كل حاجة بعد كده بتبدأ بسؤال: المنادي دوره إيه في الطاقم ده؟", "اعمل map للرتب: member 1، admin 2، owner 3؛ الدور الممنوح لازم يكون أقل من دور المنادي.", "اكتب العضوية وسطر الـ audit في نفس الـ transaction، وفي HTTP حوّل ErrNotFound لـ 404 حتى لو الطاقم موجود."},
+		Hints: []string{"كل صلاحية تخص العضوية داخل الطاقم، مش المستخدم بمعزل عن السياق.", "رتّب خطوات التحقق قبل تنفيذ تغيير العضوية أو كتابة audit.", "ارجع لطرق Crews في starter وحدد مين actor ومين target في كل طلب."},
 		En: &LevelText{Title: "Isolated Crews", Goal: "Add crews with owner/admin/member roles, full isolation between crews (outsiders see not found), escalation prevention, and an audit log", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}},
 			Lesson: `# Command Center: Isolated Crews
 
@@ -1110,7 +1115,8 @@ Add migration 5: ~memberships(crew_id, user_id, role)~ keyed by ~(crew_id, user_
 
 ~NewCommandAPI(c)~ serves every ~NewAPI~ route, and all of the following need a ~session~ cookie (without one: 401 ~unauthorized~): ~POST /v1/crews~ with ~{"name"}~ returns 201 and ~{"id","name"}~ (a blank name is 400 ~bad_request~). ~POST /v1/crews/{crew}/members~ with ~{"email","role"}~ returns 201. ~GET /v1/crews/{crew}/audit~ returns 200 and ~{"entries":[{"actor","action","target"}]}~. ~GET /v1/crews/{crew}/tasks/{task}~ is now members only. Errors: 404 ~not_found~, 403 ~forbidden~, 400 ~invalid_role~, 409 ~conflict~.
 `,
-			Hints: []string{"Start with migration 5 and Role; everything afterwards starts with: what is the caller's role in this crew?", "Make a rank map: member 1, admin 2, owner 3; the granted role must rank below the caller's.", "Write the membership and the audit row in one transaction, and in HTTP map ErrNotFound to 404 even when the crew exists."}},
+			LessonRevision: 1, Steps: ch37TenantsEnglishSteps,
+			Hints: []string{"Every permission belongs to a membership in a crew, not to the user in isolation.", "Order authorization checks before changing membership or writing audit data.", "Use the Crews signatures in the starter to identify each request's actor and target."}},
 		Lab: &Lab{ReqFile: "crews.go", Bonus: false, Hidden: ch373Hidden},
 	})
 }
@@ -1360,6 +1366,7 @@ func TestHiddenCrewHTTPIsolation(t *testing.T) {
 func init() {
 	add(&Level{ID: "37-4-tasks", Chapter: 37, Kind: "lab", CarryFrom: "37-3-tenants",
 		Title: "لوحة المهام", Goal: "ضيف مهام بـ Idempotency-Key ونسخة متفائلة وصفحات بـ cursor ثابت من غير تكرار", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch37TasksArabicSteps,
 		Requires: []string{"sel:strconv.Atoi", "sel:base64.RawURLEncoding"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}},
 		Lesson: `# مركز القيادة: لوحة المهام
@@ -1412,7 +1419,7 @@ db.QueryContext(ctx, "SELECT ... LIMIT $1 OFFSET $2", n, page*n) // صفوف ب�
 
 ~GET /v1/crews/{crew}/tasks?limit=&cursor=~: ~limit~ افتراضي 20 ومن 1 لـ 100، و cursor مش base64 صح: 400 ~bad_request~. يرجع 200 و ~{"tasks":[...],"next":"..."}~ بترتيب ~id~، و ~next~ فاضي في آخر صفحة. اللف على كل الصفحات بيرجّع كل مهمة مرة واحدة، حتى لو اتضافت مهام بين الصفحات.
 `,
-		Hints: []string{"ابدأ بالـ PATCH: UPDATE بشرط version = $N، وRowsAffected صفر يبقى 409 أو 404.", "للصفحات: WHERE id > cursor ORDER BY id LIMIT limit+1؛ الـ cursor هو base64 لآخر id.", "للـ POST: اقرا الجسم بـ io.ReadAll واحسب sha256، واعمل INSERT للمفتاح كأول أمر في الـ transaction؛ لو اتكرر، اقرا الرد المحفوظ وقارن البصمة."},
+		Hints: []string{"فكر في التكرار والتعارض كحالتين مختلفتين من طلبات الشبكة.", "قسّم POST وPATCH وGET pages إلى تدفقات منفصلة قبل مشاركة أجزاء التخزين.", "ارجع إلى NewTaskAPI في starter وحدد البيانات التي تخص كل route."},
 		En: &LevelText{Title: "Task Board", Goal: "Add tasks with Idempotency-Key, optimistic versions, and stable cursor pages without duplicates", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}},
 			Lesson: `# Command Center: Task Board
 
@@ -1464,7 +1471,8 @@ Add migration 6: a key table keyed by ~(crew_id, user_id, key)~ holding the fing
 
 ~GET /v1/crews/{crew}/tasks?limit=&cursor=~: ~limit~ defaults to 20 and must be 1 to 100, and a cursor that is not valid base64 is 400 ~bad_request~. Returns 200 and ~{"tasks":[...],"next":"..."}~ in ~id~ order, with an empty ~next~ on the last page. Walking every page returns each task exactly once, even when tasks are added between pages.
 `,
-			Hints: []string{"Start with PATCH: UPDATE with version = $N; zero RowsAffected is 409 or 404.", "For pages: WHERE id > cursor ORDER BY id LIMIT limit+1; the cursor is base64 of the last id.", "For POST: read the body with io.ReadAll and hash it with sha256, and INSERT the key as the transaction's first statement; on a duplicate, read the saved reply and compare fingerprints."}},
+			LessonRevision: 1, Steps: ch37TasksEnglishSteps,
+			Hints: []string{"Treat retries and conflicts as different outcomes of network requests.", "Separate POST, PATCH, and GET-page flows before sharing storage helpers.", "Use NewTaskAPI in the starter to identify the data each route needs."}},
 		Lab: &Lab{ReqFile: "tasks.go", Bonus: false, Hidden: ch374Hidden},
 	})
 }
@@ -1772,6 +1780,7 @@ func TestHiddenCursorPages(t *testing.T) {
 func init() {
 	add(&Level{ID: "37-5-operate", Chapter: 37, Kind: "lab", CarryFrom: "37-4-tasks",
 		Title: "غرفة التشغيل", Goal: "لف الـ API بـ request ID وشكل أخطاء ثابت وmetrics وحد طلبات وسجل من غير أسرار وإغلاق بيصفّي الطلبات الجارية", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch37OpsArabicSteps,
 		Requires: []string{"recover", "mutex"}, Deps: []string{"modernc.org/sqlite", "github.com/jackc/pgx/v5", "golang.org/x/crypto"}, Bridge: []int{100, 91, 96}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}, {Name: "ops.go", Starter: ch375Starter}},
 		Lesson: `# مركز القيادة: غرفة التشغيل
@@ -1838,7 +1847,7 @@ srv.Shutdown(ctx) // ctx اللي اتلغى أصلاً: مفيش تصفية خ�
 
 ~Serve(ctx, ln, h, drain)~ تخدم على ~ln~ لحد ما ~ctx~ يتلغي، وبعدها تبطّل تقبل اتصالات وتصفّي الجاري: ~nil~ لو خلص في ~drain~، وخطأ لو لأ (بعد ما تقطع الباقي). النجمة التالتة: ~command_requests_in_flight~ صح وطلب شغال.
 `,
-		Hints: []string{"ابدأ بـ Serve: srv.Serve في goroutine، استنى ctx.Done، وبعدين Shutdown بسياق جديد عمره drain.", "اعمل struct بيلف ResponseWriter: لو الحالة 400 أو أكتر جمّع الجسم في bytes.Buffer، وبعد ما h تخلص اكتب الشكل الموحد.", "قفل واحد sync.Mutex يحمي العدادات ونوافذ الحد والكتابة في Log؛ والـ recover جوه func فيها defer حوالين h.ServeHTTP."},
+		Hints: []string{"الـmiddleware يضيف معلومات الطلب حول handler من غير نقل ملكية الرد.", "قسّم عمليات HTTP عن الحالة المحمية بالتزامن وإدارة عمر السيرفر.", "ابدأ من تواقيع Operate وServe في starter وحدد موارد كل واحدة."},
 		En: &LevelText{Title: "Operations Room", Goal: "Wrap the API with request IDs, a fixed error shape, metrics, rate limiting, secret-free logs, and shutdown that drains in-flight requests", Files: []LabFile{{Name: "main.go", Starter: ch371Starter}, {Name: "auth.go", Starter: ch372Starter}, {Name: "crews.go", Starter: ch373Starter}, {Name: "tasks.go", Starter: ch374Starter}, {Name: "ops.go", Starter: ch375Starter}},
 			Lesson: `# Command Center: Operations Room
 
@@ -1904,7 +1913,8 @@ Every reply carries ~X-Request-ID~: the incoming value if it matches ~^[A-Za-z0-
 
 ~Serve(ctx, ln, h, drain)~ serves on ~ln~ until ~ctx~ is canceled, then stops accepting connections and drains in-flight requests: ~nil~ if they finish within ~drain~, an error otherwise (after cutting the rest). Third star: ~command_requests_in_flight~ is correct while a request is running.
 `,
-			Hints: []string{"Start with Serve: srv.Serve in a goroutine, wait for ctx.Done, then Shutdown with a fresh context that lasts drain.", "Make a struct that wraps ResponseWriter: at status 400 or above collect the body in a bytes.Buffer, and after h returns write the shared shape.", "One sync.Mutex guards the counters, the limit windows, and writes to Log; put recover in a func with a defer around h.ServeHTTP."}},
+			LessonRevision: 1, Steps: ch37OpsEnglishSteps,
+			Hints: []string{"Middleware adds request context around a handler without taking ownership of its reply.", "Separate HTTP operations from synchronized state and server lifetime management.", "Start with Operate and Serve in the starter and map each function's resources."}},
 		Lab: &Lab{ReqFile: "ops.go", Bonus: true, Hidden: ch375Hidden},
 	})
 }
