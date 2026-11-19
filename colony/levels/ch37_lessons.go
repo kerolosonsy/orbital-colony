@@ -43,7 +43,7 @@ func ch37AtomicConfig() map[string]any {
 			"title":  ch37Pair("تغييرين مع بعض", "Two changes together"),
 			"schema": ch37Pair("schema", "schema"), "ledger": ch37Pair("سجل النسخ", "version ledger"),
 			"fail": ch37Pair("محاكاة فشل", "Simulate failure"), "commit": ch37Pair("محاكاة نجاح", "Simulate commit"), "reset": ch37Pair("ابدأ تاني", "Reset"),
-			"ready": ch37Pair("جاهز لتغيير تجريبي", "Ready for a sample change"), "failed": ch37Pair("فشل؛ الاتنين زي ما هم", "Failed; both values stay"), "committed": ch37Pair("نجاح؛ القيمتين اتحدثوا سوا", "Committed; both values moved"),
+			"ready": ch37Pair("جاهز لتغيير تجريبي", "Ready for a sample change"), "failed": ch37Pair("فشل؛ الاتنين زي ما هم", "Failed; both values stay"), "committed": ch37Pair("نجاح؛ الـvalues اتحدثوا سوا", "Committed; both values moved"),
 		},
 		"values": map[string]any{"schema": 4, "ledger": 4, "next": 5},
 	}
@@ -53,9 +53,9 @@ func ch37SessionConfig() map[string]any {
 	return map[string]any{
 		"labels": map[string]any{
 			"title":  ch37Pair("التوكن ومخزونه", "Token and stored digest"),
-			"client": ch37Pair("مع العميل", "Client holds"), "store": ch37Pair("المخزن", "Store holds"),
+			"client": ch37Pair("مع الـclient", "Client holds"), "store": ch37Pair("المخزن", "Store holds"),
 			"issue": ch37Pair("إصدار جلسة", "Issue session"), "logout": ch37Pair("خروج", "Log out"), "reset": ch37Pair("ابدأ تاني", "Reset"),
-			"empty": ch37Pair("مفيش", "None"), "ready": ch37Pair("مفيش جلسة", "No active session"), "issued": ch37Pair("العميل ماسك التوكن", "Client holds the token"), "ended": ch37Pair("الجلسة اتقفلت", "Session ended"), "cleared": ch37Pair("الحالة اتصفّرت", "Session state cleared"),
+			"empty": ch37Pair("مفيش", "None"), "ready": ch37Pair("مفيش جلسة", "No active session"), "issued": ch37Pair("الـclient ماسك التوكن", "Client holds the token"), "ended": ch37Pair("الجلسة اتقفلت", "Session ended"), "cleared": ch37Pair("الحالة اتصفّرت", "Session state cleared"),
 		},
 		"values": map[string]any{"token": "token-amber", "digest": "digest-amber"},
 	}
@@ -64,8 +64,8 @@ func ch37SessionConfig() map[string]any {
 func ch37CrewConfig() map[string]any {
 	return map[string]any{
 		"labels": map[string]any{
-			"title": ch37Pair("المفتاح فيه نطاق", "The key includes scope"),
-			"key":   ch37Pair("المفتاح المركّب", "Composite key"), "role": ch37Pair("الدور", "Role"), "choose": ch37Pair("اختار نطاق", "Choose a scope"),
+			"title": ch37Pair("الـkey فيه نطاق", "The key includes scope"),
+			"key":   ch37Pair("الـkey المركّب", "Composite key"), "role": ch37Pair("الدور", "Role"), "choose": ch37Pair("اختار نطاق", "Choose a scope"),
 			"blue": ch37Pair("blue + mira", "blue + mira"), "gold": ch37Pair("gold + mira", "gold + mira"), "red": ch37Pair("red + mira", "red + mira"), "empty": ch37Pair("—", "—"),
 		},
 		"lookups": []any{
@@ -92,13 +92,13 @@ func ch37CursorConfig() map[string]any {
 func ch37OperationsConfig() map[string]any {
 	return map[string]any{
 		"labels": map[string]any{
-			"title":    ch37Pair("مسار الطلب", "Request path"),
+			"title":    ch37Pair("مسار الـrequest", "Request path"),
 			"previous": ch37Pair("اللي قبلها", "Previous"), "next": ch37Pair("اللي بعدها", "Next"), "reset": ch37Pair("من الأول", "Reset"),
 		},
 		"frames": []any{
-			map[string]any{"stage": ch37Pair("وصول", "Arrival"), "detail": "GET /v1/tasks?sample=1", "caption": ch37Pair("طلب تجريبي وصل", "A sample request arrived")},
-			map[string]any{"stage": ch37Pair("هوية الطلب", "Request identity"), "detail": "req-42", "caption": ch37Pair("اتضاف request ID", "A request ID was added")},
-			map[string]any{"stage": ch37Pair("الرد", "Response"), "detail": "202 Accepted", "caption": ch37Pair("الرد رجع للعميل", "The response returned to the client")},
+			map[string]any{"stage": ch37Pair("وصول", "Arrival"), "detail": "GET /v1/tasks?sample=1", "caption": ch37Pair("request تجريبي وصل", "A sample request arrived")},
+			map[string]any{"stage": ch37Pair("هوية الـrequest", "Request identity"), "detail": "req-42", "caption": ch37Pair("اتضاف request ID", "A request ID was added")},
+			map[string]any{"stage": ch37Pair("الـresponse", "Response"), "detail": "202 Accepted", "caption": ch37Pair("الـresponse رجع للـclient", "The response returned to the client")},
 			map[string]any{"stage": ch37Pair("السجل", "Log"), "detail": "GET /v1/tasks · 202", "caption": ch37Pair("السجل فيه path من غير query", "The log keeps the path, not query")},
 		},
 	}
@@ -171,7 +171,7 @@ const ch37ContextExample = `func main() {
 	fmt.Println(ctx.Err())
 }`
 
-const ch37FoundationArabic = `1. كمّل migrations وrepository وسيرفر صغير في ~main.go~.
+const ch37FoundationArabic = `1. كمّل migrations وrepository وserver صغير في ~main.go~.
 2. خلّي سجل النسخ يواكب كل تغيير في schema.
 3. حافظ على عقد واحد لـSQLite وPostgres.
 
@@ -200,8 +200,8 @@ var ch37FoundationArabicSteps = []LessonStep{
 			ch37TransactionExample, "e371-atomic-step", []string{"fmt"},
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
-				{Line: 1, Caption: "الدالة تستقبل حالة قديمة."},
-				{Line: 2, Caption: "المعاملة فشلت."},
+				{Line: 1, Caption: "الـfunction تستقبل حالة قديمة."},
+				{Line: 2, Caption: "الـtransaction فشلت."},
 				{Line: 3, Caption: "الحالة القديمة تفضل."},
 				{Line: 5, Caption: "النجاح يضيف نسخة."},
 				{Line: 8, Caption: "جهّز النسخة الحالية."},
@@ -239,8 +239,8 @@ var ch37FoundationArabicSteps = []LessonStep{
 	{
 		ID: "c371.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch37Markdown("c371.plan", "ابدأ بقراءة النسخة، وبعدها نفّذ كل ترحيل كوحدة واحدة.\n\nافصل schema عن repository وعن HTTP؛ خلي كل دالة واضحة."),
-			ch37Question("c371.ledger-transaction", "سطر النسخة يتسجل فين؟", []string{"بعد الـtransaction", "جوا نفس الـtransaction", "بعد رد HTTP"}, 1, []string{
+			ch37Markdown("c371.plan", "ابدأ بقراية النسخة، وبعدها نفّذ كل ترحيل كوحدة واحدة.\n\nافصل schema عن repository وعن HTTP؛ خلي كل function واضحة."),
+			ch37Question("c371.ledger-transaction", "سطر النسخة يتسجل فين؟", []string{"بعد الـtransaction", "جوا نفس الـtransaction", "بعد response HTTP"}, 1, []string{
 				"الفشل هنا يسيب schema والـledger مختلفين.",
 				"التغيير وسطر نسخته لازم يثبتوا مع بعض.",
 				"HTTP مش مالك ترحيل schema.",
@@ -325,7 +325,7 @@ const ch37AuthArabic = `1. كمّل التسجيل والدخول والجلسا
 
 الملفات السابقة جاية من مرحلة الأساس.
 
-خلي رد بيانات الدخول الغلط موحّد.`
+خلي response بيانات الدخول الغلط موحّد.`
 
 const ch37AuthEnglish = `1. Complete registration, sign-in, and sessions in ~auth.go~.
 2. Store a session digest instead of the raw token.
@@ -344,12 +344,12 @@ var ch37AuthArabicSteps = []LessonStep{
 		ID: "c372.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{ch37Walkthrough(
 			"c372.session-digest",
-			"الـtoken بيرجع للعميل مرة واحدة. خزّن بصمة ثابتة منه عشان تقدر تقارنها من غير ما تحفظ سر الجلسة نفسه.",
+			"الـtoken بيرجع للـclient مرة واحدة. خزّن بصمة ثابتة منه عشان تقدر تقارنها من غير ما تحفظ سر الجلسة نفسه.",
 			ch37DigestExample, "e372-session-digest", []string{"crypto/sha256", "fmt"},
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
 				{Line: 1, Caption: "ابدأ main."},
-				{Line: 2, Caption: "الـtoken نص توضيحي.", Variables: []LessonVariable{{Name: "token", Value: "session-demo"}}},
+				{Line: 2, Caption: "الـtoken string توضيحي.", Variables: []LessonVariable{{Name: "token", Value: "session-demo"}}},
 				{Line: 3, Caption: "احسب digest ثابت الطول.", Variables: []LessonVariable{{Name: "digest", Value: "32 bytes"}}},
 				{Line: 4, Caption: "قارن الطولين.", Variables: []LessonVariable{{Name: "digest", Value: "32 bytes"}}, Output: "12 32"},
 			},
@@ -360,12 +360,12 @@ var ch37AuthArabicSteps = []LessonStep{
 		Blocks: []LessonBlock{
 			ch37Question("c372.predict-digest", ch37Prediction("توقّع طول الـdigest اللي بيرجعه المثال.", ch37DigestTryExample), []string{"6", "32", "64"}, 1, []string{
 				"ده طول كلمة sample، مش البصمة.",
-				"SHA-256 بيرجع 32 bytes.",
+				"SHA-256 بيرجّع 32 bytes.",
 				"64 هو عدد خانات hex بعد التحويل.",
 			}),
 			ch37Walkthrough(
 				"c372.digest-reveal",
-				"شوف طول بصمة SHA-256 لقيمة توضيحية.",
+				"شوف طول بصمة SHA-256 لـvalue توضيحية.",
 				ch37DigestTryExample, "e372-digest-length", []string{"crypto/sha256", "fmt"},
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
@@ -379,14 +379,14 @@ var ch37AuthArabicSteps = []LessonStep{
 	},
 	{
 		ID: "c372.watch-step", Title: "خد بالك",
-		Blocks: []LessonBlock{ch37Markdown("c372.watch", "- password hashing غير digest الجلسة؛ ما تستخدمش SHA-256 وحده لكلمات المرور.\n- رد واحد للـemail الغايب وكلمة السر الغلط يقلل كشف الحسابات.")},
+		Blocks: []LessonBlock{ch37Markdown("c372.watch", "- password hashing غير digest الجلسة؛ ما تستخدمش SHA-256 وحده لكلمات المرور.\n- response واحد للـemail الغايب وكلمة السر الغلط يقلل كشف الحسابات.")},
 	},
 	{
 		ID: "c372.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch37Markdown("c372.plan", "افصل إنشاء المستخدم عن التحقق من كلمة السر، وبعدها أنشئ جلسة واربطها بالمستخدم.\n\nراجع أثر logout وتغيير كلمة السر على الجلسات السابقة."),
-			ch37Question("c372.session-storage", "أنهي قيمة تتخزن للجلسة؟", []string{"الـtoken الخام", "digest للـtoken", "كلمة السر"}, 1, []string{
-				"الـtoken سر يحمله العميل.",
+			ch37Markdown("c372.plan", "افصل إنشاء المستخدم عن التحقق من كلمة السر، وبعدها افتح session واربطها بالمستخدم.\n\nراجع أثر logout وتغيير كلمة السر على الـsessions السابقة."),
+			ch37Question("c372.session-storage", "أنهي value تتخزن للـsession؟", []string{"الـtoken الخام", "digest للـtoken", "كلمة السر"}, 1, []string{
+				"الـtoken سر يحمله الـclient.",
 				"البصمة تكفي للمقارنة من غير تخزين السر.",
 				"كلمة السر مش session credential.",
 			}),
@@ -467,7 +467,7 @@ const ch37TenantsArabic = `1. كمّل إدارة الأطقم والأدوار 
 
 الأساس وتسجيل الدخول جايين من المراحل السابقة.
 
-فكّر في هوية المستخدم وسياق الطاقم مع بعض.`
+فكّر في هوية المستخدم وcontext الطاقم مع بعض.`
 
 const ch37TenantsEnglish = `1. Complete crew and role management in ~crews.go~.
 2. Isolate each crew's data from nonmembers.
@@ -490,10 +490,10 @@ var ch37TenantsArabicSteps = []LessonStep{
 			ch37MembershipExample, "e373-tenant-key", []string{"fmt"},
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
-				{Line: 1, Caption: "المفتاح فيه طاقم ومستخدم."},
+				{Line: 1, Caption: "الـkey فيه طاقم ومستخدم."},
 				{Line: 5, Caption: "ابدأ main."},
-				{Line: 6, Caption: "خريطة العضويات."},
-				{Line: 10, Caption: "اقرأ الدورين.", Output: "lead reader"},
+				{Line: 6, Caption: "الـmap للعضويات."},
+				{Line: 10, Caption: "اقرا الدورين.", Output: "lead reader"},
 			},
 		)},
 	},
@@ -502,8 +502,8 @@ var ch37TenantsArabicSteps = []LessonStep{
 		Blocks: []LessonBlock{
 			ch37Question("c373.predict-scope", ch37Prediction("توقّع دور nova داخل الطاقم gold.", ch37ScopeTryExample), []string{"lead", "reader", "empty"}, 1, []string{
 				"lead يخص الطاقم التاني.",
-				"مفتاح المجموعة فيه gold وnova.",
-				"العضوية موجودة في الخريطة.",
+				"الـkey المركب فيه gold وnova.",
+				"العضوية موجودة في الـmap.",
 			}),
 			ch37Walkthrough(
 				"c373.scope-reveal",
@@ -511,9 +511,9 @@ var ch37TenantsArabicSteps = []LessonStep{
 				ch37ScopeTryExample, "e373-scope-reveal", []string{"fmt"},
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التنفيذ."},
-					{Line: 1, Caption: "Scope يجمع قيمتين."},
-					{Line: 3, Caption: "خريطة فيها عضويتان."},
-					{Line: 4, Caption: "اطلب المفتاح المركب.", Output: "reader"},
+					{Line: 1, Caption: "Scope بيجمع values."},
+					{Line: 3, Caption: "الـmap فيها عضويتين."},
+					{Line: 4, Caption: "اطلب الـkey المركب.", Output: "reader"},
 				},
 			),
 			ch37Sandbox("c373.scope-playground", "بدّل نطاق الطاقم وشوف الدور.", "ch37-scoped-membership", ch37CrewConfig()),
@@ -526,8 +526,8 @@ var ch37TenantsArabicSteps = []LessonStep{
 	{
 		ID: "c373.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch37Markdown("c373.plan", "ابدأ بهوية المنادي، بعدين عضويته ودوره في الطاقم المطلوب.\n\nبعد التحقق، اربط تغيير العضوية بسطر audit وراجع رد الـHTTP."),
-			ch37Question("c373.outsider-code", "غريب سأل عن طاقم؛ أنهي رد يخفي وجوده؟", []string{"403 Forbidden", "404 Not Found", "200 OK"}, 1, []string{
+			ch37Markdown("c373.plan", "ابدأ بهوية المنادي، بعدين عضويته ودوره في الطاقم المطلوب.\n\nبعد التحقق، اربط تغيير العضوية بسطر audit وراجع response الـHTTP."),
+			ch37Question("c373.outsider-code", "غريب سأل عن طاقم؛ أنهي response يخفي وجوده؟", []string{"403 Forbidden", "404 Not Found", "200 OK"}, 1, []string{
 				"403 يلمّح إن المورد موجود.",
 				"404 مايكشفش وجود الطاقم.",
 				"200 يكشف بيانات المورد.",
@@ -604,7 +604,7 @@ var ch37TenantsEnglishSteps = []LessonStep{
 }
 
 const ch37TasksArabic = `1. كمّل إنشاء وتعديل وعرض المهام في ~tasks.go~.
-2. عالج إعادة الطلب وتعارض النسخ.
+2. عالج إعادة الـrequest وتعارض النسخ.
 3. خلّي صفحات القائمة تكمل من cursor ثابت.
 
 الملفات السابقة محمولة من مرحلة الأطقم.
@@ -628,12 +628,12 @@ var ch37TasksArabicSteps = []LessonStep{
 		ID: "c374.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{ch37Walkthrough(
 			"c374.cursor-encode",
-			"الـcursor علامة متابعة opaque للعميل. ترميز الـID يخليه نص آمن للنقل، والترتيب الثابت يحدد الصفحة التالية.",
+			"الـcursor علامة متابعة opaque للـclient. ترميز الـID يخليه string آمن للنقل، والترتيب الثابت يحدد الصفحة التالية.",
 			ch37CursorExample, "e374-cursor-encode", []string{"encoding/base64", "fmt"},
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
 				{Line: 1, Caption: "ابدأ main."},
-				{Line: 2, Caption: "حوّل ID توضيحي لنص."},
+				{Line: 2, Caption: "حوّل ID توضيحي لـstring."},
 				{Line: 3, Caption: "اطبع الـcursor.", Output: "cm93LWFtYmVy"},
 			},
 		)},
@@ -642,9 +642,9 @@ var ch37TasksArabicSteps = []LessonStep{
 		ID: "c374.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{
 			ch37Question("c374.predict-cursor", ch37Prediction("توقّع الـID بعد فك الـcursor.", ch37CursorTryExample), []string{"cm93LWJsdWU", "row-blue", "row-amber"}, 1, []string{
-				"ده النص المرمّز نفسه.",
+				"ده الـstring المرمّز نفسه.",
 				"فك الترميز يرجّع ID الأصلي.",
-				"ده مثال تاني مش قيمة الـcursor.",
+				"ده مثال تاني مش الـvalue بتاعة الـcursor.",
 			}),
 			ch37Walkthrough(
 				"c374.cursor-reveal",
@@ -653,7 +653,7 @@ var ch37TasksArabicSteps = []LessonStep{
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
 					{Line: 1, Caption: "ابدأ main."},
-					{Line: 2, Caption: "فك النص المرمّز."},
+					{Line: 2, Caption: "فك الـstring المرمّز."},
 					{Line: 3, Caption: "اطبع الـID الأصلي.", Output: "row-blue"},
 				},
 			),
@@ -662,15 +662,15 @@ var ch37TasksArabicSteps = []LessonStep{
 	},
 	{
 		ID: "c374.watch-step", Title: "خد بالك",
-		Blocks: []LessonBlock{ch37Markdown("c374.watch", "- مفتاح التكرار مرتبط بالمستخدم والطاقم والجسم.\n- version تمنع تعديل قديم يمسح تحديث أحدث؛ OFFSET بيتأثر بإضافات الصفوف.")},
+		Blocks: []LessonBlock{ch37Markdown("c374.watch", "- الـkey بتاع التكرار مرتبط بالمستخدم والطاقم والجسم.\n- version تمنع تعديل قديم يمسح تحديث أحدث؛ OFFSET بيتأثر بإضافات الصفوف.")},
 	},
 	{
 		ID: "c374.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch37Markdown("c374.plan", "راجع POST لوحده مع إعادة الطلب، ثم PATCH مع نسخة قديمة، وبعدها مرّ على صفحات GET.\n\nقارن ترتيب العناصر وحدد إزاي كل cursor بيكمل القائمة."),
-			ch37Question("c374.retry-check", "نفس المفتاح ونفس الجسم اتبعتوا تاني؛ إيه المتوقع؟", []string{"مهمة جديدة", "الرد المحفوظ", "تعديل للنسخة"}, 1, []string{
+			ch37Markdown("c374.plan", "راجع POST لوحده مع إعادة الـrequest، ثم PATCH مع نسخة قديمة، وبعدها مرّ على صفحات GET.\n\nقارن ترتيب العناصر وحدد إزاي كل cursor بيكمل القائمة."),
+			ch37Question("c374.retry-check", "نفس الـkey ونفس الجسم اتبعتوا تاني؛ إيه المتوقع؟", []string{"مهمة جديدة", "الـresponse المحفوظ", "تعديل للنسخة"}, 1, []string{
 				"إعادة الإرسال المفروض ما تكررّش الأثر.",
-				"نفس الطلب يرجع الرد اللي اتحفظ.",
+				"نفس الـrequest بيرجّع الـresponse اللي اتحفظ.",
 				"النسخة تخص تعديل PATCH.",
 			}),
 		},
@@ -744,8 +744,8 @@ var ch37TasksEnglishSteps = []LessonStep{
 }
 
 const ch37OpsArabic = `1. كمّل middleware و~Serve~ في ~ops.go~.
-2. ضيف request ID وأخطاء وmetrics وحد طلبات من غير أسرار في السجل.
-3. صفّي الطلبات الجارية وقت الإغلاق.
+2. ضيف request ID وerrors وmetrics وrate limit من غير أسرار في السجل.
+3. صفّي الـrequests الجارية وقت الإغلاق.
 
 كل ملفات الـAPI السابقة محمولة.
 
@@ -768,12 +768,12 @@ var ch37OpsArabicSteps = []LessonStep{
 		ID: "c375.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{ch37Walkthrough(
 			"c375.path-log",
-			"~URL.Path~ فيه المسار من غير query. استخدمه لما تسجل الطلب عشان قيمة زي token ماتدخلش في السجل.",
+			"~URL.Path~ فيه المسار من غير query. استخدمه لما تسجل الـrequest عشان value زي token ماتدخلش في السجل.",
 			ch37PathExample, "e375-path-log", []string{"fmt", "net/http"},
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
 				{Line: 1, Caption: "ابدأ main."},
-				{Line: 2, Caption: "الطلب فيه query."},
+				{Line: 2, Caption: "الـrequest فيه query."},
 				{Line: 3, Caption: "اطبع المسار وحده.", Output: "/v1/tasks"},
 			},
 		)},
@@ -783,7 +783,7 @@ var ch37OpsArabicSteps = []LessonStep{
 		Blocks: []LessonBlock{
 			ch37Question("c375.predict-context", ch37Prediction("توقّع نتيجة الـcontext بعد cancel.", ch37ContextExample), []string{"<nil>", "context canceled", "deadline exceeded"}, 1, []string{
 				"الـcontext اتلغى بالفعل.",
-				"Err بيرجع سبب الإلغاء.",
+				"Err بيرجّع سبب الإلغاء.",
 				"مافيش deadline اتحدد.",
 			}),
 			ch37Walkthrough(
@@ -793,32 +793,32 @@ var ch37OpsArabicSteps = []LessonStep{
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
 					{Line: 1, Caption: "ابدأ main."},
-					{Line: 2, Caption: "أنشئ context قابل للإلغاء."},
+					{Line: 2, Caption: "جهّز context قابل للإلغاء."},
 					{Line: 3, Caption: "ألغِه صراحة."},
-					{Line: 4, Caption: "اقرأ سبب الإلغاء.", Output: "context canceled"},
+					{Line: 4, Caption: "اقرا سبب الإلغاء.", Output: "context canceled"},
 				},
 			),
-			ch37Sandbox("c375.request-playground", "تتبّع طلبًا تجريبيًا مرحلة مرحلة.", "ch37-request-path", ch37OperationsConfig()),
+			ch37Sandbox("c375.request-playground", "تتبّع request تجريبي مرحلة مرحلة.", "ch37-request-path", ch37OperationsConfig()),
 		},
 	},
 	{
 		ID: "c375.watch-step", Title: "خد بالك",
-		Blocks: []LessonBlock{ch37Markdown("c375.watch", "- استخدم context جديد بمهلة للتصفية بعد إلغاء context السيرفر.\n- احمِ العدادات والنوافذ والسجل من race؛ ما تسجلش headers.")},
+		Blocks: []LessonBlock{ch37Markdown("c375.watch", "- استخدم context جديد بمهلة للتصفية بعد إلغاء context الـserver.\n- احمِ العدادات والنوافذ والسجل من race؛ ما تسجلش headers.")},
 	},
 	{
 		ID: "c375.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch37Markdown("c375.plan", "تتبّع الطلب من ID للـhandler ثم للـresponse والـlog، مع قياس الحالة مرة واحدة.\n\nافصل طلب metrics عن العد، وراجع سلوك drain بعد الإلغاء."),
+			ch37Markdown("c375.plan", "تتبّع الـrequest من ID للـhandler ثم للـresponse والـlog، مع قياس الحالة مرة واحدة.\n\nافصل request metrics عن العد، وراجع سلوك drain بعد الإلغاء."),
 			ch37Question("c375.drain-context", "بعد إلغاء context الأصلي، إيه اللي يسمح بوقت للتصفية؟", []string{"نفس context الملغي", "context جديد", "Background بلا مهلة"}, 1, []string{
-				"السياق الملغي ينهي العمل فوراً.",
-				"سياق جديد يقدر يحمل مهلة التصفية.",
+				"الـcontext الملغي ينهي العمل فوراً.",
+				"context جديد يقدر يحمل مهلة التصفية.",
 				"من غير مهلة مفيش حد للانتظار.",
 			}),
 		},
 	},
 	{
 		ID: "c375.turn-step", Title: "دورك",
-		Blocks: []LessonBlock{ch37Markdown("c375.turn", "ابدأ بالـmiddleware على handler بسيط. بعده جرّب الخطأ والحد والتزامن، ثم شغّل Serve على listener محلي.")},
+		Blocks: []LessonBlock{ch37Markdown("c375.turn", "ابدأ بالـmiddleware على handler بسيط. بعده جرّب الـerror والحد والتزامن، ثم شغّل Serve على listener محلي.")},
 	},
 }
 

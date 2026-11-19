@@ -3,7 +3,7 @@
     "frames": [
       {
         "caption": {
-          "ar": "الاسمين شايفين نفس البايتات.",
+          "ar": "الاسمين شايفين نفس الـbytes.",
           "en": "Both names share these bytes."
         },
         "leftLabel": {
@@ -48,7 +48,7 @@
     ],
     "labels": {
       "advance": {
-        "ar": "غيّر أول بايت",
+        "ar": "غيّر أول byte",
         "en": "Change first byte"
       },
       "reset": {
@@ -57,7 +57,7 @@
       }
     },
     "title": {
-      "ar": "ملكية البايتات",
+      "ar": "ملكية الـbytes",
       "en": "Byte ownership"
     }
   },
@@ -69,7 +69,7 @@
           "en": "The record is complete and checksum matches."
         },
         "leftLabel": {
-          "ar": "البايتات",
+          "ar": "الـbytes",
           "en": "Bytes"
         },
         "leftValue": {
@@ -91,7 +91,7 @@
           "en": "The tail is short; the record is incomplete."
         },
         "leftLabel": {
-          "ar": "البايتات",
+          "ar": "الـbytes",
           "en": "Bytes"
         },
         "leftValue": {
@@ -113,7 +113,7 @@
           "en": "The length is complete, but checksum differs."
         },
         "leftLabel": {
-          "ar": "البايتات",
+          "ar": "الـbytes",
           "en": "Bytes"
         },
         "leftValue": {
@@ -321,7 +321,7 @@
       },
       {
         "caption": {
-          "ar": "الإصلاح نسخ بايتات سليمة.",
+          "ar": "الإصلاح نسخ bytes سليمة.",
           "en": "Repair copied intact bytes."
         },
         "leftLabel": {

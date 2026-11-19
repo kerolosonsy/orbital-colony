@@ -162,10 +162,10 @@ var ch32Sandbox321 = map[string]any{
 
 var ch32Sandbox322 = map[string]any{
 	"labels": map[string]any{
-		"title": ch32LocalizedText("طلب ورد", "Request and reply"), "query": ch32LocalizedText("الطلب", "Request"),
-		"reply": ch32LocalizedText("الرد", "Reply"), "sector": ch32LocalizedText("القطاع", "Sector"),
+		"title": ch32LocalizedText("request وresponse", "Request and reply"), "query": ch32LocalizedText("الـrequest", "Request"),
+		"reply": ch32LocalizedText("الـresponse", "Reply"), "sector": ch32LocalizedText("القطاع", "Sector"),
 		"pressure": ch32LocalizedText("الضغط", "Pressure"), "send": ch32LocalizedText("ابعت query", "Send query"),
-		"initial": ch32LocalizedText("طلب واحد ينتج رداً واحداً.", "One request produces one reply."),
+		"initial": ch32LocalizedText("request واحدة بتطلع response واحد.", "One request produces one reply."),
 		"empty":   ch32LocalizedText("لسه مفيش", "None yet"), "reset": ch32LocalizedText("ابدأ من الأول", "Reset"),
 	},
 	"queries": []any{
@@ -203,8 +203,8 @@ var ch32Sandbox324 = map[string]any{
 		"flip": ch32LocalizedText("بدّل الطرف", "Switch peer"),
 	},
 	"sides": []any{
-		map[string]any{"peer": ch32LocalizedText("العميل", "Client"), "expects": "probe.colony", "presents": "probe.colony"},
-		map[string]any{"peer": ch32LocalizedText("السيرفر", "Server"), "expects": "Colony CA", "presents": "Colony CA"},
+		map[string]any{"peer": ch32LocalizedText("الـclient", "Client"), "expects": "probe.colony", "presents": "probe.colony"},
+		map[string]any{"peer": ch32LocalizedText("الـserver", "Server"), "expects": "Colony CA", "presents": "Colony CA"},
 	},
 }
 
@@ -257,25 +257,25 @@ func main() {
 }`, tryExampleID: "e321-queue", tryImports: []string{"fmt"}, tryFrames: []ch32FrameSpec{
 		{line: 0, caption: ch32Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
 		{line: 1, caption: ch32Pair{ar: "Packet تحمل وصف الرسالة.", en: "Packet carries the message label."}},
-		{line: 3, caption: ch32Pair{ar: "الطابور فيه رسالتين.", en: "The queue has two messages."}, vars: []LessonVariable{{Name: "queue", Value: "[{text air} {binary map}]"}}},
+		{line: 3, caption: ch32Pair{ar: "الـqueue فيها رسالتين.", en: "The queue has two messages."}, vars: []LessonVariable{{Name: "queue", Value: "[{text air} {binary map}]"}}},
 		{line: 4, caption: ch32Pair{ar: "بدأت أول لفة.", en: "The first iteration starts."}, vars: []LessonVariable{{Name: "p", Value: "{text air}"}}, output: ""},
 		{line: 5, caption: ch32Pair{ar: "اطبع الرسالة الأولى.", en: "Print the first message."}, vars: []LessonVariable{{Name: "p", Value: "{text air}"}}, output: "text air"},
 		{line: 4, caption: ch32Pair{ar: "وصلت للرسالة التانية.", en: "The next message is selected."}, vars: []LessonVariable{{Name: "p", Value: "{binary map}"}}, output: "text air"},
 		{line: 5, caption: ch32Pair{ar: "اطبع الرسالة التانية.", en: "Print the second message."}, vars: []LessonVariable{{Name: "p", Value: "{binary map}"}}, output: "text air\nbinary map"},
 	},
 	tryOptions: []ch32Pair{{ar: "text air وبعدها binary map", en: "text air, then binary map"}, {ar: "binary map بس", en: "binary map only"}, {ar: "ترتيب عكسي", en: "Reverse order"}}, tryAnswer: 0,
-	tryFeedback: []ch32Pair{{ar: "range ماشية بترتيب الـslice.", en: "range follows slice order."}, {ar: "اللفة بتزور العنصرين.", en: "The loop visits both elements."}, {ar: "مفيش عكس للترتيب هنا.", en: "Nothing reverses the order here."}},
+	tryFeedback: []ch32Pair{{ar: "range ماشية بترتيب الـslice.", en: "range follows slice order."}, {ar: "الـloop بتعدي على العنصرين.", en: "The loop visits both elements."}, {ar: "مفيش عكس للترتيب هنا.", en: "Nothing reverses the order here."}},
 	sandboxKind: "ch32-message-pumps", sandboxText: ch32Pair{ar: "غيّر ترتيب التنفيذ وشوف كل packet كاملة.", en: "Change execution order and keep each packet whole."}, sandboxConfig: ch32Sandbox321,
 	watch: ch32Pair{ar: "- خليك واضح مين بيملك كل نوع I/O.\n- الإلغاء لازم يفك الطرف اللي مستني.", en: "- Keep one clear owner for each kind of I/O.\n- Cancellation must release whichever side is waiting."},
 	plan:  ch32Pair{ar: "قسّم التفكير: قبول آمن، قراية، كتابة، وبعدين خروج.\nاسأل نفسك إيه اللي يحصل لو الطرف التاني اختفى فجأة.", en: "Separate the work: safe acceptance, reading, writing, then shutdown.\nAsk what happens when the peer disappears."},
-	check: ch32QuestionSpec{text: ch32Pair{ar: "إيه اللي يخلي pump ما تفضلش معلّقة بعد الإلغاء؟", en: "What helps a pump avoid getting stranded after cancellation?"}, options: []ch32Pair{{ar: "تختار بين الشغل وسياق الإلغاء", en: "Select between work and context cancellation"}, {ar: "تتجاهل أخطاء القراية", en: "Ignore read errors"}, {ar: "تفتح goroutine لكل بايت", en: "Start a goroutine per byte"}}, answer: 0, feedback: []ch32Pair{{ar: "سياق الإلغاء بيدي طريق خروج.", en: "Cancellation gives the loop an exit."}, {ar: "تجاهل الخطأ يخلي الحلقة تدور بعد الفصل.", en: "Ignoring errors can spin after disconnect."}, {ar: "تجزئة المسؤولية تكفي؛ goroutine لكل بايت زيادة.", en: "Separate responsibilities; a goroutine per byte is excessive."}}},
-	turn:  ch32Pair{ar: "ابدأ من عقد الرسالة، وبعدها تتبّع مين بيقرا ومين بيكتب.\nشغّل التستات وراقب كل مسار خروج.", en: "Start from the message contract, then trace who reads and who writes.\nRun the tests and inspect each shutdown path."},
-	hints: [3]ch32Pair{{ar: "رسالة WebSocket لها نوع ومحتوى؛ خليك متعامل معاها كقطعة واحدة.", en: "A WebSocket message has a type and payload; handle it as one unit."}, {ar: "افصل مسار القراية عن مسار الكتابة وارسم نقطة الإلغاء بينهم.", en: "Separate read and write paths, then mark where cancellation connects them."}, {ar: "راجع سلوك ~Read~ و~Write~ وسياق ~Ping~ في توثيق الحزمة.", en: "Review ~Read~, ~Write~, and the ~Ping~ context in the package docs."}},
+	check: ch32QuestionSpec{text: ch32Pair{ar: "إيه اللي يخلي pump ما تفضلش معلّقة بعد الإلغاء؟", en: "What helps a pump avoid getting stranded after cancellation?"}, options: []ch32Pair{{ar: "الـselect بين الشغل والـcontext", en: "Select between work and context cancellation"}, {ar: "تتجاهل errors القراية", en: "Ignore read errors"}, {ar: "تفتح goroutine لكل byte", en: "Start a goroutine per byte"}}, answer: 0, feedback: []ch32Pair{{ar: "الـcontext بتاع الإلغاء بيدي طريق للخروج.", en: "Cancellation gives the loop an exit."}, {ar: "تجاهل الـerror يخلي الـloop تلف بعد الفصل.", en: "Ignoring errors can spin after disconnect."}, {ar: "تجزئة المسؤولية تكفي؛ goroutine لكل byte زيادة.", en: "Separate responsibilities; a goroutine per byte is excessive."}}},
+	turn:  ch32Pair{ar: "ابدأ من عقد الرسالة، وبعدها تتبّع مين بيقرا ومين بيكتب.\nشغّل الـtests وراقب كل مسار خروج.", en: "Start from the message contract, then trace who reads and who writes.\nRun the tests and inspect each shutdown path."},
+	hints: [3]ch32Pair{{ar: "رسالة WebSocket لها نوع ومحتوى؛ خليك متعامل معاها كقطعة واحدة.", en: "A WebSocket message has a type and payload; handle it as one unit."}, {ar: "افصل مسار القراية عن مسار الكتابة وارسم نقطة الإلغاء بينهم.", en: "Separate read and write paths, then mark where cancellation connects them."}, {ar: "راجع سلوك ~Read~ و~Write~ وcontext ~Ping~ في توثيق الـpackage.", en: "Review ~Read~, ~Write~, and the ~Ping~ context in the package docs."}},
 })
 
 var ch32Lesson322Arabic, ch32Lesson322English, ch32Lesson322HintsArabic, ch32Lesson322HintsEnglish = ch32BuildLesson(ch32LessonSpec{
 	prefix:  "c322",
-	mission: ch32Pair{ar: "المهمة بتحوّل طلب قطاع لقراءة واحدة ورد واحد.\nافصل رفض الطلب، فشل المخزن، والنجاح؛ كل واحد له معنى مختلف للعميل.", en: "The mission turns one sector request into one reading and one reply.\nSeparate rejected input, store failure, and success; each means something different to the caller."},
+	mission: ch32Pair{ar: "المهمة بتحوّل request القطاع لقراية واحدة وresponse واحدة.\nافصل رفض الـrequest، فشل المخزن، والنجاح؛ كل واحد له معنى مختلف للـclient.", en: "The mission turns one sector request into one reading and one reply.\nSeparate rejected input, store failure, and success; each means something different to the caller."},
 	idea: ch32WalkSpec{text: ch32Pair{ar: "Unary RPC بتاخد message واحدة وترجع message واحدة.\nالـstruct بتوضح إيه اللي داخل وإيه اللي راجع.", en: "A unary RPC takes one message and returns one message.\nThe structs make the input and result explicit."}, code: `type Query struct { Sector string }
 type Reply struct { Sector string; Pressure int64 }
 func inspect(q Query) Reply { return Reply{q.Sector, -3} }
@@ -284,12 +284,12 @@ func main() {
 	fmt.Println(r.Sector, r.Pressure)
 }`, exampleID: "e322-unary-shape", imports: []string{"fmt"}, frames: []ch32FrameSpec{
 		{line: 0, caption: ch32Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 1, caption: ch32Pair{ar: "Query تمثل الطلب.", en: "Query represents the request."}},
+		{line: 1, caption: ch32Pair{ar: "Query تمثل الـrequest.", en: "Query represents the request."}},
 		{line: 2, caption: ch32Pair{ar: "Reply تمثل النتيجة.", en: "Reply represents the result."}},
-		{line: 5, caption: ch32Pair{ar: "الطلب طلب قطاع ring.", en: "The query names sector ring."}, vars: []LessonVariable{{Name: "r", Value: "{ring -3}"}}},
+		{line: 5, caption: ch32Pair{ar: "الـrequest بيحدد sector ring.", en: "The query names sector ring."}, vars: []LessonVariable{{Name: "r", Value: "{ring -3}"}}},
 		{line: 6, caption: ch32Pair{ar: "اطبع القطاع والضغط.", en: "Print sector and pressure."}, vars: []LessonVariable{{Name: "r", Value: "{ring -3}"}}, output: "ring -3"},
 	}},
-	tryPrompt: ch32Pair{ar: "توقّع قيمة ~reply.Pressure~.", en: "Predict the value of ~reply.Pressure~."},
+	tryPrompt: ch32Pair{ar: "توقّع الـvalue بتاعة ~reply.Pressure~.", en: "Predict the value of ~reply.Pressure~."},
 	tryCode: `type Reply struct { Pressure int64 }
 func main() {
 	reply := Reply{Pressure: 0}
@@ -301,13 +301,13 @@ func main() {
 		{line: 4, caption: ch32Pair{ar: "اطبع القراءة زي ما هي.", en: "Print the reading unchanged."}, vars: []LessonVariable{{Name: "reply.Pressure", Value: "0"}}, output: "0"},
 	},
 	tryOptions: []ch32Pair{{ar: "0", en: "0"}, {ar: "-3", en: "-3"}, {ar: "البرنامج مش هيطبع حاجة", en: "The program prints nothing"}}, tryAnswer: 0,
-	tryFeedback: []ch32Pair{{ar: "القيمة الصفرية موجودة في الحقل.", en: "The field contains zero."}, {ar: "-3 كانت في مثال تاني.", en: "-3 belonged to another example."}, {ar: "fmt.Println بتطبع الحقل.", en: "fmt.Println prints the field."}},
-	sandboxKind: "ch32-unary-rpc", sandboxText: ch32Pair{ar: "ابعت query وشوف الرد المقابل.", en: "Send a query and watch its matching reply."}, sandboxConfig: ch32Sandbox322,
-	watch: ch32Pair{ar: "- status code جزء من API العام، مش نص خطأ عشوائي.\n- متطلعش تفاصيل المخزن الداخلية للعميل.", en: "- A status code is part of the public API, not an arbitrary error string.\n- Keep private store details away from callers."},
-	plan:  ch32Pair{ar: "ابدأ بعقد الرسائل المسجّلة، وبعدها خدمة مستقلة.\nراجع حدود الطلب قبل البحث وحدد تحويل الأخطاء عند الحافة.", en: "Start with the registered message contract, then the service.\nValidate before lookup and decide how errors map at the boundary."},
-	check: ch32QuestionSpec{text: ch32Pair{ar: "فين تحط فحص المفتاح المشترك لكل unary call؟", en: "Where should shared key checks for unary calls live?"}, options: []ch32Pair{{ar: "Unary interceptor", en: "A unary interceptor"}, {ar: "داخل كل lookup", en: "Inside every lookup"}, {ar: "بعد ما الرد يوصل للعميل", en: "After the reply reaches the client"}}, answer: 0, feedback: []ch32Pair{{ar: "الـinterceptor بيغلف استدعاءات الخدمة.", en: "The interceptor wraps service calls."}, {ar: "المخزن مسؤول عن البيانات، مش بيانات الاعتماد.", en: "The store owns data, not credentials."}, {ar: "الفحص لازم يوقف الطلب قبل الخدمة.", en: "The check must stop the call before the service."}}},
-	turn:  ch32Pair{ar: "اكتب الخدمة حول عقد الـproto المقفول.\nاختبر النجاح والرفض وأخطاء السياق لوحدهم.", en: "Build the service around the read-only proto contract.\nCheck success, rejection, and context errors separately."},
-	hints: [3]ch32Pair{{ar: "Unary RPC بيربط طلب typed واحد بنتيجة typed واحدة.", en: "A unary RPC pairs one typed request with one typed result."}, {ar: "خلّي حالة الطلب محلية، وافصل اعتراض التصريح عن منطق الخدمة.", en: "Keep request state local and separate authorization from service logic."}, {ar: "ابدأ من ~BerthControlServer~ و~UnaryServerInterceptor~ المولّدين.", en: "Start with the generated ~BerthControlServer~ and ~UnaryServerInterceptor~ APIs."}},
+	tryFeedback: []ch32Pair{{ar: "الـzero value موجودة في الحقل.", en: "The field contains zero."}, {ar: "-3 كانت في مثال تاني.", en: "-3 belonged to another example."}, {ar: "fmt.Println بتطبع الحقل.", en: "fmt.Println prints the field."}},
+	sandboxKind: "ch32-unary-rpc", sandboxText: ch32Pair{ar: "ابعت query وشوف الـresponse المقابل.", en: "Send a query and watch its matching reply."}, sandboxConfig: ch32Sandbox322,
+	watch: ch32Pair{ar: "- status code جزء من API العام، مش نص error عشوائي.\n- متطلعش تفاصيل المخزن الداخلية للـclient.", en: "- A status code is part of the public API, not an arbitrary error string.\n- Keep private store details away from callers."},
+	plan:  ch32Pair{ar: "ابدأ بعقد الرسائل المسجّلة، وبعدها خدمة مستقلة.\nراجع حدود الـrequest قبل البحث وحدد تحويل الـerrors عند الحافة.", en: "Start with the registered message contract, then the service.\nValidate before lookup and decide how errors map at the boundary."},
+	check: ch32QuestionSpec{text: ch32Pair{ar: "فين تحط فحص الـkey المشترك لكل unary call؟", en: "Where should shared key checks for unary calls live?"}, options: []ch32Pair{{ar: "Unary interceptor", en: "A unary interceptor"}, {ar: "داخل كل lookup", en: "Inside every lookup"}, {ar: "بعد ما الـresponse يوصل للـclient", en: "After the reply reaches the client"}}, answer: 0, feedback: []ch32Pair{{ar: "الـinterceptor بيغلف استدعاءات الخدمة.", en: "The interceptor wraps service calls."}, {ar: "المخزن مسؤول عن البيانات، مش بيانات الاعتماد.", en: "The store owns data, not credentials."}, {ar: "الفحص لازم يوقف الـrequest قبل الخدمة.", en: "The check must stop the call before the service."}}},
+	turn:  ch32Pair{ar: "اكتب الخدمة حول عقد الـproto المقفول.\nاختبر النجاح والرفض وerrors الـcontext لوحدهم.", en: "Build the service around the read-only proto contract.\nCheck success, rejection, and context errors separately."},
+	hints: [3]ch32Pair{{ar: "Unary RPC بيربط request typed واحدة بـresponse typed واحدة.", en: "A unary RPC pairs one typed request with one typed result."}, {ar: "خلّي حالة الـrequest محلية، وافصل اعتراض التصريح عن منطق الخدمة.", en: "Keep request state local and separate authorization from service logic."}, {ar: "ابدأ من ~BerthControlServer~ و~UnaryServerInterceptor~ المولّدين.", en: "Start with the generated ~BerthControlServer~ and ~UnaryServerInterceptor~ APIs."}},
 })
 
 var ch32Lesson323Arabic, ch32Lesson323English, ch32Lesson323HintsArabic, ch32Lesson323HintsEnglish = ch32BuildLesson(ch32LessonSpec{
@@ -335,30 +335,30 @@ func main() {
 	}
 }`, tryExampleID: "e323-range-output", tryImports: []string{"fmt"}, tryFrames: []ch32FrameSpec{
 		{line: 0, caption: ch32Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 2, caption: ch32Pair{ar: "القيمة الأولى 3.", en: "The first value is 3."}, vars: []LessonVariable{{Name: "n", Value: "3"}}},
+		{line: 2, caption: ch32Pair{ar: "أول value هي 3.", en: "The first value is 3."}, vars: []LessonVariable{{Name: "n", Value: "3"}}},
 		{line: 3, caption: ch32Pair{ar: "اطبع 3.", en: "Print 3."}, vars: []LessonVariable{{Name: "n", Value: "3"}}, output: "3"},
-		{line: 2, caption: ch32Pair{ar: "بعدها القيمة 5.", en: "Next, the value is 5."}, vars: []LessonVariable{{Name: "n", Value: "5"}}, output: "3"},
+		{line: 2, caption: ch32Pair{ar: "بعدها الـvalue تبقى 5.", en: "Next, the value is 5."}, vars: []LessonVariable{{Name: "n", Value: "5"}}, output: "3"},
 		{line: 3, caption: ch32Pair{ar: "اطبع 5.", en: "Print 5."}, vars: []LessonVariable{{Name: "n", Value: "5"}}, output: "3\n5"},
 	},
 	tryOptions: []ch32Pair{{ar: "3 وبعدها 5", en: "3, then 5"}, {ar: "5 وبعدها 3", en: "5, then 3"}, {ar: "3 بس", en: "3 only"}}, tryAnswer: 0,
 	tryFeedback: []ch32Pair{{ar: "range بتمشي بترتيب العناصر.", en: "range visits elements in order."}, {ar: "مفيش ترتيب عكسي في الكود.", en: "The code does not reverse the order."}, {ar: "الـslice فيها عنصرين.", en: "The slice has two elements."}},
 	sandboxKind: "ch32-stream-interleave", sandboxText: ch32Pair{ar: "أعد التشغيل وقارن ترتيب الـstreams.", en: "Run again and compare stream order."}, sandboxConfig: ch32Sandbox323,
-	watch: ch32Pair{ar: "- حالة كل stream مكانها جوه الاستدعاء.\n- EOF معناه نهاية إرسال طبيعية من العميل.", en: "- Each stream's state belongs to its call.\n- EOF means the client finished sending normally."},
-	plan:  ch32Pair{ar: "تابع حدود الرسالة، حالة stream، والرد المقابل.\nخلي الفشل يوقف الخطوات اللي بعده.", en: "Track the message boundary, stream state, and matching reply.\nLet a failure stop later steps."},
-	check: ch32QuestionSpec{text: ch32Pair{ar: "ليه حالة الإجمالي تبقى محلية لكل stream؟", en: "Why keep the running total local to each stream?"}, options: []ch32Pair{{ar: "عشان streams متخلطش بياناتها", en: "So streams do not mix their data"}, {ar: "عشان نقدر نعيد نفس الإجمالي لكل crew", en: "So every crew can reuse one total"}, {ar: "عشان نتجاهل ترتيب الخطوات", en: "So step order can be ignored"}}, answer: 0, feedback: []ch32Pair{{ar: "كل استدعاء له حالة مستقلة.", en: "Each call has independent state."}, {ar: "المشاركة تخلط النتائج بين العملاء.", en: "Sharing can mix results between clients."}, {ar: "الترتيب جزء من معنى الرسائل.", en: "Order is part of the message meaning."}}},
+	watch: ch32Pair{ar: "- حالة كل stream مكانها جوه الاستدعاء.\n- EOF معناه نهاية إرسال طبيعية من الـclient.", en: "- Each stream's state belongs to its call.\n- EOF means the client finished sending normally."},
+	plan:  ch32Pair{ar: "تابع حدود الرسالة، حالة stream، والـresponse المقابل.\nخلي الفشل يوقف الخطوات اللي بعده.", en: "Track the message boundary, stream state, and matching reply.\nLet a failure stop later steps."},
+	check: ch32QuestionSpec{text: ch32Pair{ar: "ليه حالة الإجمالي تبقى محلية لكل stream؟", en: "Why keep the running total local to each stream?"}, options: []ch32Pair{{ar: "عشان streams متخلطش بياناتها", en: "So streams do not mix their data"}, {ar: "عشان نقدر نعيد نفس الإجمالي لكل crew", en: "So every crew can reuse one total"}, {ar: "عشان نتجاهل ترتيب الخطوات", en: "So step order can be ignored"}}, answer: 0, feedback: []ch32Pair{{ar: "كل استدعاء له حالة مستقلة.", en: "Each call has independent state."}, {ar: "المشاركة تخلط النتائج بين الـclients.", en: "Sharing can mix results between clients."}, {ar: "الترتيب جزء من معنى الرسائل.", en: "Order is part of the message meaning."}}},
 	turn:  ch32Pair{ar: "ابدأ بمسار stream واحد، وبعدها جرّب أكتر من stream.\nراجع الإرسال والإغلاق مع بعض.", en: "Start with one stream path, then check simultaneous streams.\nReview sending and closure together."},
-	hints: [3]ch32Pair{{ar: "Bidirectional RPC بيمرر رسائل في الاتجاهين على stream واحدة.", en: "A bidirectional RPC carries messages both ways on one stream."}, {ar: "افصل حالة كل استدعاء عن حالة السيرفر المشتركة.", en: "Separate per-call state from shared server state."}, {ar: "راجع سلوك ~Recv~ و~Send~ و~Context~ في interface المولّد.", en: "Review ~Recv~, ~Send~, and ~Context~ on the generated stream interface."}},
+	hints: [3]ch32Pair{{ar: "Bidirectional RPC بيمرر رسائل في الاتجاهين على stream واحدة.", en: "A bidirectional RPC carries messages both ways on one stream."}, {ar: "افصل حالة كل استدعاء عن حالة الـserver المشتركة.", en: "Separate per-call state from shared server state."}, {ar: "راجع سلوك ~Recv~ و~Send~ و~Context~ في interface المولّد.", en: "Review ~Recv~, ~Send~, and ~Context~ on the generated stream interface."}},
 })
 
 var ch32Lesson324Arabic, ch32Lesson324English, ch32Lesson324HintsArabic, ch32Lesson324HintsEnglish = ch32BuildLesson(ch32LessonSpec{
 	prefix:  "c324",
-	mission: ch32Pair{ar: "المهمة بتبني إعدادين: واحد للسيرفر وواحد للعميل.\n\nفكّر مين يعرض الشهادة، ومين يقرر يثق في الطرف التاني.\n\nساعة الاختبار تختار وقت التحقق من غير انتظار حقيقي.", en: "The mission builds two configurations: one for the server and one for the client.\n\nAsk who presents a certificate and who decides to trust the other peer.\n\nThe injected clock selects verification time without real waiting."},
-	idea: ch32WalkSpec{text: ch32Pair{ar: "إعداد TLS بيحمل توقعات كل طرف. ~ServerName~ اسم الهوية اللي العميل بيتحقق منها، مش عنوان اتصال.\nكل peer له شهادة أو مجموعة ثقة حسب دوره.", en: "A TLS config carries each peer's expectations. ~ServerName~ is the identity the client verifies, not a dial address.\nEach peer presents or trusts certificates according to its role."}, code: `func main() {
+	mission: ch32Pair{ar: "المهمة بتبني إعدادين: واحد للـserver وواحد للـclient.\n\nفكّر مين يعرض الشهادة، ومين يقرر يثق في الطرف التاني.\n\nساعة الـtest تختار وقت التحقق من غير انتظار حقيقي.", en: "The mission builds two configurations: one for the server and one for the client.\n\nAsk who presents a certificate and who decides to trust the other peer.\n\nThe injected clock selects verification time without real waiting."},
+	idea: ch32WalkSpec{text: ch32Pair{ar: "إعداد TLS بيحمل توقعات كل طرف. ~ServerName~ اسم الهوية اللي الـclient بيتحقق منها، مش عنوان اتصال.\nكل peer له شهادة أو مجموعة ثقة حسب دوره.", en: "A TLS config carries each peer's expectations. ~ServerName~ is the identity the client verifies, not a dial address.\nEach peer presents or trusts certificates according to its role."}, code: `func main() {
 	client := &tls.Config{ServerName: "probe.colony", MinVersion: tls.VersionTLS13}
 	fmt.Println(client.ServerName, client.MinVersion == tls.VersionTLS13)
 }`, exampleID: "e324-client-expectation", imports: []string{"crypto/tls", "fmt"}, frames: []ch32FrameSpec{
 		{line: 0, caption: ch32Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 2, caption: ch32Pair{ar: "العميل يتوقع اسم الهوية.", en: "The client expects this identity."}, vars: []LessonVariable{{Name: "client.ServerName", Value: "probe.colony"}, {Name: "client.MinVersion", Value: "772"}}},
+		{line: 2, caption: ch32Pair{ar: "الـclient يتوقع اسم الهوية.", en: "The client expects this identity."}, vars: []LessonVariable{{Name: "client.ServerName", Value: "probe.colony"}, {Name: "client.MinVersion", Value: "772"}}},
 		{line: 3, caption: ch32Pair{ar: "اعرض الاسم وفحص النسخة.", en: "Print the name and version check."}, vars: []LessonVariable{{Name: "client.ServerName", Value: "probe.colony"}}, output: "probe.colony true"},
 	}},
 	tryPrompt: ch32Pair{ar: "توقّع ناتج نسخة TLS.", en: "Predict the TLS version check."},
@@ -371,18 +371,18 @@ var ch32Lesson324Arabic, ch32Lesson324English, ch32Lesson324HintsArabic, ch32Les
 		{line: 3, caption: ch32Pair{ar: "قارن النسخة المطلوبة.", en: "Compare the requested version."}, output: "true"},
 	},
 	tryOptions: []ch32Pair{{ar: "true", en: "true"}, {ar: "false", en: "false"}, {ar: "0", en: "0"}}, tryAnswer: 0,
-	tryFeedback: []ch32Pair{{ar: "القيمتين هما TLS 1.3.", en: "Both values are TLS 1.3."}, {ar: "مافيش قيمة تانية اتطلبت.", en: "No other version was requested."}, {ar: "المقارنة بترجع bool.", en: "The comparison returns a bool."}},
+	tryFeedback: []ch32Pair{{ar: "الـvalues هما TLS 1.3.", en: "Both values are TLS 1.3."}, {ar: "مافيش value تانية اتطلبت.", en: "No other version was requested."}, {ar: "المقارنة بترجع bool.", en: "The comparison returns a bool."}},
 	sandboxKind: "ch32-peer-trust", sandboxText: ch32Pair{ar: "بدّل الطرف وشوف توقعات الهوية.", en: "Switch peers and compare identity expectations."}, sandboxConfig: ch32Sandbox324,
 	watch: ch32Pair{ar: "- التشفير لوحده مش إثبات هوية.\n- سيب التحقق القياسي شغال ومتعدّليش مدخلات المستدعي.\nنسخ trust pool يحافظ على ملكية المستدعي.", en: "- Encryption alone does not prove identity.\n- Keep standard verification enabled and leave caller inputs untouched.\nCloning a trust pool protects caller ownership."},
-	plan:  ch32Pair{ar: "افصل إعداد السيرفر عن العميل، وبعدها راجع اتجاه الثقة.\nاختبر الإعداد بالمصافحة اللي تناسبه، وقارن الاسم والوقت والجهة الموثوقة.", en: "Separate server and client settings, then check the direction of trust.\nUse a matching handshake and compare identity, time, and trust."},
-	check: ch32QuestionSpec{text: ch32Pair{ar: "~ServerName~ عند العميل بيحدد إيه؟", en: "What does client ~ServerName~ identify?"}, options: []ch32Pair{{ar: "اسم السيرفر المتوقع", en: "The expected server identity"}, {ar: "عنوان IP لازم يتصل به", en: "The IP address to dial"}, {ar: "اسم ملف الشهادة", en: "The certificate file name"}}, answer: 0, feedback: []ch32Pair{{ar: "TLS بيقارن هوية الشهادة بالاسم.", en: "TLS checks the certificate identity against the name."}, {ar: "الـconnection بيتحدد برّه الحقل ده.", en: "The connection target is chosen elsewhere."}, {ar: "الحقل مش بيحمّل شهادة.", en: "This field does not load a certificate."}}},
-	turn:  ch32Pair{ar: "ابنِ الإعدادات كقيم جديدة قبل المصافحة.\nخلي كل فشل يوضح جهة الثقة اللي اترفضت.", en: "Build fresh config values before the handshake.\nIdentify which trust check rejected each failure."},
+	plan:  ch32Pair{ar: "افصل إعداد الـserver عن الـclient، وبعدها راجع اتجاه الثقة.\nاختبر الإعداد بالمصافحة اللي تناسبه، وقارن الاسم والوقت والجهة الموثوقة.", en: "Separate server and client settings, then check the direction of trust.\nUse a matching handshake and compare identity, time, and trust."},
+	check: ch32QuestionSpec{text: ch32Pair{ar: "~ServerName~ عند الـclient بيحدد إيه؟", en: "What does client ~ServerName~ identify?"}, options: []ch32Pair{{ar: "اسم الـserver المتوقع", en: "The expected server identity"}, {ar: "عنوان IP لازم يتصل به", en: "The IP address to dial"}, {ar: "اسم ملف الشهادة", en: "The certificate file name"}}, answer: 0, feedback: []ch32Pair{{ar: "TLS بيقارن هوية الشهادة بالاسم.", en: "TLS checks the certificate identity against the name."}, {ar: "الـconnection بيتحدد برّه الحقل ده.", en: "The connection target is chosen elsewhere."}, {ar: "الحقل مش بيحمّل شهادة.", en: "This field does not load a certificate."}}},
+	turn:  ch32Pair{ar: "ابنِ الإعدادات كvalues جديدة قبل المصافحة.\nخلي كل فشل يوضح جهة الثقة اللي اترفضت.", en: "Build fresh config values before the handshake.\nIdentify which trust check rejected each failure."},
 	hints: [3]ch32Pair{{ar: "TLS بيربط التشفير بهوية شهادة موثوقة.", en: "TLS combines encryption with a trusted certificate identity."}, {ar: "فكّر في إعداد مستقل لكل peer وفي نسخ مجموعات الثقة.", en: "Plan a separate config per peer and clone trust pools."}, {ar: "راجع حقول ~tls.Config~ زي ~RootCAs~ و~ClientCAs~ و~ServerName~.", en: "Review ~tls.Config~ fields such as ~RootCAs~, ~ClientCAs~, and ~ServerName~."}},
 })
 
 var ch32Lesson325Arabic, ch32Lesson325English, ch32Lesson325HintsArabic, ch32Lesson325HintsEnglish = ch32BuildLesson(ch32LessonSpec{
 	prefix:  "c325",
-	mission: ch32Pair{ar: "الخدمة بتقرأ من أكتر من طلب على نفس وصلة TLS.\nركز على تفاوض البروتوكول وعلى إن قراءة واحدة واقفة ما توقفش الباقي.", en: "The service reads multiple requests over one TLS connection.\nFocus on protocol negotiation and keeping one blocked read from stopping its siblings."},
+	mission: ch32Pair{ar: "الخدمة بتقرأ من أكتر من request على نفس وصلة TLS.\nركز على تفاوض البروتوكول وعلى إن قراءة واحدة واقفة ما توقفش الباقي.", en: "The service reads multiple requests over one TLS connection.\nFocus on protocol negotiation and keeping one blocked read from stopping its siblings."},
 	idea: ch32WalkSpec{text: ch32Pair{ar: "ALPN بيختار بروتوكول التطبيق أثناء TLS. وجود ~h2~ في القائمة عرض، والاتصال نفسه يثبت إيه اللي اتفاوض عليه.", en: "ALPN selects an application protocol during TLS. Offering ~h2~ is an offer; the connection reveals what was negotiated."}, code: `func main() {
 	config := &tls.Config{NextProtos: []string{"h2", "http/1.1"}}
 	fmt.Println(config.NextProtos[0], len(config.NextProtos))
@@ -401,18 +401,18 @@ var ch32Lesson325Arabic, ch32Lesson325English, ch32Lesson325HintsArabic, ch32Les
 		{line: 3, caption: ch32Pair{ar: "len تعدّهم.", en: "len counts them."}, output: "2"},
 	},
 	tryOptions: []ch32Pair{{ar: "2", en: "2"}, {ar: "1", en: "1"}, {ar: "h2", en: "h2"}}, tryAnswer: 0,
-	tryFeedback: []ch32Pair{{ar: "القائمة فيها h2 وhttp/1.1.", en: "The list has h2 and http/1.1."}, {ar: "الـslice فيها قيمتين.", en: "The slice has two values."}, {ar: "len بترجع عدد العناصر.", en: "len returns the element count."}},
+	tryFeedback: []ch32Pair{{ar: "القائمة فيها h2 وhttp/1.1.", en: "The list has h2 and http/1.1."}, {ar: "الـslice فيها values.", en: "The slice has two values."}, {ar: "len بترجع عدد العناصر.", en: "len returns the element count."}},
 	sandboxKind: "ch32-alpn-reads", sandboxText: ch32Pair{ar: "بدّل نتيجة التفاوض وترتيب القراءات.", en: "Change negotiation and read order."}, sandboxConfig: ch32Sandbox325,
-	watch: ch32Pair{ar: "- متغيّرش TLS config اللي جالك؛ Clone وبعدين عدّل النسخة.\n- القفل المشترك حوالين قراءة الشبكة يعطّل الطلبات الشقيقة.\nنسخة NextProtos بتحافظ على إعداد المستدعي.", en: "- Do not mutate the supplied TLS config; clone before changing it.\n- A shared lock around network reads blocks sibling requests.\nA fresh NextProtos slice protects caller settings."},
+	watch: ch32Pair{ar: "- متغيّرش TLS config اللي جالك؛ Clone وبعدين عدّل النسخة.\n- الـlock المشترك حوالين قراءة الشبكة يعطّل الـrequests الشقيقة.\nنسخة NextProtos بتحافظ على إعداد المستدعي.", en: "- Do not mutate the supplied TLS config; clone before changing it.\n- A shared lock around network reads blocks sibling requests.\nA fresh NextProtos slice protects caller settings."},
 	plan:  ch32Pair{ar: "راجع طبقة TLS، handler، ثم القراءات المتزامنة.\nاستخدم نتيجة ALPN وهوية الاتصال كدليل، مش الوقت.\nالحاجز يوضح التوازي من غير تخمين السرعة.", en: "Review TLS, the handler, then concurrent reads.\nUse ALPN and connection identity as evidence, not elapsed time.\nA barrier proves concurrency without timing guesses."},
-	check: ch32QuestionSpec{text: ch32Pair{ar: "إيه اللي يثبت إن الاتصال اتكلم HTTP/2 فعلًا؟", en: "What proves the connection actually spoke HTTP/2?"}, options: []ch32Pair{{ar: "البروتوكول المتفاوض عليه في TLS والـresponse", en: "The negotiated TLS protocol and response"}, {ar: "وجود h2 في القائمة بس", en: "Only that h2 appears in the offer"}, {ar: "إن الطلب خلص بسرعة", en: "That the request finished quickly"}}, answer: 0, feedback: []ch32Pair{{ar: "التفاوض الفعلي أقوى من عرض البروتوكول.", en: "The actual negotiation is stronger evidence than the offer."}, {ar: "القائمة وحدها ما تثبتش الاختيار.", en: "The offer alone does not prove selection."}, {ar: "الوقت مش دليل على نسخة البروتوكول.", en: "Timing does not establish the protocol version."}}},
-	turn:  ch32Pair{ar: "ابنِ handler صغير الأول، وبعدها تأكد من التفاوض والتوازي.\nراجع إن طلب جانبي يكمل لو قراءة اتأخرت.", en: "Build the small handler first, then verify negotiation and concurrency.\nCheck that a sibling request finishes while another read waits."},
-	hints: [3]ch32Pair{{ar: "HTTP/2 بيحمل streams متعددة على اتصال واحد.", en: "HTTP/2 carries multiple streams over one connection."}, {ar: "افصل فحص المسار والطريقة عن قراءة الحساس، وسيب كل طلب مستقل.", en: "Separate route and method checks from sensor reads; keep requests independent."}, {ar: "راجع ~tls.Config.Clone~ و~NextProtos~ وإعدادات ~http.Server~.", en: "Review ~tls.Config.Clone~, ~NextProtos~, and ~http.Server~ settings."}},
+	check: ch32QuestionSpec{text: ch32Pair{ar: "إيه اللي يثبت إن الاتصال اتكلم HTTP/2 فعلًا؟", en: "What proves the connection actually spoke HTTP/2?"}, options: []ch32Pair{{ar: "البروتوكول المتفاوض عليه في TLS والـresponse", en: "The negotiated TLS protocol and response"}, {ar: "وجود h2 في القائمة بس", en: "Only that h2 appears in the offer"}, {ar: "إن الـrequest خلص بسرعة", en: "That the request finished quickly"}}, answer: 0, feedback: []ch32Pair{{ar: "التفاوض الفعلي أقوى من عرض البروتوكول.", en: "The actual negotiation is stronger evidence than the offer."}, {ar: "القائمة وحدها ما تثبتش الاختيار.", en: "The offer alone does not prove selection."}, {ar: "الوقت مش دليل على نسخة البروتوكول.", en: "Timing does not establish the protocol version."}}},
+	turn:  ch32Pair{ar: "ابنِ handler صغير الأول، وبعدها تأكد من التفاوض والتوازي.\nراجع إن request جانبي يكمل لو قراءة اتأخرت.", en: "Build the small handler first, then verify negotiation and concurrency.\nCheck that a sibling request finishes while another read waits."},
+	hints: [3]ch32Pair{{ar: "HTTP/2 بيحمل streams متعددة على اتصال واحد.", en: "HTTP/2 carries multiple streams over one connection."}, {ar: "افصل فحص المسار والـmethod عن قراية الحساس، وسيب كل request مستقل.", en: "Separate route and method checks from sensor reads; keep requests independent."}, {ar: "راجع ~tls.Config.Clone~ و~NextProtos~ وإعدادات ~http.Server~.", en: "Review ~tls.Config.Clone~, ~NextProtos~, and ~http.Server~ settings."}},
 })
 
 var ch32Lesson326Arabic, ch32Lesson326English, ch32Lesson326HintsArabic, ch32Lesson326HintsEnglish = ch32BuildLesson(ch32LessonSpec{
 	prefix:  "c326",
-	mission: ch32Pair{ar: "الوصلة بتنفّذ أوامر فحص محددة بعد اتصال موثوق.\nاربط الاختيار بهوية السيرفر، وخلي الإلغاء ينهي الموارد التابعة للطلب.", en: "The link runs a small set of inspection commands over a trusted connection.\nTie command selection to server identity, and let cancellation release request resources."},
+	mission: ch32Pair{ar: "الوصلة بتنفّذ أوامر فحص محددة بعد اتصال موثوق.\nاربط الاختيار بهوية الـserver، وخلي الإلغاء ينهي الموارد التابعة للـrequest.", en: "The link runs a small set of inspection commands over a trusted connection.\nTie command selection to server identity, and let cancellation release request resources."},
 	idea: ch32WalkSpec{text: ch32Pair{ar: "جدول allowlist بيربط اختيار معروف بفعل ثابت.\nده يمنع إن اسم جاي من المستخدم يبقى أمر حر.", en: "An allowlist maps a known choice to a fixed action.\nThat keeps user input from becoming an arbitrary command."}, code: `type Command struct { label, text string }
 func main() {
 	commands := map[string]Command{"inspect": {"inspect", "show queue"}}
@@ -421,27 +421,27 @@ func main() {
 }`, exampleID: "e326-command-map", imports: []string{"fmt"}, frames: []ch32FrameSpec{
 		{line: 0, caption: ch32Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
 		{line: 1, caption: ch32Pair{ar: "Command تجمع الاختيار والفعل.", en: "Command groups a choice and action."}},
-		{line: 3, caption: ch32Pair{ar: "الخريطة فيها أمر توضيحي.", en: "The map has an illustrative command."}, vars: []LessonVariable{{Name: "commands", Value: "map[inspect:{inspect show queue}]"}}},
+		{line: 3, caption: ch32Pair{ar: "الـmap فيها أمر توضيحي.", en: "The map has an illustrative command."}, vars: []LessonVariable{{Name: "commands", Value: "map[inspect:{inspect show queue}]"}}},
 		{line: 4, caption: ch32Pair{ar: "الاختيار موجود.", en: "The choice exists."}, vars: []LessonVariable{{Name: "ok", Value: "true"}, {Name: "c.text", Value: "show queue"}}},
 		{line: 5, caption: ch32Pair{ar: "اطبع النتيجة الثابتة.", en: "Print the fixed action."}, output: "true show queue"},
 	}},
-	tryPrompt: ch32Pair{ar: "توقّع نتيجة البحث عن المفتاح.", en: "Predict the lookup result."},
+	tryPrompt: ch32Pair{ar: "توقّع نتيجة البحث عن الـkey.", en: "Predict the lookup result."},
 	tryCode: `func main() {
 	commands := map[string]string{"scan": "read status"}
 	text, ok := commands["scan"]
 	fmt.Println(ok, text)
 }`, tryExampleID: "e326-allowlist-lookup", tryImports: []string{"fmt"}, tryFrames: []ch32FrameSpec{
 		{line: 0, caption: ch32Pair{ar: "قبل التنفيذ.", en: "Before execution."}},
-		{line: 2, caption: ch32Pair{ar: "الخريطة فيها scan.", en: "The map contains scan."}, vars: []LessonVariable{{Name: "commands", Value: "map[scan:read status]"}}},
-		{line: 3, caption: ch32Pair{ar: "المفتاح معروف.", en: "The key is known."}, vars: []LessonVariable{{Name: "ok", Value: "true"}, {Name: "text", Value: "read status"}}},
+		{line: 2, caption: ch32Pair{ar: "الـmap فيها scan.", en: "The map contains scan."}, vars: []LessonVariable{{Name: "commands", Value: "map[scan:read status]"}}},
+		{line: 3, caption: ch32Pair{ar: "الـkey معروف.", en: "The key is known."}, vars: []LessonVariable{{Name: "ok", Value: "true"}, {Name: "text", Value: "read status"}}},
 		{line: 4, caption: ch32Pair{ar: "اطبع وجوده والنص.", en: "Print presence and action."}, output: "true read status"},
 	},
 	tryOptions: []ch32Pair{{ar: "true read status", en: "true read status"}, {ar: "false <فاضي>", en: "false <empty>"}, {ar: "panic", en: "panic"}}, tryAnswer: 0,
-	tryFeedback: []ch32Pair{{ar: "الـlookup رجّع القيمة وtrue.", en: "The lookup returned the value and true."}, {ar: "المفتاح موجود في الخريطة.", en: "The key is present in the map."}, {ar: "قراءة المفتاح الموجود آمنة.", en: "Reading an existing key is safe."}},
+	tryFeedback: []ch32Pair{{ar: "الـlookup رجّع الـvalue وtrue.", en: "The lookup returned the value and true."}, {ar: "الـkey موجود في الـmap.", en: "The key is present in the map."}, {ar: "قراية الـkey الموجود آمنة.", en: "Reading an existing key is safe."}},
 	sandboxKind: "ch32-ssh-allowlist", sandboxText: ch32Pair{ar: "تنقّل بين اختيارات الـallowlist.", en: "Browse the allowlist choices."}, sandboxConfig: ch32Sandbox326,
-	watch: ch32Pair{ar: "- متبعتش نص أمر حر من الطلب.\n- راقب الإلغاء وأخطاء الجلسة والاتصال.\nخلي stdout وstderr منفصلين عشان تراجع النتيجة.", en: "- Never pass free-form command text from the request.\n- Track cancellation and session or connection errors.\nKeep stdout and stderr separate when reviewing the result."},
+	watch: ch32Pair{ar: "- متبعتش نص أمر حر من الـrequest.\n- راقب الإلغاء وerrors الـsession والاتصال.\nخلي stdout وstderr منفصلين عشان تراجع النتيجة.", en: "- Never pass free-form command text from the request.\n- Track cancellation and session or connection errors.\nKeep stdout and stderr separate when reviewing the result."},
 	plan:  ch32Pair{ar: "افصل التحقق قبل الاتصال عن تنفيذ الجلسة.\nراجع ملكية الاتصال والـsession وكل مخرج لوحده.", en: "Separate validation before connecting from session execution.\nReview ownership of the connection, session, and each output."},
-	check: ch32QuestionSpec{text: ch32Pair{ar: "ليه نستخدم host key موثوق؟", en: "Why use a trusted host key?"}, options: []ch32Pair{{ar: "عشان نعرف هوية السيرفر", en: "To verify the server identity"}, {ar: "عشان نختار نص الأمر", en: "To choose command text"}, {ar: "عشان نتجاهل الإلغاء", en: "To ignore cancellation"}}, answer: 0, feedback: []ch32Pair{{ar: "التحقق يمنع قبول endpoint متنكّر.", en: "Verification rejects an impersonating endpoint."}, {ar: "الأمر مصدره اختيار مسموح، مش host key.", en: "The command comes from an allowed choice, not the host key."}, {ar: "الإلغاء يفضل جزء من دورة الاتصال.", en: "Cancellation remains part of connection lifetime."}}},
+	check: ch32QuestionSpec{text: ch32Pair{ar: "ليه نستخدم host key موثوق؟", en: "Why use a trusted host key?"}, options: []ch32Pair{{ar: "عشان نعرف هوية الـserver", en: "To verify the server identity"}, {ar: "عشان نختار نص الأمر", en: "To choose command text"}, {ar: "عشان نتجاهل الإلغاء", en: "To ignore cancellation"}}, answer: 0, feedback: []ch32Pair{{ar: "التحقق يمنع قبول endpoint متنكّر.", en: "Verification rejects an impersonating endpoint."}, {ar: "الأمر مصدره اختيار مسموح، مش host key.", en: "The command comes from an allowed choice, not the host key."}, {ar: "الإلغاء يفضل جزء من دورة الاتصال.", en: "Cancellation remains part of connection lifetime."}}},
 	turn:  ch32Pair{ar: "راجع الـenum والعقد قبل فتح اتصال.\nجرّب حالات الإلغاء ومخارج الأمر كل حالة لوحدها.", en: "Review the enum and contract before opening a connection.\nCheck cancellation and command outcomes separately."},
-	hints: [3]ch32Pair{{ar: "SSH host key بيثبت هوية الطرف البعيد؛ التشفير وحده مش كفاية.", en: "An SSH host key verifies the remote peer; encryption alone is not enough."}, {ar: "ارسم عمر الاتصال والجلسة وراقب مين يقفل كل مورد.", en: "Trace connection and session lifetime, including who closes each resource."}, {ar: "راجع ~ssh.FixedHostKey~ و~ssh.NewClientConn~ وسياق الطلب.", en: "Review ~ssh.FixedHostKey~, ~ssh.NewClientConn~, and the request context."}},
+	hints: [3]ch32Pair{{ar: "SSH host key بيثبت هوية الطرف البعيد؛ التشفير وحده مش كفاية.", en: "An SSH host key verifies the remote peer; encryption alone is not enough."}, {ar: "ارسم عمر الاتصال والـsession وراقب مين يقفل كل مورد.", en: "Trace connection and session lifetime, including who closes each resource."}, {ar: "راجع ~ssh.FixedHostKey~ و~ssh.NewClientConn~ والـrequest context.", en: "Review ~ssh.FixedHostKey~, ~ssh.NewClientConn~, and the request context."}},
 })

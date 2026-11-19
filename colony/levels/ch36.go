@@ -92,7 +92,7 @@ return promhttp.Handler()                   // بيعرض السجل الغلط
 ~RecordLanding(bay string, ok bool, d time.Duration)~ يزوّد العداد واحد بـ ~outcome~ قيمته ~ok~ لو ~ok~ صح و ~aborted~ لو غلط، ويضيف ~d~ بالثواني للمدرّج. أي bay مش من الأربعة بالظبط (حتى ~North~ أو ~""~) يتسجّل ~other~. المدة السالبة تتحسب 0. ~SetQueue(n int)~ يحط المؤشر على n، والسالب 0. ~Handler() http.Handler~ يعرض نفس السجل بـ ~promhttp~. كل الدوال آمنة بالتزامن. ~main~ فاضية.
 
 النجمة التالتة: ~Inflight(bay string) func()~ يزوّد مؤشر ~dock_inflight~ بـ label ~bay~ (بنفس قاعدة ~other~) واحد، ويرجع دالة بتنقّصه واحد أول مرة تتنادى بس؛ النداء التاني مبيعملش حاجة.`,
-		Hints: []string{"العداد التراكمي غير قياس الحالة الحالية؛ اختار النوع من معنى القيمة.", "رتّب التفكير بين إنشاء المقاييس وتسجيلها ثم تحديثها وعرضها.", "ارجع لتواقيع RecordLanding وSetQueue في starter وحدد أثر كل method."},
+		Hints: []string{"العداد التراكمي غير قياس الحالة الحالية؛ اختار النوع من معنى الـvalue.", "رتّب التفكير بين إنشاء المقاييس وتسجيلها ثم تحديثها وعرضها.", "ارجع لتواقيع RecordLanding وSetQueue في starter وحدد أثر كل method."},
 		En: &LevelText{LessonRevision: 1, Steps: ch36MetricsEnglishSteps, Title: "Counters", Goal: "Expose landing dock metrics with Prometheus using bounded labels, an endpoint, and concurrent updates", Files: []LabFile{{Name: "main.go", Starter: ch361Starter}},
 			Lesson: `# Landing Dock Counters
 
@@ -962,7 +962,7 @@ db.Ping(context.Background())               // القاعدة عالقة: الف
 آمن بالتزامن، ومن غير شبكة. ~main~ فاضية.
 
 النجمة التالتة: ~(*Ops).Drain()~ آمنة بالتزامن؛ بعدها ~/readyz~ يرجع 503 و ~draining\n~ من غير ~Ping~ ومن غير سجل ~Warn~، و ~/livez~ يفضل 200.`,
-		Hints: []string{"فصل الحياة عن الجاهزية يمنع فشل dependency من إعادة تشغيل كل النسخ.", "قسّم logger وفحوص HTTP قبل ربط السجل بالرد.", "ارجع لواجهة Pinger وServeHTTP في starter وحدد أي probe يستدعي Ping."},
+		Hints: []string{"فصل الحياة عن الجاهزية يمنع فشل dependency من إعادة تشغيل كل النسخ.", "قسّم logger وفحوص HTTP قبل ربط السجل بالـresponse.", "ارجع لـinterface Pinger وServeHTTP في starter وحدد أي probe بيستدعي Ping."},
 		En: &LevelText{LessonRevision: 1, Steps: ch36OpsEnglishSteps, Title: "Readiness", Goal: "Write structured slog logs that hide secrets, and /livez and /readyz probes tied to the base database", Files: []LabFile{{Name: "main.go", Starter: ch363Starter}},
 			Lesson: `# Base Readiness
 

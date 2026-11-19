@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "32-1-websocket", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson321Arabic, Title: "بث حي", Goal: "رحّل قراءات الحساسات بـ WebSocket وحلقات بتقف من غير تسريب",
+	add(&Level{ID: "32-1-websocket", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson321Arabic, Title: "بث حي", Goal: "رحّل قراءات الحساسات بـ WebSocket وloops بتقف من غير تسريب",
 		Requires: []string{"sel:websocket.Accept"}, Deps: []string{"github.com/coder/websocket"}, Bridge: []int{74}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch321Starter}},
 		Lesson: `# بث قراءات المستعمرة
@@ -2527,7 +2527,7 @@ func TestHiddenMultiplexFallbackAndTrust(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "32-6-ssh", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson326Arabic, Title: "SSH", Goal: "نفّذ أوامر فحص الرصيف المحددة بمفتاح مضيف موثوق وإلغاء كامل",
+	add(&Level{ID: "32-6-ssh", Chapter: 32, Kind: "lab", LessonRevision: 1, Steps: ch32Lesson326Arabic, Title: "SSH", Goal: "نفّذ أوامر فحص الرصيف المحددة بhost key موثوق وإلغاء كامل",
 		Requires: []string{"sel:ssh.NewClientConn", "sel:ssh.FixedHostKey"}, Deps: []string{"golang.org/x/crypto"}, Bridge: []int{81}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch326Starter}},
 		Lesson: `# وصلة SSH بمفتاح رصيف موثوق

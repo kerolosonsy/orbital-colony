@@ -53,7 +53,7 @@ Flush متسلسلة مع Record على نفس الكائن: اقرا كل pendi
 
 GET ~/livez~ يرجع 200 مستقل عن القاعدة. ~/readyz~ يرجع 200 لو القاعدة متاحة ومفيش pending، وإلا 503. ~/metrics~ يرجع نص بالظبط ~colony_storm_commands_total N~ ثم ~colony_storm_pending P~، كل سطر newline ومن غير labels؛ N عدد كل الصفوف وP الغير منشورة. فشل القاعدة 503 برسالة عامة من غير تفاصيل، وأي مسار تاني 404. مرّر السياق لكل I/O وامنع السباقات. سيب ~main~ فاضية. النجمة التالتة: فقدان ack ثم إعادة فتح القاعدة وإعادة Record وFlush مينشئش أمر جديد أو يكرر أثر المستهلك.
 `,
-		Hints: []string{"الـoutbox يحفظ نية النشر قبل الاعتماد على الشبكة.", "تتبّع ملكية كل أمر من تسجيله لحد التسليم، وخلي الفشل قابل للإعادة.", "ابدأ من Init وRecord وFlush في starter وحدد عمر كل مورد."},
+		Hints: []string{"الـoutbox بيخزّن نية النشر قبل الاعتماد على الشبكة.", "تتبّع ملكية كل أمر من تسجيله لحد التسليم، وخلي الفشل قابل للإعادة.", "ابدأ من Init وRecord وFlush في starter وحدد عمر كل مورد."},
 		En: &LevelText{Title: "Boss: Storm Shield Control", Goal: "Recover durable shield commands, retry delivery, and expose readiness and metrics", Files: []LabFile{{Name: "main.go", Starter: `package main
 import ("context";"database/sql";"errors";"log/slog";"net/http")
 type StormEvent struct { ID string; Delta int; Version int }

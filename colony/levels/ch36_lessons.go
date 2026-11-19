@@ -78,11 +78,11 @@ func ch36SandboxConfig(prefix string, language int) map[string]any {
 		variants = [][]ch36SandboxFrame{
 			{
 				ch36Frame("قاعدة البيانات جاهزة.", "The database is ready.", ch36Row("DB", "Database", "connected", "connected"), ch36Row("/livez", "/livez", "ok", "ok"), ch36Row("/readyz", "/readyz", "ready", "ready")),
-				ch36Frame("ترتيب الطلبات ممكن يختلف.", "Request order can vary.", ch36Row("أول رد", "First response", "/livez: ok", "/livez: ok"), ch36Row("تاني رد", "Second response", "/readyz: ready", "/readyz: ready"), ch36Row("الترتيب", "Order", "live ثم ready", "live then ready")),
+				ch36Frame("ترتيب الـrequests ممكن يختلف.", "Request order can vary.", ch36Row("أول response", "First response", "/livez: ok", "/livez: ok"), ch36Row("تاني response", "Second response", "/readyz: ready", "/readyz: ready"), ch36Row("الترتيب", "Order", "live ثم ready", "live then ready")),
 			},
 			{
 				ch36Frame("قاعدة البيانات واقفة.", "The database is offline.", ch36Row("DB", "Database", "offline", "offline"), ch36Row("/livez", "/livez", "ok", "ok"), ch36Row("/readyz", "/readyz", "waiting", "waiting")),
-				ch36Frame("الـliveness مستقل عن DB.", "Liveness stays independent of the database.", ch36Row("أول رد", "First response", "/readyz: waiting", "/readyz: waiting"), ch36Row("تاني رد", "Second response", "/livez: ok", "/livez: ok"), ch36Row("الترتيب", "Order", "ready ثم live", "ready then live")),
+				ch36Frame("الـliveness مستقل عن DB.", "Liveness stays independent of the database.", ch36Row("أول response", "First response", "/readyz: waiting", "/readyz: waiting"), ch36Row("تاني response", "Second response", "/livez: ok", "/livez: ok"), ch36Row("الترتيب", "Order", "ready ثم live", "ready then live")),
 			},
 		}
 	case "c364.":
@@ -175,8 +175,8 @@ func main() {
 }`
 
 const ch36MetricsArabic = `1. كمّل ~DockMetrics~ في ~main.go~ واربط المقاييس بالـregistry المحلي.
-2. فرّق بين العداد والمؤشر والمدرّج.
-3. خلّي قيم الـlabels محدودة والتحديثات آمنة.
+2. فرّق بين counter وGauge وHistogram.
+3. خلّي values الـlabels محدودة والتحديثات آمنة.
 
 الـstarter فيه الـtypes والتواقيع.
 
@@ -213,19 +213,19 @@ var ch36MetricsArabicSteps = []LessonStep{
 		ID: "c361.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{
 			ch36Question("c361.predict-label", ch36Prediction("توقّع الناتج؛ المدخل الغريب بيروح لفئة ثابتة.", ch36LabelExample), []string{"amber flight-9", "amber other", "other other"}, 1, []string{
-				"القيمة الغريبة مش label مستقلة.",
+				"الـvalue الغريبة مش label مستقلة.",
 				"الغريب بيتجمع في other.",
-				"القيمة المعروفة بتفضل زي ما هي.",
+				"الـvalue المعروفة بتفضل زي ما هي.",
 			}),
 			ch36Walkthrough(
 				"c361.label-reveal",
-				"تابع label مع قيمة معروفة وبعدها قيمة جديدة.",
+				"تابع label مع value معروفة وبعدها value جديدة.",
 				ch36LabelExample, "e361-bounded-label", []string{"fmt"},
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
-					{Line: 1, Caption: "الدالة بتاخد bay."},
-					{Line: 2, Caption: "قارن بالقيمة المعروفة."},
-					{Line: 5, Caption: "القيم التانية تتجمع."},
+					{Line: 1, Caption: "الـfunction بتاخد bay."},
+					{Line: 2, Caption: "قارن بالـvalue المعروفة."},
+					{Line: 5, Caption: "الـvalues التانية تتجمع."},
 					{Line: 7, Caption: "اطبع الفئتين."},
 					{Line: 8, Caption: "الفئة ثابتة للغريب.", Output: "amber other"},
 				},
@@ -240,10 +240,10 @@ var ch36MetricsArabicSteps = []LessonStep{
 	{
 		ID: "c361.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch36Markdown("c361.plan", "اكتب معنى كل قيمة ووحدتها قبل اختيار النوع.\n\nبعدها اربط كل method بالمقياس والـhandler، وراجع أخطاء التسجيل."),
-			ch36Question("c361.gauge-check", "طول الطابور الحالي أقرب لأي نوع؟", []string{"Counter", "Gauge", "Histogram"}, 1, []string{
+			ch36Markdown("c361.plan", "اكتب معنى كل value ووحدتها قبل اختيار النوع.\n\nبعدها اربط كل method بالمقياس والـhandler، وراجع errors التسجيل."),
+			ch36Question("c361.gauge-check", "طول الـqueue الحالي أقرب لأي نوع؟", []string{"Counter", "Gauge", "Histogram"}, 1, []string{
 				"العداد بيسجل الزيادات المتراكمة.",
-				"المؤشر بيمثل قيمة بتطلع وتنزل.",
+				"الـGauge بيمثل value بتطلع وتنزل.",
 				"المدرّج بيجمع قياسات في buckets.",
 			}),
 		},
@@ -367,10 +367,10 @@ func main() {
 }`
 
 const ch36OpsArabic = `1. كمّل logger وفحوص ~/livez~ و ~/readyz~ في ~main.go~.
-2. اخفِ مفاتيح الأسرار من السجل.
+2. اخفِ الـsecret keys من السجل.
 3. خلي فحص الجاهزية مرتبط بقاعدة البيانات.
 
-الـstarter فيه ~Pinger~ وواجهة ~ServeHTTP~.
+الـstarter فيه ~Pinger~ وmethod ~ServeHTTP~.
 
 ده lab؛ ابدأ من العقد والتواقيع.`
 
@@ -391,16 +391,16 @@ var ch36OpsArabicSteps = []LessonStep{
 		ID: "c363.idea-step", Title: "الفكرة",
 		Blocks: []LessonBlock{ch36Walkthrough(
 			"c363.structured-log",
-			"~slog~ بيطلع مفاتيح وقيم منظمة. ~ReplaceAttr~ تقدر تشيل مفتاح أو تبدّل قيمته، حتى جوه group.",
+			"~slog~ بيطلع keys وvalues منظمة. ~ReplaceAttr~ تقدر تشيل key أو تبدّل الـvalue، حتى جوه group.",
 			ch36ReadinessLogExample, "e363-structured-log", []string{"log/slog", "os", "strings"},
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
 				{Line: 1, Caption: "ابدأ main."},
 				{Line: 2, Caption: "جهّز تعديل السجل."},
 				{Line: 3, Caption: "احذف الوقت المتغير."},
-				{Line: 6, Caption: "فتّش عن المفتاح الحساس."},
-				{Line: 7, Caption: "بدّل قيمة السر."},
-				{Line: 11, Caption: "أنشئ JSON handler."},
+				{Line: 6, Caption: "فتّش عن الـkey الحساس."},
+				{Line: 7, Caption: "بدّل الـvalue السرية."},
+				{Line: 11, Caption: "جهّز JSON handler."},
 				{Line: 12, Caption: "اكتب record منظم.", Output: "{\"level\":\"INFO\",\"msg\":\"request\",\"token\":\"[REDACTED]\",\"status\":503}"},
 			},
 		)},
@@ -415,12 +415,12 @@ var ch36OpsArabicSteps = []LessonStep{
 			}),
 			ch36Walkthrough(
 				"c363.path-reveal",
-				"راقب الفرق بين مسار الطلب والـquery.",
+				"راقب الفرق بين مسار الـrequest والـquery.",
 				ch36PathExample, "e363-path-only", []string{"fmt", "net/http"},
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
 					{Line: 1, Caption: "ابدأ main."},
-					{Line: 2, Caption: "جهّز طلب فيه query."},
+					{Line: 2, Caption: "جهّز request فيه query."},
 					{Line: 3, Caption: "اطبع المسار وحده.", Output: "/readyz"},
 				},
 			),
@@ -434,7 +434,7 @@ var ch36OpsArabicSteps = []LessonStep{
 	{
 		ID: "c363.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
-			ch36Markdown("c363.plan", "جهّز logger الأول، وبعده فرّق بين فروع HTTP وسجّل النتيجة بعد تحديدها.\n\nاقرأ الطلبات المتوازية بعين على الحالة المشتركة."),
+			ch36Markdown("c363.plan", "جهّز logger الأول، وبعده فرّق بين فروع HTTP وسجّل النتيجة بعد تحديدها.\n\nاقرا الـrequests المتوازية بعين على الحالة المشتركة."),
 			ch36Question("c363.live-check", "لو قاعدة البيانات وقعت، فحص الحياة يعمل إيه؟", []string{"يفحص القاعدة", "يفضل مستقل عنها", "يرجع نجاح الجاهزية"}, 1, []string{
 				"فحص الجاهزية هو اللي يتابع dependency.",
 				"حياة العملية مش رهينة قاعدة البيانات.",
@@ -515,7 +515,7 @@ var ch36OpsEnglishSteps = []LessonStep{
 }
 
 const ch36BossArabic = `1. كمّل ~StormControl~ في ~main.go~ باستخدام SQLite والـbroker المحقون.
-2. احفظ الأوامر وكمّل تسليم الـpending بأمان.
+2. خزّن الأوامر وكمّل تسليم الـpending بأمان.
 3. اعرض الجاهزية والمقاييس الثابتة.
 
 الـstarter فيه الـtypes والتواقيع.
@@ -564,9 +564,9 @@ var ch36BossArabicSteps = []LessonStep{
 				ch36AckExample, "e364-ack-state", []string{"fmt"},
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
-					{Line: 1, Caption: "الدالة تستقبل نتيجة النشر."},
+					{Line: 1, Caption: "الـfunction بتستقبل نتيجة النشر."},
 					{Line: 2, Caption: "افحص الفشل أولاً."},
-					{Line: 3, Caption: "الفشل لا يؤكد التسليم."},
+					{Line: 3, Caption: "الفشل مش بيأكد التسليم."},
 					{Line: 5, Caption: "النجاح يؤكد التسليم."},
 					{Line: 8, Caption: "العلامة تتبع النجاح.", Output: "false true"},
 				},
@@ -576,13 +576,13 @@ var ch36BossArabicSteps = []LessonStep{
 	},
 	{
 		ID: "c364.watch-step", Title: "خد بالك",
-		Blocks: []LessonBlock{ch36Markdown("c364.watch", "- ما تسيبش Rows مفتوحة وقت نداء broker.\n- سجّل الخطأ برسالة ثابتة، من غير error ممكن يحتوي سر.")},
+		Blocks: []LessonBlock{ch36Markdown("c364.watch", "- ما تسيبش Rows مفتوحة وقت نداء broker.\n- سجّل الـerror برسالة ثابتة، من غير raw error ممكن يحتوي سر.")},
 	},
 	{
 		ID: "c364.check-step", Title: "فكّر واختبر",
 		Blocks: []LessonBlock{
 			ch36Markdown("c364.plan", "ارسم انتقال الأمر من التسجيل للتسليم، وحدد مين يملك كل نتيجة بعد الفشل.\n\nقارن بيانات التخزين والـpending قبل وبعد Flush."),
-			ch36Question("c364.ack-check", "متى تتحول علامة pending؟", []string{"قبل Publish", "بعد نجاح Publish", "عند إنشاء handler"}, 1, []string{
+			ch36Question("c364.ack-check", "إمتى علامة pending بتتغير؟", []string{"قبل Publish", "بعد نجاح Publish", "عند إنشاء handler"}, 1, []string{
 				"الفشل قبل النشر لازم يترك شغل قابل للإعادة.",
 				"النجاح هو اللي يثبت التسليم.",
 				"إنشاء handler مش تسليم.",
@@ -664,7 +664,7 @@ const ch36ContainersArabic = `1. كمّل ~RunPodCtl~ في ~main.go~ باستخ�
 2. اعرض حالة الكبسولات ونفّذ الأوامر المسموحة.
 3. خلّي الإيقاف محتاج تأكيد واضح.
 
-الـstarter بيفصل الـCLI عن واجهة الـruntime.
+الـstarter بيفصل الـCLI عن interface الـruntime.
 
 ده lab؛ مفيش runtime حقيقي مطلوب.`
 
@@ -689,31 +689,31 @@ var ch36ContainersArabicSteps = []LessonStep{
 			ch36InterfaceExample, "e362-interface", []string{"fmt"},
 			[]LessonFrame{
 				{Line: 0, Caption: "قبل التنفيذ."},
-				{Line: 1, Caption: "الواجهة تصف Start."},
-				{Line: 4, Caption: "Demo يحقق الواجهة."},
+				{Line: 1, Caption: "الـinterface تصف Start."},
+				{Line: 4, Caption: "Demo يحقق الـinterface."},
 				{Line: 7, Caption: "المتغير يحمل تطبيقها."},
-				{Line: 8, Caption: "العملية ترجع النص.", Output: "started probe-4"},
+				{Line: 8, Caption: "العملية بترجّع string.", Output: "started probe-4"},
 			},
 		)},
 	},
 	{
 		ID: "c362.try-step", Title: "جرّب",
 		Blocks: []LessonBlock{
-			ch36Question("c362.predict-interface", ch36Prediction("توقّع الناتج اللي بترجعه الواجهة.", ch36InterfaceExampleReveal), []string{"relay", "Label", "nil"}, 0, []string{
+			ch36Question("c362.predict-interface", ch36Prediction("توقّع الـvalue اللي بترجعها الـinterface.", ch36InterfaceExampleReveal), []string{"relay", "Label", "nil"}, 0, []string{
 				"ده اسم method، مش ناتجها.",
-				"الدالة بترجع قيمة نصية.",
-				"Relay موجودة كقيمة.",
+				"الـfunction بترجّع string value.",
+				"Relay موجودة كـvalue.",
 			}),
 			ch36Walkthrough(
 				"c362.interface-reveal",
-				"شوف إزاي الواجهة بتوصل للـmethod.",
+				"شوف إزاي الـinterface بتوصل للـmethod.",
 				ch36InterfaceExampleReveal, "e362-interface-reveal", []string{"fmt"},
 				[]LessonFrame{
 					{Line: 0, Caption: "قبل التشغيل."},
 					{Line: 1, Caption: "Name تطلب Label."},
 					{Line: 3, Caption: "Relay يحقق السلوك."},
-					{Line: 5, Caption: "القيمة تدخل في الواجهة."},
-					{Line: 6, Caption: "الـmethod ترجع النص.", Output: "relay"},
+					{Line: 5, Caption: "الـvalue تدخل في الـinterface."},
+					{Line: 6, Caption: "الـmethod بترجّع string.", Output: "relay"},
 				},
 			),
 			ch36Sandbox("c362.playground", ch36SandboxInstruction("c362.", 0), "c362.", 0),
