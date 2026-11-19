@@ -2,10 +2,12 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -38,12 +40,193 @@ func TestCh35Lessons(t *testing.T) {
 			continue
 		}
 		seenLevels[level.ID] = true
-		ch34ValidateLesson(t, level, prefix, arabicTitles, englishTitles)
+		copy := *level
+		copy.Steps = ch35WithoutSandboxes(level.Steps)
+		english := *level.En
+		english.Steps = ch35WithoutSandboxes(level.En.Steps)
+		copy.En = &english
+		ch34ValidateLesson(t, &copy, prefix, arabicTitles, englishTitles)
 	}
 	for id := range idToPrefix {
 		if !seenLevels[id] {
 			t.Errorf("chapter 35 lesson is missing for %s", id)
 		}
+	}
+}
+
+func ch35WithoutSandboxes(steps []LessonStep) []LessonStep {
+	copy := make([]LessonStep, len(steps))
+	for i, step := range steps {
+		copy[i] = step
+		copy[i].Blocks = make([]LessonBlock, 0, len(step.Blocks))
+		for _, block := range step.Blocks {
+			if block.Kind != "sandbox" {
+				copy[i].Blocks = append(copy[i].Blocks, block)
+			}
+		}
+	}
+	return copy
+}
+
+func TestCh35Sandboxes(t *testing.T) {
+	type fixtureLevel struct {
+		ID      string                     `json:"id"`
+		Kind    string                     `json:"kind"`
+		Configs map[string]json.RawMessage `json:"configs"`
+	}
+	var fixture struct {
+		Levels []fixtureLevel `json:"levels"`
+	}
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch35.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(body, &fixture); err != nil {
+		t.Fatal(err)
+	}
+	fixtures := make(map[string]fixtureLevel, len(fixture.Levels))
+	for _, item := range fixture.Levels {
+		if _, exists := fixtures[item.ID]; exists {
+			t.Errorf("duplicate sandbox fixture for %s", item.ID)
+		}
+		fixtures[item.ID] = item
+	}
+	if len(fixtures) != 7 {
+		t.Fatalf("expected seven chapter 35 fixtures, found %d", len(fixtures))
+	}
+	for _, id := range []string{
+		"35-1-task-queue", "35-2-scheduler", "35-3-redis-lock", "35-4-outbox",
+		"35-5-kafka", "35-6-raft-election", "35-7-raft-log",
+	} {
+		level := Get(id)
+		if level == nil || level.En == nil {
+			t.Fatalf("%s: missing bilingual lesson", id)
+		}
+		ar, arCount, arMisplaced := ch35FindSandbox(level.Steps)
+		en, enCount, enMisplaced := ch35FindSandbox(level.En.Steps)
+		if arCount != 1 || enCount != 1 || ar == nil || en == nil || arMisplaced || enMisplaced || ar.Sandbox == nil || en.Sandbox == nil {
+			t.Errorf("%s: want one sandbox after the question and walkthrough in both languages", id)
+			continue
+		}
+		if ar.ID != en.ID || ar.Kind != en.Kind || ar.Sandbox.Kind != en.Sandbox.Kind {
+			t.Errorf("%s: sandbox identities differ across languages", id)
+		}
+		if ar.Kind != "sandbox" || !strings.HasPrefix(ar.Sandbox.Kind, "ch35-") || ar.Sandbox.Config == nil {
+			t.Errorf("%s: sandbox must use a ch35 kind and Config", id)
+		}
+		if !ch35SameConfigShape(t, ar.Sandbox.Config, en.Sandbox.Config) {
+			t.Errorf("%s: Arabic and English sandbox Config structure differs", id)
+		}
+		item, ok := fixtures[id]
+		if !ok {
+			t.Errorf("%s: missing JavaScript fixture", id)
+			continue
+		}
+		if item.Kind != ar.Sandbox.Kind || !ch35JSONEqual(t, ar.Sandbox.Config, item.Configs["ar"]) || !ch35JSONEqual(t, en.Sandbox.Config, item.Configs["en"]) {
+			t.Errorf("%s: Go sandbox Config differs from JavaScript fixture", id)
+		}
+		delete(fixtures, id)
+	}
+	for id := range fixtures {
+		t.Errorf("unexpected chapter 35 sandbox fixture %s", id)
+	}
+}
+
+func ch35FindSandbox(steps []LessonStep) (*LessonBlock, int, bool) {
+	var found *LessonBlock
+	count := 0
+	misplaced := false
+	for stepIndex, step := range steps {
+		for blockIndex := range step.Blocks {
+			block := &step.Blocks[blockIndex]
+			if block.Kind != "sandbox" {
+				continue
+			}
+			count++
+			if stepIndex != 2 || blockIndex != len(step.Blocks)-1 {
+				misplaced = true
+			}
+			found = block
+		}
+	}
+	return found, count, misplaced
+}
+
+func ch35JSONEqual(t *testing.T, got any, wantJSON json.RawMessage) bool {
+	t.Helper()
+	var want, normalized any
+	if err := json.Unmarshal(wantJSON, &want); err != nil {
+		t.Errorf("decode fixture Config: %v", err)
+		return false
+	}
+	body, err := json.Marshal(got)
+	if err != nil {
+		t.Errorf("encode sandbox Config: %v", err)
+		return false
+	}
+	if err := json.Unmarshal(body, &normalized); err != nil {
+		t.Errorf("normalize sandbox Config: %v", err)
+		return false
+	}
+	return reflect.DeepEqual(normalized, want)
+}
+
+func ch35SameConfigShape(t *testing.T, first, second any) bool {
+	t.Helper()
+	normalize := func(value any) (any, bool) {
+		body, err := json.Marshal(value)
+		if err != nil {
+			t.Errorf("encode sandbox Config: %v", err)
+			return nil, false
+		}
+		var normalized any
+		if err := json.Unmarshal(body, &normalized); err != nil {
+			t.Errorf("normalize sandbox Config: %v", err)
+			return nil, false
+		}
+		return normalized, true
+	}
+	left, ok := normalize(first)
+	if !ok {
+		return false
+	}
+	right, ok := normalize(second)
+	if !ok {
+		return false
+	}
+	return ch35JSONShape(left, right)
+}
+
+func ch35JSONShape(first, second any) bool {
+	switch left := first.(type) {
+	case map[string]any:
+		right, ok := second.(map[string]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for key, value := range left {
+			other, ok := right[key]
+			if !ok || !ch35JSONShape(value, other) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		right, ok := second.([]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for index, value := range left {
+			if !ch35JSONShape(value, right[index]) {
+				return false
+			}
+		}
+		return true
+	case string:
+		_, ok := second.(string)
+		return ok
+	default:
+		return reflect.DeepEqual(first, second)
 	}
 }
 

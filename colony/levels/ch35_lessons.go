@@ -2,6 +2,158 @@ package levels
 
 import "strings"
 
+type ch35SandboxPair struct {
+	Arabic  string `json:"ar"`
+	English string `json:"en"`
+}
+
+type ch35SandboxRow struct {
+	Label ch35SandboxPair `json:"label"`
+	Value ch35SandboxPair `json:"value"`
+}
+
+type ch35SandboxFrame struct {
+	Caption ch35SandboxPair  `json:"caption"`
+	Rows    []ch35SandboxRow `json:"rows"`
+}
+
+func ch35Pair(arabic, english string) ch35SandboxPair {
+	return ch35SandboxPair{Arabic: arabic, English: english}
+}
+
+func ch35LanguagePair(pair ch35SandboxPair, language int) ch35SandboxPair {
+	if language == 0 {
+		pair.English = ""
+	} else {
+		pair.Arabic = ""
+	}
+	return pair
+}
+
+func ch35Row(labelArabic, labelEnglish, valueArabic, valueEnglish string) ch35SandboxRow {
+	return ch35SandboxRow{Label: ch35Pair(labelArabic, labelEnglish), Value: ch35Pair(valueArabic, valueEnglish)}
+}
+
+func ch35Frame(captionArabic, captionEnglish string, rows ...ch35SandboxRow) ch35SandboxFrame {
+	return ch35SandboxFrame{Caption: ch35Pair(captionArabic, captionEnglish), Rows: rows}
+}
+
+func ch35SandboxInstruction(prefix string, language int) string {
+	text := map[string][2]string{
+		"c351.": {"قدّم الساعة، وتابع lease من التسليم للإعادة.", "Advance the clock and follow the lease."},
+		"c352.": {"قدّم الوقت، وشوف موعد heap الجاي.", "Advance time and inspect the next heap job."},
+		"c353.": {"تابع انتهاء lease ومحاولة العامل القديم.", "Follow expiry and the old owner's release."},
+		"c354.": {"تابع publish ثم إعادة محاولة event.", "Follow publish and an event retry."},
+		"c355.": {"حرّك الرسالة من fetch لحد commit.", "Move a message from fetch to commit."},
+		"c356.": {"بدّل ترتيب الرسائل وراقب term والـrole.", "Change message order and watch term and role."},
+		"c357.": {"بدّل ترتيب الـack وشوف committed prefix.", "Change ack order and inspect the committed prefix."},
+	}[prefix]
+	return text[language]
+}
+
+func ch35SandboxConfig(prefix string, language int) map[string]any {
+	advance := ch35Pair("كمّل خطوة", "Next step")
+	replay := ch35Pair("جرّب ترتيب تاني", "Try another order")
+	reset := ch35Pair("من الأول", "Reset")
+	variants := [][]ch35SandboxFrame{}
+	switch prefix {
+	case "c351.":
+		variants = [][]ch35SandboxFrame{
+			{
+				ch35Frame("المهمة مستنية.", "The task is waiting.", ch35Row("المهمة", "Task", "valve-a", "valve-a"), ch35Row("الحالة", "State", "ready", "ready"), ch35Row("التسليمات", "Deliveries", "0", "0")),
+				ch35Frame("انتهاء الـlease يعيدها.", "Lease expiry returns work.", ch35Row("العامل الجديد", "New worker", "worker-b", "worker-b"), ch35Row("الحالة", "State", "leased تاني", "leased again"), ch35Row("التسليمات", "Deliveries", "2", "2")),
+			},
+			{
+				ch35Frame("العامل التاني كسب السباق.", "Worker B wins this race.", ch35Row("العامل", "Worker", "worker-b", "worker-b"), ch35Row("الحالة", "State", "leased", "leased"), ch35Row("الـack", "Ack", "لسه", "pending")),
+				ch35Frame("من غير ack، المهمة ترجع.", "Without ack, work returns.", ch35Row("العامل التالي", "Next worker", "worker-a", "worker-a"), ch35Row("الحالة", "State", "ready", "ready"), ch35Row("الترتيب", "Order", "اتغيّر", "changed")),
+			},
+		}
+	case "c352.":
+		variants = [][]ch35SandboxFrame{
+			{
+				ch35Frame("الـheap تحفظ أقرب موعد.", "The heap keeps the nearest job.", ch35Row("الوقت", "Clock", "1", "1"), ch35Row("الجذر", "Root", "relay @ 2", "relay @ 2"), ch35Row("بعده", "Next", "scan @ 4", "scan @ 4")),
+				ch35Frame("بعد الوقت، الجذر يتغير.", "After time moves, the root changes.", ch35Row("الوقت", "Clock", "2", "2"), ch35Row("المستحق", "Due", "relay", "relay"), ch35Row("الجذر التالي", "Next root", "scan @ 4", "scan @ 4")),
+			},
+			{
+				ch35Frame("موعدين متساويين.", "Two jobs share a deadline.", ch35Row("الوقت", "Clock", "2", "2"), ch35Row("الجذر", "Root", "scan @ 2", "scan @ 2"), ch35Row("الآخر", "Other", "relay @ 2", "relay @ 2")),
+				ch35Frame("ترتيب التعادل ممكن يتغير.", "Tie order can vary.", ch35Row("الوقت", "Clock", "2", "2"), ch35Row("الجذر", "Root", "relay @ 2", "relay @ 2"), ch35Row("الآخر", "Other", "scan @ 2", "scan @ 2")),
+			},
+		}
+	case "c353.":
+		variants = [][]ch35SandboxFrame{
+			{
+				ch35Frame("العامل A ماسك lock.", "Worker A holds the lock.", ch35Row("المالك", "Owner", "worker-a", "worker-a"), ch35Row("token", "Token", "T-old", "T-old"), ch35Row("الوقت", "Clock", "قبل الانتهاء", "before expiry")),
+				ch35Frame("المالك الجديد يفضل محمي.", "The new owner stays protected.", ch35Row("المالك", "Owner", "worker-b", "worker-b"), ch35Row("token", "Token", "T-new", "T-new"), ch35Row("محاولة القديم", "Old release", "مرفوضة", "ignored")),
+			},
+			{
+				ch35Frame("العامل B كسب السباق.", "Worker B wins this race.", ch35Row("الترتيب", "Order", "B ثم A", "B then A"), ch35Row("المالك", "Owner", "worker-b", "worker-b"), ch35Row("token", "Token", "T-old", "T-old")),
+				ch35Frame("القديم مايمسحش lock الجديد.", "The old owner cannot clear the new lock.", ch35Row("المالك الجديد", "New owner", "worker-a", "worker-a"), ch35Row("token", "Token", "T-new", "T-new"), ch35Row("محاولة B", "Worker B release", "مرفوضة", "ignored")),
+			},
+		}
+	case "c354.":
+		variants = [][]ch35SandboxFrame{
+			{
+				ch35Frame("الطلب والـrow اتسجلوا سوا.", "Order and outbox row are saved together.", ch35Row("الطلب", "Order", "saved", "saved"), ch35Row("الـoutbox", "Outbox", "pending", "pending"), ch35Row("الحدث", "Event", "evt-4", "evt-4")),
+				ch35Frame("النشر ممكن يتكرر؛ الأثر لأ.", "Publish can repeat; the effect stays once.", ch35Row("الـrelay", "Relay", "نشر ثم crash", "publish then crash"), ch35Row("retry", "Retry", "evt-4 مجددًا", "evt-4 again"), ch35Row("المستهلك", "Consumer", "المجموع 1", "total 1")),
+			},
+			{
+				ch35Frame("حدثان ممكن يوصلوا بترتيبين.", "Two events may arrive in either order.", ch35Row("الوارد", "Incoming", "evt-4 ثم evt-5", "evt-4 then evt-5"), ch35Row("المجموع", "Total", "0", "0"), ch35Row("الحالة", "State", "منتظر", "waiting")),
+				ch35Frame("ترتيب الوصول اتبدّل.", "Arrival order changed.", ch35Row("الوارد", "Incoming", "evt-5 ثم evt-4", "evt-5 then evt-4"), ch35Row("المجموع", "Total", "2", "2"), ch35Row("المكرر", "Duplicate", "evt-4 يتجاهل", "evt-4 ignored")),
+			},
+		}
+	case "c355.":
+		variants = [][]ch35SandboxFrame{
+			{
+				ch35Frame("المفتاح يحدد الـpartition.", "The key selects a partition.", ch35Row("partition 0", "partition 0", "rover-7 · offset 4", "rover-7 · offset 4"), ch35Row("partition 1", "partition 1", "rover-9 · offset 8", "rover-9 · offset 8"), ch35Row("المرحلة", "Stage", "fetch", "fetch")),
+				ch35Frame("الـcommit يتأخر بعد retry.", "Commit waits through a retry.", ch35Row("partition 0", "partition 0", "handler نجح", "handler succeeded"), ch35Row("partition 1", "partition 1", "retry", "retry"), ch35Row("الـcommit", "Commit", "لسه", "pending")),
+			},
+			{
+				ch35Frame("الـpartitionين مستقلين.", "Partitions progress independently.", ch35Row("أول وصول", "First arrival", "partition 1", "partition 1"), ch35Row("التالي", "Next", "partition 0", "partition 0"), ch35Row("الترتيب", "Order", "مختلف", "varied")),
+				ch35Frame("كل partition يحفظ ترتيبه.", "Each partition keeps its order.", ch35Row("partition 0", "partition 0", "offset 4 ثم 5", "offset 4 then 5"), ch35Row("partition 1", "partition 1", "offset 8 ثم retry", "offset 8 then retry"), ch35Row("الـcommit", "Commit", "بعد النجاح", "after success")),
+			},
+		}
+	case "c356.":
+		variants = [][]ch35SandboxFrame{
+			{
+				ch35Frame("المرشح بعت vote request.", "Candidate sent a vote request.", ch35Row("الدور", "Role", "candidate", "candidate"), ch35Row("term", "Term", "4", "4"), ch35Row("الرسائل", "Messages", "vote ثم heartbeat", "vote then heartbeat")),
+				ch35Frame("term أحدث يرجّع follower.", "A newer term returns follower.", ch35Row("الدور", "Role", "follower", "follower"), ch35Row("term", "Term", "5", "5"), ch35Row("الرسائل", "Messages", "heartbeat وصل", "heartbeat arrived")),
+			},
+			{
+				ch35Frame("الـheartbeat وصل الأول.", "The heartbeat arrived first.", ch35Row("الدور", "Role", "candidate", "candidate"), ch35Row("term", "Term", "4", "4"), ch35Row("الرسائل", "Messages", "heartbeat ثم vote", "heartbeat then vote")),
+				ch35Frame("رسائل Raft مش بترتيب ثابت.", "Raft messages have no fixed order.", ch35Row("الدور", "Role", "follower", "follower"), ch35Row("term", "Term", "5", "5"), ch35Row("الرسائل", "Messages", "vote أقدم اتشاف", "older vote observed")),
+			},
+		}
+	case "c357.":
+		variants = [][]ch35SandboxFrame{
+			{
+				ch35Frame("الـsuffix مختلف.", "The suffix conflicts.", ch35Row("leader", "Leader", "1:scan · 2:dock", "1:scan · 2:dock"), ch35Row("follower", "Follower", "1:scan · 2:wait", "1:scan · 2:wait"), ch35Row("committed", "Committed", "1", "1")),
+				ch35Frame("المطابقة تصلح الـsuffix.", "A matching prefix repairs the suffix.", ch35Row("leader", "Leader", "1:scan · 2:dock", "1:scan · 2:dock"), ch35Row("follower", "Follower", "1:scan · 2:dock", "1:scan · 2:dock"), ch35Row("committed", "Committed", "2", "2")),
+			},
+			{
+				ch35Frame("الـacks وصلت B ثم C.", "Acks arrived B, then C.", ch35Row("الـprefix", "Prefix", "متطابق", "matching"), ch35Row("الترتيب", "Order", "B → C", "B → C"), ch35Row("committed", "Committed", "2", "2")),
+				ch35Frame("ممكن توصل C قبل B.", "C may arrive before B.", ch35Row("الـprefix", "Prefix", "متطابق", "matching"), ch35Row("الترتيب", "Order", "C → B", "C → B"), ch35Row("committed", "Committed", "2", "2")),
+			},
+		}
+	}
+	labels := map[string]ch35SandboxPair{"advance": advance, "again": replay, "reset": reset}
+	for key, pair := range labels {
+		labels[key] = ch35LanguagePair(pair, language)
+	}
+	for variant := range variants {
+		for frame := range variants[variant] {
+			variants[variant][frame].Caption = ch35LanguagePair(variants[variant][frame].Caption, language)
+			for row := range variants[variant][frame].Rows {
+				variants[variant][frame].Rows[row].Label = ch35LanguagePair(variants[variant][frame].Rows[row].Label, language)
+				variants[variant][frame].Rows[row].Value = ch35LanguagePair(variants[variant][frame].Rows[row].Value, language)
+			}
+		}
+	}
+	return map[string]any{
+		"labels":   labels,
+		"variants": variants,
+	}
+}
+
 type ch35FrameSpec struct {
 	line    int
 	caption [2]string
@@ -96,6 +248,7 @@ func ch35BuildLesson(spec ch35LessonSpec) ([]LessonStep, []LessonStep) {
 			{ID: prefix + "try-step", Title: titles[language][2], Blocks: []LessonBlock{
 				ch35Question(prefix+"predict", ch35FencedQuestion(spec.question[language], spec.reveal.code), spec.options[language], spec.answer, spec.feedback[language]),
 				ch35Walkthrough(prefix+"reveal", spec.revealText[language], spec.reveal, language),
+				{ID: prefix + "playground", Kind: "sandbox", Text: ch35SandboxInstruction(prefix, language), Sandbox: &LessonSandbox{Kind: "ch35-event-trace", Config: ch35SandboxConfig(prefix, language)}},
 			}},
 			{ID: prefix + "watch-step", Title: titles[language][3], Blocks: []LessonBlock{ch35Markdown(prefix+"watch", spec.watch[language])}},
 			{ID: prefix + "check-step", Title: titles[language][4], Blocks: []LessonBlock{

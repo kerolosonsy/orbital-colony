@@ -1,1 +1,23 @@
-/* Chapter 36 sandbox styles will be added with its renderer. */
+.ch36-service-flow {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  min-inline-size: 0;
+  padding: 10px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-2);
+}
+.ch36-flow-rows { display: grid; gap: 5px; }
+.ch36-flow-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 8px;
+  align-items: baseline;
+  padding-block: 3px;
+  border-block-end: 1px solid var(--rule);
+}
+.ch36-flow-label { color: var(--muted); overflow-wrap: anywhere; }
+.ch36-flow-value { text-align: end; overflow-wrap: anywhere; unicode-bidi: isolate; }
+.ch36-flow-caption { margin-block: 8px 4px; font-weight: 600; }
+.ch36-flow-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.ch36-flow-controls .tool { min-height: 40px; height: auto; padding: 6px 10px; }

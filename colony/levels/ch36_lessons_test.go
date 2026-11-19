@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -68,6 +69,9 @@ func TestCh36Lessons(t *testing.T) {
 						}
 					}
 				}
+				if block.Sandbox != nil && (other.Sandbox == nil || block.Sandbox.Kind != other.Sandbox.Kind || !ch36SameConfigShape(t, block.Sandbox.Config, other.Sandbox.Config)) {
+					t.Errorf("%s: Arabic and English sandbox Config structure differs", block.ID)
+				}
 			}
 		}
 	}
@@ -132,6 +136,10 @@ func ch36ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 					continue
 				}
 				words += ch36ValidateFrames(t, name, block)
+			case "sandbox":
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch36-") || block.Sandbox.Config == nil {
+					t.Errorf("%s: %s has an incomplete chapter 36 sandbox", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed block kind %q", name, block.ID, block.Kind)
 			}
@@ -156,8 +164,8 @@ func ch36ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 	}
 	if len(steps) > 2 {
 		try := steps[2]
-		if len(try.Blocks) != 2 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" {
-			t.Errorf("%s: Try it must predict first, then reveal with a walkthrough", name)
+		if len(try.Blocks) != 3 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" || try.Blocks[2].Kind != "sandbox" {
+			t.Errorf("%s: Try it must predict, reveal, then show one sandbox", name)
 		} else if strings.TrimSpace(ch36QuestionCode(try.Blocks[0].Text)) != strings.TrimSpace(try.Blocks[1].Code) {
 			t.Errorf("%s: prediction example differs from its walkthrough reveal", name)
 		}
@@ -166,6 +174,165 @@ func ch36ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 		t.Errorf("%s: learner text has %d words; want %d-%d", name, words, minWords, maxWords)
 	}
 	t.Logf("%s learner-authored words: %d", name, words)
+}
+
+func TestCh36Sandboxes(t *testing.T) {
+	type fixtureLevel struct {
+		ID      string                     `json:"id"`
+		Kind    string                     `json:"kind"`
+		Configs map[string]json.RawMessage `json:"configs"`
+	}
+	var fixture struct {
+		Levels []fixtureLevel `json:"levels"`
+	}
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch36.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(body, &fixture); err != nil {
+		t.Fatal(err)
+	}
+	fixtures := make(map[string]fixtureLevel, len(fixture.Levels))
+	for _, item := range fixture.Levels {
+		if _, exists := fixtures[item.ID]; exists {
+			t.Errorf("duplicate sandbox fixture for %s", item.ID)
+		}
+		fixtures[item.ID] = item
+	}
+	if len(fixtures) != 4 {
+		t.Fatalf("expected four chapter 36 fixtures, found %d", len(fixtures))
+	}
+	for _, id := range []string{"36-1-metrics", "36-2-containers", "36-3-ops", "36-boss-storm-control"} {
+		level := Get(id)
+		if level == nil || level.En == nil {
+			t.Fatalf("%s: missing bilingual lesson", id)
+		}
+		ar, arCount, arMisplaced := ch36FindSandbox(level.Steps)
+		en, enCount, enMisplaced := ch36FindSandbox(level.En.Steps)
+		if arCount != 1 || enCount != 1 || ar == nil || en == nil || arMisplaced || enMisplaced || ar.Sandbox == nil || en.Sandbox == nil {
+			t.Errorf("%s: want one sandbox after the question and walkthrough in both languages", id)
+			continue
+		}
+		if ar.ID != en.ID || ar.Kind != en.Kind || ar.Sandbox.Kind != en.Sandbox.Kind {
+			t.Errorf("%s: sandbox identities differ across languages", id)
+		}
+		if ar.Kind != "sandbox" || !strings.HasPrefix(ar.Sandbox.Kind, "ch36-") || ar.Sandbox.Config == nil {
+			t.Errorf("%s: sandbox must use a ch36 kind and Config", id)
+		}
+		if !ch36SameConfigShape(t, ar.Sandbox.Config, en.Sandbox.Config) {
+			t.Errorf("%s: Arabic and English sandbox Config structure differs", id)
+		}
+		item, ok := fixtures[id]
+		if !ok {
+			t.Errorf("%s: missing JavaScript fixture", id)
+			continue
+		}
+		if item.Kind != ar.Sandbox.Kind || !ch36JSONEqual(t, ar.Sandbox.Config, item.Configs["ar"]) || !ch36JSONEqual(t, en.Sandbox.Config, item.Configs["en"]) {
+			t.Errorf("%s: Go sandbox Config differs from JavaScript fixture", id)
+		}
+		delete(fixtures, id)
+	}
+	for id := range fixtures {
+		t.Errorf("unexpected chapter 36 sandbox fixture %s", id)
+	}
+}
+
+func ch36FindSandbox(steps []LessonStep) (*LessonBlock, int, bool) {
+	var found *LessonBlock
+	count := 0
+	misplaced := false
+	for stepIndex, step := range steps {
+		for blockIndex := range step.Blocks {
+			block := &step.Blocks[blockIndex]
+			if block.Kind != "sandbox" {
+				continue
+			}
+			count++
+			if stepIndex != 2 || blockIndex != len(step.Blocks)-1 {
+				misplaced = true
+			}
+			found = block
+		}
+	}
+	return found, count, misplaced
+}
+
+func ch36JSONEqual(t *testing.T, got any, wantJSON json.RawMessage) bool {
+	t.Helper()
+	var want, normalized any
+	if err := json.Unmarshal(wantJSON, &want); err != nil {
+		t.Errorf("decode fixture Config: %v", err)
+		return false
+	}
+	body, err := json.Marshal(got)
+	if err != nil {
+		t.Errorf("encode sandbox Config: %v", err)
+		return false
+	}
+	if err := json.Unmarshal(body, &normalized); err != nil {
+		t.Errorf("normalize sandbox Config: %v", err)
+		return false
+	}
+	return reflect.DeepEqual(normalized, want)
+}
+
+func ch36SameConfigShape(t *testing.T, first, second any) bool {
+	t.Helper()
+	normalize := func(value any) (any, bool) {
+		body, err := json.Marshal(value)
+		if err != nil {
+			t.Errorf("encode sandbox Config: %v", err)
+			return nil, false
+		}
+		var normalized any
+		if err := json.Unmarshal(body, &normalized); err != nil {
+			t.Errorf("normalize sandbox Config: %v", err)
+			return nil, false
+		}
+		return normalized, true
+	}
+	left, ok := normalize(first)
+	if !ok {
+		return false
+	}
+	right, ok := normalize(second)
+	if !ok {
+		return false
+	}
+	return ch36JSONShape(left, right)
+}
+
+func ch36JSONShape(first, second any) bool {
+	switch left := first.(type) {
+	case map[string]any:
+		right, ok := second.(map[string]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for key, value := range left {
+			other, ok := right[key]
+			if !ok || !ch36JSONShape(value, other) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		right, ok := second.([]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for index, value := range left {
+			if !ch36JSONShape(value, right[index]) {
+				return false
+			}
+		}
+		return true
+	case string:
+		_, ok := second.(string)
+		return ok
+	default:
+		return reflect.DeepEqual(first, second)
+	}
 }
 
 func ch36EndsSentence(text string) bool {

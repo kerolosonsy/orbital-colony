@@ -1,0 +1,1420 @@
+{
+  "levels": [
+    {
+      "id": "36-1-metrics",
+      "kind": "ch36-service-flow",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب الحالة التانية",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "الـcounter بيجمع القراءات.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "label",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "bay-east",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "counter",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "4",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "gauge",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "18",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "قراءة جديدة تزود counter.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "label",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "bay-east",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "counter",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "5",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "gauge",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "18",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "labels مختلفة تتجمع في other.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "label",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "other",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "counter",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "5",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "gauge",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "18",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "الـgauge ممكن يقل.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "label",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "other",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "counter",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "5",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "gauge",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "16",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try the other case"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The counter accumulates readings."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Label"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "bay-east"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Counter"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "4"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Gauge"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "18"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "A new reading raises the counter."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Label"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "bay-east"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Counter"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "5"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Gauge"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "18"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Different labels group under other."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Label"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "other"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Counter"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "5"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Gauge"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "18"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "A gauge can move down."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Label"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "other"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Counter"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "5"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Gauge"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "16"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "36-2-containers",
+      "kind": "ch36-service-flow",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب الحالة التانية",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "الـCLI ينادي contract مش engine.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "caller",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "RunPodCtl",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "interface",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "Runtime",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "implementation",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "fake-a",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "نفس method وصلت للـfake.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "method",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "Start(probe-4)",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "implementation",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "fake-a",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "result",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "started",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "الـinterface تقبل implementation تانية.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "caller",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "RunPodCtl",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "interface",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "Runtime",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "implementation",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "fake-b",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "النداء نفسه؛ التنفيذ اتبدّل.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "method",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "Start(probe-4)",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "implementation",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "fake-b",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "result",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "probe ready",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try the other case"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The CLI calls a contract, not an engine."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Caller"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "RunPodCtl"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Interface"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "Runtime"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Implementation"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "fake-a"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The same method reached the fake."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Method"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "Start(probe-4)"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Implementation"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "fake-a"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Result"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "started"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The interface accepts another implementation."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Caller"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "RunPodCtl"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Interface"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "Runtime"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Implementation"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "fake-b"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Same call, different implementation."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Method"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "Start(probe-4)"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Implementation"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "fake-b"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Result"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "probe ready"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "36-3-ops",
+      "kind": "ch36-service-flow",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب الحالة التانية",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "قاعدة البيانات جاهزة.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "DB",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "connected",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "/livez",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "ok",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "/readyz",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "ready",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "ترتيب الطلبات ممكن يختلف.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "أول رد",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "/livez: ok",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "تاني رد",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "/readyz: ready",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الترتيب",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "live ثم ready",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "قاعدة البيانات واقفة.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "DB",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "offline",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "/livez",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "ok",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "/readyz",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "waiting",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "الـliveness مستقل عن DB.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "أول رد",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "/readyz: waiting",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "تاني رد",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "/livez: ok",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "الترتيب",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "ready ثم live",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try the other case"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The database is ready."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Database"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "connected"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "/livez"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "ok"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "/readyz"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "ready"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Request order can vary."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "First response"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "/livez: ok"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Second response"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "/readyz: ready"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "live then ready"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "The database is offline."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Database"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "offline"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "/livez"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "ok"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "/readyz"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "waiting"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Liveness stays independent of the database."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "First response"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "/readyz: waiting"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Second response"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "/livez: ok"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "ready then live"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "36-boss-storm-control",
+      "kind": "ch36-service-flow",
+      "configs": {
+        "ar": {
+          "labels": {
+            "advance": {
+              "ar": "كمّل خطوة",
+              "en": ""
+            },
+            "again": {
+              "ar": "جرّب الحالة التانية",
+              "en": ""
+            },
+            "reset": {
+              "ar": "من الأول",
+              "en": ""
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "الـrows اتقفلت قبل broker.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "DB rows",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "closed",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "محاولة A",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "failed",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "outbox",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "pending",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "retry نجح والحدث اتسجل.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "DB rows",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "closed",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "محاولة B",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "sent",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "outbox",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "delivered",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "محاولة B وصلت الأول.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "DB rows",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "closed",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "ترتيب المحاولات",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "B ثم A",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "outbox",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "pending",
+                      "en": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "الترتيب اختلف، والحالة محفوظة.",
+                  "en": ""
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "DB rows",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "closed",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "المحاولة الناجحة",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "A",
+                      "en": ""
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "outbox",
+                      "en": ""
+                    },
+                    "value": {
+                      "ar": "delivered",
+                      "en": ""
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "en": {
+          "labels": {
+            "advance": {
+              "ar": "",
+              "en": "Next step"
+            },
+            "again": {
+              "ar": "",
+              "en": "Try the other case"
+            },
+            "reset": {
+              "ar": "",
+              "en": "Reset"
+            }
+          },
+          "variants": [
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Rows closed before the broker call."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "DB rows"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "closed"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Attempt A"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "failed"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Outbox"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "pending"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Retry succeeded and delivery is recorded."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "DB rows"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "closed"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Attempt B"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "sent"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Outbox"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "delivered"
+                    }
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Attempt B arrived first."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "DB rows"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "closed"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Attempt order"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "B then A"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Outbox"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "pending"
+                    }
+                  }
+                ]
+              },
+              {
+                "caption": {
+                  "ar": "",
+                  "en": "Order changed; durable state remains."
+                },
+                "rows": [
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "DB rows"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "closed"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Successful attempt"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "A"
+                    }
+                  },
+                  {
+                    "label": {
+                      "ar": "",
+                      "en": "Outbox"
+                    },
+                    "value": {
+                      "ar": "",
+                      "en": "delivered"
+                    }
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

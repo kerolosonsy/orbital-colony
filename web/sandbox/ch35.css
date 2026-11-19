@@ -1,1 +1,23 @@
-/* Chapter 35 sandbox styles will be added with its renderer. */
+.ch35-event-trace {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  min-inline-size: 0;
+  padding: 10px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-2);
+}
+.ch35-trace-rows { display: grid; gap: 5px; }
+.ch35-trace-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 8px;
+  align-items: baseline;
+  padding-block: 3px;
+  border-block-end: 1px solid var(--rule);
+}
+.ch35-trace-label { color: var(--muted); overflow-wrap: anywhere; }
+.ch35-trace-value { text-align: end; overflow-wrap: anywhere; unicode-bidi: isolate; }
+.ch35-trace-caption { margin-block: 8px 4px; font-weight: 600; }
+.ch35-trace-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.ch35-trace-controls .tool { min-height: 40px; height: auto; padding: 6px 10px; }
