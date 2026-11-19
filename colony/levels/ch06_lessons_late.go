@@ -39,23 +39,23 @@ func stockOrderLesson(useEnglish bool) []LessonStep {
 		{
 			ID: "c64.late.mission-step", Title: lateText("المهمة", "Mission", useEnglish),
 			Blocks: []LessonBlock{{ID: "c64.late.mission", Kind: "markdown", Text: lateText(
-				"1. رتّب المواقع: الحجم الأكبر أولًا، ثم x الأصغر عند التعادل.\n2. اقرأ العرض بـ~colony.WorldSize~ وابعث المواقع بتقرير واحد.\n3. الـstarter طبع قياسًا من غير حفظ؛ كلف tick. ممنوع الحصاد.\n\nالذهب: **19 ticks أو أقل**.",
+				"1. رتّب المواقع: الحجم الأكبر الأول، وبعده x الأصغر عند التعادل.\n2. اقرا العرض بـ~colony.WorldSize~ وابعت المواقع بتقرير واحد.\n3. الـstarter طبع قياس من غير ما يخزّنه؛ ده كلّف tick. ممنوع الحصاد.\n\nالذهب: **19 ticks أو أقل**.",
 				"1. Rank positions: larger sizes first, then smaller x on ties.\n2. Read width with ~colony.WorldSize~; report positions once.\n3. The starter printed an unsaved measurement (one tick); do not harvest.\n\nGold: **19 ticks or fewer**.", useEnglish)}},
 		},
 		{
 			ID: "c64.late.idea-step", Title: lateText("الفكرة", "Idea", useEnglish),
 			Blocks: []LessonBlock{{
 				ID: "c64.late.trace", Kind: "walkthrough",
-				Text: lateText("المقارنة بتقول مين يسبق: السالب يقدّم a، والصفر تعادل، والموجب يأخّره.\n\nالمثال أسماء ثم أعمار؛ قاعدة المهمة مختلفة.", "A comparator returns a sign: negative puts a first, zero ties, positive puts it later.\n\nThis toy sorts names, then ages; the mission differs.", useEnglish),
+				Text: lateText("الـcomparator بيرجّع sign: السالب يقدّم a، والصفر تعادل، والموجب يأخّره.\n\nالمثال بيرتّب أسماء وبعدها أعمار؛ قاعدة المهمة مختلفة.", "A comparator returns a sign: negative puts a first, zero ties, positive puts it later.\n\nThis toy sorts names, then ages; the mission differs.", useEnglish),
 				Code: stockOrderComparatorExample, Imports: []string{"cmp", "fmt", "slices"}, ExampleID: "e64-sort-sign-late",
 				Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
 					{Line: 0, Caption: lateText("قبل الكروت.", "Before the cards.", useEnglish)},
-					{Line: 1, Caption: lateText("نوع بيانات للتجربة.", "An illustrative type.", useEnglish), Variables: []LessonVariable{{Name: "Player", Value: "name, age"}}},
+					{Line: 1, Caption: lateText("struct للتجربة.", "An illustrative type.", useEnglish), Variables: []LessonVariable{{Name: "Player", Value: "name, age"}}},
 					{Line: 2, Caption: lateText("أسماء وأعمار للتوضيح.", "Illustrative names and ages.", useEnglish), Variables: []LessonVariable{{Name: "players", Value: "[{Mira 8} {Ari 12} {Ari 9}]"}}},
-					{Line: 3, Caption: lateText("قاعدة المقارنة محفوظة.", "Comparator saved.", useEnglish), Variables: []LessonVariable{{Name: "before", Value: "function value"}}},
+					{Line: 3, Caption: lateText("خزّنّا قاعدة المقارنة.", "Comparator saved.", useEnglish), Variables: []LessonVariable{{Name: "before", Value: "function value"}}},
 					{Line: 9, Caption: lateText("Ari يسبق Mira؛ النتيجة -1.", "Ari precedes Mira; result -1.", useEnglish), Variables: []LessonVariable{{Name: "byName", Value: "-1"}}, Output: "-1"},
 					{Line: 10, Caption: lateText("الاسم اتعادل؛ العمر حسمها.", "Names tie; age decides.", useEnglish), Variables: []LessonVariable{{Name: "byName", Value: "0"}, {Name: "byAge", Value: "1"}}, Output: "-1\n1"},
-					{Line: 11, Caption: lateText("SortFunc رتّبت القائمة.", "SortFunc reorders the slice.", useEnglish), Variables: []LessonVariable{{Name: "players", Value: "[{Ari 9} {Ari 12} {Mira 8}]"}}, Output: "-1\n1"},
+					{Line: 11, Caption: lateText("SortFunc رتّبت الـslice.", "SortFunc reorders the slice.", useEnglish), Variables: []LessonVariable{{Name: "players", Value: "[{Ari 9} {Ari 12} {Mira 8}]"}}, Output: "-1\n1"},
 					{Line: 12, Caption: lateText("الأسماء ثم الأعمار.", "Names, then ages.", useEnglish), Variables: []LessonVariable{{Name: "players", Value: "[{Ari 9} {Ari 12} {Mira 8}]"}}, Output: "-1\n1\n[{Ari 9} {Ari 12} {Mira 8}]"},
 				}},
 			}},
@@ -84,13 +84,13 @@ func stockOrderLesson(useEnglish bool) []LessonStep {
 		{
 			ID: "c64.late.check-step", Title: lateText("فكّر واختبر", "Think & check", useEnglish),
 			Blocks: []LessonBlock{
-				{ID: "c64.late.plan", Kind: "markdown", Text: lateText("قيس الكل → احتفظ بالقراءات → رتّب المواقع → ابعت تقريرًا واحدًا.", "Measure all → keep the readings → rank positions → send one report.", useEnglish)},
+				{ID: "c64.late.plan", Kind: "markdown", Text: lateText("قيس الكل → خزّن القراءات → رتّب المواقع → ابعت تقرير واحد.", "Measure all → keep the readings → rank positions → send one report.", useEnglish)},
 				lateQuestion("c64.late.q-sign", "-1 معناها إيه؟", "What does -1 mean?",
 					[]string{"a يسبق", "تعادل", "a يتأخر"}, []string{"a comes first", "Tie", "a comes later"}, 0,
 					[]string{"السالب يقدّم a.", "الصفر يعني تعادل.", "الموجب يأخر a."}, []string{"Negative puts a first.", "Zero means a tie.", "Positive puts a later."}, useEnglish),
-				lateQuestion("c64.late.q-stable", "هل ~SortFunc~ تحفظ ترتيب المتعادلين؟", "Does ~SortFunc~ keep tied items in input order?",
+				lateQuestion("c64.late.q-stable", "هل ~SortFunc~ بتحافظ على ترتيب العناصر المتعادلة؟", "Does ~SortFunc~ keep tied items in input order?",
 					[]string{"دايمًا", "مش مضمون", "بس مع أرقام"}, []string{"Always", "Not guaranteed", "Only for numbers"}, 1,
-					[]string{"SortFunc مش stable.", "صح؛ SortStableFunc تحفظ ترتيبهم.", "نوع العنصر مش فارق هنا."}, []string{"SortFunc is not stable.", "Right; SortStableFunc keeps their order.", "The element type does not matter here."}, useEnglish),
+					[]string{"SortFunc مش stable.", "صح؛ SortStableFunc بتحافظ على ترتيبهم.", "نوع العنصر مش فارق هنا."}, []string{"SortFunc is not stable.", "Right; SortStableFunc keeps their order.", "The element type does not matter here."}, useEnglish),
 				lateQuestion("c64.late.q-report", "تقرير المهمة يبعت إيه؟", "What does the mission report?",
 					[]string{"أحجام", "مواقع", "طباعة"}, []string{"Sizes", "Positions", "Printed output"}, 1,
 					[]string{"المهمة عايزة المواقع.", "صح؛ ابعت المواقع المرتبة.", "الطباعة للتصحيح."}, []string{"The mission needs positions.", "Right; report ranked positions.", "Printing is for debugging."}, useEnglish),
@@ -120,7 +120,7 @@ func heatGridLesson(useEnglish bool) []LessonStep {
 		{
 			ID: "c65.late.mission-step", Title: lateText("المهمة", "Mission", useEnglish),
 			Blocks: []LessonBlock{{ID: "c65.late.mission", Kind: "markdown", Text: lateText(
-				"دي lab: زر Run بيشغّل tests للدوال، مش حركة للدرون. كمّل ~OverlayHeat~ و~ThroughHeat~ و~FlipHeat~؛ مفيش ~Report~ ولا ticks.",
+				"دي lab: زر Run بيشغّل tests للـfunctions، مش حركة للدرون. كمّل ~OverlayHeat~ و~ThroughHeat~ و~FlipHeat~؛ مفيش ~Report~ ولا ticks.",
 				"Lab: Run tests, not drones. Implement ~OverlayHeat~, ~ThroughHeat~, and ~FlipHeat~; no ~Report~ or ticks.", useEnglish)}},
 		},
 		{
@@ -179,14 +179,14 @@ func heatGridLesson(useEnglish bool) []LessonStep {
 				lateQuestion("c65.late.q-shape", "A 2×3 وB 3×4؛ ThroughHeat صالحة؟", "A is 2×3 and B is 3×4; is ThroughHeat valid?",
 					[]string{"آه؛ 2×4", "لأ", "آه؛ 3×3"}, []string{"Yes; 2×4", "No", "Yes; 3×3"}, 0,
 					[]string{"صح؛ 3 هو البعد المشترك.", "ThroughHeat محتاجة أعمدة A تساوي صفوف B.", "3 هو البعد المشترك، مش الناتج."}, []string{"Right; 3 is the shared dimension.", "ThroughHeat needs A's columns to equal B's rows.", "3 is shared, not the output shape."}, useEnglish),
-				lateQuestion("c65.late.q-clone", "نسخت outer وعدّلت خلية؛ إيه اللي يحصل؟", "Clone the outer slice and edit a cell; what happens?",
+				lateQuestion("c65.late.q-clone", "نسخت الـouter slice وعدّلت خلية؛ إيه اللي يحصل؟", "Clone the outer slice and edit a cell; what happens?",
 					[]string{"المصدر يتغير", "النسخة بس", "Compile error"}, []string{"Source changes", "Copy only", "Compile error"}, 0,
-					[]string{"الصفوف لسه مشتركة.", "ده محتاج نسخ كل row.", "Go تسمح بالنسخ السطحي."}, []string{"Rows are still shared.", "That needs each row cloned.", "Go allows shallow clones."}, useEnglish),
+					[]string{"الصفوف لسه مشتركة.", "ده محتاج نسخ كل row.", "Go بتسمح بالنسخ السطحي."}, []string{"Rows are still shared.", "That needs each row cloned.", "Go allows shallow clones."}, useEnglish),
 			},
 		},
 		{
 			ID: "c65.late.turn-step", Title: lateText("دورك", "Your turn", useEnglish),
-			Blocks: []LessonBlock{{ID: "c65.late.turn", Kind: "markdown", Text: lateText("شغّل الـstarter، وحدد أول contract فشل، واختار دالة.", "Run; inspect the first failure; choose a function.", useEnglish)}},
+			Blocks: []LessonBlock{{ID: "c65.late.turn", Kind: "markdown", Text: lateText("شغّل الـstarter، وحدد أول contract فشل، واختار function.", "Run; inspect the first failure; choose a function.", useEnglish)}},
 		},
 	}
 }

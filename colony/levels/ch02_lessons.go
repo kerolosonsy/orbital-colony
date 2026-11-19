@@ -130,32 +130,32 @@ var ch02UnitsSandboxConfig = map[string]any{
 }
 
 var ch02InventoryArabic = []LessonStep{
-	{ID: "c21.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch02Markdown("c21.mission", "1. اقرأ رصيد الطحالب والكريستال من المخزن.\n2. ابعت مجموعهم للقاعدة.\n3. القيم بتتغير مع كل تشغيل.\n\nالـstarter قرأ الطحالب وطبعها للمراجعة؛ ده مش تقرير للقاعدة.")}},
-	{ID: "c21.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c21.variables", "المتغير اسم لقيمة هنستخدمها بعدين. الرمز ~:=~ بيعرّف متغيرًا داخل الدالة. بعد القراءة، تقدر تحسب قيمة جديدة وتطبعها؛ المثال بأرقام للتوضيح.",
+	{ID: "c21.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch02Markdown("c21.mission", "1. اقرا رصيد الطحالب والكريستال من المخزن.\n2. ابعت مجموعهم للقاعدة.\n3. الـvalues بتتغير مع كل تشغيل.\n\nالـstarter قرأ الطحالب وطبعها للمراجعة؛ ده مش تقرير للقاعدة.")}},
+	{ID: "c21.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c21.variables", "المتغير اسم بنستخدمه علشان نخزّن value ونرجعلها بعدين. الرمز ~:=~ بيعرّف متغير جوه الـfunction. بعد ما تقرأ value، تقدر تحسب value جديدة وتطبعها؛ المثال بأرقام للتوضيح.",
 		`func main() {
 	moss := 3
 	crystal := 2
 	total := moss + crystal
 	fmt.Println(total)
 }`,
-		"e21-variables", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 2, Caption: "moss تخزن 3.", Variables: []LessonVariable{ch02Variable("moss", "3")}}, {Line: 3, Caption: "crystal تخزن 2.", Variables: []LessonVariable{ch02Variable("moss", "3"), ch02Variable("crystal", "2")}}, {Line: 4, Caption: "اجمع القيمتين.", Variables: []LessonVariable{ch02Variable("moss", "3"), ch02Variable("crystal", "2"), ch02Variable("total", "5")}}, {Line: 5, Caption: "اطبع المجموع.", Variables: []LessonVariable{ch02Variable("total", "5")}, Output: "5"}})}},
+		"e21-variables", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 2, Caption: "moss خزّنت 3.", Variables: []LessonVariable{ch02Variable("moss", "3")}}, {Line: 3, Caption: "crystal خزّنت 2.", Variables: []LessonVariable{ch02Variable("moss", "3"), ch02Variable("crystal", "2")}}, {Line: 4, Caption: "اجمع الـvalues.", Variables: []LessonVariable{ch02Variable("moss", "3"), ch02Variable("crystal", "2"), ch02Variable("total", "5")}}, {Line: 5, Caption: "اطبع المجموع.", Variables: []LessonVariable{ch02Variable("total", "5")}, Output: "5"}})}},
 	{ID: "c21.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch02Question("c21.predict-total", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tparts := 4\n\textra := 2\n\tfmt.Println(parts + extra)\n}\n~~~", []string{"42", "6", "2"}, 1, []string{"+ بتجمع أعدادًا، مش نصوصًا.", "أربعة زائد اتنين يساوي ستة.", "الناتج مش قيمة المتغير التاني وحده."}),
-		ch02Walkthrough("c21.total-reveal", "تابع القيم لحد ما توصل لعملية الجمع.",
+		ch02Question("c21.predict-total", "توقّع الناتج:\n\n~~~go\nfunc main() {\n\tparts := 4\n\textra := 2\n\tfmt.Println(parts + extra)\n}\n~~~", []string{"42", "6", "2"}, 1, []string{"+ بتجمع أعداد، مش نصوص.", "أربعة زائد اتنين يساووا ستة.", "الناتج مش value المتغير التاني لوحدها."}),
+		ch02Walkthrough("c21.total-reveal", "تابع الـvalues لحد ما توصل لعملية الجمع.",
 			`func main() {
 	parts := 4
 	extra := 2
 	fmt.Println(parts + extra)
 }`,
 			"e21-total", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "parts تساوي 4.", Variables: []LessonVariable{ch02Variable("parts", "4")}}, {Line: 3, Caption: "extra تساوي 2.", Variables: []LessonVariable{ch02Variable("parts", "4"), ch02Variable("extra", "2")}}, {Line: 4, Caption: "اجمع واطبع الناتج.", Variables: []LessonVariable{ch02Variable("parts", "4"), ch02Variable("extra", "2")}, Output: "6"}}),
-		ch02Sandbox("ch02-inventory", "تابع القيم والجمع، وبدّل وجهة الناتج.", "ch02-inventory-flow", ch02InventorySandboxConfig),
+		ch02Sandbox("ch02-inventory", "تابع الـvalues والجمع، وبدّل وجهة الناتج.", "ch02-inventory-flow", ch02InventorySandboxConfig),
 	}},
 	{ID: "c21.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c21.watch", "- Go مش هتقبل متغير اتعرّف وماتستخدمش.\n- ~fmt.Println~ بيطبع ليك؛ ~colony.Report~ هو اللي يبعت للقاعدة.")}},
 	{ID: "c21.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch02Markdown("c21.plan", "اقرأ الفئتين من الـAPI، وخزن كل نتيجة باسم واضح. استخدم القيم المخزنة للحساب، وبعدها ابعت الناتج بالطريقة اللي المهمة بتفحصها."),
-		ch02Question("c21.report-check", "أنهي أمر يرسل قيمة للمهمة؟", []string{"fmt.Println", "colony.Report", ":="}, 1, []string{"ده يعرض القيمة في Console.", "ده يرسل القيمة للقاعدة.", "ده يعرّف متغيرًا جديدًا."}),
+		ch02Markdown("c21.plan", "اقرا الفئتين من الـAPI، وخزّن كل نتيجة باسم واضح. استخدم الـvalues المخزنة للحساب، وبعدها ابعت الناتج بالطريقة اللي المهمة بتفحصها."),
+		ch02Question("c21.report-check", "أنهي أمر يبعت value للمهمة؟", []string{"fmt.Println", "colony.Report", ":="}, 1, []string{"ده بيعرض الـvalue في Console.", "ده بيبعت الـvalue للقاعدة.", "ده بيعرّف متغير جديد."}),
 	}},
-	{ID: "c21.turn-step", Title: "دورك", Blocks: []LessonBlock{ch02Markdown("c21.turn", "كمّل قراءة المخزن واحسب المجموع. شغّل البرنامج، وراجع إن القاعدة استلمت القيمة المطلوبة.")}},
+	{ID: "c21.turn-step", Title: "دورك", Blocks: []LessonBlock{ch02Markdown("c21.turn", "كمّل قراءة المخزن واحسب المجموع. شغّل البرنامج، واتأكد إن القاعدة استلمت الـvalue المطلوبة.")}},
 }
 
 var ch02InventoryEnglish = []LessonStep{
@@ -189,7 +189,7 @@ var ch02InventoryEnglish = []LessonStep{
 
 var ch02SurveyArabic = []LessonStep{
 	{ID: "c22.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch02Markdown("c22.mission", "1. اعرف عرض الخريطة وطولها من ~WorldSize~.\n2. ابعت المساحة، وبعدها المحيط.\n3. الحجم بيتغيّر مع كل تشغيل.\n\nالـstarter بيقرأ البعدين ويطبعهم للمراجعة.")}},
-	{ID: "c22.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c22.multiple-values", "دالة Go ممكن ترجع قيمتين، ونستقبلهم بمتغيرين في نفس السطر. كل اسم بياخد القيمة المقابلة له. لو مش محتاج قيمة، استخدم ~_~. المثال يرجّع قياسين للتوضيح ويطبعهم بالترتيب.",
+	{ID: "c22.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c22.multiple-values", "function في Go ممكن ترجّع قيمتين، ونستقبلهم في متغيرين في نفس السطر. كل اسم بياخد الـvalue اللي قصاده. لو مش محتاج value، استخدم ~_~. المثال بيرجّع قياسين للتوضيح وبيطبعهم بالترتيب.",
 		`func dimensions() (int, int) {
 	return 4, 2
 }
@@ -197,24 +197,24 @@ func main() {
 	width, height := dimensions()
 	fmt.Println(width, height)
 }`,
-		"e22-values", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 5, Caption: "اطلب قياسي الدالة."}, {Line: 2, Caption: "الدالة ترجع 4 و2."}, {Line: 5, Caption: "استقبل العرض والطول.", Variables: []LessonVariable{ch02Variable("width", "4"), ch02Variable("height", "2")}}, {Line: 6, Caption: "اطبع القيمتين بالترتيب.", Variables: []LessonVariable{ch02Variable("width", "4"), ch02Variable("height", "2")}, Output: "4 2"}})}},
+		"e22-values", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 5, Caption: "اطلب القياسين من الـfunction."}, {Line: 2, Caption: "الـfunction بترجّع 4 و2."}, {Line: 5, Caption: "استقبل العرض والطول.", Variables: []LessonVariable{ch02Variable("width", "4"), ch02Variable("height", "2")}}, {Line: 6, Caption: "اطبع الـvalues بالترتيب.", Variables: []LessonVariable{ch02Variable("width", "4"), ch02Variable("height", "2")}, Output: "4 2"}})}},
 	{ID: "c22.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch02Question("c22.predict-values", "توقّع الناتج:\n\n~~~go\nfunc pair() (int, int) { return 2, 3 }\nfunc main() {\n\ta, b := pair()\n\tfmt.Println(a, b)\n}\n~~~", []string{"3 2", "2 3", "5"}, 1, []string{"القيم مش بتتبدّل تلقائيًا.", "كل قيمة تروح لمتغيرها بالترتيب.", "الطباعة تعرض قيمتين منفصلتين."}),
-		ch02Walkthrough("c22.values-reveal", "تابع القيمة الأولى وبعدها الثانية.",
+		ch02Question("c22.predict-values", "توقّع الناتج:\n\n~~~go\nfunc pair() (int, int) { return 2, 3 }\nfunc main() {\n\ta, b := pair()\n\tfmt.Println(a, b)\n}\n~~~", []string{"3 2", "2 3", "5"}, 1, []string{"الـvalues مش بتتبدّل تلقائيًا.", "كل value بتروح لمتغيرها بالترتيب.", "الطباعة بتعرضهم كـvalues منفصلة."}),
+		ch02Walkthrough("c22.values-reveal", "تابع أول value وبعدها التانية.",
 			`func pair() (int, int) { return 2, 3 }
 func main() {
 	a, b := pair()
 	fmt.Println(a, b)
 }`,
-			"e22-pair", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 3, Caption: "اطلب قيمتين من pair."}, {Line: 1, Caption: "الدالة ترجع 2 و3."}, {Line: 3, Caption: "استقبل النتيجتين.", Variables: []LessonVariable{ch02Variable("a", "2"), ch02Variable("b", "3")}}, {Line: 4, Caption: "اطبع حسب ترتيب الاستقبال.", Variables: []LessonVariable{ch02Variable("a", "2"), ch02Variable("b", "3")}, Output: "2 3"}}),
-		ch02Sandbox("ch02-survey", "غيّر أبعاد الخريطة وتابع ترتيب القيم.", "ch02-return-pair", ch02SurveySandboxConfig),
+			"e22-pair", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 3, Caption: "اطلب الـvalues من pair."}, {Line: 1, Caption: "الـfunction بترجّع 2 و3."}, {Line: 3, Caption: "استقبل النتيجتين.", Variables: []LessonVariable{ch02Variable("a", "2"), ch02Variable("b", "3")}}, {Line: 4, Caption: "اطبع بالترتيب اللي استقبلتهم بيه.", Variables: []LessonVariable{ch02Variable("a", "2"), ch02Variable("b", "3")}, Output: "2 3"}}),
+		ch02Sandbox("ch02-survey", "غيّر أبعاد الخريطة وتابع ترتيب الـvalues.", "ch02-return-pair", ch02SurveySandboxConfig),
 	}},
-	{ID: "c22.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c22.watch", "- ~WorldSize~ ترجع العرض قبل الارتفاع.\n- ترتيب التقارير مهم: القاعدة مستنية المساحة قبل المحيط.")}},
+	{ID: "c22.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c22.watch", "- ~WorldSize~ بترجّع العرض قبل الارتفاع.\n- ترتيب التقارير مهم: القاعدة مستنية المساحة قبل المحيط.")}},
 	{ID: "c22.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch02Markdown("c22.plan", "سمّي كل بُعد بوضوح، وبعدها استخدم الاتنين في الحسابين. ابعت الناتج الأول، ثم ابعت التاني. راجع إن كل تعبير بيرجع رقمًا صحيحًا."),
+		ch02Markdown("c22.plan", "سمّي كل بُعد بوضوح، وبعدها استخدم الاتنين في الحسابين. ابعت الناتج الأول، وبعده التاني. اتأكد إن كل تعبير بيطلع رقم int صحيح."),
 		ch02Question("c22.order-check", "إيه التقرير اللي لازم يوصل للقاعدة الأول؟", []string{"المحيط", "المساحة", "عرض الخريطة"}, 1, []string{"القاعدة بتفحص المساحة قبل المحيط.", "المساحة أول تقرير مطلوب.", "العرض لوحده مش التقرير المطلوب."}),
 	}},
-	{ID: "c22.turn-step", Title: "دورك", Blocks: []LessonBlock{ch02Markdown("c22.turn", "استخدم العرض والارتفاع اللي قرأتهم، واحسب القيم المطلوبة. شغّل البرنامج وتأكد من ترتيب التقارير.")}},
+	{ID: "c22.turn-step", Title: "دورك", Blocks: []LessonBlock{ch02Markdown("c22.turn", "استخدم العرض والارتفاع اللي قرأتهم، واحسب الـvalues المطلوبة. شغّل البرنامج وتأكد من ترتيب التقارير.")}},
 }
 
 var ch02SurveyEnglish = []LessonStep{
@@ -248,29 +248,29 @@ func main() {
 }
 
 var ch02CallsignsArabic = []LessonStep{
-	{ID: "c23.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch02Markdown("c23.mission", "1. اقرأ اسمي النداء، اسمًا في كل مرة.\n2. قارن byte length بعدد الـrunes، وابعت طرفَي كل اسم.\n3. التقارير لازم تمشي بالترتيب المحدد في الـLesson.\n\nالاسمين للتشغيل الحالي؛ متكتبش قيم ثابتة.")}},
-	{ID: "c23.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c23.utf8", "~len~ بتعد bytes في UTF-8، مش الحروف. الـrune قيمة Unicode واحدة؛ استخدم دوال ~unicode/utf8~ للعد وفك أول وآخر rune. المثال للتدريب، والنص مش بيانات المهمة.",
+	{ID: "c23.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch02Markdown("c23.mission", "1. اقرا اسمي النداء، اسم في كل مرة.\n2. قارن byte length بعدد الـrunes، وابعت طرفَي كل اسم.\n3. التقارير لازم تمشي بالترتيب المحدد في الـLesson.\n\nالاسمين للتشغيل الحالي؛ متكتبش قيم ثابتة.")}},
+	{ID: "c23.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c23.utf8", "~len~ بتعد bytes في UTF-8، مش الـrunes. الـrune بتمثل code point واحدة في Unicode؛ استخدم functions ~unicode/utf8~ للعد وفك أول وآخر rune. المثال للتدريب، والنص مش بيانات المهمة.",
 		`func main() {
 	text := "é🚀"
 	first, _ := utf8.DecodeRuneInString(text)
 	last, _ := utf8.DecodeLastRuneInString(text)
 	fmt.Println(len(text), utf8.RuneCountInString(text), string(first), string(last))
 }`,
-		"e23-utf8", []string{"fmt", "unicode/utf8"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 2, Caption: "النص فيه رمزان.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}}, {Line: 3, Caption: "اقرأ أول rune.", Variables: []LessonVariable{ch02Variable("first", "é")}}, {Line: 4, Caption: "اقرأ آخر rune.", Variables: []LessonVariable{ch02Variable("first", "é"), ch02Variable("last", "🚀")}}, {Line: 5, Caption: "اطبع العدّ والطرفين.", Variables: []LessonVariable{ch02Variable("first", "é"), ch02Variable("last", "🚀")}, Output: "6 2 é 🚀"}})}},
+		"e23-utf8", []string{"fmt", "unicode/utf8"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 2, Caption: "النص فيه 2 rune.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}}, {Line: 3, Caption: "اقرا أول rune.", Variables: []LessonVariable{ch02Variable("first", "é")}}, {Line: 4, Caption: "اقرا آخر rune.", Variables: []LessonVariable{ch02Variable("first", "é"), ch02Variable("last", "🚀")}}, {Line: 5, Caption: "اطبع العدّ والطرفين.", Variables: []LessonVariable{ch02Variable("first", "é"), ch02Variable("last", "🚀")}, Output: "6 2 é 🚀"}})}},
 	{ID: "c23.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch02Question("c23.predict-runes", "توقّع ناتج عدّ الـrunes:\n\n~~~go\nfunc main() {\n\ttext := \"é🚀\"\n\tfmt.Println(utf8.RuneCountInString(text))\n}\n~~~", []string{"6", "2", "8"}, 1, []string{"6 هو عدد الـbytes في UTF-8.", "في النص رمزان Unicode.", "الرقم ده مش مجموع أحجام التخزين."}),
+		ch02Question("c23.predict-runes", "توقّع ناتج عدّ الـrunes:\n\n~~~go\nfunc main() {\n\ttext := \"é🚀\"\n\tfmt.Println(utf8.RuneCountInString(text))\n}\n~~~", []string{"6", "2", "8"}, 1, []string{"6 هو عدد الـbytes في UTF-8.", "النص فيه 2 rune من Unicode.", "الرقم ده مش مجموع أحجام التخزين."}),
 		ch02Walkthrough("c23.rune-reveal", "تابع النص ثم عدّ الـrunes.",
 			`func main() {
 	text := "é🚀"
 	fmt.Println(utf8.RuneCountInString(text))
 }`,
-			"e23-count", []string{"fmt", "unicode/utf8"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "النص محفوظ كما هو.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}}, {Line: 3, Caption: "الدالة تطبع عدد runes.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}, Output: "2"}}),
+			"e23-count", []string{"fmt", "unicode/utf8"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "النص زي ما هو.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}}, {Line: 3, Caption: "الـfunction بتطبع عدد الـrunes.", Variables: []LessonVariable{ch02Variable("text", "é🚀")}, Output: "2"}}),
 		ch02Sandbox("ch02-callsigns", "اختار Rune وشوف Bytes بتاعتها.", "ch02-utf8-span", ch02CallsignsSandboxConfig),
 	}},
-	{ID: "c23.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c23.watch", "- ~name[0]~ byte واحدة، مش أول rune كاملة.\n- حوّل الـrune لـ~string~ قبل تقرير الحرف.")}},
+	{ID: "c23.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c23.watch", "- ~name[0]~ byte واحدة، مش أول rune كاملة.\n- حوّل الـrune لـ~string~ قبل ما تبعت تقرير الـrune.")}},
 	{ID: "c23.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch02Markdown("c23.plan", "ابدأ باسم واحد: اقرأه، احسب النوعين من العد، وفك أول وآخر rune. راجع إن كل تقرير رايح بالترتيب، وبعدها كرر للاسم التاني."),
-		ch02Question("c23.byte-check", "إيه اللي بترجعه ~len(name)~؟", []string{"عدد الـbytes", "عدد الـrunes", "آخر rune"}, 0, []string{"len على string بتعد bytes.", "استخدم utf8 للـrune count.", "len مش بتفك الحروف."}),
+		ch02Markdown("c23.plan", "ابدأ باسم واحد: اقراه، احسب النوعين من العد، وفك أول وآخر rune. راجع إن كل تقرير رايح بالترتيب، وبعدها كرر للاسم التاني."),
+		ch02Question("c23.byte-check", "إيه اللي بترجّعه ~len(name)~؟", []string{"عدد الـbytes", "عدد الـrunes", "آخر rune"}, 0, []string{"len على string بتعد bytes.", "استخدم utf8 علشان تعد الـrunes.", "len مش بتفك الـrunes."}),
 	}},
 	{ID: "c23.turn-step", Title: "دورك", Blocks: []LessonBlock{ch02Markdown("c23.turn", "نفّذ خطوة خطوة وراجع أسماء النداء والناتج في الـConsole. اتأكد إن كل اسم له تقاريره بالترتيب قبل الانتقال للتاني.")}},
 }
@@ -304,8 +304,8 @@ var ch02CallsignsEnglish = []LessonStep{
 }
 
 var ch02UnitsArabic = []LessonStep{
-	{ID: "c24.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch02Markdown("c24.mission", "1. عرّف نوعًا للشحنات وأنواعًا للوحدة الموحدة.\n2. اقرأ كميات Cell وPack وCrate وحوّلها.\n3. ابعت إجماليًا واحدًا بوحدة cells.\n\nالـstarter بيعرض كمية واحدة بس للمراجعة؛ باقي العقد في وصف المهمة.")}},
-	{ID: "c24.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c24.iota", "النوع المسمّى بيدي الرقم معنى واضح. في مجموعة ~const~، ~iota~ تبدأ من صفر وتزيد مع كل سطر. التحويل الصريح يخلّي النوع مناسبًا لدالة أو حساب؛ دي أدوار تدريبية للتوضيح.",
+	{ID: "c24.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch02Markdown("c24.mission", "1. عرّف type للشحنات وtype لكل وحدة موحدة.\n2. اقرا كميات Cell وPack وCrate وحوّلها.\n3. ابعت إجمالي واحد بوحدة cells.\n\nالـstarter بيعرض كمية واحدة بس للمراجعة؛ باقي العقد في وصف المهمة.")}},
+	{ID: "c24.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch02Walkthrough("c24.iota", "الـnamed type بيدي الرقم معنى واضح. في مجموعة ~const~، ~iota~ بتبدأ من صفر وبتزيد مع كل سطر. التحويل الصريح بيخلّي النوع مناسب للـfunction أو للحساب؛ دي أمثلة للتوضيح.",
 		`type Role int
 const (
 	Guest Role = iota
@@ -315,9 +315,9 @@ const (
 func main() {
 	fmt.Println(int(Guest), int(Pilot), int(Chief))
 }`,
-		"e24-iota", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 2, Caption: "ابدأ مجموعة الثوابت."}, {Line: 3, Caption: "Guest قيمتها صفر."}, {Line: 4, Caption: "الثابت التالي يزيد واحدًا."}, {Line: 5, Caption: "الثابت الثالث يزيد كمان."}, {Line: 8, Caption: "حوّل واطبع القيم.", Output: "0 1 2"}})}},
+		"e24-iota", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التنفيذ."}, {Line: 2, Caption: "ابدأ مجموعة الثوابت."}, {Line: 3, Caption: "Guest الـvalue بتاعتها صفر."}, {Line: 4, Caption: "الثابت اللي بعده بيزيد واحد."}, {Line: 5, Caption: "الثابت التالت بيزيد كمان."}, {Line: 8, Caption: "حوّل واطبع الـvalues.", Output: "0 1 2"}})}},
 	{ID: "c24.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch02Question("c24.predict-iota", "توقّع الناتج:\n\n~~~go\ntype Badge int\nconst (\n\tNew Badge = iota\n\tReady\n\tSent\n)\nfunc main() { fmt.Println(int(Ready)) }\n~~~", []string{"0", "1", "2"}, 1, []string{"New بياخد أول قيمة.", "Ready هو الثابت التاني.", "Sent هو الثابت التالت."}),
+		ch02Question("c24.predict-iota", "توقّع الناتج:\n\n~~~go\ntype Badge int\nconst (\n\tNew Badge = iota\n\tReady\n\tSent\n)\nfunc main() { fmt.Println(int(Ready)) }\n~~~", []string{"0", "1", "2"}, 1, []string{"New بياخد أول value.", "Ready هو الثابت التاني.", "Sent هو الثابت التالت."}),
 		ch02Walkthrough("c24.iota-reveal", "تابع بداية العد ومكان ~Ready~.",
 			`type Badge int
 const (
@@ -326,15 +326,15 @@ const (
 	Sent
 )
 func main() { fmt.Println(int(Ready)) }`,
-			"e24-badge", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "ابدأ تعريف الثوابت."}, {Line: 3, Caption: "New تبدأ من صفر."}, {Line: 4, Caption: "Ready بعدها بواحد."}, {Line: 7, Caption: "اطبع القيمة بعد التحويل.", Output: "1"}}),
+			"e24-badge", []string{"fmt"}, []LessonFrame{{Line: 0, Caption: "قبل التشغيل."}, {Line: 2, Caption: "ابدأ تعريف الثوابت."}, {Line: 3, Caption: "New بتبدأ من صفر."}, {Line: 4, Caption: "Ready بتيجي بعدها بواحد."}, {Line: 7, Caption: "اطبع الـvalue بعد التحويل.", Output: "1"}}),
 		ch02Sandbox("ch02-units", "وحّد الوحدات وشوف أثر التحويل.", "ch02-unit-align", ch02UnitsSandboxConfig),
 	}},
-	{ID: "c24.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c24.watch", "- الأنواع المسماة مش بتختلط تلقائيًا مع ~int~.\n- وحّد الوحدات قبل جمع كميات الشحنات.")}},
+	{ID: "c24.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch02Markdown("c24.watch", "- الـnamed types مش بتختلط تلقائيًا مع ~int~.\n- وحّد الوحدات قبل جمع كميات الشحنات.")}},
 	{ID: "c24.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch02Markdown("c24.plan", "فكّر في العقد على أجزاء: تعريف الأنواع والثوابت، قراءة كل كمية، ثم تحويلها لوحدة واحدة قبل الجمع. خلي تعريف الأنواع برّه ~main~."),
-		ch02Question("c24.unit-check", "ليه نحول كل الكميات لنفس الوحدة؟", []string{"عشان المقارنة والجمع يبقوا بمعنى", "عشان iota تقرأ المخزن", "عشان نلغي أنواع Go"}, 0, []string{"الوحدة الموحدة تخلي المجموع مفهومًا.", "iota تخص قيم الثوابت.", "الأنواع تفضل موجودة."}),
+		ch02Markdown("c24.plan", "فكّر في العقد على أجزاء: تعريف الـtypes والثوابت، قراءة كل كمية، ثم تحويلها لوحدة واحدة قبل الجمع. خلي تعريف الـtypes برّه ~main~."),
+		ch02Question("c24.unit-check", "ليه نحول كل الكميات لنفس الوحدة؟", []string{"عشان المقارنة والجمع يبقوا بمعنى", "عشان iota تقرأ المخزن", "عشان نلغي أنواع Go"}, 0, []string{"الوحدة الموحدة تخلي المجموع مفهوم.", "iota تخص الـvalues اللي في الثوابت.", "الـtypes بتفضل موجودة."}),
 	}},
-	{ID: "c24.turn-step", Title: "دورك", Blocks: []LessonBlock{ch02Markdown("c24.turn", "ابدأ بتعريفاتك، وبعدها اقرأ البيانات وحوّل كل كمية. شغّل برنامجك وراجع نتيجة المهمة بعد كل تعديل.")}},
+	{ID: "c24.turn-step", Title: "دورك", Blocks: []LessonBlock{ch02Markdown("c24.turn", "ابدأ بتعريفاتك، وبعدها اقرا البيانات وحوّل كل كمية. شغّل برنامجك وراجع نتيجة المهمة بعد كل تعديل.")}},
 }
 
 var ch02UnitsEnglish = []LessonStep{

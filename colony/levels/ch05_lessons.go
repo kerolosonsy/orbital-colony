@@ -192,44 +192,44 @@ func main() {
 )
 
 var ch05FunctionsArabic = []LessonStep{
-	{ID: "c51.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch05Markdown("c51.mission", `احصد الطحالب في الصفوف الثلاثة باستخدام دالة تكتبها.
+	{ID: "c51.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch05Markdown("c51.mission", `احصد الطحالب في الصفوف التلاتة باستخدام function هتكتبها.
 
 الـstarter جهّز ~harvestRow(n, dir)~ واستدعاها مرة.
 
-الهدف 24 طحلب؛ ركّز على وظيفة الـparameters وتقسيم الشغل بين الدوال.`)}},
-	{ID: "c51.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c51.params-trace", `الـparameter قيمة تدخل الدالة. الدالة ممكن ترجع نتيجة بنوع واضح.
+	الهدف 24 طحلب؛ ركّز على وظيفة الـparameters وتقسيم الشغل بين الـfunctions.`)}},
+	{ID: "c51.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c51.params-trace", `الـparameter هو value بتدخل الـfunction. الـfunction ممكن ترجّع نتيجة بنوع واضح.
 
-اتابع ~n~ من النداء، وبعدها شوف القيمة اللي رجعت للـcaller.`, ch05ParamsCode, "e51-params", []string{"fmt"}, []LessonFrame{
+تابع ~n~ من النداء، وبعدها شوف الـvalue اللي رجعت للـcaller.`, ch05ParamsCode, "e51-params", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التنفيذ."},
-		{Line: 1, Caption: "الدالة تستقبل رقمًا."},
+		{Line: 1, Caption: "الـfunction بتستقبل رقم."},
 		{Line: 5, Caption: "twice تستقبل 4.", Variables: []LessonVariable{{Name: "n", Value: "4"}}},
-		{Line: 2, Caption: "الناتج يرجع 8.", Variables: []LessonVariable{{Name: "n", Value: "4"}}},
-		{Line: 6, Caption: "اطبع القيمة الراجعة.", Variables: []LessonVariable{{Name: "value", Value: "8"}}, Output: "8"},
+		{Line: 2, Caption: "الـfunction بترجّع 8.", Variables: []LessonVariable{{Name: "n", Value: "4"}}},
+		{Line: 6, Caption: "اطبع الـvalue اللي رجعت.", Variables: []LessonVariable{{Name: "value", Value: "8"}}, Output: "8"},
 	})}},
 	{ID: "c51.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch05Question("c51.predict-result", "توقّع الناتج من النداء:", ch05PredictParamsCode, []string{"12", "7", "34"}, 1, []string{"الضرب مش مستخدم في الدالة.", "الدالة بتجمع القيمتين: 3 و4.", "النداء ما بيطبعش الأرقام جنب بعض."}),
-		ch05Walkthrough("c51.result-reveal", `تابع القيم وهي داخلة للدالة وراجعة.`, ch05PredictParamsCode, "e51-total", []string{"fmt"}, []LessonFrame{
+		ch05Question("c51.predict-result", "توقّع الناتج من النداء:", ch05PredictParamsCode, []string{"12", "7", "34"}, 1, []string{"الـfunction مش بتستخدم الضرب.", "الـfunction بتجمع الـvalues: 3 و4.", "النداء ما بيطبعش الأرقام جنب بعض."}),
+		ch05Walkthrough("c51.result-reveal", `تابع الـvalues وهي داخلة للـfunction وراجعة.`, ch05PredictParamsCode, "e51-total", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 5, Caption: "النداء يمرر 3 و4."},
-			{Line: 2, Caption: "الجمع يرجع 7."},
+			{Line: 2, Caption: "الجمع بيرجّع 7."},
 			{Line: 6, Caption: "الناتج المطبوع 7.", Output: "7"},
 		}),
-		ch05Sandbox("c51.params-sandbox", "تابع قيمة توضيحية وهي داخلة ~function~ وراجعة.", "ch05-params", ch05ParamsSandboxConfig()),
+		ch05Sandbox("c51.params-sandbox", "تابع value للتوضيح وهي داخلة ~function~ وراجعة.", "ch05-params", ch05ParamsSandboxConfig()),
 	}},
-	{ID: "c51.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c51.watch", `الـparameter داخل الدالة له الاسم والنوع المكتوبين في التوقيع.
+	{ID: "c51.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c51.watch", `الـparameter جوه الـfunction ليه الاسم والنوع المكتوبين في التوقيع.
 
 النداء لازم يمرر النوع المناسب؛ والـreturn لازم يطابق نوع النتيجة.
 
-خلي كل دالة مسؤولة عن جزء مفهوم.`)}},
+	خلّي كل function مسؤولة عن جزء مفهوم.`)}},
 	{ID: "c51.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch05Markdown("c51.plan", `ابدأ بتحديد شغل الصف الواحد، وبعدها قرر إيه اللي يتكرر وإيه اللي يتغير بين النداءات.
 
 خلّي ترتيب الانتقال واضح في ~main~. راجع اتجاه الدرون بعد كل صف.
 
-ما تخلطش بين عدد مدخلات الدالة وعدد مرات استدعائها.`),
-		ch05Question("c51.q-parameter", "لو عايز الدالة تتعامل مع طول مختلف، أنهي تعديل يعبّر عنه؟", "func walk(n int)", []string{"إضافة parameter للطول", "طباعة n بدل استخدامها", "تغيير اسم الدالة فقط"}, 0, []string{"الـparameter ينقل القيمة للداخل.", "الطباعة لا تغيّر سلوك الدالة.", "اسم الدالة لا يمرر قيمة."}),
+		ما تخلطش بين عدد parameters الـfunction وعدد مرات استدعائها.`),
+		ch05Question("c51.q-parameter", "لو عايز الـfunction تتعامل مع طول مختلف، أنهي تعديل يعبّر عن ده؟", "func walk(n int)", []string{"إضافة parameter للطول", "طباعة n بدل استخدامها", "تغيير اسم الدالة فقط"}, 0, []string{"الـparameter بينقل الـvalue للـfunction.", "الطباعة مش بتغيّر سلوك الـfunction.", "اسم الـfunction مش بيمرر value."}),
 	}},
-	{ID: "c51.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c51.turn", `كمّل جسم الدالة، ثم رتّب النداءات في ~main~. شغّل المهمة وراقب الحصاد بعد كل انتقال.`)}},
+	{ID: "c51.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c51.turn", `كمّل جسم الـfunction، وبعدها رتّب النداءات في ~main~. شغّل المهمة وراقب الحصاد بعد كل انتقال.`)}},
 }
 
 var ch05FunctionsEnglish = []LessonStep{
@@ -278,40 +278,40 @@ var ch05StormArabic = []LessonStep{
 
 الـstarter جرّب ~TryHarvest~ مرة، لكنه لسه ما فصلش النجاح عن الفشل.
 
-المهمة بتستخدم خطأ كقيمة راجعة.`)}},
-	{ID: "c52.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c52.error-trace", `الدالة ممكن ترجع نتيجة و~error~ مع بعض. افحص الخطأ قبل ما تعتمد على النتيجة.
+المهمة بتستخدم error كـvalue راجعة.`)}},
+	{ID: "c52.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c52.error-trace", `الـfunction ممكن ترجّع نتيجة و~error~ مع بعض. افحص الـerror قبل ما تعتمد على الـvalue.
 
 هنا العطل للتوضيح؛ مفيش حركة أو بيانات مهمة.`, ch05ErrorCode, "e52-error", []string{"errors", "fmt"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التنفيذ."},
-		{Line: 5, Caption: "sample ترجع قيمة وخطأ."},
-		{Line: 6, Caption: "الخطأ موجود.", Variables: []LessonVariable{{Name: "n", Value: "6"}, {Name: "err", Value: "storm"}}},
+		{Line: 5, Caption: "sample بترجّع value وerror."},
+		{Line: 6, Caption: "فيه error.", Variables: []LessonVariable{{Name: "n", Value: "6"}, {Name: "err", Value: "storm"}}},
 		{Line: 7, Caption: "اختار مسار إعادة المحاولة."},
 		{Line: 8, Caption: "اطبع سبب المحاولة.", Variables: []LessonVariable{{Name: "err", Value: "storm"}}, Output: "retry"},
 	})}},
 	{ID: "c52.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch05Question("c52.predict-success", "في المثال ده، إيه اللي هيتطبع؟", ch05PredictErrorCode, []string{"retry", "6", "nil"}, 1, []string{"الخطأ nil، فشرط if مش هيدخل.", "المسار الناجح بيطبع قيمة n.", "nil مش قيمة مطبوعة في الكود."}),
-		ch05Walkthrough("c52.success-reveal", `اتبع شرط الخطأ للمسار المناسب.`, ch05PredictErrorCode, "e52-success", []string{"fmt"}, []LessonFrame{
+		ch05Question("c52.predict-success", "في المثال ده، إيه اللي هيتطبع؟", ch05PredictErrorCode, []string{"retry", "6", "nil"}, 1, []string{"الـerror nil، فشرط if مش هيدخل.", "المسار الناجح بيطبع الـvalue اللي في n.", "nil مش value مطبوعة في الكود."}),
+		ch05Walkthrough("c52.success-reveal", `اتبع شرط الـerror للمسار المناسب.`, ch05PredictErrorCode, "e52-success", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 5, Caption: "sample ترجع ستة وnil."},
-			{Line: 6, Caption: "مفيش خطأ."},
-			{Line: 9, Caption: "اطبع القيمة الناجحة.", Variables: []LessonVariable{{Name: "n", Value: "6"}}, Output: "6"},
+			{Line: 5, Caption: "sample بترجّع 6 وnil."},
+			{Line: 6, Caption: "مفيش error."},
+			{Line: 9, Caption: "اطبع الـvalue الناجحة.", Variables: []LessonVariable{{Name: "n", Value: "6"}}, Output: "6"},
 		}),
-		ch05Sandbox("c52.error-value-sandbox", "بدّل حالة القراءة ولاحظ فحص ~error~ قبل القيمة.", "ch05-error-value", ch05ErrorValueSandboxConfig()),
+		ch05Sandbox("c52.error-value-sandbox", "بدّل حالة القراءة ولاحظ فحص ~error~ قبل الـvalue.", "ch05-error-value", ch05ErrorValueSandboxConfig()),
 	}},
-	{ID: "c52.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c52.watch", `ما تستخدمش قيمة النتيجة لو العملية رجّعت error.
+	{ID: "c52.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c52.watch", `ما تستخدمش الـvalue لو العملية رجّعت error.
 
-~errors.Is~ بتقارن سبب الخطأ المعروف حتى لو اتلف برسالة.
+~errors.Is~ بتقارن سبب الـerror المعروف حتى لو اتلف برسالة.
 
 إعادة المحاولة لازم تكون لسبب ينفع يتعالج.`)}},
 	{ID: "c52.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch05Markdown("c52.plan", `افصل بين محاولة العملية ومعالجة نتيجتها. احتفظ بالمجموع خارج المحاولات.
 
-ما تكررّش تسجيل قيمة فاشلة، وراجع شرط اكتمال الجمع قبل التقرير.
+		ما تكررّش تسجيل الـvalue لو العملية فشلت، وراجع شرط اكتمال الجمع قبل التقرير.
 
 فكر: إيه اللي يتغير بعد نجاح واحد؟`),
-		ch05Question("c52.q-error", "لو ~err != nil~، أنهي تصرف آمن؟", "value, err := read()", []string{"افحص سبب الخطأ قبل استخدام value", "اعتبر value ناجحة دائمًا", "تجاهل err"}, 0, []string{"الخطأ يحدد إذا كانت النتيجة صالحة.", "قد تكون العملية فشلت.", "تجاهل الخطأ يخفي سبب الفشل."}),
+		ch05Question("c52.q-error", "لو ~err != nil~، أنهي تصرف آمن؟", "value, err := read()", []string{"افحص سبب الخطأ قبل استخدام value", "اعتبر value ناجحة دائمًا", "تجاهل err"}, 0, []string{"الـerror بيحدد لو الـvalue صالحة.", "العملية ممكن تكون فشلت.", "تجاهل الـerror بيخفي سبب الفشل."}),
 	}},
-	{ID: "c52.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c52.turn", `رتّب فحص الخطأ حول ~TryHarvest~. شغّل المهمة وراقب الفرق بين العاصفة والنجاح.`)}},
+	{ID: "c52.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c52.turn", `رتّب فحص الـerror حول ~TryHarvest~. شغّل المهمة وراقب الفرق بين العاصفة والنجاح.`)}},
 }
 
 var ch05StormEnglish = []LessonStep{
@@ -361,39 +361,39 @@ var ch05FaultArabic = []LessonStep{
 الـstarter بيعرض عدد الوحدات؛ كمّل على نفس المصدر.
 
 فيه وحدات سليمة، فمش كل نتيجة هتكون error.`)}},
-	{ID: "c53.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c53.wrap-trace", `~%w~ يضيف سياقًا ويحافظ على هوية السبب. لذلك ~errors.Is~ تقدر تلاقيه بعد اللف.
+	{ID: "c53.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c53.wrap-trace", `~%w~ بيضيف context وبيحافظ على هوية السبب. عشان كده ~errors.Is~ تقدر تلاقيه بعد اللف.
 
-القيم هنا إنذار تدريبي، مش تشخيص المهمة.`, ch05WrapCode, "e53-wrap", []string{"errors", "fmt"}, []LessonFrame{
+الـvalues هنا إنذار تدريبي، مش تشخيص المهمة.`, ch05WrapCode, "e53-wrap", []string{"errors", "fmt"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التنفيذ."},
-		{Line: 2, Caption: "أنشئ سببًا للتوضيح."},
-		{Line: 3, Caption: "لف السبب بسياق الوحدة."},
+		{Line: 2, Caption: "اعمل سبب للتوضيح."},
+		{Line: 3, Caption: "لف السبب بـcontext الوحدة."},
 		{Line: 4, Caption: "Is لسه لاقية السبب.", Variables: []LessonVariable{{Name: "wrapped", Value: "bay 2: valve"}}, Output: "true"},
-		{Line: 5, Caption: "النص يحتفظ بالسياق.", Output: "true\nbay 2: valve"},
+		{Line: 5, Caption: "النص بيحتفظ بالـcontext.", Output: "true\nbay 2: valve"},
 	})}},
 	{ID: "c53.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch05Question("c53.predict-cause", "توقّع نتيجة فحص هوية السبب:", ch05PredictWrapCode, []string{"true", "false", "sensor"}, 0, []string{"%w حفظ السبب الأصلي.", "الرسالة اتغيرت لكن الهوية فضلت.", "errors.Is بترجع true أو false."}),
-		ch05Walkthrough("c53.cause-reveal", `تابع الخطأ الملفوف لحد السبب الأصلي.`, ch05PredictWrapCode, "e53-cause", []string{"errors", "fmt"}, []LessonFrame{
+		ch05Question("c53.predict-cause", "توقّع نتيجة فحص هوية السبب:", ch05PredictWrapCode, []string{"true", "false", "sensor"}, 0, []string{"%w حفظ السبب الأصلي.", "الرسالة اتغيرت لكن الهوية فضلت.", "errors.Is بترجّع true أو false."}),
+		ch05Walkthrough("c53.cause-reveal", `تابع الـerror الملفوف لحد السبب الأصلي.`, ch05PredictWrapCode, "e53-cause", []string{"errors", "fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 2, Caption: "أنشئ السبب الأصلي."},
 			{Line: 3, Caption: "%w يحتفظ بالسبب."},
-			{Line: 4, Caption: "السبب موجود داخل الخطأ.", Output: "true"},
+			{Line: 4, Caption: "السبب موجود جوه الـerror.", Output: "true"},
 		}),
 		ch05Sandbox("c53.wrap-sandbox", "بدّل ~format~ وشوف النص وهوية السبب.", "ch05-wrap", ch05WrapSandboxConfig()),
 	}},
-	{ID: "c53.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c53.watch", `~%v~ يطبع السبب بس؛ مش بيحافظ على هويته زي ~%w~.
+	{ID: "c53.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c53.watch", `~%v~ بيطبع السبب بس؛ مش بيحافظ على هويته زي ~%w~.
 
-نتيجة ~Diagnose(i)~ ممكن تكون ~nil~؛ افحصها قبل استخراج الكود.
+الـvalue اللي بترجّعها ~Diagnose(i)~ ممكن تكون ~nil~؛ افحصها قبل استخراج الكود.
 
-~errors.Join~ بتجمع الأسباب؛ احتفظ بالقيمة الراجعة عشان السجل يكبر.`)}},
+~errors.Join~ بتجمع الأسباب؛ خزّن الـvalue الراجعة عشان السجل يكبر.`)}},
 	{ID: "c53.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch05Markdown("c53.plan", `اتبع دورة صغيرة: افحص index، تعامل مع الخطأ إن وجد، وسجّل الناتج المناسب.
+		ch05Markdown("c53.plan", `امشِ بخطوات صغيرة: افحص index، وتعامل مع الـerror لو موجود، وسجّل الناتج المناسب.
 
-احتفظ بتراكم الأسباب بين اللفات؛ ما تستبدلش اللي اتجمع.
+		خزّن تراكم الأسباب بين اللفات؛ ما تستبدلش اللي اتجمع.
 
-بعد اكتمال الفحص، قارن ترتيب السجل بالتقارير الفردية.`),
-		ch05Question("c53.q-wrap", "أي صيغة بتحافظ على سبب error جوه الخطأ الجديد؟", "fmt.Errorf(\"unit: %w\", err)", []string{"%w", "%v", "%s"}, 0, []string{"%w يربط السبب الأصلي.", "%v يعرض النص فقط.", "%s مخصص للنص، مش wrapping."}),
+بعد ما الفحص يخلص، قارن ترتيب السجل بالتقارير الفردية.`),
+		ch05Question("c53.q-wrap", "أنهي صيغة بتحافظ على سبب error جوه error جديد؟", "fmt.Errorf(\"unit: %w\", err)", []string{"%w", "%v", "%s"}, 0, []string{"%w بيربط السبب الأصلي.", "%v بيعرض النص بس.", "%s للنص، مش للـwrapping."}),
 	}},
-	{ID: "c53.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c53.turn", `أضف دورة الفحص ومعالجة الأخطاء. راجع كل تقرير بالترتيب بعد التشغيل.`)}},
+	{ID: "c53.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c53.turn", `ضيف دورة الفحص ومعالجة الـerrors. راجع كل تقرير بالترتيب بعد التشغيل.`)}},
 }
 
 var ch05FaultEnglish = []LessonStep{
@@ -443,28 +443,28 @@ var ch05UndockArabic = []LessonStep{
 الـstarter يعرض عدد المحاولات بس.
 
 بعد ما المحاولات تخلص، فيه حركة وتقرير واحد.`)}},
-	{ID: "c54.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c54.defer-trace", `النداء المؤجل بيتنفذ عند خروج الدالة. ده بيخلي التنضيف يحصل بعد الشغل العادي.
+	{ID: "c54.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c54.defer-trace", `الـdefer بيتنفّذ لما الـfunction تخلص. كده التنضيف بيحصل بعد الشغل العادي.
 
 كل frame يوضح السطر اللي اشتغل وترتيب الخروج.`, ch05DeferCode, "e54-defer", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التنفيذ."},
 		{Line: 5, Caption: "ابدأ استدعاء work."},
 		{Line: 2, Caption: "سجّل طباعة الإغلاق."},
-		{Line: 3, Caption: "نفّذ الشغل الآن.", Output: "working"},
-		{Line: 2, Caption: "defer يعمل عند الخروج.", Output: "working\nclosed"},
+		{Line: 3, Caption: "نفّذ الشغل دلوقتي.", Output: "working"},
+		{Line: 2, Caption: "defer بيتنفّذ لما الـfunction تخلص.", Output: "working\nclosed"},
 	})}},
 	{ID: "c54.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch05Question("c54.predict-order", "توقّع النص بعد انتهاء ~work~:", ch05PredictDeferCode, []string{"ABC", "CBA", "CAB"}, 1, []string{"defer لا يعمل بترتيب التسجيل.", "المؤجل الأخير يعمل أولًا بعد C.", "A سُجلت أولًا فتعمل أخيرًا."}),
+		ch05Question("c54.predict-order", "توقّع النص بعد انتهاء ~work~:", ch05PredictDeferCode, []string{"ABC", "CBA", "CAB"}, 1, []string{"defer مش بيتنفّذ بترتيب تسجيله.", "آخر defer بيتنفّذ الأول بعد C.", "A اتسجلت الأول، فهتتنفّذ في الآخر."}),
 		ch05Walkthrough("c54.order-reveal", `راقب التنفيذ الفوري ثم ترتيب النداءات المؤجلة.`, ch05PredictDeferCode, "e54-order", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
 			{Line: 7, Caption: "ابدأ استدعاء work."},
 			{Line: 4, Caption: "اطبع C فورًا.", Output: "C"},
-			{Line: 3, Caption: "defer الأخير يطبع B.", Output: "CB"},
-			{Line: 2, Caption: "defer الأول يطبع A.", Output: "CBA"},
-			{Line: 8, Caption: "أضف سطر النهاية.", Output: "CBA"},
+			{Line: 3, Caption: "آخر defer بيطبع B.", Output: "CB"},
+			{Line: 2, Caption: "أول defer بيطبع A.", Output: "CBA"},
+			{Line: 8, Caption: "ضيف سطر النهاية.", Output: "CBA"},
 		}),
 		ch05Sandbox("c54.defer-sandbox", "شغّل الخطوات وشوف ترتيب نداءات ~defer~.", "ch05-defer", ch05DeferSandboxConfig()),
 	}},
-	{ID: "c54.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c54.watch", `~recover~ لازم تتنادى مباشرة داخل function مؤجلة.
+	{ID: "c54.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c54.watch", `لازم تنادي ~recover~ مباشرة جوه function معمول لها ~defer~.
 
 بعد التعافي، التنفيذ بيرجع للـcaller؛ مش بيكمل بعد سطر ~panic~.
 
@@ -472,12 +472,12 @@ var ch05UndockArabic = []LessonStep{
 	{ID: "c54.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch05Markdown("c54.plan", `فكّر في كل محاولة كحد مستقل: بداية العمل، خطوة ممكن تفشل، وتنضيف مضمون عند الخروج.
 
-خلّي الحلقة في مستوى يقدر يبدأ محاولة جديدة بعد رجوع الدالة.
+خلّي الـloop في مستوى يقدر يبدأ محاولة جديدة بعد ما الـfunction ترجع.
 
 افصل رسائل التشخيص عن تقرير المهمة.`),
-		ch05Question("c54.q-recover", "فين يقدر ~recover~ يمسك panic؟", "defer func() { _ = recover() }()", []string{"داخل function مؤجلة", "في أي سطر من main", "بعد انتهاء البرنامج"}, 0, []string{"recover يعمل مباشرة داخل deferred function.", "السطر العادي لا يلتقط panic.", "بعد خروج البرنامج مفيش تنفيذ."}),
+		ch05Question("c54.q-recover", "فين يقدر ~recover~ يمسك panic؟", "defer func() { _ = recover() }()", []string{"داخل function مؤجلة", "في أي سطر من main", "بعد انتهاء البرنامج"}, 0, []string{"recover بيشتغل مباشرة جوه deferred function.", "السطر العادي مش بيلقط panic.", "بعد ما البرنامج يخلص، مفيش تنفيذ."}),
 	}},
-	{ID: "c54.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c54.turn", `قسّم المحاولة عن الحلقة. اختبر التشغيل وشوف إن كل محاولة اتقفلت قبل التقرير.`)}},
+	{ID: "c54.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c54.turn", `قسّم المحاولة عن الـloop. اختبر التشغيل وشوف إن كل محاولة اتقفلت قبل التقرير.`)}},
 }
 
 var ch05UndockEnglish = []LessonStep{
@@ -524,44 +524,44 @@ Separate diagnostics from the mission report.`),
 }
 
 var ch05CommandArabic = []LessonStep{
-	{ID: "c55.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch05Markdown("c55.mission", `اختار دالة لكل أمر، نفّذها، وعدّ الأوامر المعروفة بــclosure.
+	{ID: "c55.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch05Markdown("c55.mission", `اختار function لكل أمر، نفّذها، وعدّ الأوامر المعروفة بـclosure.
 
 الـstarter بيعرض عدد الأوامر؛ النصوص نفسها تتقري من API.
 
 حافظ على ترتيب النتائج وتعامل مع الاسم المجهول.`)}},
-	{ID: "c55.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c55.function-trace", `اسم الدالة من غير أقواس قيمة تقدر تخزنها. الأقواس هي اللي تنفذ النداء.
+	{ID: "c55.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch05Walkthrough("c55.function-trace", `اسم الـfunction من غير أقواس هو value تقدر تخزّنها. الأقواس هي اللي بتنفّذ النداء.
 
 الـfunction value هنا نوعها ~func()~.`, ch05FunctionValueCode, "e55-function-value", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التنفيذ."},
-		{Line: 1, Caption: "ping تطبع علامة."},
-		{Line: 3, Caption: "خزّن الدالة نفسها."},
-		{Line: 4, Caption: "نفّذ القيمة المخزنة."},
+		{Line: 1, Caption: "ping بتطبع علامة."},
+		{Line: 3, Caption: "خزّن الـfunction نفسها."},
+		{Line: 4, Caption: "نفّذ الـfunction اللي خزّنتها."},
 		{Line: 5, Caption: "ظهر النداء في الناتج.", Output: "P!"},
 	})}},
 	{ID: "c55.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch05Question("c55.predict-closure", "كام هتطبع closure بعد النداءين؟", ch05PredictClosureCode, []string{"1", "2", "0"}, 1, []string{"hits اتعرّف خارج closure وبيتشارك.", "كل نداء يزود نفس المتغير.", "التعريف لا يبدأ من صفر بعد كل نداء."}),
+		ch05Question("c55.predict-closure", "كام هتطبع closure بعد النداءين؟", ch05PredictClosureCode, []string{"1", "2", "0"}, 1, []string{"hits اتعرّف برّه closure وبيتشارك.", "كل نداء بيزوّد نفس المتغير.", "hits مش بيرجع لصفر بعد كل نداء."}),
 		ch05Walkthrough("c55.closure-reveal", `تابع المتغير اللي closure بتحتفظ بيه.`, ch05PredictClosureCode, "e55-closure", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 2, Caption: "العداد يبدأ بصفر.", Variables: []LessonVariable{{Name: "hits", Value: "0"}}},
+			{Line: 2, Caption: "العداد بيبدأ بصفر.", Variables: []LessonVariable{{Name: "hits", Value: "0"}}},
 			{Line: 3, Caption: "closure تلتقط hits."},
-			{Line: 4, Caption: "النداء الأول يزود العداد.", Variables: []LessonVariable{{Name: "hits", Value: "1"}}},
-			{Line: 5, Caption: "النداء الثاني يزوده تاني.", Variables: []LessonVariable{{Name: "hits", Value: "2"}}},
-			{Line: 6, Caption: "اطبع القيمة النهائية.", Variables: []LessonVariable{{Name: "hits", Value: "2"}}, Output: "2"},
+			{Line: 4, Caption: "النداء الأول بيزوّد العداد.", Variables: []LessonVariable{{Name: "hits", Value: "1"}}},
+			{Line: 5, Caption: "النداء التاني بيزوّده كمان.", Variables: []LessonVariable{{Name: "hits", Value: "2"}}},
+			{Line: 6, Caption: "اطبع الـvalue النهائية.", Variables: []LessonVariable{{Name: "hits", Value: "2"}}, Output: "2"},
 		}),
-		ch05Sandbox("c55.closure-sandbox", "خزّن ~function~ value، وبعدها نادِها وشوف ~closure~ count.", "ch05-closure", ch05ClosureSandboxConfig()),
+		ch05Sandbox("c55.closure-sandbox", "خزّن function value، وبعدها نادِها وشوف عدّاد الـclosure.", "ch05-closure", ch05ClosureSandboxConfig()),
 	}},
-	{ID: "c55.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c55.watch", `~action := ping~ يخزن الدالة؛ ~action()~ ينفذها.
+	{ID: "c55.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c55.watch", `~action := ping~ بيخزّن الـfunction؛ ~action()~ بينفّذها.
 
-تأكد إن نوع الدالة المختارة يناسب parameter المستقبِل.
+اتأكد إن نوع الـfunction اللي اختارتها يناسب الـparameter اللي هيستقبلها.
 
 الـclosure لازم تلتقط عدادًا يعيش بين النداءات.`)}},
 	{ID: "c55.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch05Markdown("c55.plan", `اقرأ القائمة بالترتيب، ونظّف المسافات قبل اختيار الأمر.
+		ch05Markdown("c55.plan", `اقرا القائمة بالترتيب، ونضّف المسافات قبل اختيار الأمر.
 
-افصل بين اختيار الدالة وتنفيذها، وبعدها حدّث العداد لو الأمر معروف.
+		افصل بين اختيار الـfunction وتنفيذها، وبعدها حدّث العداد لو الأمر معروف.
 
 اتأكد إن المجهول ما يوقفش بقية القائمة.`),
-		ch05Question("c55.q-value", "أنهي صيغة تمرر function value من غير تشغيلها؟", "run(ping)", []string{"run(ping)", "run(ping())", "run(nil())"}, 0, []string{"ping هنا قيمة دالة.", "الأقواس تنفذ ping فورًا.", "nil مش function قابلة للنداء."}),
+		ch05Question("c55.q-value", "أنهي صيغة بتمرر function value من غير ما تشغّلها؟", "run(ping)", []string{"run(ping)", "run(ping())", "run(nil())"}, 0, []string{"ping هنا function value.", "الأقواس بتشغّل ping فورًا.", "nil مش function ينفع تناديها."}),
 	}},
 	{ID: "c55.turn-step", Title: "دورك", Blocks: []LessonBlock{ch05Markdown("c55.turn", `اربط اختيار الأمر بالـclosure. شغّل المهمة وراجع ترتيب التقارير والعدد النهائي.`)}},
 }
