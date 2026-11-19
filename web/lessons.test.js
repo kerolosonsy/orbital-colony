@@ -3,6 +3,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
+const { TestElement } = require("./sandbox/harness.js");
 const source = fs.readFileSync(__dirname + "/lessons.js", "utf8");
 const app = fs.readFileSync(__dirname + "/app.js", "utf8");
 
@@ -10,38 +11,11 @@ const app = fs.readFileSync(__dirname + "/app.js", "utf8");
 function fixture({ blob, review = false, lang = "en" } = {}) {
   let focused = null;
   const observers = [];
-  class Element {
-    constructor(tag) {
-      this.tagName = tag; this.children = []; this.dataset = {}; this.attributes = {};
-      this.className = ""; this._text = ""; this._html = "";
-      this.scrollTop = 0; this.offsetTop = 0; this.offsetHeight = 20; this.clientHeight = 100;
-      const properties = new Map();
-      this.style = { setProperty: (name, text) => properties.set(name, text), removeProperty: (name) => properties.delete(name), getPropertyValue: (name) => properties.get(name) || "" };
-      this.classList = {
-        add: (...names) => { this.className += " " + names.join(" "); },
-        remove: (name) => { this.className = this.className.split(" ").filter((c) => c !== name).join(" "); },
-        toggle: (name, on) => { this.classList.remove(name); if (on) this.classList.add(name); },
-      };
-    }
-    set textContent(text) { this._text = text; this._html = ""; this.children = []; }
-    get textContent() { return this._text + this._html.replace(/<[^>]*>/g, "") + this.children.map((c) => c.textContent).join(""); }
-    set innerHTML(html) { this._html = html; this._text = ""; this.children = []; }
-    get innerHTML() { return this._html; }
-    append(...children) { this.children.push(...children); }
-    appendChild(child) { this.append(child); return child; }
-    replaceChildren(...children) { this.children = children; this._text = ""; this._html = ""; }
-    setAttribute(name, text) { this.attributes[name] = text; }
-    focus() { focused = this; }
-    querySelectorAll(selector) {
-      const matches = (node) => selector.startsWith(".") ? node.className.split(" ").includes(selector.slice(1)) : node.tagName === selector;
-      return this.children.flatMap((child) => [...(matches(child) ? [child] : []), ...child.querySelectorAll(selector)]);
-    }
-    querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
-  }
-  const roots = Object.fromEntries(["#lesson", "#lesson-panel", "#btn-lesson", "#btn-hint", "#hint-list"].map((id) => [id, new Element("section")]));
-  roots["#btn-hint"].appendChild(new Element("span"));
-  const editor = new Element("textarea");
-  const body = new Element("body");
+  const createElement = (tag) => new TestElement(tag, { onFocus: (focusedElement) => { focused = focusedElement; } });
+  const roots = Object.fromEntries(["#lesson", "#lesson-panel", "#btn-lesson", "#btn-hint", "#hint-list"].map((id) => [id, createElement("section")]));
+  roots["#btn-hint"].appendChild(createElement("span"));
+  const editor = createElement("textarea");
+  const body = createElement("body");
   const store = { blob: blob || { progress: {}, prefs: {}, quizScores: {}, review: {}, lessons: {} }, save() {} };
   const context = vm.createContext({
     ResizeObserver: class {
@@ -49,7 +23,7 @@ function fixture({ blob, review = false, lang = "en" } = {}) {
       observe(target) { this.target = target; }
       disconnect() { this.disconnected = true; }
     },
-    document: { body, createElement: (tag) => new Element(tag), querySelector: (selector) => roots["#lesson"].querySelector(selector) },
+    document: { body, createElement, querySelector: (selector) => roots["#lesson"].querySelector(selector) },
     $: (selector) => roots[selector], ed: editor, store, S: { review }, T: (ar, en) => lang === "en" ? en : ar, Sound: { play() {} },
   });
   vm.runInContext(app.slice(app.indexOf("const esc ="), app.indexOf("// ---------- files ----------")), context);

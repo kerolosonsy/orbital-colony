@@ -263,6 +263,7 @@ func assertLessonParity(t *testing.T, arabic, english LessonBlock) {
 		if translated == nil || len(arabic.Sandbox.Presets) != len(translated.Presets) || arabic.Sandbox.Kind != translated.Kind || arabic.Sandbox.Limit != translated.Limit || arabic.Sandbox.AppendValue != translated.AppendValue || !reflect.DeepEqual(arabic.Sandbox.Sequence, translated.Sequence) || !reflect.DeepEqual(arabic.Sandbox.Kinds, translated.Kinds) || arabic.Sandbox.MissingKey != translated.MissingKey || !reflect.DeepEqual(arabic.Sandbox.Grid, translated.Grid) {
 			t.Fatalf("%s: sandbox behaviour differs", arabic.ID)
 		}
+		sandboxConfigParity(t, arabic.Sandbox.Config, translated.Config)
 		if (arabic.Sandbox.SourceLabel == "") != (translated.SourceLabel == "") || (arabic.Sandbox.ResetLabel == "") != (translated.ResetLabel == "") || (arabic.Sandbox.ResetText == "") != (translated.ResetText == "") || (arabic.Sandbox.CloneSortLabel == "") != (translated.CloneSortLabel == "") || (arabic.Sandbox.OriginalSortLabel == "") != (translated.OriginalSortLabel == "") || (arabic.Sandbox.CloneSortText == "") != (translated.CloneSortText == "") || (arabic.Sandbox.OriginalSortText == "") != (translated.OriginalSortText == "") || (arabic.Sandbox.MissingReadLabel == "") != (translated.MissingReadLabel == "") || (arabic.Sandbox.MapOrderLabel == "") != (translated.MapOrderLabel == "") {
 			t.Fatalf("%s: translated sandbox controls differ", arabic.ID)
 		}

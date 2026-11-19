@@ -57,6 +57,7 @@ type LessonQuestion struct {
 
 type LessonSandbox struct {
 	Kind                string              `json:"kind"`
+	Config              map[string]any      `json:"config,omitempty"`
 	Presets             []LessonSlicePreset `json:"presets,omitempty"`
 	AppendValue         int                 `json:"appendValue,omitempty"`
 	Limit               int                 `json:"limit,omitempty"`

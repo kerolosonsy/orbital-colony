@@ -3,69 +3,21 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
+const { TestElement } = require("./sandbox/harness.js");
 const lessonSource = fs.readFileSync(__dirname + "/lessons.js", "utf8");
 const lateSource = fs.readFileSync(__dirname + "/lessons-late.js", "utf8");
 const app = fs.readFileSync(__dirname + "/app.js", "utf8");
 
 function fixture({ lang = "en", reduceMotion = false, animations = false } = {}) {
   const animationCalls = [];
-  class Element {
-    constructor(tag) {
-      this.tagName = tag; this.children = []; this.dataset = {}; this.attributes = {};
-      this.className = ""; this._text = ""; this._html = ""; this.parentElement = null;
-      this.scrollTop = 0; this.offsetTop = 0; this.offsetHeight = 20; this.clientHeight = 100;
-      this.hidden = false; this.disabled = false;
-      const properties = new Map();
-      this.style = { setProperty: (name, text) => properties.set(name, text), removeProperty: (name) => properties.delete(name), getPropertyValue: (name) => properties.get(name) || "" };
-      this.classList = {
-        add: (...names) => { this.className = [...new Set([...this.className.split(/\s+/).filter(Boolean), ...names])].join(" "); },
-        remove: (...names) => { this.className = this.className.split(/\s+/).filter((name) => name && !names.includes(name)).join(" "); },
-        toggle: (name, force) => {
-          const present = this.className.split(/\s+/).includes(name);
-          const next = force === undefined ? !present : Boolean(force);
-          if (next) this.classList.add(name); else this.classList.remove(name);
-          return next;
-        },
-        contains: (name) => this.className.split(/\s+/).includes(name),
-      };
-      if (animations) {
-        this.getBoundingClientRect = () => ({ left: (this.parentElement?.children.indexOf(this) || 0) * 64, top: 0 });
-        this.animate = (...args) => animationCalls.push([this, ...args]);
-      }
-    }
-    set textContent(text) { this.replaceChildren(); this._text = String(text); this._html = ""; }
-    get textContent() { return this._text + this._html.replace(/<[^>]*>/g, "") + this.children.map((child) => child.textContent).join(""); }
-    set innerHTML(html) { this.replaceChildren(); this._html = String(html); this._text = ""; }
-    get innerHTML() { return this._html; }
-    append(...nodes) {
-      for (const node of nodes) {
-        if (node.parentElement) node.parentElement.children = node.parentElement.children.filter((child) => child !== node);
-        node.parentElement = this;
-        this.children.push(node);
-      }
-    }
-    appendChild(node) { this.append(node); return node; }
-    replaceChildren(...nodes) {
-      for (const child of this.children) child.parentElement = null;
-      this.children = []; this._text = ""; this._html = "";
-      this.append(...nodes);
-    }
-    setAttribute(name, text) { this.attributes[name] = String(text); }
-    getAttribute(name) { return this.attributes[name] ?? null; }
-    focus() {}
-    querySelectorAll(selector) {
-      const matches = (node) => selector.startsWith(".") ? node.className.split(/\s+/).includes(selector.slice(1)) : node.tagName === selector.toLowerCase();
-      return this.children.flatMap((child) => [...(matches(child) ? [child] : []), ...child.querySelectorAll(selector)]);
-    }
-    querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
-  }
-  const roots = Object.fromEntries(["#lesson", "#lesson-panel", "#btn-lesson", "#btn-hint", "#hint-list"].map((id) => [id, new Element("section")]));
-  roots["#btn-hint"].appendChild(new Element("span"));
-  const editor = new Element("textarea"), body = new Element("body");
+  const createElement = (tag) => new TestElement(tag, { animations, animationCalls });
+  const roots = Object.fromEntries(["#lesson", "#lesson-panel", "#btn-lesson", "#btn-hint", "#hint-list"].map((id) => [id, createElement("section")]));
+  roots["#btn-hint"].appendChild(createElement("span"));
+  const editor = createElement("textarea"), body = createElement("body");
   const store = { blob: { progress: {}, prefs: {}, quizScores: {}, review: {}, lessons: {} }, save() {} };
   const context = vm.createContext({
     ResizeObserver: class { observe() {} disconnect() {} },
-    document: { body, createElement: (tag) => new Element(tag), querySelector: (selector) => roots["#lesson"].querySelector(selector) },
+    document: { body, createElement, querySelector: (selector) => roots["#lesson"].querySelector(selector) },
     $: (selector) => roots[selector], ed: editor, store, S: { review: false },
     T: (arabic, english) => lang === "en" ? english : arabic,
     Sound: { play() {} }, matchMedia: () => ({ matches: reduceMotion }),

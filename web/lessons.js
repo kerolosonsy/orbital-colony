@@ -245,7 +245,12 @@ const Lessons = (() => {
   function sandbox(block) {
     const spec = block.sandbox;
     const extension = sandboxExtensions.get(spec.kind);
-    if (extension) return extension(block, { element, button, T });
+    if (extension) return extension(block, { element, button, T, kit: Lessons.kit });
+    return renderBuiltInSandbox(block);
+  }
+
+  function renderBuiltInSandbox(block) {
+    const spec = block.sandbox;
     if (spec.kind === "slice-append-sequence") return sequenceSandbox(spec);
     if (spec.kind === "slice-sort-clone") return sortCloneSandbox(spec);
     if (spec.kind === "map-count") return mapCountSandbox(spec);
@@ -270,6 +275,10 @@ const Lessons = (() => {
     panel.append(presets, view, element("p", "lesson-reserved-label", spec.reservedLabel), element("p", "lesson-growth-label", spec.growthLabel), status, limit, controls);
     update();
     return panel;
+  }
+
+  function registerSandbox(kind, render) {
+    sandboxExtensions.set(kind, render);
   }
 
   function sortCloneSandbox(spec) {
@@ -496,5 +505,12 @@ const Lessons = (() => {
     return observer;
   }
 
-  return { open, createSession, registerSandbox(kind, render) { sandboxExtensions.set(kind, render); } };
+  return { open, createSession, registerSandbox, _renderBuiltInSandbox: renderBuiltInSandbox };
 })();
+
+const renderBuiltInSandbox = Lessons._renderBuiltInSandbox;
+Lessons.registerSandbox("slice-make", renderBuiltInSandbox);
+Lessons.registerSandbox("slice-append-sequence", renderBuiltInSandbox);
+Lessons.registerSandbox("slice-sort-clone", renderBuiltInSandbox);
+Lessons.registerSandbox("map-count", renderBuiltInSandbox);
+delete Lessons._renderBuiltInSandbox;

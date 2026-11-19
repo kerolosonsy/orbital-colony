@@ -1,0 +1,29 @@
+.sandbox-kit {
+  min-inline-size: 0;
+  max-inline-size: 290px;
+}
+.sandbox-kit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-block: 8px;
+}
+.sandbox-kit-controls .tool { min-height: 40px; height: auto; padding-block: 6px; }
+.sandbox-kit-counter, .sandbox-kit-value { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.sandbox-kit-counter { direction: ltr; unicode-bidi: isolate; }
+.sandbox-kit-frame { min-inline-size: 0; }
+.sandbox-kit-slider { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 10px; }
+.sandbox-kit-slider .sandbox-kit-label { grid-column: 1 / -1; }
+.sandbox-kit-range { inline-size: 100%; accent-color: var(--regolith); }
+.sandbox-kit-value-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; padding-block: 4px; }
+.sandbox-kit-value { direction: ltr; unicode-bidi: isolate; }
+.sandbox-kit-value-changed { animation: sandbox-kit-flash .35s ease-out; }
+.sandbox-kit-box-row { display: flex; flex-wrap: wrap; gap: 5px; direction: ltr; list-style: none; padding: 0; margin: 6px 0; }
+.sandbox-kit-box { min-inline-size: 38px; padding: 3px 7px; text-align: center; overflow-wrap: anywhere; border: 1px solid var(--rule-strong); background: var(--ink-2); color: var(--paper); font: 13px/1.5 var(--mono); }
+.sandbox-kit-log-list { padding-inline-start: 1.4em; margin-block: 4px; }
+.sandbox-kit-log-list li { padding-inline-start: 3px; overflow-wrap: anywhere; }
+.sandbox-kit-code { max-block-size: 12rem; overflow: auto; direction: ltr; unicode-bidi: isolate; font: 12px/1.65 var(--mono); background: var(--ink-2); border: 1px solid var(--rule); }
+.sandbox-kit-code-line { display: block; min-block-size: 1.65em; padding-inline: 8px; }
+.sandbox-kit-code-line.current { background: color-mix(in oklab, var(--regolith) 22%, var(--ink)); outline: 1px solid var(--regolith); outline-offset: -1px; }
+@keyframes sandbox-kit-flash { from { background: color-mix(in oklab, var(--regolith) 42%, transparent); } to { background: transparent; } }
