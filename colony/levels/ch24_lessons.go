@@ -17,34 +17,34 @@ func ch24SandboxConfig(action map[string]string, frames ...map[string]any) map[s
 }
 
 var ch24PingSandboxConfig = ch24SandboxConfig(ch24SandboxPair("ترتيب ممكن تاني", "Another possible order"),
-	ch24SandboxFrame("ترتيب ممكن؛ A تستلم أولًا.", "One possible order; A receives first.",
+	ch24SandboxFrame("ترتيب ممكن؛ A بتستلم الأول.", "One possible order; A receives first.",
 		ch24SandboxRow("التسليم", "Handoff", "A → receiver: 4; B waits"), ch24SandboxRow("بعدها", "Then", "B → receiver: 6")),
-	ch24SandboxFrame("ترتيب ممكن؛ B تستلم أولًا.", "One possible order; B receives first.",
+	ch24SandboxFrame("ترتيب ممكن؛ B بتستلم الأول.", "One possible order; B receives first.",
 		ch24SandboxRow("التسليم", "Handoff", "B → receiver: 6; A waits"), ch24SandboxRow("بعدها", "Then", "A → receiver: 4")))
 
 var ch24DepotSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترتيبًا ممكنًا تاني", "Show another possible order"),
-	ch24SandboxFrame("ترتيب ممكن: A قبل B؛ السعة ثابتة.", "Possible order: A then B; capacity stays fixed.",
-		ch24SandboxRow("الطابور", "Queue", "[A:4]"), ch24SandboxRow("السعة", "Capacity", "2"), ch24SandboxRow("الطول", "Length", "1")),
-	ch24SandboxFrame("ترتيب ممكن: B قبل A؛ السعة ثابتة.", "Possible order: B then A; capacity stays fixed.",
-		ch24SandboxRow("الطابور", "Queue", "[B:6]"), ch24SandboxRow("السعة", "Capacity", "2"), ch24SandboxRow("الطول", "Length", "1")))
+	ch24SandboxFrame("ترتيب ممكن: A قبل B؛ الـcapacity ثابتة.", "Possible order: A then B; capacity stays fixed.",
+		ch24SandboxRow("الـqueue", "Queue", "[A:4]"), ch24SandboxRow("الـcapacity", "Capacity", "2"), ch24SandboxRow("الـlength", "Length", "1")),
+	ch24SandboxFrame("ترتيب ممكن: B قبل A؛ الـcapacity ثابتة.", "Possible order: B then A; capacity stays fixed.",
+		ch24SandboxRow("الـqueue", "Queue", "[B:6]"), ch24SandboxRow("الـcapacity", "Capacity", "2"), ch24SandboxRow("الـlength", "Length", "1")))
 
 var ch24CrewSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترتيبًا محتملًا تاني", "Show another possible order"),
 	ch24SandboxFrame("B ممكن تخلص قبل A.", "B may finish before A.",
-		ch24SandboxRow("النوع", "Type", "Reply[string]"), ch24SandboxRow("اكتمال العمال", "Worker completion", "B → A"), ch24SandboxRow("ترتيب الردود", "Reply order", "[A:ore, B:iron]")),
+		ch24SandboxRow("النوع", "Type", "Reply[string]"), ch24SandboxRow("اكتمال العمال", "Worker completion", "B → A"), ch24SandboxRow("ترتيب الـresponses", "Reply order", "[A:ore, B:iron]")),
 	ch24SandboxFrame("A ممكن تخلص قبل B.", "A may finish before B.",
-		ch24SandboxRow("النوع", "Type", "Reply[string]"), ch24SandboxRow("اكتمال العمال", "Worker completion", "A → B"), ch24SandboxRow("ترتيب الردود", "Reply order", "[A:ore, B:iron]")))
+		ch24SandboxRow("النوع", "Type", "Reply[string]"), ch24SandboxRow("اكتمال العمال", "Worker completion", "A → B"), ch24SandboxRow("ترتيب الـresponses", "Reply order", "[A:ore, B:iron]")))
 
 var ch24PipelineSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شوف ترتيبًا ممكنًا تاني", "Show another possible order"),
 	ch24SandboxFrame("ترتيب ممكن: 3 ثم 5.", "Possible order: 3, then 5.",
-		ch24SandboxRow("وصول القيم", "Arrival order", "[3, 5]"), ch24SandboxRow("range", "range", "prints 3, then 5"), ch24SandboxRow("النهاية", "End", "closed and drained")),
+		ch24SandboxRow("وصول الـvalues", "Arrival order", "[3, 5]"), ch24SandboxRow("range", "range", "prints 3, then 5"), ch24SandboxRow("النهاية", "End", "closed and drained")),
 	ch24SandboxFrame("ترتيب وصول تاني ممكن.", "Another arrival order is possible.",
-		ch24SandboxRow("وصول القيم", "Arrival order", "[5, 3]"), ch24SandboxRow("range", "range", "prints 5, then 3"), ch24SandboxRow("النهاية", "End", "closed and drained")))
+		ch24SandboxRow("وصول الـvalues", "Arrival order", "[5, 3]"), ch24SandboxRow("range", "range", "prints 5, then 3"), ch24SandboxRow("النهاية", "End", "closed and drained")))
 
 var ch24BeaconSandboxConfig = ch24SandboxConfig(ch24SandboxPair("بدّل ترتيب الاكتمال", "Change completion order"),
 	ch24SandboxFrame("B ممكن تكتمل قبل A.", "B may finish before A.",
-		ch24SandboxRow("الاكتمال", "Completion", "B → A"), ch24SandboxRow("الردود بالترتيب", "Replies by input", "[A:202, B:timeout]"), ch24SandboxRow("الخطأ", "Error", "timeout ≠ HTTP status")),
+		ch24SandboxRow("الاكتمال", "Completion", "B → A"), ch24SandboxRow("الـresponses بالترتيب", "Replies by input", "[A:202, B:timeout]"), ch24SandboxRow("الـerror", "Error", "timeout ≠ HTTP status")),
 	ch24SandboxFrame("A ممكن تكتمل قبل B.", "A may finish before B.",
-		ch24SandboxRow("الاكتمال", "Completion", "A → B"), ch24SandboxRow("الردود بالترتيب", "Replies by input", "[A:202, B:timeout]"), ch24SandboxRow("الخطأ", "Error", "timeout ≠ HTTP status")))
+		ch24SandboxRow("الاكتمال", "Completion", "A → B"), ch24SandboxRow("الـresponses بالترتيب", "Replies by input", "[A:202, B:timeout]"), ch24SandboxRow("الـerror", "Error", "timeout ≠ HTTP status")))
 
 var ch24ChunkSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترتيبًا ممكنًا تاني", "Show another possible order"),
 	ch24SandboxFrame("ترتيب ممكن: B قبل A.", "Possible order: B before A.",
@@ -55,7 +55,7 @@ var ch24ChunkSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترت�
 var ch24TilesSandboxConfig = ch24SandboxConfig(ch24SandboxPair("شغّل ترتيبًا ممكنًا تاني", "Show another possible order"),
 	ch24SandboxFrame("ترتيب ممكن: B تكمل قبل A.", "One possible order: B completes before A.",
 		ch24SandboxRow("الإعدادات", "Config", "A: png 2×1; B: jpeg 3×2"), ch24SandboxRow("pixels", "Pixels", "not decoded"), ch24SandboxRow("اكتمال العمال", "Worker completion", "B → A")),
-	ch24SandboxFrame("اكتمال العمال ممكن يتبدّل.", "Worker completion can vary.",
+	ch24SandboxFrame("ترتيب اكتمال العمال ممكن يتغير.", "Worker completion can vary.",
 		ch24SandboxRow("الإعدادات", "Config", "A: png 2×1; B: jpeg 3×2"), ch24SandboxRow("pixels", "Pixels", "not decoded"), ch24SandboxRow("اكتمال العمال", "Worker completion", "A → B")))
 
 type ch24Copy struct {
@@ -145,7 +145,7 @@ var ch24PingExamples = [2]ch24Example{
 }`,
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 2, arabic: "قناة بلا مخزن.", english: "The channel has no buffer."},
+			{line: 2, arabic: "channel من غير buffer.", english: "The channel has no buffer."},
 			{line: 3, arabic: "مرسل واحد ينتظر.", english: "One sender waits."},
 			{line: 4, arabic: "الاستقبال يستلم 7.", english: "The receive gets 7."},
 			{line: 5, arabic: "اطبع التصريح.", english: "Print the permit.", output: "7"},
@@ -161,25 +161,25 @@ var ch24PingExamples = [2]ch24Example{
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 2, arabic: "السعة خانة واحدة.", english: "Capacity is one slot."},
-			{line: 3, arabic: "الرسالة تدخل الطابور.", english: "The value enters the queue."},
-			{line: 4, arabic: "الاستقبال يطبع 4.", english: "The receive prints 4.", output: "4"},
+			{line: 3, arabic: "الـvalue تدخل الـqueue.", english: "The value enters the queue."},
+			{line: 4, arabic: "الاستقبال بيطبع 4.", english: "The receive prints 4.", output: "4"},
 		},
 	},
 }
 
 var ch24PingArabic = ch24BuildLesson("c241", ch24Copy{
-	mission:       "نفّذ ~RelaySupplies~ لتسليم جولات بين درونين. راجع الإلغاء والأخطاء ونهاية القنوات من غير goroutine معلّقة. الـstarter فيه التوقيع بس.",
-	idea:          "القناة unbuffered زي مقابلة: الإرسال والاستقبال يلاقوا بعض. ده ترتيب واحد ممكن بين goroutines، مش وعد بترتيب تشغيل ثابت.",
-	tryQuestion:   "توقّع اللي هيتطبع بعد إرسال القيمة:",
+	mission:       "نفّذ ~RelaySupplies~ لتسليم جولات بين درونين. راجع الإلغاء والـerrors ونهاية الـchannels من غير goroutine معلّقة. الـstarter فيه التوقيع بس.",
+	idea:          "الـchannel unbuffered زي مقابلة: الإرسال والاستقبال يلاقوا بعض. ده ترتيب واحد ممكن بين goroutines، مش وعد بترتيب تشغيل ثابت.",
+	tryQuestion:   "توقّع اللي هيتطبع بعد إرسال الـvalue:",
 	tryOptions:    []string{"0", "4", "مافيش ناتج"},
-	tryFeedback:   []string{"القناة فيها قيمة قبل الاستقبال.", "الاستقبال بياخد القيمة المرسلة.", "الإرسال يسبق الاستقبال في نفس المسار."},
-	reveal:        "تابع دخول القيمة للقناة ثم الاستقبال.",
-	watch:         "- إشارة الاستلام مش معناها إن callback خلصت.\n- قافل القناة لازم يملك قرار آخر إرسال.",
-	think:         "قسّم العقد: مدخلات صالحة، جولات متبادلة، ثم إيقاف واضح. راجع مين منتظر إيه عند النجاح والخطأ.\n\nاكتب كل إرسال واستقبال كسهم واضح.",
-	checkQuestion: "إيه اللي يميّز نهاية قناة مقفولة وفاضية؟",
+	tryFeedback:   []string{"الـchannel فيها value قبل الاستقبال.", "الاستقبال بياخد الـvalue المرسلة.", "الإرسال يسبق الاستقبال في نفس المسار."},
+	reveal:        "تابع دخول الـvalue للـchannel ثم الاستقبال.",
+	watch:         "- إشارة الاستلام مش معناها إن callback خلصت.\n- مالك الـchannel هو اللي يقرر إمتى آخر send حصل.",
+	think:         "قسّم العقد: مدخلات صالحة، جولات متبادلة، ثم إيقاف واضح. راجع مين منتظر إيه عند النجاح والـerror.\n\nاكتب كل إرسال واستقبال كسهم واضح.",
+	checkQuestion: "إيه اللي يميّز نهاية channel مقفولة وفاضية؟",
 	checkOptions:  []string{"القيمة 0 بس", "الاستقبال بيرجع ~ok == false~", "إرسال جديد"},
-	checkFeedback: []string{"الصفر ممكن يكون قيمة حقيقية.", "~ok~ بيفرق النهاية عن قيمة صفر عادية.", "الإرسال بعد القفل يسبب panic."},
-	turn:          "ابدأ من التوقيع والـcontext. شغّل التستات بعد ما تحدد ملكية كل قناة ونقطة انتظارها.",
+	checkFeedback: []string{"الصفر ممكن يكون value حقيقية.", "~ok~ بيفرق النهاية عن zero value عادية.", "الإرسال بعد القفل يسبب panic."},
+	turn:          "ابدأ من التوقيع والـcontext. شغّل الـtests بعد ما تحدد ملكية كل channel ونقطة انتظارها.",
 	sandboxText:   "بدّل ترتيب التسليم.", sandboxKind: "ch24-channel-handoff", sandboxConfig: ch24PingSandboxConfig,
 }, ch24PingExamples, false)
 
@@ -210,10 +210,10 @@ var ch24DepotExamples = [2]ch24Example{
 }`,
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 2, arabic: "سعة الطابور اتنين.", english: "Queue capacity is two."},
+			{line: 2, arabic: "الـqueue سعتها اتنين.", english: "Queue capacity is two."},
 			{line: 3, arabic: "أول صندوق يدخل.", english: "The first crate enters."},
 			{line: 4, arabic: "التاني يفضل بعده.", english: "The next one waits behind it."},
-			{line: 5, arabic: "السعة والطول: 2 و2.", english: "Capacity and length: 2 and 2.", output: "2 2"},
+			{line: 5, arabic: "الـcapacity والـlength: 2 و2.", english: "Capacity and length: 2 and 2.", output: "2 2"},
 		},
 	},
 	{
@@ -227,24 +227,24 @@ var ch24DepotExamples = [2]ch24Example{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 2, arabic: "فيه خانة واحدة.", english: "There is one slot."},
 			{line: 3, arabic: "الخانة بقت مشغولة.", english: "The slot is now occupied."},
-			{line: 4, arabic: "السعة والطول: 1 و1.", english: "Capacity and length: 1 and 1.", output: "1 1"},
+			{line: 4, arabic: "الـcapacity والـlength: 1 و1.", english: "Capacity and length: 1 and 1.", output: "1 1"},
 		},
 	},
 }
 
 var ch24DepotArabic = ch24BuildLesson("c242", ch24Copy{
 	mission:       "اجمع صناديق ~batches~ عبر ~UnloadDepots~ من غير فقد. الـlab يفحص استهلاكًا واحدًا و~capacity~ محدودة؛ الـstarter فيه التوقيع بس.",
-	idea:          "القناة ذات buffer صف انتظار محدود. ~cap~ هي عدد الخانات، و~len~ عدد الرسائل المنتظرة دلوقتي.",
-	tryQuestion:   "توقّع قيمتي ~cap~ و~len~ بعد الإرسال:",
+	idea:          "الـchannel اللي فيها buffer صف انتظار محدود. ~cap~ هي عدد الخانات، و~len~ عدد الـmessages المنتظرة دلوقتي.",
+	tryQuestion:   "توقّع الـvalues بتاعة ~cap~ و~len~ بعد الإرسال:",
 	tryOptions:    []string{"1 و0", "1 و1", "0 و1"},
-	tryFeedback:   []string{"السعة ما بتقلش لما الرسالة تدخل.", "خانة واحدة متاحة ومشغولة.", "السعة هنا مش صفر."},
-	reveal:        "شوف الفرق بين سعة القناة والرسائل اللي جواها.",
-	watch:         "- وجود buffer ما يضمنش وصول الرسالة للمستهلك.\n- حالة التجميع المشتركة تحتاج مالك واضح.",
-	think:         "ابدأ بمسار الرسالة من كل batch للمستهلك. راجع مين بيتعامل مع الخطأ وإمتى المنتجين يوقفوا.\n\nكل batch تحتفظ بترتيبها الداخلي؛ تابع القناة حتى النهاية.\n\nعدد العمال مش دليل على صحة القيم. الحفاظ على الترتيب جزء من العقد.",
-	checkQuestion: "لو القناة ممتلئة، الإرسال العادي يعمل إيه؟",
+	tryFeedback:   []string{"الـcapacity ما بتقلش لما الـvalue تدخل.", "خانة واحدة متاحة ومشغولة.", "السعة هنا مش صفر."},
+	reveal:        "شوف الفرق بين سعة الـchannel والـmessages اللي جواها.",
+	watch:         "- وجود buffer ما يضمنش وصول الـvalue للـconsumer.\n- حالة التجميع المشتركة تحتاج مالك واضح.",
+	think:         "ابدأ بمسار الـvalue من كل batch للـconsumer. راجع مين بيتعامل مع الـerror وإمتى المنتجين يوقفوا.\n\nكل batch تحتفظ بترتيبها الداخلي؛ تابع الـchannel حتى النهاية.\n\nعدد العمال مش دليل على صحة الـvalues. الحفاظ على الترتيب جزء من العقد.",
+	checkQuestion: "لو الـchannel ممتلئة، الإرسال العادي يعمل إيه؟",
 	checkOptions:  []string{"ينتظر مستقبلًا", "يمسح أقدم قيمة", "يوسّع السعة"},
-	checkFeedback: []string{"الإرسال يكمّل لما تتوفر خانة.", "القنوات ما بتحذفش تلقائيًا.", "السعة ما بتتغيرش بعد الإنشاء."},
-	turn:          "جرّب تتبع كل قيمة من المصدر للاستهلاك. راقب مسارات الإلغاء والخطأ كمان.",
+	checkFeedback: []string{"الإرسال يكمّل لما تتوفر خانة.", "الـchannels ما بتحذفش الـvalues تلقائيًا.", "الـcapacity ما بتتغيرش بعد الإنشاء."},
+	turn:          "جرّب تتبع كل value من المصدر للاستهلاك. راقب مسارات الإلغاء والـerror كمان.",
 	sandboxText:   "شوف ترتيب وصول تاني.", sandboxKind: "ch24-buffer-queue", sandboxConfig: ch24DepotSandboxConfig,
 }, ch24DepotExamples, false)
 
@@ -275,8 +275,8 @@ func main() {
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 1, arabic: "T نوع بيتحدد لاحقًا.", english: "T is chosen at use."},
-			{line: 3, arabic: "هنا القيمة int.", english: "Here the value is an int."},
-			{line: 4, arabic: "اقرأ نتيجة النوع.", english: "Read the typed result.", output: "7"},
+			{line: 3, arabic: "هنا الـvalue int.", english: "Here the value is an int."},
+			{line: 4, arabic: "اقرا الـtyped result.", english: "Read the typed result.", output: "7"},
 		},
 	},
 	{
@@ -288,27 +288,27 @@ func main() {
 }`,
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 1, arabic: "النوع يقبل أنواعًا مختلفة.", english: "The type accepts different types."},
-			{line: 3, arabic: "هنا القيمة string.", english: "Here the value is a string."},
+			{line: 1, arabic: "الـgeneric type بيقبل types مختلفة.", english: "The type accepts different types."},
+			{line: 3, arabic: "هنا الـvalue string.", english: "Here the value is a string."},
 			{line: 4, arabic: "الناتج هو ore.", english: "The output is ore.", output: "ore"},
 		},
 	},
 }
 
 var ch24CrewArabic = ch24BuildLesson("c243", ch24Copy{
-	mission:       "نفّذ ~RunCrew~ generic بطاقم ثابت و~CrewReply~ لكل مدخل. لكل نتيجة مكانها، والخطأ العام يوقف الشغل؛ الـstarter فيه الأنواع والتوقيع.",
+	mission:       "نفّذ ~RunCrew~ generic بطاقم ثابت و~CrewReply~ لكل مدخل. لكل نتيجة مكانها، والـerror العام يوقف الشغل؛ الـstarter فيه الأنواع والتوقيع.",
 	idea:          "الـtype parameter زي خانة نوع مؤقتة. عند استخدام ~Reply[int]~ تبقى ~Value~ من نوع int؛ شكل النتيجة يفضل نفسه.",
-	tryQuestion:   "توقّع القيمة المطبوعة من ~Reply[string]~:",
+	tryQuestion:   "توقّع الـvalue المطبوعة من ~Reply[string]~:",
 	tryOptions:    []string{"7", "ore", "string"},
-	tryFeedback:   []string{"دي قيمة المثال الرقمي.", "الـfield فيها النص اللي دخلناه.", "اسم النوع مش قيمة field."},
+	tryFeedback:   []string{"دي الـvalue بتاعة المثال الرقمي.", "الـfield فيها النص اللي دخلناه.", "اسم النوع مش value field."},
 	reveal:        "تابع اختيار النوع ثم قراءة ~Value~.",
-	watch:         "- نتيجة كل عنصر تختلف عن خطأ استدعاء الطاقم كله.\n- العمال ما يكتبوش في نفس خانة النتيجة.",
-	think:         "اقرأ العقد وحدد معنى كل return. بعدين تتبع المدخل، نتيجته، وحالة الإلغاء من غير ما تخلطهم.\n\nالـindex يربط الرد بمدخله حتى لو اختلف ترتيب الوصول.\n\nترتيب الردود لازم يطابق ترتيب المدخلات. راجع ترتيبها قبل الاستنتاج.",
+	watch:         "- نتيجة كل عنصر تختلف عن error استدعاء الطاقم كله.\n- العمال ما يكتبوش في نفس خانة النتيجة.",
+	think:         "اقرا العقد وحدد معنى كل return. بعدين تتبع المدخل والـresult وحالة الإلغاء من غير ما تخلطهم.\n\nالـindex بيربط الـresponse بمدخله حتى لو اختلف ترتيب الوصول.\n\nترتيب الـresponses لازم يطابق ترتيب المدخلات. راجع ترتيبها قبل الاستنتاج.",
 	checkQuestion: "في ~Reply[T]~، إيه دور ~T~؟",
 	checkOptions:  []string{"عدد العمال", "نوع القيمة داخل Reply", "index المدخل"},
-	checkFeedback: []string{"العمال إعداد منفصل عن نوع البيانات.", "كل استخدام يحدد النوع الفعلي لـT.", "الـindex يحدد ترتيب العنصر."},
-	turn:          "ابدأ بقراءة أنواع ~T~ و~R~ في التوقيع. افحص ملكية كل نتيجة وعمر كل عامل.",
-	sandboxText:   "بدّل اكتمال الردود.", sandboxKind: "ch24-typed-reply", sandboxConfig: ch24CrewSandboxConfig,
+	checkFeedback: []string{"العمال إعداد منفصل عن نوع البيانات.", "كل استخدام بيحدد النوع الفعلي لـT.", "الـindex بيحدد ترتيب العنصر."},
+	turn:          "ابدأ بإنك تقرا types ~T~ و~R~ في التوقيع. افحص ملكية كل result وعمر كل عامل.",
+	sandboxText:   "بدّل اكتمال الـresponses.", sandboxKind: "ch24-typed-reply", sandboxConfig: ch24CrewSandboxConfig,
 }, ch24CrewExamples, false)
 
 var ch24CrewEnglish = ch24BuildLesson("c243", ch24Copy{
@@ -341,7 +341,7 @@ var ch24PipelineExamples = [2]ch24Example{
 }`,
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 2, arabic: "الطابور فيه خانتين.", english: "The queue has two slots."},
+			{line: 2, arabic: "الـqueue فيها خانتين.", english: "The queue has two slots."},
 			{line: 5, arabic: "المرسل أعلن النهاية.", english: "The sender announced the end."},
 			{line: 7, arabic: "أول قراءة تطبع 3.", english: "The first receive prints 3.", output: "3"},
 			{line: 7, arabic: "التانية تطبع 5.", english: "The next prints 5.", output: "3\n5"},
@@ -357,27 +357,27 @@ var ch24PipelineExamples = [2]ch24Example{
 }`,
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 3, arabic: "القناة اتقفلت فاضية.", english: "The empty channel is closed."},
-			{line: 4, arabic: "القيمة صفر وok خطأ.", english: "The value is zero and ok is false."},
+			{line: 3, arabic: "الـchannel اتقفلت وهي فاضية.", english: "The empty channel is closed."},
+			{line: 4, arabic: "الـzero value و~ok~ false.", english: "The value is zero and ok is false."},
 			{line: 5, arabic: "دي علامة النهاية.", english: "That is the end signal.", output: "0 false"},
 		},
 	},
 }
 
 var ch24PipelineArabic = ch24BuildLesson("c244", ch24Copy{
-	mission:       "نفّذ ~RefineOre~ عشان يقسم شغل الخامات على lanes ويرجع stream ردود. الـlab يراجع الإلغاء والإغلاق؛ الـstarter محدد الأنواع والتوقيع.",
-	idea:          "~close~ يقول إن مفيش رسائل جديدة. ~range~ يستهلك الموجود ويقف لوحده بعد ما القناة تتقفل وتفضى.",
-	tryQuestion:   "القناة فاضية ومقفولة؛ توقّع نتيجة الاستقبال:",
+	mission:       "نفّذ ~RefineOre~ عشان يقسم شغل الخامات على lanes ويرجّع stream من الـresponses. الـlab يراجع الإلغاء والإغلاق؛ الـstarter محدد الأنواع والتوقيع.",
+	idea:          "~close~ بيقول إن مفيش رسائل جديدة. ~range~ بيستهلك الموجود وبيقف لوحده بعد ما الـchannel تتقفل وتفضى.",
+	tryQuestion:   "الـchannel فاضية ومقفولة؛ توقّع الـvalue و~ok~ بتوع الاستقبال:",
 	tryOptions:    []string{"0 وfalse", "0 وtrue", "panic"},
-	tryFeedback:   []string{"القيمة الصفرية ومعاها علامة النهاية.", "true معناها وصلت قيمة فعلية.", "الاستقبال من قناة مقفولة مسموح."},
-	reveal:        "اتبع علامة ~ok~ بعد قفل قناة فاضية.",
-	watch:         "- اقفل الإرسال بعد آخر مرسل، مش بعد أول عنصر.\n- الإلغاء لازم يفضل ممكن لو مفيش مستقبل.",
-	think:         "ارسم مسار كل batch: قناة lane، تحويل، ثم الدمج. حدّد ملكية كل إغلاق ونقطة انتظار.\n\nالخرج النهائي له نقطة إغلاق واحدة.",
-	checkQuestion: "إمتى ~range~ على قناة بيخلص؟",
+	tryFeedback:   []string{"الـzero value ومعاها علامة النهاية.", "true معناها وصلت value فعلية.", "الاستقبال من channel مقفولة مسموح."},
+	reveal:        "اتبع علامة ~ok~ بعد قفل channel فاضية.",
+	watch:         "- اقفل الإرسال بعد آخر مرسل، مش بعد أول عنصر.\n- الإلغاء لازم يفضل ممكن حتى لو مفيش receiver.",
+	think:         "ارسم مسار كل batch: channel lane، تحويل، ثم الدمج. حدّد ملكية كل إغلاق ونقطة انتظار.\n\nالخرج النهائي له نقطة إغلاق واحدة.",
+	checkQuestion: "إمتى ~range~ على الـchannel بيخلص؟",
 	checkOptions:  []string{"بعد أول قيمة", "لما القناة تتقفل وتفضى", "بعد عدد ثابت"},
-	checkFeedback: []string{"range يكمل مع القيم المتاحة.", "القفل مع تفريغ القناة ينهي الحلقة.", "عدد الرسائل مش لازم يبقى معروف."},
-	turn:          "ابدأ بتحديد اتجاه القنوات ومن يملك إغلاقها. بعدين تتبع الإلغاء في كل انتظار.",
-	sandboxText:   "بدّل ترتيب وصول القيم.", sandboxKind: "ch24-drain-close", sandboxConfig: ch24PipelineSandboxConfig,
+	checkFeedback: []string{"~range~ بيكمل مع الـvalues المتاحة.", "قفل الـchannel وتفريغها بينهي الـloop.", "عدد الـmessages مش لازم يبقى معروف."},
+	turn:          "ابدأ بتحديد اتجاه الـchannels ومن يملك إغلاقها. بعدين تتبع الإلغاء في كل انتظار.",
+	sandboxText:   "بدّل ترتيب وصول الـvalues.", sandboxKind: "ch24-drain-close", sandboxConfig: ch24PipelineSandboxConfig,
 }, ch24PipelineExamples, false)
 
 var ch24PipelineEnglish = ch24BuildLesson("c244", ch24Copy{
@@ -409,9 +409,9 @@ var ch24BeaconExamples = [2]ch24Example{
 }`,
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 2, arabic: "الطلب مربوط بالسياق.", english: "The request carries its context."},
+			{line: 2, arabic: "الـrequest مربوط بالـcontext.", english: "The request carries its context."},
 			{line: 3, arabic: "العنوان صالح.", english: "The address is valid."},
-			{line: 6, arabic: "اقرأ الطريقة والـhost.", english: "Read the method and host.", output: "GET beacon.example"},
+			{line: 6, arabic: "اقرا الـmethod والـhost.", english: "Read the method and host.", output: "GET beacon.example"},
 		},
 	},
 	{
@@ -422,26 +422,26 @@ var ch24BeaconExamples = [2]ch24Example{
 }`,
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 2, arabic: "الرد يحمل status.", english: "The response carries a status."},
-			{line: 3, arabic: "اقرأ قيمة status.", english: "Read the status value.", output: "202"},
+			{line: 2, arabic: "الـresponse شايل status.", english: "The response carries a status."},
+			{line: 3, arabic: "اقرا الـvalue بتاعة status.", english: "Read the status value.", output: "202"},
 		},
 	},
 }
 
 var ch24BeaconArabic = ch24BuildLesson("c245", ch24Copy{
-	mission:       "نفّذ ~CheckBeacons~ بعميل HTTP محقون وحد فعلي للتوازي. النتائج تفضل بترتيب العناوين؛ الـstarter فيه ~BeaconReply~ والتوقيع.",
-	idea:          "~NewRequestWithContext~ يربط الطلب بسياق الإلغاء. إنشاء الطلب لوحده مش اتصال، و~StatusCode~ يخص رد HTTP وصل فعلًا.",
-	tryQuestion:   "توقّع status اللي يمثله الرد:",
+	mission:       "نفّذ ~CheckBeacons~ باستخدام HTTP client محقون وحد فعلي للتوازي. النتائج تفضل بترتيب العناوين؛ الـstarter فيه ~BeaconReply~ والتوقيع.",
+	idea:          "~NewRequestWithContext~ بيربط الـrequest بـcontext الإلغاء. إنشاء الـrequest لوحده مش اتصال، و~StatusCode~ يخص HTTP response وصل فعلًا.",
+	tryQuestion:   "توقّع الـstatus اللي بيمثله الـresponse:",
 	tryOptions:    []string{"200", "202", "404"},
-	tryFeedback:   []string{"ده status نجاح شائع لكن مش الموجود هنا.", "~StatusAccepted~ قيمته 202.", "ده status لمورد مش موجود."},
-	reveal:        "تابع الـconstant لحد قيمة status المطبوعة.",
-	watch:         "- خطأ ~Do~ مش هو status HTTP.\n- الرد اللي له body يحتاج إغلاقه.",
-	think:         "افصل إعداد الطلب عن تنفيذ الاتصال وعن تفسير الرد. راجع كمان مين يحتفظ بنتيجة كل عنوان.\n\nالعميل المحقون يحدد transport والـtimeout. status HTTP تفضل ردًا، مش خطأ تنفيذ.\n\nحدد العنوان غير الصالح قبل الاتصال، وسجل الرد في موضع عنوانه الأصلي.\n\nراجع إن كل response يتقفل، وافصل خطأ النقل. اكتب status بوضوح.",
+	tryFeedback:   []string{"ده status نجاح شائع لكن مش الموجود هنا.", "~StatusAccepted~ الـvalue بتاعته 202.", "ده status لمورد مش موجود."},
+	reveal:        "تابع الـconstant لحد الـvalue المطبوعة بتاعة status.",
+	watch:         "- error ~Do~ مش هو status HTTP.\n- الـresponse اللي له body يحتاج إغلاقه.",
+	think:         "افصل إعداد الـrequest عن تنفيذ الاتصال وعن تفسير الـresponse. راجع كمان مين يحتفظ بنتيجة كل عنوان.\n\nالـclient المحقون بيحدد transport والـtimeout. status HTTP تفضل response، مش error تنفيذ.\n\nحدّد العنوان غير الصالح قبل الاتصال، وخزّن الـresponse في مكان عنوانه الأصلي.\n\nراجع إن كل response يتقفل، وافصل transport error. اكتب status بوضوح.",
 	checkQuestion: "لو ~Do~ رجّع response من غير error، ~StatusCode~ بيوصف إيه؟",
 	checkOptions:  []string{"نتيجة HTTP", "عدد الطلبات", "طول العنوان"},
-	checkFeedback: []string{"status جزء من الرد المستلم.", "الطلبات ما تتحسبش من status.", "طول العنوان معلومة منفصلة."},
-	turn:          "ابدأ من عقد العميل المحقون. تتبع الإلغاء والحد المتزامن قبل قراءة النتائج.",
-	sandboxText:   "بدّل اكتمال الطلبات.", sandboxKind: "ch24-http-result", sandboxConfig: ch24BeaconSandboxConfig,
+	checkFeedback: []string{"status جزء من الـresponse المستلم.", "الـrequests ما تتحسبش من status.", "طول العنوان معلومة منفصلة."},
+	turn:          "ابدأ من عقد الـclient المحقون. تتبع الإلغاء والحد المتزامن قبل قراءة النتائج.",
+	sandboxText:   "بدّل اكتمال الـrequests.", sandboxKind: "ch24-http-result", sandboxConfig: ch24BeaconSandboxConfig,
 }, ch24BeaconExamples, false)
 
 var ch24BeaconEnglish = ch24BuildLesson("c245", ch24Copy{
@@ -494,7 +494,7 @@ var ch24ChunkExamples = [2]ch24Example{
 		frames: []ch24FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 2, arabic: "اتفتح ملف للتوضيح.", english: "A demo file was opened."},
-			{line: 5, arabic: "اكتب حرفين عند offset 4.", english: "Write two bytes at offset 4."},
+			{line: 5, arabic: "اكتب 2 bytes عند offset 4.", english: "Write two bytes at offset 4."},
 			{line: 6, arabic: "الناتج عدد bytes.", english: "The output is the byte count.", output: "2"},
 		},
 	},
@@ -503,16 +503,16 @@ var ch24ChunkExamples = [2]ch24Example{
 var ch24ChunkArabic = ch24BuildLesson("c246", ch24Copy{
 	mission:       "نزّل خريطة مقسمة في ~DownloadChart~، واكتب كل جزء في مرحلته، وانشرها بس بعد الاكتمال. الـstarter محدد ~ChartPlan~ و~ChartStage~.",
 	idea:          "~WriteAt~ يكتب bytes عند offset محدد. كده الأجزاء تقدر تروح لمواضعها من غير ما ترتيب وصولها يحدد مكانها.",
-	tryQuestion:   "توقّع قيمة ~count~ بعد كتابة حرفين:",
+	tryQuestion:   "توقّع الـvalue بتاعة ~count~ بعد كتابة حرفين:",
 	tryOptions:    []string{"0", "2", "4"},
-	tryFeedback:   []string{"الكتابة نجحت وفيها bytes.", "القيمة هي عدد bytes المكتوبة.", "offset مش عدد bytes المكتوبة."},
-	reveal:        "اتبع قيمة الإرجاع من ~WriteAt~.",
-	watch:         "- الرد الجزئي مش نفس حجم الجزء المتوقع.\n- المرحلة ما تتنشرش قبل نجاح كل الأجزاء.",
-	think:         "فكّر في التخطيط، التحقق من كل رد، ثم قرار واحد للنشر أو الإلغاء. راجع حدود كل جزء وملكيته.\n\nكل نطاق جزء من ملف واحد؛ اكتب في موضعه ثم استنى القرار قبل النشر.",
+	tryFeedback:   []string{"الكتابة نجحت وفيها bytes.", "الـvalue هي عدد الـbytes المكتوبة.", "offset مش عدد الـbytes المكتوبة."},
+	reveal:        "تابع الـvalue اللي ~WriteAt~ رجّعها.",
+	watch:         "- الـresponse الجزئي مش نفس حجم الجزء المتوقع.\n- المرحلة ما تتنشرش قبل نجاح كل الأجزاء.",
+	think:         "فكّر في التخطيط، التحقق من كل response، ثم قرار واحد للنشر أو الإلغاء. راجع حدود كل جزء وملكيته.\n\nكل نطاق جزء من ملف واحد؛ اكتب في موضعه ثم استنى القرار قبل النشر.",
 	checkQuestion: "في ~WriteAt(data, offset)~، الـoffset يحدد إيه؟",
 	checkOptions:  []string{"موضع بداية الكتابة", "عدد الـworkers", "حجم الملف النهائي"},
-	checkFeedback: []string{"هو مكان بداية bytes في الوجهة.", "العمال إعداد مستقل.", "الحجم مش هو موضع الكتابة."},
-	turn:          "ابدأ بعقد ~ChartStage~ وعميل HTTP. تتبع كل فشل حتى ~Commit~ أو الإلغاء.",
+	checkFeedback: []string{"هو مكان بداية الـbytes في الوجهة.", "العمال إعداد مستقل.", "الحجم مش هو موضع الكتابة."},
+	turn:          "ابدأ بعقد ~ChartStage~ وHTTP client. تتبع كل فشل حتى ~Commit~ أو الإلغاء.",
 	sandboxText:   "بدّل ترتيب وصول الأجزاء.", sandboxKind: "ch24-write-offset", sandboxConfig: ch24ChunkSandboxConfig,
 }, ch24ChunkExamples, false)
 
@@ -550,7 +550,7 @@ var ch24TilesExamples = [2]ch24Example{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 2, arabic: "صورة أبعادها 2×1.", english: "The image is 2 by 1."},
 			{line: 4, arabic: "حوّل الصورة لـPNG.", english: "Encode the image as PNG."},
-			{line: 5, arabic: "اقرأ بيانات الصورة.", english: "Read image configuration."},
+			{line: 5, arabic: "اقرا إعدادات الصورة.", english: "Read image configuration."},
 			{line: 9, arabic: "الصيغة والعرض والارتفاع.", english: "Format, width, and height.", output: "png 2 1"},
 		},
 	},
@@ -576,11 +576,11 @@ var ch24TilesArabic = ch24BuildLesson("c247", ch24Copy{
 	tryFeedback:   []string{"دي إحداثيات الحافة، مش الأبعاد.", "الفرق بين الحافتين هو 4×6.", "العرض والارتفاع مش مقلوبين."},
 	reveal:        "تابع حساب الحجم من حدود المستطيل.",
 	watch:         "- صورة source ممكن تكون PNG أو JPEG.\n- افحص الأسماء والإعدادات قبل تشغيل العمال.",
-	think:         "قسّم المهمة لقراءة الإعدادات، معالجة كل بلاطة، ثم حفظ ردها. راجع ملكية كل نتيجة وسياق الحفظ.\n\nأبعاد الخرج لازم تكون موجبة. راجع الصيغة قبل الحفظ، وخلي كل صورة مستقلة.\n\nكل نتيجة تخص بلاطة واحدة.\n\nراجع اسم كل صورة.",
-	checkQuestion: "إيه المعلومة اللي ترجع من ~DecodeConfig~؟",
+	think:         "قسّم المهمة لقراءة الإعدادات، معالجة كل بلاطة، ثم خزّن الـresponse بتاعها. راجع ملكية كل نتيجة والـcontext بتاع الحفظ.\n\nأبعاد الخرج لازم تكون موجبة. راجع الصيغة قبل الحفظ، وخلي كل صورة مستقلة.\n\nكل نتيجة تخص بلاطة واحدة.\n\nراجع اسم كل صورة.",
+	checkQuestion: "إيه المعلومة اللي ~DecodeConfig~ بيرجّعها؟",
 	checkOptions:  []string{"أبعاد وصيغة الصورة", "كل pixels المفكوكة", "اسم ملف الحفظ"},
 	checkFeedback: []string{"تقدر تفحص الإعدادات قبل فك pixels.", "دي خطوة تانية بعد قراءة config.", "اسم الحفظ يأتي من بيانات البلاطة."},
-	turn:          "ابدأ من ~TileSpec~ وأنواع الرد. تتبع صورة واحدة ذهنيًا قبل مراجعة مسارات التوازي.",
+	turn:          "ابدأ من ~TileSpec~ وأنواع الـresponses. تتبع صورة واحدة ذهنيًا قبل مراجعة مسارات التوازي.",
 	sandboxText:   "بدّل اكتمال البلاطات.", sandboxKind: "ch24-image-config", sandboxConfig: ch24TilesSandboxConfig,
 }, ch24TilesExamples, false)
 

@@ -44,7 +44,7 @@ func ch22TreeSandboxConfig() map[string]any {
 			"depth": ch22Pair("العمق", "Depth"), "entries": ch22Pair("المدخلات المرتبة", "Sorted entries"),
 		},
 		"frames": []any{
-			map[string]any{"caption": ch22Pair("اقرأ عناصر الجذر أولًا.", "Read root entries first."), "depth": 0, "entries": []any{ch22Pair("alpha/", "alpha/"), ch22Pair("zeta.dat", "zeta.dat")}},
+			map[string]any{"caption": ch22Pair("اقرا عناصر الجذر الأول.", "Read root entries first."), "depth": 0, "entries": []any{ch22Pair("alpha/", "alpha/"), ch22Pair("zeta.dat", "zeta.dat")}},
 			map[string]any{"caption": ch22Pair("انزل مجلدًا واحدًا.", "Recurse one directory deeper."), "depth": 1, "entries": []any{ch22Pair("alpha/", "alpha/"), ch22Pair("alpha/a.dat", "alpha/a.dat"), ch22Pair("alpha/nest/", "alpha/nest/"), ch22Pair("zeta.dat", "zeta.dat")}},
 			map[string]any{"caption": ch22Pair("الحد يوقف قراءة الفروع.", "The depth limit stops deeper reads."), "depth": 2, "entries": []any{ch22Pair("alpha/", "alpha/"), ch22Pair("alpha/a.dat", "alpha/a.dat"), ch22Pair("alpha/nest/", "alpha/nest/"), ch22Pair("alpha/nest/b.dat", "alpha/nest/b.dat"), ch22Pair("zeta.dat", "zeta.dat")}},
 		},
@@ -87,7 +87,7 @@ func ch22DuplicatesSandboxConfig() map[string]any {
 	return map[string]any{
 		"labels": map[string]any{
 			"fileA": ch22Pair("الملف الأول", "First file"), "fileB": ch22Pair("الملف التاني", "Second file"),
-			"sizes": ch22Pair("الحجم بالبايت", "Size in bytes"), "sizeCheck": ch22Pair("فلتر الحجم", "Size filter"),
+			"sizes": ch22Pair("الحجم بالـbytes", "Size in bytes"), "sizeCheck": ch22Pair("فلتر الحجم", "Size filter"),
 			"contentCheck": ch22Pair("مقارنة المحتوى", "Content comparison"), "hashes": ch22Pair("بصمات المحتوى", "Content digests"),
 			"sameSize":      ch22Pair("مرشح للمقارنة", "Candidate for comparison"),
 			"differentSize": ch22Pair("تخطّى قبل البصمة", "Skip before hashing"), "sameContent": ch22Pair("نفس البصمة", "Same digest"),
@@ -104,33 +104,33 @@ func ch22DuplicatesSandboxConfig() map[string]any {
 
 func ch22EnglishFrames(frames []LessonFrame) []LessonFrame {
 	translations := map[string]string{
-		"قبل التنفيذ.":              "Before run.",
-		"خريطة الملفات للتوضيح.":    "Illustrative file map.",
-		"اقرأ أبناء الجذر.":         "Read the root entries.",
-		"أول اسم هو alpha.":         "alpha is the first name.",
-		"ابدأ العد من 2.":           "Start counting from 2.",
-		"لسه ما وصلناش للصفر.":      "Zero is not reached yet.",
-		"اطبع القيمة الحالية.":      "Print the current value.",
-		"النداء يبدأ قيمة أصغر.":    "The call starts with less.",
-		"النداء التاني يطبع 1.":     "The next call prints 1.",
-		"الصفر يوقف النداءات.":      "Zero stops further calls.",
-		"خطة للتوضيح.":              "Illustrative plan.",
-		"ترتيب ثابت قبل التنفيذ.":   "Stable order before execution.",
-		"اطبع الترتيب الجديد.":      "Print the new order.",
-		"وحّد حالة الامتداد.":       "Normalize the extension case.",
-		"الامتداد بقى صغير.":        "The extension is lowercase.",
-		"مساحة مؤقتة للتجهيز.":      "A temporary staging space.",
-		"الكتابة ما زالت معزولة.":   "The write stays isolated.",
-		"الناتج لسه جاهز.":          "The result is ready.",
-		"ابدأ بمساحة منفصلة.":       "Start in a separate space.",
-		"اكتب للحزمة المؤقتة.":      "Write into the temporary buffer.",
-		"اعرض اللي اتجهز.":          "Show the prepared value.",
-		"بصمة جديدة لكل stream.":    "A fresh hash for each stream.",
-		"Copy يمرر البايتات.":       "Copy passes the bytes along.",
-		"عدد البايتات وطول البصمة.": "Byte count and hash length.",
-		"محتوى أول للتوضيح.":        "First illustrative content.",
-		"محتوى تاني بنفس الحجم.":    "Second content with equal size.",
-		"الحجم وحده مش كفاية.":      "Size alone is not enough.",
+		"قبل التنفيذ.":                "Before run.",
+		"خريطة الملفات للتوضيح.":      "Illustrative file map.",
+		"اقرا أبناء الجذر.":           "Read the root entries.",
+		"أول اسم هو alpha.":           "alpha is the first name.",
+		"ابدأ العد من 2.":             "Start counting from 2.",
+		"لسه ما وصلناش للصفر.":        "Zero is not reached yet.",
+		"اطبع الـvalue الحالية.":      "Print the current value.",
+		"الـcall بيبدأ بـvalue أصغر.": "The call starts with less.",
+		"الـcall اللي بعده بيطبع 1.":  "The next call prints 1.",
+		"الصفر يوقف النداءات.":        "Zero stops further calls.",
+		"خطة للتوضيح.":                "Illustrative plan.",
+		"ترتيب ثابت قبل التنفيذ.":     "Stable order before execution.",
+		"اطبع الترتيب الجديد.":        "Print the new order.",
+		"وحّد حالة الامتداد.":         "Normalize the extension case.",
+		"الامتداد بقى صغير.":          "The extension is lowercase.",
+		"مساحة مؤقتة للتجهيز.":        "A temporary staging space.",
+		"الكتابة ما زالت معزولة.":     "The write stays isolated.",
+		"الناتج لسه جاهز.":            "The result is ready.",
+		"ابدأ بمساحة منفصلة.":         "Start in a separate space.",
+		"اكتب للـbuffer المؤقت.":      "Write into the temporary buffer.",
+		"اطبع الـvalue اللي اتجهزت.":  "Show the prepared value.",
+		"بصمة جديدة لكل stream.":      "A fresh hash for each stream.",
+		"Copy بيمرّر الـbytes.":       "Copy passes the bytes along.",
+		"عدد الـbytes وطول الـhash.":  "Byte count and hash length.",
+		"محتوى أول للتوضيح.":          "First illustrative content.",
+		"محتوى تاني بنفس الحجم.":      "Second content with equal size.",
+		"الحجم وحده مش كفاية.":        "Size alone is not enough.",
 	}
 	translated := make([]LessonFrame, len(frames))
 	for i, frame := range frames {
@@ -163,7 +163,7 @@ func main() {
 var ch22Frames221Idea = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
 	{Line: 2, Caption: "خريطة الملفات للتوضيح."},
-	{Line: 6, Caption: "اقرأ أبناء الجذر."},
+	{Line: 6, Caption: "اقرا أبناء الجذر."},
 	{Line: 7, Caption: "أول اسم هو alpha.", Output: "alpha 2 <nil>"},
 }
 
@@ -171,33 +171,33 @@ var ch22Frames221Try = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
 	{Line: 9, Caption: "ابدأ العد من 2."},
 	{Line: 2, Caption: "لسه ما وصلناش للصفر."},
-	{Line: 5, Caption: "اطبع القيمة الحالية.", Output: "2"},
-	{Line: 6, Caption: "النداء يبدأ قيمة أصغر.", Output: "2"},
-	{Line: 5, Caption: "النداء التاني يطبع 1.", Output: "2\n1"},
+	{Line: 5, Caption: "اطبع الـvalue الحالية.", Output: "2"},
+	{Line: 6, Caption: "الـcall بيبدأ بـvalue أصغر.", Output: "2"},
+	{Line: 5, Caption: "الـcall اللي بعده بيطبع 1.", Output: "2\n1"},
 	{Line: 3, Caption: "الصفر يوقف النداءات.", Output: "2\n1"},
 }
 
 var ch22Lesson221Arabic = []LessonStep{
 	{ID: "c221.mission-step", Title: "المهمة", Blocks: []LessonBlock{
-		ch22Markdown("c221.mission", "المخزن هنا ~fs.FS~ محقون، مش فولدر جهازك.\n\nاعرض أسماءه في شجرة مرتبة، وخلي حد العمق يوقف الفروع الأبعد.\n\nالـstarter فيه توقيع ~StoreTree~ ولسه محتاج تنفيذ."),
+		ch22Markdown("c221.mission", "المخزن هنا ~fs.FS~ محقون، مش فولدر جهازك.\n\nاطبع أسماءه في شجرة مرتبة، وخلي حد العمق يوقف الفروع الأبعد.\n\nالـstarter فيه توقيع ~StoreTree~ ولسه محتاج تنفيذ."),
 	}},
 	{ID: "c221.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-		ch22Walkthrough("c221.fs-trace", "تخيل كل مجلد محطة صغيرة: اقرأ أبناءه، وبعدها تابع المجلدات اللي يسمح بيها الحد.\n\n~fs.ReadDir~ بترتب الأسماء؛ و~fs.DirEntry~ فيها الاسم المحلي ونوع العنصر.", ch22Example221Idea, "e221-fs-readdir", []string{"fmt", "io/fs", "testing/fstest"}, ch22Frames221Idea),
+		ch22Walkthrough("c221.fs-trace", "تخيل كل مجلد محطة صغيرة: اقرا أبناءه، وبعدها تابع المجلدات اللي يسمح بيها الحد.\n\n~fs.ReadDir~ بترتب الأسماء؛ و~fs.DirEntry~ فيها الاسم المحلي ونوع العنصر.", ch22Example221Idea, "e221-fs-readdir", []string{"fmt", "io/fs", "testing/fstest"}, ch22Frames221Idea),
 	}},
 	{ID: "c221.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch22QuestionExample("c221.recursion-predict", "توقّع الناتج قبل ما تشوف التنفيذ.", ch22Example221Try, []string{"2 بس", "2 وبعدها 1", "2 وبعدها 1 وبعدها 0"}, 1, []string{
-			"القيمة 1 بتتطبع في نداء تاني.",
-			"كل نداء يطبع قبل ما يستدعي قيمة أصغر.",
-			"لما نوصل للصفر بنرجع من غير طباعة.",
+			"الـvalue 1 بتتطبع في call تاني.",
+			"كل call بيطبع قبل ما ينادي على value أصغر.",
+			"لما نوصل للصفر، بنرجّع من غير ما نطبع.",
 		}),
-		ch22Walkthrough("c221.recursion-reveal", "تابع القيمة وهي بتصغر لحد حالة التوقف.", ch22Example221Try, "e221-recursion", []string{"fmt"}, ch22Frames221Try),
+		ch22Walkthrough("c221.recursion-reveal", "تابع الـvalue وهي بتصغر لحد حالة التوقف.", ch22Example221Try, "e221-recursion", []string{"fmt"}, ch22Frames221Try),
 		ch22SandboxBlock("c221.playground", "ch22-depth-tree", "قدّم العمق خطوة؛ شوف الشجرة المرتبة.", ch22TreeSandboxConfig()),
 	}},
 	{ID: "c221.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
-		ch22Markdown("c221.watch", "- افحص الخطأ قبل استخدام ناتج القراءة.\n- عند حد العمق، متقراش المجلد الأبعد."),
+		ch22Markdown("c221.watch", "- افحص الـerror قبل استخدام ناتج القراءة.\n- عند حد العمق، متقراش المجلد الأبعد."),
 	}},
 	{ID: "c221.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch22Markdown("c221.plan", "افصل بين التحقق من الجذر وعرض محتواه.\n\nبعدها حدّد إمتى الفرع يقف، وإمتى يكمل. خطأ من filesystem أو writer لازم يفضل ظاهر."),
+		ch22Markdown("c221.plan", "افصل بين التحقق من الجذر وعرض محتواه.\n\nبعدها حدّد إمتى الفرع يقف، وإمتى يكمل. error من filesystem أو writer لازم يفضل ظاهر."),
 		ch22Question("c221.stop-question", "إيه اللي بيوقف recursion بأمان؟", []string{"حالة توقف واضحة", "اسم متغير جديد", "ترتيب مختلف للأبناء"}, 0, []string{
 			"من غير حالة توقف، النداءات مبتنتهيش.",
 			"اسم المتغير مش بيغيّر عدد النداءات.",
@@ -205,7 +205,7 @@ var ch22Lesson221Arabic = []LessonStep{
 		}),
 	}},
 	{ID: "c221.turn-step", Title: "دورك", Blocks: []LessonBlock{
-		ch22Markdown("c221.turn", "ابدأ بالجذر، وبعدها جرّب فرع صغير. راجع النص المكتوب بعد أول خطأ."),
+		ch22Markdown("c221.turn", "ابدأ بالجذر، وبعدها جرّب فرع صغير. راجع النص المكتوب بعد أول error."),
 	}},
 }
 
@@ -270,7 +270,7 @@ var ch22Lesson222Arabic = []LessonStep{
 		ch22Markdown("c222.mission", "ملفات الوارد محتاجة رف مناسب، بس اكتشافها ماينقلهاش.\n\nابني خطة تتراجع الأول، وبعدها نفّذها على مجلد حقيقي من غير مفاجآت في النص."),
 	}},
 	{ID: "c222.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
-		ch22Walkthrough("c222.plan-trace", "الخطة بيانات عادية؛ تقدر ترتبها وتفحصها قبل أي تغيير.\n\nخلي أسماء الواجهة slash-separated، ومسارات الجهاز مسؤولية ~filepath~.", ch22Example222Idea, "e222-sort-plan", []string{"fmt", "slices"}, ch22Frames222Idea),
+		ch22Walkthrough("c222.plan-trace", "الخطة بيانات عادية؛ تقدر ترتبها وتفحصها قبل أي تغيير.\n\nخلي أسماء الـinterface slash-separated، ومسارات الجهاز مسؤولية ~filepath~.", ch22Example222Idea, "e222-sort-plan", []string{"fmt", "slices"}, ch22Frames222Idea),
 	}},
 	{ID: "c222.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch22QuestionExample("c222.extension-predict", "توقّع الامتداد بعد التطبيع.", ch22Example222Try, []string{".JSON", ".json", "NOTE.JSON"}, 1, []string{
@@ -282,14 +282,14 @@ var ch22Lesson222Arabic = []LessonStep{
 		ch22SandboxBlock("c222.playground", "ch22-review-plan", "رتّب خطة توضيحية؛ المخزن ما بيتغيرش.", ch22OrganizerSandboxConfig()),
 	}},
 	{ID: "c222.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
-		ch22Markdown("c222.watch", "- اكتشاف المصدر مش معناه إنك تنقله.\n- افشل عند أي خطأ غير «غير موجود»."),
+		ch22Markdown("c222.watch", "- اكتشاف المصدر مش معناه إنك تنقله.\n- افشل عند أي error غير «غير موجود»."),
 	}},
 	{ID: "c222.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch22Markdown("c222.plan", "رتّب شغلك على مراحل: اكتشاف، تصنيف، تحقق، ثم تنفيذ.\n\nاسأل نفسك إيه اللي يحصل لو آخر وجهة متعارضة؟ وإيه اللي يفضل بعد فشل نقل؟"),
 		ch22Question("c222.phase-question", "إمتى يبدأ تغيير الملفات؟", []string{"بعد مراجعة الخطة", "وقت اكتشاف أول ملف", "بعد تجاهل أخطاء القراءة"}, 0, []string{
 			"التحقق المسبق يحمي أول الملفات من تصادم لاحق.",
 			"الاكتشاف المفروض ما يعملش تغييرات.",
-			"تجاهل أخطاء القراءة يخفي نقص الخطة.",
+			"تجاهل errors القراءة بيخفي نقص الخطة.",
 		}),
 	}},
 	{ID: "c222.turn-step", Title: "دورك", Blocks: []LessonBlock{
@@ -351,28 +351,28 @@ var ch22Frames223Idea = []LessonFrame{
 var ch22Frames223Try = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
 	{Line: 2, Caption: "ابدأ بمساحة منفصلة."},
-	{Line: 3, Caption: "اكتب للحزمة المؤقتة."},
-	{Line: 4, Caption: "اعرض اللي اتجهز.", Output: "packet <nil>"},
+	{Line: 3, Caption: "اكتب للـbuffer المؤقت."},
+	{Line: 4, Caption: "اطبع الـvalue اللي اتجهزت.", Output: "packet <nil>"},
 }
 
 var ch22Lesson223Arabic = []LessonStep{
 	{ID: "c223.mission-step", Title: "المهمة", Blocks: []LessonBlock{
-		ch22Markdown("c223.mission", "لو تجهيز الحزمة فشل بعد أول بايت، النسخة القديمة لازم تفضل سليمة.\n\nالمطلوب يفصل الكتابة عن النشر، ويخلّي فشل النقل واضح."),
+		ch22Markdown("c223.mission", "لو تجهيز الحزمة فشل بعد أول byte، النسخة القديمة لازم تفضل سليمة.\n\nالمطلوب يفصل الكتابة عن النشر، ويخلّي فشل النقل واضح."),
 	}},
 	{ID: "c223.idea-step", Title: "الفكرة", Blocks: []LessonBlock{
 		ch22Walkthrough("c223.staging-trace", "الـwriter عقدة للكتابة، مش الملف النهائي.\n\nجهّز المحتوى في مساحة مستقلة؛ النشر ييجي بعد نجاح الكتابة والقفل بالتسلسل.", ch22Example223Idea, "e223-staging-writer", []string{"fmt", "io", "strings"}, ch22Frames223Idea),
 	}},
 	{ID: "c223.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch22QuestionExample("c223.writer-predict", "توقّع النص والخطأ اللي هيظهروا.", ch22Example223Try, []string{"packet <nil>", "فاضي <nil>", "packet EOF"}, 0, []string{
+		ch22QuestionExample("c223.writer-predict", "توقّع النص والـerror اللي هيظهروا.", ch22Example223Try, []string{"packet <nil>", "فاضي <nil>", "packet EOF"}, 0, []string{
 			"الـBuilder احتفظ بالنص والكتابة نجحت.",
-			"الـBuilder استقبل البايتات.",
-			"الـwriter قبل النص من غير خطأ.",
+			"الـBuilder استقبل الـbytes.",
+			"الـwriter قبل النص من غير error.",
 		}),
 		ch22Walkthrough("c223.writer-reveal", "اتبع الكتابة قبل ما تتخيل أي نشر للملف.", ch22Example223Try, "e223-writer", []string{"fmt", "io", "strings"}, ch22Frames223Try),
 		ch22SandboxBlock("c223.playground", "ch22-atomic-publish", "جرّب التجهيز والنشر والفشل؛ راقب الهدف.", ch22AtomicSandboxConfig()),
 	}},
 	{ID: "c223.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
-		ch22Markdown("c223.watch", "- متفتحش الهدف للكتابة قبل اكتمال المحتوى.\n- افحص خطأ ~Close~ قبل النقل."),
+		ch22Markdown("c223.watch", "- متفتحش الهدف للكتابة قبل اكتمال المحتوى.\n- افحص error ~Close~ قبل النقل."),
 	}},
 	{ID: "c223.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch22Markdown("c223.plan", "ارسم عمر الملف: إنشاء، callback، قفل، ثم قرار النقل.\n\nلو مرحلة فشلت، فكّر مين بينضّف الاسم المؤقت وإيه اللي لازم يفضل عند الهدف."),
@@ -383,7 +383,7 @@ var ch22Lesson223Arabic = []LessonStep{
 		}),
 	}},
 	{ID: "c223.turn-step", Title: "دورك", Blocks: []LessonBlock{
-		ch22Markdown("c223.turn", "اختبر callback ناجح وفاشل، وبعدها راقب الهدف والأسماء المؤقتة."),
+		ch22Markdown("c223.turn", "شغّل الـtest على callback ناجح وفاشل، وبعدها راقب الهدف والأسماء المؤقتة."),
 	}},
 }
 
@@ -434,8 +434,8 @@ const ch22Example224Try = `func main() {
 var ch22Frames224Idea = []LessonFrame{
 	{Line: 0, Caption: "قبل التنفيذ."},
 	{Line: 2, Caption: "بصمة جديدة لكل stream."},
-	{Line: 3, Caption: "Copy يمرر البايتات."},
-	{Line: 4, Caption: "عدد البايتات وطول البصمة.", Output: "4 32 <nil>"},
+	{Line: 3, Caption: "Copy بيمرّر الـbytes."},
+	{Line: 4, Caption: "عدد الـbytes وطول الـhash.", Output: "4 32 <nil>"},
 }
 
 var ch22Frames224Try = []LessonFrame{
@@ -453,7 +453,7 @@ var ch22Lesson224Arabic = []LessonStep{
 		ch22Walkthrough("c224.stream-trace", "ابدأ بمعلومة رخيصة زي الحجم، وبعدها مرّر المرشحين على hash.\n\n~io.Copy~ يوصل reader بـwriter من غير ما تجمع الملف كله.", ch22Example224Idea, "e224-stream-hash", []string{"crypto/sha256", "fmt", "io", "strings"}, ch22Frames224Idea),
 	}},
 	{ID: "c224.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch22QuestionExample("c224.size-predict", "توقّع قيم المقارنة.", ch22Example224Try, []string{"false false", "true false", "true true"}, 1, []string{
+		ch22QuestionExample("c224.size-predict", "توقّع الـvalues اللي هتقارن بينهم.", ch22Example224Try, []string{"false false", "true false", "true true"}, 1, []string{
 			"الحرفين طولهم واحد.",
 			"الحجم متساوي لكن المحتوى مختلف.",
 			"المحتوى مش متساوي.",
@@ -462,14 +462,14 @@ var ch22Lesson224Arabic = []LessonStep{
 		ch22SandboxBlock("c224.playground", "ch22-size-hash", "بدّل الأزواج؛ الحجم مش دليل كفاية.", ch22DuplicatesSandboxConfig()),
 	}},
 	{ID: "c224.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
-		ch22Markdown("c224.watch", "- نفس الحجم مش دليل إن الملفين متطابقين.\n- اقفل كل ملف وافحص خطأ القراءة والقفل."),
+		ch22Markdown("c224.watch", "- نفس الحجم مش دليل إن الملفين متطابقين.\n- اقفل كل ملف وافحص error القراءة والقفل."),
 	}},
 	{ID: "c224.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch22Markdown("c224.plan", "رتّب التفكير: اجمع metadata، اختار الأحجام المشتركة، احسب بصمة مستقلة لكل ملف، ثم جهّز التقرير.\n\nخطأ متأخر ماينفعش يسيب نتيجة ناقصة."),
+		ch22Markdown("c224.plan", "رتّب التفكير: اجمع metadata، اختار الأحجام المشتركة، احسب بصمة مستقلة لكل ملف، ثم جهّز التقرير.\n\nerror متأخر ماينفعش يسيب نتيجة ناقصة."),
 		ch22Question("c224.hash-question", "ليه hash جديدة لكل ملف؟", []string{"عشان كل بصمة تمثل محتوى واحد", "عشان الحجم يبقى أكبر", "عشان نقدر نكتب في المصدر"}, 0, []string{
 			"إعادة استخدام الحالة تخلط محتوى الملفات.",
 			"الحساب ما بيغيرش حجم المصدر.",
-			"الفحص هنا للقراءة فقط.",
+			"الفحص هنا للقراءة بس.",
 		}),
 	}},
 	{ID: "c224.turn-step", Title: "دورك", Blocks: []LessonBlock{
