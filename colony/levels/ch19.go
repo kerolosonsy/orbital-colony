@@ -53,7 +53,7 @@ _ = start.Add(duration) // ضيّعت القيمة الجديدة
 
 ## المهمة
 اقرأ ~colony.Orders() []string~. كل أمر حقلين بالظبط بينهم ~|~: مغادرة UTC تقبلها ~time.Parse("2006-01-02 15:04:05",...)~ ومدة تقبلها ParseDuration. ابعت تقرير string واحد لكل أمر بنفس الترتيب. لو أي parser فشل أو المدة برا [0,48*time.Hour]، ابعت ~invalid~. غير كده ابعت ~arrival|duration~: arrival هي departure.Add(duration).Format("2006-01-02 15:04:05") والمدة Duration.String(). الثواني والكسور حسب سلوك الدوال دي. مفيش تقارير زيادة ولا حركة ولا time.Now ولا انتظار حقيقي.
-`, Hints: []string{"الـduration وقت منقضي، والـinstant بيمثل لحظة على التقويم.", "اقرأ الحقول كل واحد لوحده وحافظ على مكان كل نتيجة.", "راجع نتيجة ~Time.Add~ وformat الوقت بعد ما تفحص أخطاء parsing."},
+`, Hints: []string{"الـduration وقت منقضي، والـinstant بيمثل لحظة على التقويم.", "اقرا الحقول كل واحد لوحده وحافظ على مكان كل نتيجة.", "راجع نتيجة ~Time.Add~ وformat الوقت بعد ما تفحص الـerrors اللي رجعها الـparsing."},
 		En: &LevelText{LessonRevision: 1, Steps: ch19DurationsEnglish, Title: "Flight Durations", Goal: "Calculate arrivals from departure and elapsed duration", Lesson: `# Flight Schedules
 
 ## Before you write
@@ -138,7 +138,7 @@ loc,_:=time.LoadLocation(name) // تجاهل الاسم المجهول
 
 ## المهمة
 نفّذ ~ReadSuns(instant,home,remote string) (SunReadings,error)~؛ الحقول ~Home,Remote string~ و~DayChanged bool~. اقرأ instant بـRFC3339، وحل الاسمين بـLoadLocation. اعرض كل لحظة محلية بـ ~2006-01-02 15:04 -0700~، وDayChanged true لو تاريخهم الكامل مختلف. أي خطأ يرجّع SunReadings{} وخطأ فيه instant أو اسم المنطقة اللي فشلت. استخدم time/tzdata؛ مفيش Now ولا Local. الاسم الفاضي وLocal مش ضمن المدخلات. النجمة التالتة لقواعد الموسم.
-`, Hints: []string{"الـtime zone بتغيّر العرض المحلي، مش اللحظة نفسها.", "حل كل المدخلات قبل ما ترجع نتيجة كاملة.", "راجع ~LoadLocation~ ثم ~In~ وoffset الرقمي في format."},
+`, Hints: []string{"الـtime zone بتغيّر العرض المحلي، مش اللحظة نفسها.", "حل كل الـinputs قبل ما ترجّع الـresult كاملة.", "راجع ~LoadLocation~ ثم ~In~ وoffset الرقمي في format."},
 		En: &LevelText{LessonRevision: 1, Steps: ch19SunsEnglish, Title: "Two Suns", Goal: "Render one instant at two observatories independently of the host", Lesson: `# Two Suns, One Instant
 
 ## Before you write
@@ -180,7 +180,7 @@ loc,_:=time.LoadLocation(name) // Discards unknown-zone errors
 ## Your mission
 Implement ~ReadSuns(instant,home,remote string) (SunReadings,error)~ with ~Home,Remote string~ and ~DayChanged bool~. Parse instant using RFC3339 and resolve both names using LoadLocation. Render each local instant with ~2006-01-02 15:04 -0700~; DayChanged reports whether their full dates differ. Every error returns SunReadings{} and an error mentioning instant or the failing zone name. Import time/tzdata; do not use Now or Local. Empty names and Local are outside the input domain. The third star checks seasonal rules.
 `, Hints: []string{"A time zone changes local display, not the instant itself.", "Resolve all inputs before returning a complete result.", "Review ~LoadLocation~, then ~In~ and the numeric format offset."}, Files: []LabFile{{Name: "main.go", Starter: twoSunsStarter}}}, Kind: "lab", Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: twoSunsStarterAr}}, Lab: &Lab{ReqFile: "main.go", Hidden: twoSunsHidden, Bonus: true}})
-	add(&Level{ID: "19-3-countdown", Chapter: 19, LessonRevision: 1, Steps: ch19CountdownArabic, Title: "العد التنازلي", Goal: "شغّل عداد قابل للإلغاء بساعة محقونة ونظّف الـ ticker", Requires: []string{"sel:context.Context", "select"}, Bridge: []int{15},
+	add(&Level{ID: "19-3-countdown", Chapter: 19, LessonRevision: 1, Steps: ch19CountdownArabic, Title: "العد التنازلي", Goal: "شغّل عداد قابل للإلغاء بساعة محقونة ونظّف الـticker", Requires: []string{"sel:context.Context", "select"}, Bridge: []int{15},
 		Lesson: `# الإطلاق من غير نوم
 
 ## قبل ما تكتب
@@ -273,7 +273,7 @@ time.Sleep(time.Second) // Ignores injected time
 ## Your mission
 Implement ~Countdown(ctx context.Context,clock labkit.Clock,seconds int,emit func(int)error) error~. ctx is non-nil. Reject nil clock, nil emit, or seconds<0 before side effects. Then an already-canceled ctx returns Err without output or a ticker. Emit seconds immediately; zero completes without a ticker. Otherwise create a one-second ticker and emit one lower value per received tick through zero inclusive. Check cancellation before every tick-driven emission. Return the original callback error or ctx.Err; return nil after successful zero emission. Stop every owned ticker exactly once on every exit. Callbacks return promptly. No internal goroutine, real waiting, or Report is needed.
 `, Hints: []string{"An injected clock makes time controllable without real waiting.", "Consider ticker ownership and cancellation paths before writing the loop.", "Review ~Ticker.Stop~ and ~ctx.Err~ after receiving a tick."}, Files: []LabFile{{Name: "main.go", Starter: countdownStarter}}}, Kind: "lab", Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: countdownStarterAr}}, Lab: &Lab{ReqFile: "main.go", Hidden: countdownHidden, HiddenFiles: map[string]string{"clock_helpers_test.go": cosmicClockHidden}}})
-	add(&Level{ID: "19-4-many-timers", Chapter: 19, LessonRevision: 1, Steps: ch19TimersArabic, Title: "مؤقتات كتير", Goal: "انتظر الأرصفة بالتوازي واعرض النتائج بترتيب الطلبات", Requires: []string{"go", "waitgroup"}, Bridge: []int{31},
+	add(&Level{ID: "19-4-many-timers", Chapter: 19, LessonRevision: 1, Steps: ch19TimersArabic, Title: "مؤقتات كتير", Goal: "انتظر الأرصفة بالتوازي واعرض النتائج بترتيب الـrequests", Requires: []string{"go", "waitgroup"}, Bridge: []int{31},
 		Lesson: `# الأرصفة بتخلص بترتيب مختلف
 
 ## قبل ما تكتب
@@ -322,7 +322,7 @@ go func(){results=append(results,reply)}() // race وترتيب وصول
 
 ## المهمة
 نفّذ ~AwaitDocks(ctx context.Context,clock labkit.Clock,jobs []DockTimer) ([]DockResult,error)~. DockTimer حقولها ID string وDelay time.Duration؛ DockResult حقولها ID,Status string. ctx غير nil. nil clock أو ID فاضي أو مكرر أو Delay سالبة يرفضوا الدفعة كلها بـnil,error من غير جدولة. متعدلش jobs. الفاضي نتيجة طول0,nil. عامل لكل طلب يكتب نفس index مرة واحدة، وWaitGroup تستنى الكل. العامل يشوف ctx.Err أولاً: الملغي نتيجته canceled حتى للصفر؛ غير كده صفر done فوراً من غير ticker. الموجب ticker بمدة Delay؛ أول tick وErr==nil يثبّت done، والإلغاء يثبّت canceled. كل ticker تتوقف مرة واحدة. بعد اكتمال العمال ارجع النتائج,nil حتى لو بعضهم ملغي. نتيجة done متتغيرش بإلغاء لاحق؛ إلغاء متزامن قبل تثبيت النتيجة ممكن يكسب. مفيش انتظار حقيقي ولا Report؛ Race شغالة.
-`, Hints: []string{"ترتيب انتهاء العمال مش هو ترتيب الطلبات.", "حدّد ملكية كل نتيجة وطريقة انتظار المجموعة قبل تشغيل العمال.", "راجع إن ~WaitGroup.Done~ بعد الكتابة وإن ~Wait~ قبل القراءة."},
+`, Hints: []string{"ترتيب انتهاء العمال مش هو ترتيب الـrequests.", "حدّد ملكية كل نتيجة وطريقة انتظار المجموعة قبل تشغيل العمال.", "راجع إن ~WaitGroup.Done~ بعد الكتابة وإن ~Wait~ قبل القراءة."},
 		En: &LevelText{LessonRevision: 1, Steps: ch19TimersEnglish, Title: "Many Timers", Goal: "Await dock timers concurrently and display results in request order", Lesson: `# Docks Finish Out of Order
 
 ## Before you write

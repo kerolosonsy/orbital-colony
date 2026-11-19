@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "22-1-tree", Chapter: 22, Kind: "lab", LessonRevision: 1, Steps: ch22Lesson221Arabic, Title: "شجرة المخزن", Goal: "اعرض مخزن المستعمرة بشجرة مرتبة وعمق محدود",
+	add(&Level{ID: "22-1-tree", Chapter: 22, Kind: "lab", LessonRevision: 1, Steps: ch22Lesson221Arabic, Title: "شجرة المخزن", Goal: "اطبع شجرة مرتبة لمخزن المستعمرة بعمق محدود",
 		Requires: []string{"recursion", "sel:fs.FS"}, Bridge: []int{24}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch221StarterAr}},
 		Lesson: `# خريطة المخزن
@@ -74,7 +74,7 @@ StoreTree(store,depth,out) // استدعاء نفس المدخلات مش recurs
 اعرض depth-first بترتيب أسماء الإخوة في Go. كل سطر مسافتين لكل مستوى، ثم الاسم المحلي؛ المجلد آخره ~/~. كل سطر ينتهي newline. متقراش مجلد عند حد العمق، ومتغيرش المصدر. استخدم recursion و ~fs.FS~. فشل filesystem أو writer يوقف فوراً بخطأ يحتفظ بالسبب وباسم المسار المتأثر؛ الإخراج السابق ممكن يفضل.
 
 النجمة التالتة: الروابط آخرها ~@~ والملفات الخاصة ~!~، من غير نزول أو فتح. مفيش Report ولا اعتماد على قرص جهازك.
-`, Hints: []string{"النظام المحقون يفصل القراءة عن ملفات جهازك.", "قسّم التفكير بين الجذر والأبناء وحد التوقف.", "راجع ترتيب ~fs.ReadDir~ وفحص ~depth~ قبل متابعة الفرع."},
+	`, Hints: []string{"النظام المحقون يفصل القراءة عن ملفات جهازك.", "قسّم التفكير بين الجذر والأبناء وحد التوقف.", "راجع ترتيب ~fs.ReadDir~ وفحص ~depth~ قبل متابعة الفرع."},
 		En: &LevelText{LessonRevision: 1, Steps: ch22Lesson221English, Title: "Store Tree", Goal: "Render a sorted, depth-limited colony store", Files: []LabFile{{Name: "main.go", Starter: ch221Starter}}, Lesson: `# A Map of the Store
 
 The crew needs a shelf map without opening every crate. Read an injected filesystem and write to the caller's writer.
@@ -400,7 +400,7 @@ if err!=nil { /* افتراض إن الوجهة مش موجودة: ممكن perm
 افشل بخطة nil لو مصدرين لنفس الوجهة، أو الوجهة موجودة بأي نوع، أو مجلد الهدف موجود ومش مجلد، أو حصل خطأ مشي أو stat. احتفظ بأسباب أخطاء I/O. ~PlanShelves~ للـ dry-run: مفيش إنشاء أو نقل أو كتابة.
 
 ~OrganizeShelves~ غلاف يستدعي ~ExecuteShelves(root string, rename func(string,string)error) (int,error)~ مع ~os.Rename~. دالة النقل غير nil؛ في النجاح تنقل فعلاً، وفي الفشل متغيرش الملفات. ~ExecuteShelves~ تستخدم ~filepath.WalkDir~ لاكتشاف ملفات الوارد الحقيقي، وتتحقق من الخطة كلها قبل أي تغيير. بعدها تنشئ مجلدات الهدف المطلوبة بس بـ 0700 وتنقل بالدالة المحقونة بترتيب الخطة. ترجع عدد النقلات المكتملة؛ أول فشل يوقف من غير rollback للنقلات السابقة. إعادة التشغيل بعد النجاح خطة فاضية. الجذر غير متغير أثناء العملية، ومجلدات الوجهة الموجودة حقيقية من غير روابط؛ مفيش تزامن أو Report. التستات الحقيقية داخل ~t.TempDir()~ بس.
-`, Hints: []string{"الخطة بيانات للمراجعة قبل تغيير الملفات.", "افصل الاكتشاف والتصنيف عن التحقق والتنفيذ.", "راجع خطأ callback في ~fs.WalkDir~ ونوع كل entry."},
+`, Hints: []string{"الخطة بيانات للمراجعة قبل تغيير الملفات.", "افصل الاكتشاف والتصنيف عن التحقق والتنفيذ.", "راجع error الـcallback في ~fs.WalkDir~ ونوع كل entry."},
 		En: &LevelText{LessonRevision: 1, Steps: ch22Lesson222English, Title: "The Organizer", Goal: "Plan incoming crate placement before moving files", Files: []LabFile{{Name: "main.go", Starter: ch222Starter}}, Lesson: `# Put Incoming Crates on the Right Shelf
 
 Incoming crates live under ~inbox~. Archive shelves are ~records~, ~images~, and ~misc~. A plan is reviewable data: discovery never moves files.
@@ -815,7 +815,7 @@ os.Remove(target) // خلق فجوة وخسارة النسخة لو Rename فش�
 أنشئ مؤقت فريد جنب الهدف بصلاحيات CreateTemp الافتراضية، وشغّل write مرة واحدة عليه. اكتب للمؤقت بس، واقفله بنجاح قبل استدعاء rename مرة واحدة من اسم المؤقت للهدف. رجّع أول خطأ إنشاء أو callback أو قفل أو نقل مع الحفاظ على سببه. فشل قبل النقل ميناديش rename، والهدف يفضل كما هو أو غايب لو كان غايب. نجاح النقل ينشر البايتات كاملة، بما فيها حزمة فاضية.
 
 استخدم defer لتنظيف الموارد: اقفل الملف على كل مسار وشيل الاسم المؤقت بعد النجاح أو الفشل لما نظام الملفات يسمح. متحذفش الهدف ولا تنسخ للمكان النهائي بعد فشل النقل. المنادي المحقون لـ rename إما ينقل فعلاً أو يرجع خطأ من غير تغيير ملفات. النجمة التالتة: فشل rename المتكرر يحافظ على الهدف ويشيل المؤقت، ومحاولة لاحقة تنجح من غير بقايا. مفيش Report؛ كل اختبار حقيقي داخل ~t.TempDir()~.
-`, Hints: []string{"افصل البايتات الجزئية عن النسخة المنشورة.", "تتبّع إنشاء المؤقت والكتابة والقفل وقرار النقل.", "راجع ~os.CreateTemp~ ودور rename المحقون في ~CommitRelay~."},
+	`, Hints: []string{"افصل bytes جزئية عن النسخة المنشورة.", "تتبّع إنشاء المؤقت والكتابة والقفل وقرار النقل.", "راجع ~os.CreateTemp~ ودور rename المحقون في ~CommitRelay~."},
 		En: &LevelText{LessonRevision: 1, Steps: ch22Lesson223English, Title: "Atomic Save", Goal: "Save a beacon packet without losing the last complete version", Files: []LabFile{{Name: "main.go", Starter: ch223Starter}}, Lesson: `# The Last Complete Packet
 
 A beacon packet can fail generation after its first bytes. Opening the final file would erase the last complete version too early. Write under a temporary name, then publish after writing and closing succeed.
@@ -1118,7 +1118,7 @@ if len(buckets[size])>1 { /* غلط: نفس الحجم مش بالضرورة ن�
 رجّع مجموعات بنفس الحجم والبصمة، طول كل مجموعة 2 على الأقل؛ الاسم نسبي slash-separated. رتّب داخل المجموعة تصاعدي بترتيب Go، ورتّب المجموعات حسب أول اسم. الفاضي أو بدون تكرار نجاح بطول صفر. الملفات الفاضية ممكن تتكرر. مفيش حذف أو كتابة أو تغيير للمصدر.
 
 أي فشل walk أو Info أو Open أو Read أو Close يرجع nil,error يحتفظ بالسبب وبالمسار. لو عدد البايتات المقروءة اختلف عن الحجم المسجل، رجّع nil,error. اقفل كل ملف اتفتح، حتى وقت الفشل، ومتفتحش ملفات زيادة بعد أول فشل. مفيش تزامن أو Report؛ التستات على نظام محقون، من غير قرص الجهاز.
-`, Hints: []string{"الحجم يضيّق البحث لكنه مش إثبات للتكرار.", "رتّب الفحص بين metadata والبصمة والتقرير.", "راجع عدد البايتات من ~io.Copy~ وخطأ ~Close~ لكل ملف."},
+`, Hints: []string{"الحجم يضيّق البحث لكنه مش إثبات للتكرار.", "رتّب الفحص بين metadata والبصمة والتقرير.", "راجع عدد bytes من ~io.Copy~ وerror ~Close~ لكل ملف."},
 		En: &LevelText{LessonRevision: 1, Steps: ch22Lesson224English, Title: "Duplicate Files", Goal: "Find repeated colony packets using size buckets and streaming hashes", Files: []LabFile{{Name: "main.go", Starter: ch224Starter}}, Lesson: `# One Packet on Several Shelves
 
 The archive contains repeated beacon packets. Size is a cheap filter, but equal-size files can differ. Hash candidate groups without loading whole files into memory.

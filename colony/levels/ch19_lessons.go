@@ -49,20 +49,20 @@ func ch19EnglishConfig(value any) any {
 }
 
 var ch19DurationsArabic = []LessonStep{
-	{ID: "c191.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c191.mission", "اقرأ جدول الرحلات واحسب وصول كل رحلة.\n\nخلي ترتيب التقارير زي ترتيب الأوامر، حتى لو أمر واحد فيه خطأ.")}},
-	{ID: "c191.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch19Walkthrough("c191.idea-duration", "~time.Duration~ مدة منقضية، و~ParseDuration~ بتحوّل النص لقيمة زمنية.", ch19DurationParseCode, "e19-1-duration", []string{"fmt", "time"}, []LessonFrame{
+	{ID: "c191.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c191.mission", "اقرا جدول الرحلات واحسب وصول كل رحلة.\n\nخلي ترتيب التقارير زي ترتيب الأوامر، حتى لو أمر واحد فيه error.")}},
+	{ID: "c191.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch19Walkthrough("c191.idea-duration", "~time.Duration~ مدة منقضية، و~ParseDuration~ بتحوّل النص لـduration.", ch19DurationParseCode, "e19-1-duration", []string{"fmt", "time"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
-		{Line: 2, Caption: "اقرأ مدة توضيحية."},
-		{Line: 3, Caption: "اتأكد من خطأ parsing."},
-		{Line: 7, Caption: "اعرض المدة بصيغتها.", Output: "35m0s 35m0s"},
+		{Line: 2, Caption: "اقرا مدة توضيحية."},
+		{Line: 3, Caption: "اتأكد من error الـparsing."},
+		{Line: 7, Caption: "اطبع المدة بصيغتها.", Output: "35m0s 35m0s"},
 	})}},
 	{ID: "c191.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch19Question("c191.try-arrival", "توقّع الناتج:\n\n~~~go\n"+ch19DurationAddCode+"\n~~~", []string{"23:40", "00:15", "35m"}, 1, []string{"ده وقت البداية قبل إضافة المدة.", "الـminute بتعدّي لليوم التالي تلقائياً.", "Format هنا بيعرض الساعة، مش المدة."}),
+		ch19Question("c191.try-arrival", "توقّع الناتج:\n\n~~~go\n"+ch19DurationAddCode+"\n~~~", []string{"23:40", "00:15", "35m"}, 1, []string{"ده وقت البداية قبل إضافة المدة.", "الـminute بتعدّي لليوم اللي بعده لوحدها.", "Format هنا بيعرض الساعة، مش المدة."}),
 		ch19Walkthrough("c191.try-reveal", "تابع وقت توضيحي وهو يعدّي نص الليل.", ch19DurationAddCode, "e19-1-add", []string{"fmt", "time"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
-			{Line: 2, Caption: "وقت البداية قيمة مستقلة.", Variables: []LessonVariable{{Name: "start", Value: "2031-04-03 23:40 UTC"}}},
+			{Line: 2, Caption: "وقت البداية value مستقلة.", Variables: []LessonVariable{{Name: "start", Value: "2031-04-03 23:40 UTC"}}},
 			{Line: 3, Caption: "Add رجّعت وقت وصول جديد.", Variables: []LessonVariable{{Name: "arrival", Value: "2031-04-04 00:15 UTC"}}},
-			{Line: 4, Caption: "اعرض الساعة الجديدة.", Variables: []LessonVariable{{Name: "arrival", Value: "2031-04-04 00:15 UTC"}}, Output: "00:15"},
+			{Line: 4, Caption: "اطبع الساعة الجديدة.", Variables: []LessonVariable{{Name: "arrival", Value: "2031-04-04 00:15 UTC"}}, Output: "00:15"},
 		}),
 		ch19SandboxBlock("c191.try-sandbox", "ch19-duration-add", "حرّك الوقت وشوف ساعة الوصول.", map[string]any{
 			"startHour": 23, "startMinute": 40,
@@ -77,7 +77,7 @@ var ch19DurationsArabic = []LessonStep{
 	}},
 	{ID: "c191.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch19Markdown("c191.watch", "~Parse~ بتستخدم layout Go من تاريخ مرجعي، مش رموز YYYY/MM.\n\nالـduration ممكن تتقري صح وتفضل مخالفة للعقد؛ افصل parsing عن التحقق.")}},
 	{ID: "c191.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch19Markdown("c191.plan", "اقرأ كل field لوحده، وبعدها قرر صلاحية الأمر.\n\nخلّي نتيجة كل أمر في مكانه وما تستخدمش ساعة الجهاز."),
+		ch19Markdown("c191.plan", "اقرا كل field لوحده، وبعدها قرر صلاحية الأمر.\n\nخلّي نتيجة كل أمر في مكانه وما تستخدمش ساعة الجهاز."),
 		ch19Question("c191.check-parse", "لو ~ParseDuration~ نجحت، هل ده يثبت إن الأمر صالح؟", []string{"لأ، لسه فيه تحقق للعقد", "آه، parsing كفاية", "بس لو المدة ساعة"}, 0, []string{"الـparser بتأكد الصيغة، مش قواعد المهمة.", "المدخل ممكن يخالف العقد رغم صحة الصيغة.", "نوع المدة مش معيار التحقق."}),
 	}},
 	{ID: "c191.turn-step", Title: "دورك", Blocks: []LessonBlock{ch19Markdown("c191.turn", "ابدأ بمدخل واحد للتوضيح، شغّله، وبعدها راجع ترتيب كل تقرير.")}},
@@ -119,12 +119,12 @@ var ch19DurationsEnglish = []LessonStep{
 }
 
 var ch19SunsArabic = []LessonStep{
-	{ID: "c192.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c192.mission", "اعرض نفس اللحظة في منطقتين زمنيتين.\n\nالنتيجة كلها أو خطأ واضح؛ الجهاز اللي شغّل الكود ما يختارش المناطق بدالك.\n\nأسماء المناطق IANA وليها قواعد بتختلف حسب الموسم.")}},
+	{ID: "c192.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c192.mission", "اعرض نفس اللحظة في منطقتين زمنيتين.\n\nيا النتيجة كلها يا error واضح؛ الجهاز اللي شغّل الكود ما يختارش المناطق بدالك.\n\nأسماء المناطق IANA وليها قواعد بتختلف حسب الموسم.")}},
 	{ID: "c192.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch19Walkthrough("c192.idea-in", "~Time.In~ بيغيّر طريقة عرض اللحظة؛ ~Time.Equal~ يتأكد إن اللحظة نفسها ما اتحركتش.", ch19SunsInCode, "e19-2-in", []string{"fmt", "time"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
-		{Line: 2, Caption: "أنشئ لحظة بتوقيت UTC."},
+		{Line: 2, Caption: "اعمل لحظة بتوقيت UTC."},
 		{Line: 3, Caption: "جهّز منطقة توضيحية."},
-		{Line: 4, Caption: "اعرض نفس اللحظة محلياً."},
+		{Line: 4, Caption: "اطبع نفس اللحظة محلياً."},
 		{Line: 5, Caption: "اللحظة ثابتة؛ العرض اتغير.", Output: "true 04:00 +0400"},
 	})}},
 	{ID: "c192.try-step", Title: "جرّب", Blocks: []LessonBlock{
@@ -133,7 +133,7 @@ var ch19SunsArabic = []LessonStep{
 			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "ابدأ بمنتصف الليل UTC."},
 			{Line: 3, Caption: "حوّل لنفس اللحظة."},
-			{Line: 4, Caption: "اعرض اللحظة والتاريخ المحلي.", Output: "true 2030-12-31 19:00 -0500"},
+			{Line: 4, Caption: "اطبع اللحظة والتاريخ المحلي.", Output: "true 2030-12-31 19:00 -0500"},
 		}),
 		ch19SandboxBlock("c192.try-sandbox", "ch19-zone-view", "غيّر الساعة وقارن العرض المحلي.", map[string]any{
 			"hour":    map[string]any{"value": 0, "min": 0, "max": 23, "step": 1},
@@ -149,7 +149,7 @@ var ch19SunsArabic = []LessonStep{
 			},
 		}),
 	}},
-	{ID: "c192.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch19Markdown("c192.watch", "~LoadLocation~ بترجع error للاسم المجهول؛ خلي قواعد ~time/tzdata~ متاحة.\n\nقارن التاريخ كامل بالسنة والشهر واليوم، مش رقم اليوم بس.")}},
+	{ID: "c192.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch19Markdown("c192.watch", "~LoadLocation~ بترجّع error للاسم المجهول؛ خلي قواعد ~time/tzdata~ متاحة.\n\nقارن التاريخ كامل بالسنة والشهر واليوم، مش رقم اليوم بس.")}},
 	{ID: "c192.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch19Markdown("c192.plan", "حلّ اللحظة والمنطقتين قبل تكوين النتيجة.\n\nاستخدم format واضح فيه offset رقمي، وما تعتمدش على ~Local~."),
 		ch19Question("c192.check-in", "إيه اللي بيحافظ على نفس اللحظة في منطقة مختلفة؟", []string{"~In~", "~Add~", "~time.Now~"}, 0, []string{"In بتغيّر الـLocation المرتبطة بالعرض.", "Add بتزود مدة وبتحرّك اللحظة.", "Now بتجيب لحظة الجهاز الحالية."}),
@@ -197,20 +197,20 @@ var ch19SunsEnglish = []LessonStep{
 }
 
 var ch19CountdownArabic = []LessonStep{
-	{ID: "c193.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c193.mission", "كمّل countdown بتقبل cancellation وبتستخدم clock محقونة.\n\nخلي كل مسار ينضّف ticker من غير نوم حقيقي أو تسريب.\n\nالإلغاء ممكن يحصل قبل أول tick أو بعده؛ الاختبار هو اللي بيحرّك الوقت.")}},
+	{ID: "c193.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c193.mission", "كمّل countdown بتقبل cancellation وبتستخدم clock محقونة.\n\nخلي كل مسار ينضّف ticker من غير نوم حقيقي أو تسريب.\n\nالإلغاء ممكن يحصل قبل أول tick أو بعده؛ الـtest هو اللي بيحرّك الوقت.")}},
 	{ID: "c193.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch19Walkthrough("c193.idea-context", "~Context.Done~ إشارة للإلغاء؛ ~select~ يقدر يراقبها مع شغل تاني.", ch19CountdownContextCode, "e19-3-context", []string{"context", "fmt"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
-		{Line: 2, Caption: "جهّز سياق قابل للإلغاء."},
+		{Line: 2, Caption: "جهّز context قابل للإلغاء."},
 		{Line: 4, Caption: "راقب إشارة الإلغاء."},
 		{Line: 8, Caption: "قبل الإلغاء، البرنامج شغال.", Output: "running"},
 	})}},
 	{ID: "c193.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch19Question("c193.try-cancel", "توقّع الناتج:\n\n~~~go\n"+ch19CountdownCanceledCode+"\n~~~", []string{"<nil>", "context canceled", "running"}, 1, []string{"السياق اتلغى قبل قراءة Err.", "Err بتوضح إن الإلغاء حصل.", "running كانت هتظهر قبل الإلغاء."}),
-		ch19Walkthrough("c193.try-reveal", "شوف قيمة Err بعد إلغاء السياق.", ch19CountdownCanceledCode, "e19-3-cancel", []string{"context", "fmt"}, []LessonFrame{
+		ch19Question("c193.try-cancel", "توقّع الناتج:\n\n~~~go\n"+ch19CountdownCanceledCode+"\n~~~", []string{"<nil>", "context canceled", "running"}, 1, []string{"الـcontext اتلغى قبل قراءة Err.", "Err بتوضح إن الإلغاء حصل.", "running كانت هتظهر قبل الإلغاء."}),
+		ch19Walkthrough("c193.try-reveal", "شوف الـvalue بتاعة Err بعد إلغاء الـcontext.", ch19CountdownCanceledCode, "e19-3-cancel", []string{"context", "fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
-			{Line: 2, Caption: "أنشئ context جديد."},
+			{Line: 2, Caption: "اعمل context جديد."},
 			{Line: 3, Caption: "نفّذ الإلغاء."},
-			{Line: 4, Caption: "اقرأ سبب الإلغاء.", Output: "context canceled"},
+			{Line: 4, Caption: "اقرا سبب الإلغاء.", Output: "context canceled"},
 		}),
 		ch19SandboxBlock("c193.try-sandbox", "ch19-select-race", "بدّل اختيار ~select~ وشوف المسار.", map[string]any{
 			"labels": map[string]any{
@@ -235,10 +235,10 @@ var ch19CountdownArabic = []LessonStep{
 	}},
 	{ID: "c193.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch19Markdown("c193.watch", "اعمل ticker بعد التحقق، و~defer Stop~ بعد إنشائها مباشرة.\n\nبعد tick، راجع ~ctx.Err~ قبل العرض؛ الإلغاء والـtick ممكن يبقوا جاهزين.")}},
 	{ID: "c193.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch19Markdown("c193.plan", "الـFakeClock بتحرّك الوقت وقت الاختبار من غير انتظار.\n\nاختبر بداية العملية، tick، الإلغاء، وتنظيف الموارد كل مسار لوحده."),
-		ch19Question("c193.check-tick", "بعد ما ~select~ يستقبل tick، إمتى تفحص الإلغاء؟", []string{"قبل الـcallback", "بعد ما ترجع الدالة", "مرة واحدة قبل الـloop"}, 0, []string{"الإلغاء ممكن يكون جاهز مع tick.", "بعد الرجوع يكون العرض حصل بالفعل.", "الفحص الأول مش بيغطي الإلغاء اللاحق."}),
+		ch19Markdown("c193.plan", "الـFakeClock بتحرّك الوقت وقت الـtest من غير انتظار.\n\nالـtest يغطّي بداية العملية، tick، الإلغاء، وتنظيف الموارد في كل مسار لوحده."),
+		ch19Question("c193.check-tick", "بعد ما ~select~ يستقبل tick، إمتى تفحص الإلغاء؟", []string{"قبل الـcallback", "بعد ما ترجع الدالة", "مرة واحدة قبل الـloop"}, 0, []string{"الإلغاء ممكن يكون جاهز مع tick.", "بعد ما الـfunction تخلص، العرض بيكون حصل بالفعل.", "الفحص الأول مش بيغطي الإلغاء اللاحق."}),
 	}},
-	{ID: "c193.turn-step", Title: "دورك", Blocks: []LessonBlock{ch19Markdown("c193.turn", "خلّي FakeClock يقدّم الوقت خطوة خطوة، وراقب القيم والتنظيف بعد كل مسار.")}},
+	{ID: "c193.turn-step", Title: "دورك", Blocks: []LessonBlock{ch19Markdown("c193.turn", "خلّي FakeClock يقدّم الوقت خطوة خطوة، وراقب الـvalues والتنظيف بعد كل مسار.")}},
 }
 
 var ch19CountdownEnglish = []LessonStep{
@@ -287,23 +287,23 @@ var ch19CountdownEnglish = []LessonStep{
 }
 
 var ch19TimersArabic = []LessonStep{
-	{ID: "c194.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c194.mission", "انتظر timers الأرصفة بالتوازي، واعرض الردود بترتيب الطلبات.\n\nعامل ممكن يخلص قبل غيره؛ ما تخليش وقت الوصول يغيّر مكان النتيجة.")}},
+	{ID: "c194.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c194.mission", "انتظر timers الأرصفة بالتوازي، واعرض الـresponses بترتيب الـrequests.\n\nعامل ممكن يخلص قبل غيره؛ ما تخليش وقت الوصول يغيّر مكان النتيجة.")}},
 	{ID: "c194.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch19Walkthrough("c194.idea-wait", "الـWaitGroup بتجمع اكتمال العمال. الـframes بتعرض ترتيب محتمل واحد؛ توقيت الـgoroutines الفعلي ممكن يختلف.", ch19TimersWaitCode, "e19-4-wait", []string{"fmt", "sync"}, []LessonFrame{
 		{Line: 0, Caption: "قبل التشغيل."},
 		{Line: 2, Caption: "جهّز عدّاد العمال."},
 		{Line: 4, Caption: "ابدأ goroutine واحدة."},
 		{Line: 6, Caption: "العامل يطبع قبل Done.", Output: "worker"},
-		{Line: 8, Caption: "Wait رجعت بعد اكتمال العامل.", Output: "worker"},
+		{Line: 8, Caption: "Wait رجّعت بعد اكتمال العامل.", Output: "worker"},
 		{Line: 9, Caption: "كمل بعد انتهاء العمال.", Output: "worker\nready"},
 	})}},
 	{ID: "c194.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch19Question("c194.try-slots", "تخيّل إن slot التانية خلصت الأول؛ توقّع الناتج:\n\n~~~go\n"+ch19TimersSlotCode+"\n~~~", []string{"[fast slow]", "[slow fast]", "[slow]"}, 1, []string{"الطباعة تتبع مواقع الـslice مش وقت الإكمال.", "كل نتيجة فضلت في slot بتاعة طلبها.", "الـslice اتعملت بطول اتنين."}),
 		ch19Walkthrough("c194.try-reveal", "الكتابة في index محدد تحفظ ترتيب الطلب.", ch19TimersSlotCode, "e19-4-slots", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التشغيل."},
-			{Line: 2, Caption: "احجز خانتين للردود."},
-			{Line: 3, Caption: "الرد التاني وصل الأول."},
+			{Line: 2, Caption: "احجز خانتين للـresponses."},
+			{Line: 3, Caption: "الـresponse التاني وصل الأول."},
 			{Line: 4, Caption: "الأول وصل بعده."},
-			{Line: 5, Caption: "اعرض حسب ترتيب الـindex.", Output: "[slow fast]"},
+			{Line: 5, Caption: "اطبع حسب ترتيب الـindex.", Output: "[slow fast]"},
 		}),
 		ch19SandboxBlock("c194.try-sandbox", "ch19-worker-order", "غيّر وصول العمال وثبّت ترتيب الطلب.", map[string]any{
 			"workers": []any{
@@ -318,7 +318,7 @@ var ch19TimersArabic = []LessonStep{
 			"requestOrder": []string{"A", "B", "C"},
 			"labels": map[string]any{
 				"finishOrder":  ch19Localized("ترتيب الإكمال", "Finish order"),
-				"requestOrder": ch19Localized("ترتيب الطلبات", "Request order"),
+				"requestOrder": ch19Localized("ترتيب الـrequests", "Request order"),
 				"runAgain":     ch19Localized("شغّل ترتيب محتمل تاني", "Show another possible run"),
 				"caption":      ch19Localized("التوقيت الحقيقي ممكن يختلف.", "Actual timing can vary."),
 			},
@@ -329,7 +329,7 @@ var ch19TimersArabic = []LessonStep{
 		ch19Markdown("c194.plan", "افصل صلاحية الدفعة عن تشغيل العمال.\n\nحدّد مين يملك كل نتيجة، وإمتى بقى آمن تقراها."),
 		ch19Question("c194.check-wait", "إيه اللي تضمنه ~WaitGroup.Wait~؟", []string{"كل worker أبلغ عن اكتماله", "ترتيب الإكمال", "ترتيب إنشاء الـgoroutines"}, 0, []string{"Wait تستنى كل Done المقابلة.", "الانتظار ما بيفرضش ترتيب تنفيذ.", "التشغيل مش معناه ترتيب ثابت."}),
 	}},
-	{ID: "c194.turn-step", Title: "دورك", Blocks: []LessonBlock{ch19Markdown("c194.turn", "ابدأ بطلبين توضيحيين، شغّل fake clock، وبعدها راجع ترتيب الردود والتنظيف.")}},
+	{ID: "c194.turn-step", Title: "دورك", Blocks: []LessonBlock{ch19Markdown("c194.turn", "ابدأ بـ2 requests توضيحية، شغّل fake clock، وبعدها راجع ترتيب الـresponses والتنظيف.")}},
 }
 
 var ch19TimersEnglish = []LessonStep{
@@ -364,7 +364,7 @@ var ch19TimersEnglish = []LessonStep{
 			"requestOrder": []string{"A", "B", "C"},
 			"labels": map[string]any{
 				"finishOrder":  ch19Localized("ترتيب الإكمال", "Finish order"),
-				"requestOrder": ch19Localized("ترتيب الطلبات", "Request order"),
+				"requestOrder": ch19Localized("ترتيب الـrequests", "Request order"),
 				"runAgain":     ch19Localized("شغّل ترتيب محتمل تاني", "Show another possible run"),
 				"caption":      ch19Localized("التوقيت الحقيقي ممكن يختلف.", "Actual timing can vary."),
 			},

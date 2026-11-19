@@ -135,7 +135,7 @@ permit <- 4 // panic: إرسال بعد القفل
 نفّذ ~RelaySupplies(ctx context.Context, rounds int, visit func(drone, round int) error) error~. السياق غير ~nil~. ارفض ~rounds < 0~ أو callback ~nil~ قبل تشغيل أي شغل. بعدها الإلغاء المسبق يرجع ~ctx.Err()~ حتى مع 0. صفر جولات ناجح من غير callbacks أو goroutines.
 
 في النجاح، شغّل مشاركين للدرونين 0 و 1. استخدم قنوات unbuffered لتسليم الجولة والإقرار. نادِ ~visit(0,r)~ وبعدها ~visit(1,r)~ لكل ~r~ من 0 لحد ~rounds-1~ بالترتيب ومن غير تداخل callbacks. استخدم ~close~ بعد انتهاء المرسلين، واستنى كل goroutine قبل الرجوع. أي خطأ callback يرجع بنفس السبب ويوقف الجولات؛ الإلغاء يرجع خطأ السياق، ومفيش callback جديدة بعد ملاحظة الإلغاء. ممنوع وقت حقيقي أو ~Report~. ~main~ فاضية؛ دي محاكاة لتسليم درونين بحقن نقاط التفاعل عشان نختبر العمر والقفل.`,
-		Hints: []string{"فرّق بين تسليم الرسالة وانتهاء شغل المستقبل.", "ارسم اتجاه الإرسال والرد قبل مراجعة goroutines.", "راجع استخدام ~close~ وقراءة ~ok~ عند نهاية القناة."},
+		Hints: []string{"فرّق بين تسليم الـmessage وانتهاء شغل الـreceiver.", "ارسم اتجاه الـsend والـresponse قبل مراجعة goroutines.", "راجع استخدام ~close~ وقراءة ~ok~ عند نهاية الـchannel."},
 		En: &LevelText{LessonRevision: 1, Steps: ch24PingEnglish, Title: "Ping Pong", Goal: "Have two drones hand over a cargo permit in alternating rounds and stop without leaks", Files: []LabFile{{Name: "main.go", Starter: ch241Starter}},
 			Lesson: `# A Cargo Permit Between Two Drones
 
@@ -294,7 +294,7 @@ func TestHiddenRelayStopsAndJoins(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "24-2-producers", Chapter: 24, Kind: "lab", LessonRevision: 1, Steps: ch24DepotArabic, Title: "منتجين ومستهلكين", Goal: "اجمع صناديق مخازن متوازية في مستهلك واحد بطابور محدود",
+	add(&Level{ID: "24-2-producers", Chapter: 24, Kind: "lab", LessonRevision: 1, Steps: ch24DepotArabic, Title: "منتجين ومستهلكين", Goal: "اجمع صناديق مخازن متوازية في مستهلك واحد بـqueue محدودة",
 		Requires: []string{"bufchan", "close"}, Bridge: []int{37}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch242StarterAr}},
 		Lesson: `# مخازن بتغذّي رصيف واحد
@@ -347,7 +347,7 @@ go func() { crates <- 5 }() // ممكن يبعت بعد القفل
 نفّذ ~UnloadDepots(ctx context.Context, batches [][]int, capacity int, consume func(int) error) error~. السياق غير ~nil~. ارفض سعة سالبة أو callback ~nil~ قبل أي callback. بعدها الإلغاء المسبق يرجع خطأ السياق. شغّل منتج لكل batch غير فاضية، وقناة واحدة بسعة ~capacity~، ومستهلك واحد ينادي ~consume~ بالتتابع.
 
 النجاح يستهلك كل عنصر مرة واحدة بما فيها القيم السالبة والتكرارات، ويحفظ ترتيب كل batch. صفر ~batches~ أو ~batches~ فاضية نجاح من غير callbacks. متغيرش المدخلات. خطأ المستهلك يوقف callbacks التالية ويرجع سببه. الإلغاء يوقف عند ملاحظته ويرجع ~ctx.Err()~؛ لا ضمان لعدد جزئي ثابت وقت السباق مع الإلغاء. استنى كل المنتجين والقافل قبل الرجوع؛ القناة تتقفل مرة واحدة بعد انتهاء المرسلين. ممنوع وقت حقيقي أو ~Report~.`,
-		Hints: []string{"افصل مساحة الانتظار عن عدد الرسائل الحالية.", "حدد مين يملك كتابة نتيجة الاستهلاك.", "راجع مقارنة ~cap~ و~len~ في المثال قبل تتبع queue."},
+		Hints: []string{"فرّق بين مساحة الانتظار وعدد الـmessages الحالية.", "حدّد مين بيملك كتابة نتيجة الـconsumer.", "راجع مقارنة ~cap~ و~len~ في المثال قبل تتبع الـqueue."},
 		En: &LevelText{LessonRevision: 1, Steps: ch24DepotEnglish, Title: "Producers and Consumers", Goal: "Merge concurrent depot crates into one consumer through a bounded queue", Files: []LabFile{{Name: "main.go", Starter: ch242Starter}},
 			Lesson: `# Many Depots, One Dock
 
@@ -503,7 +503,7 @@ func TestHiddenDepotsStopBlockedProducers(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "24-3-work-crew", Chapter: 24, Kind: "lab", LessonRevision: 1, Steps: ch24CrewArabic, Title: "طاقم الشغل", Goal: "ابني طاقم عام بعدد عمّال ثابت ونتيجة أو خطأ لكل شحنة",
+	add(&Level{ID: "24-3-work-crew", Chapter: 24, Kind: "lab", LessonRevision: 1, Steps: ch24CrewArabic, Title: "طاقم الشغل", Goal: "ابني طاقم عام بعدد عمّال ثابت وresult أو error لكل شحنة",
 		Requires: []string{"chan", "go", "sel:context.Context"}, Bridge: []int{34}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch243StarterAr}},
 		Lesson: `# طاقم الشحن تحت الضغط
@@ -568,7 +568,7 @@ for _, cargo := range cargos {
 بعد التحقق، جهّز نتيجة لكل مدخل بنفس الترتيب. لو السياق متلغي، املأ النتائج بخطئه من غير callbacks وارجع خطأ السياق للـ batch. غير كده الفاضي نجاح. استخدم طابور indexes محدود و ~workers~ عمال كحد أقصى، مع السماح بعدد أكبر من المدخلات. كل مدخل يبدأ مرة واحدة في النجاح، وكل callback ترجع قيمة وخطأ يتخزنوا كما هم؛ خطأ عنصر ميوقفش الباقي. متغيرش المدخلات. عند الإلغاء، أوقف الجديد عند ملاحظته واستنى الجاري؛ المواضع اللي متبدأتش تاخد صفر النوع وخطأ السياق. ارجع خطأ السياق للـ batch عند الإلغاء، أو ~nil~ في النجاح حتى مع أخطاء عناصر. مفيش تسريب أو وقت حقيقي أو ~Report~.
 
 النجمة التالتة: نفس العقد مع structs ونصوص بدل أرقام، واستدعاءات مستقلة متوازية من غير حالة عامة مشتركة.`,
-		Hints: []string{"ميّز الخطأ العام عن خطأ عنصر واحد.", "اربط كل مدخل بخانة نتيجة مستقلة.", "ارجع لتعريف ~CrewReply[R]~ قبل تتبع قيم ~R~."},
+		Hints: []string{"ميّز الـerror العام عن error عنصر واحد.", "اربط كل input بخانة result مستقلة.", "ارجع لتعريف ~CrewReply[R]~ قبل تتبع الـvalues من النوع ~R~."},
 		En: &LevelText{LessonRevision: 1, Steps: ch24CrewEnglish, Title: "Work Crew", Goal: "Build a generic fixed-size crew with a result or error for each shipment", Files: []LabFile{{Name: "main.go", Starter: ch243Starter}},
 			Lesson: `# A Crew Under Backpressure
 
@@ -881,7 +881,7 @@ close(feed) // المستهلك مش مالك دخل محقون
 غير كده ارجع قناة خرج فوراً وnil. وزّع الدخل على ~lanes~ عمال بحد أقصى، كل عامل له خرج خاص، وادمجهم بقنوات fan-in في قناة نهائية unbuffered. في التشغيل غير الملغي: كل batch لها رد واحد بنفس ~ID~ وقيمة وخطأ callback كما هما، بما فيهم أخطاء العناصر؛ الترتيب غير مضمون. الـ callback بتحترم السياق وبتنتهي. الدخل الفاضي المقفول يقفل الخرج، والخطأ في عنصر ميوقفش الباقي.
 
 الإلغاء يقفل الخرج بعد انتهاء كل العمال والناقلين، حتى مع دخل مفتوح ساكت أو مستهلك مبطل قراءة. بعد ملاحظة الإلغاء متبدأش callback جديدة؛ مسموح ردود جزئية سبقت الإلغاء. الإلغاء المسبق يرجع قناة بتتقفل من غير callbacks. متقفلش الدخل. كل خرج داخلي يتقفل مرة واحدة بمالكه، والنهائي بعد الناقلين. الاختبار يصرف الخرج لحد القفل. ممنوع وقت حقيقي أو ~Report~.`,
-		Hints: []string{"اتبع إشارة انتهاء الإدخال عبر كل مرحلة.", "اكتب مالك كل قناة قبل مراجعة الإغلاق.", "راجع سلوك ~range~ بعد ~close~ في المثال الصغير."},
+		Hints: []string{"اتبع إشارة انتهاء الـinput في كل مرحلة.", "حدّد مين مالك كل channel قبل ما تراجع إغلاقها.", "راجع سلوك ~range~ بعد ~close~ في المثال الصغير."},
 		En: &LevelText{LessonRevision: 1, Steps: ch24PipelineEnglish, Title: "Refining Pipeline", Goal: "Fan dock ore out across refining lanes and merge their results with clean cancellation", Files: []LabFile{{Name: "main.go", Starter: ch244Starter}},
 			Lesson: `# Many Lanes, One Stream
 
@@ -1144,7 +1144,7 @@ func TestHiddenRefineryPreflight(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "24-5-beacon-check", Chapter: 24, Kind: "lab", LessonRevision: 1, Steps: ch24BeaconArabic, Title: "فحص المنارات", Goal: "افحص منارات HTTP بعميل محقون وحد فعلي للتوازي",
+	add(&Level{ID: "24-5-beacon-check", Chapter: 24, Kind: "lab", LessonRevision: 1, Steps: ch24BeaconArabic, Title: "فحص المنارات", Goal: "افحص منارات HTTP باستخدام HTTP client محقون وحد فعلي للتوازي",
 		Requires: []string{"sel:http.Client"}, Bridge: []int{33}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch245StarterAr}},
 		Lesson: `# فحص منارات القاعدة
@@ -1224,7 +1224,7 @@ if resp.StatusCode == 200 { return nil } // الجسم متقفلش
 نفّذ ~CheckBeacons(ctx context.Context, client *http.Client, addresses []string, limit int) ([]BeaconReply,error)~. ~BeaconReply~ فيها ~Status int~ و ~Err error~. السياق غير ~nil~. ارفض عميل ~nil~ أو ~limit <= 0~ بـ ~nil~ وخطأ قبل أي طلب، حتى لو القائمة فاضية. باقي الحالات ترجع slice بطول الدخل وبنفس الترتيب وnil كخطأ batch.
 
 لكل عنوان اعمل GET بالعميل المحقون وبنفس السياق، مع حد ~limit~ للطلبات المتزامنة. العناوين المكررة مستقلة. العنوان غير المطلق أو غير HTTP/HTTPS له خطأ عنصر ومش بيتبعت. حالة 200 لحد 299 نجاح؛ غير كده ~Status~ الفعلي وخطأ عنصر. خطأ نقل أو timeout يحافظ على السبب، وStatus تبقى 0. اقفل أي جسم رد مستلم. متغيرش العناوين أو العميل. عند الإلغاء، الطلبات اللي متبدأتش تاخد 0 وخطأ السياق، والجارية تنتهي عن طريقه، والنتائج المكتملة تفضل محفوظة. استنى الكل قبل الرجوع. احترام سياسة redirects والـ timeout مسؤولية العميل المحقون؛ ممنوع شبكة عامة أو وقت ثابت في الحل.`,
-		Hints: []string{"فرّق بين خطأ النقل ورد HTTP.", "راجع ترتيب النتائج مقارنة بترتيب العناوين.", "ارجع لـ~NewRequestWithContext~ قبل تتبع طلب المنارة."},
+		Hints: []string{"فرّق بين transport error وHTTP response.", "راجع ترتيب الـresults مقارنة بترتيب العناوين.", "ارجع لـ~NewRequestWithContext~ قبل ما تتبع request المنارة."},
 		En: &LevelText{LessonRevision: 1, Steps: ch24BeaconEnglish, Title: "Beacon Check", Goal: "Inspect HTTP beacons with an injected client and an enforced concurrency limit", Files: []LabFile{{Name: "main.go", Starter: ch245Starter}},
 			Lesson: `# Checking Colony Beacons
 
@@ -1561,7 +1561,7 @@ stage.Commit() // غلط قبل انتظار العمال وفحص أخطائه�
 بعد التحقق تبدأ معاملة: صفر حجم يعمل ~Commit~ من غير طلب. الإلغاء المسبق يعمل ~Abort~ ويرجع سبب السياق. غير كده اعمل GET لأول نطاق من 0 لحد ~min(Chunk,Size)-1~. لو 206، افحص ~Content-Range~ بالنص المطابق ~bytes start-end/Size~ وطول الجسم بالظبط، واكتب عند البداية. نفّذ الباقي بطاقم بحد ~Workers~، من غير تداخل نطاقات، وبنفس فحص الحالة والـ header والطول. لو أول رد 200، اقرأ ~Size~ بالظبط واكتب مرة عند 0 ومتبعتش باقي الأجزاء. أي حالة تانية أو 200 لاحق أو نقص/زيادة/خطأ قراءة أو كتابة يوقف النشر.
 
 كل الطلبات مرتبطة بالسياق المشتق من الأب وتستخدم العميل المحقون فقط. اقفل كل الأجسام. أي فشل يلغي العمال ويستناهم ويعمل ~Abort~ مرة؛ احتفظ بالأسباب، بما فيها خطأ ~Abort~. النجاح يستنى كل العمال ثم ~Commit~ مرة، من غير ~Abort~. فشل ~Commit~ يتبعه ~Abort~. مفيش ملفات أو وقت حقيقي أو طلبات عامة أو ~Report~ في الحل؛ تستات السيرفر محلية في الذاكرة.`,
-		Hints: []string{"افصل مكان الجزء عن ترتيب اكتمال طلبه.", "راجع الفرق بين كتابة البيانات ونشر المرحلة.", "ارجع لتوقيع ~WriteAt~ في ~ChartStage~ عند تتبع offset."},
+		Hints: []string{"افصل مكان الـchunk عن ترتيب اكتمال الـrequest.", "راجع الفرق بين كتابة البيانات ونشر المرحلة.", "ارجع لتوقيع ~WriteAt~ في ~ChartStage~ وإنت بتتبع الـoffset."},
 		En: &LevelText{LessonRevision: 1, Steps: ch24ChunkEnglish, Title: "Chunk Download", Goal: "Download a navigation chart in parallel chunks and publish only after completion", Files: []LabFile{{Name: "main.go", Starter: ch246Starter}},
 			Lesson: `# A Navigation Chart in Pieces
 
@@ -1984,7 +1984,7 @@ png.Encode(out, img) // غلط لو محتوى الدخل JPEG ولازم يحا
 ملف بايظ أو زيادة بكسلات أو خطأ حفظ يرجع الاسم وخطأ مع سبب محفوظ، وباقي حقول النتيجة صفر. كمل باقي الصور. عند الإلغاء أوقف الجديد عند ملاحظته واستنى الجاري؛ غير المكتمل يرجع الاسم وخطأ السياق، والمكتمل قبل الإلغاء يفضل ناجح. العمال والحفظ مع بعض ميتعدوش ~Workers~؛ مفيش goroutine لكل عنصر، أو تسريب، أو ملفات، أو وقت حقيقي، أو ~Report~.
 
 النجمة التالتة: عيّنات PNG الملونة الشفافة تحتفظ بقيم اللون وalpha بالظبط بعد التصغير، باستخدام استبدال ~draw.Src~.`,
-		Hints: []string{"افصل قراءة الإعدادات عن فك pixels.", "اربط كل بلاطة بخانة نتيجة مستقلة.", "راجع ~DecodeConfig~ و~Format~ في المثال قبل اختيار encoder."},
+		Hints: []string{"افصل قراءة الـconfig عن فك الـpixels.", "اربط كل tile بخانة result مستقلة.", "راجع ~DecodeConfig~ و~Format~ في المثال قبل اختيار encoder."},
 		En: &LevelText{LessonRevision: 1, Steps: ch24TilesEnglish, Title: "Map Tiles", Goal: "Resize navigation tiles with a bounded crew while preserving each image format", Files: []LabFile{{Name: "main.go", Starter: ch247Starter}},
 			Lesson: `# Navigation Map Images
 

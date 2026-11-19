@@ -49,8 +49,8 @@ func ch20EnglishConfig(value any) any {
 }
 
 var ch20BulletinArabic = []LessonStep{
-	{ID: "c201.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch20Markdown("c201.mission", "1. حوّل نص النشرة لـ HTML آمن بـ~RenderBulletin~.\n2. اتعامل مع tagين معروفين بس؛ الأقواس التانية تفضل نص عادي.\n3. الـstarter بيرجع خطأ مؤقت، والمهمة من غير Report.")}},
-	{ID: "c201.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch20Walkthrough("c201.state-example", "اعتبر كل tag معروفة مفتاح لحالة. ~HasPrefix~ بتتعرف على بداية النص، وبعدها تقرأ الباقي حسب الحالة.\n\nده مثال توضيحي صغير، مش parser كامل. خليك عارف هل النص عادي ولا جوه tag.", `func main() {
+	{ID: "c201.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch20Markdown("c201.mission", "1. حوّل نص النشرة لـ HTML آمن بـ~RenderBulletin~.\n2. اتعامل مع tagين معروفين بس؛ الأقواس التانية تفضل نص عادي.\n3. الـstarter بيرجّع error مؤقت، والمهمة من غير Report.")}},
+	{ID: "c201.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch20Walkthrough("c201.state-example", "اعتبر كل tag معروفة key لحالة. ~HasPrefix~ بتتعرف على بداية النص، وبعدها اقرا الباقي حسب الحالة.\n\nده مثال توضيحي صغير، مش parser كامل. خليك عارف هل النص عادي ولا جوه tag.", `func main() {
 var source = "[alert]low[/alert]"
 mode := "plain"
 if strings.HasPrefix(source, "[alert]") {
@@ -95,12 +95,12 @@ fmt.Println(out.String())
 			},
 		}),
 	}},
-	{ID: "c201.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c201.watch", "- اكتب tags بتاعتك مباشرة، واعمِل escaping لنص المستخدم مرة واحدة.\n- القفل الغلط أو نهاية النص وحالة tag مفتوحة معناهم خطأ من غير ناتج جزئي.")}},
+	{ID: "c201.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c201.watch", "- اكتب tags بتاعتك مباشرة، واعمِل escaping لنص المستخدم مرة واحدة.\n- القفل الغلط أو نهاية النص وtag لسه مفتوحة معناهم error من غير output جزئي.")}},
 	{ID: "c201.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch20Markdown("c201.plan", "قسّم الشغل: ميّز delimiter، حدّث الحالة، وبعدها أضف النص الآمن.\n\nراجع newline حسب الحالة، وخلي أي syntax مش معروفة حرفية."),
 		ch20Question("c201.escape-place", "لو النص جوه ~[code]~ فيه ~<~، تعمل إيه؟", []string{"تسيبه حرفي", "تعمله escaping", "تعتبره tag جديدة"}, 1, []string{"ده بيخلّي HTML يفسّره كعنصر.", "نص المستخدم يفضل غير موثوق جوه كل الحالات.", "المحتوى مش delimiter معروفة."}),
 	}},
-	{ID: "c201.turn-step", Title: "دورك", Blocks: []LessonBlock{ch20Markdown("c201.turn", "ابدأ بحالة واحدة، وشغّلها على نص صغير. زوّد الحالات واحدة واحدة وراجع الناتج والأخطاء.")}},
+	{ID: "c201.turn-step", Title: "دورك", Blocks: []LessonBlock{ch20Markdown("c201.turn", "ابدأ بحالة واحدة، وشغّلها على نص صغير. زوّد الحالات واحدة واحدة وراجع الناتج والـerrors.")}},
 }
 
 var ch20BulletinEnglish = []LessonStep{
@@ -160,7 +160,7 @@ fmt.Println(out.String())
 
 var ch20ValidatorArabic = []LessonStep{
 	{ID: "c202.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch20Markdown("c202.mission", "1. راجع بطاقة الطاقم بثلاث فحوص مستقلة.\n2. اجمع الأسباب لو أكتر من حقل فشل، بترتيب ثابت.\n3. الـstarter فيه الأنواع والـsentinels؛ كمّل السلوك بس.")}},
-	{ID: "c202.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch20Walkthrough("c202.join-example", "الـerror ممكن يفضل شايل سبب محدد حتى لو اتضاف له شرح. ~%w~ يحافظ على السبب، و~errors.Join~ تجمع أخطاء مستقلة.\n\n~errors.Is~ بتدور على السبب نفسه وسط التغليف والتجميع. استخدم ~regexp~ للأنماط الصغيرة، و~^~ و~$~ عشان الفحص يشمل القيمة كلها.\n\nللتاريخ استخدم ~time.Parse~ من 19-1 وبعدها ~Format~ للتنسيق. ولفحص local name استخدم ~unicode.IsSpace~ على كل rune.", `func main() {
+	{ID: "c202.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch20Walkthrough("c202.join-example", "الـerror ممكن يفضل شايل سبب محدد حتى لو اتضاف له شرح. ~%w~ بيحافظ على السبب، و~errors.Join~ بتجمع errors مستقلة.\n\n~errors.Is~ بتدور على السبب نفسه وسط التغليف والتجميع. استخدم ~regexp~ للأنماط الصغيرة، و~^~ و~$~ عشان الفحص يشمل الـvalue كلها.\n\nللتاريخ استخدم ~time.Parse~ من 19-1 وبعدها ~Format~ للتنسيق. ولفحص local name استخدم ~unicode.IsSpace~ على كل rune.", `func main() {
 var errPilot = errors.New("pilot")
 var errRadio = errors.New("radio")
 combined := errors.Join(fmt.Errorf("card: %w", errPilot), errRadio)
@@ -190,15 +190,15 @@ fmt.Println(pattern.MatchString("relay!"))
 			},
 			"labels": map[string]any{
 				"valid":   ch20Localized("سليم", "valid"),
-				"invalid": ch20Localized("فيه خطأ", "invalid"),
+				"invalid": ch20Localized("فيه error", "invalid"),
 				"causes":  ch20Localized("الأسباب بالترتيب", "Causes in order"),
 			},
 		}),
 	}},
-	{ID: "c202.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c202.watch", "- regex من غير anchors ممكن تقبل جزء من قيمة غلط.\n- التاريخ محتاج parser حقيقي؛ regex لوحدها مش بتعرف إن اليوم موجود.")}},
+	{ID: "c202.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c202.watch", "- regex من غير anchors ممكن تقبل جزء من value غلط.\n- التاريخ محتاج parser حقيقي؛ regex لوحدها مش بتعرف إن اليوم موجود.")}},
 	{ID: "c202.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
 		ch20Markdown("c202.plan", "خلي كل validator مسؤولة عن حقل واحد وسبب واحد.\n\nبعدها اجمع النتائج، وراجع التصنيفات بالترتيب المعلن بدل ترتيب map."),
-		ch20Question("c202.classify", "إيه اللي يخلّي سبب الخطأ قابل للفحص بعد إضافة شرح؟", []string{"نقارن نص الرسالة", "نلف بـ~%w~ ونستخدم ~errors.Is~", "نخزّن النص في map"}, 1, []string{"نص الرسالة ممكن يتغير ومش هوية السبب.", "الـwrapping يحفظ السبب للتصنيف.", "ترتيب map مش عقد ثابت."}),
+		ch20Question("c202.classify", "إيه اللي يخلّي سبب الـerror قابل للفحص بعد إضافة شرح؟", []string{"نقارن نص الرسالة", "نلف بـ~%w~ ونستخدم ~errors.Is~", "نخزّن النص في map"}, 1, []string{"نص الرسالة ممكن يتغير ومش هوية السبب.", "الـwrapping يحفظ السبب للتصنيف.", "ترتيب map مش contract ثابت."}),
 	}},
 	{ID: "c202.turn-step", Title: "دورك", Blocks: []LessonBlock{ch20Markdown("c202.turn", "ابدأ بفحص واحد، وبعدها جرّب بطاقة فيها أكتر من مشكلة. اتأكد إن كل سبب ظاهر مرة واحدة وبالترتيب.")}},
 }
@@ -235,7 +235,7 @@ fmt.Println(pattern.MatchString("relay!"))
 			},
 			"labels": map[string]any{
 				"valid":   ch20Localized("سليم", "valid"),
-				"invalid": ch20Localized("فيه خطأ", "invalid"),
+				"invalid": ch20Localized("فيه error", "invalid"),
 				"causes":  ch20Localized("الأسباب بالترتيب", "Causes in order"),
 			},
 		}),
@@ -250,7 +250,7 @@ fmt.Println(pattern.MatchString("relay!"))
 
 var ch20LexerArabic = []LessonStep{
 	{ID: "c203.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch20Markdown("c203.mission", "1. حوّل أوامر الطيران لـtokens في ~LexFlight~.\n2. كل token تحتفظ بنوعها وتهجئتها ومكانها بالـbyte.\n3. الـstarter عرّف ~CommandToken~ و~CommandError~؛ مفيش تنفيذ أو Report.")}},
-	{ID: "c203.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch20Walkthrough("c203.token-example", "الـtoken بتسجل دليل من المصدر: النوع، النص الأصلي، والـoffset. الـoffset هنا رقم byte من صفر، مش رقم حرف ظاهر.\n\nامشِ byte byte واستهلك أطول run. ~strconv.ParseInt~ بيرجع error لو الرقم مش قابل للقراءة؛ ما تتجاهلش الخطأ.", `type Token struct {
+	{ID: "c203.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch20Walkthrough("c203.token-example", "الـtoken بتسجل دليل من المصدر: النوع، النص الأصلي، والـoffset. الـoffset هنا رقم byte من صفر، مش رقم حرف ظاهر.\n\nامشِ byte byte واستهلك أطول run. ~strconv.ParseInt~ بيرجّع error لو الرقم مش قابل للقراءة؛ ما تتجاهلش الـerror.", `type Token struct {
 	Kind, Text string
 	Offset int
 }
@@ -265,7 +265,7 @@ func main() {
 		{Line: 7, Caption: "Print the stored fields.", Variables: []LessonVariable{{Name: "t", Value: "{name bay_2 4}"}}, Output: "name bay_2 4"},
 	})}},
 	{ID: "c203.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch20Question("c203.predict-offsets", "توقّع السطرين اللي هيظهروا:\n\n~~~go\nfunc main() {\nsource := \"go\"\nfor i := 0; i < len(source); i++ {\nfmt.Println(i, string(source[i]))\n}\n}\n~~~", []string{"0 g ثم 1 o", "1 g ثم 2 o", "g ثم o من غير أرقام"}, 0, []string{"الفهرس يبدأ من صفر، وبيعد bytes النص.", "الـindex مش بيبدأ من واحد.", "الكود بيطبع index مع كل byte."}),
+		ch20Question("c203.predict-offsets", "توقّع السطرين اللي هيظهروا:\n\n~~~go\nfunc main() {\nsource := \"go\"\nfor i := 0; i < len(source); i++ {\nfmt.Println(i, string(source[i]))\n}\n}\n~~~", []string{"0 g ثم 1 o", "1 g ثم 2 o", "g ثم o من غير أرقام"}, 0, []string{"الـindex بيبدأ من صفر وبيعد bytes النص.", "الـindex مش بيبدأ من واحد.", "الكود بيطبع index مع كل byte."}),
 		ch20Walkthrough("c203.offset-reveal", "تابع index والـbyte في مثال ASCII صغير.", `func main() {
 source := "go"
 for i := 0; i < len(source); i++ {
@@ -273,22 +273,22 @@ fmt.Println(i, string(source[i]))
 }
 }`, "e203-offset", []string{"fmt"}, []LessonFrame{
 			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 2, Caption: "source فيها بايتين."},
-			{Line: 4, Caption: "أول بايت عند صفر.", Output: "0 g"},
-			{Line: 4, Caption: "البايت التانية عند واحد.", Output: "0 g\n1 o"},
+			{Line: 2, Caption: "source فيها 2 bytes."},
+			{Line: 4, Caption: "أول byte عند صفر.", Output: "0 g"},
+			{Line: 4, Caption: "الـbyte التانية عند واحد.", Output: "0 g\n1 o"},
 		}),
 		ch20SandboxBlock("c203.try-sandbox", "ch20-lexer-offset", "حرّك المسح وراقب token والـoffset.", map[string]any{
 			"source": "go_2 > 7",
 			"frames": []any{
 				map[string]any{"cursor": "0", "token": ch20Localized("لسه مفيش", "not yet"), "offset": "—", "caption": ch20Localized("ابدأ من أول byte.", "Start at the first byte.")},
 				map[string]any{"cursor": "4", "token": "name go_2", "offset": "0", "caption": ch20Localized("استهلك الاسم بالكامل.", "Consume the whole name.")},
-				map[string]any{"cursor": "6", "token": ">", "offset": "5", "caption": ch20Localized("تخطّى المسافة واحفظ الرمز.", "Skip space; keep the symbol.")},
+				map[string]any{"cursor": "6", "token": ">", "offset": "5", "caption": ch20Localized("تخطّى المسافة وخزّن الرمز.", "Skip space; keep the symbol.")},
 				map[string]any{"cursor": "8", "token": "number 7", "offset": "7", "caption": ch20Localized("سجّل بداية الرقم بالـbyte.", "Record the number's byte offset.")},
 				map[string]any{"cursor": "8", "token": "eof", "offset": "8", "caption": ch20Localized("EOF بعد آخر byte.", "EOF follows the final byte.")},
 			},
 			"labels": map[string]any{
 				"source":   ch20Localized("النص", "Input"),
-				"cursor":   ch20Localized("المؤشر", "Cursor"),
+				"cursor":   ch20Localized("الـindex", "Cursor"),
 				"token":    ch20Localized("آخر token", "Current token"),
 				"offset":   ch20Localized("offset", "Offset"),
 				"previous": ch20Localized("السابق", "Previous"),
@@ -297,9 +297,9 @@ fmt.Println(i, string(source[i]))
 			},
 		}),
 	}},
-	{ID: "c203.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c203.watch", "- اقرأ أطول run من الاسم أو الأرقام؛ ما تطلعش token لكل حرف.\n- أي byte مجهولة توقف التحليل بخطأ عند مكانها، ومفيش tokens جزئية.")}},
+	{ID: "c203.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c203.watch", "- اقرا أطول run من الاسم أو الأرقام؛ ما تطلعش token لكل حرف.\n- أي byte مجهولة توقف التحليل بـerror عند مكانها، ومفيش tokens جزئية.")}},
 	{ID: "c203.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch20Markdown("c203.plan", "امشِ على المصدر من اليسار لليمين: احفظ البداية، حدّد النوع، واستهلك السلسلة كاملة.\n\nسيب علامات الجمل منفصلة، وأضف ~eof~ في النهاية."),
+		ch20Markdown("c203.plan", "امشِ على المصدر من اليسار لليمين: خزّن البداية، حدّد النوع، واستهلك الـstring كاملة.\n\nسيب علامات الجمل منفصلة، وأضف ~eof~ في النهاية."),
 		ch20Question("c203.number-sign", "علامة السالب في ~-8~ تتعامل معاها إزاي؟", []string{"جزء من رقم واحد", "token مستقلة عن الرقم", "مسافة تتشال"}, 1, []string{"المطلوب إن الرقم يحتفظ بتهجئته كأرقام.", "الـlexer تفصل الرمز عن run الأرقام.", "السالب رمز معروف في اللغة."}),
 	}},
 	{ID: "c203.turn-step", Title: "دورك", Blocks: []LessonBlock{ch20Markdown("c203.turn", "ابدأ بأسماء وأرقام ورموز قليلة. راجع offsets يدويًا، وبعدها جرّب whitespace وbyte مرفوضة.")}},
@@ -339,13 +339,13 @@ fmt.Println(i, string(source[i]))
 			"frames": []any{
 				map[string]any{"cursor": "0", "token": ch20Localized("لسه مفيش", "not yet"), "offset": "—", "caption": ch20Localized("ابدأ من أول byte.", "Start at the first byte.")},
 				map[string]any{"cursor": "4", "token": "name go_2", "offset": "0", "caption": ch20Localized("استهلك الاسم بالكامل.", "Consume the whole name.")},
-				map[string]any{"cursor": "6", "token": ">", "offset": "5", "caption": ch20Localized("تخطّى المسافة واحفظ الرمز.", "Skip space; keep the symbol.")},
+				map[string]any{"cursor": "6", "token": ">", "offset": "5", "caption": ch20Localized("تخطّى المسافة وخزّن الرمز.", "Skip space; keep the symbol.")},
 				map[string]any{"cursor": "8", "token": "number 7", "offset": "7", "caption": ch20Localized("سجّل بداية الرقم بالـbyte.", "Record the number's byte offset.")},
 				map[string]any{"cursor": "8", "token": "eof", "offset": "8", "caption": ch20Localized("EOF بعد آخر byte.", "EOF follows the final byte.")},
 			},
 			"labels": map[string]any{
 				"source":   ch20Localized("النص", "Input"),
-				"cursor":   ch20Localized("المؤشر", "Cursor"),
+				"cursor":   ch20Localized("الـindex", "Cursor"),
 				"token":    ch20Localized("آخر token", "Current token"),
 				"offset":   ch20Localized("offset", "Offset"),
 				"previous": ch20Localized("السابق", "Previous"),
@@ -371,7 +371,7 @@ var ch20EvaluatorArabic = []LessonStep{
 		{Line: 2, Caption: "الضرب يحصل قبل الجمع.", Output: "14"},
 	})}},
 	{ID: "c204.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch20Question("c204.predict-associativity", "توقّع ناتج العملية من اليسار لليمين:\n\n~~~go\nfunc main() {\nfmt.Println(9 - 3 - 1)\n}\n~~~", []string{"7", "5", "9"}, 1, []string{"ده هيكون الناتج لو اتجمعت 9-(3-1).", "الطرح على نفس المستوى بيتحسب left associative.", "العملية بتطرح قيمتين من 9."}),
+		ch20Question("c204.predict-associativity", "توقّع ناتج العملية من اليسار لليمين:\n\n~~~go\nfunc main() {\nfmt.Println(9 - 3 - 1)\n}\n~~~", []string{"7", "5", "9"}, 1, []string{"ده هيكون الناتج لو اتجمعت 9-(3-1).", "الطرح على نفس المستوى بيتحسب left associative.", "الـoperator بتطرح الـvalues اللي بعدها من 9."}),
 		ch20Walkthrough("c204.associativity-reveal", "تابع طرح متسلسل بنفس أولوية العمليات.", `func main() {
 fmt.Println(9 - 3 - 1)
 }`, "e204-associativity", []string{"fmt"}, []LessonFrame{
@@ -383,23 +383,23 @@ fmt.Println(9 - 3 - 1)
 				map[string]any{"expression": "4 + 2 * 3", "value": ch20Localized("لسه ما اتحسبتش", "not evaluated"), "caption": ch20Localized("ابدأ بالتعبير كامل.", "Start with the full expression.")},
 				map[string]any{"expression": "2 * 3", "value": "6", "caption": ch20Localized("الضرب يرتبط أقوى.", "Multiplication binds more tightly.")},
 				map[string]any{"expression": "4 + 6", "value": "10", "caption": ch20Localized("اجمع بعد تقييم الضرب.", "Add after evaluating multiplication.")},
-				map[string]any{"expression": "10", "value": "10", "caption": ch20Localized("التعبير رجّع قيمة.", "The expression returns a value.")},
+				map[string]any{"expression": "10", "value": "10", "caption": ch20Localized("الـexpression رجّع الـvalue.", "The expression returns a value.")},
 			},
 			"labels": map[string]any{
 				"expression": ch20Localized("التعبير", "Expression"),
-				"value":      ch20Localized("القيمة", "Value"),
+				"value":      ch20Localized("الـvalue", "Value"),
 				"previous":   ch20Localized("السابق", "Previous"),
 				"next":       ch20Localized("التالي", "Next"),
 				"reset":      ch20Localized("من الأول", "Reset"),
 			},
 		}),
 	}},
-	{ID: "c204.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c204.watch", "- حلّل البرنامج كله قبل أي حركة؛ خطأ syntax ما يتحولش لأثر في العالم.\n- خطأ runtime يوقف الجمل الجاية، والحركة اللي تمت تفضل.")}},
+	{ID: "c204.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch20Markdown("c204.watch", "- حلّل البرنامج كله قبل أي حركة؛ syntax error ما يتحولش لأثر في العالم.\n- runtime error يوقف الجمل الجاية، والحركة اللي تمت تفضل.")}},
 	{ID: "c204.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch20Markdown("c204.plan", "افصل المراحل: parse للجمل والتعبيرات، ثم evaluation للـAST، ثم استدعاء ~FlightDrive.Step~.\n\nراجع مكان الخطأ في الـtoken أو الـoperator المناسبة قبل التجربة."),
-		ch20Question("c204.parse-first", "إمتى ينفع أول استدعاء حركة؟", []string{"بعد كل statement مباشرة أثناء parsing", "بعد نجاح parsing للبرنامج كله", "قبل قراءة tokens"}, 1, []string{"ده ممكن يحرّك الدرون قبل اكتشاف syntax غلط لاحق.", "الـAST الكامل يفصل syntax عن الآثار.", "لازم القواعد تتقري قبل التنفيذ."}),
+		ch20Markdown("c204.plan", "افصل المراحل: parse للجمل والتعبيرات، ثم evaluation للـAST، ثم استدعاء ~FlightDrive.Step~.\n\nراجع مكان الـerror في الـtoken أو الـoperator المناسبة قبل التجربة."),
+		ch20Question("c204.parse-first", "إمتى ينفع أول استدعاء حركة؟", []string{"بعد كل statement مباشرة أثناء parsing", "بعد نجاح parsing للبرنامج كله", "قبل قراءة tokens"}, 1, []string{"ده ممكن يحرّك الدرون قبل اكتشاف syntax error لاحق.", "الـAST الكامل يفصل syntax عن الآثار.", "لازم القواعد تتقري قبل التنفيذ."}),
 	}},
-	{ID: "c204.turn-step", Title: "دورك", Blocks: []LessonBlock{ch20Markdown("c204.turn", "ابدأ بتعبير صغير، وبعدها جرّب let وthrust. راقب الأخطاء والحركة المكتملة كل واحدة لوحدها.")}},
+	{ID: "c204.turn-step", Title: "دورك", Blocks: []LessonBlock{ch20Markdown("c204.turn", "ابدأ بتعبير صغير، وبعدها جرّب let وthrust. راقب الـerrors والحركة المكتملة كل واحدة لوحدها.")}},
 }
 
 var ch20EvaluatorEnglish = []LessonStep{
@@ -423,11 +423,11 @@ fmt.Println(9 - 3 - 1)
 				map[string]any{"expression": "4 + 2 * 3", "value": ch20Localized("لسه ما اتحسبتش", "not evaluated"), "caption": ch20Localized("ابدأ بالتعبير كامل.", "Start with the full expression.")},
 				map[string]any{"expression": "2 * 3", "value": "6", "caption": ch20Localized("الضرب يرتبط أقوى.", "Multiplication binds more tightly.")},
 				map[string]any{"expression": "4 + 6", "value": "10", "caption": ch20Localized("اجمع بعد تقييم الضرب.", "Add after evaluating multiplication.")},
-				map[string]any{"expression": "10", "value": "10", "caption": ch20Localized("التعبير رجّع قيمة.", "The expression returns a value.")},
+				map[string]any{"expression": "10", "value": "10", "caption": ch20Localized("الـexpression رجّع الـvalue.", "The expression returns a value.")},
 			},
 			"labels": map[string]any{
 				"expression": ch20Localized("التعبير", "Expression"),
-				"value":      ch20Localized("القيمة", "Value"),
+				"value":      ch20Localized("الـvalue", "Value"),
 				"previous":   ch20Localized("السابق", "Previous"),
 				"next":       ch20Localized("التالي", "Next"),
 				"reset":      ch20Localized("من الأول", "Reset"),
