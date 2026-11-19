@@ -48,3 +48,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 44. **⌘S / Ctrl+S saves** — instead of opening the browser's "Save page as…" dialog (a common reflex), it saves the code immediately, pushes progress to the server and shows "Saved". Listed in the shortcuts sheet.
 45. **Smart Home key** — Home jumps to the first code character of the line, a second press to column 0 (Shift+Home selects), like code editors. Tested.
 46. **Search in the mission index** — a search box (focused when the index opens) filters the 181 missions by sheet code, id, title or chapter name. Numbers are exact: `3-1` shows only sheet 3-1 (not 13-1/23-1) and `3` shows chapter 3; empty results say so. Verified in the browser.
+47. **Enter in the index search opens the mission** — type `2-3` + Enter to jump straight to it (first unlocked match).

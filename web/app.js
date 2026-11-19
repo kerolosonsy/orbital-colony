@@ -1664,6 +1664,12 @@ function applyMissionFilter() {
   $("#mission-search-empty").hidden = shown > 0;
 }
 $("#mission-search").addEventListener("input", applyMissionFilter);
+// Enter opens the first open mission left after filtering
+$("#mission-search").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || !e.target.value.trim()) return;
+  const first = [...document.querySelectorAll("#chapter-list .cell[data-code]")].find((cell) => !cell.hidden && !cell.closest("[hidden]") && !cell.disabled);
+  if (first) { e.preventDefault(); first.click(); }
+});
 
 function cycleOverlayFocus(e) {
   if (e.key !== "Tab") return;
