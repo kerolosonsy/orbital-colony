@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -51,6 +52,14 @@ func TestCh29Lessons(t *testing.T) {
 				if block.ID != other.ID || block.Kind != other.Kind {
 					t.Errorf("%s: Arabic and English block identities differ", block.ID)
 				}
+				if block.Sandbox != nil {
+					if other.Sandbox == nil || block.Sandbox.Kind != other.Sandbox.Kind || !reflect.DeepEqual(block.Sandbox.Config, other.Sandbox.Config) {
+						t.Errorf("%s: sandbox kind or config differs by language", block.ID)
+					}
+					if !strings.HasPrefix(block.Sandbox.Kind, "ch29-") {
+						t.Errorf("%s: sandbox kind %q needs a ch29- prefix", block.ID, block.Sandbox.Kind)
+					}
+				}
 				if block.Question != nil && (other.Question == nil || block.Question.Answer != other.Question.Answer || len(block.Question.Options) != len(other.Question.Options)) {
 					t.Errorf("%s: question answer or option count differs", block.ID)
 				}
@@ -93,6 +102,45 @@ func TestCh29Lessons(t *testing.T) {
 	}
 }
 
+func TestCh29SandboxFixtures(t *testing.T) {
+	type fixture struct {
+		ID     string         `json:"id"`
+		Kind   string         `json:"kind"`
+		Config map[string]any `json:"config"`
+	}
+	data, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch29.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]fixture
+	if err := json.Unmarshal(data, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	ids := []string{"29-1-sqlite-crud", "29-2-migrations", "29-3-transfer", "29-4-pool", "29-5-sqlx", "29-6-gorm"}
+	if len(fixtures) != len(ids) {
+		t.Fatalf("got %d sandbox fixtures, want %d", len(fixtures), len(ids))
+	}
+	for _, id := range ids {
+		level := Get(id)
+		block := level.Steps[2].Blocks[2]
+		fixture, ok := fixtures[id]
+		if !ok {
+			t.Errorf("missing fixture for %s", id)
+			continue
+		}
+		if block.ID != fixture.ID || block.Sandbox.Kind != fixture.Kind {
+			t.Errorf("%s: fixture identity differs", id)
+		}
+		want, _ := json.Marshal(fixture.Config)
+		for language, steps := range map[string][]LessonStep{"ar": level.Steps, "en": level.En.Steps} {
+			got, _ := json.Marshal(steps[2].Blocks[2].Sandbox.Config)
+			if string(got) != string(want) {
+				t.Errorf("%s %s: Config differs from JavaScript fixture", id, language)
+			}
+		}
+	}
+}
+
 func ch29ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonStep, hints, titles []string) int {
 	t.Helper()
 	seen := map[string]bool{}
@@ -106,6 +154,7 @@ func ch29ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonSte
 		seen[id] = true
 	}
 	words := 0
+	sandboxCount := 0
 	for stepIndex, step := range steps {
 		claim(step.ID)
 		if step.Title != titles[stepIndex] || len(step.Blocks) == 0 {
@@ -122,6 +171,11 @@ func ch29ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonSte
 			case "markdown":
 				if block.Question != nil || block.Walkthrough != nil || block.Sandbox != nil || block.Code != "" {
 					t.Errorf("%s: %s markdown has another payload", name, block.ID)
+				}
+			case "sandbox":
+				sandboxCount++
+				if block.Sandbox == nil || block.Question != nil || block.Walkthrough != nil || block.Code != "" || !strings.HasPrefix(block.Sandbox.Kind, "ch29-") {
+					t.Errorf("%s: %s has an invalid chapter sandbox", name, block.ID)
 				}
 			case "question":
 				if block.Question == nil || len(block.Question.Options) < 2 || len(block.Question.Options) != len(block.Question.Feedback) || block.Question.Answer < 0 || block.Question.Answer >= len(block.Question.Options) {
@@ -151,6 +205,9 @@ func ch29ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonSte
 			}
 		}
 	}
+	if sandboxCount != 1 {
+		t.Errorf("%s: expected exactly one sandbox, got %d", name, sandboxCount)
+	}
 	if len(hints) != 3 {
 		t.Errorf("%s: expected exactly three hints", name)
 	} else {
@@ -169,10 +226,13 @@ func ch29ValidateLessonCopy(t *testing.T, name, prefix string, steps []LessonSte
 	}
 	if len(steps) > 2 {
 		try := steps[2]
-		if len(try.Blocks) != 2 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" {
-			t.Errorf("%s: Try it must predict first, then reveal with a walkthrough", name)
+		if len(try.Blocks) != 3 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" || try.Blocks[2].Kind != "sandbox" {
+			t.Errorf("%s: Try it must predict, reveal, then show one sandbox", name)
 		} else if strings.TrimSpace(ch29QuestionCode(try.Blocks[0].Text)) != strings.TrimSpace(try.Blocks[1].Code) {
 			t.Errorf("%s: prediction and reveal code differ", name)
+		}
+		if len(try.Blocks) == 3 && (try.Blocks[2].Sandbox == nil || !strings.HasPrefix(try.Blocks[2].Sandbox.Kind, "ch29-")) {
+			t.Errorf("%s: Try it needs one sandbox with a ch29- kind", name)
 		}
 	}
 	t.Logf("%s learner-authored words: %d", name, words)

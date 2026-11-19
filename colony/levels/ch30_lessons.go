@@ -20,6 +20,19 @@ func ch30Caption(arabic, englishText string, useEnglish bool) string {
 	return arabic
 }
 
+func ch30TextPair(ar, en string) map[string]string {
+	return map[string]string{"ar": ar, "en": en}
+}
+
+func ch30SandboxBlock(id, kind string, config map[string]any, english bool) LessonBlock {
+	intro := config["intro"].(map[string]string)
+	text := intro["ar"]
+	if english {
+		text = intro["en"]
+	}
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
 func ch30Walkthrough(id, text, code, exampleID string, imports []string, frames []LessonFrame) LessonBlock {
 	return LessonBlock{
 		ID:          id,
@@ -72,6 +85,7 @@ var ch30Lesson301Arabic = []LessonStep{
 			"ok بيقول إن المفتاح مش موجود.",
 		}),
 		ch30CacheMiss("تابع القيمة وراية الوجود لحد الطباعة.", false),
+		ch30SandboxBlock("c301.playground", "ch30-cache-aside", ch30CacheConfig, false),
 	}},
 	{ID: "c301.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c301.watch", "- ~redis.Nil~ غياب مؤكد؛ باقي أخطاء Redis ممكن تكون عطل.\n- نجاح الحفظ يسبق حذف المفتاح؛ فشل الحذف يفضل محتاج مزامنة.")}},
 	{ID: "c301.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -95,6 +109,7 @@ var ch30Lesson301English = []LessonStep{
 			"The flag says the key was not found.",
 		}),
 		ch30CacheMiss("Follow the value and presence flag to the print.", true),
+		ch30SandboxBlock("c301.playground", "ch30-cache-aside", ch30CacheConfig, true),
 	}},
 	{ID: "c301.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch30Markdown("c301.watch", "- ~redis.Nil~ means confirmed absence; other Redis errors may be outages.\n- Save before deleting the key; a failed deletion still needs synchronization.")}},
 	{ID: "c301.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -151,6 +166,7 @@ var ch30Lesson302Arabic = []LessonStep{
 			"الزيادة مش أول عنصر في الصفحة.",
 		}),
 		ch30Page("شوف عدد الصفوف قبل وبعد الحد، وإشارة الزيادة.", false),
+		ch30SandboxBlock("c302.playground", "ch30-document-pages", ch30DocumentConfig, false),
 	}},
 	{ID: "c302.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c302.watch", "- الفحص قبل insert مش بديل عن unique index.\n- اقفل ~cursor~ حتى مع خطأ، وافحص ~Err~ بعد اللف.")}},
 	{ID: "c302.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -174,6 +190,7 @@ var ch30Lesson302English = []LessonStep{
 			"The extra row is not the page's first item.",
 		}),
 		ch30Page("Compare rows before and after the limit, plus the extra flag.", true),
+		ch30SandboxBlock("c302.playground", "ch30-document-pages", ch30DocumentConfig, true),
 	}},
 	{ID: "c302.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch30Markdown("c302.watch", "- A pre-insert check cannot replace a unique index.\n- Close the ~cursor~ on errors, and check ~Err~ after iteration.")}},
 	{ID: "c302.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -228,6 +245,7 @@ var ch30Lesson303Arabic = []LessonStep{
 			"العنصرين موجودين بعد الترتيب.",
 		}),
 		ch30Sort("تابع slice قبل sort وبعدها، ثم راقب الطباعة.", false),
+		ch30SandboxBlock("c303.playground", "ch30-search-index", ch30IndexConfig, false),
 	}},
 	{ID: "c303.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c303.watch", "- اجمع كلمات السؤال المختلفة مرة واحدة؛ ترتيب map غير مضمون.\n- رتّب كل النتائج قبل تطبيق ~offset~ و~limit~.")}},
 	{ID: "c303.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -251,6 +269,7 @@ var ch30Lesson303English = []LessonStep{
 			"Both values remain after sorting.",
 		}),
 		ch30Sort("Follow the slice before and after sort, then watch the print.", true),
+		ch30SandboxBlock("c303.playground", "ch30-search-index", ch30IndexConfig, true),
 	}},
 	{ID: "c303.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch30Markdown("c303.watch", "- Count distinct query terms once; map order is unspecified.\n- Sort all hits before applying ~offset~ and ~limit~.")}},
 	{ID: "c303.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -304,6 +323,7 @@ var ch30Lesson304Arabic = []LessonStep{
 			"Is بترجع true أو false مش نص الرسالة.",
 		}),
 		ch30WrappedError("امشِ من السبب، للتغليف، وبعدها لفحص errors.Is.", false),
+		ch30SandboxBlock("c304.playground", "ch30-read-write-window", ch30ReadWriteConfig, false),
 	}},
 	{ID: "c304.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c304.watch", "- خطأ مجال من النسخة مش معناه إنها واقعة؛ fallback له سبب محدد.\n- القراية ما تجددش النافذة، وفشل الكتابة ما يغيّرش علامتها.")}},
 	{ID: "c304.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -327,6 +347,7 @@ var ch30Lesson304English = []LessonStep{
 			"Is returns true or false, not the message.",
 		}),
 		ch30WrappedError("Follow the cause, its wrapper, then the errors.Is check.", true),
+		ch30SandboxBlock("c304.playground", "ch30-read-write-window", ch30ReadWriteConfig, true),
 	}},
 	{ID: "c304.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch30Markdown("c304.watch", "- A replica domain error does not prove an outage; fallback has a specific cause.\n- Reads do not renew the window, and failed writes do not change it.")}},
 	{ID: "c304.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -386,6 +407,7 @@ var ch30Lesson30bArabic = []LessonStep{
 			"الاثنان جزء من الخطأ المركب.",
 		}),
 		ch30JoinedErrors("تابع تكوين الخطأ المركب، ثم افحص كل سبب.", false),
+		ch30SandboxBlock("c30b.playground", "ch30-commit-cache-boundary", ch30BossConfig, false),
 	}},
 	{ID: "c30b.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c30b.watch", "- تحقّق من الطلب والسطور قبل أي كتابة.\n- فشل cache بعد commit ما يرجّعش خصم القاعدة.")}},
 	{ID: "c30b.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -409,6 +431,7 @@ var ch30Lesson30bEnglish = []LessonStep{
 			"Both errors belong to the joined value.",
 		}),
 		ch30JoinedErrors("Follow the joined error, then check each cause.", true),
+		ch30SandboxBlock("c30b.playground", "ch30-commit-cache-boundary", ch30BossConfig, true),
 	}},
 	{ID: "c30b.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch30Markdown("c30b.watch", "- Validate the request and lines before writing.\n- Cache failure after commit does not undo database debits.")}},
 	{ID: "c30b.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -420,4 +443,63 @@ var ch30Lesson30bEnglish = []LessonStep{
 		}),
 	}},
 	{ID: "c30b.turn-step", Title: "Your turn", Blocks: []LessonBlock{ch30Markdown("c30b.turn", "Draw the transaction boundary first, then add the cache effect.")}},
+}
+
+var ch30CacheConfig = map[string]any{
+	"intro": ch30TextPair("اقرأ مرة مع cache miss، وبعدها جرّب hit.", "Read through a cache miss, then try a hit."),
+	"labels": map[string]any{
+		"key": ch30TextPair("المفتاح", "Key"), "cache": ch30TextPair("الكاش", "Cache"), "store": ch30TextPair("المخزن", "Store"),
+		"result": ch30TextPair("مصدر القراءة", "Read source"), "read": ch30TextPair("اقرأ", "Read"), "evict": ch30TextPair("امسح من الكاش", "Evict cache"),
+		"miss": ch30TextPair("مش موجود", "Miss"), "hit": ch30TextPair("موجود", "Hit"), "cacheSource": ch30TextPair("الكاش", "Cache"),
+		"storeSource": ch30TextPair("المخزن", "Store"), "filled": ch30TextPair("الكاش اتملأ", "Cache filled"),
+	},
+	"key": ch30TextPair("ridge", "ridge"), "value": ch30TextPair("جاهز", "ready"), "cachePresent": false,
+}
+
+var ch30DocumentConfig = map[string]any{
+	"intro": ch30TextPair("تنقّل بين صفحات صغيرة وشوف وجود صفوف زيادة.", "Move through small pages and watch for extra rows."),
+	"labels": map[string]any{
+		"page": ch30TextPair("الصفحة", "Page"), "documents": ch30TextPair("المستندات", "Documents"),
+		"more": ch30TextPair("فيه صفحة تانية", "More rows"), "next": ch30TextPair("الصفحة التالية", "Next page"),
+		"reset": ch30TextPair("ابدأ من الأول", "Reset"), "yes": ch30TextPair("آه", "Yes"), "no": ch30TextPair("لأ", "No"),
+	},
+	"pageSize": 2,
+	"rows":     []any{ch30TextPair("mica · 4", "mica · 4"), ch30TextPair("slate · 7", "slate · 7"), ch30TextPair("quartz · 9", "quartz · 9"), ch30TextPair("basalt · 12", "basalt · 12"), ch30TextPair("flint · 15", "flint · 15")},
+}
+
+var ch30IndexConfig = map[string]any{
+	"intro": ch30TextPair("اختار term وشوف قائمة النشرات المرتبطة.", "Pick a term and inspect its posting list."),
+	"labels": map[string]any{
+		"term": ch30TextPair("الكلمة", "Term"), "postings": ch30TextPair("قائمة النشرات", "Posting list"),
+		"lookup": ch30TextPair("جرّب كلمة تانية", "Look up another term"), "mapNote": ch30TextPair("ترتيب map مش مضمون.", "Map order is unspecified."),
+	},
+	"terms": []any{
+		map[string]any{"term": ch30TextPair("amber", "amber"), "postings": []any{ch30TextPair("note-q", "note-q"), ch30TextPair("note-m", "note-m")}},
+		map[string]any{"term": ch30TextPair("slate", "slate"), "postings": []any{ch30TextPair("note-r", "note-r"), ch30TextPair("note-b", "note-b"), ch30TextPair("note-x", "note-x")}},
+	},
+}
+
+var ch30ReadWriteConfig = map[string]any{
+	"intro": ch30TextPair("اكتب لجلسة، وقدّم الساعة وشوف مسار القراءة.", "Write for one session, advance time, and watch its read route."),
+	"labels": map[string]any{
+		"clock": ch30TextPair("الوقت", "Time"), "ownSession": ch30TextPair("الجلسة دي", "This session"),
+		"otherSession": ch30TextPair("جلسة تانية", "Another session"), "route": ch30TextPair("مسار القراءة", "Read route"),
+		"primary": ch30TextPair("Primary", "Primary"), "replica": ch30TextPair("Replica", "Replica"),
+		"write": ch30TextPair("كتابة ناجحة", "Successful write"), "advance": ch30TextPair("قدّم الوقت", "Advance time"),
+		"reset": ch30TextPair("ابدأ من الأول", "Reset"), "tick": ch30TextPair("دقيقة", "minute"),
+	},
+	"now": 0, "stickyTicks": 2,
+}
+
+var ch30BossConfig = map[string]any{
+	"intro": ch30TextPair("احفظ الاقتراح، وبعدها جرّب فشل الكاش.", "Commit the proposal, then simulate a cache failure."),
+	"labels": map[string]any{
+		"draft": ch30TextPair("اقتراح الخصم", "Proposed debit"), "saved": ch30TextPair("المحفوظ في القاعدة", "Saved in database"),
+		"cache": ch30TextPair("الكاش", "Cache"), "notCommitted": ch30TextPair("لسه ما اتحفظش", "Not committed"),
+		"committed": ch30TextPair("اتحفظ", "Committed"), "fresh": ch30TextPair("متزامن", "In sync"),
+		"warning": ch30TextPair("تحذير مزامنة", "Sync warning"), "commit": ch30TextPair("اعمل commit", "Commit transaction"),
+		"failCache": ch30TextPair("حاكي فشل الكاش", "Simulate cache failure"), "reset": ch30TextPair("ابدأ من الأول", "Reset"),
+		"savedBoundary": ch30TextPair("القاعدة اتثبتت قبل الكاش.", "The database committed before cache work."),
+	},
+	"before": 7, "proposed": 9,
 }

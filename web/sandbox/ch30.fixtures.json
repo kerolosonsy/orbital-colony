@@ -1,0 +1,308 @@
+{
+  "30-1-cache-aside": {
+    "id": "c301.playground",
+    "kind": "ch30-cache-aside",
+    "config": {
+      "cachePresent": false,
+      "intro": {
+        "ar": "اقرأ مرة مع cache miss، وبعدها جرّب hit.",
+        "en": "Read through a cache miss, then try a hit."
+      },
+      "key": {
+        "ar": "ridge",
+        "en": "ridge"
+      },
+      "labels": {
+        "cache": {
+          "ar": "الكاش",
+          "en": "Cache"
+        },
+        "cacheSource": {
+          "ar": "الكاش",
+          "en": "Cache"
+        },
+        "evict": {
+          "ar": "امسح من الكاش",
+          "en": "Evict cache"
+        },
+        "filled": {
+          "ar": "الكاش اتملأ",
+          "en": "Cache filled"
+        },
+        "hit": {
+          "ar": "موجود",
+          "en": "Hit"
+        },
+        "key": {
+          "ar": "المفتاح",
+          "en": "Key"
+        },
+        "miss": {
+          "ar": "مش موجود",
+          "en": "Miss"
+        },
+        "read": {
+          "ar": "اقرأ",
+          "en": "Read"
+        },
+        "result": {
+          "ar": "مصدر القراءة",
+          "en": "Read source"
+        },
+        "store": {
+          "ar": "المخزن",
+          "en": "Store"
+        },
+        "storeSource": {
+          "ar": "المخزن",
+          "en": "Store"
+        }
+      },
+      "value": {
+        "ar": "جاهز",
+        "en": "ready"
+      }
+    }
+  },
+  "30-2-documents": {
+    "id": "c302.playground",
+    "kind": "ch30-document-pages",
+    "config": {
+      "intro": {
+        "ar": "تنقّل بين صفحات صغيرة وشوف وجود صفوف زيادة.",
+        "en": "Move through small pages and watch for extra rows."
+      },
+      "labels": {
+        "documents": {
+          "ar": "المستندات",
+          "en": "Documents"
+        },
+        "more": {
+          "ar": "فيه صفحة تانية",
+          "en": "More rows"
+        },
+        "next": {
+          "ar": "الصفحة التالية",
+          "en": "Next page"
+        },
+        "no": {
+          "ar": "لأ",
+          "en": "No"
+        },
+        "page": {
+          "ar": "الصفحة",
+          "en": "Page"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        },
+        "yes": {
+          "ar": "آه",
+          "en": "Yes"
+        }
+      },
+      "pageSize": 2,
+      "rows": [
+        {
+          "ar": "mica · 4",
+          "en": "mica · 4"
+        },
+        {
+          "ar": "slate · 7",
+          "en": "slate · 7"
+        },
+        {
+          "ar": "quartz · 9",
+          "en": "quartz · 9"
+        },
+        {
+          "ar": "basalt · 12",
+          "en": "basalt · 12"
+        },
+        {
+          "ar": "flint · 15",
+          "en": "flint · 15"
+        }
+      ]
+    }
+  },
+  "30-3-search-index": {
+    "id": "c303.playground",
+    "kind": "ch30-search-index",
+    "config": {
+      "intro": {
+        "ar": "اختار term وشوف قائمة النشرات المرتبطة.",
+        "en": "Pick a term and inspect its posting list."
+      },
+      "labels": {
+        "lookup": {
+          "ar": "جرّب كلمة تانية",
+          "en": "Look up another term"
+        },
+        "mapNote": {
+          "ar": "ترتيب map مش مضمون.",
+          "en": "Map order is unspecified."
+        },
+        "postings": {
+          "ar": "قائمة النشرات",
+          "en": "Posting list"
+        },
+        "term": {
+          "ar": "الكلمة",
+          "en": "Term"
+        }
+      },
+      "terms": [
+        {
+          "postings": [
+            {
+              "ar": "note-q",
+              "en": "note-q"
+            },
+            {
+              "ar": "note-m",
+              "en": "note-m"
+            }
+          ],
+          "term": {
+            "ar": "amber",
+            "en": "amber"
+          }
+        },
+        {
+          "postings": [
+            {
+              "ar": "note-r",
+              "en": "note-r"
+            },
+            {
+              "ar": "note-b",
+              "en": "note-b"
+            },
+            {
+              "ar": "note-x",
+              "en": "note-x"
+            }
+          ],
+          "term": {
+            "ar": "slate",
+            "en": "slate"
+          }
+        }
+      ]
+    }
+  },
+  "30-4-read-write-split": {
+    "id": "c304.playground",
+    "kind": "ch30-read-write-window",
+    "config": {
+      "intro": {
+        "ar": "اكتب لجلسة، وقدّم الساعة وشوف مسار القراءة.",
+        "en": "Write for one session, advance time, and watch its read route."
+      },
+      "labels": {
+        "advance": {
+          "ar": "قدّم الوقت",
+          "en": "Advance time"
+        },
+        "clock": {
+          "ar": "الوقت",
+          "en": "Time"
+        },
+        "otherSession": {
+          "ar": "جلسة تانية",
+          "en": "Another session"
+        },
+        "ownSession": {
+          "ar": "الجلسة دي",
+          "en": "This session"
+        },
+        "primary": {
+          "ar": "Primary",
+          "en": "Primary"
+        },
+        "replica": {
+          "ar": "Replica",
+          "en": "Replica"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        },
+        "route": {
+          "ar": "مسار القراءة",
+          "en": "Read route"
+        },
+        "tick": {
+          "ar": "دقيقة",
+          "en": "minute"
+        },
+        "write": {
+          "ar": "كتابة ناجحة",
+          "en": "Successful write"
+        }
+      },
+      "now": 0,
+      "stickyTicks": 2
+    }
+  },
+  "30-boss-nursery": {
+    "id": "c30b.playground",
+    "kind": "ch30-commit-cache-boundary",
+    "config": {
+      "before": 7,
+      "intro": {
+        "ar": "احفظ الاقتراح، وبعدها جرّب فشل الكاش.",
+        "en": "Commit the proposal, then simulate a cache failure."
+      },
+      "labels": {
+        "cache": {
+          "ar": "الكاش",
+          "en": "Cache"
+        },
+        "commit": {
+          "ar": "اعمل commit",
+          "en": "Commit transaction"
+        },
+        "committed": {
+          "ar": "اتحفظ",
+          "en": "Committed"
+        },
+        "draft": {
+          "ar": "اقتراح الخصم",
+          "en": "Proposed debit"
+        },
+        "failCache": {
+          "ar": "حاكي فشل الكاش",
+          "en": "Simulate cache failure"
+        },
+        "fresh": {
+          "ar": "متزامن",
+          "en": "In sync"
+        },
+        "notCommitted": {
+          "ar": "لسه ما اتحفظش",
+          "en": "Not committed"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        },
+        "saved": {
+          "ar": "المحفوظ في القاعدة",
+          "en": "Saved in database"
+        },
+        "savedBoundary": {
+          "ar": "القاعدة اتثبتت قبل الكاش.",
+          "en": "The database committed before cache work."
+        },
+        "warning": {
+          "ar": "تحذير مزامنة",
+          "en": "Sync warning"
+        }
+      },
+      "proposed": 9
+    }
+  }
+}

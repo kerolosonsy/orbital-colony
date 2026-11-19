@@ -1,1 +1,65 @@
-/* Chapter 29 sandbox styles will be added with its renderer. */
+.ch29-playground {
+  box-sizing: border-box;
+  inline-size: min(100%, 290px);
+  max-inline-size: 290px;
+  padding: 0.7rem;
+  border: 1px solid var(--lesson-border, #cbd5e1);
+  border-radius: 0.7rem;
+  background: var(--lesson-surface, #fff);
+  text-align: start;
+}
+
+.ch29-playground * {
+  box-sizing: border-box;
+}
+
+.ch29-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-block: 0.35rem;
+}
+
+.ch29-label,
+.ch29-status,
+.ch29-note {
+  margin: 0.4rem 0;
+  color: var(--lesson-muted, #475569);
+  font-size: 0.88rem;
+}
+
+.ch29-value {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  unicode-bidi: isolate;
+}
+
+.ch29-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-block-start: 0.65rem;
+}
+
+.ch29-controls button {
+  max-inline-size: 100%;
+  font: inherit;
+}
+
+.ch29-transfer-log,
+.ch29-child-list {
+  margin: 0.45rem 0;
+  padding-inline-start: 1.35rem;
+}
+
+.ch29-transfer-log li,
+.ch29-child-list li {
+  margin-block: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.ch29-status[role="status"] {
+  min-block-size: 1.35em;
+}
