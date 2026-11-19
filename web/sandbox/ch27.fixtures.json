@@ -2,10 +2,10 @@
   "ch27-signed-pass": {
     "labels": {
       "payload": {"ar": "الـpayload", "en": "Payload"},
-      "key": {"ar": "المفتاح", "en": "Key"},
+      "key": {"ar": "الـkey", "en": "Key"},
       "tag": {"ar": "tag توضيحي", "en": "Toy tag"},
       "changeMessage": {"ar": "غيّر الرسالة", "en": "Change message"},
-      "rotateKey": {"ar": "بدّل المفتاح", "en": "Rotate key"},
+      "rotateKey": {"ar": "بدّل الـkey", "en": "Rotate key"},
       "caption": {"ar": "الرسالة مقروءة والـtag يتغير.", "en": "The payload stays readable; the tag changes."}
     },
     "messages": ["crew=Mira", "crew=Vega"],
@@ -15,7 +15,7 @@
   "ch27-session-lookup": {
     "labels": {
       "browser": {"ar": "مع المتصفح", "en": "Browser holds"},
-      "server": {"ar": "نتيجة السيرفر", "en": "Server lookup"},
+      "server": {"ar": "نتيجة الـserver", "en": "Server lookup"},
       "next": {"ar": "بدّل الـID", "en": "Switch ID"}
     },
     "lookups": [
@@ -27,24 +27,24 @@
     "labels": {
       "method": {"ar": "الطريقة", "en": "Method"},
       "stage": {"ar": "الفرع", "en": "Path"},
-      "status": {"ar": "الرد", "en": "Response"},
+      "status": {"ar": "الـresponse", "en": "Response"},
       "innerCalls": {"ar": "نداءات handler", "en": "Handler calls"},
-      "next": {"ar": "الطلب التالي", "en": "Next request"}
+      "next": {"ar": "الـrequest التالي", "en": "Next request"}
     },
     "requests": [
       {"method": "OPTIONS", "stage": "preflight", "status": "204", "calls": "0", "caption": {"ar": "الفرع ده ما ناداش handler.", "en": "This branch skipped the handler."}},
-      {"method": "GET", "stage": "route", "status": "200", "calls": "1", "caption": {"ar": "الطلب العادي وصل للـhandler.", "en": "The normal request reached the handler."}}
+      {"method": "GET", "stage": "route", "status": "200", "calls": "1", "caption": {"ar": "الـrequest العادي وصل للـhandler.", "en": "The normal request reached the handler."}}
     ]
   },
   "ch27-client-counts": {
     "labels": {
-      "client": {"ar": "العميل", "en": "Client"},
-      "count": {"ar": "الطلبات", "en": "Requests"},
+      "client": {"ar": "الـclient", "en": "Client"},
+      "count": {"ar": "الـrequests", "en": "Requests"},
       "caption": {"ar": "كل عنوان له عدّاده.", "en": "Each address has its own count."}
     },
     "clients": [
-      {"address": "198.51.100.8", "button": {"ar": "طلب من A", "en": "Request A"}},
-      {"address": "198.51.100.9", "button": {"ar": "طلب من B", "en": "Request B"}}
+      {"address": "198.51.100.8", "button": {"ar": "request من A", "en": "Request A"}},
+      {"address": "198.51.100.9", "button": {"ar": "request من B", "en": "Request B"}}
     ]
   },
   "ch27-base62-index": {

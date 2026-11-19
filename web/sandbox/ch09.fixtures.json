@@ -5,17 +5,17 @@
       "en": "Next step"
     },
     "intro": {
-      "ar": "خطوة بخطوة، حدّث قيمة المفتاح.",
+      "ar": "خطوة بخطوة، حدّث الـvalue المرتبطة بالـkey.",
       "en": "Step through updates to one map key."
     },
     "mapLabel": {
-      "ar": "الخريطة",
+      "ar": "الـmap",
       "en": "Map"
     },
     "steps": [
       {
         "caption": {
-          "ar": "بدأت الخريطة فاضية.",
+          "ar": "الـmap بدأت فاضية.",
           "en": "The map starts empty."
         },
         "map": {
@@ -25,7 +25,7 @@
       },
       {
         "caption": {
-          "ar": "اتضاف مفتاح جديد.",
+          "ar": "اتضاف key جديد.",
           "en": "A new key is added."
         },
         "map": {
@@ -35,7 +35,7 @@
       },
       {
         "caption": {
-          "ar": "اتحدّثت قيمة نفس المفتاح.",
+          "ar": "الـvalue المرتبطة بنفس الـkey اتحدّثت.",
           "en": "The same key is updated."
         },
         "map": {
@@ -117,7 +117,7 @@
       "en": "Switch the view; inspect Stringer."
     },
     "outputLabel": {
-      "ar": "شكل القيمة",
+      "ar": "شكل الـvalue",
       "en": "Value display"
     },
     "showDefault": {
@@ -185,7 +185,7 @@
       "en": "Type"
     },
     "valueLabel": {
-      "ar": "القيمة",
+      "ar": "الـvalue",
       "en": "Value"
     },
     "values": [
@@ -231,7 +231,7 @@
           "en": "Point"
         },
         "effect": {
-          "ar": "اقرأ الحقول",
+          "ar": "اقرا الحقول",
           "en": "Read its fields"
         },
         "type": {

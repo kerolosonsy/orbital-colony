@@ -5,7 +5,7 @@
         "events": [
           {
             "caption": {
-              "ar": "مفيش عامل ماسك قفل",
+              "ar": "مفيش عامل ماسك lock",
               "en": "No worker holds a lock"
             },
             "cart": "free",
@@ -14,7 +14,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A أخد المثقاب",
+              "ar": "العامل A أخد الـlock بتاع المثقاب",
               "en": "Worker A takes Drill"
             },
             "cart": "free",
@@ -23,7 +23,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B مستني المثقاب",
+              "ar": "العامل B مستني الـlock بتاع المثقاب",
               "en": "Worker B waits for Drill"
             },
             "cart": "free",
@@ -32,7 +32,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A أخد العربية",
+              "ar": "العامل A أخد الـlock بتاع العربية",
               "en": "Worker A takes Cart"
             },
             "cart": "a",
@@ -41,7 +41,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A فتح القفلين",
+              "ar": "العامل A فكّ الـlocks الاتنين",
               "en": "Worker A releases both"
             },
             "cart": "free",
@@ -50,7 +50,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B أخد المثقاب",
+              "ar": "العامل B أخد الـlock بتاع المثقاب",
               "en": "Worker B takes Drill"
             },
             "cart": "free",
@@ -59,7 +59,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B أخد العربية",
+              "ar": "العامل B أخد الـlock بتاع العربية",
               "en": "Worker B takes Cart"
             },
             "cart": "b",
@@ -85,7 +85,7 @@
         "events": [
           {
             "caption": {
-              "ar": "مفيش عامل ماسك قفل",
+              "ar": "مفيش عامل ماسك lock",
               "en": "No worker holds a lock"
             },
             "cart": "free",
@@ -94,7 +94,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B أخد المثقاب",
+              "ar": "العامل B أخد الـlock بتاع المثقاب",
               "en": "Worker B takes Drill"
             },
             "cart": "free",
@@ -103,7 +103,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A مستني المثقاب",
+              "ar": "العامل A مستني الـlock بتاع المثقاب",
               "en": "Worker A waits for Drill"
             },
             "cart": "free",
@@ -112,7 +112,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B أخد العربية",
+              "ar": "العامل B أخد الـlock بتاع العربية",
               "en": "Worker B takes Cart"
             },
             "cart": "b",
@@ -121,7 +121,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B فتح القفلين",
+              "ar": "العامل B فكّ الـlocks الاتنين",
               "en": "Worker B releases both"
             },
             "cart": "free",
@@ -130,7 +130,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A أخد المثقاب",
+              "ar": "العامل A أخد الـlock بتاع المثقاب",
               "en": "Worker A takes Drill"
             },
             "cart": "free",
@@ -139,7 +139,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A أخد العربية",
+              "ar": "العامل A أخد الـlock بتاع العربية",
               "en": "Worker A takes Cart"
             },
             "cart": "a",
@@ -168,7 +168,7 @@
         "en": "Run again"
       },
       "cart": {
-        "ar": "العربية",
+        "ar": "الـlock بتاع العربية",
         "en": "Cart lock"
       },
       "cycle": {
@@ -180,7 +180,7 @@
         "en": "Both workers finished"
       },
       "drill": {
-        "ar": "المثقاب",
+        "ar": "الـlock بتاع المثقاب",
         "en": "Drill lock"
       },
       "fixed": {
@@ -192,7 +192,7 @@
         "en": "Free"
       },
       "lockOrder": {
-        "ar": "ترتيب الأقفال",
+        "ar": "ترتيب الـlocks",
         "en": "Lock order"
       },
       "mixed": {
@@ -204,7 +204,7 @@
         "en": "Next step"
       },
       "orderButton": {
-        "ar": "بدّل ترتيب الأقفال",
+        "ar": "بدّل ترتيب الـlocks",
         "en": "Toggle lock order"
       },
       "running": {
@@ -233,7 +233,7 @@
         "events": [
           {
             "caption": {
-              "ar": "مفيش عامل ماسك قفل",
+              "ar": "مفيش عامل ماسك lock",
               "en": "No worker holds a lock"
             },
             "cart": "free",
@@ -242,7 +242,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A أخد المثقاب",
+              "ar": "العامل A أخد الـlock بتاع المثقاب",
               "en": "Worker A takes Drill"
             },
             "cart": "free",
@@ -251,7 +251,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A أخد العربية",
+              "ar": "العامل A أخد الـlock بتاع العربية",
               "en": "Worker A takes Cart"
             },
             "cart": "a",
@@ -260,7 +260,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A فتح القفلين",
+              "ar": "العامل A فكّ الـlocks الاتنين",
               "en": "Worker A releases both"
             },
             "cart": "free",
@@ -269,7 +269,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B أخد العربية",
+              "ar": "العامل B أخد الـlock بتاع العربية",
               "en": "Worker B takes Cart"
             },
             "cart": "b",
@@ -278,7 +278,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B أخد المثقاب",
+              "ar": "العامل B أخد الـlock بتاع المثقاب",
               "en": "Worker B takes Drill"
             },
             "cart": "b",
@@ -296,7 +296,7 @@
           }
         ],
         "name": {
-          "ar": "A أخد القفلين الأول",
+          "ar": "A مسك الـlocks الاتنين الأول",
           "en": "A gets both locks first"
         }
       },
@@ -304,7 +304,7 @@
         "events": [
           {
             "caption": {
-              "ar": "مفيش عامل ماسك قفل",
+              "ar": "مفيش عامل ماسك lock",
               "en": "No worker holds a lock"
             },
             "cart": "free",
@@ -313,7 +313,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A أخد المثقاب",
+              "ar": "العامل A أخد الـlock بتاع المثقاب",
               "en": "Worker A takes Drill"
             },
             "cart": "free",
@@ -322,7 +322,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B أخد العربية",
+              "ar": "العامل B أخد الـlock بتاع العربية",
               "en": "Worker B takes Cart"
             },
             "cart": "b",
@@ -331,7 +331,7 @@
           },
           {
             "caption": {
-              "ar": "A مستني العربية عند B",
+              "ar": "A مستني الـlock بتاع العربية عند B",
               "en": "A waits for Cart held by B"
             },
             "cart": "b",
@@ -340,7 +340,7 @@
           },
           {
             "caption": {
-              "ar": "B مستني المثقاب عند A",
+              "ar": "B مستني الـlock بتاع المثقاب عند A",
               "en": "B waits for Drill held by A"
             },
             "cart": "b",
@@ -349,7 +349,7 @@
           }
         ],
         "name": {
-          "ar": "كل واحد ماسك قفل",
+          "ar": "كل واحد ماسك lock",
           "en": "Each worker holds one lock"
         }
       }
@@ -378,7 +378,7 @@
         "en": "Write log"
       },
       "map": {
-        "ar": "السجل",
+        "ar": "الـmap",
         "en": "Map"
       },
       "next": {
@@ -390,15 +390,15 @@
         "en": "One possible write order"
       },
       "shared": {
-        "ar": "قفل واحد",
+        "ar": "نفس الـlock",
         "en": "One shared lock"
       },
       "sharedLock": {
-        "ar": "القفل نفسه لكل الكتّاب",
+        "ar": "نفس الـmutex لكل الكتّاب",
         "en": "One mutex for every writer"
       },
       "start": {
-        "ar": "السجل بدأ فاضي",
+        "ar": "الـmap بدأت فاضية",
         "en": "Map starts empty"
       },
       "waitGroup": {
@@ -484,7 +484,7 @@
         "en": "All workers finished"
       },
       "mutex": {
-        "ar": "القفل المشترك",
+        "ar": "الـmutex المشتركة",
         "en": "Shared mutex"
       },
       "next": {
@@ -492,7 +492,7 @@
         "en": "Next step"
       },
       "off": {
-        "ar": "مقفول",
+        "ar": "locked",
         "en": "Off"
       },
       "on": {
@@ -521,7 +521,7 @@
         "locked": [
           {
             "caption": {
-              "ar": "الإجمالي يبدأ صفر",
+              "ar": "الإجمالي بيبدأ بصفر",
               "en": "Total starts at zero"
             },
             "done": false,
@@ -529,7 +529,7 @@
           },
           {
             "caption": {
-              "ar": "A مسك القفل وقرأ صفر",
+              "ar": "A عمل lock وقرا صفر",
               "en": "A locks and reads zero"
             },
             "done": false,
@@ -537,7 +537,7 @@
           },
           {
             "caption": {
-              "ar": "A كتب واحد وفتح القفل",
+              "ar": "A كتب واحد وفك الـlock",
               "en": "A writes one and unlocks"
             },
             "done": false,
@@ -545,7 +545,7 @@
           },
           {
             "caption": {
-              "ar": "B قرأ واحد تحت القفل",
+              "ar": "B قرا واحد والـlock مقفول",
               "en": "B reads one under lock"
             },
             "done": false,
@@ -553,7 +553,7 @@
           },
           {
             "caption": {
-              "ar": "B كتب اتنين وفتح القفل",
+              "ar": "B كتب اتنين وفك الـlock",
               "en": "B writes two and unlocks"
             },
             "done": true,
@@ -567,7 +567,7 @@
         "unlocked": [
           {
             "caption": {
-              "ar": "الإجمالي يبدأ صفر",
+              "ar": "الإجمالي بيبدأ بصفر",
               "en": "Total starts at zero"
             },
             "done": false,
@@ -575,7 +575,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A قرأ صفر",
+              "ar": "العامل A قرا صفر",
               "en": "Worker A reads zero"
             },
             "done": false,
@@ -583,7 +583,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B قرأ صفر",
+              "ar": "العامل B قرا صفر",
               "en": "Worker B reads zero"
             },
             "done": false,
@@ -611,7 +611,7 @@
         "locked": [
           {
             "caption": {
-              "ar": "الإجمالي يبدأ صفر",
+              "ar": "الإجمالي بيبدأ بصفر",
               "en": "Total starts at zero"
             },
             "done": false,
@@ -619,7 +619,7 @@
           },
           {
             "caption": {
-              "ar": "B مسك القفل وقرأ صفر",
+              "ar": "B عمل lock وقرا صفر",
               "en": "B locks and reads zero"
             },
             "done": false,
@@ -627,7 +627,7 @@
           },
           {
             "caption": {
-              "ar": "B كتب واحد وفتح القفل",
+              "ar": "B كتب واحد وفك الـlock",
               "en": "B writes one and unlocks"
             },
             "done": false,
@@ -635,7 +635,7 @@
           },
           {
             "caption": {
-              "ar": "A قرأ واحد تحت القفل",
+              "ar": "A قرا واحد والـlock مقفول",
               "en": "A reads one under lock"
             },
             "done": false,
@@ -643,7 +643,7 @@
           },
           {
             "caption": {
-              "ar": "A كتب اتنين وفتح القفل",
+              "ar": "A كتب اتنين وفك الـlock",
               "en": "A writes two and unlocks"
             },
             "done": true,
@@ -657,7 +657,7 @@
         "unlocked": [
           {
             "caption": {
-              "ar": "الإجمالي يبدأ صفر",
+              "ar": "الإجمالي بيبدأ بصفر",
               "en": "Total starts at zero"
             },
             "done": false,
@@ -665,7 +665,7 @@
           },
           {
             "caption": {
-              "ar": "العامل B قرأ صفر",
+              "ar": "العامل B قرا صفر",
               "en": "Worker B reads zero"
             },
             "done": false,
@@ -681,7 +681,7 @@
           },
           {
             "caption": {
-              "ar": "العامل A قرأ واحد",
+              "ar": "العامل A قرا واحد",
               "en": "Worker A reads one"
             },
             "done": false,

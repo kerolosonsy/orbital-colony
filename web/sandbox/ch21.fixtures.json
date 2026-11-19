@@ -9,7 +9,7 @@
       "environment": {"ar": "os.LookupEnv", "en": "os.LookupEnv"},
       "name": {"ar": "الاسم", "en": "Name"},
       "presence": {"ar": "الوجود", "en": "Presence"},
-      "value": {"ar": "القيمة", "en": "Value"},
+      "value": {"ar": "الـvalue", "en": "Value"},
       "present": {"ar": "موجود", "en": "Present"},
       "missing": {"ar": "غايب", "en": "Missing"},
       "next": {"ar": "الحالة الجاية", "en": "Next state"},
@@ -17,13 +17,13 @@
     },
     "states": [
       {"label": {"ar": "اسم غايب", "en": "Missing name"}, "value": {"ar": "مش موجود", "en": "Not set"}, "present": false},
-      {"label": {"ar": "قيمة فاضية", "en": "Empty value"}, "value": {"ar": "\"\"", "en": "\"\""}, "present": true},
-      {"label": {"ar": "قيمة موجودة", "en": "Present value"}, "value": {"ar": "crew-7", "en": "crew-7"}, "present": true}
+      {"label": {"ar": "value فاضية", "en": "Empty value"}, "value": {"ar": "\"\"", "en": "\"\""}, "present": true},
+      {"label": {"ar": "value موجودة", "en": "Present value"}, "value": {"ar": "crew-7", "en": "crew-7"}, "present": true}
     ]
   },
   "ch21-reader-lines": {
     "labels": {
-      "caption": {"ar": "كل Scan تكشف سطرًا واحدًا.", "en": "Each Scan exposes one line."},
+      "caption": {"ar": "كل Scan بتعرض سطر واحد.", "en": "Each Scan exposes one line."},
       "current": {"ar": "السطر الحالي", "en": "Current line"},
       "written": {"ar": "سطور وصلت للـwriter", "en": "Lines sent to writer"},
       "previous": {"ar": "السابق", "en": "Previous"},
@@ -48,7 +48,7 @@
       "selected": {"ar": "الاسم المختار", "en": "Selected label"},
       "calls": {"ar": "عدد النداءات", "en": "Calls"},
       "none": {"ar": "لسه مفيش اختيار", "en": "No choice yet"},
-      "caption": {"ar": "المصدر يرجع index أصغر من الحد.", "en": "The source returns an index below the bound."}
+      "caption": {"ar": "المصدر بيرجّع index أصغر من الحد.", "en": "The source returns an index below the bound."}
     },
     "choices": [{"ar": "amber", "en": "amber"}, {"ar": "cyan", "en": "cyan"}, {"ar": "violet", "en": "violet"}],
     "fixedResults": [1, 1, 1],
@@ -56,10 +56,10 @@
   },
   "ch21-maneuver-values": {
     "labels": {
-      "caption": {"ar": "اسم النوع يفصل القيمة عن النص.", "en": "A named type separates value from text."},
+      "caption": {"ar": "الـnamed type بيفصل الـvalue عن النص.", "en": "A named type separates value from text."},
       "command": {"ar": "نص الأمر", "en": "Command text"},
-      "named": {"ar": "القيمة المسماة", "en": "Named value"},
-      "ordinal": {"ar": "قيمة iota", "en": "iota value"},
+      "named": {"ar": "الـnamed value", "en": "Named value"},
+      "ordinal": {"ar": "value بتاعة iota", "en": "iota value"},
       "next": {"ar": "أمر توضيحي تاني", "en": "Next example command"}
     },
     "commands": [

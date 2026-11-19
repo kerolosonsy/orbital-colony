@@ -8,7 +8,7 @@
       "entries": {"ar": "المدخلات المرتبة", "en": "Sorted entries"}
     },
     "frames": [
-      {"caption": {"ar": "اقرأ عناصر الجذر أولًا.", "en": "Read root entries first."}, "depth": 0, "entries": [{"ar": "alpha/", "en": "alpha/"}, {"ar": "zeta.dat", "en": "zeta.dat"}]},
+      {"caption": {"ar": "اقرا عناصر الجذر الأول.", "en": "Read root entries first."}, "depth": 0, "entries": [{"ar": "alpha/", "en": "alpha/"}, {"ar": "zeta.dat", "en": "zeta.dat"}]},
       {"caption": {"ar": "انزل مجلدًا واحدًا.", "en": "Recurse one directory deeper."}, "depth": 1, "entries": [{"ar": "alpha/", "en": "alpha/"}, {"ar": "alpha/a.dat", "en": "alpha/a.dat"}, {"ar": "alpha/nest/", "en": "alpha/nest/"}, {"ar": "zeta.dat", "en": "zeta.dat"}]},
       {"caption": {"ar": "الحد يوقف قراءة الفروع.", "en": "The depth limit stops deeper reads."}, "depth": 2, "entries": [{"ar": "alpha/", "en": "alpha/"}, {"ar": "alpha/a.dat", "en": "alpha/a.dat"}, {"ar": "alpha/nest/", "en": "alpha/nest/"}, {"ar": "alpha/nest/b.dat", "en": "alpha/nest/b.dat"}, {"ar": "zeta.dat", "en": "zeta.dat"}]}
     ]
@@ -54,7 +54,7 @@
     "labels": {
       "fileA": {"ar": "الملف الأول", "en": "First file"},
       "fileB": {"ar": "الملف التاني", "en": "Second file"},
-      "sizes": {"ar": "الحجم بالبايت", "en": "Size in bytes"},
+      "sizes": {"ar": "الحجم بالـbytes", "en": "Size in bytes"},
       "sizeCheck": {"ar": "فلتر الحجم", "en": "Size filter"},
       "contentCheck": {"ar": "مقارنة المحتوى", "en": "Content comparison"},
       "hashes": {"ar": "بصمات المحتوى", "en": "Content digests"},

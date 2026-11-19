@@ -4,19 +4,19 @@
       {
         "name": { "ar": "X", "en": "X" },
         "value": 3,
-        "read": { "ar": "اقرأ X", "en": "Read X" },
-        "caption": { "ar": "قرأنا X من النقطة.", "en": "Read X from the point." }
+        "read": { "ar": "اقرا X", "en": "Read X" },
+        "caption": { "ar": "قرينا X من النقطة.", "en": "Read X from the point." }
       },
       {
         "name": { "ar": "Y", "en": "Y" },
         "value": 1,
-        "read": { "ar": "اقرأ Y", "en": "Read Y" },
-        "caption": { "ar": "قرأنا Y من النقطة.", "en": "Read Y from the point." }
+        "read": { "ar": "اقرا Y", "en": "Read Y" },
+        "caption": { "ar": "قرينا Y من النقطة.", "en": "Read Y from the point." }
       }
     ],
     "labels": {
       "object": { "ar": "حقول Point", "en": "Point fields" },
-      "output": { "ar": "القيمة المقروءة", "en": "Read value" },
+      "output": { "ar": "الـvalue اللي اتقرت", "en": "Read value" },
       "waiting": { "ar": "اختار حقل تقراه.", "en": "Choose a field to read." }
     }
   },
@@ -31,7 +31,7 @@
     "captions": {
       "ready": { "ar": "Nav لسه عند 2.", "en": "Nav starts at 2." },
       "updated": { "ar": "الـpointer receiver غيّر الأصل.", "en": "Pointer receiver changed the original." },
-      "reset": { "ar": "رجعنا لقيمة Nav الأصلية.", "en": "Nav returned to its starting value." }
+      "reset": { "ar": "رجعنا للـvalue الأصلية بتاعة Nav.", "en": "Nav returned to its starting value." }
     }
   },
   "ch07-manhattan": {
@@ -79,7 +79,7 @@
         "index": 0,
         "prompt": { "ar": "نوع التربة؟", "en": "Soil type?" },
         "choices": 2,
-        "caption": { "ar": "range بيدي index وقيمة.", "en": "range gives an index and value." }
+        "caption": { "ar": "range بيدي index وvalue.", "en": "range gives an index and value." }
       },
       {
         "index": 1,

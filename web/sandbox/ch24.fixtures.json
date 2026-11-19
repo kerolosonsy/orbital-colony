@@ -7,27 +7,27 @@
     "frames": [
       {
         "caption": {
-          "ar": "ترتيب ممكن: A قبل B؛ السعة ثابتة.",
+          "ar": "ترتيب ممكن: A قبل B؛ الـcapacity ثابتة.",
           "en": "Possible order: A then B; capacity stays fixed."
         },
         "rows": [
           {
             "label": {
-              "ar": "الطابور",
+              "ar": "الـqueue",
               "en": "Queue"
             },
             "value": "[A:4]"
           },
           {
             "label": {
-              "ar": "السعة",
+              "ar": "الـcapacity",
               "en": "Capacity"
             },
             "value": "2"
           },
           {
             "label": {
-              "ar": "الطول",
+              "ar": "الـlength",
               "en": "Length"
             },
             "value": "1"
@@ -36,27 +36,27 @@
       },
       {
         "caption": {
-          "ar": "ترتيب ممكن: B قبل A؛ السعة ثابتة.",
+          "ar": "ترتيب ممكن: B قبل A؛ الـcapacity ثابتة.",
           "en": "Possible order: B then A; capacity stays fixed."
         },
         "rows": [
           {
             "label": {
-              "ar": "الطابور",
+              "ar": "الـqueue",
               "en": "Queue"
             },
             "value": "[B:6]"
           },
           {
             "label": {
-              "ar": "السعة",
+              "ar": "الـcapacity",
               "en": "Capacity"
             },
             "value": "2"
           },
           {
             "label": {
-              "ar": "الطول",
+              "ar": "الـlength",
               "en": "Length"
             },
             "value": "1"
@@ -73,7 +73,7 @@
     "frames": [
       {
         "caption": {
-          "ar": "ترتيب ممكن؛ A تستلم أولًا.",
+          "ar": "ترتيب ممكن؛ A بتستلم الأول.",
           "en": "One possible order; A receives first."
         },
         "rows": [
@@ -95,7 +95,7 @@
       },
       {
         "caption": {
-          "ar": "ترتيب ممكن؛ B تستلم أولًا.",
+          "ar": "ترتيب ممكن؛ B بتستلم الأول.",
           "en": "One possible order; B receives first."
         },
         "rows": [
@@ -131,7 +131,7 @@
         "rows": [
           {
             "label": {
-              "ar": "وصول القيم",
+              "ar": "وصول الـvalues",
               "en": "Arrival order"
             },
             "value": "[3, 5]"
@@ -160,7 +160,7 @@
         "rows": [
           {
             "label": {
-              "ar": "وصول القيم",
+              "ar": "وصول الـvalues",
               "en": "Arrival order"
             },
             "value": "[5, 3]"
@@ -204,14 +204,14 @@
           },
           {
             "label": {
-              "ar": "الردود بالترتيب",
+              "ar": "الـresponses بالترتيب",
               "en": "Replies by input"
             },
             "value": "[A:202, B:timeout]"
           },
           {
             "label": {
-              "ar": "الخطأ",
+              "ar": "الـerror",
               "en": "Error"
             },
             "value": "timeout ≠ HTTP status"
@@ -233,14 +233,14 @@
           },
           {
             "label": {
-              "ar": "الردود بالترتيب",
+              "ar": "الـresponses بالترتيب",
               "en": "Replies by input"
             },
             "value": "[A:202, B:timeout]"
           },
           {
             "label": {
-              "ar": "الخطأ",
+              "ar": "الـerror",
               "en": "Error"
             },
             "value": "timeout ≠ HTTP status"
@@ -286,7 +286,7 @@
       },
       {
         "caption": {
-          "ar": "اكتمال العمال ممكن يتبدّل.",
+          "ar": "ترتيب اكتمال العمال ممكن يتغير.",
           "en": "Worker completion can vary."
         },
         "rows": [
@@ -343,7 +343,7 @@
           },
           {
             "label": {
-              "ar": "ترتيب الردود",
+              "ar": "ترتيب الـresponses",
               "en": "Reply order"
             },
             "value": "[A:ore, B:iron]"
@@ -372,7 +372,7 @@
           },
           {
             "label": {
-              "ar": "ترتيب الردود",
+              "ar": "ترتيب الـresponses",
               "en": "Reply order"
             },
             "value": "[A:ore, B:iron]"

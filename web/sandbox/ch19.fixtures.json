@@ -56,7 +56,7 @@
     "requestOrder": ["A", "B", "C"],
     "labels": {
       "finishOrder": {"ar": "ترتيب الإكمال", "en": "Finish order"},
-      "requestOrder": {"ar": "ترتيب الطلبات", "en": "Request order"},
+      "requestOrder": {"ar": "ترتيب الـrequests", "en": "Request order"},
       "runAgain": {"ar": "شغّل ترتيب محتمل تاني", "en": "Show another possible run"},
       "caption": {"ar": "التوقيت الحقيقي ممكن يختلف.", "en": "Actual timing can vary."}
     }

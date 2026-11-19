@@ -79,7 +79,7 @@
       "en": "Next step / run again"
     },
     "intro": {
-      "ar": "كل تشغيل يوضح ترتيبًا ممكنًا.",
+      "ar": "كل تشغيل بيوضح ترتيب ممكن.",
       "en": "Each run shows one possible order."
     },
     "logLabel": {
@@ -98,7 +98,7 @@
             "en": "B starts."
           },
           {
-            "ar": "A تطبع.",
+            "ar": "A بتطبع.",
             "en": "A prints."
           },
           {
@@ -106,7 +106,7 @@
             "en": "A calls Done."
           },
           {
-            "ar": "B تطبع.",
+            "ar": "B بتطبع.",
             "en": "B prints."
           },
           {
@@ -114,7 +114,7 @@
             "en": "B calls Done."
           },
           {
-            "ar": "Wait ترجع بعد الاتنين.",
+            "ar": "Wait بتخلص بعد الاتنين.",
             "en": "Wait returns after both."
           }
         ]
@@ -130,7 +130,7 @@
             "en": "A starts."
           },
           {
-            "ar": "B تطبع.",
+            "ar": "B بتطبع.",
             "en": "B prints."
           },
           {
@@ -138,7 +138,7 @@
             "en": "B calls Done."
           },
           {
-            "ar": "A تطبع.",
+            "ar": "A بتطبع.",
             "en": "A prints."
           },
           {
@@ -146,7 +146,7 @@
             "en": "A calls Done."
           },
           {
-            "ar": "Wait ترجع بعد الاتنين.",
+            "ar": "Wait بتخلص بعد الاتنين.",
             "en": "Wait returns after both."
           }
         ]
@@ -159,7 +159,7 @@
       "en": "Next step / run again"
     },
     "intro": {
-      "ar": "Wait ترجع بعد انتهاء الشغل المسجل.",
+      "ar": "Wait بتخلص بعد ما الشغل المسجل يخلص.",
       "en": "Wait returns after registered work ends."
     },
     "logLabel": {
@@ -178,7 +178,7 @@
             "en": "helper finishes its task."
           },
           {
-            "ar": "Wait رجعت بعد ما helper خلص.",
+            "ar": "Wait خلصت بعد ما helper خلص.",
             "en": "Wait returns after helper finishes."
           }
         ]
@@ -194,7 +194,7 @@
             "en": "main finishes its work."
           },
           {
-            "ar": "Wait رجعت بعد ما helper خلص.",
+            "ar": "Wait خلصت بعد ما helper خلص.",
             "en": "Wait returns after helper finishes."
           }
         ]

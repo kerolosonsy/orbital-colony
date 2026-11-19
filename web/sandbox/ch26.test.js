@@ -30,8 +30,8 @@ function clickChanged(harness, panel, index) {
 const languages = [
   ["ch26-handler-flow", "Next step", "الخطوة الجاية"],
   ["ch26-rest-atomic", "Records", "السجلات"],
-  ["ch26-middleware-order", "Request enters outer.", "الطلب دخل outer."],
-  ["ch26-error-envelope", "Error chain", "سلسلة الخطأ"],
+  ["ch26-middleware-order", "Request enters outer.", "الـrequest دخل outer."],
+  ["ch26-error-envelope", "Error chain", "سلسلة الـerror"],
   ["ch26-static-route", "Route", "المسار"],
   ["ch26-upload-stream", "Sample file", "الملف التوضيحي"],
 ];
