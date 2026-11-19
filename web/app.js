@@ -1554,6 +1554,32 @@ function quizEntryText(chapter) {
 }
 
 const CHAPTER_UNITS = ["#d39b55", "#9fd2cb", "#93c45c", "#d75c9f", "#a45f3e", "#45b3a8", "#f2b33d", "#c7a2ff"];
+// Filter the index by mission id, sheet code, title or chapter name.
+function applyMissionFilter() {
+  const query = $("#mission-search").value.trim().toLowerCase();
+  // "3" means chapter 3 and "3-1" means that sheet, not 13-1 or 23-1
+  const numeric = /^\d+(-\d+)?$/.test(query);
+  let shown = 0;
+  for (const row of document.querySelectorAll("#chapter-list .quad-row")) {
+    const chapterHit = !query || (!numeric && row.querySelector(".quad-name").textContent.toLowerCase().includes(query));
+    let any = false;
+    for (const cell of row.querySelectorAll(".cell")) {
+      const code = cell.dataset.code || "";
+      const hit = chapterHit || (numeric ? code === query || code.startsWith(query + "-") : (cell.dataset.search || "").includes(query));
+      cell.hidden = !hit;
+      any ||= hit;
+    }
+    row.hidden = !any;
+    if (any) shown++;
+  }
+  for (const group of document.querySelectorAll("#chapter-list .track-group")) {
+    group.hidden = !group.querySelector(".quad-row:not([hidden])");
+    if (query) group.open = true;
+  }
+  $("#mission-search-empty").hidden = shown > 0;
+}
+$("#mission-search").addEventListener("input", applyMissionFilter);
+
 function renderMissions() {
   const list = $("#chapter-list");
   list.innerHTML = "";
@@ -1611,6 +1637,8 @@ function renderMissions() {
       b.innerHTML = `<span class="cell-top"><span class="cell-code">${sheetCode(l)}</span>${open ? `<span class="stars">${starHTML(r.stars)}</span>` : ""}</span><span class="cell-title">${esc(l.title)}</span>${l.boss ? `<span class="boss-badge">${T("ختام المسار", "Track Boss")}</span>` : ""}`;
       b.title = open ? (l.kind === "lab" ? T("مختبر", "Lab") : T("مهمة", "Mission")) : T("مقفولة: خلّص اللي قبلها", "Locked: finish the one before it");
       b.onclick = () => { closeOverlay($("#missions")); loadLevel(l.id); };
+      b.dataset.search = `${l.id} ${sheetCode(l)} ${l.title}`.toLowerCase();
+      b.dataset.code = sheetCode(l);
       cells.appendChild(b);
     }
     if (ch.quiz?.length) {
@@ -1624,6 +1652,7 @@ function renderMissions() {
     row.appendChild(cells);
     group.appendChild(row);
   }
+  applyMissionFilter();
   requestAnimationFrame(() => list.querySelector(store.blob.review?.due ? ".review-card" : ".cell.current")?.scrollIntoView({ block: "center" }));
 }
 function showOverlay(selector) {
