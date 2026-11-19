@@ -126,6 +126,7 @@ const Colony = (() => {
     updateSeasonTitle();
     $("#lvl-stars").innerHTML = "";
     $("#goal-strip-par").textContent = "";
+    $("#banner")?.classList.add("hidden"); // the last mission's result doesn't belong here
     lastErrors = []; lastMtime = 0;
     showFile("main.go"); linkUI();
     if (isLinked()) syncFromWorkspace(true);

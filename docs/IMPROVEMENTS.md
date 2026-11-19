@@ -81,3 +81,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 77. **Your best next to the targets** — the mission header now shows "your best: N" beside the 2★/3★ tick targets (updated right after a successful run), so it's clear how far you are from three stars. Verified in the browser (and that the result sheet focuses "Next mission").
 78. **Result sheet says how many ticks to save** — below three stars it now adds "(N to save)" next to the 3★ target, instead of making you subtract.
 79. **Index shows your best on hover** — each finished mission cell's tooltip includes your best tick count.
+80. **No stale mission banner in the colony** — entering the colony right after finishing a mission kept "Mission complete in 3 ticks!" under the colony map; the banner is now cleared on entry (seen in a screenshot, fixed).
