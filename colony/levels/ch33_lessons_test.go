@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,6 +13,28 @@ import (
 	"testing"
 	"time"
 )
+
+func TestCh33SandboxFixtures(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch33.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]map[string]any
+	if err := json.Unmarshal(data, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	ids := []string{"33-1-retry-client", "33-2-reverse-proxy", "33-3-load-balancer", "33-4-gateway", "33-boss-survey-uplink"}
+	if len(fixtures) != len(ids) {
+		t.Fatalf("fixture count = %d, want %d", len(fixtures), len(ids))
+	}
+	for _, id := range ids {
+		level := Get(id)
+		block := level.Steps[2].Blocks[2]
+		if block.Sandbox == nil || block.Sandbox.Kind != "ch33-http-flow" || !reflect.DeepEqual(block.Sandbox.Config, fixtures[id]) {
+			t.Errorf("%s sandbox differs from its JavaScript fixture", id)
+		}
+	}
+}
 
 func TestCh33Lessons(t *testing.T) {
 	ids := []string{"33-1-retry-client", "33-2-reverse-proxy", "33-3-load-balancer", "33-4-gateway", "33-boss-survey-uplink"}
@@ -63,6 +86,7 @@ func ch33ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 		t.Fatalf("%s: expected six lesson steps", name)
 	}
 	words := 0
+	sandboxes := 0
 	for i, step := range steps {
 		if step.Title != titles[i] || len(step.Blocks) == 0 {
 			t.Errorf("%s: step %d has wrong title or no blocks", name, i)
@@ -73,8 +97,16 @@ func ch33ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 		words += ch33TextWords(step.Title)
 		for _, block := range step.Blocks {
 			words += ch33TextWords(block.Text)
-			if !strings.HasPrefix(block.ID, prefix+".") || strings.TrimSpace(block.Text) == "" {
-				t.Errorf("%s: %s has wrong prefix or empty text", name, block.ID)
+			if block.Kind == "sandbox" {
+				sandboxes++
+				if !strings.HasPrefix(block.ID, "ch33-") {
+					t.Errorf("%s: sandbox ID %q lacks chapter prefix", name, block.ID)
+				}
+			} else if !strings.HasPrefix(block.ID, prefix+".") {
+				t.Errorf("%s: %s has wrong prefix", name, block.ID)
+			}
+			if strings.TrimSpace(block.Text) == "" {
+				t.Errorf("%s: %s has empty text", name, block.ID)
 			}
 			switch block.Kind {
 			case "markdown":
@@ -110,6 +142,10 @@ func ch33ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 					}
 					words += ch33TextWords(frame.Caption)
 				}
+			case "sandbox":
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch33-") || len(block.Sandbox.Config) == 0 || block.Question != nil || block.Walkthrough != nil || block.Code != "" {
+					t.Errorf("%s: %s has incomplete or unprefixed sandbox data", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed kind %q", name, block.ID, block.Kind)
 			}
@@ -130,10 +166,13 @@ func ch33ValidateCopy(t *testing.T, name, prefix string, steps []LessonStep, hin
 			words += ch33TextWords(hint)
 		}
 	}
-	if len(steps[2].Blocks) != 2 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" {
-		t.Errorf("%s: Try it must predict, then reveal", name)
+	if len(steps[2].Blocks) != 3 || steps[2].Blocks[0].Kind != "question" || steps[2].Blocks[1].Kind != "walkthrough" || steps[2].Blocks[2].Kind != "sandbox" {
+		t.Errorf("%s: Try it must predict, reveal, then sandbox", name)
 	} else if strings.TrimSpace(ch33QuestionCode(steps[2].Blocks[0].Text)) != strings.TrimSpace(steps[2].Blocks[1].Code) {
 		t.Errorf("%s: prediction and walkthrough code differ", name)
+	}
+	if sandboxes != 1 {
+		t.Errorf("%s: expected exactly one sandbox, found %d", name, sandboxes)
 	}
 	if words < 200 || words > 320 {
 		t.Errorf("%s: learner text has %d words; want 200–320", name, words)
@@ -175,6 +214,9 @@ func ch33CompareCopies(t *testing.T, name string, arabic, english []LessonStep) 
 						t.Errorf("%s: %s frame %d execution state differs", name, block.ID, k)
 					}
 				}
+			}
+			if block.Sandbox != nil && (other.Sandbox == nil || block.Sandbox.Kind != other.Sandbox.Kind || !reflect.DeepEqual(block.Sandbox.Config, other.Sandbox.Config)) {
+				t.Errorf("%s: %s sandbox config differs between languages", name, block.ID)
 			}
 		}
 	}

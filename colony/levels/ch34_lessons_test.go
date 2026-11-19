@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,6 +13,28 @@ import (
 	"testing"
 	"time"
 )
+
+func TestCh34SandboxFixtures(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch34.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]map[string]any
+	if err := json.Unmarshal(data, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	ids := []string{"34-1-kv-store", "34-2-wal", "34-3-compaction", "34-4-chunk-store"}
+	if len(fixtures) != len(ids) {
+		t.Fatalf("fixture count = %d, want %d", len(fixtures), len(ids))
+	}
+	for _, id := range ids {
+		level := Get(id)
+		block := level.Steps[2].Blocks[2]
+		if block.Sandbox == nil || block.Sandbox.Kind != "ch34-storage-flow" || !reflect.DeepEqual(block.Sandbox.Config, fixtures[id]) {
+			t.Errorf("%s sandbox differs from its JavaScript fixture", id)
+		}
+	}
+}
 
 var ch34ExamplePattern = regexp.MustCompile("(?s)<!-- go-example id=(e34[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\n```go\n(.*?)\n```")
 var ch34StdoutPattern = regexp.MustCompile("(?s)Real stdout:\n\n```text\n(.*?)\n```")
@@ -101,6 +124,9 @@ func ch34ValidateLesson(t *testing.T, level *Level, prefix string, arabicTitles,
 			if block.Question != nil && (other.Question == nil || block.Question.Answer != other.Question.Answer || len(block.Question.Options) != len(other.Question.Options)) {
 				t.Errorf("%s: question answer or option count differs", block.ID)
 			}
+			if block.Sandbox != nil && (other.Sandbox == nil || block.Sandbox.Kind != other.Sandbox.Kind || !reflect.DeepEqual(block.Sandbox.Config, other.Sandbox.Config)) {
+				t.Errorf("%s: sandbox config differs between languages", block.ID)
+			}
 			if block.Walkthrough == nil {
 				continue
 			}
@@ -122,24 +148,31 @@ func ch34ValidateLesson(t *testing.T, level *Level, prefix string, arabicTitles,
 func ch34ValidateCopy(t *testing.T, name string, steps []LessonStep, hints []string, prefix string, titles []string) {
 	t.Helper()
 	seen := map[string]bool{}
-	claim := func(id string) {
+	claim := func(id, idPrefix string) {
 		if id == "" || seen[id] {
 			t.Errorf("%s: empty or duplicate ID %q", name, id)
 		}
-		if !strings.HasPrefix(id, prefix) {
-			t.Errorf("%s: ID %q lacks prefix %q", name, id, prefix)
+		if !strings.HasPrefix(id, idPrefix) {
+			t.Errorf("%s: ID %q lacks prefix %q", name, id, idPrefix)
 		}
 		seen[id] = true
 	}
 	words := 0
 	for i, step := range steps {
-		claim(step.ID)
+		claim(step.ID, prefix)
 		if step.Title != titles[i] || len(step.Blocks) == 0 {
 			t.Errorf("%s: step %d has the wrong title or no blocks", name, i)
 		}
 		words += ch34TextWords(step.Title)
 		for _, block := range step.Blocks {
-			claim(block.ID)
+			blockPrefix := prefix
+			if block.Kind == "sandbox" && !strings.HasPrefix(block.ID, "ch34-") {
+				t.Errorf("%s: sandbox ID %q lacks chapter prefix", name, block.ID)
+			}
+			if block.Kind == "sandbox" {
+				blockPrefix = "ch34-"
+			}
+			claim(block.ID, blockPrefix)
 			if strings.TrimSpace(block.Text) == "" {
 				t.Errorf("%s: %s has no learner text", name, block.ID)
 			}
@@ -167,6 +200,10 @@ func ch34ValidateCopy(t *testing.T, name string, steps []LessonStep, hints []str
 					continue
 				}
 				words += ch34ValidateFrames(t, name, block)
+			case "sandbox":
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch34-") || len(block.Sandbox.Config) == 0 || block.Question != nil || block.Walkthrough != nil || block.Code != "" {
+					t.Errorf("%s: %s has incomplete or unprefixed sandbox data", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed kind %q", name, block.ID, block.Kind)
 			}
@@ -184,10 +221,34 @@ func ch34ValidateCopy(t *testing.T, name string, steps []LessonStep, hints []str
 		words += ch34TextWords(hint)
 	}
 	try := steps[2]
-	if len(try.Blocks) != 2 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" {
-		t.Errorf("%s: Try it must predict before a walkthrough", name)
+	chapter34 := strings.HasPrefix(prefix, "c34")
+	wantTryBlocks := 2
+	if chapter34 {
+		wantTryBlocks = 3
+	}
+	if len(try.Blocks) != wantTryBlocks || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" || (chapter34 && try.Blocks[2].Kind != "sandbox") {
+		if chapter34 {
+			t.Errorf("%s: Try it must predict, reveal, then sandbox", name)
+		} else {
+			t.Errorf("%s: Try it must predict before a walkthrough", name)
+		}
 	} else if strings.TrimSpace(ch34QuestionCode(try.Blocks[0].Text)) != strings.TrimSpace(try.Blocks[1].Code) {
 		t.Errorf("%s: prediction code differs from its reveal", name)
+	}
+	sandboxes := 0
+	for _, step := range steps {
+		for _, block := range step.Blocks {
+			if block.Kind == "sandbox" {
+				sandboxes++
+			}
+		}
+	}
+	wantSandboxes := 0
+	if chapter34 {
+		wantSandboxes = 1
+	}
+	if sandboxes != wantSandboxes {
+		t.Errorf("%s: expected exactly %d sandboxes, found %d", name, wantSandboxes, sandboxes)
 	}
 	if words < 200 || words > 320 {
 		t.Errorf("%s: learner text has %d words; want 200-320", name, words)

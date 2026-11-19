@@ -1,0 +1,534 @@
+{
+  "33-1-retry-client": {
+    "labels": {
+      "advance": {
+        "ar": "الخطوة الجاية",
+        "en": "Next event"
+      },
+      "repeat": {
+        "ar": "ترتيب تاني",
+        "en": "Another order"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "runs": [
+      {
+        "frames": [
+          {
+            "caption": {
+              "ar": "جسم الطلب لسه مقروء.",
+              "en": "The request body is ready."
+            },
+            "leftLabel": {
+              "ar": "الجسم",
+              "en": "Body"
+            },
+            "leftValue": {
+              "ar": "stream جاهز",
+              "en": "stream: ready"
+            },
+            "rightLabel": {
+              "ar": "GetBody",
+              "en": "GetBody"
+            },
+            "rightValue": {
+              "ar": "موجود",
+              "en": "available"
+            }
+          },
+          {
+            "caption": {
+              "ar": "المحاولة استهلكت الـstream.",
+              "en": "The attempt consumed its stream."
+            },
+            "leftLabel": {
+              "ar": "المحاولة",
+              "en": "Attempt"
+            },
+            "leftValue": {
+              "ar": "اترسلت",
+              "en": "sent"
+            },
+            "rightLabel": {
+              "ar": "GetBody",
+              "en": "GetBody"
+            },
+            "rightValue": {
+              "ar": "موجود",
+              "en": "available"
+            }
+          },
+          {
+            "caption": {
+              "ar": "إعادة المحاولة تحتاج جسم جديد.",
+              "en": "A retry needs a fresh body."
+            },
+            "leftLabel": {
+              "ar": "المحاولة",
+              "en": "Attempt"
+            },
+            "leftValue": {
+              "ar": "إعادة",
+              "en": "replay"
+            },
+            "rightLabel": {
+              "ar": "نسخة الجسم",
+              "en": "Body copy"
+            },
+            "rightValue": {
+              "ar": "جديدة",
+              "en": "fresh"
+            }
+          }
+        ],
+        "label": {
+          "ar": "طلب توضيحي",
+          "en": "Illustrative request"
+        }
+      }
+    ],
+    "title": {
+      "ar": "جسم الطلب",
+      "en": "Request body"
+    }
+  },
+  "33-2-reverse-proxy": {
+    "labels": {
+      "advance": {
+        "ar": "طلب تاني",
+        "en": "Next request"
+      },
+      "repeat": {
+        "ar": "ترتيب تاني",
+        "en": "Another order"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "runs": [
+      {
+        "frames": [
+          {
+            "caption": {
+              "ar": "الـhandler استقبل المسار.",
+              "en": "The handler received this path."
+            },
+            "leftLabel": {
+              "ar": "الطلب",
+              "en": "Request"
+            },
+            "leftValue": {
+              "ar": "/hydro/pump",
+              "en": "/hydro/pump"
+            },
+            "rightLabel": {
+              "ar": "المسجل",
+              "en": "Recorded"
+            },
+            "rightValue": {
+              "ar": "/hydro/pump",
+              "en": "/hydro/pump"
+            }
+          },
+          {
+            "caption": {
+              "ar": "طلب تاني له مساره.",
+              "en": "Another request carries its path."
+            },
+            "leftLabel": {
+              "ar": "الطلب",
+              "en": "Request"
+            },
+            "leftValue": {
+              "ar": "/air/valve",
+              "en": "/air/valve"
+            },
+            "rightLabel": {
+              "ar": "المسجل",
+              "en": "Recorded"
+            },
+            "rightValue": {
+              "ar": "/air/valve",
+              "en": "/air/valve"
+            }
+          }
+        ],
+        "label": {
+          "ar": "طلبات محلية للتوضيح",
+          "en": "Illustrative local requests"
+        }
+      }
+    ],
+    "title": {
+      "ar": "المسار الوارد",
+      "en": "Incoming path"
+    }
+  },
+  "33-3-load-balancer": {
+    "labels": {
+      "advance": {
+        "ar": "الحدث الجاي",
+        "en": "Next event"
+      },
+      "repeat": {
+        "ar": "ترتيب محتمل تاني",
+        "en": "Another possible order"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "runs": [
+      {
+        "frames": [
+          {
+            "caption": {
+              "ar": "العداد محمي بقفل.",
+              "en": "The counter is protected by a lock."
+            },
+            "leftLabel": {
+              "ar": "القيمة",
+              "en": "Value"
+            },
+            "leftValue": {
+              "ar": "0",
+              "en": "0"
+            },
+            "rightLabel": {
+              "ar": "التالي",
+              "en": "Next"
+            },
+            "rightValue": {
+              "ar": "A",
+              "en": "A"
+            }
+          },
+          {
+            "caption": {
+              "ar": "A حدّثت الحالة.",
+              "en": "A updated the shared state."
+            },
+            "leftLabel": {
+              "ar": "القيمة",
+              "en": "Value"
+            },
+            "leftValue": {
+              "ar": "1",
+              "en": "1"
+            },
+            "rightLabel": {
+              "ar": "التالي",
+              "en": "Next"
+            },
+            "rightValue": {
+              "ar": "B",
+              "en": "B"
+            }
+          },
+          {
+            "caption": {
+              "ar": "B حدّثت الحالة.",
+              "en": "B updated the shared state."
+            },
+            "leftLabel": {
+              "ar": "القيمة",
+              "en": "Value"
+            },
+            "leftValue": {
+              "ar": "2",
+              "en": "2"
+            },
+            "rightLabel": {
+              "ar": "الحالة",
+              "en": "State"
+            },
+            "rightValue": {
+              "ar": "محمية",
+              "en": "protected"
+            }
+          }
+        ],
+        "label": {
+          "ar": "ترتيب محتمل: A ثم B",
+          "en": "One possible order: A then B"
+        }
+      },
+      {
+        "frames": [
+          {
+            "caption": {
+              "ar": "العداد محمي بقفل.",
+              "en": "The counter is protected by a lock."
+            },
+            "leftLabel": {
+              "ar": "القيمة",
+              "en": "Value"
+            },
+            "leftValue": {
+              "ar": "0",
+              "en": "0"
+            },
+            "rightLabel": {
+              "ar": "التالي",
+              "en": "Next"
+            },
+            "rightValue": {
+              "ar": "B",
+              "en": "B"
+            }
+          },
+          {
+            "caption": {
+              "ar": "B حدّثت الحالة.",
+              "en": "B updated the shared state."
+            },
+            "leftLabel": {
+              "ar": "القيمة",
+              "en": "Value"
+            },
+            "leftValue": {
+              "ar": "1",
+              "en": "1"
+            },
+            "rightLabel": {
+              "ar": "التالي",
+              "en": "Next"
+            },
+            "rightValue": {
+              "ar": "A",
+              "en": "A"
+            }
+          },
+          {
+            "caption": {
+              "ar": "A حدّثت الحالة.",
+              "en": "A updated the shared state."
+            },
+            "leftLabel": {
+              "ar": "القيمة",
+              "en": "Value"
+            },
+            "leftValue": {
+              "ar": "2",
+              "en": "2"
+            },
+            "rightLabel": {
+              "ar": "الحالة",
+              "en": "State"
+            },
+            "rightValue": {
+              "ar": "محمية",
+              "en": "protected"
+            }
+          }
+        ],
+        "label": {
+          "ar": "ترتيب محتمل: B ثم A",
+          "en": "Another possible order: B then A"
+        }
+      }
+    ],
+    "title": {
+      "ar": "ترتيب التحديثات",
+      "en": "Update order"
+    }
+  },
+  "33-4-gateway": {
+    "labels": {
+      "advance": {
+        "ar": "الطبقة الجاية",
+        "en": "Next layer"
+      },
+      "repeat": {
+        "ar": "ترتيب تاني",
+        "en": "Another order"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "runs": [
+      {
+        "frames": [
+          {
+            "caption": {
+              "ar": "الطلب وصل للبوابة.",
+              "en": "The request reached the gateway."
+            },
+            "leftLabel": {
+              "ar": "المسار",
+              "en": "Path"
+            },
+            "leftValue": {
+              "ar": "/hydro/pump",
+              "en": "/hydro/pump"
+            },
+            "rightLabel": {
+              "ar": "الطبقة",
+              "en": "Layer"
+            },
+            "rightValue": {
+              "ar": "identity",
+              "en": "identity"
+            }
+          },
+          {
+            "caption": {
+              "ar": "طبقة أضافت سياقًا.",
+              "en": "A layer added request context."
+            },
+            "leftLabel": {
+              "ar": "السياق",
+              "en": "Context"
+            },
+            "leftValue": {
+              "ar": "crew key",
+              "en": "crew key"
+            },
+            "rightLabel": {
+              "ar": "الطبقة",
+              "en": "Layer"
+            },
+            "rightValue": {
+              "ar": "rate check",
+              "en": "rate check"
+            }
+          },
+          {
+            "caption": {
+              "ar": "الطلب وصل للمعالج الداخلي.",
+              "en": "The request reached the inner handler."
+            },
+            "leftLabel": {
+              "ar": "السياق",
+              "en": "Context"
+            },
+            "leftValue": {
+              "ar": "ready",
+              "en": "ready"
+            },
+            "rightLabel": {
+              "ar": "الطبقة",
+              "en": "Layer"
+            },
+            "rightValue": {
+              "ar": "proxy",
+              "en": "proxy"
+            }
+          }
+        ],
+        "label": {
+          "ar": "طلب توضيحي",
+          "en": "Illustrative request"
+        }
+      }
+    ],
+    "title": {
+      "ar": "طبقات البوابة",
+      "en": "Gateway layers"
+    }
+  },
+  "33-boss-survey-uplink": {
+    "labels": {
+      "advance": {
+        "ar": "الجزء الجاي",
+        "en": "Next part"
+      },
+      "repeat": {
+        "ar": "ترتيب تاني",
+        "en": "Another order"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "runs": [
+      {
+        "frames": [
+          {
+            "caption": {
+              "ar": "الهيدر بايتين.",
+              "en": "The header has two bytes."
+            },
+            "leftLabel": {
+              "ar": "الهيدر",
+              "en": "Header"
+            },
+            "leftValue": {
+              "ar": "00 03",
+              "en": "00 03"
+            },
+            "rightLabel": {
+              "ar": "المحتوى",
+              "en": "Payload"
+            },
+            "rightValue": {
+              "ar": "لسه",
+              "en": "waiting"
+            }
+          },
+          {
+            "caption": {
+              "ar": "اتقرا الطول بالترتيب الكبير.",
+              "en": "The big-endian length was read."
+            },
+            "leftLabel": {
+              "ar": "الطول",
+              "en": "Length"
+            },
+            "leftValue": {
+              "ar": "3",
+              "en": "3"
+            },
+            "rightLabel": {
+              "ar": "المحتوى",
+              "en": "Payload"
+            },
+            "rightValue": {
+              "ar": "بعده",
+              "en": "next"
+            }
+          },
+          {
+            "caption": {
+              "ar": "المحتوى اتقرا بعد الطول.",
+              "en": "The payload follows its length."
+            },
+            "leftLabel": {
+              "ar": "الطول",
+              "en": "Length"
+            },
+            "leftValue": {
+              "ar": "3",
+              "en": "3"
+            },
+            "rightLabel": {
+              "ar": "المحتوى",
+              "en": "Payload"
+            },
+            "rightValue": {
+              "ar": "ice",
+              "en": "ice"
+            }
+          }
+        ],
+        "label": {
+          "ar": "بايتات للتوضيح",
+          "en": "Illustrative bytes"
+        }
+      }
+    ],
+    "title": {
+      "ar": "إطار توضيحي",
+      "en": "Illustrative frame"
+    }
+  }
+}

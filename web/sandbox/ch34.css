@@ -1,1 +1,67 @@
-/* Chapter 34 sandbox styles will be added with its renderer. */
+.ch34-storage-flow {
+  box-sizing: border-box;
+  inline-size: min(100%, 290px);
+  min-inline-size: 0;
+  padding: 10px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-2);
+  color: var(--paper);
+}
+
+.ch34-flow-title,
+.ch34-flow-caption {
+  margin: 0 0 7px;
+}
+
+.ch34-flow-title {
+  font-size: 14px;
+}
+
+.ch34-flow-caption {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ch34-flow-metrics {
+  display: grid;
+  gap: 5px;
+  min-inline-size: 0;
+}
+
+.ch34-flow-metric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-inline-size: 0;
+  padding-block: 4px;
+  border-block-start: 1px solid var(--rule);
+  font-size: 12px;
+}
+
+.ch34-flow-label {
+  min-inline-size: 0;
+  color: var(--muted);
+}
+
+.ch34-flow-value {
+  max-inline-size: 62%;
+  overflow-wrap: anywhere;
+  text-align: end;
+  font: 12px/1.4 var(--mono);
+}
+
+.ch34-flow-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block-start: 9px;
+}
+
+.ch34-flow-controls .tool {
+  min-block-size: 38px;
+  block-size: auto;
+  max-inline-size: 100%;
+  padding: 5px 8px;
+  white-space: normal;
+}
