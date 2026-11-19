@@ -63,8 +63,8 @@ fmt.Println(runtime.GOOS) // غلط جوه StationInfo: تجاهل اللقطة 
 ارفض أي خطأ parsing، بما فيه طلب help، وأي arguments متبقية، قبل كتابة أي تقرير أو استدعاء lookup. مفيش تعديل لـ args. بعد النجاح، لو system مفعلة اكتب بالترتيب ~os=%q~ ثم ~arch=%q~ ثم ~go=%q~، كل قيمة من host وكل سطر آخره newline.
 
 لو crew مفعلة، بعدها اقرأ ~COLONY_CREW~ مرة واحدة فقط: لو موجود اكتب ~crew=%q~ بقيمته الأصلية حتى لو فاضية؛ لو غايب اكتب ~crew=<missing>~. لو crew مطفية متستدعيش lookup. إطفاء الاتنين نجاح من غير إخراج. فشل الكتابة يوقف فوراً ويرجع خطأ يحتفظ بالسبب؛ الأجزاء اللي اتكتبت ممكن تفضل. مفيش قراءة حقيقية لـ os أو runtime جوه StationInfo، ولا Report.
-`, Hints: []string{"اعمل FlagSet جديدة وحدد defaults قبل Parse؛ افحص NArg قبل أي أثر.", "dereference لنتائج Bool؛ حضّر سطور system بترتيب ثابت واستخدم %q.", "افحص bool من Lookup مش القيمة الفاضية؛ رجّع أول خطأ كتابة بنفس السبب."},
-		En: &LevelText{Title: "Station Status", Goal: "Parse flags and report injected system data and an allowlisted environment value", Files: []LabFile{{Name: "main.go", Starter: stationInfoStarter}},
+`, LessonRevision: 1, Steps: ch21StationArabic, Hints: []string{"اعتبر مصادر النظام dependencies واضحة عند حدود البرنامج.", "افصل قراءة flags عن تجميع بيانات التقرير.", "ابدأ من توقيع ~StationInfo~ في starter، وخلي lookup محقون."},
+		En: &LevelText{Title: "Station Status", Goal: "Parse flags and report injected system data and an allowlisted environment value", Files: []LabFile{{Name: "main.go", Starter: stationInfoStarter}}, LessonRevision: 1, Steps: ch21StationEnglish,
 			Lesson: `# A Predictable Station Report
 
 The crew needs reports it can compare between runs. Gather real host data at the program boundary; pass a snapshot into the reporting function so tests stay the same on Windows and Linux.
@@ -124,7 +124,7 @@ Implement ~StationInfo(args []string, host StationHost, out io.Writer) error~. ~
 Reject any parsing error, including help, and remaining positional arguments before output or lookup calls. Do not mutate args. After success, if system is enabled, write ~os=%q~, ~arch=%q~, then ~go=%q~, taking strings from host and ending every line with a newline.
 
 If crew is enabled, look up only ~COLONY_CREW~, exactly once, after the system lines. When present, write ~crew=%q~ with the original value, including empty; when absent write ~crew=<missing>~. Disabled crew must not call lookup. Disabling both succeeds without output. Stop immediately on write failure and preserve its cause; previously written bytes may remain. StationInfo must not query real os or runtime values. No Report.
-`, Hints: []string{"Create a fresh FlagSet with defaults; check NArg before side effects.", "Dereference Bool results and write system lines in fixed order using %q.", "Check Lookup's presence bool, not empty text; return the first write error with its cause."}},
+`, Hints: []string{"Treat system sources as explicit dependencies at the program boundary.", "Separate flag parsing from assembling the report data.", "Start with the starter's ~StationInfo~ signature and keep lookup injected."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: stationInfoHidden},
 	})
 	add(&Level{ID: "21-2-subcommands", Chapter: 21, Kind: "lab", Title: "أوامر فرعية", Goal: "شغّل أوامر ورشة الإصلاح بمدخلات محقونة وأكواد خروج واضحة",
@@ -195,8 +195,8 @@ os.Exit(2) // غلط جوه run: هيقفل سيرفر الاختبار بدل �
 الأوامر وعدد arguments بالظبط: ~add sector units~ يكتب ~queued=N~؛ ~done id~ يكتب ~done=N~؛ ~rm id~ يكتب ~removed=N~؛ ~list~ يكتب سطر لكل طلب بالترتيب بصيغة ~%d|%q|%d|%t~ للـ ID وSector وUnits وDone. الفاضي مفيهوش سطور. كل سطر بينتهي newline. الـ ID والـ units يقبلهم Atoi مع فحص المدى. أي أمر مجهول أو malformed أو خطأ domain يكتب ~error~ بس، من غير تغيير حالة.
 
 الكود 0 لو كل الأوامر نجحت، 2 لو أي أمر اترفض، و1 لفشل القراءة أو الكتابة حتى بعد خطأ أمر. في وضع السيل كمّل بعد code 2؛ قف فوراً بعد code 1. إخراج سابق أو تعديل ناجح قبل فشل writer ممكن يفضل. الـ readers والـ writers غير nil، والأوامر الصالحة لحد 4096 بايت محتوى مع LF أو CRLF أو آخر سطر من غير newline. الأكبر code 1. مفيش ملفات أو حالة بين استدعاءين ولا Report.
-`, Hints: []string{"ابدأ بذاكرة خلف RepairBook: slice وعدّاد منفصل؛ تحقق قبل التعديل.", "افصل تنفيذ أمر واحد عن Scanner؛ استخدم نفس الموزّع لو args موجودة.", "احتفظ بكود 2 بعد أمر بايظ وكمّل؛ خطأ Scanner أو writer يوقف بكود 1 فوراً."},
-		En: &LevelText{Title: "Subcommands", Goal: "Run repair-shop commands with injected streams and explicit exit codes", Files: []LabFile{{Name: "main.go", Starter: repairCommandsStarter}},
+`, LessonRevision: 1, Steps: ch21CommandsArabic, Hints: []string{"اعتبر الـreader والـwriter dependencies بدل التيرمنال المباشر.", "افصل تفسير الأمر عن تحديث سجل الطلبات.", "ابدأ من توقيع ~run~ في starter، واستخدم ~Scanner~ للسطور."},
+		En: &LevelText{Title: "Subcommands", Goal: "Run repair-shop commands with injected streams and explicit exit codes", Files: []LabFile{{Name: "main.go", Starter: repairCommandsStarter}}, LessonRevision: 1, Steps: ch21CommandsEnglish,
 			Lesson: `# Repair-Shop Commands
 
 The shop receives repair orders: a sector and a cell count. Separate the order book from the terminal through an interface, then execute one command from args or a stream from stdin. State lives in memory for one invocation.
@@ -262,7 +262,7 @@ Define and use ~RepairBook interface{Queue(string,int)(int,error); Orders() []Re
 Exact commands and arities: ~add sector units~ prints ~queued=N~; ~done id~ prints ~done=N~; ~rm id~ prints ~removed=N~. ~list~ prints one line per order in creation order using ~%d|%q|%d|%t~ for ID, Sector, Units, Done. Empty lists print nothing. End every line with a newline. Parse IDs and units with Atoi and check bounds. Unknown or malformed commands and domain errors print only ~error~ without mutation.
 
 Return 0 when all commands succeed, 2 if any command is rejected, and 1 on read or write failure even after command errors. Stream mode continues after code 2 and stops immediately on code 1. Prior output and successful mutations before writer failure may remain. Readers and writers are non-nil. Valid command content is at most 4096 bytes, with LF, CRLF, or an unterminated final line; longer content yields code 1. No files, cross-invocation state, or Report.
-`, Hints: []string{"Start with memory behind RepairBook: a slice and a separate counter; validate before mutation.", "Separate single-command dispatch from Scanner and reuse it for nonempty args.", "Retain code 2 after malformed commands and continue; Scanner and writer failures stop immediately with 1."}},
+`, Hints: []string{"Treat the reader and writer as dependencies instead of using the terminal directly.", "Separate command interpretation from updating the order book.", "Start with the starter's ~run~ signature and use ~Scanner~ for lines."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: repairCommandsHidden},
 	})
 
@@ -323,8 +323,8 @@ used++ // غلط لو قبل parsing: كلمة مش رقم استهلكت حفر
 اقرأ سطور لحد النهاية. طبّق TrimSpace ثم Atoi: لو parsing فشل اكتب ~invalid~؛ لو الرقم برا 1..64 اكتب ~range~. الاتنين ميستهلكوش محاولة. كل تخمين صالح يستهلك واحدة من 4. الصح يكتب ~found=N attempts=A~ وينهي فوراً؛ N السر وA عدد المحاولات الصالحة. غير كده اكتب ~deeper~ لو أقل من السر أو ~shallower~ لو أكبر. بعد رابع تخمين غلط اكتب ~lost=N~ وانهي، بعد تلميحه. متعالجش سطور زيادة بعد الفوز أو الاستنفاد.
 
 EOF قبل النهاية تكتب ~aborted~ وترجع nil من غير كشف السر؛ حتى لو مفيش تخمينات. خطأ reader أو سطر أكبر من 128 KiB محتوى يرجّع error من غير aborted؛ خطأ writer يوقف ويحافظ على سببه. إخراج سابق ممكن يفضل. كل سطر إخراج آخره newline، ومفيش غير الصيغ المذكورة. اقبل CRLF وآخر سطر من غير newline. الاختبارات الأساسية تستخدم سطور لحد 4096 بايت؛ النجمة التالتة لسطور بايظة أطول، لحد 128 KiB شامل. مفيش Report ولا إعادة لعب تلقائية.
-`, Hints: []string{"اختار السر مرة واحدة من draw(64)+1 بعد فحص المصدر؛ العداد يبدأ صفر.", "TrimSpace ثم Atoi وفحص المدى، وبعدهم بس زوّد المحاولة وافحص الفوز قبل حد 4.", "بعد Scan false افحص Err؛ وسّع Buffer للنجمة التالتة وارجع أول خطأ كتابة."},
-		En: &LevelText{Title: "Guess the Depth", Goal: "Guide a mining probe with bounded guesses and injected randomness", Files: []LabFile{{Name: "main.go", Starter: guessDepthStarter}},
+`, LessonRevision: 1, Steps: ch21DepthArabic, Hints: []string{"خلي مصدر العشوائية dependency واضحة بدل random global جوه منطق اللعبة.", "افصل قراءة التخمين عن اختيار السر وتحديث حالة الجولة.", "بص على parameter ~draw func(int) int~ في توقيع starter."},
+		En: &LevelText{Title: "Guess the Depth", Goal: "Guide a mining probe with bounded guesses and injected randomness", Files: []LabFile{{Name: "main.go", Starter: guessDepthStarter}}, LessonRevision: 1, Steps: ch21DepthEnglish,
 			Lesson: `# The Probe Searches for Ore
 
 Ore is hidden at a depth from 1 through 64. The probe has four valid guesses; nonnumeric text is not a drilling attempt. Inject selection of the layer to test wins and losses without luck.
@@ -379,7 +379,7 @@ Implement ~GuessDepth(in io.Reader, out io.Writer, draw func(int) int) error~. T
 Read lines until termination. TrimSpace, then Atoi: parsing failures print ~invalid~; numbers outside 1..64 print ~range~. Neither consumes an attempt. Each valid guess consumes one of four attempts. Equality prints ~found=N attempts=A~ and ends immediately, with secret N and valid-attempt count A. Otherwise print ~deeper~ below the secret or ~shallower~ above it. After the fourth wrong guess print ~lost=N~ and stop, after that guess's hint. Do not process further lines after winning or exhaustion.
 
 EOF before termination prints ~aborted~ and returns nil without revealing the secret, even with no guesses. Reader failures or content exceeding 128 KiB return an error without aborted. Writer failures stop immediately and preserve their causes. Prior output may remain. End every output line with a newline; print only the stated forms. Accept CRLF and a final unterminated line. Core tests use lines through 4096 bytes; the third star covers longer invalid lines through exactly 128 KiB. No Report or automatic replay.
-`, Hints: []string{"Choose the secret once using validated draw(64)+1; start attempts at zero.", "TrimSpace, Atoi, then bounds; increment only after those and check equality before the four-attempt limit.", "After Scan returns false, check Err; expand Buffer for the third star and return the first write failure."}},
+`, Hints: []string{"Keep randomness an explicit dependency instead of using it globally inside game logic.", "Separate reading a guess from choosing a secret and updating round state.", "Look at the ~draw func(int) int~ parameter in the starter signature."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: guessDepthHidden, Bonus: true},
 	})
 
@@ -450,8 +450,8 @@ if player==rival {return "win",nil} // التعادل مش فوز
 كل سطر إخراج ينتهي newline؛ مفيش prompts أو ملخص عند EOF. اقبل CRLF وآخر سطر من غير newline، وحد المحتوى 4096 بايت شامل؛ الأكبر خطأ من غير invalid للسطر الحالي. أي خطأ قراءة أو كتابة أو مصدر يرجّع النتيجة الجزئية للجولات المكتوبة بنجاح وخطأ يحتفظ بسبب النقل. مفيش معالجة بعد أول فشل نقل، ولا Report.
 
 النجمة التالتة: ~score~ بعد TrimSpace وToLower تكتب ~score=W/L/D~ بالعدادات الحالية، من غير اعتبارها invalid أو جولة ومن غير سحب عشوائي. كل جلسة مستقلة؛ مفيش حد جولات أو إعادة ضبط بعد استعلام النتيجة.
-`, Hints: []string{"عرّف Maneuver وثوابتها بـ iota؛ جدول 3×3 يوضح كل نتائج ResolveDuel.", "Parse الأول؛ السطر البايظ يكتب invalid من غير draw. الصالح يسحب draw(3) مرة واحدة.", "اكتب الجولة ثم زوّد العداد؛ score استعلام مستقل، وأخطاء النقل ترجع النتيجة السابقة وسبب الفشل."},
-		En: &LevelText{Title: "Drone Duel", Goal: "Map duel commands to named types and score rounds with injected randomness", Files: []LabFile{{Name: "main.go", Starter: droneDuelStarter}},
+`, LessonRevision: 1, Steps: ch21DuelArabic, Hints: []string{"خلّي النص عند حد الإدخال والقيم المسماة جوه منطق الجولة.", "افصل parsing عن حساب النتيجة، وراجع الأزواج بالترتيب.", "ارجع لتوقيعي ~Maneuver~ و~ParseManeuver~ في starter للتحويل والتحقق."},
+		En: &LevelText{Title: "Drone Duel", Goal: "Map duel commands to named types and score rounds with injected randomness", Files: []LabFile{{Name: "main.go", Starter: droneDuelStarter}}, LessonRevision: 1, Steps: ch21DuelEnglish,
 			Lesson: `# Drone Training Arena
 
 A training drone chooses a ~pulse~, ~shield~, or ~drill~ maneuver. Pulse disables drill, drill pierces shield, and shield blocks pulse. Identical maneuvers draw. Test all nine ordered pairs before connecting them to command input.
@@ -516,7 +516,7 @@ Implement ~Duel(in io.Reader, out io.Writer, draw func(int) int) (DuelScore,erro
 End each output line with a newline. No prompts or summary at EOF. Accept CRLF and an unterminated final line. Maximum content is 4096 bytes inclusive; longer lines fail without invalid for that line. Any read, write, or source failure returns the partial score for successfully written rounds and an error preserving transport causes. Stop on the first transport failure. No Report.
 
 Third star: a ~score~ line after TrimSpace and ToLower prints ~score=W/L/D~ from current counters. It is neither invalid nor a round and consumes no randomness. Sessions are independent, with no round cap or reset after a score query.
-`, Hints: []string{"Declare Maneuver and iota constants; a 3 by 3 table specifies every ResolveDuel result.", "Parse first; invalid lines print invalid without drawing. Valid lines call draw(3) once.", "Write the round before incrementing; score is an independent query and transport failures return previous scores with their causes."}},
+`, Hints: []string{"Keep text at the input boundary and named values inside the round logic.", "Separate parsing from outcome calculation and review ordered pairs.", "Use the starter's ~Maneuver~ and ~ParseManeuver~ signatures for conversion and validation."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: droneDuelHidden, Bonus: true},
 	})
 
