@@ -826,6 +826,18 @@ function jumpToLine(file, line) {
   ed.focus();
   ed.setSelectionRange(start, Math.min(ed.value.length, start + (lines[line - 1] || "").length));
 }
+// A panic marks the line it happened on like a compile error: red band, and
+// the panic message with its meaning above the caret there.
+function markPanicLine(level, r) {
+  const stderr = r.stderr || "";
+  const head = /^(panic: .*|fatal error: .*)$/m.exec(stderr);
+  if (!head) return;
+  const names = new Set(levelFiles(level).map((f) => f.name));
+  const where = [...stderr.matchAll(/^\t(?:.*\/)?([\w.-]+\.go):(\d+)/gm)].find((m) => names.has(m[1]));
+  if (!where) return;
+  lastErrors = [{ file: where[1], line: Number(where[2]), msg: head[1].replace(/ \[recovered\]$/, ""), tip: r.runtimeTip || "" }];
+  if (S.cur === level && S.file === where[1]) { errLines = new Map([[Number(where[2]), head[1]]]); renderEditor(); }
+}
 // Panic traces and failing test output name "main.go:12": make those lines
 // clickable when the file is one of the mission's files.
 function logOutputLine(text, cls) {
@@ -2121,6 +2133,7 @@ async function run(opts = {}) {
     if (r.stdout) { log("fmt output:", "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => log(l)); }
     if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => logOutputLine(l, "c-err"));
     if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
+    markPanicLine(level, r);
     log(T("الدرون شغال…", "Drone running…"), "c-info");
     if (r.trace?.available && r.trace.synced && r.trace.frames?.length) {
       startDebugRun(level, r, !!opts.paused);
