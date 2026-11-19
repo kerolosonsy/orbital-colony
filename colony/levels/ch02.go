@@ -12,7 +12,7 @@ import (
 
 func init() {
 	add(&Level{
-		En: &LevelText{
+		En: &LevelText{LessonRevision: 1, Steps: ch02InventoryEnglish,
 			Title: "Inventory Check",
 			Goal:  "Report the total moss + crystal in storage to base",
 			Lesson: `# Variables 📦
@@ -58,11 +58,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Just as you created ~moss~, create ~crystals := colony.Count(colony.Crystal)~.",
-				"Use ~total := moss + crystals~, then ~colony.Report(total)~.",
+				"A variable keeps a changing value available for later calculations.",
+				"Read each inventory category, calculate from the saved values, and choose the mission output.",
+				"The starter already reads moss; look at ~colony.Count~ for the other category.",
 			},
 		},
-		ID: "2-1-inventory", Chapter: 2, Title: "جرد المخزن",
+		LessonRevision: 1, Steps: ch02InventoryArabic, ID: "2-1-inventory", Chapter: 2, Title: "جرد المخزن",
 		Goal: "ابعت للقاعدة مجموع الطحالب + الكريستال اللي في المخزن",
 		Par:  0, Gold: 0, MaxTicks: 20,
 		Setup: func(w *sim.World) {
@@ -95,8 +96,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"زي ما عملنا ~moss~، اعمل متغير ~crystals := colony.Count(colony.Crystal)~.",
-			"~total := moss + crystals~ وبعدين ~colony.Report(total)~.",
+			"المتغير بيحتفظ بقيمة بتتغير عشان تستخدمها بعدين.",
+			"اقرأ كل نوع من المخزن، واحسب من القيم المحفوظة، واختار طريقة إرسال المهمة.",
+			"الـstarter قرأ الطحالب بالفعل؛ بص على ~colony.Count~ للنوع التاني.",
 		},
 		Lesson: `# المتغيرات 📦
 
@@ -129,7 +131,7 @@ half := total / 2 // قسمة أرقام صحيحة: 7 / 2 = 3
 	})
 
 	add(&Level{
-		En: &LevelText{
+		En: &LevelText{LessonRevision: 1, Steps: ch02SurveyEnglish,
 			Title: "Survey the Area",
 			Goal:  "Report the map's area (width × height), then its perimeter",
 			Lesson: `# Returning More Than One Value 📐
@@ -176,12 +178,12 @@ func main() {
 }
 `,
 			Hints: []string{
-				"Go uses ~*~ for multiplication: ~area := width * height~.",
-				"Parentheses are evaluated first: ~2 * (width + height)~.",
-				"Send the area with ~colony.Report(area)~ first, then the perimeter.",
+				"A function may return multiple values, each received in matching order.",
+				"Use both dimensions to reason about the two requested measurements.",
+				"Inspect the existing ~colony.WorldSize()~ line and the required report order.",
 			},
 		},
-		ID: "2-2-survey", Chapter: 2, Title: "مسح المنطقة",
+		LessonRevision: 1, Steps: ch02SurveyArabic, ID: "2-2-survey", Chapter: 2, Title: "مسح المنطقة",
 		Goal: "ابعت مساحة الخريطة (العرض × الطول)، وبعدها محيطها",
 		Par:  0, Gold: 0, MaxTicks: 20,
 		Setup: func(w *sim.World) {
@@ -228,9 +230,9 @@ func main() {
 }
 `,
 		Hints: []string{
-			"الضرب في Go بـ ~*~. يعني ~area := width * height~.",
-			"الأقواس بتتحسب الأول: ~2 * (width + height)~.",
-			"ابعت المساحة الأول بـ ~colony.Report(area)~ وبعدين المحيط.",
+			"الدالة ممكن ترجع أكتر من قيمة، وكل متغير يستقبل قيمته بالترتيب.",
+			"استخدم البعدين عشان تفكر في القياسين المطلوبين.",
+			"راجع سطر ~colony.WorldSize()~ الموجود وترتيب التقارير المطلوبة.",
 		},
 		Lesson: `# دالة بترجّع أكتر من قيمة 📐
 
@@ -274,7 +276,7 @@ func main() {
 	// Build the report described in the lesson.
 }
 `
-	add(&Level{ID: "2-3-callsigns", Chapter: 2, Title: "أسماء النداء", Goal: "قارن bytes وrunes وابعت أول وآخر حرف لاسمين",
+	add(&Level{LessonRevision: 1, Steps: ch02CallsignsArabic, ID: "2-3-callsigns", Chapter: 2, Title: "أسماء النداء", Goal: "قارن bytes وrunes وابعت أول وآخر حرف لاسمين",
 		Requires: []string{"rune"}, Bridge: []int{6},
 		Par: 0, Gold: 0, MaxTicks: 20,
 		Starter: callsignsStarter, Lesson: `# النص مش عدد bytes بس 📡
@@ -324,8 +326,12 @@ first := string(text[0]) // غلط لو هدفك أول حرف
 ## المهمة
 اقرأ الاسم 0 والاسم 1 بنداءين منفصلين. لكل اسم ابعت أربع تقارير منفصلة بـ ~colony.Report~: عدد الـ bytes، عدد الـ runes، أول rune كنص، وآخر rune كنص، بالترتيب ده.
 
-يعني ثمان تقارير في الآخر: الأربعة بتوع الاسم 0، وبعدهم الأربعة بتوع الاسم 1. مفيش عكس أسماء ولا حلقات في المهمة دي.`, Hints: []string{"ابدأ باسم 0 بس وشوف الفرق بين ~len~ و~utf8.RuneCountInString~ في الـ Console.", "الدالتين ~DecodeRuneInString~ و~DecodeLastRuneInString~ بيرجعوا قيمتين؛ استخدم ~_~ للعرض اللي مش محتاجه.", "حوّل كل rune لنص بـ ~string~، وابعت الأربع قيم بالترتيب قبل ما تعمل نفس الخطوات للاسم 1."},
-		En: &LevelText{Title: "Callsigns", Goal: "Report byte length, rune count, and endpoint characters for two callsigns", Starter: callsignsStarter, Lesson: `# Text Is More Than Bytes 📡
+يعني ثمان تقارير في الآخر: الأربعة بتوع الاسم 0، وبعدهم الأربعة بتوع الاسم 1. مفيش عكس أسماء ولا حلقات في المهمة دي.`, Hints: []string{
+			"~len~ بتعد bytes؛ دوال UTF-8 بتعد Unicode code points كـrunes.",
+			"اشتغل على اسم واحد كل مرة وخلي تقاريره الأربعة مع بعض.",
+			"راجع الـimports ودالتي decode قبل ما تبدأ مجموعة الاسم التاني.",
+		},
+		En: &LevelText{LessonRevision: 1, Steps: ch02CallsignsEnglish, Title: "Callsigns", Goal: "Report byte length, rune count, and endpoint characters for two callsigns", Starter: callsignsStarter, Lesson: `# Text Is More Than Bytes 📡
 
 A drone callsign can contain Arabic or emoji. Today we will distinguish storage size from character count, without loops or collections.
 
@@ -372,7 +378,11 @@ first := string(text[0]) // Wrong for reading the first character
 ## Your mission
 Read callsigns 0 and 1 with separate calls. For each name, send four separate ~colony.Report~ calls: byte length, rune count, first rune as text, and last rune as text, in that order.
 
-There must be eight reports: the four for name 0, followed by the four for name 1. This mission requires no reversal or loops.`, Hints: []string{"Start with name 0 and compare ~len~ with ~utf8.RuneCountInString~ in the Console.", "Both decode functions return two values; use ~_~ for the width you do not need.", "Convert each rune with ~string~ and send the four values in order before repeating for name 1."}},
+There must be eight reports: the four for name 0, followed by the four for name 1. This mission requires no reversal or loops.`, Hints: []string{
+			"~len~ counts bytes; UTF-8 rune functions count Unicode code points.",
+			"Work through one name at a time and keep its four reports together.",
+			"Check the imports and the two decode functions before building the second group.",
+		}},
 		Setup: func(w *sim.World) {
 			w.Init(4, 2, sim.Regolith)
 			// Both names are nonempty UTF-8; Arabic, emoji, and combining marks vary by seed.
@@ -405,7 +415,7 @@ func main() {
 	// Build the report described in the lesson.
 }
 `
-	add(&Level{ID: "2-4-units", Chapter: 2, Title: "وحدات القياس", Goal: "عرّف أنواع الشحنات وحوّل ثلاث كميات لـ cells",
+	add(&Level{LessonRevision: 1, Steps: ch02UnitsArabic, ID: "2-4-units", Chapter: 2, Title: "وحدات القياس", Goal: "عرّف أنواع الشحنات وحوّل ثلاث كميات لـ cells",
 		Requires: []string{"iota", "const"}, Bridge: []int{3, 8},
 		Par: 0, Gold: 0, MaxTicks: 20,
 		Starter: unitsStarter, Lesson: `# أسماء للأنواع ووحدات للشحنة 📦
@@ -468,8 +478,12 @@ fmt.Println(minutes + count) // مش هيتبني
 ## المهمة
 عرّف ~CargoKind~ أساسه int، وثوابت ~Cell~ و~Pack~ و~Crate~ بـ iota بالترتيب 0 و1 و2. عرّف ~Cells~ أساسه int ومعاملات ثابتة من نوع Cells: ~CellFactor=1~ و~PackFactor=6~ و~CrateFactor=24~.
 
-اقرأ الكميات بنداءات منفصلة، باستخدام ~int(Cell)~ وباقي أسماء الأنواع. حوّلها لـ Cells واضرب كل كمية في معاملها. ابعت تقرير واحد: إجمالي cells كعدد صحيح. مفيش حلقات ولا parsing ولا أخطاء هنا.`, Hints: []string{"اكتب الأنواع والثوابت برّه ~main~، والكميات المتغيّرة جوّاها.", "مرّر ~int(Pack)~ مثلاً لقراءة كمية packs، وبعدها حوّل العدد لـ ~Cells~.", "كل كمية تتضرب في معامل نوعها قبل الجمع؛ التقرير المطلوب واحد بس."},
-		En: &LevelText{Title: "Cargo Units", Goal: "Define cargo kinds and convert three quantities to cells", Starter: unitsStarter, Lesson: `# Named Types and Cargo Units 📦
+اقرأ الكميات بنداءات منفصلة، باستخدام ~int(Cell)~ وباقي أسماء الأنواع. حوّلها لـ Cells واضرب كل كمية في معاملها. ابعت تقرير واحد: إجمالي cells كعدد صحيح. مفيش حلقات ولا parsing ولا أخطاء هنا.`, Hints: []string{
+			"الأنواع المسماة بتدي الأعداد والوحدات معاني مختلفة في Go.",
+			"افصل تعريف الأنواع والثوابت عن قراءة الكميات اللي بتتغير.",
+			"راجع نوع argument في ~CargoAmount~ وحوّل القيم قبل جمعها.",
+		},
+		En: &LevelText{LessonRevision: 1, Steps: ch02UnitsEnglish, Title: "Cargo Units", Goal: "Define cargo kinds and convert three quantities to cells", Starter: unitsStarter, Lesson: `# Named Types and Cargo Units 📦
 
 Storage contains individual cells, packs, and crates. Adding their counts directly does not tell us the real cargo quantity; first use one common unit.
 
@@ -529,7 +543,11 @@ The types differ, so convert explicitly before arithmetic. For cargo, adding cra
 ## Your mission
 Define ~CargoKind~ based on int, and ~Cell~, ~Pack~, ~Crate~ using iota in the order 0, 1, 2. Define ~Cells~ based on int and typed Cells constants ~CellFactor=1~, ~PackFactor=6~, ~CrateFactor=24~.
 
-Read the three quantities with separate calls using ~int(Cell)~ and the other kind names. Convert them to Cells and multiply each by its factor. Send one report containing the integer total in cells. No loops, parsing, or error handling are needed.`, Hints: []string{"Declare types and constants outside ~main~, and changing quantities inside it.", "For example, pass ~int(Pack)~ to read packs, then convert the quantity to ~Cells~.", "Multiply each quantity by its own factor before addition; send only one report."}},
+Read the three quantities with separate calls using ~int(Cell)~ and the other kind names. Convert them to Cells and multiply each by its factor. Send one report containing the integer total in cells. No loops, parsing, or error handling are needed.`, Hints: []string{
+			"Named types give counts and units different meanings in Go.",
+			"Separate the type and constant declarations from reading changing quantities.",
+			"Check the ~CargoAmount~ argument type and convert values before combining them.",
+		}},
 		Setup: func(w *sim.World) {
 			w.Init(4, 2, sim.Regolith)
 			for kind := range w.Data.CargoAmounts {
