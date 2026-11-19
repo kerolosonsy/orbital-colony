@@ -25,6 +25,94 @@ func ch05Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	}
 }
 
+func ch05Pair(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch05Sandbox(id, text, kind string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch05ParamsSandboxConfig() map[string]any {
+	return map[string]any{
+		"source": ch05Pair("قيم للتوضيح", "Illustrative values"),
+		"labels": map[string]any{
+			"previous": ch05Pair("السابق", "Previous"), "next": ch05Pair("التالي", "Next"), "reset": ch05Pair("من الأول", "Reset"),
+			"call": ch05Pair("النداء", "Call"), "inside": ch05Pair("جوه الدالة", "Inside function"), "result": ch05Pair("النتيجة", "Result"),
+		},
+		"frames": []any{
+			map[string]any{"caption": ch05Pair("النداء يمرر 2.", "The call passes 2."), "call": "triple(2)", "inside": "—", "result": "—"},
+			map[string]any{"caption": ch05Pair("n تستقبل القيمة.", "n receives the value."), "call": "triple(2)", "inside": "2", "result": "—"},
+			map[string]any{"caption": ch05Pair("الـreturn ترجع 6.", "return carries 6."), "call": "triple(2)", "inside": "2", "result": "6"},
+		},
+	}
+}
+
+func ch05ErrorValueSandboxConfig() map[string]any {
+	return map[string]any{
+		"source": ch05Pair("قراءة توضيحية", "Illustrative read"),
+		"labels": map[string]any{
+			"outcome": ch05Pair("حالة error", "Error state"), "present": ch05Pair("موجود", "Present"), "absent": ch05Pair("nil", "nil"),
+			"value": ch05Pair("القيمة الراجعة", "Returned value"), "error": ch05Pair("الخطأ", "Error"), "action": ch05Pair("التصرف", "Next step"),
+		},
+		"success": map[string]any{
+			"error": ch05Pair("nil", "nil"), "action": ch05Pair("استخدم القيمة 12.", "Use value 12."), "caption": ch05Pair("مفيش خطأ؛ النتيجة صالحة.", "No error; the result is usable."),
+		},
+		"failure": map[string]any{
+			"error": ch05Pair("sensor", "sensor"), "action": ch05Pair("افحص الخطأ الأول.", "Check the error first."), "caption": ch05Pair("فيه خطأ؛ سيب القيمة.", "An error is present; skip the value."),
+		},
+		"value": 12,
+	}
+}
+
+func ch05WrapSandboxConfig() map[string]any {
+	return map[string]any{
+		"source": ch05Pair("سبب توضيحي", "Illustrative cause"),
+		"labels": map[string]any{
+			"format": ch05Pair("صيغة التنسيق", "Format"), "wrap": "%w", "plain": "%v",
+			"message": ch05Pair("الرسالة", "Message"), "identity": ch05Pair("errors.Is", "errors.Is"),
+		},
+		"wrapped": map[string]any{
+			"message": "bay 2: valve", "identity": "true", "caption": ch05Pair("السبب لسه معروف.", "The cause stays identifiable."),
+		},
+		"plain": map[string]any{
+			"message": "bay 2: valve", "identity": "false", "caption": ch05Pair("النص موجود؛ الهوية ضاعت.", "Text remains; identity is lost."),
+		},
+	}
+}
+
+func ch05DeferSandboxConfig() map[string]any {
+	return map[string]any{
+		"source": ch05Pair("حروف تدريبية", "Sample markers"),
+		"labels": map[string]any{
+			"previous": ch05Pair("السابق", "Previous"), "next": ch05Pair("التالي", "Next"), "reset": ch05Pair("من الأول", "Reset"),
+			"output": ch05Pair("الناتج", "Output"),
+		},
+		"frames": []any{
+			map[string]any{"caption": ch05Pair("مفيش طباعة لسه.", "No output yet."), "output": "—"},
+			map[string]any{"caption": ch05Pair("النداء الفوري طبع K.", "The immediate call prints K."), "output": "K"},
+			map[string]any{"caption": ch05Pair("آخر defer طبع J.", "The last defer prints J."), "output": "KJ"},
+			map[string]any{"caption": ch05Pair("أول defer طبع H.", "The first defer prints H."), "output": "KJH"},
+		},
+	}
+}
+
+func ch05ClosureSandboxConfig() map[string]any {
+	return map[string]any{
+		"source": ch05Pair("أمر تدريبي", "Sample command"),
+		"labels": map[string]any{
+			"store": ch05Pair("خزّن الدالة", "Store function"), "call": ch05Pair("نفّذ النداء", "Call function"), "reset": ch05Pair("من الأول", "Reset"),
+			"count": ch05Pair("عدد النداءات", "Call count"),
+		},
+		"states": map[string]any{
+			"idle":   ch05Pair("لسه مفيش function value.", "No function value stored yet."),
+			"stored": ch05Pair("اتخزنت؛ لسه ما اتنفذتش.", "Stored; nothing has run yet."),
+			"called": ch05Pair("الـclosure حدّثت العداد.", "The closure updated its counter."),
+		},
+		"initialCount": 0,
+	}
+}
+
 const (
 	ch05ParamsCode = `func twice(n int) int {
 	return n * 2
@@ -126,6 +214,7 @@ var ch05FunctionsArabic = []LessonStep{
 			{Line: 2, Caption: "الجمع يرجع 7."},
 			{Line: 6, Caption: "الناتج المطبوع 7.", Output: "7"},
 		}),
+		ch05Sandbox("c51.params-sandbox", "تابع قيمة توضيحية وهي داخلة ~function~ وراجعة.", "ch05-params", ch05ParamsSandboxConfig()),
 	}},
 	{ID: "c51.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c51.watch", `الـparameter داخل الدالة له الاسم والنوع المكتوبين في التوقيع.
 
@@ -166,6 +255,7 @@ Follow ~n~ from the call, then watch the returned value reach its caller.`, ch05
 			{Line: 2, Caption: "The sum returns 7."},
 			{Line: 6, Caption: "The printed output is 7.", Output: "7"},
 		}),
+		ch05Sandbox("c51.params-sandbox", "Follow a sample value into a ~function~ and back.", "ch05-params", ch05ParamsSandboxConfig()),
 	}},
 	{ID: "c51.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch05Markdown("c51.watch", `A parameter inside a function has the name and type from its signature.
 
@@ -206,6 +296,7 @@ var ch05StormArabic = []LessonStep{
 			{Line: 6, Caption: "مفيش خطأ."},
 			{Line: 9, Caption: "اطبع القيمة الناجحة.", Variables: []LessonVariable{{Name: "n", Value: "6"}}, Output: "6"},
 		}),
+		ch05Sandbox("c52.error-value-sandbox", "بدّل حالة القراءة ولاحظ فحص ~error~ قبل القيمة.", "ch05-error-value", ch05ErrorValueSandboxConfig()),
 	}},
 	{ID: "c52.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c52.watch", `ما تستخدمش قيمة النتيجة لو العملية رجّعت error.
 
@@ -246,6 +337,7 @@ This failure is illustrative; it uses no mission state.`, ch05ErrorCode, "e52-er
 			{Line: 6, Caption: "There is no error."},
 			{Line: 9, Caption: "Print the successful value.", Variables: []LessonVariable{{Name: "n", Value: "6"}}, Output: "6"},
 		}),
+		ch05Sandbox("c52.error-value-sandbox", "Toggle the read outcome; check ~error~ before value.", "ch05-error-value", ch05ErrorValueSandboxConfig()),
 	}},
 	{ID: "c52.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch05Markdown("c52.watch", `Do not use a result when the operation returned an error.
 
@@ -286,6 +378,7 @@ var ch05FaultArabic = []LessonStep{
 			{Line: 3, Caption: "%w يحتفظ بالسبب."},
 			{Line: 4, Caption: "السبب موجود داخل الخطأ.", Output: "true"},
 		}),
+		ch05Sandbox("c53.wrap-sandbox", "بدّل ~format~ وشوف النص وهوية السبب.", "ch05-wrap", ch05WrapSandboxConfig()),
 	}},
 	{ID: "c53.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c53.watch", `~%v~ يطبع السبب بس؛ مش بيحافظ على هويته زي ~%w~.
 
@@ -326,6 +419,7 @@ These values are sample alarms, not mission diagnostics.`, ch05WrapCode, "e53-wr
 			{Line: 3, Caption: "%w preserves the cause."},
 			{Line: 4, Caption: "The cause remains inside.", Output: "true"},
 		}),
+		ch05Sandbox("c53.wrap-sandbox", "Toggle the ~format~; watch text and cause identity.", "ch05-wrap", ch05WrapSandboxConfig()),
 	}},
 	{ID: "c53.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch05Markdown("c53.watch", `~%v~ prints the cause but does not preserve its identity like ~%w~.
 
@@ -368,6 +462,7 @@ var ch05UndockArabic = []LessonStep{
 			{Line: 2, Caption: "defer الأول يطبع A.", Output: "CBA"},
 			{Line: 8, Caption: "أضف سطر النهاية.", Output: "CBA"},
 		}),
+		ch05Sandbox("c54.defer-sandbox", "شغّل الخطوات وشوف ترتيب نداءات ~defer~.", "ch05-defer", ch05DeferSandboxConfig()),
 	}},
 	{ID: "c54.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c54.watch", `~recover~ لازم تتنادى مباشرة داخل function مؤجلة.
 
@@ -410,6 +505,7 @@ Each frame shows the executed line and exit order.`, ch05DeferCode, "e54-defer",
 			{Line: 2, Caption: "The first defer prints A.", Output: "CBA"},
 			{Line: 8, Caption: "Add the final newline.", Output: "CBA"},
 		}),
+		ch05Sandbox("c54.defer-sandbox", "Step through calls and watch ~defer~ order.", "ch05-defer", ch05DeferSandboxConfig()),
 	}},
 	{ID: "c54.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch05Markdown("c54.watch", `~recover~ must be called directly inside a deferred function.
 
@@ -452,6 +548,7 @@ var ch05CommandArabic = []LessonStep{
 			{Line: 5, Caption: "النداء الثاني يزوده تاني.", Variables: []LessonVariable{{Name: "hits", Value: "2"}}},
 			{Line: 6, Caption: "اطبع القيمة النهائية.", Variables: []LessonVariable{{Name: "hits", Value: "2"}}, Output: "2"},
 		}),
+		ch05Sandbox("c55.closure-sandbox", "خزّن ~function~ value، وبعدها نادِها وشوف ~closure~ count.", "ch05-closure", ch05ClosureSandboxConfig()),
 	}},
 	{ID: "c55.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch05Markdown("c55.watch", `~action := ping~ يخزن الدالة؛ ~action()~ ينفذها.
 
@@ -494,6 +591,7 @@ This function value has type ~func()~.`, ch05FunctionValueCode, "e55-function-va
 			{Line: 5, Caption: "Second call increments it again.", Variables: []LessonVariable{{Name: "hits", Value: "2"}}},
 			{Line: 6, Caption: "Print the final value.", Variables: []LessonVariable{{Name: "hits", Value: "2"}}, Output: "2"},
 		}),
+		ch05Sandbox("c55.closure-sandbox", "Store a ~function~ value, then call it and watch the ~closure~ count.", "ch05-closure", ch05ClosureSandboxConfig()),
 	}},
 	{ID: "c55.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch05Markdown("c55.watch", `~action := ping~ stores the function; ~action()~ runs it.
 
