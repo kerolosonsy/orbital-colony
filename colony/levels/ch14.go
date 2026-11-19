@@ -107,6 +107,7 @@ func dfsCost(w *sim.World, goal sim.Point) int {
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch14Lesson141.English,
 			Title: "One Function for Every Type",
 			Goal:  "Report the greatest depth (int) and highest temperature (float64) using one generic Max function",
 			Lesson: `# Generics: Write It Once for Multiple Types 🧬
@@ -170,11 +171,9 @@ func main() {
 	colony.Report(MaxInt(depths))
 }
 `,
-			Hints: []string{
-				"Change MaxInt to ~func Max[T cmp.Ordered](xs []T) T~ and ~import \"cmp\"~.",
-				"Keep the same body, then use ~colony.Report(Max(depths))~ and ~colony.Report(Max(temps))~.",
-			},
+			Hints: ch14Lesson141.EnglishHints,
 		},
+		LessonRevision: 1, Steps: ch14Lesson141.Arabic,
 		ID: "14-1-generic-max", Chapter: 14, Title: "دالة لكل الأنواع",
 		Goal: "ابعت أكبر عمق (int) وأعلى حرارة (float64) بدالة Max واحدة generic",
 		Par:  0, Gold: 0, MaxTicks: 20,
@@ -217,10 +216,7 @@ func main() {
 	colony.Report(MaxInt(depths))
 }
 `,
-		Hints: []string{
-			"غيّر MaxInt لـ ~func Max[T cmp.Ordered](xs []T) T~، واعمل ~import \"cmp\"~.",
-			"جوّاها نفس الكود بالظبط، وبعدين ~colony.Report(Max(depths))~ و~colony.Report(Max(temps))~.",
-		},
+		Hints: ch14Lesson141.ArabicHints,
 		Lesson: `# Generics: اكتبها مرة لكل الأنواع 🧬
 
 ~MaxInt~ و~MaxFloat~ نفس الكود بالحرف، والفرق الوحيد هو **النوع**. قبل Go 1.18 كنت لازم تكرّر الكود أو تستخدم ~any~ وتخسر الـ type safety. دلوقتي فيه **type parameters**:
@@ -260,6 +256,7 @@ func First[T any](xs []T) T { return xs[0] }
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch14Lesson142.English,
 			Title: "The Tunnel",
 			Goal:  "The map is hidden! Explore the tunnel, harvest the crystal at its end, and return to (0, 0) using your Stack[T]",
 			Lesson: `# Generic types: Stack[T] 📚
@@ -333,12 +330,9 @@ func main() {
 	// Explore: try each direction. If Move succeeds, Push. At a dead end, Pop and backtrack
 }
 `,
-			Hints: []string{
-				"Pop: if ~len(s.items) == 0~, return ok = false. Otherwise take ~s.items[len(s.items)-1]~ and shorten the slice.",
-				"Remember visited tiles in ~map[colony.Point]bool~ to avoid circles. On each new tile, check ~colony.GetEntity() == colony.Crystal~.",
-				"To return: while ~Pop~ returns ok, move ~opposite(d)~.",
-			},
+			Hints: ch14Lesson142.EnglishHints,
 		},
+		LessonRevision: 1, Steps: ch14Lesson142.Arabic,
 		ID: "14-2-stack", Chapter: 14, Title: "النفق",
 		Goal: "الخريطة مخفية! استكشف النفق، احصد الكريستال اللي في آخره، وارجع (0, 0) بـ Stack[T] بتاعك",
 		Par:  80, Gold: 50, MaxTicks: 600,
@@ -396,11 +390,7 @@ func main() {
 	// استكشف: جرّب كل اتجاه. لو Move نجحت، اعمل Push. لو كله مقفول، Pop وارجع
 }
 `,
-		Hints: []string{
-			"Pop: لو ~len(s.items) == 0~ ارجّع ok = false. غير كده خد ~s.items[len(s.items)-1]~ وقصّر الـ slice.",
-			"افتكر الخانات اللي زرتها في ~map[colony.Point]bool~ عشان متلفّش في دواير. وكل خانة جديدة: ~colony.GetEntity() == colony.Crystal~؟",
-			"الرجوع: طول ما ~Pop~ بترجّع ok، اتحرك ~opposite(d)~.",
-		},
+		Hints: ch14Lesson142.ArabicHints,
 		Lesson: `# Generic types: Stack[T] 📚
 
 مش الدوال بس اللي ينفع تبقى generic. الـ **types** كمان:
@@ -443,6 +433,7 @@ var nums Stack[int]               // Stack من الأرقام
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch14Lesson143.English,
 			Title: "Type Constraints",
 			Goal:  "Report the sums of depths, weights (Kg), and temperatures with one Sum function",
 			Lesson: `# Write Your Own Constraints 🔧
@@ -518,11 +509,9 @@ func main() {
 	// colony.Report(Sum(colony.Weights())) // ← Uncomment and see what the compiler says
 }
 `,
-			Hints: []string{
-				"~colony.Kg~ is a new type based on float64 (~type Kg float64~). It is distinct from float64, so ~int | float64~ does not accept it.",
-				"Put a tilde (the wave symbol near 1 on many keyboards) before int and float64 in Number. It means any type with one of those underlying types.",
-			},
+			Hints: ch14Lesson143.EnglishHints,
 		},
+		LessonRevision: 1, Steps: ch14Lesson143.Arabic,
 		ID: "14-3-constraints", Chapter: 14, Title: "قيود الأنواع",
 		Goal: "ابعت مجموع الأعماق والأوزان (Kg) ودرجات الحرارة، بدالة Sum واحدة",
 		Par:  0, Gold: 0, MaxTicks: 20,
@@ -577,10 +566,7 @@ func main() {
 	// colony.Report(Sum(colony.Weights())) // ← شيل الـ comment وشوف الـ compiler هيقول إيه
 }
 `,
-		Hints: []string{
-			"~colony.Kg~ نوع جديد معمول من float64 (~type Kg float64~). هو مش float64 نفسه، فـ ~int | float64~ مش بتقبله.",
-			"اكتب علامة التلدة (الموجة اللي جنب الرقم 1 في الكيبورد) قبل int وقبل float64 جوه Number. معناها: أي نوع أصله الأنواع دي.",
-		},
+		Hints: ch14Lesson143.ArabicHints,
 		Lesson: `# Constraints بإيدك 🔧
 
 الـ constraint هو **interface** بيوصف الأنواع المسموحة. وممكن يكون عبارة عن **قايمة أنواع**:
@@ -629,7 +615,7 @@ cmp.Ordered // كل الأنواع اللي بتتقارن، ومعمولة با
 - لما تلاقي نفسك بتكتب **نفس الكود** لأكتر من نوع: containers، وخوارزميات على slices وmaps.
 - **مش** لكل حاجة. لو دالة بتشتغل مع نوع واحد، خلّيها عادية. الـ generics بتصعّب القراية لو اتستخدمت من غير داعي.`,
 	})
-	add(&Level{ID: "14-4-airlock-queue", Chapter: 14, Kind: "lab", Title: "طابور البوابة", Goal: "ابني طابور generic يحافظ على ترتيب الوصول", Requires: []string{"generictype"}, Bridge: []int{27},
+	add(&Level{LessonRevision: 1, Steps: ch14Lesson144.Arabic, ID: "14-4-airlock-queue", Chapter: 14, Kind: "lab", Title: "طابور البوابة", Goal: "ابني طابور generic يحافظ على ترتيب الوصول", Requires: []string{"generictype"}, Bridge: []int{27},
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: airlockQueueStarter, ReadOnly: false}},
 		Lesson: `# اللي وصل الأول يخرج الأول
 
@@ -688,8 +674,8 @@ last := q.waiting[len(q.waiting)-1] // ده آخر واحد، وممكن panic �
 نفّذ ~Queue[T any]~؛ ~var q Queue[int]~ شغال فوراً. ~Admit(v)~ يضيف آخر الطابور، ~Depart() (T,bool)~ يشيل أول عنصر، و~Front() (T,bool)~ يقرأه بس. الاتنين يرجّعوا zero,false لو فاضي من غير panic. ~Len() int~ العدد الحالي.
 
 بعد Admit(4) وAdmit(9)، Depart ترجع 4,true وFront ترجع 9,true من غير تغيير Len. امسح المراجع المستهلكة، وتخلّص من التخزين لما يفضى. العقد تسلسلي ومش آمن لتزامن؛ مفيش Report في المختبر.
-`, Hints: []string{"الـ nil slice جاهزة لـ append.", "اقرأ أول خانة، وامسحها بقيمة صفرية من T قبل التقطيع.", "Front متغيّرش التخزين؛ جرّب فاضي ثم عنصر واحد ثم إعادة استعمال."},
-		En: &LevelText{Title: "Airlock Queue", Goal: "Build a generic queue that preserves arrival order", Files: []LabFile{{Name: "main.go", Starter: airlockQueueStarter, ReadOnly: false}}, Lesson: `# First Arrival, First Departure
+`, Hints: ch14Lesson144.ArabicHints,
+		En: &LevelText{LessonRevision: 1, Steps: ch14Lesson144.English, Title: "Airlock Queue", Goal: "Build a generic queue that preserves arrival order", Files: []LabFile{{Name: "main.go", Starter: airlockQueueStarter, ReadOnly: false}}, Lesson: `# First Arrival, First Departure
 
 The previous stack used LIFO. An airlock needs FIFO: the first passenger admitted is the first to depart, regardless of the passenger data type.
 
@@ -746,10 +732,10 @@ That is stack order. Check length before indexing. ~Front~ is a query and must l
 Implement ~Queue[T any]~ so ~var q Queue[int]~ works immediately. ~Admit(v)~ appends, ~Depart() (T,bool)~ removes the first passenger, and ~Front() (T,bool)~ only reads it. Both return zero,false when empty without panic. ~Len() int~ is the current count.
 
 After Admit(4) and Admit(9), Depart returns 4,true and Front returns 9,true without changing Len. Clear consumed references and release storage when empty. The contract is sequential, with no concurrent safety requirement and no Report.
-`, Hints: []string{"A nil slice is ready for append.", "Read the first slot, clear it using a zero T, then slice it away.", "Front must not modify storage; try empty, singleton, and reuse."}},
+`, Hints: ch14Lesson144.EnglishHints},
 		Lab: &Lab{ReqFile: "main.go", Hidden: airlockQueueHidden},
 	})
-	add(&Level{ID: "14-5-archive-tree", Chapter: 14, Kind: "lab", Title: "شجرة الأرشيف", Goal: "خزّن سجلات في شجرة generic بمقارنة وترتيب محددين", Requires: []string{"generictype", "recursion"}, Bridge: []int{28},
+	add(&Level{LessonRevision: 1, Steps: ch14Lesson145.Arabic, ID: "14-5-archive-tree", Chapter: 14, Kind: "lab", Title: "شجرة الأرشيف", Goal: "خزّن سجلات في شجرة generic بمقارنة وترتيب محددين", Requires: []string{"generictype", "recursion"}, Bridge: []int{28},
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: archiveTreeStarter, ReadOnly: false}},
 		Lesson: `# أرشيف بيتفرّع
 
@@ -811,8 +797,8 @@ func countdown(n int) int { return countdown(n) } // مفيش تقدّم أو ت
 نفّذ ~Archive[T any]~. ~Order(func(T,T) int) error~ يحدد المقارنة في أرشيف فاضي؛ nil أو محاولة تغييرها بعد وجود سجلات ترجع error من غير تعديل. ~Store(record) (bool,error)~ يحتاج مقارنة، ويرجّع true لو أضاف، وfalse,nil لو تكرار حسب مقارنة صفر، مع الاحتفاظ بالسجل الأول.
 
 ~Contains(record) bool~ يرجّع وجود سجل مساوٍ بالمقارنة. ~Records() []T~ نسخة مستقلة in-order. الـ zero value تقبل البحث والعرض وترجع فاضي؛ Store من غير Order ترجع خطأ من غير panic أو تعديل. استخدم دالة recursive للإدخال أو الزيارة. العقد تسلسلي؛ مفيش Report.
-`, Hints: []string{"ابدأ بالفرع nil كحالة توقف.", "نتيجة المقارنة صفر معناها تكرار: متغيّرش السجل القديم.", "في الزيارة اجمع الشمال ثم العقدة ثم اليمين؛ متخزّنش الناتج كـ slice مشتركة."},
-		En: &LevelText{Title: "Archive Tree", Goal: "Store records in a generic tree with a defined comparison order", Files: []LabFile{{Name: "main.go", Starter: archiveTreeStarter, ReadOnly: false}}, Lesson: `# A Branching Archive
+`, Hints: ch14Lesson145.ArabicHints,
+		En: &LevelText{LessonRevision: 1, Steps: ch14Lesson145.English, Title: "Archive Tree", Goal: "Store records in a generic tree with a defined comparison order", Files: []LabFile{{Name: "main.go", Starter: archiveTreeStarter, ReadOnly: false}}, Lesson: `# A Branching Archive
 
 Instead of comparing with every record, a tree selects a smaller or larger branch. This lesson introduces recursion: a function solves a smaller instance of its problem by calling itself.
 
@@ -872,7 +858,7 @@ Do not use ~record < node.record~ for T any: it might be a struct. Use the injec
 Implement ~Archive[T any]~. ~Order(func(T,T) int) error~ configures an empty archive. A nil comparator or reordering a populated archive returns an error without mutation. ~Store(record) (bool,error)~ requires a comparator, returns true for insertion, or false,nil for comparator equality, retaining the first record.
 
 ~Contains(record) bool~ reports comparator equality. ~Records() []T~ returns an independent in-order snapshot. The zero value supports empty reads; Store before Order returns an error without panic or mutation. Use a recursive function for insertion or traversal. This is a sequential contract with no Report.
-`, Hints: []string{"Start with a nil branch as the base case.", "Zero comparison means duplicate: keep the original record.", "Traverse left, node, right; do not expose a shared result slice."}},
+`, Hints: ch14Lesson145.EnglishHints},
 		Lab: &Lab{ReqFile: "main.go", Hidden: archiveTreeHidden},
 	})
 }
