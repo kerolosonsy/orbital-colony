@@ -16,6 +16,19 @@ type ch34ExampleSpec struct {
 	frames  []ch34FrameSpec
 }
 
+type ch34SandboxFrame struct {
+	caption                [2]string
+	leftLabel, leftValue   [2]string
+	rightLabel, rightValue [2]string
+}
+
+type ch34SandboxSpec struct {
+	id             string
+	text, title    [2]string
+	advance, reset [2]string
+	frames         []ch34SandboxFrame
+}
+
 type ch34LessonSpec struct {
 	prefix        string
 	mission       [2]string
@@ -36,6 +49,7 @@ type ch34LessonSpec struct {
 	checkFeedback [2][]string
 	turn          [2]string
 	hints         [2][3]string
+	sandbox       ch34SandboxSpec
 }
 
 func ch34Markdown(id, text string) LessonBlock {
@@ -55,6 +69,31 @@ func ch34Walkthrough(id, text string, example ch34ExampleSpec, language int) Les
 		ID: id, Kind: "walkthrough", Text: ch34ShortParagraphs(text), Code: example.code,
 		Imports: example.imports, ExampleID: example.id,
 		Walkthrough: &LessonWalkthrough{Frames: frames},
+	}
+}
+
+func ch34Locale(value [2]string) map[string]any {
+	return map[string]any{"ar": value[0], "en": value[1]}
+}
+
+func ch34SandboxBlock(spec ch34SandboxSpec, language int) LessonBlock {
+	frames := make([]any, 0, len(spec.frames))
+	for _, frame := range spec.frames {
+		frames = append(frames, map[string]any{
+			"caption":    ch34Locale(frame.caption),
+			"leftLabel":  ch34Locale(frame.leftLabel),
+			"leftValue":  ch34Locale(frame.leftValue),
+			"rightLabel": ch34Locale(frame.rightLabel),
+			"rightValue": ch34Locale(frame.rightValue),
+		})
+	}
+	return LessonBlock{
+		ID: spec.id, Kind: "sandbox", Text: spec.text[language],
+		Sandbox: &LessonSandbox{Kind: "ch34-storage-flow", Config: map[string]any{
+			"title":  ch34Locale(spec.title),
+			"labels": map[string]any{"advance": ch34Locale(spec.advance), "reset": ch34Locale(spec.reset)},
+			"frames": frames,
+		}},
 	}
 }
 
@@ -97,6 +136,7 @@ func ch34BuildLesson(spec ch34LessonSpec) ([]LessonStep, []LessonStep) {
 			{ID: prefix + "try-step", Title: titles[language][2], Blocks: []LessonBlock{
 				ch34Question(prefix+"predict", ch34FencedQuestion(spec.question[language], spec.reveal.code), spec.options[language], spec.answer, spec.feedback[language]),
 				ch34Walkthrough(prefix+"reveal", spec.revealText[language], spec.reveal, language),
+				ch34SandboxBlock(spec.sandbox, language),
 			}},
 			{ID: prefix + "watch-step", Title: titles[language][3], Blocks: []LessonBlock{ch34Markdown(prefix+"watch", spec.watch[language])}},
 			{ID: prefix + "check-step", Title: titles[language][4], Blocks: []LessonBlock{
@@ -185,6 +225,16 @@ var ch34VaultArabic, ch34VaultEnglish = ch34BuildLesson(ch34LessonSpec{
 		{"الـslice ممكن تشارك backing array؛ وضّح مين يملك البايتات قبل تعديلها.", "قسّم التصميم بين حماية الحالة، وحساب الصلاحية، وحدود نسخ القيم.", "ابدأ من تعريف ~Vault~ وتوقيعات methods في الـstarter، وحدد إمتى القيمة تعتبر حية."},
 		{"A slice may share a backing array; clarify byte ownership before changing it.", "Separate state protection, expiry decisions, and value-copy boundaries.", "Start at the ~Vault~ type and starter methods, and define when a value is live."},
 	},
+	sandbox: ch34SandboxSpec{
+		id:      "ch34-key-vault",
+		text:    [2]string{"غيّر بايت وشوف الاسم التاني بيتأثر.", "Change one byte and watch its alias."},
+		title:   [2]string{"ملكية البايتات", "Byte ownership"},
+		advance: [2]string{"غيّر أول بايت", "Change first byte"}, reset: [2]string{"من الأول", "Reset"},
+		frames: []ch34SandboxFrame{
+			{caption: [2]string{"الاسمين شايفين نفس البايتات.", "Both names share these bytes."}, leftLabel: [2]string{"المصدر", "Source"}, leftValue: [2]string{"air", "air"}, rightLabel: [2]string{"alias", "Alias"}, rightValue: [2]string{"air", "air"}},
+			{caption: [2]string{"التعديل ظهر في الاسمين.", "The edit appears through both names."}, leftLabel: [2]string{"المصدر", "Source"}, leftValue: [2]string{"fir", "fir"}, rightLabel: [2]string{"alias", "Alias"}, rightValue: [2]string{"fir", "fir"}},
+		},
+	},
 })
 
 var ch34LedgerArabic, ch34LedgerEnglish = ch34BuildLesson(ch34LessonSpec{
@@ -262,6 +312,17 @@ var ch34LedgerArabic, ch34LedgerEnglish = ch34BuildLesson(ch34LessonSpec{
 	hints: [2][3]string{
 		{"السجل بيسمح بإعادة بناء الحالة بعد إعادة التشغيل.", "رتّب تفكيرك من bytes إلى record ثم حالة الذاكرة.", "ابدأ من ~Ledger~ وتوقيعات ~OpenLedger~ و~Lookup~ في الـstarter."},
 		{"A log lets the program rebuild state after a restart.", "Reason from bytes to records, then to in-memory state.", "Start at ~Ledger~ and the ~OpenLedger~ and ~Lookup~ signatures in the starter."},
+	},
+	sandbox: ch34SandboxSpec{
+		id:      "ch34-write-ahead-log",
+		text:    [2]string{"قارن سجل كامل بذيل ناقص وبايت متغير.", "Compare complete, short, and changed records."},
+		title:   [2]string{"قراءة السجل", "Reading a record"},
+		advance: [2]string{"الحالة الجاية", "Next case"}, reset: [2]string{"من الأول", "Reset"},
+		frames: []ch34SandboxFrame{
+			{caption: [2]string{"السجل كامل وفحصه مطابق.", "The record is complete and checksum matches."}, leftLabel: [2]string{"البايتات", "Bytes"}, leftValue: [2]string{"01 02 03 04", "01 02 03 04"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"سليم", "intact"}},
+			{caption: [2]string{"الذيل ناقص؛ السجل مش كامل.", "The tail is short; the record is incomplete."}, leftLabel: [2]string{"البايتات", "Bytes"}, leftValue: [2]string{"01 02 03", "01 02 03"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"غير مكتمل", "incomplete"}},
+			{caption: [2]string{"الطول كامل لكن الفحص مختلف.", "The length is complete, but checksum differs."}, leftLabel: [2]string{"البايتات", "Bytes"}, leftValue: [2]string{"01 02 FF 04", "01 02 FF 04"}, rightLabel: [2]string{"النتيجة", "Result"}, rightValue: [2]string{"تلف", "corrupt"}},
+		},
 	},
 })
 
@@ -341,6 +402,18 @@ func main() {
 		{"العلامة الصريحة بتخلي الحذف حالة قابلة للقراءة.", "افصل بين تفريغ الحالة الحالية ودمج التاريخ القديم.", "راجع حقول ~Ledger~ الموروثة وتوقيعات ~Flush~ و~Compact~ في الـstarter."},
 		{"An explicit marker makes deletion a readable state.", "Separate flushing the current state from merging old history.", "Review the inherited ~Ledger~ fields and ~Flush~ and ~Compact~ signatures in the starter."},
 	},
+	sandbox: ch34SandboxSpec{
+		id:      "ch34-compaction",
+		text:    [2]string{"تابع علامة الحذف قدام قيمة أقدم.", "Trace a tombstone beside an older value."},
+		title:   [2]string{"دمج الأجيال", "Merging generations"},
+		advance: [2]string{"الخطوة الجاية", "Next event"}, reset: [2]string{"من الأول", "Reset"},
+		frames: []ch34SandboxFrame{
+			{caption: [2]string{"العلامة الجديدة بتخفي القديم.", "The newer marker hides the older value."}, leftLabel: [2]string{"القديم", "Older table"}, leftValue: [2]string{"fuel", "fuel"}, rightLabel: [2]string{"القراءة", "Read"}, rightValue: [2]string{"محذوف", "deleted"}},
+			{caption: [2]string{"شيل العلامة بدري؛ القديم يظهر.", "Drop the marker early; the old value returns."}, leftLabel: [2]string{"القديم", "Older table"}, leftValue: [2]string{"fuel", "fuel"}, rightLabel: [2]string{"القراءة", "Read"}, rightValue: [2]string{"fuel", "fuel"}},
+			{caption: [2]string{"بعد دمج القديم، الحذف ثابت.", "After merging old tables, deletion remains."}, leftLabel: [2]string{"القديم", "Older table"}, leftValue: [2]string{"اتشال", "removed"}, rightLabel: [2]string{"القراءة", "Read"}, rightValue: [2]string{"محذوف", "deleted"}},
+			{caption: [2]string{"دلوقتي اختفاء العلامة آمن.", "Now removing the marker is safe."}, leftLabel: [2]string{"القديم", "Older table"}, leftValue: [2]string{"اتشال", "removed"}, rightLabel: [2]string{"القراءة", "Read"}, rightValue: [2]string{"مش موجود", "absent"}},
+		},
+	},
 })
 
 var ch34DepotArabic, ch34DepotEnglish = ch34BuildLesson(ch34LessonSpec{
@@ -416,6 +489,18 @@ var ch34DepotArabic, ch34DepotEnglish = ch34BuildLesson(ch34LessonSpec{
 	hints: [2][3]string{
 		{"الاسم المبني من المحتوى يسهّل اكتشاف التكرار والتلف.", "رتّب الخطوات من chunk إلى placement ثم verification وrepair.", "ابدأ من ~Pod.Fetch~ و~Pod.Store~ وتعريف ~Depot~ في الـstarter."},
 		{"A content-derived name helps detect duplicates and damage.", "Think from chunking to placement, then verification and repair.", "Start at ~Pod.Fetch~, ~Pod.Store~, and the ~Depot~ type in the starter."},
+	},
+	sandbox: ch34SandboxSpec{
+		id:      "ch34-distributed-storage",
+		text:    [2]string{"اتبع نسخة تالفة وقراءة نسخة بديلة وإصلاحها.", "Trace a damaged copy, fallback, and repair."},
+		title:   [2]string{"نسخ موزعة", "Distributed copies"},
+		advance: [2]string{"الحدث الجاي", "Next event"}, reset: [2]string{"من الأول", "Reset"},
+		frames: []ch34SandboxFrame{
+			{caption: [2]string{"النسخ الثلاث سليمة.", "All three copies are intact."}, leftLabel: [2]string{"A / B / C", "A / B / C"}, leftValue: [2]string{"سليمة", "intact"}, rightLabel: [2]string{"قراءة", "Read"}, rightValue: [2]string{"تحقق", "verified"}},
+			{caption: [2]string{"النسخة A بقت تالفة.", "Copy A is now damaged."}, leftLabel: [2]string{"A / B / C", "A / B / C"}, leftValue: [2]string{"تالف / سليم / سليم", "bad / good / good"}, rightLabel: [2]string{"قراءة", "Read"}, rightValue: [2]string{"جرّب نسخة تانية", "try another copy"}},
+			{caption: [2]string{"النسخة B اجتازت التحقق.", "Copy B passed verification."}, leftLabel: [2]string{"القراءة", "Read"}, leftValue: [2]string{"B", "B"}, rightLabel: [2]string{"البصمة", "Fingerprint"}, rightValue: [2]string{"مطابقة", "matches"}},
+			{caption: [2]string{"الإصلاح نسخ بايتات سليمة.", "Repair copied intact bytes."}, leftLabel: [2]string{"A / B / C", "A / B / C"}, leftValue: [2]string{"سليم / سليم / سليم", "good / good / good"}, rightLabel: [2]string{"المصدر", "Source"}, rightValue: [2]string{"B", "B"}},
+		},
 	},
 })
 

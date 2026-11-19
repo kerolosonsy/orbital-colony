@@ -1,0 +1,360 @@
+{
+  "34-1-kv-store": {
+    "frames": [
+      {
+        "caption": {
+          "ar": "الاسمين شايفين نفس البايتات.",
+          "en": "Both names share these bytes."
+        },
+        "leftLabel": {
+          "ar": "المصدر",
+          "en": "Source"
+        },
+        "leftValue": {
+          "ar": "air",
+          "en": "air"
+        },
+        "rightLabel": {
+          "ar": "alias",
+          "en": "Alias"
+        },
+        "rightValue": {
+          "ar": "air",
+          "en": "air"
+        }
+      },
+      {
+        "caption": {
+          "ar": "التعديل ظهر في الاسمين.",
+          "en": "The edit appears through both names."
+        },
+        "leftLabel": {
+          "ar": "المصدر",
+          "en": "Source"
+        },
+        "leftValue": {
+          "ar": "fir",
+          "en": "fir"
+        },
+        "rightLabel": {
+          "ar": "alias",
+          "en": "Alias"
+        },
+        "rightValue": {
+          "ar": "fir",
+          "en": "fir"
+        }
+      }
+    ],
+    "labels": {
+      "advance": {
+        "ar": "غيّر أول بايت",
+        "en": "Change first byte"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "title": {
+      "ar": "ملكية البايتات",
+      "en": "Byte ownership"
+    }
+  },
+  "34-2-wal": {
+    "frames": [
+      {
+        "caption": {
+          "ar": "السجل كامل وفحصه مطابق.",
+          "en": "The record is complete and checksum matches."
+        },
+        "leftLabel": {
+          "ar": "البايتات",
+          "en": "Bytes"
+        },
+        "leftValue": {
+          "ar": "01 02 03 04",
+          "en": "01 02 03 04"
+        },
+        "rightLabel": {
+          "ar": "النتيجة",
+          "en": "Result"
+        },
+        "rightValue": {
+          "ar": "سليم",
+          "en": "intact"
+        }
+      },
+      {
+        "caption": {
+          "ar": "الذيل ناقص؛ السجل مش كامل.",
+          "en": "The tail is short; the record is incomplete."
+        },
+        "leftLabel": {
+          "ar": "البايتات",
+          "en": "Bytes"
+        },
+        "leftValue": {
+          "ar": "01 02 03",
+          "en": "01 02 03"
+        },
+        "rightLabel": {
+          "ar": "النتيجة",
+          "en": "Result"
+        },
+        "rightValue": {
+          "ar": "غير مكتمل",
+          "en": "incomplete"
+        }
+      },
+      {
+        "caption": {
+          "ar": "الطول كامل لكن الفحص مختلف.",
+          "en": "The length is complete, but checksum differs."
+        },
+        "leftLabel": {
+          "ar": "البايتات",
+          "en": "Bytes"
+        },
+        "leftValue": {
+          "ar": "01 02 FF 04",
+          "en": "01 02 FF 04"
+        },
+        "rightLabel": {
+          "ar": "النتيجة",
+          "en": "Result"
+        },
+        "rightValue": {
+          "ar": "تلف",
+          "en": "corrupt"
+        }
+      }
+    ],
+    "labels": {
+      "advance": {
+        "ar": "الحالة الجاية",
+        "en": "Next case"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "title": {
+      "ar": "قراءة السجل",
+      "en": "Reading a record"
+    }
+  },
+  "34-3-compaction": {
+    "frames": [
+      {
+        "caption": {
+          "ar": "العلامة الجديدة بتخفي القديم.",
+          "en": "The newer marker hides the older value."
+        },
+        "leftLabel": {
+          "ar": "القديم",
+          "en": "Older table"
+        },
+        "leftValue": {
+          "ar": "fuel",
+          "en": "fuel"
+        },
+        "rightLabel": {
+          "ar": "القراءة",
+          "en": "Read"
+        },
+        "rightValue": {
+          "ar": "محذوف",
+          "en": "deleted"
+        }
+      },
+      {
+        "caption": {
+          "ar": "شيل العلامة بدري؛ القديم يظهر.",
+          "en": "Drop the marker early; the old value returns."
+        },
+        "leftLabel": {
+          "ar": "القديم",
+          "en": "Older table"
+        },
+        "leftValue": {
+          "ar": "fuel",
+          "en": "fuel"
+        },
+        "rightLabel": {
+          "ar": "القراءة",
+          "en": "Read"
+        },
+        "rightValue": {
+          "ar": "fuel",
+          "en": "fuel"
+        }
+      },
+      {
+        "caption": {
+          "ar": "بعد دمج القديم، الحذف ثابت.",
+          "en": "After merging old tables, deletion remains."
+        },
+        "leftLabel": {
+          "ar": "القديم",
+          "en": "Older table"
+        },
+        "leftValue": {
+          "ar": "اتشال",
+          "en": "removed"
+        },
+        "rightLabel": {
+          "ar": "القراءة",
+          "en": "Read"
+        },
+        "rightValue": {
+          "ar": "محذوف",
+          "en": "deleted"
+        }
+      },
+      {
+        "caption": {
+          "ar": "دلوقتي اختفاء العلامة آمن.",
+          "en": "Now removing the marker is safe."
+        },
+        "leftLabel": {
+          "ar": "القديم",
+          "en": "Older table"
+        },
+        "leftValue": {
+          "ar": "اتشال",
+          "en": "removed"
+        },
+        "rightLabel": {
+          "ar": "القراءة",
+          "en": "Read"
+        },
+        "rightValue": {
+          "ar": "مش موجود",
+          "en": "absent"
+        }
+      }
+    ],
+    "labels": {
+      "advance": {
+        "ar": "الخطوة الجاية",
+        "en": "Next event"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "title": {
+      "ar": "دمج الأجيال",
+      "en": "Merging generations"
+    }
+  },
+  "34-4-chunk-store": {
+    "frames": [
+      {
+        "caption": {
+          "ar": "النسخ الثلاث سليمة.",
+          "en": "All three copies are intact."
+        },
+        "leftLabel": {
+          "ar": "A / B / C",
+          "en": "A / B / C"
+        },
+        "leftValue": {
+          "ar": "سليمة",
+          "en": "intact"
+        },
+        "rightLabel": {
+          "ar": "قراءة",
+          "en": "Read"
+        },
+        "rightValue": {
+          "ar": "تحقق",
+          "en": "verified"
+        }
+      },
+      {
+        "caption": {
+          "ar": "النسخة A بقت تالفة.",
+          "en": "Copy A is now damaged."
+        },
+        "leftLabel": {
+          "ar": "A / B / C",
+          "en": "A / B / C"
+        },
+        "leftValue": {
+          "ar": "تالف / سليم / سليم",
+          "en": "bad / good / good"
+        },
+        "rightLabel": {
+          "ar": "قراءة",
+          "en": "Read"
+        },
+        "rightValue": {
+          "ar": "جرّب نسخة تانية",
+          "en": "try another copy"
+        }
+      },
+      {
+        "caption": {
+          "ar": "النسخة B اجتازت التحقق.",
+          "en": "Copy B passed verification."
+        },
+        "leftLabel": {
+          "ar": "القراءة",
+          "en": "Read"
+        },
+        "leftValue": {
+          "ar": "B",
+          "en": "B"
+        },
+        "rightLabel": {
+          "ar": "البصمة",
+          "en": "Fingerprint"
+        },
+        "rightValue": {
+          "ar": "مطابقة",
+          "en": "matches"
+        }
+      },
+      {
+        "caption": {
+          "ar": "الإصلاح نسخ بايتات سليمة.",
+          "en": "Repair copied intact bytes."
+        },
+        "leftLabel": {
+          "ar": "A / B / C",
+          "en": "A / B / C"
+        },
+        "leftValue": {
+          "ar": "سليم / سليم / سليم",
+          "en": "good / good / good"
+        },
+        "rightLabel": {
+          "ar": "المصدر",
+          "en": "Source"
+        },
+        "rightValue": {
+          "ar": "B",
+          "en": "B"
+        }
+      }
+    ],
+    "labels": {
+      "advance": {
+        "ar": "الحدث الجاي",
+        "en": "Next event"
+      },
+      "reset": {
+        "ar": "من الأول",
+        "en": "Reset"
+      }
+    },
+    "title": {
+      "ar": "نسخ موزعة",
+      "en": "Distributed copies"
+    }
+  }
+}

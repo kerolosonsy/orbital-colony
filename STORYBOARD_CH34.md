@@ -6,7 +6,7 @@ Four labs, each with the same six short steps in Arabic and English. Every walkt
 
 Mission names concurrent state, expiry, and faithful snapshots. Idea walks through slice aliasing. Try asks about the exact expiry instant, then steps through the `time.Time.Before` result. Watch out covers map coordination and byte ownership; Think checks why an injected clock helps repeatable reasoning.
 
-**Playground idea:** Let the learner edit an input byte and watch every alias that changes. A separate fixed clock could move to just before, at, and after a sample deadline.
+**Playground:** Change the first byte in a shared slice and watch the alias change too. The existing Try it question keeps the separate fixed-clock expiry boundary.
 
 <!-- go-example id=e341-byte-alias imports=fmt outcome=ok -->
 ```go
@@ -31,7 +31,7 @@ func main() {
 
 Mission contrasts a short tail with complete corruption. Idea follows `io.ReadFull` on a short input. Try predicts a big-endian round trip. Watch out separates incomplete data from a bad checksum; Think checks how the program should treat a complete invalid record.
 
-**Playground idea:** Show a record as byte groups and let the learner shorten its tail or flip one byte. Display whether the record is incomplete or complete with a failed checksum.
+**Playground:** Step between an intact record, a short tail, and a complete record with a mismatched checksum.
 
 <!-- go-example id=e342-short-read imports=fmt,io,strings outcome=ok -->
 ```go
@@ -56,7 +56,7 @@ func main() {
 
 Mission continues the previous ledger. Idea walks through sorting keys. Try predicts a tombstone field. Watch out explains how old immutable tables can resurrect deleted values; Think checks the role of a delete marker during reads and compaction.
 
-**Playground idea:** Put entries from several table generations on a timeline. Let the learner change which value wins and see when a tombstone can be removed safely.
+**Playground:** Step through an older value hidden by a tombstone, early marker removal, and compaction before marker removal.
 
 <!-- go-example id=e343-sort-keys imports=fmt,sort outcome=ok -->
 ```go
@@ -82,7 +82,7 @@ func main() {
 
 Mission frames chunk storage, replicas, verification, and repair. Idea follows equal content fingerprints. Try predicts the hex identifier length. Watch out distinguishes a successful fetch from intact bytes; Think asks whether a copy with the wrong fingerprint can be used.
 
-**Playground idea:** Split an illustrative file into chunks and place copies on labeled pods. Let the learner mark copies missing or damaged, then trace failover and repair from a valid replica.
+**Playground:** Trace a damaged copy, a verified fallback replica, and repair from that intact copy.
 
 <!-- go-example id=e344-content-hash imports=crypto/sha256,fmt outcome=ok -->
 ```go

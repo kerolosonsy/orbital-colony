@@ -1,10 +1,12 @@
 # Chapter 33 lesson storyboards
 
-Short bilingual lessons for all four chapter 33 labs and the boss lab. Each lesson has six steps; Try it predicts an output, then reveals the same example line by line. All sample values are illustrative.
+Short bilingual lessons for all four chapter 33 labs and the boss lab. Each lesson has six steps; Try it predicts an output, reveals the same example line by line, then offers one interactive state playground. All sample values are illustrative.
 
 ## 33-1 — Stubborn Client
 
 Mission: retry only when doing so is safe. Idea: request bodies are streams, and some can be recreated. Try: predict whether a request has a replay function. Watch out: protect operation semantics and close discarded responses. Think: decide replayability before network attempts. Your turn: check body and cancellation paths.
+
+Playground: step through a body stream, its replay function, and a fresh retry body.
 
 <!-- go-example id=e331-replayable-body imports=fmt,net/http,strings outcome=ok -->
 ```go
@@ -25,6 +27,8 @@ func main() {
 ## 33-2 — Reverse Proxy
 
 Mission: route public requests to trusted backends. Idea: a handler receives a request and response writer. Try: predict the path recorded by a local handler. Watch out: trust configured routes and strip forged headers. Think: separate route checks from proxy rewriting. Your turn: test allowed and rejected paths locally.
+
+Playground: compare two local request paths with the handler's recorded path.
 
 <!-- go-example id=e332-handler-path imports=fmt,net/http,net/http/httptest outcome=ok -->
 ```go
@@ -55,6 +59,8 @@ func main() {
 ## 33-3 — Load Balancer
 
 Mission: share work across healthy units. Idea: use a mutex to protect shared state. Try: predict the value after one locked update. Watch out: do not keep a lock during network waits. Think: review selection, health checks, and recovery separately. Your turn: inspect state under concurrent requests.
+
+Playground: step through two possible locked update orders; run again to compare.
 
 <!-- go-example id=e333-protected-counter imports=fmt,sync outcome=ok -->
 ```go
@@ -88,6 +94,8 @@ func main() {
 
 Mission: compose routing, identity, limits, and forwarding. Idea: middleware wraps a handler and may prepare a response first. Try: predict a local handler's header and body. Watch out: layer order is policy; remove client-supplied identity headers. Think: trace each request through the chain. Your turn: test rejection before proxying.
 
+Playground: trace an illustrative request through identity, rate check, and proxy layers.
+
 <!-- go-example id=e334-middleware-wrap imports=fmt,net/http,net/http/httptest outcome=ok -->
 ```go
 func main() {
@@ -120,6 +128,8 @@ func main() {
 ## Boss — Survey Uplink
 
 Mission: combine framed input, HTTPS, deadlines, and response ownership. Idea: read a length prefix before its content. Try: predict a big-endian length. Watch out: validate before allocation and close every response body. Think: trace ownership across each error boundary. Your turn: use small cases to check each stage.
+
+Playground: read an illustrative two-byte length before its payload.
 
 <!-- go-example id=e33boss-frame-length imports=encoding/binary,fmt outcome=ok -->
 ```go
