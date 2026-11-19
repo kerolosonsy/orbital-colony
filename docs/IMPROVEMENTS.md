@@ -71,3 +71,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 67. **Format with gofmt (Shift+Alt+F)** — new `POST /api/format` runs Go's own `go/format` in-process (nothing executed) and the editor replaces the file through the undo history, keeping the caret on the same code character (verified: caret stays before `Move(` after reformatting). Code that doesn't parse yet gets a short "can't format yet: <reason>". Test: `TestFormatCode`; shortcut in the sheet and README.
 68. **README testing section** — `make check` / `make test` / `make test-web`, and how to tune `ORBITAL_TEST_PARALLEL`.
 69. **`{ }` format button** — a small button next to the file tabs formats the file with gofmt, for people who don't know the shortcut (tooltip shows Shift+Alt+F).
+70. **Mission intro mentions the keys** — the first console line of every mission now says Run is Ctrl/⌘+Enter and `?` lists the shortcuts.

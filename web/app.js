@@ -1494,7 +1494,7 @@ async function loadLevel(id, review = null) {
     : T("مراجعة · كود البداية فاضي عن قصد. اكتب الحل من ذاكرتك.", "Review · The starter is intentionally empty. Write the solution from memory.");
   $("#banner").classList.add("hidden");
   con.innerHTML = "";
-  log(T(`ورقة ${sheetCode(l)}: ${l.title}. اكتب الكود ودوس Run.`, `Sheet ${sheetCode(l)}: ${l.title}. Write the code and press Run.`), "c-info");
+  log(T(`ورقة ${sheetCode(l)}: ${l.title}. اكتب الكود ودوس Run (Ctrl/⌘+Enter). دوس ? للاختصارات.`, `Sheet ${sheetCode(l)}: ${l.title}. Write the code and press Run (Ctrl/⌘+Enter). Press ? for shortcuts.`), "c-info");
   document.body.classList.remove("lesson-open");
   $(".lesson-panel").scrollTop = 0;
   try {
