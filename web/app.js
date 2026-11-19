@@ -640,7 +640,7 @@ function renderCompletion() {
   const { items, index, start } = completion;
   completeBox.innerHTML = items.map((s, i) => `<li role="option" id="complete-${i}" data-i="${i}" aria-selected="${i === index}">`
     + `<span class="c-kind">${esc(s.kind)}</span><span class="c-name">${esc(s.name)}</span>`
-    + (s.signature ? `<span class="c-sig">${esc(s.signature)}</span>` : "")
+    + (s.signature ? `<span class="c-sig">${esc(s.kind === "func" ? s.signature : " " + s.signature)}</span>` : "")
     + (s.doc ? `<span class="c-doc">${esc(s.doc)}</span>` : "") + "</li>").join("");
   ed.setAttribute("aria-activedescendant", `complete-${index}`);
   // place the list under the name being typed

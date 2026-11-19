@@ -49,11 +49,13 @@ func colonySymbols(dir string) []apiSymbol {
 			s.Doc = firstSentence(s.Doc)
 			symbolsList = append(symbolsList, s)
 		}
-		values := func(kind string, groups []*doc.Value) {
+		// values lists constants/vars; ones grouped under a type show that type
+		// (e.g. East is a Direction), which says more than an empty doc.
+		values := func(kind string, groups []*doc.Value, typeName string) {
 			for _, group := range groups {
 				for _, name := range group.Names {
 					if ast.IsExported(name) {
-						add(apiSymbol{Name: name, Kind: kind, Doc: group.Doc})
+						add(apiSymbol{Name: name, Kind: kind, Signature: typeName, Doc: group.Doc})
 					}
 				}
 			}
@@ -61,12 +63,12 @@ func colonySymbols(dir string) []apiSymbol {
 		for _, f := range pkg.Funcs {
 			add(apiSymbol{Name: f.Name, Kind: "func", Signature: signature(f.Decl), Doc: f.Doc})
 		}
-		values("const", pkg.Consts)
-		values("var", pkg.Vars)
+		values("const", pkg.Consts, "")
+		values("var", pkg.Vars, "")
 		for _, t := range pkg.Types {
 			add(apiSymbol{Name: t.Name, Kind: "type", Doc: t.Doc})
-			values("const", t.Consts)
-			values("var", t.Vars)
+			values("const", t.Consts, t.Name)
+			values("var", t.Vars, t.Name)
 			for _, f := range t.Funcs { // constructors such as Spawn() *Drone
 				add(apiSymbol{Name: f.Name, Kind: "func", Signature: signature(f.Decl), Doc: f.Doc})
 			}

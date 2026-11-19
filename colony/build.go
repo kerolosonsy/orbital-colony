@@ -5,6 +5,7 @@ import "orbital/colony/econ"
 // BuildingKind names a building type for Build, e.g. Smelter or Silo.
 type BuildingKind string
 
+// The BuildingKinds you can Build once you own their blueprint.
 const (
 	Composter  BuildingKind = "composter"
 	Smelter    BuildingKind = "smelter"
@@ -21,6 +22,7 @@ const (
 // BuildingError is the type of the Err* building errors below; compare with errors.Is.
 type BuildingError = econ.BuildingError
 
+// Building errors returned by Build and Building methods; compare with errors.Is.
 var (
 	ErrNoInput           = econ.ErrNoInput
 	ErrNoPower           = econ.ErrNoPower
