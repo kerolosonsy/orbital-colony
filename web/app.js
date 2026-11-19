@@ -2085,6 +2085,14 @@ function restoreSpeeds() {
   const map = Number(store.pref("mapSpeed"));
   if (map >= +speedEl.min && map <= +speedEl.max) speedEl.value = map;
   speedEl.addEventListener("change", () => store.pref("mapSpeed", +speedEl.value));
+  // say what the slider means: playback runs one tick every 380/speed ms
+  const describe = () => {
+    const perSecond = Math.round((1000 * +speedEl.value) / 380);
+    const text = T(`حوالي ${perSecond} tick في الثانية`, `about ${perSecond} ticks per second`);
+    speedEl.title = text; speedEl.setAttribute("aria-valuetext", text);
+  };
+  speedEl.addEventListener("input", describe);
+  describe();
   const select = $("#debugger-speed");
   const saved = String(store.pref("debugSpeed") || "");
   if (select && [...select.options].some((o) => o.value === saved)) {
