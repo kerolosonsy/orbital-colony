@@ -1,7 +1,9 @@
 package levels
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -78,8 +80,108 @@ func TestCh26Lessons(t *testing.T) {
 				}
 			}
 		}
+		ch26AssertSandbox(t, id, "ch26-")
 	}
 	ch26CheckGlobalIDs(t, seenArabic, seenEnglish)
+}
+
+func ch26AssertSandbox(t *testing.T, id, kindPrefix string) {
+	t.Helper()
+	level := Get(id)
+	var arabic, english *LessonSandbox
+	for _, set := range []struct {
+		steps []LessonStep
+		dest  **LessonSandbox
+	}{{level.Steps, &arabic}, {level.En.Steps, &english}} {
+		count := 0
+		for stepIndex, step := range set.steps {
+			for _, block := range step.Blocks {
+				if block.Kind != "sandbox" {
+					continue
+				}
+				count++
+				if stepIndex != 2 || block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, kindPrefix) {
+					t.Errorf("%s: sandbox must be in Try it and use a %s kind", id, kindPrefix)
+				}
+				*set.dest = block.Sandbox
+			}
+		}
+		if count != 1 {
+			t.Errorf("%s: expected exactly one sandbox, got %d", id, count)
+		}
+	}
+	if arabic == nil || english == nil || arabic.Kind != english.Kind || !ch26SameConfigShape(arabic.Config, english.Config) {
+		t.Fatalf("%s: Arabic and English sandbox configs differ in shape or values", id)
+	}
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch26.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]json.RawMessage
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	want, ok := fixtures[arabic.Kind]
+	if !ok {
+		t.Fatalf("%s: no JS fixture for kind %q", id, arabic.Kind)
+	}
+	got, err := json.Marshal(arabic.Config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var canonicalGot, canonicalWant any
+	if err := json.Unmarshal(got, &canonicalGot); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(want, &canonicalWant); err != nil {
+		t.Fatal(err)
+	}
+	got, _ = json.Marshal(canonicalGot)
+	want, _ = json.Marshal(canonicalWant)
+	if !bytes.Equal(got, want) {
+		t.Errorf("%s: JS fixture config differs from the lesson config", id)
+	}
+}
+
+func ch26SameConfigShape(arabic, english any) bool {
+	switch left := arabic.(type) {
+	case map[string]any:
+		right, ok := english.(map[string]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for key, value := range left {
+			other, exists := right[key]
+			if !exists || !ch26SameConfigShape(value, other) {
+				return false
+			}
+		}
+		return true
+	case map[string]string:
+		right, ok := english.(map[string]string)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for key := range left {
+			if _, exists := right[key]; !exists {
+				return false
+			}
+		}
+		return true
+	case []any:
+		right, ok := english.([]any)
+		if !ok || len(left) != len(right) {
+			return false
+		}
+		for i := range left {
+			if !ch26SameConfigShape(left[i], right[i]) {
+				return false
+			}
+		}
+		return true
+	default:
+		return reflect.DeepEqual(arabic, english)
+	}
 }
 
 func ch26CheckGlobalIDs(t *testing.T, seenArabic, seenEnglish map[string]bool) {
@@ -167,6 +269,10 @@ func ch26ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 					continue
 				}
 				words += ch26ValidateFrames(t, name, block)
+			case "sandbox":
+				if block.Sandbox == nil || block.Question != nil || block.Walkthrough != nil || block.Code != "" || !strings.HasPrefix(block.Sandbox.Kind, "ch26-") {
+					t.Errorf("%s: %s has invalid sandbox data", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed block kind %q", name, block.ID, block.Kind)
 			}
@@ -190,7 +296,7 @@ func ch26ValidateCopy(t *testing.T, name string, steps []LessonStep, hints, titl
 	}
 	if len(steps) == 6 {
 		try := steps[2]
-		if len(try.Blocks) != 2 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" {
+		if len(try.Blocks) != 3 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" || try.Blocks[2].Kind != "sandbox" {
 			t.Errorf("%s: Try it must predict before revealing with a walkthrough", name)
 		} else if strings.TrimSpace(ch26QuestionCode(try.Blocks[0].Text)) != strings.TrimSpace(try.Blocks[1].Code) {
 			t.Errorf("%s: prediction code differs from its walkthrough", name)

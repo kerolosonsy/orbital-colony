@@ -15,6 +15,150 @@ type ch25Copy struct {
 	turn          string
 }
 
+func ch25Pair(arabic, english string) map[string]string {
+	return map[string]string{"ar": arabic, "en": english}
+}
+
+func ch25Sandbox(prefix, language string) LessonBlock {
+	kind, config := ch25SandboxConfig(prefix)
+	return LessonBlock{ID: prefix + ".sandbox", Kind: "sandbox", Text: ch25SandboxText(prefix, language), Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch25SandboxText(prefix, language string) string {
+	translations := map[string]map[string]string{
+		"c251":  ch25Pair("نفّذ معاملتين؛ جرّب ترتيبًا تانيًا.", "Run both transactions; try another order."),
+		"c252":  ch25Pair("بدّل الترتيب وشوف الكتابة الأخيرة.", "Change the order; watch the last write."),
+		"c253":  ch25Pair("قدّم الساعة؛ احسب الفترات الكاملة.", "Advance the clock; count complete intervals."),
+		"c254":  ch25Pair("انشر واسحب؛ لاحظ امتلاء الـbuffer.", "Publish and receive; watch the full buffer."),
+		"c255":  ch25Pair("قدّم clock واقرأ صلاحية القيمة.", "Advance the clock; check entry expiry."),
+		"c256":  ch25Pair("نفّذ Add؛ بدّل ترتيب العمّال.", "Run Add; change worker order."),
+		"c25b1": ch25Pair("اقفل القناة؛ اسحب القيم بعدها.", "Close the channel; receive queued values."),
+	}
+	return translations[prefix][language]
+}
+
+func ch25SandboxConfig(prefix string) (string, map[string]any) {
+	switch prefix {
+	case "c251":
+		return "ch25-locked-account", ch25LockedAccountConfig()
+	case "c252":
+		return "ch25-race-report", ch25RaceReportConfig()
+	case "c253":
+		return "ch25-token-clock", ch25TokenClockConfig()
+	case "c254":
+		return "ch25-nonblocking-bus", ch25NonblockingBusConfig()
+	case "c255":
+		return "ch25-ttl-cache", ch25TTLCacheConfig()
+	case "c256":
+		return "ch25-atomic-counter", ch25AtomicCounterConfig()
+	case "c25b1":
+		return "ch25-closed-drain", ch25ClosedDrainConfig()
+	}
+	return "", nil
+}
+
+func ch25LockedAccountConfig() map[string]any {
+	return map[string]any{
+		"balance": 7,
+		"transactions": []any{
+			map[string]any{"worker": ch25Pair("العامل A", "Worker A"), "amount": 4},
+			map[string]any{"worker": ch25Pair("العامل B", "Worker B"), "amount": 5},
+		},
+		"labels": map[string]any{
+			"balance": ch25Pair("الرصيد", "Balance"), "next": ch25Pair("العملية الجاية", "Next operation"),
+			"again": ch25Pair("ترتيب تاني", "Try other order"), "reset": ch25Pair("من الأول", "Reset"),
+			"spends": ch25Pair("خصم", "spends"), "skips": ch25Pair("ماخصمش", "skips"),
+			"because": ch25Pair("الرصيد مايكفيش", "insufficient balance"), "left": ch25Pair("المتبقي", "left"),
+			"done": ch25Pair("خلصت المعاملات", "Transactions complete"), "order": ch25Pair("الترتيب ممكن يتغير.", "Order can vary."),
+			"protected": ch25Pair("كل فحص وتعديل جوه Mutex.", "Each check and update holds Mutex."),
+			"history":   ch25Pair("العمليات", "Operations"),
+		},
+	}
+}
+
+func ch25RaceReportConfig() map[string]any {
+	return map[string]any{
+		"initial": 10,
+		"workers": []any{
+			map[string]any{"id": "a", "name": ch25Pair("العامل A", "Worker A"), "add": 3},
+			map[string]any{"id": "b", "name": ch25Pair("العامل B", "Worker B"), "add": 5},
+		},
+		"schedules": [][]string{{"a-read", "b-read", "a-write", "b-write"}, {"b-read", "a-read", "b-write", "a-write"}},
+		"labels": map[string]any{
+			"value": ch25Pair("العداد", "Counter"), "next": ch25Pair("الخطوة الجاية", "Next step"),
+			"again": ch25Pair("ترتيب تاني", "Try other order"), "reset": ch25Pair("من الأول", "Reset"),
+			"read": ch25Pair("قرأ", "reads"), "write": ch25Pair("كتب", "writes"),
+			"order": ch25Pair("ده ترتيب محتمل واحد.", "This is one possible order."),
+			"trace": ch25Pair("الخطوات", "Trace"),
+		},
+	}
+}
+
+func ch25TokenClockConfig() map[string]any {
+	return map[string]any{
+		"elapsed": 11, "min": 0, "max": 19, "interval": 5, "tokens": 1, "capacity": 6,
+		"labels": map[string]any{
+			"elapsed": ch25Pair("الوقت اللي عدى", "Elapsed seconds"), "complete": ch25Pair("فترات كاملة", "Complete intervals"),
+			"tokens": ch25Pair("التصاريح", "Permits"), "order": ch25Pair("الوقت الزايد ما يكملش فترة.", "Extra time does not complete an interval."),
+		},
+	}
+}
+
+func ch25NonblockingBusConfig() map[string]any {
+	return map[string]any{
+		"capacity": 1, "initial": []string{"ready"}, "message": "update",
+		"labels": map[string]any{
+			"queue": ch25Pair("الـbuffer", "Buffer"), "publish": ch25Pair("انشر", "Publish"),
+			"receive": ch25Pair("اسحب", "Receive"), "reset": ch25Pair("من الأول", "Reset"),
+			"sent": ch25Pair("اتبعت", "sent"), "full": ch25Pair("ممتلئ؛ اتخطّت", "full; skipped"),
+			"empty": ch25Pair("فاضي", "empty"), "order": ch25Pair("الإرسال ما يستناش مساحة.", "A send never waits for space."),
+			"attempts": ch25Pair("محاولات الإرسال", "Send attempts"),
+		},
+	}
+}
+
+func ch25TTLCacheConfig() map[string]any {
+	return map[string]any{
+		"ttl": 5, "age": 0, "maxAge": 8,
+		"labels": map[string]any{
+			"age": ch25Pair("عمر القيمة بالثواني", "Entry age in seconds"), "advance": ch25Pair("قدّم الساعة", "Advance clock"),
+			"read": ch25Pair("اقرأ من الـcache", "Read cache"), "reset": ch25Pair("من الأول", "Reset"),
+			"fresh": ch25Pair("لسه صالحة", "Fresh"), "expired": ch25Pair("انتهت", "Expired"),
+			"ttl": ch25Pair("مدة الصلاحية", "TTL"),
+		},
+	}
+}
+
+func ch25AtomicCounterConfig() map[string]any {
+	return map[string]any{
+		"workers": []any{
+			map[string]any{"name": ch25Pair("العامل A", "Worker A"), "add": 1},
+			map[string]any{"name": ch25Pair("العامل B", "Worker B"), "add": 2},
+			map[string]any{"name": ch25Pair("العامل C", "Worker C"), "add": 3},
+		},
+		"orders": [][]int{{0, 1, 2}, {2, 0, 1}},
+		"labels": map[string]any{
+			"value": ch25Pair("قيمة العداد", "Counter value"), "next": ch25Pair("نفّذ atomic.Add", "Run atomic.Add"),
+			"again": ch25Pair("بدّل الترتيب", "Shuffle order"), "reset": ch25Pair("من الأول", "Reset"),
+			"load": ch25Pair("Load الحالي", "Current Load"), "order": ch25Pair("ترتيب Add يتغير؛ المجموع ثابت.", "Add order varies; total stays."),
+			"trace": ch25Pair("خطوات Add", "Add steps"),
+		},
+	}
+}
+
+func ch25ClosedDrainConfig() map[string]any {
+	return map[string]any{
+		"values": []int{4, 6},
+		"labels": map[string]any{
+			"channel": ch25Pair("قناة الشغل", "Job channel"), "open": ch25Pair("مفتوحة", "Open"),
+			"closed": ch25Pair("مقفولة", "Closed"), "close": ch25Pair("اقفل القناة", "Close channel"),
+			"receive": ch25Pair("استقبل القيمة", "Receive value"), "reset": ch25Pair("من الأول", "Reset"),
+			"drained": ch25Pair("الطابور فاضي", "Queue drained"), "queued": ch25Pair("لسه فيه قيم", "Values remain queued"),
+			"empty": ch25Pair("مفيش قيم؛ الاستقبال يستنى", "No values; receive waits"),
+		},
+	}
+}
+
 type ch25FrameInfo struct {
 	line      int
 	arabic    string
@@ -52,8 +196,10 @@ func ch25Walkthrough(id, text string, example ch25Example, english bool) LessonB
 
 func ch25BuildLesson(prefix string, copy ch25Copy, examples [2]ch25Example, english bool) []LessonStep {
 	titles := []string{"المهمة", "الفكرة", "جرّب", "خد بالك", "فكّر واختبر", "دورك"}
+	language := "ar"
 	if english {
 		titles = []string{"Mission", "Idea", "Try it", "Watch out", "Think & check", "Your turn"}
+		language = "en"
 	}
 	tryCode := copy.tryQuestion + "\n\n~~~go\n" + examples[1].code + "\n~~~"
 	return []LessonStep{
@@ -62,6 +208,7 @@ func ch25BuildLesson(prefix string, copy ch25Copy, examples [2]ch25Example, engl
 		{ID: prefix + ".try-step", Title: titles[2], Blocks: []LessonBlock{
 			ch25Question(prefix+".try-predict", tryCode, copy.tryOptions, copy.tryFeedback, 1),
 			ch25Walkthrough(prefix+".try-reveal", copy.reveal, examples[1], english),
+			ch25Sandbox(prefix, language),
 		}},
 		{ID: prefix + ".watch-step", Title: titles[3], Blocks: []LessonBlock{ch25Markdown(prefix+".watch", copy.watch)}},
 		{ID: prefix + ".check-step", Title: titles[4], Blocks: []LessonBlock{ch25Markdown(prefix+".think", copy.think), ch25Question(prefix+".check-question", copy.checkQuestion, copy.checkOptions, copy.checkFeedback, 1)}},
