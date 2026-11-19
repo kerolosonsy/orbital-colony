@@ -1,0 +1,204 @@
+{
+  "ch10-groups-order": {
+    "button": {
+      "ar": "الخطوة التالية / تشغيل تاني",
+      "en": "Next step / run again"
+    },
+    "groups": [
+      {
+        "ar": "A: [cup, lamp]",
+        "en": "A: [cup, lamp]"
+      },
+      {
+        "ar": "B: [map, ring]",
+        "en": "B: [map, ring]"
+      },
+      {
+        "ar": "C: [key, bowl]",
+        "en": "C: [key, bowl]"
+      }
+    ],
+    "groupsLabel": {
+      "ar": "مجموعات توضيحية",
+      "en": "Illustrative groups"
+    },
+    "intro": {
+      "ar": "كل مجموعة لها شغلها؛ النهاية ممكن تتغير.",
+      "en": "Each group owns tasks; finish order can vary."
+    },
+    "logLabel": {
+      "ar": "ترتيب انتهاء ممكن",
+      "en": "One possible finish order"
+    },
+    "runs": [
+      {
+        "events": [
+          {
+            "ar": "A تخلص.",
+            "en": "A finishes."
+          },
+          {
+            "ar": "C تخلص.",
+            "en": "C finishes."
+          },
+          {
+            "ar": "B تخلص.",
+            "en": "B finishes."
+          },
+          {
+            "ar": "كل المهام خلصت.",
+            "en": "All tasks finish."
+          }
+        ]
+      },
+      {
+        "events": [
+          {
+            "ar": "B تخلص.",
+            "en": "B finishes."
+          },
+          {
+            "ar": "A تخلص.",
+            "en": "A finishes."
+          },
+          {
+            "ar": "C تخلص.",
+            "en": "C finishes."
+          },
+          {
+            "ar": "كل المهام خلصت.",
+            "en": "All tasks finish."
+          }
+        ]
+      }
+    ]
+  },
+  "ch10-swarm-order": {
+    "button": {
+      "ar": "الخطوة التالية / تشغيل تاني",
+      "en": "Next step / run again"
+    },
+    "intro": {
+      "ar": "كل تشغيل يوضح ترتيبًا ممكنًا.",
+      "en": "Each run shows one possible order."
+    },
+    "logLabel": {
+      "ar": "سجل الأحداث",
+      "en": "Event log"
+    },
+    "runs": [
+      {
+        "events": [
+          {
+            "ar": "A تبدأ.",
+            "en": "A starts."
+          },
+          {
+            "ar": "B تبدأ.",
+            "en": "B starts."
+          },
+          {
+            "ar": "A تطبع.",
+            "en": "A prints."
+          },
+          {
+            "ar": "A تنادي Done.",
+            "en": "A calls Done."
+          },
+          {
+            "ar": "B تطبع.",
+            "en": "B prints."
+          },
+          {
+            "ar": "B تنادي Done.",
+            "en": "B calls Done."
+          },
+          {
+            "ar": "Wait ترجع بعد الاتنين.",
+            "en": "Wait returns after both."
+          }
+        ]
+      },
+      {
+        "events": [
+          {
+            "ar": "B تبدأ.",
+            "en": "B starts."
+          },
+          {
+            "ar": "A تبدأ.",
+            "en": "A starts."
+          },
+          {
+            "ar": "B تطبع.",
+            "en": "B prints."
+          },
+          {
+            "ar": "B تنادي Done.",
+            "en": "B calls Done."
+          },
+          {
+            "ar": "A تطبع.",
+            "en": "A prints."
+          },
+          {
+            "ar": "A تنادي Done.",
+            "en": "A calls Done."
+          },
+          {
+            "ar": "Wait ترجع بعد الاتنين.",
+            "en": "Wait returns after both."
+          }
+        ]
+      }
+    ]
+  },
+  "ch10-waitgroup-order": {
+    "button": {
+      "ar": "الخطوة التالية / تشغيل تاني",
+      "en": "Next step / run again"
+    },
+    "intro": {
+      "ar": "Wait ترجع بعد انتهاء الشغل المسجل.",
+      "en": "Wait returns after registered work ends."
+    },
+    "logLabel": {
+      "ar": "ترتيب ممكن",
+      "en": "One possible order"
+    },
+    "runs": [
+      {
+        "events": [
+          {
+            "ar": "main خلصت شغلها.",
+            "en": "main finishes its work."
+          },
+          {
+            "ar": "helper خلصت المهمة.",
+            "en": "helper finishes its task."
+          },
+          {
+            "ar": "Wait رجعت بعد ما helper خلص.",
+            "en": "Wait returns after helper finishes."
+          }
+        ]
+      },
+      {
+        "events": [
+          {
+            "ar": "helper خلصت المهمة.",
+            "en": "helper finishes its task."
+          },
+          {
+            "ar": "main خلصت شغلها.",
+            "en": "main finishes its work."
+          },
+          {
+            "ar": "Wait رجعت بعد ما helper خلص.",
+            "en": "Wait returns after helper finishes."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "ch09-map-updates": {
+    "button": {
+      "ar": "الخطوة التالية",
+      "en": "Next step"
+    },
+    "intro": {
+      "ar": "خطوة بخطوة، حدّث قيمة المفتاح.",
+      "en": "Step through updates to one map key."
+    },
+    "mapLabel": {
+      "ar": "الخريطة",
+      "en": "Map"
+    },
+    "steps": [
+      {
+        "caption": {
+          "ar": "بدأت الخريطة فاضية.",
+          "en": "The map starts empty."
+        },
+        "map": {
+          "ar": "map[]",
+          "en": "map[]"
+        }
+      },
+      {
+        "caption": {
+          "ar": "اتضاف مفتاح جديد.",
+          "en": "A new key is added."
+        },
+        "map": {
+          "ar": "map[amber:1]",
+          "en": "map[amber:1]"
+        }
+      },
+      {
+        "caption": {
+          "ar": "اتحدّثت قيمة نفس المفتاح.",
+          "en": "The same key is updated."
+        },
+        "map": {
+          "ar": "map[amber:4]",
+          "en": "map[amber:4]"
+        }
+      }
+    ]
+  },
+  "ch09-plan-callback": {
+    "button": {
+      "ar": "التيلة التالية",
+      "en": "Next tile"
+    },
+    "intro": {
+      "ar": "Plan بتتسأل عن كل tile.",
+      "en": "Plan is called for each tile."
+    },
+    "resultLabel": {
+      "ar": "النتيجة",
+      "en": "Return"
+    },
+    "tileLabel": {
+      "ar": "الـtile",
+      "en": "Tile"
+    },
+    "tiles": [
+      {
+        "caption": {
+          "ar": "المكتبة نادت Plan.",
+          "en": "The library called Plan."
+        },
+        "result": {
+          "ar": "0 actions",
+          "en": "0 actions"
+        },
+        "tile": {
+          "ar": "Tile A",
+          "en": "Tile A"
+        }
+      },
+      {
+        "caption": {
+          "ar": "النتيجة تخص الخانة دي.",
+          "en": "This return belongs to this tile."
+        },
+        "result": {
+          "ar": "2 actions",
+          "en": "2 actions"
+        },
+        "tile": {
+          "ar": "Tile B",
+          "en": "Tile B"
+        }
+      },
+      {
+        "caption": {
+          "ar": "بعدها المكتبة تكمل.",
+          "en": "Then the library continues."
+        },
+        "result": {
+          "ar": "1 action",
+          "en": "1 action"
+        },
+        "tile": {
+          "ar": "Tile C",
+          "en": "Tile C"
+        }
+      }
+    ]
+  },
+  "ch09-stringer": {
+    "default": {
+      "ar": "{4}",
+      "en": "{4}"
+    },
+    "intro": {
+      "ar": "بدّل العرض وشوف Stringer.",
+      "en": "Switch the view; inspect Stringer."
+    },
+    "outputLabel": {
+      "ar": "شكل القيمة",
+      "en": "Value display"
+    },
+    "showDefault": {
+      "ar": "اعرض الشكل الافتراضي",
+      "en": "Show default form"
+    },
+    "showString": {
+      "ar": "اعرض String()",
+      "en": "Show String()"
+    },
+    "string": {
+      "ar": "dock-04",
+      "en": "dock-04"
+    }
+  },
+  "ch09-trim-space": {
+    "inputLabel": {
+      "ar": "قبل",
+      "en": "Before"
+    },
+    "intro": {
+      "ar": "رمز ␠ بيمثل المسافة؛ جرّب TrimSpace.",
+      "en": "␠ marks spaces; try TrimSpace."
+    },
+    "outputLabel": {
+      "ar": "بعد",
+      "en": "After"
+    },
+    "raw": {
+      "ar": "␠␠beacon-7␠␠",
+      "en": "␠␠beacon-7␠␠"
+    },
+    "restore": {
+      "ar": "اعرض المسافات",
+      "en": "Show spaces"
+    },
+    "trim": {
+      "ar": "طبّق TrimSpace",
+      "en": "Apply TrimSpace"
+    },
+    "trimmed": {
+      "ar": "beacon-7",
+      "en": "beacon-7"
+    }
+  },
+  "ch09-type-switch": {
+    "button": {
+      "ar": "الإشارة التالية",
+      "en": "Next value"
+    },
+    "caseLabel": {
+      "ar": "الـcase",
+      "en": "Case"
+    },
+    "effectLabel": {
+      "ar": "النتيجة",
+      "en": "Effect"
+    },
+    "intro": {
+      "ar": "النوع الحقيقي يختار الـcase.",
+      "en": "The concrete type selects the case."
+    },
+    "typeLabel": {
+      "ar": "النوع",
+      "en": "Type"
+    },
+    "valueLabel": {
+      "ar": "القيمة",
+      "en": "Value"
+    },
+    "values": [
+      {
+        "case": {
+          "ar": "int",
+          "en": "int"
+        },
+        "effect": {
+          "ar": "اجمع رقمًا",
+          "en": "Add a number"
+        },
+        "type": {
+          "ar": "int",
+          "en": "int"
+        },
+        "value": {
+          "ar": "42",
+          "en": "42"
+        }
+      },
+      {
+        "case": {
+          "ar": "string",
+          "en": "string"
+        },
+        "effect": {
+          "ar": "تعامل مع النص",
+          "en": "Handle text"
+        },
+        "type": {
+          "ar": "string",
+          "en": "string"
+        },
+        "value": {
+          "ar": "beacon",
+          "en": "beacon"
+        }
+      },
+      {
+        "case": {
+          "ar": "Point",
+          "en": "Point"
+        },
+        "effect": {
+          "ar": "اقرأ الحقول",
+          "en": "Read its fields"
+        },
+        "type": {
+          "ar": "Point",
+          "en": "Point"
+        },
+        "value": {
+          "ar": "Point{2, 5}",
+          "en": "Point{2, 5}"
+        }
+      }
+    ]
+  }
+}

@@ -1,5 +1,66 @@
 package levels
 
+func ch09Pair(arabic, english string) map[string]any {
+	return map[string]any{"ar": arabic, "en": english}
+}
+
+var ch09StringerSandbox = &LessonSandbox{
+	Kind: "ch09-stringer",
+	Config: map[string]any{
+		"intro":       ch09Pair("بدّل العرض وشوف Stringer.", "Switch the view; inspect Stringer."),
+		"outputLabel": ch09Pair("شكل القيمة", "Value display"),
+		"default":     ch09Pair("{4}", "{4}"),
+		"string":      ch09Pair("dock-04", "dock-04"),
+		"showString":  ch09Pair("اعرض String()", "Show String()"),
+		"showDefault": ch09Pair("اعرض الشكل الافتراضي", "Show default form"),
+	},
+}
+
+var ch09AutopilotSandbox = &LessonSandbox{
+	Kind: "ch09-plan-callback",
+	Config: map[string]any{
+		"intro":       ch09Pair("Plan بتتسأل عن كل tile.", "Plan is called for each tile."),
+		"button":      ch09Pair("التيلة التالية", "Next tile"),
+		"tileLabel":   ch09Pair("الـtile", "Tile"),
+		"resultLabel": ch09Pair("النتيجة", "Return"),
+		"tiles": []any{
+			map[string]any{"tile": ch09Pair("Tile A", "Tile A"), "result": ch09Pair("0 actions", "0 actions"), "caption": ch09Pair("المكتبة نادت Plan.", "The library called Plan.")},
+			map[string]any{"tile": ch09Pair("Tile B", "Tile B"), "result": ch09Pair("2 actions", "2 actions"), "caption": ch09Pair("النتيجة تخص الخانة دي.", "This return belongs to this tile.")},
+			map[string]any{"tile": ch09Pair("Tile C", "Tile C"), "result": ch09Pair("1 action", "1 action"), "caption": ch09Pair("بعدها المكتبة تكمل.", "Then the library continues.")},
+		},
+	},
+}
+
+var ch09SignalsSandbox = &LessonSandbox{
+	Kind: "ch09-type-switch",
+	Config: map[string]any{
+		"intro":       ch09Pair("النوع الحقيقي يختار الـcase.", "The concrete type selects the case."),
+		"button":      ch09Pair("الإشارة التالية", "Next value"),
+		"valueLabel":  ch09Pair("القيمة", "Value"),
+		"typeLabel":   ch09Pair("النوع", "Type"),
+		"caseLabel":   ch09Pair("الـcase", "Case"),
+		"effectLabel": ch09Pair("النتيجة", "Effect"),
+		"values": []any{
+			map[string]any{"value": ch09Pair("42", "42"), "type": ch09Pair("int", "int"), "case": ch09Pair("int", "int"), "effect": ch09Pair("اجمع رقمًا", "Add a number")},
+			map[string]any{"value": ch09Pair("beacon", "beacon"), "type": ch09Pair("string", "string"), "case": ch09Pair("string", "string"), "effect": ch09Pair("تعامل مع النص", "Handle text")},
+			map[string]any{"value": ch09Pair("Point{2, 5}", "Point{2, 5}"), "type": ch09Pair("Point", "Point"), "case": ch09Pair("Point", "Point"), "effect": ch09Pair("اقرأ الحقول", "Read its fields")},
+		},
+	},
+}
+
+var ch09TrimSandbox = &LessonSandbox{
+	Kind: "ch09-trim-space",
+	Config: map[string]any{
+		"intro":       ch09Pair("رمز ␠ بيمثل المسافة؛ جرّب TrimSpace.", "␠ marks spaces; try TrimSpace."),
+		"inputLabel":  ch09Pair("قبل", "Before"),
+		"outputLabel": ch09Pair("بعد", "After"),
+		"raw":         ch09Pair("␠␠beacon-7␠␠", "␠␠beacon-7␠␠"),
+		"trimmed":     ch09Pair("beacon-7", "beacon-7"),
+		"trim":        ch09Pair("طبّق TrimSpace", "Apply TrimSpace"),
+		"restore":     ch09Pair("اعرض المسافات", "Show spaces"),
+	},
+}
+
 var ch09StringerArabic = []LessonStep{
 	{
 		ID: "c9m1.mission-step", Title: "المهمة",
@@ -31,6 +92,7 @@ var ch09StringerArabic = []LessonStep{
 				{Line: 1, Caption: "Duration حققت العقد.", Variables: []LessonVariable{{Name: "label", Value: "time.Duration: 1m30s"}}},
 				{Line: 2, Caption: "الطباعة نادت String.", Variables: []LessonVariable{{Name: "label", Value: "time.Duration: 1m30s"}}, Output: "1m30s"},
 			}}},
+			{ID: "c9m1.stringer-sandbox", Kind: "sandbox", Text: "بدّل ~String()~ وشوف شكل القيمة.", Sandbox: ch09StringerSandbox},
 		},
 	},
 	{
@@ -88,6 +150,7 @@ var ch09StringerEnglish = []LessonStep{
 				{Line: 1, Caption: "Duration fits the contract.", Variables: []LessonVariable{{Name: "label", Value: "time.Duration: 1m30s"}}},
 				{Line: 2, Caption: "Printing calls String.", Variables: []LessonVariable{{Name: "label", Value: "time.Duration: 1m30s"}}, Output: "1m30s"},
 			}}},
+			{ID: "c9m1.stringer-sandbox", Kind: "sandbox", Text: "Toggle ~String()~ and inspect the display.", Sandbox: ch09StringerSandbox},
 		},
 	},
 	{
@@ -150,6 +213,7 @@ var ch09AutopilotArabic = []LessonStep{
 				{Line: 4, Caption: "6 حققت الشرط؛ توقف."},
 				{Line: 6, Caption: "الـindex والنداءات.", Variables: []LessonVariable{{Name: "found", Value: "1"}, {Name: "calls", Value: "2"}}, Output: "1 2"},
 			}}},
+			{ID: "c9m2.plan-sandbox", Kind: "sandbox", Text: "~Plan~ لكل tile.", Sandbox: ch09AutopilotSandbox},
 		},
 	},
 	{
@@ -212,6 +276,7 @@ var ch09AutopilotEnglish = []LessonStep{
 				{Line: 4, Caption: "6 passes; stop."},
 				{Line: 6, Caption: "The index and call count.", Variables: []LessonVariable{{Name: "found", Value: "1"}, {Name: "calls", Value: "2"}}, Output: "1 2"},
 			}}},
+			{ID: "c9m2.plan-sandbox", Kind: "sandbox", Text: "~Plan~ per tile.", Sandbox: ch09AutopilotSandbox},
 		},
 	},
 	{
@@ -271,6 +336,7 @@ var ch09SignalsArabic = []LessonStep{
 				{Line: 2, Caption: "الـswitch اختار string."},
 				{Line: 6, Caption: "اطبع النوع والنص.", Variables: []LessonVariable{{Name: "v", Value: "3"}}, Output: "text 3"},
 			}}},
+			{ID: "c9m3.type-switch-sandbox", Kind: "sandbox", Text: "حرّك القيم وشوف الـcase المطابق.", Sandbox: ch09SignalsSandbox},
 		},
 	},
 	{
@@ -330,6 +396,7 @@ var ch09SignalsEnglish = []LessonStep{
 				{Line: 2, Caption: "The switch chooses string."},
 				{Line: 6, Caption: "Print the type and text.", Variables: []LessonVariable{{Name: "v", Value: "3"}}, Output: "text 3"},
 			}}},
+			{ID: "c9m3.type-switch-sandbox", Kind: "sandbox", Text: "Cycle values and inspect each matching case.", Sandbox: ch09SignalsSandbox},
 		},
 	},
 	{
@@ -387,6 +454,7 @@ var ch09PlugsArabic = []LessonStep{
 				{Line: 1, Caption: "المفتاح بقى end.", Variables: []LessonVariable{{Name: "key", Value: "end"}}},
 				{Line: 2, Caption: "المقارنة والنص.", Variables: []LessonVariable{{Name: "key", Value: "end"}}, Output: "true end"},
 			}}},
+			{ID: "c9m4.trim-sandbox", Kind: "sandbox", Text: "بدّل ~TrimSpace~.", Sandbox: ch09TrimSandbox},
 		},
 	},
 	{
@@ -444,6 +512,7 @@ var ch09PlugsEnglish = []LessonStep{
 				{Line: 1, Caption: "The key becomes end.", Variables: []LessonVariable{{Name: "key", Value: "end"}}},
 				{Line: 2, Caption: "The comparison and text.", Variables: []LessonVariable{{Name: "key", Value: "end"}}, Output: "true end"},
 			}}},
+			{ID: "c9m4.trim-sandbox", Kind: "sandbox", Text: "Try ~TrimSpace~.", Sandbox: ch09TrimSandbox},
 		},
 	},
 	{

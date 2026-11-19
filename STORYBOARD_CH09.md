@@ -280,3 +280,13 @@ Real stdout:
 ```
 
 **Hints, in order:** concept — a struct groups data and an interface names behavior; structure — keep input, result, and error paths distinct; specific — inspect `Pack`, `ErrManifest`, and return paths in `main.go`.
+
+## Interactive playgrounds
+
+Each sandbox appears after the existing prediction and walkthrough in Try it. Its data is illustrative and does not supply a mission solution.
+
+- **9-1:** Toggle a toy `Status` between its default display and `String()` output.
+- **9-2:** Step across sample tiles and watch the library call `Plan` for each one.
+- **9-3:** Cycle concrete values and see which type-switch case matches.
+- **9-4:** Toggle `TrimSpace` on a sample line with visible spaces.
+- **9-boss:** Step through inserting and updating one sample map key.

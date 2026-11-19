@@ -1,1 +1,52 @@
 /* Chapter 10 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch10-waitgroup-order,
+.lesson-sandbox.ch10-swarm-order,
+.lesson-sandbox.ch10-groups-order {
+  box-sizing: border-box;
+  max-width: 290px;
+  padding: 0.65rem;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 0.65rem;
+  background: var(--surface, #fff);
+  color: inherit;
+  direction: inherit;
+  text-align: start;
+}
+
+.ch10-sandbox-intro,
+.ch10-sandbox-label {
+  margin: 0 0 0.45rem;
+  color: var(--muted, #64748b);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.ch10-sandbox-groups {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0 0 0.55rem;
+  padding-inline-start: 1.25rem;
+  font: 0.82rem/1.4 var(--mono, monospace);
+}
+
+.lesson-sandbox.ch10-waitgroup-order button,
+.lesson-sandbox.ch10-swarm-order button,
+.lesson-sandbox.ch10-groups-order button {
+  max-width: 100%;
+  margin-top: 0.55rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 0.45rem;
+  background: var(--button-bg, #f8fafc);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lesson-sandbox.ch10-waitgroup-order .sandbox-kit-log-list,
+.lesson-sandbox.ch10-swarm-order .sandbox-kit-log-list,
+.lesson-sandbox.ch10-groups-order .sandbox-kit-log-list {
+  max-width: 100%;
+  padding-inline-start: 1.25rem;
+  font-size: 0.86rem;
+}

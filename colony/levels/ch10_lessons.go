@@ -1,5 +1,78 @@
 package levels
 
+func ch10Pair(arabic, english string) map[string]any {
+	return map[string]any{"ar": arabic, "en": english}
+}
+
+var ch10WaitSandbox = &LessonSandbox{
+	Kind: "ch10-waitgroup-order",
+	Config: map[string]any{
+		"intro":    ch10Pair("Wait ترجع بعد انتهاء الشغل المسجل.", "Wait returns after registered work ends."),
+		"button":   ch10Pair("الخطوة التالية / تشغيل تاني", "Next step / run again"),
+		"logLabel": ch10Pair("ترتيب ممكن", "One possible order"),
+		"runs": []any{
+			map[string]any{"events": []any{
+				ch10Pair("main خلصت شغلها.", "main finishes its work."),
+				ch10Pair("helper خلصت المهمة.", "helper finishes its task."),
+				ch10Pair("Wait رجعت بعد ما helper خلص.", "Wait returns after helper finishes."),
+			}},
+			map[string]any{"events": []any{
+				ch10Pair("helper خلصت المهمة.", "helper finishes its task."),
+				ch10Pair("main خلصت شغلها.", "main finishes its work."),
+				ch10Pair("Wait رجعت بعد ما helper خلص.", "Wait returns after helper finishes."),
+			}},
+		},
+	},
+}
+
+var ch10SwarmSandbox = &LessonSandbox{
+	Kind: "ch10-swarm-order",
+	Config: map[string]any{
+		"intro":    ch10Pair("كل تشغيل يوضح ترتيبًا ممكنًا.", "Each run shows one possible order."),
+		"button":   ch10Pair("الخطوة التالية / تشغيل تاني", "Next step / run again"),
+		"logLabel": ch10Pair("سجل الأحداث", "Event log"),
+		"runs": []any{
+			map[string]any{"events": []any{
+				ch10Pair("A تبدأ.", "A starts."), ch10Pair("B تبدأ.", "B starts."),
+				ch10Pair("A تطبع.", "A prints."), ch10Pair("A تنادي Done.", "A calls Done."),
+				ch10Pair("B تطبع.", "B prints."), ch10Pair("B تنادي Done.", "B calls Done."),
+				ch10Pair("Wait ترجع بعد الاتنين.", "Wait returns after both."),
+			}},
+			map[string]any{"events": []any{
+				ch10Pair("B تبدأ.", "B starts."), ch10Pair("A تبدأ.", "A starts."),
+				ch10Pair("B تطبع.", "B prints."), ch10Pair("B تنادي Done.", "B calls Done."),
+				ch10Pair("A تطبع.", "A prints."), ch10Pair("A تنادي Done.", "A calls Done."),
+				ch10Pair("Wait ترجع بعد الاتنين.", "Wait returns after both."),
+			}},
+		},
+	},
+}
+
+var ch10DivideSandbox = &LessonSandbox{
+	Kind: "ch10-groups-order",
+	Config: map[string]any{
+		"intro":       ch10Pair("كل مجموعة لها شغلها؛ النهاية ممكن تتغير.", "Each group owns tasks; finish order can vary."),
+		"button":      ch10Pair("الخطوة التالية / تشغيل تاني", "Next step / run again"),
+		"groupsLabel": ch10Pair("مجموعات توضيحية", "Illustrative groups"),
+		"logLabel":    ch10Pair("ترتيب انتهاء ممكن", "One possible finish order"),
+		"groups": []any{
+			ch10Pair("A: [cup, lamp]", "A: [cup, lamp]"),
+			ch10Pair("B: [map, ring]", "B: [map, ring]"),
+			ch10Pair("C: [key, bowl]", "C: [key, bowl]"),
+		},
+		"runs": []any{
+			map[string]any{"events": []any{
+				ch10Pair("A تخلص.", "A finishes."), ch10Pair("C تخلص.", "C finishes."),
+				ch10Pair("B تخلص.", "B finishes."), ch10Pair("كل المهام خلصت.", "All tasks finish."),
+			}},
+			map[string]any{"events": []any{
+				ch10Pair("B تخلص.", "B finishes."), ch10Pair("A تخلص.", "A finishes."),
+				ch10Pair("C تخلص.", "C finishes."), ch10Pair("كل المهام خلصت.", "All tasks finish."),
+			}},
+		},
+	},
+}
+
 const (
 	ch101WaitExample = `var wg sync.WaitGroup
 wg.Add(1)
@@ -90,6 +163,7 @@ var ch10LessonArabic = map[string][]LessonStep{
 				[]string{"قبل.", "message تساوي waiting.", "الشغل اتسجل.", "ترتيب ممكن: بدأت.", "message بقت ready.", "Wait رجعت.", "اطبع القيمة."},
 				[]string{"", "", "", "", "", "", "ready\n"},
 			)},
+			{ID: "c101.wait-sandbox", Kind: "sandbox", Text: "حرّك الأحداث؛ الترتيب ممكن يتغير.", Sandbox: ch10WaitSandbox},
 		}},
 		{ID: "c101.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 			{ID: "c101.watch", Kind: "markdown", Text: "- سجّل الشغل قبل go.\n- حط Done في defer؛ هتشتغل عند نهاية الـclosure.\n- Wait تمنع main من الخروج بدري.\n- Move وHarvest كل واحد بياخد tick، حتى لو Move فشلت.\n\nالـWaitGroup تراقب كل الشغل المسجل؛ مش بتشغّله."},
@@ -130,6 +204,7 @@ var ch10LessonArabic = map[string][]LessonStep{
 				[]string{"قبل.", "مهمة A اتسجلت.", "goroutine A بدأت.", "ترتيب ممكن: اطبع A.", "A خلصت.", "مهمة B اتسجلت.", "goroutine B بدأت.", "اطبع B هنا.", "B خلصت.", "Wait رجعت."},
 				[]string{"", "", "", "", "A\n", "A\n", "A\n", "A\n", "A\nB\n", "A\nB\n"},
 			)},
+			{ID: "c102.swarm-sandbox", Kind: "sandbox", Text: "تابع التشغيل، وبعدها جرّب ترتيبًا تاني.", Sandbox: ch10SwarmSandbox},
 		}},
 		{ID: "c102.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 			{ID: "c102.watch", Kind: "markdown", Text: "- زوّد العداد قبل go.\n- كل مهمة تنادي Done مرة.\n- مرّر قيمة الصف للمهمة بوضوح.\n\nابدأ Wait بعد تسجيل المهام؛ ترتيب الطباعة ممكن يتغير."},
@@ -166,6 +241,7 @@ var ch10LessonArabic = map[string][]LessonStep{
 				[]string{"قبل.", "مجموعتان للتوضيح.", "range تمسك الأولى.", "اطبع رقمها وعددها.", "range تمسك التانية.", "اطبع الرقم والعدد."},
 				[]string{"", "", "", "0 2\n", "0 2\n", "0 2\n1 1\n"},
 			)},
+			{ID: "c103.groups-sandbox", Kind: "sandbox", Text: "شوف المجموعات وبدّل ترتيب النهاية.", Sandbox: ch10DivideSandbox},
 		}},
 		{ID: "c103.watch-step", Title: "خد بالك", Blocks: []LessonBlock{
 			{ID: "c103.watch", Kind: "markdown", Text: "- العدد مش كفاية؛ الطريق يفرق.\n- جمع أهداف بعيدة يطوّل الرحلة.\n- كل حركة وHarvest بياخدوا tick.\n\nقارن القرب قبل التقسيم."},
@@ -209,6 +285,7 @@ var ch10LessonEnglish = map[string][]LessonStep{
 				[]string{"Before.", "message is waiting.", "Task registered.", "One possible start.", "message becomes ready.", "Wait returns.", "Print the value."},
 				[]string{"", "", "", "", "", "", "ready\n"},
 			)},
+			{ID: "c101.wait-sandbox", Kind: "sandbox", Text: "Step through events; order can vary.", Sandbox: ch10WaitSandbox},
 		}},
 		{ID: "c101.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 			{ID: "c101.watch", Kind: "markdown", Text: "- Add before go.\n- Defer Done; it runs when the closure ends.\n- Wait before main returns.\n- Move and Harvest each cost a tick, even when Move fails.\n\nA WaitGroup tracks all registered work; it does not start it."},
@@ -249,6 +326,7 @@ var ch10LessonEnglish = map[string][]LessonStep{
 				[]string{"Before.", "Task A added.", "A starts.", "One order: print A.", "A ends.", "Task B added.", "B starts.", "Print B here.", "B ends.", "Wait returns."},
 				[]string{"", "", "", "", "A\n", "A\n", "A\n", "A\n", "A\nB\n", "A\nB\n"},
 			)},
+			{ID: "c102.swarm-sandbox", Kind: "sandbox", Text: "Step through a run, then compare another order.", Sandbox: ch10SwarmSandbox},
 		}},
 		{ID: "c102.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 			{ID: "c102.watch", Kind: "markdown", Text: "- Add before go.\n- Each task calls Done once.\n- Pass the row value clearly.\n\nWait after the loop registers tasks; print order can change."},
@@ -285,6 +363,7 @@ var ch10LessonEnglish = map[string][]LessonStep{
 				[]string{"Before.", "Two example groups.", "range selects first.", "Print number and count.", "range selects next.", "Print next count."},
 				[]string{"", "", "", "0 2\n", "0 2\n", "0 2\n1 1\n"},
 			)},
+			{ID: "c103.groups-sandbox", Kind: "sandbox", Text: "Inspect groups and compare finish orders.", Sandbox: ch10DivideSandbox},
 		}},
 		{ID: "c103.watch-step", Title: "Watch out", Blocks: []LessonBlock{
 			{ID: "c103.watch", Kind: "markdown", Text: "- Item count is not enough; routes matter.\n- Grouping far targets can stretch a trip.\n- Each move and Harvest costs a tick.\n\nCompare distance before splitting."},
