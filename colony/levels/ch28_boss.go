@@ -2,7 +2,7 @@ package levels
 
 func init() {
 	add(&Level{
-		ID: "28-boss-quarantine", Chapter: 28, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: true,
+		ID: "28-boss-quarantine", Chapter: 28, Kind: "lab", Boss: true, LessonRevision: 1, Steps: ch28BossArabicSteps, Setup: seededLabRoom, Race: true,
 		Title: "Boss: عزل الرصيف", Goal: "ابني API لعزل الكبسولات بعقد كامل وتصاريح وحدود",
 		Requires: []string{"mutex", "sel:http.Server", "sel:http.MaxBytesReader"}, Bridge: []int{46, 47, 48, 49, 50, 60},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
@@ -41,8 +41,8 @@ if token == "" { next.ServeHTTP(w, r) } // missing credentials grant access
 
 POST يقبل JSON واحد ~QuarantinePod{ID: "med-4", Occupants: 0}~ بحجم <=1024 بايت؛ جسم أكبر 413 ~too_large~. JSON بايظ، ID فاضي أو فيه /، أو Occupants سالب: 400 ~invalid~. المكرر 409 ~conflict~، والجديد 201 مع نفس الكائن و~Location: /pods/<ID>~. GET ~/pods/<ID>~ يرجع 200 بالكائن أو 404 ~not_found~. الأخطاء كائن بحقل error بس؛ الفشل ميغيّرش المخزن. سيب ~main~ فاضية. النجمة التالتة: ترتيب قائمة ID تصاعدي، ونسخ ~X-Request-ID~ للرد حتى في الخطأ، وعزل مخازن السيرفرات.
 `,
-		Hints: []string{"افصل التحقق من الهوية والدور عن تخزين الكبسولات.", "حد الجسم قبل JSON؛ افحص التكرار والكتابة تحت نفس القفل.", "اختبر كل status وترتيب التحقق؛ متبدأش السيرفر في constructor."},
-		En: &LevelText{Title: "Boss: Dock Quarantine", Goal: "Build a bounded quarantine API with a complete authorization contract", Files: []LabFile{{Name: "main.go", Starter: `package main
+		Hints: ch28BossArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch28BossEnglishSteps, Title: "Boss: Dock Quarantine", Goal: "Build a bounded quarantine API with a complete authorization contract", Files: []LabFile{{Name: "main.go", Starter: `package main
 import "net/http"
 type QuarantinePod struct { ID string; Occupants int }
 func NewQuarantine(token string) *http.Server {
@@ -78,7 +78,7 @@ Every response is ~application/json~. First check ~Authorization: Bearer <token>
 
 POST accepts one JSON ~QuarantinePod{ID: "med-4", Occupants: 0}~, at most 1024 bytes; larger bodies return 413 ~too_large~. Malformed JSON, empty ID, ID containing /, or negative Occupants returns 400 ~invalid~. Duplicate ID returns 409 ~conflict~; creation returns 201 with the object and ~Location: /pods/<ID>~. GET ~/pods/<ID>~ returns 200 with the object or 404 ~not_found~. Errors contain only the error field; failed requests do not mutate storage. Leave ~main~ empty. Third star: sort lists by ID, echo ~X-Request-ID~ even on errors, and isolate server stores.
 `,
-			Hints: []string{"Separate authentication and role checks from pod storage.", "Bound the body before JSON; check duplicates and insert under one lock.", "Test every status and validation order; never start the server in its constructor."}},
+			Hints: ch28BossEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: `package main
 import (
     "encoding/json"

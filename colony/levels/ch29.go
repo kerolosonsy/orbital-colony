@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "29-1-sqlite-crud", Chapter: 29, Kind: "lab",
+	add(&Level{ID: "29-1-sqlite-crud", Chapter: 29, Kind: "lab", LessonRevision: 1, Steps: ch29SQLiteArabicSteps,
 		Title: "أول قاعدة", Goal: "احفظ صناديق المؤن في SQLite بقيود واستعلامات قابلة للإلغاء", Setup: seededLabRoom,
 		Requires: []string{"sel:sql.ErrNoRows"}, Deps: []string{"modernc.org/sqlite"}, Bridge: []int{61}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch291Starter}},
@@ -78,8 +78,8 @@ for rows.Next() { } // مفيش Close مضمون ولا فحص Err النهائ�
 
 ~CrateError(err error) error~ تحوّل ~sql.ErrNoRows~ بالظبط لـ ~ErrCrateMissing~ وتحافظ على الباقي، حتى ~nil~. النجمة التالتة: حوّل الخطأ الملفوف كمان بـ ~errors.Is~. التستات ببيانات seeded وقيود وإلغاء وقاعدة مقفولة؛ مفيش شبكة ولا ~Report~.
 `,
-		Hints: []string{"ابدأ بـ InitCrates وجدول فيه PRIMARY KEY وUNIQUE وCHECK.", "مرّر القيم كـ placeholders؛ استخدم RowsAffected عشان تكتشف الغياب في التعديل والحذف.", "في ListCrates اقفل rows بـ defer وافحص rows.Err؛ للنجمة رجّع sql.ErrNoRows من الأخطاء الملفوفة كمان."},
-		En: &LevelText{Title: "First Database", Goal: "Persist supply crates in SQLite with constraints and cancelable queries", Files: []LabFile{{Name: "main.go", Starter: ch291Starter}},
+		Hints: ch29SQLiteArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch29SQLiteEnglishSteps, Title: "First Database", Goal: "Persist supply crates in SQLite with constraints and cancelable queries", Files: []LabFile{{Name: "main.go", Starter: ch291Starter}},
 			Lesson: `# Supply crates that survive a restart
 
 ## Before you write
@@ -153,7 +153,7 @@ Keep ~main~ empty. Implement the starter signatures over the injected ~*sql.DB~.
 
 ~CrateError(err error) error~ maps exactly ~sql.ErrNoRows~ to ~ErrCrateMissing~ and preserves other errors including ~nil~. Third star: also map wrapped ~sql.ErrNoRows~ via ~errors.Is~. Tests use seeded crate data, constraints, cancellation, and closed storage; no network or ~Report~.
 `,
-			Hints: []string{"Start with InitCrates and a table with PRIMARY KEY, UNIQUE, and CHECK.", "Bind values as placeholders; use RowsAffected to detect missing updates and deletes.", "In ListCrates defer rows.Close and check rows.Err; for the star recognize wrapped sql.ErrNoRows too."}},
+			Hints: ch29SQLiteEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch291Hidden},
 	})
 }
@@ -308,7 +308,7 @@ func TestHiddenBonusWrappedMissing(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "29-2-migrations", Chapter: 29, Kind: "lab",
+	add(&Level{ID: "29-2-migrations", Chapter: 29, Kind: "lab", LessonRevision: 1, Steps: ch29MigrationArabicSteps,
 		Title: "الترحيلات", Goal: "طوّر مخطط مخزن المستعمرة بترحيلات up/down وسجل نسخ ذرّي", Setup: seededLabRoom,
 		Requires: []string{"sel:sql.Tx"}, Deps: []string{"modernc.org/sqlite"}, Bridge: []int{64}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch292Starter}},
@@ -357,8 +357,8 @@ tx.Commit() // تجاهل الخطأ وتسجيل النسخة مش ذرّي
 
 مع ~down=false~ طبّق كل النسخ الجديدة بترتيب المصدر، معاملة لكل نسخة تشمل تسجيلها. تكرار up من غير جديد مبيعملش حاجة. مع ~down=true~ ارجع آخر نسخة مطبقة بس واحذفها من السجل في نفس المعاملة؛ السجل الفاضي نجاح من غير تغيير. عند فشل خطوة ارجعها وارجع خطأ وسيب الخطوات السابقة المحفوظة. مرّر أخطاء الإلغاء والقاعدة. اقفل نتائج القراية قبل فتح معاملة. المنادي بيملك القاعدة وبيسلسل النداءات وبيوفر نصوص موثوقة من غير أوامر تحكم في المعاملة. سيب ~main~ فاضية؛ مفيش شبكة ولا ~Report~.
 `,
-		Hints: []string{"افحص المصدر كله قبل إنشاء سجل النسخ: أرقام موجبة ومتزايدة ونصوص مش فاضية.", "اقرا النسخ المطبقة وتأكد إنها بادئة من المصدر، وبعدها اختار pending للـ up أو آخر نسخة للـ down.", "في كل خطوة افتح BeginTx؛ نفّذ SQL وتعديل السجل على tx نفسها، واعمل defer Rollback وبعد النجاح Commit."},
-		En: &LevelText{Title: "Migrations", Goal: "Evolve the colony store schema with up/down migrations and an atomic version ledger", Files: []LabFile{{Name: "main.go", Starter: ch292Starter}},
+		Hints: ch29MigrationArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch29MigrationEnglishSteps, Title: "Migrations", Goal: "Evolve the colony store schema with up/down migrations and an atomic version ledger", Files: []LabFile{{Name: "main.go", Starter: ch292Starter}},
 			Lesson: `# Evolving the habitat schema
 
 ## Before you write
@@ -404,7 +404,7 @@ Implement ~MigrateHabitat(ctx context.Context, db *sql.DB, source []Migration, d
 
 With ~down=false~, apply every pending up in source order, one transaction each, including insertion of its version. Repeating up is a no-op. With ~down=true~, revert only the latest applied migration and delete its version in the same transaction; an empty history is a successful no-op. On a failed step roll back that step and return an error, preserving earlier committed steps. Propagate cancellation and database errors. Close any result sets before opening a transaction. The caller owns the database, serializes calls, and supplies trusted scripts without transaction commands. Keep ~main~ empty; no network or ~Report~.
 `,
-			Hints: []string{"Validate the whole source before bootstrapping the ledger: positive increasing versions and nonblank SQL.", "Read applied versions and require a prefix of the source; then choose pending up steps or the latest down step.", "For each step BeginTx, execute SQL and the ledger mutation on that same tx, defer Rollback, then Commit on success."}},
+			Hints: ch29MigrationEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch292Hidden},
 	})
 }
@@ -563,7 +563,7 @@ func hiddenMigrationTable(t *testing.T, db *sql.DB, name string, present bool) {
 `
 
 func init() {
-	add(&Level{ID: "29-3-transfer", Chapter: 29, Kind: "lab",
+	add(&Level{ID: "29-3-transfer", Chapter: 29, Kind: "lab", LessonRevision: 1, Steps: ch29TransferArabicSteps,
 		Title: "تحويل ذرّي", Goal: "انقل وحدات الأكسجين بين خزانات من غير فقد أو تكرار تحت التزامن", Setup: seededLabRoom,
 		Requires: []string{"sel:sql.Tx"}, Deps: []string{"modernc.org/sqlite"}, Bridge: []int{66}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch293Starter}},
@@ -626,8 +626,8 @@ return errors.New("credit failed") // الخصم اتحفظ لوحده خلاص
 
 النجمة التالتة: إلغاء السياق من الـ hook، حتى لو رجّعت ~nil~، لازم يفشل بخطأ يطابق ~context.Canceled~، ويرجع كل التغييرات، ويسمح بإعادة الطلب بسياق جديد.
 `,
-		Hints: []string{"ابدأ بمعاملة واقرا request ID جواها قبل الخصم.", "استخدم UPDATE بشرط units>=? وافحص RowsAffected، وبعد الخصم نفّذ afterDebit لو موجودة.", "الإضافة وتسجيل الطلب جوه نفس tx؛ أي فشل يرجع من غير Commit، والـ defer يعمل Rollback حتى مع إلغاء السياق."},
-		En: &LevelText{Title: "Atomic Transfer", Goal: "Transfer oxygen units between tanks without loss or duplication under concurrency", Files: []LabFile{{Name: "main.go", Starter: ch293Starter}},
+		Hints: ch29TransferArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch29TransferEnglishSteps, Title: "Atomic Transfer", Goal: "Transfer oxygen units between tanks without loss or duplication under concurrency", Files: []LabFile{{Name: "main.go", Starter: ch293Starter}},
 			Lesson: `# One oxygen move, one commit
 
 ## Before you write
@@ -687,7 +687,7 @@ Implement ~MoveOxygen(ctx context.Context, db *sql.DB, m OxygenMove, afterDebit 
 
 Third star: cancellation triggered by the hook, even if it returns ~nil~, must abort with an error matching ~context.Canceled~, roll back, and leave the request reusable with a fresh context.
 `,
-			Hints: []string{"Begin a transaction and check the request ID inside it before debiting.", "Use an UPDATE guarded by units>=? and check RowsAffected; call afterDebit after the debit when non-nil.", "Credit and record the request in the same tx; return without Commit on any failure so deferred Rollback also covers cancellation."}},
+			Hints: ch29TransferEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch293Hidden},
 	})
 }
@@ -913,7 +913,7 @@ func TestHiddenOxygenIntegerCapacity(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "29-4-pool", Chapter: 29, Kind: "lab",
+	add(&Level{ID: "29-4-pool", Chapter: 29, Kind: "lab", LessonRevision: 1, Steps: ch29PoolArabicSteps,
 		Title: "حوض الاتصالات", Goal: "اضبط حوض قارئ بوابات الترحيل وحرر الصفوف حتى عند الفشل", Setup: seededLabRoom,
 		Requires: []string{"sel:sql.DB", "defer"}, Deps: []string{"modernc.org/sqlite"}, Bridge: []int{68}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch294Starter}},
@@ -982,8 +982,8 @@ if rows.Next() { return nil } // رجوع بدري بيسرّب سعة من غي
 
 نفّذ ~ReadRelayPorts(ctx context.Context, db *sql.DB, min int) ([]int, error)~. المنادي بيوفر ~relay_ports(code)~؛ اختار الأكواد الأكبر من أو المساوية للحد المربوط كقيمة، ورتّب تصاعدي مع الحفاظ على التكرار. النتيجة الفاضية slice مش ~nil~. عند خطأ الاستعلام أو القراية أو نهاية اللف ارجع ~nil,error~ مع الحفاظ على الإلغاء. اقفل الصفوف دايماً، حتى عند خطأ ~Scan~ المبكر. التستات بتضيف خلية نص مش قابلة للتحويل لعدد، وبتحجز سعة حقيقية، وبتلغي المنتظرين، وبتثبت إعادة استخدام الاتصال. سيب ~main~ فاضية. التنفيذ مش محتاج ~Report~ أو شبكة أو نوم أو ساعة أو إعدادات جهاز.
 `,
-		Hints: []string{"ارفض max غير الموجب قبل أي setter؛ اضبط SetMaxOpenConns وSetMaxIdleConns على نفس الحد.", "استخدم QueryContext وWHERE code>=? وORDER BY code؛ خلّي النتيجة الفاضية slice مش nil.", "حط defer rows.Close فور نجاح QueryContext وافحص كل Scan وبعد اللف rows.Err؛ الفشل يرجع nil slice."},
-		En: &LevelText{Title: "Connection Pool", Goal: "Bound the relay-port reader pool and release rows even on failure", Files: []LabFile{{Name: "main.go", Starter: ch294Starter}},
+		Hints: ch29PoolArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch29PoolEnglishSteps, Title: "Connection Pool", Goal: "Bound the relay-port reader pool and release rows even on failure", Files: []LabFile{{Name: "main.go", Starter: ch294Starter}},
 			Lesson: `# A bounded pool for relay ports
 
 ## Before you write
@@ -1049,7 +1049,7 @@ Implement ~ConfigureRelayPool(db *sql.DB, max int) error~. Reject ~max <= 0~ wit
 
 Implement ~ReadRelayPorts(ctx context.Context, db *sql.DB, min int) ([]int, error)~. The caller supplies ~relay_ports(code)~; select codes greater than or equal to the bound minimum, ordered ascending, preserving duplicates. Return a non-nil empty slice for no rows. On query, scan, or terminal iteration failure return ~nil,error~, preserving cancellation. Always close rows, including early scan failure. Tests deliberately insert a text cell that cannot scan into an integer, hold real pool capacity, cancel waiters, and verify connection reuse. Keep ~main~ empty. No ~Report~, network, sleep, clock reads, or machine configuration belong in your implementation.
 `,
-			Hints: []string{"Reject nonpositive max before any setter; set SetMaxOpenConns and SetMaxIdleConns to that limit.", "Use QueryContext with WHERE code>=? and ORDER BY code; return a non-nil empty slice.", "Defer rows.Close immediately after QueryContext succeeds, check each Scan and final rows.Err; return a nil slice on failure."}},
+			Hints: ch29PoolEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch294Hidden},
 	})
 }
@@ -1285,7 +1285,7 @@ func TestHiddenRelayTerminalError(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "29-5-sqlx", Chapter: 29, Kind: "lab",
+	add(&Level{ID: "29-5-sqlx", Chapter: 29, Kind: "lab", LessonRevision: 1, Steps: ch29SQLXArabicSteps,
 		Title: "sqlx", Goal: "افصل شحن المؤن عن repository حقيقي بـ named queries وstruct scan على Postgres", Setup: seededLabRoom,
 		Requires: []string{"iface", "sel:sqlx.NamedExecContext", "sel:sqlx.SelectContext"}, Deps: []string{"github.com/jmoiron/sqlx", "github.com/jackc/pgx/v5"}, Bridge: []int{62}, Race: true, Service: "postgres",
 		Files: []LabFile{{Name: "main.go", Starter: ch295Starter}},
@@ -1342,8 +1342,8 @@ sqlx.SelectContext(context.Background(), db, &out, "SELECT * FROM beacons") // �
 
 ~NewSQLRations(db *sqlx.DB) *SQLRations~ بتغلّف الحوض المحقون. ~InitRations(ctx, db)~ تنشئ ~ration_bins(bay TEXT PRIMARY KEY CHECK(length(trim(bay))>0), units INTEGER NOT NULL CHECK(units>=0))~ بشكل قابل للتكرار. ~Put~ تضيف الحقول زي ما هي باستخدام ~sqlx.NamedExecContext~ وtags ~db~؛ من غير تطبيع، وبترجع أخطاء التكرار والقيود. ~List(ctx, min)~ تستخدم ~sqlx.SelectContext~ عشان ترجع الخلجان اللي وحداتها على الأقل ~min~، مرتبة بالاسم، بكل الحقول، وslice فاضية مش ~nil~. عند الخطأ ارجع ~nil,error~. مرّر السياق لكل استعلام وحافظ على الأخطاء وسيب عمر القاعدة للمنادي. التكامل على PostgreSQL حقيقي من ~ORBITAL_PG_DSN~؛ تستات المخزن الوهمي بتشتغل دايماً من غيره. مفيش نداءات شبكة صريحة في المخزن.
 `,
-		Hints: []string{"خلّي StockRation تتحقق من السياق والاسم والوحدات قبل نداء المخزن المحقون.", "اعمل repository شايلة *sqlx.DB؛ اربط :bay و:units بـ sqlx.NamedExecContext وdb tags.", "استخدم sqlx.SelectContext على slice مهيّأة وplaceholder $1، وسيب التست يعمل schema معزولة من ORBITAL_PG_DSN."},
-		En: &LevelText{Title: "sqlx", Goal: "Separate ration stocking from a real Postgres repository using named queries and struct scanning", Files: []LabFile{{Name: "main.go", Starter: ch295Starter}},
+		Hints: ch29SQLXArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch29SQLXEnglishSteps, Title: "sqlx", Goal: "Separate ration stocking from a real Postgres repository using named queries and struct scanning", Files: []LabFile{{Name: "main.go", Starter: ch295Starter}},
 			Lesson: `# Named supplies with sqlx
 
 ## Before you write
@@ -1397,7 +1397,7 @@ Keep the starter types and empty ~main~. Implement ~StockRation(ctx context.Cont
 
 ~NewSQLRations(db *sqlx.DB) *SQLRations~ wraps the injected pool. ~InitRations(ctx, db)~ idempotently creates ~ration_bins(bay TEXT PRIMARY KEY CHECK(length(trim(bay))>0), units INTEGER NOT NULL CHECK(units>=0))~. ~Put~ inserts exact supplied fields using ~sqlx.NamedExecContext~ and ~db~ tags; it performs no normalization and returns duplicate/constraint errors. ~List(ctx, min)~ uses ~sqlx.SelectContext~ to return bays with units at least ~min~, ordered by bay, with all fields populated and a non-nil empty slice. On error return ~nil,error~. Pass context through every query, preserve errors, and leave database lifetime to the caller. Integration uses real PostgreSQL via ~ORBITAL_PG_DSN~; fake-store tests always run without it. No network calls belong in the repository itself.
 `,
-			Hints: []string{"Have StockRation check context, bay, and units before calling the injected store.", "Keep *sqlx.DB in the repository; bind :bay and :units with sqlx.NamedExecContext and db tags.", "Use sqlx.SelectContext into an initialized slice and a $1 placeholder; let tests isolate a schema from ORBITAL_PG_DSN."}},
+			Hints: ch29SQLXEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch295Hidden},
 	})
 }
@@ -1619,7 +1619,7 @@ func TestHiddenRationsPostgresIntegration(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "29-6-gorm", Chapter: 29, Kind: "lab",
+	add(&Level{ID: "29-6-gorm", Chapter: 29, Kind: "lab", LessonRevision: 1, Steps: ch29GORMArabicSteps,
 		Title: "GORM", Goal: "اربط قباب الزراعة بأحواضها وحمّل العلاقات من غير N+1", Setup: seededLabRoom,
 		Requires: []string{"sel:gorm.DB"}, Deps: []string{"gorm.io/gorm", "github.com/glebarez/sqlite"}, Bridge: []int{63}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch296Starter}},
@@ -1700,8 +1700,8 @@ for _, d := range domes { db.Where("dome_id=?", d.ID).Find(&beds) } // N+1
 
 ~SetGardenBed(ctx, db, id, active)~ تغيّر نشاط الحوض ده بس، حتى false؛ الغايب يرجع ~gorm.ErrRecordNotFound~. حافظ على باقي الأخطاء ومرّر السياق لكل العمليات. قيود القاعدة ترفض الابن اليتيم وحذف أب عنده أبناء. كل الدوال تدعم استخدام المقبض المحقون بالتزامن. سيب ~main~ فاضية؛ مفيش شبكة ولا ~Report~.
 `,
-		Hints: []string{"عرّف مفاتيح ID وعلاقة Beds بـ foreignKey:DomeID وreferences:ID وقيد RESTRICT، وفهرس مشترك على DomeID وLabel.", "اتحقق من الاسم وكل labels قبل Create؛ اعمل إنشاء القبة والأحواض في Transaction واحدة.", "في ListGarden استخدم Preload قبل Find ورتّب القباب والأحواض بالـ ID؛ Update لعمود active بيحفظ false كمان."},
-		En: &LevelText{Title: "GORM", Goal: "Relate garden domes to beds and load associations without N+1 queries", Files: []LabFile{{Name: "main.go", Starter: ch296Starter}},
+		Hints: ch29GORMArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch29GORMEnglishSteps, Title: "GORM", Goal: "Relate garden domes to beds and load associations without N+1 queries", Files: []LabFile{{Name: "main.go", Starter: ch296Starter}},
 			Lesson: `# Garden domes and their beds
 
 ## Before you write
@@ -1779,7 +1779,7 @@ Keep starter type and field names. Add explicit tags to ~GardenDome~ and ~Garden
 
 ~SetGardenBed(ctx, db, id, active)~ updates just that bed's active flag, including false; missing IDs return ~gorm.ErrRecordNotFound~. Preserve other errors and pass context through all operations. Database constraints reject orphan children and parent deletion while children exist. All functions support concurrent use of the injected handle. Keep ~main~ empty; no network or ~Report~.
 `,
-			Hints: []string{"Define ID keys, a Beds relation with foreignKey:DomeID and references:ID, RESTRICT, and a joint DomeID/Label unique index.", "Validate the name and every label before Create; create the dome and beds inside one Transaction.", "In ListGarden register Preload before Find and order both domes and beds by ID; a single-column Update also persists false."}},
+			Hints: ch29GORMEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch296Hidden},
 	})
 }
