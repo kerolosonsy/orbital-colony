@@ -12,3 +12,10 @@ Each entry: what changed and why. Numbered in the order they landed.
 8. **Ctrl/⌘+/ toggles `//` comments** on the current line or all selected lines (blank lines untouched).
 9. **Selection wrapping** — with a single-line selection, typing `(`/`[`/`{`/`"` wraps it instead of replacing it.
 10. **Editor edits are undoable** — every edit above goes through `execCommand` with the exact range, so Ctrl/⌘+Z undoes it like normal typing; the read-only editor (debugger) ignores them.
+11. **Security headers on every response** — `X-Frame-Options: DENY` + `frame-ancestors 'none'` (another site can't frame the page that holds the API token and click Run for you), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`. Test: `TestGuardSetsSecurityHeaders`.
+12. **Map speed is remembered** — the playback speed slider is saved per player and restored on the next visit.
+13. **Debugger speed is remembered** — the 0.5×/1×/2×/4× choice is saved per player too.
+14. **Local save can't break editing** — `store.save()` wraps `localStorage.setItem` in try/catch, so a full or blocked storage no longer throws on every keystroke; the server save still runs.
+15. **F9 toggles a breakpoint on the caret line** (VS Code habit), without reaching for the mouse.
+16. **Debugger buttons show their shortcut** — tooltips now say F10 / F11 / Shift+F11 / F5 / Shift+F5.
+17. **Keyboard shortcuts sheet** — press `?` (outside the editor) to see every shortcut in Arabic or English.

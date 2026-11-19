@@ -48,7 +48,8 @@ const store = {
     } catch { return null; }
   },
   save() {
-    localStorage.setItem(this.cacheKey, JSON.stringify(this.blob));
+    // a full or blocked localStorage must not stop saving to the server
+    try { localStorage.setItem(this.cacheKey, JSON.stringify(this.blob)); } catch {}
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.push(), 800);
   },
@@ -522,6 +523,14 @@ function applyEdit(edit) {
 }
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }
+  if (e.key === "F9" && S.cur) {
+    // toggle a breakpoint on the caret's line, like VS Code
+    e.preventDefault();
+    const line = ed.value.slice(0, ed.selectionStart).split("\n").length;
+    InlineDebugger.toggleBreakpoint(S.cur.id, S.file, line);
+    renderEditor();
+    return;
+  }
   if (ed.readOnly || !window.EditKeys) return;
   const edit = EditKeys.handle(ed.value, ed.selectionStart, ed.selectionEnd, e);
   if (!edit) return;
@@ -1696,6 +1705,12 @@ function stopRun(quiet) {
   if (!quiet) { log(T("اتوقف الكود.", "Code stopped."), "c-warn"); Sound.play("fail"); }
 }
 document.addEventListener("keydown", (e) => {
+  const typing = e.target.closest?.("input, textarea, select, [contenteditable]");
+  if (e.key === "?" && !typing && !e.metaKey && !e.ctrlKey && !document.querySelector("dialog[open]")) {
+    e.preventDefault();
+    showOverlay("#shortcuts");
+    return;
+  }
   if (e.key === "Escape" && S.running && S.mode !== "colony" && !document.querySelector("dialog[open]")) stopRun();
 });
 
@@ -1874,10 +1889,25 @@ function finish(level, res, missing = [], silent = false) {
     const firstOpen = S.levels.findIndex((l, i) => unlocked(i) && rec(l.id).stars === 0);
     id = S.levels[firstOpen >= 0 ? firstOpen : 0].id;
   }
+  restoreSpeeds();
   updateOverall();
   loadLevel(id);
   if (!store.pref("welcomed")) showWelcome();
 })();
+
+// The map speed and the debugger speed are remembered per player.
+function restoreSpeeds() {
+  const map = Number(store.pref("mapSpeed"));
+  if (map >= +speedEl.min && map <= +speedEl.max) speedEl.value = map;
+  speedEl.addEventListener("change", () => store.pref("mapSpeed", +speedEl.value));
+  const select = $("#debugger-speed");
+  const saved = String(store.pref("debugSpeed") || "");
+  if (select && [...select.options].some((o) => o.value === saved)) {
+    select.value = saved;
+    select.dispatchEvent(new Event("change"));
+  }
+  select?.addEventListener("change", () => store.pref("debugSpeed", select.value));
+}
 
 function showWelcome() {
   showOverlay("#welcome");

@@ -791,6 +791,11 @@ body.colony-season #lvl-chapter { padding: 2px 6px; border: 1px solid color-mix(
 .lang-label { font: 700 14px/1 var(--cond); letter-spacing: .04em; }
 #profile-name { max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .profiles-sheet { width: min(620px, 100%); padding-bottom: 20px; }
+.shortcuts-sheet { width: min(560px, 100%); padding-bottom: 20px; }
+.shortcuts-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.shortcuts-table td { padding: 7px 4px; border-bottom: 1px dashed color-mix(in srgb, currentColor 20%, transparent); }
+.shortcuts-table td:first-child { white-space: nowrap; width: 1%; padding-inline-end: 16px; }
+.shortcuts-table kbd { font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 4px 7px; border: 1px solid color-mix(in srgb, currentColor 35%, transparent); border-bottom-width: 2px; border-radius: 5px; }
 .profiles-note { margin: 0 22px 12px; color: var(--muted); font-size: 13.5px; line-height: 1.7; }
 .profile-list { list-style: none; margin: 0 22px; padding: 0; }
 .profile { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; padding: 12px; border: 1px solid var(--rule); margin-top: -1px; background: var(--sheet-2); }

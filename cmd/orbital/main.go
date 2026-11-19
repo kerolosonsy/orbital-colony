@@ -148,6 +148,14 @@ func main() {
 // this process (which embed the token) may call the API.
 func (s *server) guard(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// The page holds the API token and runs code on this machine: no
+		// framing by other sites (clickjacking), no MIME sniffing, and no
+		// Referer leaving the game.
+		h := w.Header()
+		h.Set("X-Frame-Options", "DENY")
+		h.Set("Content-Security-Policy", "frame-ancestors 'none'")
+		h.Set("X-Content-Type-Options", "nosniff")
+		h.Set("Referrer-Policy", "no-referrer")
 		host, _, err := net.SplitHostPort(r.Host)
 		if err != nil {
 			host = r.Host

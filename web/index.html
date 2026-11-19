@@ -163,10 +163,10 @@
         <button type="button" class="debugger-button" data-debug-command="back" aria-label="خطوة لورا" data-en-aria="Step back" title="خطوة لورا" data-en-title="Step back"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12.5 3.5v9L6 8z"/><path d="M4 3.5v9"/></svg></button>
           </div>
           <div class="debugger-group">
-        <button type="button" class="debugger-button" data-debug-command="into" aria-label="ادخل جوه الدالة" data-en-aria="Step into" title="ادخل جوه الدالة" data-en-title="Step into"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7"/><path d="M5 7l3 3 3-3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
-        <button type="button" class="debugger-button is-primary" data-debug-command="over" aria-label="عدّي الدالة" data-en-aria="Step over" title="عدّي الدالة" data-en-title="Step over"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.8 9.5a5.2 5.2 0 0 1 10 -2.2"/><path d="M13.6 3.6l-.6 3.9-3.8-1"/><circle cx="8" cy="13" r="1.3"/></svg></button>
-        <button type="button" class="debugger-button" data-debug-command="out" aria-label="اخرج من الدالة" data-en-aria="Step out" title="اخرج من الدالة" data-en-title="Step out"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10.5v-7"/><path d="M5 6l3-3 3 3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
-        <button type="button" class="debugger-button" data-debug-command="go" aria-label="كمّل لحد نقطة توقف" data-en-aria="Continue" title="كمّل لحد نقطة توقف" data-en-title="Continue"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.2v9.6L9.8 8z"/><path d="M11.5 3.5v9"/></svg></button>
+        <button type="button" class="debugger-button" data-debug-command="into" aria-label="ادخل جوه الدالة" data-en-aria="Step into" title="ادخل جوه الدالة (F11)" data-en-title="Step into (F11)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7"/><path d="M5 7l3 3 3-3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+        <button type="button" class="debugger-button is-primary" data-debug-command="over" aria-label="عدّي الدالة" data-en-aria="Step over" title="عدّي الدالة (F10)" data-en-title="Step over (F10)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.8 9.5a5.2 5.2 0 0 1 10 -2.2"/><path d="M13.6 3.6l-.6 3.9-3.8-1"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+        <button type="button" class="debugger-button" data-debug-command="out" aria-label="اخرج من الدالة" data-en-aria="Step out" title="اخرج من الدالة (Shift+F11)" data-en-title="Step out (Shift+F11)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10.5v-7"/><path d="M5 6l3-3 3 3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
+        <button type="button" class="debugger-button" data-debug-command="go" aria-label="كمّل لحد نقطة توقف" data-en-aria="Continue" title="كمّل لحد نقطة توقف (F5)" data-en-title="Continue (F5)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.2v9.6L9.8 8z"/><path d="M11.5 3.5v9"/></svg></button>
           </div>
           <label class="debugger-speed" title="سرعة التشغيل" data-en-title="Playback speed"><span class="sr-only" data-en="Speed">السرعة</span>
             <select id="debugger-speed" aria-label="سرعة التشغيل" data-en-aria="Playback speed">
@@ -174,7 +174,7 @@
             </select>
           </label>
           <div id="debugger-where" class="debugger-where" aria-live="polite"><i class="debugger-pulse" aria-hidden="true"></i><span id="debugger-where-text"></span></div>
-        <button type="button" class="debugger-button debugger-exit" data-debug-command="exit" aria-label="اقفل التتبّع" data-en-aria="Stop debugging" title="اقفل التتبّع" data-en-title="Stop debugging"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+        <button type="button" class="debugger-button debugger-exit" data-debug-command="exit" aria-label="اقفل التتبّع" data-en-aria="Stop debugging" title="اقفل التتبّع (Shift+F5)" data-en-title="Stop debugging (Shift+F5)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </div>
         <div class="debugger-timeline">
           <svg id="debugger-depth" class="debugger-depth" preserveAspectRatio="none" aria-hidden="true"></svg>
@@ -339,6 +339,26 @@
       <button class="tool" data-close data-en="Close">تمام</button>
       <button id="btn-season-again" class="tool" data-en="Seasons">المواسم</button>
     </div>
+  </div>
+</dialog>
+
+<dialog id="shortcuts" class="overlay hidden" aria-labelledby="shortcuts-title">
+  <div class="sheet shortcuts-sheet">
+    <div class="sheet-head">
+      <h2 id="shortcuts-title" data-en="Keyboard shortcuts">اختصارات الكيبورد</h2>
+      <button class="tool" data-close aria-label="قفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+    </div>
+    <table class="shortcuts-table">
+      <tr><td><kbd dir="ltr">Ctrl/⌘ + Enter</kbd></td><td data-en="Run the code">شغّل الكود</td></tr>
+      <tr><td><kbd dir="ltr">Ctrl/⌘ + Shift + Enter</kbd></td><td data-en="Run and step through it">شغّل خطوة بخطوة</td></tr>
+      <tr><td><kbd dir="ltr">Esc</kbd></td><td data-en="Stop the run">وقّف التشغيل</td></tr>
+      <tr><td><kbd dir="ltr">Ctrl/⌘ + /</kbd></td><td data-en="Comment / uncomment lines">علّق السطر أو شيل التعليق</td></tr>
+      <tr><td><kbd dir="ltr">Tab · Shift + Tab</kbd></td><td data-en="Indent / outdent selected lines">زوّد أو قلّل المسافة للسطور المختارة</td></tr>
+      <tr><td><kbd dir="ltr">F9</kbd></td><td data-en="Toggle a breakpoint on the caret line">حط أو شيل نقطة توقف على سطر المؤشر</td></tr>
+      <tr><td><kbd dir="ltr">F10 · F11 · Shift + F11</kbd></td><td data-en="Step over · into · out">عدّي · ادخل · اخرج من الدالة</td></tr>
+      <tr><td><kbd dir="ltr">F5 · Shift + F5</kbd></td><td data-en="Continue · stop debugging">كمّل لحد نقطة توقف · اقفل التتبّع</td></tr>
+      <tr><td><kbd dir="ltr">?</kbd></td><td data-en="Show these shortcuts">اعرض الاختصارات دي</td></tr>
+    </table>
   </div>
 </dialog>
 

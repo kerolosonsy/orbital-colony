@@ -332,3 +332,18 @@ func (r *colonyStreamRecorder) Flush() {
 	r.ResponseRecorder.Flush()
 	r.flushed <- struct{}{}
 }
+
+func TestGuardSetsSecurityHeaders(t *testing.T) {
+	s := testColony(t)
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {})
+	for _, path := range []string{"/", "/api/colony"} { // allowed and refused
+		response := httptest.NewRecorder()
+		s.guard(mux).ServeHTTP(response, httptest.NewRequest("GET", "http://localhost"+path, nil))
+		h := response.Header()
+		if h.Get("X-Frame-Options") != "DENY" || h.Get("X-Content-Type-Options") != "nosniff" ||
+			!strings.Contains(h.Get("Content-Security-Policy"), "frame-ancestors 'none'") || h.Get("Referrer-Policy") != "no-referrer" {
+			t.Fatalf("%s headers: %v", path, h)
+		}
+	}
+}
