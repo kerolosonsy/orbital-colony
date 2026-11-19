@@ -2116,7 +2116,9 @@ async function run(opts = {}) {
     }
     if (r.phase === "compile") {
       lastErrors = r.compileErrors || [];
-      log(r.result.message, "c-err");
+      // fix them top to bottom: later errors are often caused by the first one
+      const count = lastErrors.length > 1 ? T(` (${lastErrors.length} أخطاء، ابدأ بأولهم)`, ` (${lastErrors.length} errors, start with the first)`) : "";
+      log(r.result.message + count, "c-err");
       Sound.play("error");
       if (lastErrors.length) {
         for (const e of lastErrors) {
