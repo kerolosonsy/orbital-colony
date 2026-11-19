@@ -42,7 +42,18 @@ func main() {
 	colonyDir := flag.String("colony", "colony", "path to the colony module")
 	wsDir := flag.String("workspace", "workspace", "folder for missions opened in VS Code")
 	savesDir := flag.String("saves", "saves", "folder for persistent colony saves")
+	stats := flag.Bool("stats", false, "print the top learning struggle levels")
 	flag.Parse()
+	if *stats {
+		savesAbs, err := filepath.Abs(*savesDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := printLearningStats(savesAbs, os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 
 	abs, err := filepath.Abs(*colonyDir)
 	if err != nil {
@@ -276,11 +287,17 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 		resp.Result.Stars = 0
 		if resp.Result.Success {
 			finishReview(reviewSave, l.ID, time.Now())
-			if err := saveProgress(reviewPath, reviewSave); err != nil {
+		}
+		recordLearningRun(reviewSave, l.ID, resp)
+		if err := saveProgress(reviewPath, reviewSave); err != nil {
+			if resp.Result.Success {
 				requestError(w, r, err.Error(), 500)
 				return
 			}
+			log.Printf("save learning metrics: %v", err)
 		}
+	} else {
+		s.recordProfileLearningRun(requestProfile(r), l.ID, resp)
 	}
 	writeJSON(w, resp)
 }

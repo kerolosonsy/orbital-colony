@@ -212,6 +212,7 @@ func (s *server) registerProfiles(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /api/profiles/{id}", s.profileDelete)
 	mux.HandleFunc("GET /api/profiles/{id}/progress", s.profileProgress)
 	mux.HandleFunc("PUT /api/profiles/{id}/progress", s.profileProgress)
+	mux.HandleFunc("GET /api/profiles/{id}/metrics", s.profileMetrics)
 	mux.HandleFunc("POST /api/profiles/{id}/review/{action}", s.profileReview)
 }
 
@@ -438,7 +439,17 @@ func (s *server) profileProgress(w http.ResponseWriter, r *http.Request) {
 		profileBadRequest(w, r, "invalid JSON", 400)
 		return
 	}
+	metricsWerePresent := len(old["metrics"]) > 0 || len(incoming["metrics"]) > 0
+	mergeLearningMetrics(old, incoming)
 	if incoming["progress"] == nil && old["progress"] == nil {
+		if metricsWerePresent {
+			if err := saveProgress(path, incoming); err != nil {
+				profileError(w, r, err)
+				return
+			}
+			writeJSON(w, incoming)
+			return
+		}
 		if err := atomicJSON(path, blob); err != nil {
 			profileError(w, r, err)
 			return

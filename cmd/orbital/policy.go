@@ -65,7 +65,7 @@ func rejectedImports(missing []string, languages ...string) *runResponse {
 		lang = normalizeLang(languages[0])
 	}
 	return &runResponse{
-		Phase: "require", Missing: missing,
+		Phase: "require", Failure: "check", Missing: missing,
 		Result: result{Message: tr(lang, "الكود بيستورد مكتبات غير متاحة في الحلول المُقيّمة.", "The code imports packages that are unavailable in graded solutions.")},
 	}
 }

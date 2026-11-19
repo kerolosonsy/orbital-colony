@@ -19,7 +19,7 @@ async function api(path, body, method, signal) {
 // Each player profile keeps mission, quiz and lesson progress in separate fields.
 // localStorage holds a copy so a failed upload is never lost.
 const store = {
-  blob: { progress: {}, prefs: {}, quizScores: {}, lessons: {} }, timer: null,
+  blob: { progress: {}, prefs: {}, quizScores: {}, lessons: {}, metrics: {} }, timer: null,
   cacheKey: "orbital.p." + PROFILE,
   async load() {
     let b = null, online = true;
@@ -30,7 +30,8 @@ const store = {
     const legacy = !b?.progress && PROFILE === "default" && online && this.legacy();
     if (legacy) b = legacy;
     const lessons = b?.lessons && typeof b.lessons === "object" && !Array.isArray(b.lessons) ? b.lessons : {};
-    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {}, review: b?.review || {}, lessons };
+    this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {}, review: b?.review || {}, lessons,
+      metrics: LearningMetrics.normalizeMetrics(b?.metrics) };
     if (legacy) {
       await this.push();
       for (const k of ["orbital.progress.v1", "orbital.current", "orbital.welcomed", "orbital.linked"]) localStorage.removeItem(k);
@@ -57,6 +58,7 @@ const store = {
       if (!response.ok) throw new Error(String(response.status));
       const saved = await response.json();
       this.blob.review = saved.review || {};
+      this.blob.metrics = LearningMetrics.mergeMetrics(this.blob.metrics, saved.metrics);
       if ($("#missions").open) renderMissions();
     }).catch(() => {});
   },
@@ -65,6 +67,7 @@ const store = {
     this.blob.prefs[k] = v; this.save();
   },
 };
+LearningMetrics.bind(store);
 const S = { chapters: [], levels: [], cur: null, progress: {}, hintsShown: 0, running: false };
 const rec = (id) => (S.progress[id] ||= { stars: 0, best: 0, code: null });
 
@@ -1276,6 +1279,7 @@ async function loadLevel(id, review = null) {
   const l = review || S.levels[idx(id)];
   S.review = !!review; S.reviewDraft = {};
   S.cur = l; S.hintsShown = 0;
+  LearningMetrics.openLevel(store, id);
   store.pref("current", id);
   const ch = S.chapters.find((c) => c.n === l.chapter);
   $("#lvl-chapter").textContent = `${sheetCode(l)} · ${ch ? ch.title : ""}`;
@@ -1285,7 +1289,8 @@ async function loadLevel(id, review = null) {
   $("#goal-strip-text").innerHTML = inline(l.goal);
   refreshService(l);
   parText(l.par, l.gold, false);
-  Lessons.open(l);
+  Lessons.open(l, (stepID) => LearningMetrics.recordStepViewed(store, id, stepID));
+  LearningMetrics.recordLessonOpened(store, id);
   $("#hint-list").innerHTML = "";
   $("#btn-hint").disabled = !l.hints?.length;
   $("#btn-hint").querySelector("span").textContent = T(`تلميح (${l.hints?.length || 0})`, `Hint (${l.hints?.length || 0})`);
@@ -1318,7 +1323,9 @@ $("#btn-hint").onclick = () => {
   if (S.hintsShown >= l.hints.length) return;
   const d = document.createElement("div");
   d.className = "hint";
+  const hintIndex = S.hintsShown;
   const hintText = inline(l.hints[S.hintsShown++].replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, ""));
+  LearningMetrics.recordHint(store, l.id, hintIndex);
   const hintLabel = l.steps?.length ? [T("الفكرة", "Concept"), T("التنظيم", "Structure"), T("ركّز هنا", "Specific")][S.hintsShown - 1] : "";
   d.innerHTML = hintLabel ? `<strong>${hintLabel}</strong><div>${hintText}</div>` : hintText;
   Sound.play("hint");
@@ -1493,7 +1500,50 @@ document.querySelectorAll("dialog.overlay").forEach((overlay) => {
     if (!overlay.open) overlay.classList.add("hidden");
   });
 });
+async function refreshLearningStats() {
+  let saved = null;
+  try {
+    saved = await api(`/api/profiles/${PROFILE}/metrics`);
+  } catch (error) {
+    if (!(error instanceof Error)) throw error;
+    // The profile's local save remains usable while the localhost API is offline.
+  }
+  if (saved) {
+    store.blob.metrics = LearningMetrics.mergeMetrics(store.blob.metrics, saved);
+    store.save();
+  }
+  LearningMetrics.renderStats({ struggles: $("#metrics-struggles"), chapters: $("#metrics-chapters") }, store.blob.metrics,
+    { levels: S.levels, chapters: S.chapters });
+}
+
 $("#btn-missions").onclick = () => { renderMissions(); showOverlay("#missions"); };
+$("#btn-stats").onclick = async () => {
+  closeOverlay($("#missions"));
+  showOverlay("#metrics");
+  LearningMetrics.renderStats({ struggles: $("#metrics-struggles"), chapters: $("#metrics-chapters") }, store.blob.metrics,
+    { levels: S.levels, chapters: S.chapters });
+  await refreshLearningStats();
+};
+$("#btn-metrics-export").onclick = () => {
+  const blob = new Blob([JSON.stringify(LearningMetrics.normalizeMetrics(store.blob.metrics), null, 2)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "orbital-learning-metrics.json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  const url = link.href;
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+};
+function countLessonInteraction(event) {
+  const target = event.target.closest("button, select, input");
+  if (!target || !target.closest(".lesson-walkthrough, .lesson-sandbox")) return;
+  if (event.type === "click" && target.tagName !== "BUTTON") return;
+  if (event.type === "change" && target.tagName === "BUTTON") return;
+  if (S.cur) LearningMetrics.recordInteraction(store, S.cur.id);
+}
+$("#lesson").addEventListener("click", countLessonInteraction);
+$("#lesson").addEventListener("change", countLessonInteraction);
 document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = () => closeOverlay(b.closest("dialog"))));
 
 // ---------- run ----------
@@ -1551,6 +1601,7 @@ async function run() {
     } else payload.code = fileCode(level, levelFiles(level)[0]);
     const r = await api("/api/run", payload, null, ctl.signal);
     if (me !== runId || S.cur !== level) return;
+    LearningMetrics.recordRun(store, level.id, r);
     if (r.phase === "require") {
       finish(level, r.result, r.missing || []);
       return;

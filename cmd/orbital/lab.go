@@ -121,6 +121,7 @@ func (r *runner) RunLab(ctx context.Context, lvl *levels.Level, edited map[strin
 	}
 	if isBuildFailure(out) {
 		resp.Phase = "compile"
+		resp.Failure = "compile"
 		resp.CompileOutput = out
 		for _, line := range strings.Split(out, "\n") {
 			if ce, ok := parseCompileLine(line, lang); ok {
