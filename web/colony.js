@@ -326,8 +326,8 @@ const Colony = (() => {
         refresh();
         return;
       }
-      case "stdout": log(ev.msg); return;
-      case "stderr": log(ev.msg, "c-err"); return;
+      case "stdout": (typeof logExact === "function" ? logExact : log)(ev.msg); return; // the program's own text, as printed
+      case "stderr": (typeof logExact === "function" ? logExact : log)(ev.msg, "c-err"); return;
       case "stopped":
         running = false; live = null; runUI();
         log(T(`المستعمرة وقفت. ${ev.msg || ""}`, `Colony stopped. ${ev.msg || ""}`), "c-info");
