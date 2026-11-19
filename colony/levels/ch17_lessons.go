@@ -70,6 +70,68 @@ func ch17Walkthrough(id, ar, en, code, exampleID string, imports []string, frame
 	}
 }
 
+func ch17Localized(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch17Sandbox(id, kind, ar, en, mode string, labels, data map[string]any, english bool) LessonBlock {
+	return LessonBlock{
+		ID: id, Kind: "sandbox", Text: ch17Copy(ar, en, english),
+		Sandbox: &LessonSandbox{Kind: kind, Config: map[string]any{"mode": mode, "labels": labels, "data": data}},
+	}
+}
+
+func ch17CoordinateSandbox(english bool) LessonBlock {
+	return ch17Sandbox("c171.sandbox", "ch17-layer-coordinate", "غيّر z.", "Change z.", "coordinate", map[string]any{
+		"location": ch17Localized("المكان", "Location"),
+		"x":        ch17Localized("إحداثي x", "x coordinate"),
+		"y":        ch17Localized("إحداثي y", "y coordinate"),
+		"z":        ch17Localized("الطبقة z", "layer z"),
+		"action":   ch17Localized("غيّر z", "Change z"),
+		"caption":  ch17Localized("x وy ثابتين", "x and y stay fixed"),
+	}, map[string]any{"x": 1, "y": 2, "layers": []int{0, 1, 2}}, english)
+}
+
+func ch17VolumeSandbox(english bool) LessonBlock {
+	return ch17Sandbox("c172.sandbox", "ch17-volume-index", "اختار خلية.", "Pick a tile.", "volume", map[string]any{
+		"indices": ch17Localized("القراءة بالترتيب [z][x][y]", "Read in [z][x][y] order"),
+		"action":  ch17Localized("الخلية التالية", "Next tile"),
+		"caption": ch17Localized("كل index له محور", "Each index has an axis"),
+	}, map[string]any{"cells": []map[string]any{
+		{"z": 0, "x": 0, "y": 0, "value": "A"},
+		{"z": 0, "x": 1, "y": 0, "value": "C"},
+		{"z": 1, "x": 0, "y": 1, "value": "F"},
+		{"z": 1, "x": 1, "y": 0, "value": "G"},
+	}}, english)
+}
+
+func ch17QueueSandbox(english bool) LessonBlock {
+	return ch17Sandbox("c173.sandbox", "ch17-fifo-queue", "جرّب الطابور.", "Try the queue.", "queue", map[string]any{
+		"queue":   ch17Localized("الطابور", "Queue"),
+		"current": ch17Localized("اتسحب", "Taken"),
+		"action":  ch17Localized("اسحب الأول", "Take first"),
+		"empty":   ch17Localized("فاضي", "Empty"),
+	}, map[string]any{"items": []any{
+		ch17Localized("أ", "A"),
+		ch17Localized("ب", "B"),
+		ch17Localized("ج", "C"),
+	}}, english)
+}
+
+func ch17KeySandbox(english bool) LessonBlock {
+	return ch17Sandbox("c17b.sandbox", "ch17-comparable-key", "قارن المفتاح.", "Compare keys.", "key", map[string]any{
+		"stored":  ch17Localized("المفتاح المخزّن", "Stored key"),
+		"lookup":  ch17Localized("المفتاح المقروء", "Lookup key"),
+		"result":  ch17Localized("النتيجة", "Result"),
+		"found":   ch17Localized("موجود", "Found"),
+		"missing": ch17Localized("مش موجود", "Absent"),
+		"action":  ch17Localized("غيّر z", "Change z"),
+	}, map[string]any{
+		"stored": map[string]int{"x": 2, "z": 1},
+		"probes": []map[string]int{{"x": 2, "z": 1}, {"x": 2, "z": 2}},
+	}, english)
+}
+
 func ch17Mission1(english bool) []LessonStep {
 	cell := `type Cell struct { X, Y, Z int }
 func main() {
@@ -108,6 +170,7 @@ func main() {
 				{line: 3, ar: "زودناها واحد.", en: "Increase it by one.", vars: []LessonVariable{{Name: "z", Value: "1"}}},
 				{line: 4, ar: "يطبع رقم الطبقة.", en: "Prints the layer number.", vars: []LessonVariable{{Name: "z", Value: "1"}}, output: "1"},
 			}, english),
+			ch17CoordinateSandbox(english),
 		}},
 		{ID: "c171.watch-step", Title: ch17Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch17Markdown("c171.watch",
 			"~Dig~ بيفتح الخانة اللي جنبك تحت الأرض؛ ~Move~ يعدّي في نفق مفتوح.\n\n~DigDown~ و~Descend~ خطوتين مختلفتين.",
@@ -160,6 +223,7 @@ func ch17Mission2(english bool) []LessonStep {
 				{line: 3, ar: "اختار x=1 ثم y=0.", en: "Select x=1, then y=0.", vars: []LessonVariable{{Name: "layers[1][1][0]", Value: "7"}}},
 				{line: 3, ar: "الناتج 7.", en: "The result is 7.", output: "7"},
 			}, english),
+			ch17VolumeSandbox(english),
 		}},
 		{ID: "c172.watch-step", Title: ch17Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch17Markdown("c172.watch",
 			"الخريطة مش لازم تبقى مربعة؛ استخدم طول كل slice في مستواها.\n\nالخانة المفتوحة تشمل ~Tunnel~ و~Shaft~.",
@@ -217,6 +281,7 @@ func main() {
 				{line: 4, ar: "باقي shaft في الطابور.", en: "shaft remains in the queue.", vars: []LessonVariable{{Name: "queue", Value: "[shaft]"}}},
 				{line: 5, ar: "يطبع المحطة والباقي.", en: "Print the item and remainder.", vars: []LessonVariable{{Name: "current", Value: "dock"}, {Name: "queue", Value: "[shaft]"}}, output: "dock [shaft]"},
 			}, english),
+			ch17QueueSandbox(english),
 		}},
 		{ID: "c173.watch-step", Title: ch17Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch17Markdown("c173.watch",
 			"BFS يضمن أقصر طريق لما كل edge تكلفته واحدة.\n\nتحت الأرض الحركة مسموحة في Tunnel أو Shaft؛ والانتقال بين طبقات محتاج shaft.",
@@ -271,6 +336,7 @@ func main() {
 				{line: 3, ar: "الخريطة فيها z=1.", en: "The map stores z=1.", vars: []LessonVariable{{Name: "known", Value: "{{2 1}:true}"}}},
 				{line: 4, ar: "الأول true، والتاني false.", en: "First is true; second is false.", vars: []LessonVariable{{Name: "known[{2 1}]", Value: "true"}, {Name: "known[{2 2}]", Value: "false"}}, output: "true false"},
 			}, english),
+			ch17KeySandbox(english),
 		}},
 		{ID: "c17b.watch-step", Title: ch17Copy("خد بالك", "Watch out", english), Blocks: []LessonBlock{ch17Markdown("c17b.watch",
 			"العقد بيوصف مسار موجه؛ الجار مش لازم يرجعلك.\n\nالنجاح الوهمي للوجهة الغايبة يخرق العقد، و~nil~ غير slice فاضية.",

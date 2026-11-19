@@ -1,0 +1,61 @@
+{
+  "ch17-layer-coordinate": {
+    "mode": "coordinate",
+    "labels": {
+      "location": {"ar": "المكان", "en": "Location"},
+      "x": {"ar": "إحداثي x", "en": "x coordinate"},
+      "y": {"ar": "إحداثي y", "en": "y coordinate"},
+      "z": {"ar": "الطبقة z", "en": "layer z"},
+      "action": {"ar": "غيّر z", "en": "Change z"},
+      "caption": {"ar": "x وy ثابتين", "en": "x and y stay fixed"}
+    },
+    "data": {"x": 1, "y": 2, "layers": [0, 1, 2]}
+  },
+  "ch17-volume-index": {
+    "mode": "volume",
+    "labels": {
+      "indices": {"ar": "القراءة بالترتيب [z][x][y]", "en": "Read in [z][x][y] order"},
+      "action": {"ar": "الخلية التالية", "en": "Next tile"},
+      "caption": {"ar": "كل index له محور", "en": "Each index has an axis"}
+    },
+    "data": {
+      "cells": [
+        {"z": 0, "x": 0, "y": 0, "value": "A"},
+        {"z": 0, "x": 1, "y": 0, "value": "C"},
+        {"z": 1, "x": 0, "y": 1, "value": "F"},
+        {"z": 1, "x": 1, "y": 0, "value": "G"}
+      ]
+    }
+  },
+  "ch17-fifo-queue": {
+    "mode": "queue",
+    "labels": {
+      "queue": {"ar": "الطابور", "en": "Queue"},
+      "current": {"ar": "اتسحب", "en": "Taken"},
+      "action": {"ar": "اسحب الأول", "en": "Take first"},
+      "empty": {"ar": "فاضي", "en": "Empty"}
+    },
+    "data": {
+      "items": [
+        {"ar": "أ", "en": "A"},
+        {"ar": "ب", "en": "B"},
+        {"ar": "ج", "en": "C"}
+      ]
+    }
+  },
+  "ch17-comparable-key": {
+    "mode": "key",
+    "labels": {
+      "stored": {"ar": "المفتاح المخزّن", "en": "Stored key"},
+      "lookup": {"ar": "المفتاح المقروء", "en": "Lookup key"},
+      "result": {"ar": "النتيجة", "en": "Result"},
+      "found": {"ar": "موجود", "en": "Found"},
+      "missing": {"ar": "مش موجود", "en": "Absent"},
+      "action": {"ar": "غيّر z", "en": "Change z"}
+    },
+    "data": {
+      "stored": {"x": 2, "z": 1},
+      "probes": [{"x": 2, "z": 1}, {"x": 2, "z": 2}]
+    }
+  }
+}

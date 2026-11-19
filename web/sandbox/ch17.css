@@ -1,1 +1,72 @@
-/* Chapter 17 sandbox styles will be added with its renderer. */
+.ch17-sandbox {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  margin-block: 8px;
+  padding: 10px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-2);
+  color: var(--paper);
+}
+
+.ch17-sandbox-state {
+  display: grid;
+  gap: 5px;
+  min-inline-size: 0;
+}
+
+.ch17-sandbox-heading,
+.ch17-sandbox-caption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ch17-sandbox-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.ch17-sandbox-label {
+  color: var(--muted);
+}
+
+.ch17-sandbox-value,
+.ch17-volume .ch17-sandbox-row bdi {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: var(--mono, monospace);
+  overflow-wrap: anywhere;
+}
+
+.ch17-sandbox-queue {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ch17-sandbox-item {
+  padding: 3px 7px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink);
+}
+
+.ch17-sandbox-controls {
+  margin-block-start: 8px;
+}
+
+.ch17-sandbox-controls button {
+  inline-size: 100%;
+  min-block-size: 40px;
+}
+
+.ch17-sandbox-empty {
+  margin: 0;
+  color: var(--muted);
+}

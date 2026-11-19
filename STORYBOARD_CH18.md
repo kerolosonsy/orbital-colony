@@ -4,6 +4,8 @@ Short bilingual lessons for six labs. Examples use illustrative values; the code
 
 ## 18-1 — Mission Log
 
+Interactive sandbox (`ch18-slice-index`): move an index and watch the selected illustrative value.
+
 ### Idea · `e18-1-table`
 
 <!-- go-example id=e18-1-table imports=fmt outcome=ok -->
@@ -64,6 +66,8 @@ Real stdout:
 
 ## 18-2 — Black Box
 
+Interactive sandbox (`ch18-json-marshal`): encode an illustrative Go value and inspect JSON bytes.
+
 ### Idea · `e18-2-json`
 
 <!-- go-example id=e18-2-json imports=encoding/json,fmt outcome=ok -->
@@ -120,6 +124,8 @@ Real stdout:
 
 ## 18-3 — Cargo Manifest
 
+Interactive sandbox (`ch18-csv-quoted-field`): switch rows and see a quoted comma stay inside one field.
+
 ### Idea · `e18-3-csv`
 
 <!-- go-example id=e18-3-csv imports=encoding/csv,fmt,strings outcome=ok -->
@@ -174,6 +180,8 @@ Real stdout:
 
 ## 18-4 — Signal Words
 
+Interactive sandbox (`ch18-unicode-words`): split illustrative text and toggle lowercase normalization.
+
 ### Idea · `e18-4-unicode`
 
 <!-- go-example id=e18-4-unicode imports=fmt,strings,unicode outcome=ok -->
@@ -224,6 +232,8 @@ echo
 
 ## 18-5 — Flight Recorder
 
+Interactive sandbox (`ch18-splitn-limit`): raise the split limit and inspect the retained final part.
+
 ### Idea · `e18-5-splitn`
 
 <!-- go-example id=e18-5-splitn imports=fmt,strings outcome=ok -->
@@ -273,6 +283,8 @@ Real stdout:
 ```
 
 ## 18-6 — Crew Directory
+
+Interactive sandbox (`ch18-normalized-search`): normalize an illustrative name before `Contains`.
 
 ### Idea · `e18-6-interface`
 

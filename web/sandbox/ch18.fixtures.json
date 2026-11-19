@@ -1,0 +1,86 @@
+{
+  "ch18-slice-index": {
+    "mode": "index",
+    "labels": {
+      "values": {"ar": "القيم", "en": "Values"},
+      "read": {"ar": "القراءة", "en": "Read"},
+      "action": {"ar": "index التالي", "en": "Next index"},
+      "caption": [
+        {"ar": "ابدأ من index صفر", "en": "Start at index zero"},
+        {"ar": "كل index له قيمة", "en": "Each index has a value"},
+        {"ar": "الترتيب يحدد القراءة", "en": "Order determines the read"}
+      ]
+    },
+    "data": {"values": [7, 4, 9]}
+  },
+  "ch18-json-marshal": {
+    "mode": "json",
+    "labels": {
+      "source": {"ar": "قيمة Go", "en": "Go value"},
+      "result": {"ar": "JSON bytes", "en": "JSON bytes"},
+      "action": {"ar": "Marshal", "en": "Marshal"},
+      "before": {"ar": "جاهزة للتحويل", "en": "Ready to encode"},
+      "after": {"ar": "بايتات JSON", "en": "JSON bytes"}
+    },
+    "data": {"source": "Beacon{Charge: 7}", "encoded": "{\"charge\":7}"}
+  },
+  "ch18-csv-quoted-field": {
+    "mode": "csv",
+    "labels": {
+      "source": {"ar": "سطر CSV", "en": "CSV row"},
+      "fields": {"ar": "الحقول", "en": "Fields"},
+      "action": {"ar": "السطر التالي", "en": "Next row"},
+      "captions": [
+        {"ar": "حقلان منفصلان", "en": "Two separate fields"},
+        {"ar": "الفاصلة جوه quotes", "en": "Comma stays inside quotes"}
+      ]
+    },
+    "data": {
+      "rows": [
+        {"source": {"ar": "شمال,4", "en": "north,4"}, "fields": [{"ar": "شمال", "en": "north"}, {"ar": "4", "en": "4"}]},
+        {"source": {"ar": "\"غرب، علوي\",4", "en": "\"west, upper\",4"}, "fields": [{"ar": "غرب، علوي", "en": "west, upper"}, {"ar": "4", "en": "4"}]}
+      ]
+    }
+  },
+  "ch18-unicode-words": {
+    "mode": "unicode",
+    "labels": {
+      "source": {"ar": "النص", "en": "Text"},
+      "result": {"ar": "الكلمات", "en": "Words"},
+      "split": {"ar": "FieldsFunc", "en": "FieldsFunc"},
+      "lower": {"ar": "ToLower", "en": "ToLower"},
+      "splitCaption": {"ar": "الفواصل تفصل الكلمات", "en": "Separators split words"},
+      "rawCaption": {"ar": "النص الأصلي", "en": "Original text"},
+      "lowerCaption": {"ar": "الحروف بقت صغيرة", "en": "Letters are lowercase"}
+    },
+    "data": {
+      "raw": {"ar": "إيكو—Relay 7", "en": "Echo—Relay 7"},
+      "lowerRaw": {"ar": "إيكو—relay 7", "en": "echo—relay 7"},
+      "words": [{"ar": "إيكو", "en": "Echo"}, {"ar": "Relay", "en": "Relay"}, {"ar": "7", "en": "7"}],
+      "lowerWords": [{"ar": "إيكو", "en": "echo"}, {"ar": "relay", "en": "relay"}, {"ar": "7", "en": "7"}]
+    }
+  },
+  "ch18-splitn-limit": {
+    "mode": "splitn",
+    "labels": {
+      "source": {"ar": "النص", "en": "Text"},
+      "limit": {"ar": "عدد الأجزاء", "en": "Piece limit"},
+      "parts": {"ar": "الناتج", "en": "Parts"},
+      "action": {"ar": "زوّد الحد", "en": "Raise limit"},
+      "caption": {"ar": "آخر جزء يحتفظ بالباقي", "en": "Last part keeps the rest"}
+    },
+    "data": {"raw": "9|relay|warm|again", "separator": "|", "limits": [2, 3]}
+  },
+  "ch18-normalized-search": {
+    "mode": "search",
+    "labels": {
+      "name": {"ar": "الاسم", "en": "Name"},
+      "query": {"ar": "البحث", "en": "Search"},
+      "result": {"ar": "النتيجة", "en": "Result"},
+      "pending": {"ar": "لسه ما اتبحثش", "en": "Not searched yet"},
+      "action": {"ar": "Normalize + Contains", "en": "Normalize + Contains"},
+      "caption": {"ar": "وحّد الحالة قبل البحث", "en": "Normalize case before searching"}
+    },
+    "data": {"name": "Pilot", "normalized": "pilot", "query": "lot", "match": "true"}
+  }
+}
