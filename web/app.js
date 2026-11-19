@@ -597,10 +597,28 @@ async function formatEditor() {
 // constants and types with the first line of their doc comment.
 const completeBox = $("#complete");
 let apiSymbols = null, completion = null, dismissedAt = -1;
+let symbolsReady = [];
 function loadSymbols() {
-  if (!apiSymbols) apiSymbols = api("/api/symbols").catch(() => { apiSymbols = null; return []; });
+  if (!apiSymbols) apiSymbols = api("/api/symbols").then((list) => (symbolsReady = list || [])).catch(() => { apiSymbols = null; return []; });
   return apiSymbols;
 }
+// Inside colony.Name( … ) a hint above the line shows the signature and doc.
+const sigHint = $("#sig-hint");
+function updateSigHint() {
+  const name = !ed.readOnly && document.activeElement === ed && ed.selectionStart === ed.selectionEnd
+    ? Complete.callContext(ed.value, ed.selectionStart) : null;
+  const symbol = name && symbolsReady.find((s) => s.name === name && s.kind === "func");
+  if (!symbol) { if (name && !symbolsReady.length) loadSymbols().then(updateSigHint); sigHint.hidden = true; return; }
+  sigHint.innerHTML = `<b>${esc(symbol.name)}</b>${esc(symbol.signature || "")}` + (symbol.doc ? `<span class="c-doc">${esc(symbol.doc)}</span>` : "");
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+  const row = ed.value.slice(0, ed.selectionStart).split("\n").length - 1;
+  sigHint.hidden = false;
+  const top = 14 + row * lineHeight - ed.scrollTop - sigHint.offsetHeight - 4;
+  sigHint.style.top = `${top < 0 ? 14 + (row + 1) * lineHeight - ed.scrollTop + 4 : top}px`;
+  sigHint.style.left = "16px";
+}
+document.addEventListener("selectionchange", () => { if (document.activeElement === ed) updateSigHint(); });
+ed.addEventListener("blur", () => { sigHint.hidden = true; });
 function closeCompletion() {
   completion = null;
   completeBox.hidden = true;

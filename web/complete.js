@@ -38,7 +38,26 @@
     return { text, caret: takesArgs ? text.length - 1 : text.length };
   }
 
-  const api = { context, rank, insertion };
+  // callContext names the colony function whose arguments the caret is in:
+  // "colony.Move(colony.Ea|" → "Move". Only simple, same-line calls.
+  function callContext(value, caret) {
+    const before = value.slice(value.lastIndexOf("\n", caret - 1) + 1, caret);
+    if (/\/\//.test(before.replace(/"(?:\\.|[^"\\])*"|`[^`]*`/g, '""'))) return null;
+    let depth = 0;
+    for (let i = before.length - 1; i >= 0; i--) {
+      if (before[i] === ")") depth++;
+      else if (before[i] === "(") {
+        if (depth === 0) {
+          const match = /(?:^|[^\w.])colony\.(\w+)$/.exec(before.slice(0, i));
+          return match ? match[1] : null;
+        }
+        depth--;
+      }
+    }
+    return null;
+  }
+
+  const api = { context, rank, insertion, callContext };
   if (typeof window !== "undefined") window.Complete = api;
   if (typeof module !== "undefined") module.exports = api;
 })();

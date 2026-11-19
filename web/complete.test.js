@@ -34,3 +34,13 @@ test("functions get parentheses, with the caret inside when they take arguments"
   assert.deepEqual(insertion(symbols[1]), { text: "Harvest()", caret: 9 });
   assert.deepEqual(insertion(symbols[2]), { text: "East", caret: 4 });
 });
+
+test("callContext finds the colony call the caret is inside", () => {
+  const { callContext } = require("./complete.js");
+  assert.equal(callContext("\tcolony.Move(", 13), "Move");
+  assert.equal(callContext("colony.Move(colony.Ea", 21), "Move");
+  assert.equal(callContext("colony.Plant(f(x), ", 19), "Plant");
+  assert.equal(callContext("colony.Move(colony.East)", 24), null);
+  assert.equal(callContext("fmt.Println(", 12), null);
+  assert.equal(callContext("// colony.Move(", 15), null);
+});
