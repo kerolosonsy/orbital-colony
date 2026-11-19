@@ -513,13 +513,36 @@ ed.addEventListener("keydown", (e) => {
 
 // ---------- console ----------
 const con = $("#console");
+function appendConsoleNode(node) {
+  con.appendChild(node);
+  if (con.childElementCount > 400) con.firstChild.remove();
+  con.scrollTop = con.scrollHeight;
+}
 function log(text, cls = "c-out") {
   text = String(text).replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, "");
   const d = document.createElement("div");
   d.className = cls; d.textContent = text;
-  con.appendChild(d);
-  if (con.childElementCount > 400) con.firstChild.remove();
-  con.scrollTop = con.scrollHeight;
+  appendConsoleNode(d);
+}
+function logErrorHelp(meaning, cause, check) {
+  const box = window.ErrorHelp?.render({ meaning, cause, check });
+  if (box) appendConsoleNode(box);
+}
+function logCompileError(e) {
+  const line = Math.max(1, Number(e.line) || 1);
+  const file = firstErrorFile([e], levelFiles(S.cur), S.file);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "c-error-line";
+  button.textContent = `${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`;
+  button.onclick = () => {
+    showFile(file);
+    const lines = ed.value.split("\n");
+    const start = Math.min(ed.value.length, lines.slice(0, line - 1).reduce((n, value) => n + value.length + 1, 0));
+    ed.focus();
+    ed.setSelectionRange(start, Math.min(ed.value.length, start + (lines[line - 1] || "").length));
+  };
+  appendConsoleNode(button);
 }
 
 // ---------- flip digits: changed characters roll in, like a counter ----------
@@ -1561,35 +1584,39 @@ async function run() {
       Sound.play("error");
       if (lastErrors.length) {
         for (const e of lastErrors) {
-          log(`${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`, "c-err");
-          if (e.tip) log(`   ${e.tip}`, "c-tip");
+          logCompileError(e);
+          logErrorHelp(e.tip, e.tipCause, e.tipCheck);
         }
         showFile(firstErrorFile(lastErrors, levelFiles(level), S.file));
       } else log(r.compileOutput, "c-err");
+      if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
       banner(r.result.message, false);
       return;
     }
     lastErrors = [];
     if (r.phase === "lab") {
       refreshService(level);
-      if (r.runtimeTip) log(r.runtimeTip, "c-tip");
       for (const st of r.steps || []) {
         log(`${st.ok ? T("نجح:", "Passed:") : T("فشل:", "Failed:")} ${st.title}`, st.ok ? "c-ok" : "c-err");
-        if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-out"));
+        if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-err"));
+        if (!st.ok) logErrorHelp(st.tip, st.tipCause, st.tipCheck);
       }
       finish(level, r.result, r.missing || []);
       return;
     }
     if (r.stdout) { log("fmt output:", "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => log(l)); }
     if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => log(l, "c-err"));
-    if (r.runtimeTip) log(r.runtimeTip, "c-tip");
+    if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
     log(T("الدرون شغال…", "Drone running…"), "c-info");
     await new Promise((res) => startPlayback(r.events, res));
     if (me !== runId) return;
     finish(level, r.result, r.missing || []);
   } catch (e) {
     if (me !== runId) return; // stopped by the player
-    if (ctl.signal.aborted) log(T("السيرفر اتأخر جداً في الرد، فوقّفت الكود. جرّب تاني.", "The server took too long to answer, so the run was stopped. Try again."), "c-err");
+    if (ctl.signal.aborted) {
+      log(T("السيرفر اتأخر جداً في الرد، فوقّفت الكود. جرّب تاني.", "The server took too long to answer, so the run was stopped. Try again."), "c-err");
+      logErrorHelp(T("التشغيل ماخلصش قبل المهلة.", "The run did not finish before its time limit."), T("ممكن يكون فيه انتظار مفتوح أو عملية بطيئة.", "The program may be waiting indefinitely or running slowly."), T("راجع آخر output ونقاط الانتظار.", "Check the last output and the places where the program waits."));
+    }
     else log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
   } finally {
     clearTimeout(timer);

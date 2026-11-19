@@ -1,0 +1,380 @@
+package main
+
+import "strings"
+
+type tipScope uint8
+
+const (
+	tipCompile tipScope = 1 << iota
+	tipRuntime
+	tipLab
+)
+
+type errorTipText struct {
+	Meaning string `json:"meaning"`
+	Cause   string `json:"cause"`
+	Check   string `json:"check"`
+}
+
+type errorTipEntry struct {
+	needle   string
+	sample   string
+	scope    tipScope
+	priority int
+	ar       errorTipText
+	en       errorTipText
+}
+
+func tipEntry(needle, sample string, scope tipScope, arMeaning, arCause, arCheck, enMeaning, enCause, enCheck string) errorTipEntry {
+	return errorTipEntry{
+		needle: needle, sample: sample, scope: scope, priority: len(needle),
+		ar: errorTipText{arMeaning, arCause, arCheck},
+		en: errorTipText{enMeaning, enCause, enCheck},
+	}
+}
+
+func (entry errorTipEntry) withPriority(priority int) errorTipEntry {
+	entry.priority = priority
+	return entry
+}
+
+var errorTips = []errorTipEntry{
+	// Compiler and type checker.
+	tipEntry("declared and not used", "main.go:4:2: declared and not used: count", tipCompile,
+		"في متغير اتعرّف وماتستخدمش.", "Go بيعتبر ده غالباً علامة إن فيه كود ناقص أو زيادة.", "راجع اسم المتغير ومكان استخدامه.",
+		"A declared variable is never used.", "Go treats this as a sign that code may be missing or unnecessary.", "Check where the variable is declared and used."),
+	tipEntry("imported and not used", "main.go:2:8: \"fmt\" imported and not used", tipCompile,
+		"في package اتعملها import وماتستخدمتش.", "الاستيراد ممكن يكون باقي من تجربة أو كود اتشال.", "راجع سطر import واستخدامات الـ package.",
+		"An imported package is never used.", "The import may be left over from an experiment or removed code.", "Check the import line and package uses."),
+	tipEntry("undefined:", "main.go:5:2: undefined: totalCount", tipCompile,
+		"الاسم ده مش معروف في المكان ده.", "ممكن يكون فيه اختلاف في الاسم أو نطاق المتغير.", "راجع الكتابة والحروف الكبيرة والصغيرة ومكان التعريف.",
+		"This name is not known here.", "The spelling or the variable's scope may differ.", "Check spelling, capitalization, and where it is declared."),
+	tipEntry("missing return", "main.go:6:1: missing return", tipCompile,
+		"في مسار في الدالة بيخلص من غير قيمة راجعة.", "الدالة معلنة إنها بترجع قيمة، لكن مش كل الطرق بتوصل لـ return.", "راجع كل الفروع ونهاية الدالة.",
+		"A path through the function ends without returning a value.", "The function promises a result, but not every path reaches a return.", "Check each branch and the end of the function."),
+	tipEntry("syntax error", "main.go:3:12: syntax error: unexpected newline", tipCompile,
+		"في خطأ في تركيب الكود.", "غالباً رمز أو فاصل في مكان غير متوقع.", "ابدأ من السطر المذكور وراجع الأقواس والفواصل حوالينه.",
+		"The code's syntax is invalid.", "A symbol or separator may be missing or unexpected.", "Start at the reported line and check nearby delimiters."),
+	tipEntry("non-boolean condition", "main.go:4:5: non-boolean condition in if statement", tipCompile,
+		"شرط if أو for لازم يكون قيمة منطقية.", "التعبير في الشرط طلع نوع تاني غير bool.", "راجع قيمة الشرط والعمليات اللي بتكوّنه.",
+		"An if or for condition must be a boolean.", "The condition expression has a type other than bool.", "Check the condition value and its operations."),
+	tipEntry("cannot use", "main.go:4:15: cannot use \"7\" (untyped string constant) as int value", tipCompile,
+		"القيمة دي مش من النوع المطلوب.", "Go مش بيحوّل الأنواع المختلفة تلقائي.", "قارن نوع القيمة بنوع المتغير أو الوسيط المطلوب.",
+		"This value does not have the required type.", "Go does not automatically convert different types.", "Compare the value's type with the expected variable or argument type."),
+	tipEntry("mismatched types", "main.go:4:9: invalid operation: count + label (mismatched types int and string)", tipCompile,
+		"العملية بتجمع أو تقارن أنواع مختلفة.", "الطرفين مش من أنواع متوافقة للعملية دي.", "راجع نوع كل طرف في التعبير.",
+		"The operation combines incompatible types.", "The operands do not have compatible types for this operation.", "Check the type of each side of the expression."),
+	tipEntry("assignment mismatch", "main.go:4:10: assignment mismatch: 2 variables but strconv.Atoi returns 1 value", tipCompile,
+		"عدد المتغيرات مش مطابق لعدد القيم الراجعة.", "الدالة أو التعبير بيرجع قيم أكتر أو أقل من اللي على الشمال.", "راجع التوقيع وعدد القيم في الطرفين.",
+		"The assignment has a different number of variables and values.", "The call returns more or fewer values than the left side accepts.", "Check the signature and the number of values on each side."),
+	tipEntry("no new variables on left side of :=", "main.go:5:2: no new variables on left side of :=", tipCompile,
+		"تعريف المتغير المختصر ما أضافش اسم جديد.", "كل الأسماء على الشمال متعرفة بالفعل في نفس النطاق.", "راجع النطاق وهل المقصود تعريف جديد ولا إعادة إسناد.",
+		"The short declaration introduces no new variable.", "Every name on the left is already declared in this scope.", "Check the scope and whether this should declare or reassign."),
+	tipEntry("is not used", "main.go:4:2: value of x is not used", tipCompile,
+		"قيمة التعبير اتعملت وماتقريتش.", "ممكن تكون النتيجة اتنسيت أو التعبير مش بيعمل اللي متوقعه.", "راجع السطر وهل القيمة محتاجة تدخل في نتيجة أو شرط.",
+		"An expression's value is ignored.", "The result may have been forgotten or the expression may not do what was expected.", "Check whether the value should affect a result or condition."),
+	tipEntry("too many arguments", "main.go:7:16: too many arguments in call to greet", tipCompile,
+		"الاستدعاء بعت وسائط زيادة.", "عدد أو ترتيب الوسائط مش مطابق لتوقيع الدالة.", "قارن الاستدعاء بتعريف الدالة.",
+		"The call passes too many arguments.", "The argument count or order does not match the function signature.", "Compare the call with the function declaration."),
+	tipEntry("not enough arguments", "main.go:7:16: not enough arguments in call to greet", tipCompile,
+		"الاستدعاء ناقصه وسيط أو أكتر.", "توقيع الدالة بيطلب قيم مش موجودة في الاستدعاء.", "قارن الوسائط المطلوبة بالموجودة.",
+		"The call is missing one or more arguments.", "The function signature requires values absent from the call.", "Compare the required arguments with the call."),
+	tipEntry("redeclared in this block", "main.go:5:6: x redeclared in this block", tipCompile,
+		"الاسم اتعرّف أكتر من مرة في نفس النطاق.", "غالباً فيه تعريف متكرر أو تعارض أسماء.", "راجع التعريفات القريبة ونطاق كل اسم.",
+		"The name is declared more than once in this scope.", "There may be a duplicate declaration or a name collision.", "Check nearby declarations and each name's scope."),
+	tipEntry("cannot assign to", "main.go:4:2: cannot assign to constant", tipCompile,
+		"الكود بيحاول يغيّر قيمة مش قابلة للإسناد.", "الطرف الشمال ممكن يكون ثابت أو نتيجة مش متغير قابل للتعديل.", "راجع التعبير اللي على شمال علامة الإسناد.",
+		"The code assigns to something that cannot be changed.", "The left side may be a constant or a non-assignable expression.", "Check the expression on the left of the assignment."),
+	tipEntry("invalid operation", "main.go:4:9: invalid operation: x / y (mismatched types string and int)", tipCompile,
+		"العملية دي مش صالحة للأنواع أو القيم دي.", "المعاملات مش مناسبة للعملية المطلوبة.", "راجع النوعين والسياق اللي اتعملت فيه العملية.",
+		"This operation is invalid for these types or values.", "The operands do not fit the requested operation.", "Check both types and the operation's context.").withPriority(1),
+	tipEntry("cannot convert", "main.go:4:12: cannot convert text (variable of type string) to type int", tipCompile,
+		"التحويل المباشر بين النوعين مش متاح.", "النوعين مش بينهم تحويل مسموح بالطريقة دي.", "راجع أنواع المصدر والهدف وطريقة التحويل المتاحة.",
+		"A direct conversion between these types is not available.", "These types do not support this conversion as written.", "Check the source and target types and supported conversions."),
+	tipEntry("cannot be compared", "main.go:4:5: invalid operation: a == b (struct containing []int cannot be compared)", tipCompile,
+		"القيمتين دول ماينفعش يتقارنوا بالطريقة دي.", "واحد من النوعين أو مكوّناته مش قابل للمقارنة.", "راجع أنواع القيم وعملية المقارنة المستخدمة.",
+		"These values cannot be compared this way.", "One type or one of its fields is not comparable.", "Check the value types and comparison operation."),
+	tipEntry("not enough type arguments", "main.go:6:8: not enough type arguments for type Set: have 1, want 2", tipCompile,
+		"استخدام النوع العام ناقصه type argument.", "التعريف محتاج معاملات نوع أكتر من المكتوب.", "راجع معاملات النوع في التعريف والاستخدام.",
+		"The generic type use is missing a type argument.", "Its declaration requires more type parameters than provided.", "Check type parameters in the declaration and use."),
+	tipEntry("cannot infer", "main.go:4:10: in call to Map, cannot infer B", tipCompile,
+		"المترجم مش قادر يستنتج نوع من أنواع generic.", "الوسائط أو النتيجة مش محددين النوع بما يكفي.", "راجع الأنواع الظاهرة في الاستدعاء وحدود الـ type parameters.",
+		"The compiler cannot infer a generic type.", "The arguments or result do not provide enough type information.", "Check the call's visible types and type parameter constraints."),
+	tipEntry("does not satisfy", "main.go:8:11: int does not satisfy comparable", tipCompile,
+		"النوع مش محقق الـ constraint المطلوب.", "النوع المستخدم مش بيدعم كل العمليات اللي الـ constraint بيطلبها.", "راجع القيد وتعريف النوع المستخدم.",
+		"The type does not satisfy the required constraint.", "The type may not support every operation required by the constraint.", "Check the constraint and the type being used."),
+	tipEntry("does not implement", "main.go:8:10: *Store does not implement Reader (missing method Read)", tipCompile,
+		"النوع مش بيحقق الـ interface.", "في method مطلوبة أو توقيعها مختلف.", "قارن methods المطلوبة بتعريفات النوع.",
+		"The type does not implement the interface.", "A required method may be missing or have a different signature.", "Compare the required methods with the type's methods."),
+	tipEntry("missing method", "main.go:8:10: cannot use store as Reader value: missing method Read", tipCompile,
+		"في method مطلوبة مش موجودة على النوع.", "الـ interface أو الاستدعاء متوقع توقيع method مختلف.", "راجع اسم الـ method والـ receiver والوسائط والنتيجة.",
+		"A required method is missing from the type.", "The interface or call expects a different method signature.", "Check the method name, receiver, arguments, and result."),
+	tipEntry("invalid receiver", "main.go:5:7: invalid receiver type int", tipCompile,
+		"تعريف الـ method مستخدم receiver غير مسموح.", "نوع الـ receiver مش نوع محلي مناسب لتعريف methods.", "راجع نوع الـ receiver ومكان تعريف النوع.",
+		"The method declaration uses an invalid receiver.", "The receiver type is not a suitable local type for methods.", "Check the receiver type and where that type is declared."),
+	tipEntry("cannot define new methods on non-local type", "main.go:5:7: cannot define new methods on non-local type time.Time", tipCompile,
+		"ماينفعش تضيف method لنوع متعرف في package تانية.", "الـ receiver تابع لنوع خارج الـ package الحالية.", "راجع مكان تعريف النوع والـ receiver المستخدم.",
+		"You cannot add a method to a type from another package.", "The receiver belongs to a type outside the current package.", "Check where the type is declared and which receiver is used."),
+	tipEntry("pointer method", "main.go:7:14: cannot call pointer method Read on Store", tipCompile,
+		"الـ method محتاجة pointer receiver في الاستخدام ده.", "القيمة المتاحة مش بتسمح باستدعاء method بالشكل الحالي.", "راجع نوع الـ receiver وطريقة الوصول للقيمة.",
+		"This method has a pointer receiver in this use.", "The available value does not allow this method call as written.", "Check the receiver type and how the value is accessed."),
+	tipEntry("cannot use ... in call to non-variadic", "main.go:7:13: cannot use ... in call to non-variadic printAll", tipCompile,
+		"الاستدعاء بيمرر slice لدالة مش variadic.", "توقيع الدالة مش معرف استقبال مجموعة وسائط بالطريقة دي.", "راجع توقيع الدالة وشكل الوسائط.",
+		"The call expands a slice into a non-variadic function.", "The function signature does not accept arguments in that form.", "Check the function signature and argument shape."),
+	tipEntry("cannot range over", "main.go:4:20: cannot range over value (variable of type int)", tipCompile,
+		"القيمة دي مش نوع ينفع نلف عليه بـ range.", "نوع التعبير مش من الأنواع المدعومة في range.", "راجع نوع القيمة اللي بعد range.",
+		"This value cannot be iterated with range.", "The expression is not a type supported by range.", "Check the type of the value after range."),
+	tipEntry("cannot index", "main.go:4:9: invalid operation: cannot index item (variable of type int)", tipCompile,
+		"القيمة دي مش قابلة للفهرسة.", "التعبير مش array أو slice أو map أو string مناسب.", "راجع نوع القيمة قبل الأقواس المربعة.",
+		"This value cannot be indexed.", "The expression is not an indexable array, slice, map, or string.", "Check the value's type before the square brackets."),
+	tipEntry("cannot slice", "main.go:4:9: invalid operation: cannot slice data (variable of type map[string]int)", tipCompile,
+		"القيمة دي مش قابلة للتقطيع بـ slice expression.", "نوع التعبير مش بيدعم حدود البداية والنهاية.", "راجع نوع القيمة واستخدام النقطتين في الأقواس.",
+		"This value cannot be sliced.", "The expression's type does not support slice bounds.", "Check the value's type and the colon expression."),
+	tipEntry("invalid composite literal", "main.go:4:10: invalid composite literal type int", tipCompile,
+		"صيغة إنشاء القيمة المركبة مش مناسبة للنوع.", "النوع المكتوب مش بيقبل قائمة قيم بالشكل ده.", "راجع نوع القيمة وترتيب عناصرها.",
+		"The composite literal does not fit this type.", "The type does not accept a value list in this form.", "Check the target type and the literal's elements."),
+	tipEntry("unknown field", "main.go:4:16: unknown field Label in struct literal of type Item", tipCompile,
+		"اسم الحقل ده مش موجود في الـ struct.", "الاسم ممكن يكون مكتوب بشكل مختلف أو مش جزء من النوع.", "راجع تعريف الـ struct وتهجئة الحقل.",
+		"This field does not exist in the struct.", "The name may differ or may not be part of this type.", "Check the struct declaration and field spelling."),
+	tipEntry("duplicate field", "main.go:4:31: duplicate field name Label in struct literal", tipCompile,
+		"نفس الحقل اتكتب مرتين في القيمة.", "فيه إدخال مكرر في الـ struct literal.", "راجع أسماء الحقول في نفس القيمة.",
+		"The same field appears more than once.", "The struct literal contains a duplicate entry.", "Check field names in this literal."),
+	tipEntry("duplicate key", "main.go:4:28: duplicate key \"a\" in map literal", tipCompile,
+		"مفتاح الـ map اتكرر في القيمة.", "فيه أكتر من عنصر بنفس المفتاح في الـ map literal.", "راجع المفاتيح المكتوبة في القيمة.",
+		"The map literal contains a repeated key.", "More than one entry uses the same key.", "Check the keys in the literal."),
+	tipEntry("cannot call", "main.go:5:2: invalid operation: cannot call count (variable of type int): int is not a function", tipCompile,
+		"الكود بيحاول يستدعي قيمة مش دالة.", "الاسم المستخدم في الأقواس ممكن يشير لمتغير أو قيمة تانية.", "راجع تعريف الاسم ونطاقه قبل الاستدعاء.",
+		"The code calls a value that is not a function.", "The name in parentheses may refer to a variable or another value.", "Check the name's declaration and scope before the call."),
+	tipEntry("declared but not used", "main.go:4:6: declared but not used: result", tipCompile,
+		"في اسم اتعرّف لكن ما اتستخدمش.", "ممكن يكون متغير أو type أو function اتساب من غير استخدام.", "راجع التعريفات المذكورة وأماكن استخدامها.",
+		"A name is declared but never used.", "A variable, type, or function may be left unused.", "Check the named declaration and its uses."),
+	tipEntry("invalid array length", "main.go:3:11: invalid array length -1", tipCompile,
+		"طول الـ array مش صالح.", "الطول لازم يكون قيمة ثابتة غير سالبة.", "راجع التعبير اللي بيحدد الطول.",
+		"The array length is invalid.", "The length must be a non-negative constant.", "Check the expression that sets the length."),
+	tipEntry("invalid map key type", "main.go:3:12: invalid map key type []int", tipCompile,
+		"نوع مفتاح الـ map مش قابل للمقارنة.", "Go محتاج المفتاح يكون من نوع قابل للمقارنة.", "راجع نوع المفتاح وخصائصه.",
+		"The map key type is not comparable.", "Go requires map keys to be comparable types.", "Check the key type and its properties."),
+	tipEntry("too many values", "main.go:4:12: too many values in struct literal of type Point", tipCompile,
+		"القيمة المركبة فيها عناصر زيادة عن النوع.", "عدد القيم المكتوبة مش مطابق لحقول النوع.", "راجع عدد العناصر وترتيبها مع تعريف النوع.",
+		"The composite literal has too many values.", "The number of values does not match the type's fields.", "Check the element count and order against the type."),
+	tipEntry("not enough values", "main.go:4:14: not enough values in struct literal of type Point", tipCompile,
+		"القيمة المركبة ناقصها عناصر.", "عدد القيم المكتوبة أقل من المطلوب للنوع.", "راجع حقول النوع وعدد القيم المقدمة.",
+		"The composite literal has too few values.", "The value list is shorter than the type requires.", "Check the type's fields and provided values."),
+	tipEntry("cannot use generic function", "main.go:5:18: cannot use generic function Map without instantiation", tipCompile,
+		"الدالة العامة مستخدمة من غير تحديد تطبيقها.", "المكان ده محتاج قيمة دالة بنوع واضح.", "راجع معاملات النوع والسياق اللي بتستخدم فيه الدالة.",
+		"The generic function is used without instantiation.", "This context needs a function value with a clear type.", "Check type arguments and the function's use context."),
+	tipEntry("invalid indirect", "main.go:4:3: invalid indirect of count (variable of type int)", tipCompile,
+		"فيه محاولة للوصول لقيمة كأنها pointer.", "التعبير مش pointer في المكان ده.", "راجع استخدام علامة النجمة ونوع التعبير.",
+		"A value is being dereferenced as if it were a pointer.", "The expression is not a pointer here.", "Check the asterisk and the expression's type."),
+	tipEntry("cannot use nil as", "main.go:4:12: cannot use nil as int value in assignment", tipCompile,
+		"nil مش قيمة صالحة للنوع ده.", "nil ينفع مع أنواع مرجعية معينة بس.", "راجع النوع المتوقع ومعنى القيمة الفارغة فيه.",
+		"nil is not a valid value for this type.", "nil is only valid for certain reference types.", "Check the expected type and its empty value."),
+	// Runtime failures, process errors, and lab diagnostics.
+	tipEntry("WARNING: DATA RACE", "WARNING: DATA RACE\nRead at 0x00 by goroutine 8:", tipRuntime|tipLab,
+		"Race detector رصد وصول متزامن متعارض.", "أكتر من goroutine وصلوا لنفس البيانات مع وجود كتابة من غير تنسيق آمن.", "قارن مواقع القراءة والكتابة وأوقات تشغيل الـ goroutines في التقرير.",
+		"The race detector found conflicting concurrent access.", "Multiple goroutines accessed the same data while at least one wrote without safe coordination.", "Compare the read and write locations and goroutine timing in the report."),
+	tipEntry("concurrent map read and map write", "fatal error: concurrent map read and map write", tipRuntime|tipLab,
+		"قراءة وكتابة حصلوا على نفس الـ map في نفس الوقت.", "الـ map اتشاركت بين goroutines من غير تنسيق.", "راجع كل أماكن القراءة والكتابة المتزامنة للـ map.",
+		"The same map was read and written concurrently.", "The map is shared between goroutines without coordination.", "Check all concurrent reads and writes to the map."),
+	tipEntry("concurrent map writes", "fatal error: concurrent map writes", tipRuntime|tipLab,
+		"أكتر من كتابة حصلت على نفس الـ map في نفس الوقت.", "الـ map مش آمنة للكتابة المتزامنة.", "راجع goroutines اللي بتعدّل الـ map وتوقيتهم.",
+		"Multiple writes reached the same map at once.", "A Go map is not safe for concurrent writes.", "Check goroutines that modify the map and their timing."),
+	tipEntry("all goroutines are asleep", "fatal error: all goroutines are asleep - deadlock!", tipRuntime|tipLab,
+		"البرنامج وصل لـ deadlock وكل goroutine مستنية.", "إشارة أو استقبال أو قفل مستني حاجة مش هتحصل.", "راجع نقاط الانتظار ومسارات الإرسال والاستقبال والقفل.",
+		"The program deadlocked and every goroutine is waiting.", "A signal, receive, or lock is waiting for something that will not happen.", "Check wait points and send, receive, and lock paths."),
+	tipEntry("send on closed channel", "panic: send on closed channel", tipRuntime|tipLab,
+		"إرسال حصل على channel مقفولة.", "الإرسال وصل بعد إغلاق القناة.", "راجع ترتيب الإرسال والإغلاق وكل الجهات اللي بتقفلها.",
+		"A value was sent to a closed channel.", "The send happened after the channel was closed.", "Check send and close ordering and every closer."),
+	tipEntry("close of closed channel", "panic: close of closed channel", tipRuntime|tipLab,
+		"نفس الـ channel اتقفلت أكتر من مرة.", "أكتر من مسار ممكن يكون بيحاول يقفلها.", "راجع كل أماكن الإغلاق وتسلسل تنفيذها.",
+		"The same channel was closed more than once.", "More than one path may be trying to close it.", "Check every close site and their execution order."),
+	tipEntry("nil pointer dereference", "panic: runtime error: invalid memory address or nil pointer dereference", tipRuntime|tipLab,
+		"الكود حاول يستخدم pointer قيمته nil.", "القيمة ما اتجهزتش أو رجعت nil قبل الاستخدام.", "راجع مصدر الـ pointer وحالته قبل السطر المذكور.",
+		"The code used a pointer whose value is nil.", "The value may not have been initialized or may have returned nil.", "Check where the pointer comes from and its state before this line."),
+	tipEntry("invalid memory address or nil pointer dereference", "runtime error: invalid memory address or nil pointer dereference", tipRuntime|tipLab,
+		"فيه وصول لذاكرة من pointer فاضي.", "قيمة مرجعية كانت nil وقت الاستخدام.", "راجع الـ stack trace ومصدر القيمة قبل الوصول لها.",
+		"Memory was accessed through a nil pointer.", "A reference value was nil when it was used.", "Check the stack trace and where the value came from."),
+	tipEntry("index out of range", "panic: runtime error: index out of range [4] with length 4", tipRuntime|tipLab,
+		"الـ index خارج حدود الـ slice أو array.", "القيمة المطلوبة مش موجودة عند الرقم ده.", "قارن الـ index بالطول الفعلي وقت التشغيل.",
+		"The index is outside the slice or array bounds.", "There is no element at that position.", "Compare the index with the length at runtime."),
+	tipEntry("slice bounds out of range", "panic: runtime error: slice bounds out of range [2:9] with capacity 8", tipRuntime|tipLab,
+		"حدود الـ slice expression خارج المدى.", "بداية أو نهاية الجزء المطلوب أكبر من الحدود المتاحة.", "راجع قيم البداية والنهاية والطول والسعة.",
+		"The slice expression uses bounds outside the available range.", "Its start or end exceeds the available limits.", "Check the start, end, length, and capacity."),
+	tipEntry("assignment to entry in nil map", "panic: assignment to entry in nil map", tipRuntime|tipLab,
+		"الكود حاول يضيف عنصر في map قيمتها nil.", "الـ map اتقرت أو اتعرّفت من غير قيمة جاهزة للكتابة.", "راجع مكان إنشاء الـ map قبل أول إضافة.",
+		"The code tried to add an entry to a nil map.", "The map was declared or received without a writable value.", "Check where the map is created before its first write."),
+	tipEntry("interface conversion", "panic: interface conversion: interface {} is string, not int", tipRuntime|tipLab,
+		"تحويل قيمة interface لنوع غير نوعها الفعلي فشل.", "النوع الموجود وقت التشغيل مختلف عن النوع المتوقع.", "راجع النوع الفعلي للقيمة ومكان إدخالها للـ interface.",
+		"Converting an interface value to the wrong concrete type failed.", "The runtime value has a different type than expected.", "Check the value's concrete type and where it entered the interface."),
+	tipEntry("nil pointer evaluating", "panic: nil pointer evaluating *main.Node", tipRuntime|tipLab,
+		"حصل وصول لحقل أو method من pointer فاضي.", "القيمة المرجعية كانت nil عند الوصول.", "راجع مصدر القيمة والسطر الأول في الـ stack trace.",
+		"A field or method was accessed through a nil pointer.", "The reference was nil at the time of access.", "Check the value's source and the first stack trace line."),
+	tipEntry("negative WaitGroup counter", "panic: sync: negative WaitGroup counter", tipRuntime|tipLab,
+		"عداد الـ WaitGroup بقى أقل من صفر.", "عدد إشعارات الانتهاء زاد عن عدد الأعمال المسجلة.", "راجع كل استدعاءات Add وDone في مسارات التنفيذ.",
+		"The WaitGroup counter dropped below zero.", "Completion notifications exceeded the registered work.", "Check every Add and Done call across execution paths."),
+	tipEntry("WaitGroup misuse", "panic: sync: WaitGroup misuse: Add called concurrently with Wait", tipRuntime|tipLab,
+		"استخدام الـ WaitGroup حصل بترتيب غير آمن.", "تعديل العداد اتداخل مع انتظار انتهاء الأعمال.", "راجع توقيت Add وWait ومن المسؤول عن بدء الأعمال.",
+		"The WaitGroup was used in an unsafe order.", "A counter change overlapped with waiting for completion.", "Check Add and Wait timing and who starts the work."),
+	tipEntry("close of nil channel", "panic: close of nil channel", tipRuntime|tipLab,
+		"الكود حاول يقفل channel قيمتها nil.", "القناة ما اتعملتش أو ما وصلتش للدالة.", "راجع مصدر الـ channel وحالتها قبل الإغلاق.",
+		"The code tried to close a nil channel.", "The channel may not have been created or passed in.", "Check where the channel comes from before closing it."),
+	tipEntry("integer divide by zero", "panic: runtime error: integer divide by zero", tipRuntime|tipLab,
+		"عملية قسمة حصلت على صفر.", "المقام وصل لقيمة صفر وقت التشغيل.", "راجع مصدر المقام والحالات اللي بتخليه صفر.",
+		"An integer division used zero as the divisor.", "The divisor evaluated to zero at runtime.", "Check the divisor's source and when it can be zero."),
+	tipEntry("context deadline exceeded", "context deadline exceeded", tipRuntime|tipLab,
+		"العملية ماخلصتش قبل انتهاء المهلة.", "العمل استغرق وقت أطول من الوقت المحدد أو علق.", "راجع مكان الانتظار والمهلة والعملية اللي ما رجعتش.",
+		"The operation did not finish before its deadline.", "It took longer than the allowed time or got stuck.", "Check wait points, the deadline, and the operation that did not return."),
+	tipEntry("context canceled", "context canceled", tipRuntime|tipLab,
+		"العملية اتلغت قبل ما تكمّل.", "السياق اتلغى من المستدعي أو من عملية أعلى.", "راجع مين بيعمل cancel وترتيب الإلغاء.",
+		"The operation was canceled before it finished.", "Its context was canceled by a caller or parent operation.", "Check who cancels the context and when."),
+	tipEntry("test timed out", "panic: test timed out after 1m30s", tipRuntime|tipLab,
+		"الاختبار ماخلصش في المهلة المحددة.", "ممكن يكون فيه انتظار مفتوح أو عملية بطيئة.", "راجع آخر سطر وصل له الاختبار ونقاط الانتظار.",
+		"The test did not finish within its time limit.", "It may be waiting forever or running slowly.", "Check the last test output and its wait points."),
+	tipEntry("signal: killed", "go test: signal: killed", tipRuntime|tipLab,
+		"العملية اتوقفت بالقوة.", "ممكن تكون المهلة انتهت أو النظام أوقف العملية.", "راجع وقت التشغيل وآخر output قبل الإيقاف.",
+		"The process was forcibly stopped.", "A timeout may have expired or the system may have stopped it.", "Check the runtime and the last output before it stopped."),
+	tipEntry("no such file or directory", "open data.json: no such file or directory", tipRuntime|tipLab,
+		"الملف المطلوب مش موجود في المسار ده.", "المسار أو اسم الملف مش مطابق لمكانه وقت التشغيل.", "راجع المسار ومجلد التشغيل واسم الملف.",
+		"The requested file was not found at that path.", "The path or name may not match its runtime location.", "Check the path, working directory, and file name."),
+	tipEntry("permission denied", "open secret.txt: permission denied", tipRuntime|tipLab,
+		"النظام رفض الوصول للملف أو المورد.", "الصلاحيات الحالية مش سامحة بالعملية المطلوبة.", "راجع المورد والعملية اللي بتحاول تعملها.",
+		"The system denied access to a file or resource.", "The current permissions do not allow the requested operation.", "Check the resource and the operation being attempted."),
+	tipEntry("connection refused", "dial tcp 127.0.0.1:5432: connect: connection refused", tipRuntime|tipLab,
+		"الاتصال اترفض من العنوان المطلوب.", "الخدمة ممكن تكون مش شغالة أو مش بتسمع على المنفذ ده.", "راجع العنوان والمنفذ وحالة الخدمة.",
+		"The connection was refused by the target address.", "The service may be stopped or listening on another port.", "Check the address, port, and service status."),
+	tipEntry("unexpected end of JSON input", "unexpected end of JSON input", tipRuntime|tipLab,
+		"بيانات JSON خلصت قبل ما تكمل.", "النص ممكن يكون ناقص أو اتقطع أثناء القراءة.", "راجع النص كامل ومصدره قبل فك الترميز.",
+		"The JSON input ended before the value was complete.", "The text may be incomplete or truncated while reading.", "Check the full input and its source before decoding."),
+	tipEntry("json: cannot unmarshal", "json: cannot unmarshal string into Go value of type int", tipRuntime|tipLab,
+		"نوع قيمة JSON مش مناسب للحقل في Go.", "البيانات فيها نوع مختلف عن النوع المتوقع في الـ struct.", "قارن شكل JSON بأنواع الحقول المستخدمة في فك الترميز.",
+		"A JSON value has the wrong type for a Go field.", "The data type differs from the struct field's expected type.", "Compare the JSON shape with field types used for decoding."),
+	tipEntry("invalid character", "invalid character '}' looking for beginning of object key string", tipRuntime|tipLab,
+		"محتوى JSON فيه رمز في مكان غير متوقع.", "الصيغة ممكن تكون ناقصها فاصل أو فيها اقتباس غير مقفول.", "راجع النص قرب الموضع اللي وقف عنده الـ decoder.",
+		"The JSON contains a character where it was not expected.", "A separator may be missing or a quote may be unclosed.", "Check the input near where the decoder stopped."),
+	tipEntry("unsupported type", "json: unsupported type: chan int", tipRuntime|tipLab,
+		"النوع ده مش مدعوم في عملية JSON.", "القيمة فيها نوع ماينفعش يتحول تلقائياً لـ JSON.", "راجع نوع القيمة اللي بتتبعت للـ encoder.",
+		"This type is not supported by the JSON operation.", "The value contains a type that cannot be encoded as JSON automatically.", "Check the value passed to the encoder."),
+	tipEntry("EOF", "decode response: EOF", tipRuntime|tipLab,
+		"القراءة وصلت لنهاية البيانات بدري.", "المصدر ممكن يكون فاضي أو اتقفل قبل اكتمال المحتوى.", "راجع مصدر القراءة وحجمه وتوقيت إغلاقه.",
+		"Reading reached the end of the input too early.", "The source may be empty or closed before all data arrived.", "Check the input source, its size, and when it is closed."),
+	tipEntry("goroutine stack exceeds", "runtime: goroutine stack exceeds 1000000000-byte limit", tipRuntime|tipLab,
+		"استهلاك الـ stack زاد عن الحد.", "استدعاءات متكررة أو بيانات محلية كبيرة ممكن تكون السبب.", "راجع الـ stack trace والتكرار وحجم القيم المحلية.",
+		"Stack usage exceeded the limit.", "Repeated calls or large local values may be involved.", "Check the stack trace, recursion, and local value sizes."),
+	tipEntry("out of memory", "fatal error: out of memory", tipRuntime|tipLab,
+		"البرنامج احتاج ذاكرة أكتر من المتاح.", "ممكن يكون فيه بيانات بتكبر أو بتفضل محتفظة بالذاكرة.", "راجع حجم البيانات ومعدل إنشائها ومدة الاحتفاظ بها.",
+		"The program needed more memory than was available.", "Data may be growing or staying in memory too long.", "Check data size, creation rate, and how long it is retained."),
+	tipEntry("panic:", "panic: unexpected state", tipRuntime|tipLab,
+		"البرنامج وقف بسبب panic.", "الكود أو مكتبة وصلوا لحالة اعتبروها غير صالحة.", "ابدأ بأول سطر من الـ stack trace وشوف القيمة وقتها.",
+		"The program stopped because of a panic.", "Code or a library reached a state it treated as invalid.", "Start with the first stack trace line and inspect the value then."),
+	tipEntry("--- FAIL:", "--- FAIL: TestParse (0.00s)", tipLab,
+		"اختبار Go فشل.", "النتيجة الفعلية ماطابقتش اللي الاختبار بيتوقعه أو حصل خطأ أثناءه.", "راجع اسم الاختبار ورسالة المقارنة والسطر اللي قبله.",
+		"A Go test failed.", "The actual result differed from the expectation or the test hit an error.", "Check the test name, comparison message, and preceding output."),
+	tipEntry("_test.go:", "--- FAIL: TestParse (0.00s)\n    main_test.go:14: missing item", tipLab,
+		"الاختبار وقف عند رسالة في ملف test.", "الرسالة اتطبعت من سطر داخل الاختبار لما شرط ما اتحققش.", "راجع السطر ورسالة الاختبار والقيم اللي كان بيقارنها.",
+		"The test stopped at a message in a test file.", "The test printed this line when one of its checks failed.", "Check the line, test message, and values it compared.").withPriority(15),
+	tipEntry("FAIL\t", "FAIL\texample.com/app\t0.012s", tipLab,
+		"حزمة Go فيها اختبار فاشل.", "واحد أو أكتر من الاختبارات ماعدّوش.", "دوّر في output على أول سطر --- FAIL ورسالة الاختبار.",
+		"A Go package has a failing test.", "One or more tests did not pass.", "Find the first --- FAIL line and the test's message."),
+	tipEntry("FAIL ", "FAIL example.com/app [build failed]", tipLab,
+		"تشغيل go test فشل للحزمة.", "الاختبارات أو البناء رجعوا نتيجة فشل.", "راجع السطور السابقة لمعرفة الاختبار أو التشخيص الأول.",
+		"go test failed for this package.", "The tests or build returned a failure.", "Check preceding lines for the first test or build diagnostic."),
+	tipEntry("Error Trace:", "Error Trace:\n\t/work/main_test.go:21", tipLab,
+		"الاختبار عرض مكان assertion فاشل.", "مكتبة التحقق طبعت trace لما شرط ما اتحققش.", "راجع السطر ورسالة Error أو يتوقع مقابل الفعلي.",
+		"The test reported where an assertion failed.", "An assertion library printed a trace for an unmet condition.", "Check the line and the expected versus actual message."),
+	tipEntry("Error:          ", "Error:          values differ", tipLab,
+		"رسالة الاختبار بتقول إن شرط أو مقارنة فشلوا.", "القيمة الفعلية اختلفت عن المتوقع.", "اقرأ تفاصيل المقارنة والسياق اللي اختبره.",
+		"The test says a check or comparison failed.", "The actual value differed from the expected value.", "Read the comparison details and the case being tested."),
+	tipEntry("Not equal:", "Error: Not equal:\nexpected: 4\nactual  : 2", tipLab,
+		"مكتبة assertions سجلت مقارنة فاشلة.", "القيمة الفعلية ماطابقتش القيمة المتوقعة.", "راجع تفاصيل المقارنة والـ test case.",
+		"An assertion library reported a failed comparison.", "The actual value did not match the expected value.", "Check the comparison details and test case."),
+	tipEntry("BenchmarkHidden", "BenchmarkHiddenParse-8    100000    1200 ns/op", tipLab,
+		"ده output قياس benchmark.", "الاختبار بيقيس زمن تنفيذ العملية لكل مرة.", "راجع عدد العمليات والوحدة ns/op وقارن القياسات في نفس البيئة.",
+		"This is benchmark output.", "The test measures execution time per operation.", "Check the operation count and ns/op unit; compare runs in the same environment."),
+	tipEntry("Printf format", "main.go:9:2: fmt.Printf format %d has arg label of wrong type string", tipLab,
+		"صيغة الطباعة مش متوافقة مع نوع القيمة.", "رمز التنسيق متوقع نوع مختلف عن الوسيط.", "قارن كل format verb بنوع الوسيط المقابل.",
+		"The print format does not match the value type.", "The format verb expects a different type than the argument.", "Compare each format verb with its corresponding argument type."),
+	tipEntry("possible Printf formatting directive", "main.go:9:2: fmt.Println call has possible Printf formatting directive %s", tipLab,
+		"go vet لقى علامة تنسيق ممكن تكون مقصودة بشكل تاني.", "النص فيه صيغة شبه format verb في استدعاء مش بيستخدمها كتوجيه.", "راجع نص الرسالة ونوع دالة الطباعة المستخدمة.",
+		"go vet found text that may be an unintended format directive.", "The text resembles a format verb in a call that does not interpret it that way.", "Check the message text and the print function being used."),
+	tipEntry("lostcancel", "context.go:20:2: the cancel function is not used on all paths (lostcancel)", tipLab,
+		"go vet لقى مسار ممكن ماينهيش الـ context.", "دالة الإلغاء مش واضحة إنها بتتنادى في كل المسارات.", "راجع عمر الـ context ومسارات الخروج من الدالة.",
+		"go vet found a path that may not end the context.", "The cancel function is not clearly called on every path.", "Check the context lifetime and function exit paths."),
+	tipEntry("copylocks", "main.go:14:9: assignment copies lock value: sync.Mutex (copylocks)", tipLab,
+		"go vet رصد نسخ قيمة فيها lock.", "نسخ lock ممكن يخلي أجزاء من الكود تستخدم أقفال منفصلة بشكل غير متوقع.", "راجع النسخ والإسناد وتمرير القيمة في السطر المذكور.",
+		"go vet found a copied value containing a lock.", "Copying a lock can make code use separate locks unexpectedly.", "Check copies, assignments, and value passing at the reported line."),
+	tipEntry("unreachable code", "main.go:8:2: unreachable code", tipLab,
+		"فيه كود مش ممكن التنفيذ يوصل له.", "تعليمة قبل السطر ده أنهت المسار بالفعل.", "راجع return أو break أو panic القريب.",
+		"This code cannot be reached during execution.", "An earlier statement already ended this path.", "Check nearby return, break, or panic statements."),
+	tipEntry("possible misuse of", "main.go:12:2: possible misuse of unsafe.Pointer", tipLab,
+		"go vet حذر من استخدام ممكن يكون غير آمن.", "التحويل أو الوصول ممكن يتجاوز قواعد الذاكرة المتوقعة.", "راجع نوع المؤشر وعمر القيمة والتحويلات المحيطة.",
+		"go vet warned about a potentially unsafe use.", "The conversion or access may violate expected memory rules.", "Check the pointer type, value lifetime, and nearby conversions."),
+	tipEntry("shadows declaration", "main.go:8:3: declaration of \"count\" shadows declaration at line 4", tipLab,
+		"اسم متغير داخلي بيغطي اسم أقدم.", "تعريف جديد في نطاق أصغر بيخلي الاسم القديم مش ظاهر هنا.", "راجع نطاقات المتغيرات واستخدامات الاسم قبل وبعد التعريف.",
+		"A local name shadows an earlier declaration.", "A new declaration in a smaller scope hides the older name here.", "Check variable scopes and uses before and after the declaration."),
+	tipEntry("got ", "    main_test.go:11: got 2, want 4", tipLab,
+		"رسالة الاختبار بتعرض الفعلي والمتوقع.", "القيمة الفعلية اختلفت عن النتيجة اللي الاختبار محددها.", "قارن القيمتين والسياق اللي اتنفذ فيه الاختبار.",
+		"The test message shows actual and expected values.", "The actual value differs from the result the test expects.", "Compare both values and the case that ran."),
+	tipEntry("undefined:", "main_test.go:6:2: undefined: missing", tipLab,
+		"الاختبار بيستخدم اسم مش معروف.", "الاسم مش متعرّف في نطاق الاختبار أو الكود المستورد.", "راجع اسم الرمز والـ package اللي المفروض توفره.",
+		"The test uses a name that is not known.", "The name is not declared in the test scope or imported code.", "Check the symbol name and the package expected to provide it."),
+}
+
+func errorTipFor(message string, scopes tipScope, lang string) errorTipText {
+	lang = normalizeLang(lang)
+	var best *errorTipEntry
+	for i := range errorTips {
+		entry := &errorTips[i]
+		if entry.scope&scopes == 0 || !strings.Contains(message, entry.needle) {
+			continue
+		}
+		if best == nil || entry.priority > best.priority {
+			best = entry
+		}
+	}
+	if best == nil {
+		return errorTipText{}
+	}
+	if lang == "en" {
+		return best.en
+	}
+	return best.ar
+}
+
+func compileTips(lang string) []struct{ needle, tip string } {
+	return legacyTipList(tipCompile, lang)
+}
+
+func runTips(lang string) []struct{ needle, tip string } {
+	return legacyTipList(tipRuntime|tipLab, lang)
+}
+
+func legacyTipList(scopes tipScope, lang string) []struct{ needle, tip string } {
+	list := make([]struct{ needle, tip string }, 0, len(errorTips))
+	for _, entry := range errorTips {
+		if entry.scope&scopes == 0 {
+			continue
+		}
+		text := entry.ar
+		if normalizeLang(lang) == "en" {
+			text = entry.en
+		}
+		list = append(list, struct{ needle, tip string }{entry.needle, text.Meaning})
+	}
+	return list
+}
+
+func runtimeTipFor(stderr string, languages ...string) string {
+	lang := "ar"
+	if len(languages) > 0 {
+		lang = normalizeLang(languages[0])
+	}
+	return errorTipFor(stderr, tipRuntime|tipLab, lang).Meaning
+}
+
+func tipFor(message string, languages ...string) string {
+	lang := "ar"
+	if len(languages) > 0 {
+		lang = normalizeLang(languages[0])
+	}
+	return errorTipFor(message, tipCompile, lang).Meaning
+}
