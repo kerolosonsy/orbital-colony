@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "28-1-gin", Chapter: 28, Kind: "lab", Title: "Gin", Goal: "انقل سجل الأرصفة لـ Gin من غير ما العقد يتغير، بربط وmiddleware",
+	add(&Level{ID: "28-1-gin", Chapter: 28, Kind: "lab", LessonRevision: 1, Steps: ch28GinArabicSteps, Title: "Gin", Goal: "انقل سجل الأرصفة لـ Gin من غير ما العقد يتغير، بربط وmiddleware",
 		Requires: []string{"sel:gin.New", "sel:binding.JSON"}, Bridge: []int{54}, Setup: seededLabRoom, Race: true,
 		Deps:  []string{"github.com/gin-gonic/gin"},
 		Files: []LabFile{{Name: "main.go", Starter: ch281Starter}},
@@ -101,8 +101,8 @@ go func() { use(c.Param("id")) }()   // c ممكن يكون اتعاد استخ�
 أي مسار تاني، منهم ~/berths/~ و ~/Berths~ و ~/berths/2/x~، يرجع 404 و ~no route\n~. طريقة مش مدعومة على مسار موجود ترجع 405 و ~use route methods\n~، و ~Allow~ فيه طرق المسار: ~GET, POST~ للمجموعة و ~DELETE, GET, PUT~ للعنصر، والترتيب مش مهم. كل رد، حتى 404 و 405 و 413، فيه ~Cache-Control: no-store~ من middleware واحد. الردود الناجحة اللي ليها جسم نوعها ~application/json~ والأخطاء ~text/plain~، والـ charset مسموح. الـ query بتتجاهل، والفشل ميغيّرش الحالة. مفيش شبكة ولا ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: ~GET /berths?min_slots=N~ يرجع بس الأرصفة اللي ~slots~ بتاعتها N أو أكتر بنفس الترتيب؛ N لازم رقم صحيح من 1 لـ 64، وإلا 400 و ~invalid berth\n~. من غير ~min_slots~ القائمة كاملة.`,
-		Hints: []string{"ابدأ بـ gin.New() وصفّر RedirectTrailingSlash وشغّل HandleMethodNotAllowed، وسجّل NoRoute وNoMethod وmiddleware الـ Cache-Control بـ Use.", "اقرا الجسم بـ io.LimitReader لحد 4097، وبعدين json.Valid، وبعدين binding.JSON.BindBody على struct بقواعد required وmin وmax، وبعدين trim للاسم.", "خلّي المخزن struct فيه sync.Mutex وعداد وخريطة؛ في PUT افحص c.Param والجسم قبل البحث، وللنجمة استخدم ShouldBindQuery بـ *int."},
-		En: &LevelText{Title: "Gin", Goal: "Move the berth registry to Gin without changing its contract, using binding and middleware", Files: []LabFile{{Name: "main.go", Starter: ch281Starter}},
+		Hints: ch28GinArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch28GinEnglishSteps, Title: "Gin", Goal: "Move the berth registry to Gin without changing its contract, using binding and middleware", Files: []LabFile{{Name: "main.go", Starter: ch281Starter}},
 			Lesson: `# The Same Berth Registry, on Gin
 
 ## Before you write
@@ -199,7 +199,7 @@ Implement ~NewBerthEngine() *gin.Engine~ returning a new engine with an independ
 Every other path, including ~/berths/~, ~/Berths~, and ~/berths/2/x~, returns 404 and ~no route\n~. An unsupported method on an existing path returns 405, ~use route methods\n~, and an ~Allow~ listing the path's methods: ~GET, POST~ for the collection and ~DELETE, GET, PUT~ for an item, in any order. Every reply, including 404, 405, and 413, carries ~Cache-Control: no-store~ from one middleware. Successful replies with a body are ~application/json~ and errors are ~text/plain~; a charset is allowed. The query is ignored, and failures never change state. No network and no ~Report~; leave ~main~ empty.
 
 Third star: ~GET /berths?min_slots=N~ returns only berths whose ~slots~ is at least N, in the same order; N must be an integer from 1 to 64, otherwise 400 and ~invalid berth\n~. Without ~min_slots~ the list is complete.`,
-			Hints: []string{"Start with gin.New(), turn off RedirectTrailingSlash, turn on HandleMethodNotAllowed, and register NoRoute, NoMethod, and the Cache-Control middleware with Use.", "Read the body through io.LimitReader up to 4097, then json.Valid, then binding.JSON.BindBody into a struct with required, min, and max rules, then trim the label.", "Make the store a struct with a sync.Mutex, a counter, and a map; in PUT check c.Param and the body before the lookup, and for the star use ShouldBindQuery with *int."}},
+			Hints: ch28GinEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch281Hidden, HiddenFiles: map[string]string{"berth_contract_test.go": ch28BerthContract}},
 	})
 }
@@ -525,7 +525,7 @@ func TestHiddenBonusGinSlotFilter(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "28-2-fiber", Chapter: 28, Kind: "lab", Title: "Fiber", Goal: "شغّل نفس عقد الأرصفة على Fiber واختبره بـ app.Test، واكتب مقارنة قصيرة بين الإطارين",
+	add(&Level{ID: "28-2-fiber", Chapter: 28, Kind: "lab", LessonRevision: 1, Steps: ch28FiberArabicSteps, Title: "Fiber", Goal: "شغّل نفس عقد الأرصفة على Fiber واختبره بـ app.Test، واكتب مقارنة قصيرة بين الإطارين",
 		Requires: []string{"sel:fiber.New", "sel:fiber.Config"}, Bridge: []int{55}, Setup: seededLabRoom, Race: true,
 		Deps:  []string{"github.com/gofiber/fiber/v2"},
 		Files: []LabFile{{Name: "main.go", Starter: ch282Starter}, {Name: "compare.go", Starter: ch282CompareAr}},
@@ -619,8 +619,8 @@ resp, _ := app.Test(req)                   // مهلة ثانية، والخطأ
 أي مسار تاني، منهم ~/berths/~ و ~/Berths~ و ~/berths/2/x~، يرجع 404 و ~no route\n~. طريقة مش مدعومة على مسار موجود ترجع 405 و ~use route methods\n~، و ~Allow~ فيه طرق المسار (~HEAD~ مسموح زيادة). كل رد، حتى 404 و 405 و 413، فيه ~Cache-Control: no-store~ من middleware واحد. النجاح بجسم نوعه ~application/json~ والأخطاء ~text/plain~. الـ query بتتجاهل، والفشل ميغيّرش الحالة. مفيش شبكة ولا ~Report~، و ~main~ فاضية.
 
 في ~compare.go~: ~Comparison~ فيها 4 عناصر بالظبط، كل موضوع من ~handler~ و ~errors~ و ~testing~ و ~lifetime~ مرة واحدة. ~Gin~ و ~Fiber~ في كل عنصر مش فاضيين بعد trim، وكل واحد 160 بايت أو أقل، والاتنين مختلفين.`,
-		Hints: []string{"ابدأ بـ fiber.New(fiber.Config{...}) فيه StrictRouting وCaseSensitive وErrorHandler، وبعدين app.Use لـ Cache-Control.", "في ErrorHandler فك الخطأ بـ errors.As لـ *fiber.Error واكتب no route أو use route methods حسب Code.", "افحص len(c.Body()) قبل json.Unmarshal، وحوّل c.Params(\"id\") برقم قياسي، وخلّي المخزن تحت sync.Mutex؛ وبعدين املا Comparison."},
-		En: &LevelText{Title: "Fiber", Goal: "Run the same berth contract on Fiber, test it with app.Test, and write a short comparison of the two frameworks", Files: []LabFile{{Name: "main.go", Starter: ch282Starter}, {Name: "compare.go", Starter: ch282CompareEn}},
+		Hints: ch28FiberArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch28FiberEnglishSteps, Title: "Fiber", Goal: "Run the same berth contract on Fiber, test it with app.Test, and write a short comparison of the two frameworks", Files: []LabFile{{Name: "main.go", Starter: ch282Starter}, {Name: "compare.go", Starter: ch282CompareEn}},
 			Lesson: `# The Same Registry on Fiber
 
 ## Before you write
@@ -711,7 +711,7 @@ Implement ~NewBerthApp() *fiber.App~ returning a new app with an independent con
 Every other path, including ~/berths/~, ~/Berths~, and ~/berths/2/x~, returns 404 and ~no route\n~. An unsupported method on an existing path returns 405, ~use route methods\n~, and an ~Allow~ listing the path's methods (an extra ~HEAD~ is allowed). Every reply, including 404, 405, and 413, carries ~Cache-Control: no-store~ from one middleware. Successful bodies are ~application/json~ and errors are ~text/plain~. The query is ignored, and failures never change state. No network and no ~Report~; leave ~main~ empty.
 
 In ~compare.go~: ~Comparison~ holds exactly 4 entries, each topic of ~handler~, ~errors~, ~testing~, and ~lifetime~ once. In every entry ~Gin~ and ~Fiber~ are nonblank after trimming, each at most 160 bytes, and different from each other.`,
-			Hints: []string{"Start with fiber.New(fiber.Config{...}) holding StrictRouting, CaseSensitive, and ErrorHandler, then app.Use for Cache-Control.", "In ErrorHandler unwrap the error with errors.As into *fiber.Error and write no route or use route methods based on Code.", "Check len(c.Body()) before json.Unmarshal, convert c.Params(\"id\") as a canonical number, and keep the store under a sync.Mutex; then fill Comparison."}},
+			Hints: ch28FiberEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch282Hidden, HiddenFiles: map[string]string{"berth_contract_test.go": ch28BerthContract}},
 	})
 }
@@ -814,7 +814,7 @@ func TestHiddenFiberComparison(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "28-3-openapi", Chapter: 28, Kind: "lab", Title: "عقد الـ API", Goal: "اقرا مستند OpenAPI لسجل المرحّلات، واتحقق إن كل رد من السيرفر مطابق له",
+	add(&Level{ID: "28-3-openapi", Chapter: 28, Kind: "lab", LessonRevision: 1, Steps: ch28OpenAPIArabicSteps, Title: "عقد الـ API", Goal: "اقرا مستند OpenAPI لسجل المرحّلات، واتحقق إن كل رد من السيرفر مطابق له",
 		Requires: []string{"sel:json.Unmarshal"}, Bridge: []int{58}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch283Starter}, {Name: "openapi.json", Starter: ch283Doc, ReadOnly: true}},
 		Lesson: `# عقد مكتوب لسجل المرحّلات
@@ -905,8 +905,8 @@ return nil                  // ونسيت additionalProperties: false
 نفّذ ~NewRelayAPI() http.Handler~ بمخزن مستقل ماشي على ~openapi.json~. ~GET /relays~ يرجع 200 ومصفوفة مرتبة بالـ ID، والفاضية ~[]~. ~POST /relays~ جسمه حده 4096 بايت، وكائن واحد مطابق لـ ~RelayInput~: ~name~ نص مش فاضي، و ~band~ واحد من ~S~ و ~X~ و ~Ka~، و ~tags~ اختياري فيه نصوص مش فاضية، ومفيش مفاتيح تانية. النجاح 201 و ~Relay~ بـ ~id~ بيبدأ من 1 ويزيد، و ~online~ بـ ~false~، و ~tags~ زي ما اتبعتت أو ~[]~، و ~Location: /relays/ID~. أي غلط 400 و ~{"error":"invalid relay"}~ من غير ما ياخد رقم.
 
 ~GET /relays/{id}~ يرجع 200 والعنصر، و ~DELETE~ يرجع 204 بجسم فاضي. الـ ID الغائب أو اللي مش رقم موجب قياسي: 404 و ~{"error":"unknown relay"}~. ردود JSON بنوع ~application/json~. أي طريقة أو مسار برا المستند مش جزء من المهمة. مفيش شبكة ولا ~Report~، و ~main~ فاضية.`,
-		Hints: []string{"اعمل structs للمستند: document فيه OpenAPI وPaths وComponents، وpathItem بحقول get وput وpost وdelete وpatch، وschema فيها Ref بـ tag json:\"$ref\".", "في LoadSpec لف على كل schema (properties وitems) واتأكد من كل $ref، وافحص مفاتيح الردود بـ strconv.Atoi وطولها 3.", "في Check فك الجسم في any واكتب validate بـ type switch؛ وفي NewRelayAPI ضمّ openapi.json بـ go:embed واتحقق من الجسم بـ RelayInput نفسها."},
-		En: &LevelText{Title: "The API Contract", Goal: "Read the relay registry's OpenAPI document and check that every server reply matches it", Files: []LabFile{{Name: "main.go", Starter: ch283Starter}, {Name: "openapi.json", Starter: ch283Doc, ReadOnly: true}},
+		Hints: ch28OpenAPIArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch28OpenAPIEnglishSteps, Title: "The API Contract", Goal: "Read the relay registry's OpenAPI document and check that every server reply matches it", Files: []LabFile{{Name: "main.go", Starter: ch283Starter}, {Name: "openapi.json", Starter: ch283Doc, ReadOnly: true}},
 			Lesson: `# A Written Contract for the Relay Registry
 
 ## Before you write
@@ -995,7 +995,7 @@ Schema rules: ~$ref~, ~type~ (~object~, ~array~, ~string~, ~integer~, ~number~, 
 Implement ~NewRelayAPI() http.Handler~ with an independent store that follows ~openapi.json~. ~GET /relays~ returns 200 and an array in ID order, ~[]~ when empty. ~POST /relays~ has a 4096-byte body cap and takes one object matching ~RelayInput~: ~name~ is nonempty text, ~band~ is one of ~S~, ~X~, and ~Ka~, ~tags~ is optional nonempty text, and there are no other keys. Success is 201 and a ~Relay~ whose ~id~ starts at 1 and increases, with ~online~ ~false~, ~tags~ as sent or ~[]~, and ~Location: /relays/ID~. Any error is 400 and ~{"error":"invalid relay"}~ without consuming an ID.
 
 ~GET /relays/{id}~ returns 200 and the item, and ~DELETE~ returns 204 with an empty body. A missing ID or one that is not a canonical positive integer is 404 and ~{"error":"unknown relay"}~. JSON replies use ~application/json~. Methods or paths outside the document are not part of the mission. No network and no ~Report~; leave ~main~ empty.`,
-			Hints: []string{"Make structs for the document: document with OpenAPI, Paths, and Components, a pathItem with get, put, post, delete, and patch fields, and a schema with Ref tagged json:\"$ref\".", "In LoadSpec walk every schema (properties and items) and verify every $ref, and check response keys with strconv.Atoi and length 3.", "In Check decode the body into any and write validate with a type switch; in NewRelayAPI embed openapi.json with go:embed and validate the body against RelayInput itself."}},
+			Hints: ch28OpenAPIEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch283Hidden},
 	})
 }
@@ -1429,7 +1429,7 @@ func TestHiddenRelayAPIHonoursContract(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "28-4-graceful", Chapter: 28, Kind: "lab", Title: "إغلاق مرتب", Goal: "اقفل بوابة القاعدة من غير ما تقطع طلب شغال: ارفض الجديد، صفّي الجاري جوه مهلة، ونضّف مرة واحدة",
+	add(&Level{ID: "28-4-graceful", Chapter: 28, Kind: "lab", LessonRevision: 1, Steps: ch28GracefulArabicSteps, Title: "إغلاق مرتب", Goal: "اقفل بوابة القاعدة من غير ما تقطع طلب شغال: ارفض الجديد، صفّي الجاري جوه مهلة، ونضّف مرة واحدة",
 		Requires: []string{"sel:http.Server", "sel:context.Context"}, Bridge: []int{60}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch284Starter}},
 		Lesson: `# إغلاق مرتب لبوابة القاعدة
@@ -1519,8 +1519,8 @@ release(); srv.Shutdown(c)           // قفلت المورد والطلب لس�
 لو ~Serve~ فشلت قبل الإيقاف، زي listener مقفول، ~Run~ ترجع خطأها من غير ما تستنى ~ctx~. لو ~ctx~ متلغي قبل النداء، ترجع ~nil~ والـ listener مقفول. ~Run~ مترجعش غير بعد ما goroutine الـ ~Serve~ يخرج. في كل الطرق دي ~release~ تتنادى مرة واحدة بعد ما الخدمة تسكت، وخطأها يتجمع في الخطأ الراجع بـ ~errors.Join~. نداء ~Run~ تاني، حتى في نفس اللحظة، يرجع ~ErrGateUsed~ فوراً من غير ما يلمس ~release~. ~http.ErrServerClosed~ مش خطأ. سيب ~main~ فاضية أو اربطها بـ ~signal.NotifyContext~؛ التستات مش بتناديها.
 
 النجمة التالتة: ~(g *Gate) Draining() <-chan struct{}~ ترجع نفس الـ channel دايماً، مفتوح لحد ما الإيقاف يبدأ وبعدها مقفول، عشان الـ handler الطويل يخلص بدري والإغلاق يرجع ~nil~ من غير ما المهلة تخلص.`,
-		Hints: []string{"شغّل srv.Serve(ln) في goroutine بيبعت نتيجته على channel، واستنى بـ select على ctx.Done() وعلى الـ channel ده.", "بعد الإيقاف اعمل context جديد من context.Background() والغيه من goroutine فيه select على clock.After(grace) وعلى channel بيتقفل لما Shutdown ترجع؛ لو Shutdown رجعت خطأ نادِ Close ورجّع ErrForced.", "استنى رجوع Serve، وبعدين errors.Join(نتيجتك، release())؛ احمي Run بـ atomic.Bool.CompareAndSwap، وللنجمة سجّل قفل الـ channel بـ RegisterOnShutdown وsync.Once."},
-		En: &LevelText{Title: "Graceful Shutdown", Goal: "Close the base gateway without cutting a running request: refuse new ones, drain the rest within a grace period, and clean up once", Files: []LabFile{{Name: "main.go", Starter: ch284Starter}},
+		Hints: ch28GracefulArabic.Hints,
+		En: &LevelText{LessonRevision: 1, Steps: ch28GracefulEnglishSteps, Title: "Graceful Shutdown", Goal: "Close the base gateway without cutting a running request: refuse new ones, drain the rest within a grace period, and clean up once", Files: []LabFile{{Name: "main.go", Starter: ch284Starter}},
 			Lesson: `# A Graceful Shutdown for the Base Gateway
 
 ## Before you write
@@ -1608,7 +1608,7 @@ Implement ~(g *Gate) Run(ctx context.Context, ln net.Listener) error~: serve ~h~
 If ~Serve~ fails before a stop, such as on a closed listener, ~Run~ returns its error without waiting for ~ctx~. If ~ctx~ is canceled before the call, return ~nil~ with the listener closed. ~Run~ returns only after the ~Serve~ goroutine has exited. On every one of these paths ~release~ is called once after serving is quiet, and its error is joined into the returned error with ~errors.Join~. A second ~Run~ call, even a simultaneous one, returns ~ErrGateUsed~ at once without touching ~release~. ~http.ErrServerClosed~ is not an error. Leave ~main~ empty or wire it to ~signal.NotifyContext~; the tests never call it.
 
 Third star: ~(g *Gate) Draining() <-chan struct{}~ always returns the same channel, open until the stop begins and closed after, so a long handler can finish early and shutdown returns ~nil~ without grace running out.`,
-			Hints: []string{"Run srv.Serve(ln) in a goroutine that sends its result on a channel, and wait with select on ctx.Done() and that channel.", "After the stop, make a fresh context from context.Background() and cancel it from a goroutine selecting on clock.After(grace) and on a channel closed when Shutdown returns; if Shutdown returns an error, call Close and return ErrForced.", "Wait for Serve to return, then errors.Join(your result, release()); guard Run with atomic.Bool.CompareAndSwap, and for the star register closing the channel with RegisterOnShutdown and sync.Once."}},
+			Hints: ch28GracefulEnglish.Hints},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch284Hidden},
 	})
 }
