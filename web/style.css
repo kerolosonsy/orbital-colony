@@ -318,6 +318,8 @@ body.debug-focus .format-btn, .format-btn:disabled { opacity: .45; }
 .complete .c-kind { float: right; color: var(--faint); font-size: 11px; margin-inline-start: 10px; }
 .sig-hint { position: absolute; z-index: 4; max-width: min(480px, 90%); padding: 5px 9px; background: var(--ink-2); border: 1px solid var(--rule); border-radius: 6px;
   box-shadow: 0 6px 18px #0007; direction: ltr; text-align: left; font: 12.5px/1.4 var(--mono); color: var(--paper); pointer-events: none; }
+.sig-hint.is-error { border-color: var(--err); }
+.sig-hint.is-error b { color: var(--err); font-weight: 600; }
 .sig-hint .c-doc { display: block; font: 12px/1.4 var(--sans); color: var(--paper-2); }
 .complete .c-doc { display: block; color: var(--paper-2, #bdb5d6); font: 12px/1.4 var(--sans); margin-top: 2px; white-space: normal; }
 .code-wrap textarea { background: transparent; color: transparent; caret-color: var(--survey-hi); resize: none; outline: none; }

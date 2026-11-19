@@ -613,10 +613,16 @@ function updateSigHint() {
     sigHint.hidden = true; return;
   }
   const symbol = inCall ? Complete.callSymbol(ed.value, ed.selectionStart, symbolsReady) : null;
-  if (!symbol) { sigHint.hidden = true; return; }
-  sigHint.innerHTML = `<b>${esc((symbol.recv ? symbol.recv + "." : "") + symbol.name)}</b>${esc(symbol.signature || "")}` + (symbol.doc ? `<span class="c-doc">${esc(symbol.doc)}</span>` : "");
-  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
   const row = ed.value.slice(0, ed.selectionStart).split("\n").length - 1;
+  // on a line with a compile error, the box shows the error and what it means
+  const focused = !ed.readOnly && document.activeElement === ed; // a selected error line counts too
+  const error = focused && !symbol && errLines.has(row + 1)
+    ? lastErrors.find((e) => Number(e.line) === row + 1 && (e.file || "main.go").replace(/^\.\//, "") === S.file) : null;
+  sigHint.classList.toggle("is-error", !!error);
+  if (error) sigHint.innerHTML = `<b>${esc(error.msg)}</b>` + (error.tip ? `<span class="c-doc" dir="auto">${esc(error.tip)}</span>` : "");
+  else if (symbol) sigHint.innerHTML = `<b>${esc((symbol.recv ? symbol.recv + "." : "") + symbol.name)}</b>${esc(symbol.signature || "")}` + (symbol.doc ? `<span class="c-doc">${esc(symbol.doc)}</span>` : "");
+  else { sigHint.hidden = true; return; }
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
   sigHint.hidden = false;
   const top = 14 + row * lineHeight - ed.scrollTop - sigHint.offsetHeight - 4;
   sigHint.style.top = `${top < 0 ? 14 + (row + 1) * lineHeight - ed.scrollTop + 4 : top}px`;
