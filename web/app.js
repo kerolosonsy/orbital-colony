@@ -592,6 +592,85 @@ async function formatEditor() {
   applyEdit({ from: 0, to: before.length, text: r.code, selStart: caret, selEnd: caret });
   log(T("الكود اتنسّق بـ gofmt.", "Formatted with gofmt."), "c-info");
 }
+// ---------- colony. autocomplete ----------
+// Typing "colony." (or Ctrl+Space after it) lists the package's functions,
+// constants and types with the first line of their doc comment.
+const completeBox = $("#complete");
+let apiSymbols = null, completion = null, dismissedAt = -1;
+function loadSymbols() {
+  if (!apiSymbols) apiSymbols = api("/api/symbols").catch(() => { apiSymbols = null; return []; });
+  return apiSymbols;
+}
+function closeCompletion() {
+  completion = null;
+  completeBox.hidden = true;
+  ed.removeAttribute("aria-activedescendant");
+}
+async function updateCompletion(force = false) {
+  const ctx = !ed.readOnly && document.activeElement === ed && ed.selectionStart === ed.selectionEnd
+    ? Complete.context(ed.value, ed.selectionStart) : null;
+  if (!ctx || (!force && ctx.start === dismissedAt)) return closeCompletion();
+  const symbols = await loadSymbols();
+  const fresh = Complete.context(ed.value, ed.selectionStart); // the caret may have moved meanwhile
+  if (!fresh || fresh.start !== ctx.start) return closeCompletion();
+  const items = Complete.rank(symbols, fresh.prefix);
+  if (!items.length) return closeCompletion();
+  completion = { items, index: 0, start: fresh.start };
+  renderCompletion();
+}
+function renderCompletion() {
+  const { items, index, start } = completion;
+  completeBox.innerHTML = items.map((s, i) => `<li role="option" id="complete-${i}" data-i="${i}" aria-selected="${i === index}">`
+    + `<span class="c-kind">${esc(s.kind)}</span><span class="c-name">${esc(s.name)}</span>`
+    + (s.signature ? `<span class="c-sig">${esc(s.signature)}</span>` : "")
+    + (s.doc ? `<span class="c-doc">${esc(s.doc)}</span>` : "") + "</li>").join("");
+  ed.setAttribute("aria-activedescendant", `complete-${index}`);
+  // place the list under the name being typed
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+  if (!charWidth) placeBrackets(lineHeight);
+  const lineStart = ed.value.lastIndexOf("\n", start - 1) + 1;
+  const row = ed.value.slice(0, start).split("\n").length;
+  let col = 0;
+  for (const c of ed.value.slice(lineStart, start)) col = c === "\t" ? col + 4 - (col % 4) : col + 1;
+  completeBox.style.top = `${14 + row * lineHeight - ed.scrollTop + 2}px`;
+  completeBox.style.left = `${Math.max(0, 16 + col * (charWidth || 8.4) - ed.scrollLeft)}px`;
+  completeBox.hidden = false;
+  completeBox.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
+}
+function acceptCompletion(i = completion.index) {
+  const symbol = completion.items[i];
+  const { text, caret } = Complete.insertion(symbol);
+  const start = completion.start;
+  closeCompletion();
+  applyEdit({ from: start, to: ed.selectionStart, text, selStart: start + caret, selEnd: start + caret });
+}
+completeBox.addEventListener("mousedown", (e) => {
+  e.preventDefault(); // keep focus in the editor
+  const li = e.target.closest("li[data-i]");
+  if (li && completion) acceptCompletion(Number(li.dataset.i));
+});
+ed.addEventListener("input", () => updateCompletion());
+ed.addEventListener("blur", closeCompletion);
+ed.addEventListener("click", () => updateCompletion());
+ed.addEventListener("scroll", () => { if (completion) renderCompletion(); });
+// handled before the editor's own keys so arrows/Enter/Tab drive the list
+ed.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.code === "Space") { e.preventDefault(); dismissedAt = -1; updateCompletion(true); return; }
+  if (!completion) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault(); e.stopImmediatePropagation();
+    const n = completion.items.length;
+    completion.index = (completion.index + (e.key === "ArrowDown" ? 1 : n - 1)) % n;
+    renderCompletion();
+  } else if (e.key === "Enter" || e.key === "Tab") {
+    e.preventDefault(); e.stopImmediatePropagation();
+    acceptCompletion();
+  } else if (e.key === "Escape") {
+    e.preventDefault(); e.stopImmediatePropagation();
+    dismissedAt = completion.start;
+    closeCompletion();
+  }
+}, true);
 $("#btn-format").onclick = () => { formatEditor(); ed.focus(); };
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }

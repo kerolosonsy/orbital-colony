@@ -191,6 +191,7 @@
       <div class="code-wrap">
         <div class="caret-line" id="caret-line" aria-hidden="true"></div>
         <div class="bracket-mark" id="bracket-a" aria-hidden="true"></div><div class="bracket-mark" id="bracket-b" aria-hidden="true"></div>
+        <ul class="complete" id="complete" role="listbox" aria-label="colony API" hidden></ul>
         <pre class="highlight" id="highlight" aria-hidden="true"></pre>
         <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="الكود" data-en-aria="Code"></textarea>
       </div>
@@ -359,6 +360,7 @@
     <table class="shortcuts-table">
       <tr><td><kbd dir="ltr">Ctrl/⌘ + Enter</kbd></td><td data-en="Run the code">شغّل الكود</td></tr>
       <tr><td><kbd dir="ltr">Ctrl/⌘ + Shift + Enter</kbd></td><td data-en="Run and step through it">شغّل خطوة بخطوة</td></tr>
+      <tr><td><kbd dir="ltr">colony. · Ctrl + Space</kbd></td><td data-en="Suggest colony functions with their docs (↑↓ then Enter/Tab, Esc closes)">اقتراحات دوال colony مع شرحها (↑↓ وبعدين Enter/Tab، و Esc يقفل)</td></tr>
       <tr><td><kbd dir="ltr">Shift + Alt + F</kbd></td><td data-en="Format the code with gofmt">نسّق الكود بـ gofmt</td></tr>
       <tr><td><kbd dir="ltr">Ctrl/⌘ + S</kbd></td><td data-en="Save now (the game also saves as you type)">احفظ دلوقتي (اللعبة بتحفظ وإنت بتكتب كمان)</td></tr>
       <tr><td><kbd dir="ltr">Esc</kbd></td><td data-en="Stop the run">وقّف التشغيل</td></tr>
@@ -420,6 +422,7 @@
 <script src="/static/sandbox/ch38.js"></script>
 <script src="/static/errhelp.js"></script>
 <script src="/static/editkeys.js"></script>
+<script src="/static/complete.js"></script>
 <script src="/static/debugger.js"></script>
 <script src="/static/app.js"></script>
 <script src="/static/profiles.js"></script>

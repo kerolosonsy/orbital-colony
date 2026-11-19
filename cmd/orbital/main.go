@@ -115,6 +115,7 @@ func main() {
 	mux.HandleFunc("POST /api/run", s.runCode)
 	mux.HandleFunc("POST /api/trace", s.traceCode)
 	mux.HandleFunc("POST /api/format", s.formatCode)
+	mux.HandleFunc("GET /api/symbols", s.symbols)
 	mux.HandleFunc("POST /api/workspace/open", s.workspaceOpen)
 	mux.HandleFunc("GET /api/workspace/files", s.workspaceFiles)
 

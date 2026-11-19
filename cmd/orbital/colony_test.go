@@ -444,3 +444,31 @@ func TestWorkspaceSuggestsGoExtensionWithoutOverwriting(t *testing.T) {
 		t.Fatalf("player settings were overwritten: %s", got)
 	}
 }
+
+func TestColonySymbolsListTheLearnerAPI(t *testing.T) {
+	abs, _ := filepath.Abs("../../colony")
+	symbols := colonySymbols(abs)
+	find := func(name, kind string) *apiSymbol {
+		for i := range symbols {
+			if symbols[i].Name == name && symbols[i].Kind == kind {
+				return &symbols[i]
+			}
+		}
+		return nil
+	}
+	move := find("Move", "func")
+	if move == nil || !strings.Contains(move.Signature, "Direction") || move.Doc == "" {
+		t.Fatalf("Move: %+v", move)
+	}
+	if find("East", "const") == nil || find("Drone", "type") == nil || find("Spawn", "func") == nil {
+		t.Fatalf("missing East/Drone/Spawn in %d symbols", len(symbols))
+	}
+	if m := find("Move", "method"); m == nil || m.Recv != "Drone" {
+		t.Fatalf("Drone.Move method: %+v", m)
+	}
+	for _, s := range symbols {
+		if strings.Contains(s.Doc, "\n") {
+			t.Fatalf("doc should be one line: %q", s.Doc)
+		}
+	}
+}
