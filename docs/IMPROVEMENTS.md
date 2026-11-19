@@ -27,7 +27,7 @@ Each entry: what changed and why. Numbered in the order they landed.
 23. **"Back to starter" is undoable** — the reset goes through the edit history (Ctrl/⌘+Z restores your code) and the console says so; before, it overwrote the textarea and the code was gone.
 24. **Arrow keys step through the lesson** — ← / → move to the previous/next lesson step (mirrored for Arabic RTL) when focus is in the lesson and not on a control, sandbox or walkthrough.
 25. **README covers the new features** — debugger, error explanations, playgrounds/stats, editor helpers, a shortcuts table and mission links.
-26. **`make test` duration is honest** — help text said ~4 minutes; the full suite takes ~15–20.
+26. **`make test` duration is honest** — help text said ~4 minutes; the full suite took ~15–20 (now ~8, see 58).
 27. **"Server is down" hint** — when the page can't reach the server (fetch fails), the console now says to run `make start` and refresh, instead of only "Failed to fetch".
 28. **"Page is stale after restart" hint** — every restart makes a new API token, so an old tab got `403 missing token` forever. The console now says to refresh the page (Arabic and English messages both detected). Verified live by restarting the server under an open tab.
 29. **Progress upload failures are no longer silent** — if saving progress to the server fails, the console says why once (and the hint is de-duplicated when a run fails at the same moment). The local copy keeps the progress meanwhile.
@@ -73,3 +73,6 @@ Each entry: what changed and why. Numbered in the order they landed.
 69. **`{ }` format button** — a small button next to the file tabs formats the file with gofmt, for people who don't know the shortcut (tooltip shows Shift+Alt+F).
 70. **Mission intro mentions the keys** — the first console line of every mission now says Run is Ctrl/⌘+Enter and `?` lists the shortcuts.
 71. **VS Code workspace suggests the Go extension** — the `workspace/` module now gets `.vscode/extensions.json` (recommends `golang.go`, which provides the gopls autocomplete/hover the README promises) and `.vscode/settings.json` (gofmt on save for Go files). Files the player already has are never overwritten. Test: `TestWorkspaceSuggestsGoExtensionWithoutOverwriting`.
+72. **Whole server suite ~2× faster end to end** — with the parallel level tests, `go test ./cmd/orbital/` now takes 492 s (8.2 min) instead of ~15–21 min; `make test` help and README updated.
+73. **Fixed broken code formatting in two lessons** — 20-1 (Arabic and English) wrote `~<br>⏎~` with a real line break inside the code span, so the rule "newlines become `<br>\n`" rendered as stray tildes; it now shows `<br>\n`. 20-4 (English) left `~(9-3)-1` unclosed. 16-3 (Arabic) used a bare `~50` for "about 50", now "حوالي 50".
+74. **Regression test for lesson markup** — `TestInlineCodeSpansCloseOnTheirLine` checks every goal, lesson, hint and step block in both languages: each `~code~` span must close on its own line (the client renders line by line), allowing the standalone generics `~` and table rows.
