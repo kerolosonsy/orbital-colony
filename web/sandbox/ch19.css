@@ -1,1 +1,49 @@
-/* Chapter 19 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch19-duration-add,
+.lesson-sandbox.ch19-zone-view,
+.lesson-sandbox.ch19-select-race,
+.lesson-sandbox.ch19-worker-order {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  direction: inherit;
+}
+
+.ch19-duration-add,
+.ch19-zone-view,
+.ch19-select-race,
+.ch19-worker-order {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ch19-playground-caption {
+  margin: 0;
+  color: var(--muted, #5d6877);
+  font-size: 0.82rem;
+}
+
+.ch19-playground-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ch19-playground-controls .tool {
+  min-height: 40px;
+  block-size: auto;
+  max-inline-size: 100%;
+  padding-block: 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ch19-select-race .sandbox-kit-log-list,
+.ch19-worker-order .sandbox-kit-log-list {
+  margin-block: 0.25rem 0;
+  padding-inline-start: 1.4rem;
+}
+
+.ch19-select-race .sandbox-kit-log-list li,
+.ch19-worker-order .sandbox-kit-log-list li {
+  padding-block: 0.12rem;
+}

@@ -12,6 +12,42 @@ func ch19Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	return LessonBlock{ID: id, Kind: "walkthrough", Text: text, Code: code, Imports: imports, ExampleID: exampleID, Walkthrough: &LessonWalkthrough{Frames: frames}}
 }
 
+func ch19Localized(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch19SandboxBlock(id, kind, text string, config map[string]any) LessonBlock {
+	return LessonBlock{ID: id, Kind: "sandbox", Text: text, Sandbox: &LessonSandbox{Kind: kind, Config: config}}
+}
+
+func ch19EnglishSandboxBlock(id, kind, text string, config map[string]any) LessonBlock {
+	return ch19SandboxBlock(id, kind, text, ch19EnglishConfig(config).(map[string]any))
+}
+
+func ch19EnglishConfig(value any) any {
+	switch value := value.(type) {
+	case map[string]any:
+		if english, ok := value["en"].(string); ok {
+			if _, localized := value["ar"].(string); localized {
+				return map[string]any{"ar": english, "en": english}
+			}
+		}
+		copy := make(map[string]any, len(value))
+		for key, item := range value {
+			copy[key] = ch19EnglishConfig(item)
+		}
+		return copy
+	case []any:
+		copy := make([]any, len(value))
+		for index, item := range value {
+			copy[index] = ch19EnglishConfig(item)
+		}
+		return copy
+	default:
+		return value
+	}
+}
+
 var ch19DurationsArabic = []LessonStep{
 	{ID: "c191.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch19Markdown("c191.mission", "اقرأ جدول الرحلات واحسب وصول كل رحلة.\n\nخلي ترتيب التقارير زي ترتيب الأوامر، حتى لو أمر واحد فيه خطأ.")}},
 	{ID: "c191.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch19Walkthrough("c191.idea-duration", "~time.Duration~ مدة منقضية، و~ParseDuration~ بتحوّل النص لقيمة زمنية.", ch19DurationParseCode, "e19-1-duration", []string{"fmt", "time"}, []LessonFrame{
@@ -27,6 +63,16 @@ var ch19DurationsArabic = []LessonStep{
 			{Line: 2, Caption: "وقت البداية قيمة مستقلة.", Variables: []LessonVariable{{Name: "start", Value: "2031-04-03 23:40 UTC"}}},
 			{Line: 3, Caption: "Add رجّعت وقت وصول جديد.", Variables: []LessonVariable{{Name: "arrival", Value: "2031-04-04 00:15 UTC"}}},
 			{Line: 4, Caption: "اعرض الساعة الجديدة.", Variables: []LessonVariable{{Name: "arrival", Value: "2031-04-04 00:15 UTC"}}, Output: "00:15"},
+		}),
+		ch19SandboxBlock("c191.try-sandbox", "ch19-duration-add", "حرّك الوقت وشوف ساعة الوصول.", map[string]any{
+			"startHour": 23, "startMinute": 40,
+			"duration": map[string]any{"value": 35, "min": 0, "max": 120, "step": 5},
+			"labels": map[string]any{
+				"start":    ch19Localized("البداية", "Start"),
+				"duration": ch19Localized("المدة بالدقايق", "Duration in minutes"),
+				"arrival":  ch19Localized("الوصول", "Arrival"),
+				"nextDay":  ch19Localized("اليوم التالي", "next day"),
+			},
 		}),
 	}},
 	{ID: "c191.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch19Markdown("c191.watch", "~Parse~ بتستخدم layout Go من تاريخ مرجعي، مش رموز YYYY/MM.\n\nالـduration ممكن تتقري صح وتفضل مخالفة للعقد؛ افصل parsing عن التحقق.")}},
@@ -52,6 +98,16 @@ var ch19DurationsEnglish = []LessonStep{
 			{Line: 2, Caption: "The start is its own value.", Variables: []LessonVariable{{Name: "start", Value: "2031-04-03 23:40 UTC"}}},
 			{Line: 3, Caption: "Add returns a new arrival.", Variables: []LessonVariable{{Name: "arrival", Value: "2031-04-04 00:15 UTC"}}},
 			{Line: 4, Caption: "Print the new clock time.", Variables: []LessonVariable{{Name: "arrival", Value: "2031-04-04 00:15 UTC"}}, Output: "00:15"},
+		}),
+		ch19EnglishSandboxBlock("c191.try-sandbox", "ch19-duration-add", "Move time; watch the arrival clock.", map[string]any{
+			"startHour": 23, "startMinute": 40,
+			"duration": map[string]any{"value": 35, "min": 0, "max": 120, "step": 5},
+			"labels": map[string]any{
+				"start":    ch19Localized("البداية", "Start"),
+				"duration": ch19Localized("المدة بالدقايق", "Duration in minutes"),
+				"arrival":  ch19Localized("الوصول", "Arrival"),
+				"nextDay":  ch19Localized("اليوم التالي", "next day"),
+			},
 		}),
 	}},
 	{ID: "c191.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch19Markdown("c191.watch", "~Parse~ uses a Go layout built from a reference date, not YYYY/MM tokens.\n\nA duration can parse yet violate the contract; separate parsing from validation.")}},
@@ -79,6 +135,19 @@ var ch19SunsArabic = []LessonStep{
 			{Line: 3, Caption: "حوّل لنفس اللحظة."},
 			{Line: 4, Caption: "اعرض اللحظة والتاريخ المحلي.", Output: "true 2030-12-31 19:00 -0500"},
 		}),
+		ch19SandboxBlock("c192.try-sandbox", "ch19-zone-view", "غيّر الساعة وقارن العرض المحلي.", map[string]any{
+			"hour":    map[string]any{"value": 0, "min": 0, "max": 23, "step": 1},
+			"offsets": map[string]any{"west": -5, "east": 4},
+			"labels": map[string]any{
+				"hour":        ch19Localized("ساعة UTC", "UTC hour"),
+				"instant":     ch19Localized("نفس اللحظة", "Same instant"),
+				"utc":         ch19Localized("UTC", "UTC"),
+				"west":        ch19Localized("UTC−5", "UTC−5"),
+				"east":        ch19Localized("UTC+4", "UTC+4"),
+				"previousDay": ch19Localized("اليوم السابق", "previous day"),
+				"nextDay":     ch19Localized("اليوم التالي", "next day"),
+			},
+		}),
 	}},
 	{ID: "c192.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch19Markdown("c192.watch", "~LoadLocation~ بترجع error للاسم المجهول؛ خلي قواعد ~time/tzdata~ متاحة.\n\nقارن التاريخ كامل بالسنة والشهر واليوم، مش رقم اليوم بس.")}},
 	{ID: "c192.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -105,6 +174,19 @@ var ch19SunsEnglish = []LessonStep{
 			{Line: 3, Caption: "Convert the same instant."},
 			{Line: 4, Caption: "Print instant and local date.", Output: "true 2030-12-31 19:00 -0500"},
 		}),
+		ch19EnglishSandboxBlock("c192.try-sandbox", "ch19-zone-view", "Change the hour; compare local times.", map[string]any{
+			"hour":    map[string]any{"value": 0, "min": 0, "max": 23, "step": 1},
+			"offsets": map[string]any{"west": -5, "east": 4},
+			"labels": map[string]any{
+				"hour":        ch19Localized("ساعة UTC", "UTC hour"),
+				"instant":     ch19Localized("نفس اللحظة", "Same instant"),
+				"utc":         ch19Localized("UTC", "UTC"),
+				"west":        ch19Localized("UTC−5", "UTC−5"),
+				"east":        ch19Localized("UTC+4", "UTC+4"),
+				"previousDay": ch19Localized("اليوم السابق", "previous day"),
+				"nextDay":     ch19Localized("اليوم التالي", "next day"),
+			},
+		}),
 	}},
 	{ID: "c192.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch19Markdown("c192.watch", "~LoadLocation~ returns an error for an unknown name; make ~time/tzdata~ available.\n\nCompare the full year, month, and day, not just the day number.")}},
 	{ID: "c192.check-step", Title: "Think & check", Blocks: []LessonBlock{
@@ -130,6 +212,26 @@ var ch19CountdownArabic = []LessonStep{
 			{Line: 3, Caption: "نفّذ الإلغاء."},
 			{Line: 4, Caption: "اقرأ سبب الإلغاء.", Output: "context canceled"},
 		}),
+		ch19SandboxBlock("c193.try-sandbox", "ch19-select-race", "بدّل اختيار ~select~ وشوف المسار.", map[string]any{
+			"labels": map[string]any{
+				"schedule": ch19Localized("مسار محتمل", "Possible schedule"),
+				"runAgain": ch19Localized("جرّب ترتيب تاني", "Try another order"),
+				"reset":    ch19Localized("من الأول", "Reset"),
+				"caption":  ch19Localized("الإشارات ممكن تبقى جاهزة مع بعض.", "Both signals may be ready."),
+			},
+			"runs": []any{
+				map[string]any{"events": []any{
+					ch19Localized("الإلغاء جاهز", "Cancellation is ready"),
+					ch19Localized("select ممكن يختار الإلغاء", "select may choose cancellation"),
+					ch19Localized("الـticker اتوقف", "Ticker stopped"),
+				}},
+				map[string]any{"events": []any{
+					ch19Localized("الـtick والإلغاء جاهزين", "Tick and cancel are ready"),
+					ch19Localized("select ممكن يختار الـtick", "select may choose the tick"),
+					ch19Localized("فحص Err تخطّى callback", "Err check skips callback"),
+				}},
+			},
+		}),
 	}},
 	{ID: "c193.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch19Markdown("c193.watch", "اعمل ticker بعد التحقق، و~defer Stop~ بعد إنشائها مباشرة.\n\nبعد tick، راجع ~ctx.Err~ قبل العرض؛ الإلغاء والـtick ممكن يبقوا جاهزين.")}},
 	{ID: "c193.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -154,6 +256,26 @@ var ch19CountdownEnglish = []LessonStep{
 			{Line: 2, Caption: "Create a new context."},
 			{Line: 3, Caption: "Cancel the context."},
 			{Line: 4, Caption: "Read the cancellation reason.", Output: "context canceled"},
+		}),
+		ch19EnglishSandboxBlock("c193.try-sandbox", "ch19-select-race", "Switch possible ~select~ outcomes.", map[string]any{
+			"labels": map[string]any{
+				"schedule": ch19Localized("مسار محتمل", "Possible schedule"),
+				"runAgain": ch19Localized("جرّب ترتيب تاني", "Try another order"),
+				"reset":    ch19Localized("من الأول", "Reset"),
+				"caption":  ch19Localized("الإشارات ممكن تبقى جاهزة مع بعض.", "Both signals may be ready."),
+			},
+			"runs": []any{
+				map[string]any{"events": []any{
+					ch19Localized("الإلغاء جاهز", "Cancellation is ready"),
+					ch19Localized("select ممكن يختار الإلغاء", "select may choose cancellation"),
+					ch19Localized("الـticker اتوقف", "Ticker stopped"),
+				}},
+				map[string]any{"events": []any{
+					ch19Localized("الـtick والإلغاء جاهزين", "Tick and cancel are ready"),
+					ch19Localized("select ممكن يختار الـtick", "select may choose the tick"),
+					ch19Localized("فحص Err تخطّى callback", "Err check skips callback"),
+				}},
+			},
 		}),
 	}},
 	{ID: "c193.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch19Markdown("c193.watch", "Create the ticker after validation, then ~defer Stop~ immediately.\n\nAfter a tick, check ~ctx.Err~ before emitting; cancellation and a tick can both be ready.")}},
@@ -183,6 +305,24 @@ var ch19TimersArabic = []LessonStep{
 			{Line: 4, Caption: "الأول وصل بعده."},
 			{Line: 5, Caption: "اعرض حسب ترتيب الـindex.", Output: "[slow fast]"},
 		}),
+		ch19SandboxBlock("c194.try-sandbox", "ch19-worker-order", "غيّر وصول العمال وثبّت ترتيب الطلب.", map[string]any{
+			"workers": []any{
+				map[string]any{"id": "A", "label": ch19Localized("الرصيف A", "Dock A")},
+				map[string]any{"id": "B", "label": ch19Localized("الرصيف B", "Dock B")},
+				map[string]any{"id": "C", "label": ch19Localized("الرصيف C", "Dock C")},
+			},
+			"runs": []any{
+				map[string]any{"finishOrder": []string{"C", "A", "B"}},
+				map[string]any{"finishOrder": []string{"B", "C", "A"}},
+			},
+			"requestOrder": []string{"A", "B", "C"},
+			"labels": map[string]any{
+				"finishOrder":  ch19Localized("ترتيب الإكمال", "Finish order"),
+				"requestOrder": ch19Localized("ترتيب الطلبات", "Request order"),
+				"runAgain":     ch19Localized("شغّل ترتيب محتمل تاني", "Show another possible run"),
+				"caption":      ch19Localized("التوقيت الحقيقي ممكن يختلف.", "Actual timing can vary."),
+			},
+		}),
 	}},
 	{ID: "c194.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch19Markdown("c194.watch", "الـworkers ممكن يخلصوا بأي ترتيب؛ خلي لكل كتابة مكان مستقل.\n\nاستنى اكتمالهم قبل قراءة النتيجة، وما تعملش append مشترك.")}},
 	{ID: "c194.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
@@ -210,6 +350,24 @@ var ch19TimersEnglish = []LessonStep{
 			{Line: 3, Caption: "The second reply arrived first."},
 			{Line: 4, Caption: "The first reply arrived next."},
 			{Line: 5, Caption: "Print in index order.", Output: "[slow fast]"},
+		}),
+		ch19EnglishSandboxBlock("c194.try-sandbox", "ch19-worker-order", "Change arrivals; keep request order.", map[string]any{
+			"workers": []any{
+				map[string]any{"id": "A", "label": ch19Localized("الرصيف A", "Dock A")},
+				map[string]any{"id": "B", "label": ch19Localized("الرصيف B", "Dock B")},
+				map[string]any{"id": "C", "label": ch19Localized("الرصيف C", "Dock C")},
+			},
+			"runs": []any{
+				map[string]any{"finishOrder": []string{"C", "A", "B"}},
+				map[string]any{"finishOrder": []string{"B", "C", "A"}},
+			},
+			"requestOrder": []string{"A", "B", "C"},
+			"labels": map[string]any{
+				"finishOrder":  ch19Localized("ترتيب الإكمال", "Finish order"),
+				"requestOrder": ch19Localized("ترتيب الطلبات", "Request order"),
+				"runAgain":     ch19Localized("شغّل ترتيب محتمل تاني", "Show another possible run"),
+				"caption":      ch19Localized("التوقيت الحقيقي ممكن يختلف.", "Actual timing can vary."),
+			},
 		}),
 	}},
 	{ID: "c194.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch19Markdown("c194.watch", "Workers can finish in any order; give each write its own location.\n\nWait before reading results, and avoid a shared append.")}},
