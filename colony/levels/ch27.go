@@ -1,7 +1,7 @@
 package levels
 
 func init() {
-	add(&Level{ID: "27-1-signed-pass", Chapter: 27, Kind: "lab", Title: "تصريح موقّع", Goal: "اطلع تصاريح دخول قصيرة العمر بعد فحص كود الطاقم بـ bcrypt",
+	add(&Level{LessonRevision: 1, Steps: ch27Lesson271.arabic, ID: "27-1-signed-pass", Chapter: 27, Kind: "lab", Title: "تصريح موقّع", Goal: "اطلع تصاريح دخول قصيرة العمر بعد فحص كود الطاقم بـ bcrypt",
 		Requires: []string{"sel:bcrypt.CompareHashAndPassword", "sel:jwt.NewWithClaims"}, Bridge: []int{50}, Setup: seededLabRoom, Race: false,
 		Deps:  []string{"golang.org/x/crypto", "github.com/golang-jwt/jwt/v5"},
 		Files: []LabFile{{Name: "main.go", Starter: ch271Starter}},
@@ -84,8 +84,8 @@ var secret = []byte("dev-secret") // سر مكتوب في الكود
 ~(d *PassDesk) Require(next http.Handler) http.Handler~ يقبل بس ~Authorization: Bearer <pass>~ لتوكن HS256 بنفس السر، و ~iss~ صحيح، و ~sub~ غير فاضي، و ~exp~ موجود وبعد الوقت الحالي، و ~iat~ مش في المستقبل. أي فشل: 401 و ~WWW-Authenticate: Bearer~ و ~pass required\n~ من غير ~next~. النجاح ينادي ~next~ بطلب سياقه فيه الاسم؛ ~CrewName(r *http.Request) string~ ترجعه أو نص فاضي. كل الأخطاء ~text/plain; charset=utf-8~. الوقت من الساعة المحقونة بس؛ مفيش ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: hash متخزن بايظ (خطأ غير ~ErrMismatchedHashAndPassword~) يرجع 500 و ~desk failure\n~ مش 401.`,
-		Hints: []string{"ابدأ بـ LoadSecret وNewPassDesk: ارفض السر القصير وانسخ السر والخريطة.", "في Login اقرا بـ LimitReader وبعدين json.Unmarshal؛ قارن بـ bcrypt.CompareHashAndPassword وفرّق ErrMismatchedHashAndPassword بـ errors.Is.", "في Require استخدم ParseWithClaims مع WithValidMethods وWithIssuer وWithTimeFunc وWithExpirationRequired وWithIssuedAt، وبعدين context.WithValue."},
-		En: &LevelText{Title: "Signed Pass", Goal: "Issue short-lived entry passes after checking crew codes with bcrypt", Files: []LabFile{{Name: "main.go", Starter: ch271Starter}},
+		Hints: []string{"فرّق بين hash كود الدخول وتوقيع التصريح.", "افصل تحميل السر وLogin عن middleware ~Require~.", "راجع خيارات ~ParseWithClaims~ الخاصة بالمصدر والوقت."},
+		En: &LevelText{LessonRevision: 1, Steps: ch27Lesson271.english, Title: "Signed Pass", Goal: "Issue short-lived entry passes after checking crew codes with bcrypt", Files: []LabFile{{Name: "main.go", Starter: ch271Starter}},
 			Lesson: `# A Signed Pass for the Quarters Gate
 
 ## Before you write
@@ -165,7 +165,7 @@ Implement ~LoadSecret(getenv func(string) string) ([]byte,error)~: read only ~OR
 ~(d *PassDesk) Require(next http.Handler) http.Handler~ accepts only ~Authorization: Bearer <pass>~ for an HS256 token with the same secret, the correct ~iss~, a nonempty ~sub~, a present ~exp~ after the current time, and an ~iat~ not in the future. Any failure returns 401, ~WWW-Authenticate: Bearer~, and ~pass required\n~ without calling ~next~. Success calls ~next~ with a request whose context holds the name; ~CrewName(r *http.Request) string~ returns it or an empty string. All errors use ~text/plain; charset=utf-8~. Time comes only from the injected clock; no ~Report~, and ~main~ stays empty.
 
 Third star: a corrupted stored hash (an error other than ~ErrMismatchedHashAndPassword~) returns 500 and ~desk failure\n~, not 401.`,
-			Hints: []string{"Start with LoadSecret and NewPassDesk: reject short secrets and copy secret and map.", "In Login read through LimitReader then json.Unmarshal; compare with bcrypt.CompareHashAndPassword and tell ErrMismatchedHashAndPassword apart with errors.Is.", "In Require use ParseWithClaims with WithValidMethods, WithIssuer, WithTimeFunc, WithExpirationRequired, and WithIssuedAt, then context.WithValue."}},
+			Hints: []string{"Separate the login-code hash from the signed pass.", "Keep secret loading, ~Login~, and ~Require~ as distinct jobs.", "Review ~ParseWithClaims~ options for issuer and time."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch271Hidden},
 	})
 }
@@ -428,7 +428,7 @@ func TestHiddenBonusPassBrokenHashIsServerFault(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "27-2-sessions", Chapter: 27, Kind: "lab", Title: "الجلسات", Goal: "افتح جلسات للمساكن بكوكي آمن وتوكن CSRF وتدوير عند كل دخول",
+	add(&Level{LessonRevision: 1, Steps: ch27Lesson272.arabic, ID: "27-2-sessions", Chapter: 27, Kind: "lab", Title: "الجلسات", Goal: "افتح جلسات للمساكن بكوكي آمن وتوكن CSRF وتدوير عند كل دخول",
 		Requires: []string{"sel:http.Cookie"}, Bridge: []int{59}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch272Starter}},
 		Lesson: `# جلسة على السيرفر وكوكي في المتصفح
@@ -498,8 +498,8 @@ if r.Header.Get("X-CSRF-Token") == v.csrf { } // مقارنة وقتها بيف�
 ~/enter~: جسم حده 4096 بايت فيه ~{"crew":"...","code":"..."}~. JSON بايظ أو أكبر أو حقل فاضي: 400 و ~bad entry\n~. ~check~ رفض: 401 و ~denied\n~. بعدها اقرا 16 بايت للرقم و 16 للتوكن بالترتيب، وكل واحد 32 حرف hex صغير. فشل المصدر أو رقم موجود أصلاً: 500 و ~quarters failure\n~ من غير كوكي ولا تغيير. النجاح يمسح جلسة الكوكي القديمة لو موجودة، ويحفظ جلسة تخلص بعد 30 دقيقة، ويحط كوكي ~quarters~ بالرقم و ~Path=/~ و ~MaxAge=1800~ و ~HttpOnly~ و ~Secure~ و ~SameSiteStrictMode~ من غير ~Domain~، ويرجع 200 و ~application/json~ و ~{"csrf":"..."}~.
 
 الجلسة صالحة لو كوكي ~quarters~ موجودة في الخريطة والوقت قبل الانتهاء؛ عند لحظة الانتهاء نفسها اتمسحت. ~/me~ من غير جلسة: 401 و ~no session\n~؛ معاها: 200 و ~crew NAME\n~. ~/logout~ من غير جلسة: 401 و ~no session\n~؛ هيدر ~X-CSRF-Token~ مختلف: 403 و ~bad csrf\n~ والجلسة تفضل. النجاح يمسح الجلسة ويحط كوكي ~quarters~ فاضية بنفس الخصائص و ~MaxAge=-1~، ويرجع 204 بجسم فاضي. الوقت من الساعة بس؛ مفيش ~Report~، و ~main~ فاضية.`,
-		Hints: []string{"خزّن الجلسات في map[string]session تحت sync.Mutex، والجلسة فيها الاسم والتوكن ووقت الانتهاء.", "ولّد الرقم والتوكن بـ io.ReadFull و%x قبل القفل، وبعدين افحص التكرار وامسح القديم واكتب الجديد تحت القفل.", "اكتب دالة واحدة بتبني http.Cookie بكل الخصائص وتاخد القيمة وMaxAge؛ استخدمها للدخول (1800) وللخروج (-1)."},
-		En: &LevelText{Title: "Sessions", Goal: "Open quarters sessions with a secure cookie, a CSRF token, and rotation on every login", Files: []LabFile{{Name: "main.go", Starter: ch272Starter}},
+		Hints: []string{"فرّق بين ID الموجود عند العميل وسجل الجلسة على السيرفر.", "رتّب التحقق والإنشاء والتدوير كعمليات واضحة.", "راجع ~ConstantTimeCompare~ عند مقارنة توكن CSRF."},
+		En: &LevelText{LessonRevision: 1, Steps: ch27Lesson272.english, Title: "Sessions", Goal: "Open quarters sessions with a secure cookie, a CSRF token, and rotation on every login", Files: []LabFile{{Name: "main.go", Starter: ch272Starter}},
 			Lesson: `# A Server Session and a Browser Cookie
 
 ## Before you write
@@ -567,7 +567,7 @@ Implement ~NewQuarters(check func(crew, code string) bool, clock labkit.Clock, r
 ~/enter~: a body of at most 4096 bytes holding ~{"crew":"...","code":"..."}~. Invalid JSON, an oversized body, or an empty field returns 400 and ~bad entry\n~. A rejecting ~check~ returns 401 and ~denied\n~. Then read 16 bytes for the ID and 16 for the token, in that order, each as 32 lowercase hex characters. A source failure or an ID already present returns 500 and ~quarters failure\n~ with no cookie and no change. Success deletes the old cookie's session if any, stores a session expiring in 30 minutes, sets cookie ~quarters~ with the ID, ~Path=/~, ~MaxAge=1800~, ~HttpOnly~, ~Secure~, and ~SameSiteStrictMode~ without ~Domain~, and returns 200, ~application/json~, and ~{"csrf":"..."}~.
 
 A session is valid when the ~quarters~ cookie is in the map and the time is before expiry; at the expiry instant it is gone. ~/me~ without a session returns 401 and ~no session\n~; with one, 200 and ~crew NAME\n~. ~/logout~ without a session returns 401 and ~no session\n~; a different ~X-CSRF-Token~ header returns 403 and ~bad csrf\n~ and the session stays. Success deletes the session, sets an empty ~quarters~ cookie with the same attributes and ~MaxAge=-1~, and returns 204 with an empty body. Time comes only from the clock; no ~Report~, and ~main~ stays empty.`,
-			Hints: []string{"Store sessions in a map[string]session under sync.Mutex; a session holds name, token, and expiry.", "Generate ID and token with io.ReadFull and %x before locking, then check collisions, delete the old one, and store the new one under the lock.", "Write one helper building the http.Cookie with every attribute from a value and MaxAge; use it for login (1800) and logout (-1)."}},
+			Hints: []string{"Separate the client-held ID from the server-side session record.", "Lay out validation, creation, and rotation as distinct operations.", "Review ~ConstantTimeCompare~ for CSRF token comparison."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch272Hidden},
 	})
 }
@@ -824,7 +824,7 @@ func TestHiddenSessionsParallel(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "27-3-cors", Chapter: 27, Kind: "lab", Title: "CORS", Goal: "اسمح لشاشات الأسطول المعروفة بس تقرا بيانات القاعدة، وحط هيدرات الحماية على كل رد",
+	add(&Level{LessonRevision: 1, Steps: ch27Lesson273.arabic, ID: "27-3-cors", Chapter: 27, Kind: "lab", Title: "CORS", Goal: "اسمح لشاشات الأسطول المعروفة بس تقرا بيانات القاعدة، وحط هيدرات الحماية على كل رد",
 		Requires: []string{"funcvalue"}, Bridge: []int{56}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch273Starter}},
 		Lesson: `# درع CORS للبوابة
@@ -894,8 +894,8 @@ w.Header().Set("Vary", "Origin") // بيمسح Vary اللي قبله
 الـ preflight ميوصلش لـ ~next~، وقيم ~Vary~ فيه بالترتيب ~Origin~ و ~Access-Control-Request-Method~ و ~Access-Control-Request-Headers~. يتقبل لو الأصل مسموح، والطريقة المطلوبة موجودة حرفياً في ~Methods~، وكل اسم في ~Access-Control-Request-Headers~ بعد التقسيم بالفاصلة والـ trim وتجاهل الفاضي موجود في ~Headers~ من غير حالة. القبول 204 بجسم فاضي، و ~Access-Control-Allow-Origin~ بالأصل، و ~Access-Control-Allow-Methods~ بـ ~Methods~ بترتيبها مفصولة بـ ~, ~، و ~Access-Control-Allow-Headers~ بنفس الشكل لو ~Headers~ مش فاضية، و ~Access-Control-Max-Age~ لو ~MaxAge~ أكبر من صفر، و ~Access-Control-Allow-Credentials: true~ لو ~Credentials~. الرفض 403 و ~text/plain; charset=utf-8~ و ~preflight denied\n~ من غير أي هيدر ~Access-Control-Allow-*~. مفيش ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: ~Shield~ ترجع ~nil,error~ لسياسة مرخية: أصل مش بالشكل ~http(s)://host[:port]~ بحروف صغيرة من غير مسار أو query أو مستخدم (زي ~*~ و ~null~)، أو طريقة فاضية أو فيها غير الحروف الكبيرة، أو هيدر فاضي أو فيه مسافة أو فاصلة، أو ~MaxAge~ برة 0 لـ 86400.`,
-		Hints: []string{"حط هيدرات الحماية و Vary: Origin بـ Add في أول الـ wrapper قبل أي قرار.", "افصل الـ preflight (OPTIONS + Access-Control-Request-Method) عن الطلب العادي اللي دايماً بيروح لـ next.", "في الـ preflight قسّم Access-Control-Request-Headers بـ strings.Split وقارن كل اسم بـ strings.EqualFold."},
-		En: &LevelText{Title: "CORS", Goal: "Let only known fleet displays read base data, and put protection headers on every response", Files: []LabFile{{Name: "main.go", Starter: ch273Starter}},
+		Hints: []string{"عامل CORS كسياسة قراءة يطبقها المتصفح.", "افصل preflight عن الطلبات العادية داخل wrapper.", "استخدم ~Header.Add~ لحفظ ~Vary~ الموجود."},
+		En: &LevelText{LessonRevision: 1, Steps: ch27Lesson273.english, Title: "CORS", Goal: "Let only known fleet displays read base data, and put protection headers on every response", Files: []LabFile{{Name: "main.go", Starter: ch273Starter}},
 			Lesson: `# A CORS Shield for the Gateway
 
 ## Before you write
@@ -963,7 +963,7 @@ An ordinary request, meaning anything other than ~OPTIONS~ with ~Access-Control-
 A preflight never reaches ~next~, and its ~Vary~ values are, in order, ~Origin~, ~Access-Control-Request-Method~, and ~Access-Control-Request-Headers~. It is accepted when the origin is allowed, the requested method is literally in ~Methods~, and every name in ~Access-Control-Request-Headers~, after splitting on commas, trimming, and skipping empties, is in ~Headers~ ignoring case. Acceptance is a bodyless 204 with ~Access-Control-Allow-Origin~ set to the origin, ~Access-Control-Allow-Methods~ listing ~Methods~ in order separated by ~, ~, ~Access-Control-Allow-Headers~ in the same form when ~Headers~ is nonempty, ~Access-Control-Max-Age~ when ~MaxAge~ is above zero, and ~Access-Control-Allow-Credentials: true~ when ~Credentials~. Denial is 403, ~text/plain; charset=utf-8~, and ~preflight denied\n~ with no ~Access-Control-Allow-*~ header. No ~Report~, and ~main~ stays empty.
 
 Third star: ~Shield~ returns ~nil,error~ for a loose policy: an origin not shaped ~http(s)://host[:port]~ in lowercase without path, query, or user (such as ~*~ and ~null~), a method that is empty or has anything but uppercase letters, a header that is empty or contains a space or comma, or ~MaxAge~ outside 0 to 86400.`,
-			Hints: []string{"Set protection headers and Vary: Origin with Add at the top of the wrapper, before any decision.", "Separate the preflight (OPTIONS plus Access-Control-Request-Method) from ordinary requests, which always reach next.", "In the preflight split Access-Control-Request-Headers with strings.Split and compare each name with strings.EqualFold."}},
+			Hints: []string{"Treat CORS as a browser-enforced read policy.", "Separate preflight from ordinary requests inside the wrapper.", "Use ~Header.Add~ to preserve existing ~Vary~ values."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch273Hidden},
 	})
 }
@@ -1171,7 +1171,7 @@ func TestHiddenBonusShieldRejectsLoosePolicies(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "27-4-rate-limit", Chapter: 27, Kind: "lab", Title: "حد الطلبات", Goal: "ادّي كل عميل خزان تصاريح خاص بيه، وارفض الزيادة بـ 429، ونضّف العملاء الخاملين",
+	add(&Level{LessonRevision: 1, Steps: ch27Lesson274.arabic, ID: "27-4-rate-limit", Chapter: 27, Kind: "lab", Title: "حد الطلبات", Goal: "ادّي كل عميل خزان تصاريح خاص بيه، وارفض الزيادة بـ 429، ونضّف العملاء الخاملين",
 		Requires: []string{"mutex"}, Bridge: []int{57}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch274Starter}},
 		Lesson: `# خزان تصاريح لكل عميل
@@ -1239,8 +1239,8 @@ mu.Lock(); b := tanks[key]; mu.Unlock(); b.credit-- // استهلاك برة ا�
 كل عميل له خزان بسعة ~Burst~ يبدأ مليان، وتصريح لكل ~Every~ كاملة بنفس قواعد 25-3، وكل طلب بتصريح. القبول يحط ~X-RateLimit-Remaining~ بالباقي بعد الاستهلاك وينادي ~next~. الرفض 429 و ~Retry-After~ بالثواني لحد التصريح الجاي متقرّبة لفوق، و ~slow down\n~، من غير ~next~. الأخطاء ~text/plain; charset=utf-8~.
 
 كل طلب له مفتاح صالح يسجّل وقت آخر ظهور حتى لو اترفض. ~(l *Limiter) Sweep() int~ يمسح العملاء اللي عدّى على آخر ظهور ليهم ~Idle~ أو أكتر ويرجع عددهم، و ~(l *Limiter) Clients() int~ يرجع عدد الخزانات. كله آمن للتزامن تحت قفل واحد؛ مفيش نوم أو وقت حقيقي أو goroutines أو ~Report~، و ~main~ فاضية.`,
-		Hints: []string{"ابدأ من حل 25-3: struct للخزان فيه الرصيد وعلامة التجديد وآخر ظهور، وخريطة منها تحت mutex واحد.", "اكتب دالة للمفتاح: SplitHostPort ثم ParseIP، ولو الـ peer موثوق خُد آخر عنصر من Header.Values مجموعة بفاصلة.", "في الرفض احسب mark.Add(every).Sub(now) وقرّبه لفوق بـ (wait+time.Second-1)/time.Second؛ وSweep يقارن now.Sub(seen) بـ Idle."},
-		En: &LevelText{Title: "Rate Limit", Goal: "Give each client its own permit tank, refuse excess with 429, and clean up idle clients", Files: []LabFile{{Name: "main.go", Starter: ch274Starter}},
+		Hints: []string{"خلي لكل عميل معروف رصيدًا وحالة تجديد خاصة.", "اجمع تعديل الخريطة والخزان تحت mutex نفسه.", "ابدأ بتحليل ~SplitHostPort~ ثم ~ParseIP~."},
+		En: &LevelText{LessonRevision: 1, Steps: ch27Lesson274.english, Title: "Rate Limit", Goal: "Give each client its own permit tank, refuse excess with 429, and clean up idle clients", Files: []LabFile{{Name: "main.go", Starter: ch274Starter}},
 			Lesson: `# A Permit Tank per Client
 
 ## Before you write
@@ -1306,7 +1306,7 @@ Implement ~NewLimiter(clock labkit.Clock, l Limits) (*Limiter,error)~. Return ~n
 Each client has a tank of capacity ~Burst~ that starts full, earns one permit per complete ~Every~ under the 25-3 rules, and spends one per request. Acceptance sets ~X-RateLimit-Remaining~ to what is left after spending and calls ~next~. Refusal returns 429, ~Retry-After~ in seconds until the next permit rounded up, and ~slow down\n~, without ~next~. Errors use ~text/plain; charset=utf-8~.
 
 Every request with a valid key records its last-seen time, even when refused. ~(l *Limiter) Sweep() int~ deletes clients with ~now - last seen >= Idle~ and returns how many, and ~(l *Limiter) Clients() int~ returns the number of tanks. Everything is concurrency-safe under one lock; no sleeping, real time, goroutines, or ~Report~, and ~main~ stays empty.`,
-			Hints: []string{"Start from your 25-3 solution: a tank struct with credit, refill marker, and last seen, kept in a map under one mutex.", "Write a key function: SplitHostPort then ParseIP; for a trusted peer take the last item of Header.Values joined with commas.", "On refusal compute mark.Add(every).Sub(now) and round up with (wait+time.Second-1)/time.Second; Sweep compares now.Sub(seen) with Idle."}},
+			Hints: []string{"Give each known client its own balance and refill state.", "Guard map and tank changes with the same mutex.", "Start by parsing ~SplitHostPort~ and then ~ParseIP~."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch274Hidden},
 	})
 }
@@ -1554,7 +1554,7 @@ func TestHiddenLimiterParallelClients(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "27-5-short-links", Chapter: 27, Kind: "lab", Title: "روابط مختصرة", Goal: "اختصر روابط الأسطول بأكواد Base62 فوق مخزن بواجهة، واتعامل مع التصادم والروابط البايظة",
+	add(&Level{LessonRevision: 1, Steps: ch27Lesson275.arabic, ID: "27-5-short-links", Chapter: 27, Kind: "lab", Title: "روابط مختصرة", Goal: "اختصر روابط الأسطول بأكواد Base62 فوق مخزن بواجهة، واتعامل مع التصادم والروابط البايظة",
 		Requires: []string{"iface"}, Bridge: []int{53}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch275Starter}},
 		Lesson: `# أكواد قصيرة لروابط الأسطول
@@ -1622,8 +1622,8 @@ if err == ErrTaken { } // الخطأ الملفوف بيعدّي
 ~GET /go/C~ حيث C من 1 لـ 11 حرف من الأبجدية: ~store.Get~؛ ~ErrNoLink~ (حتى ملفوف) 404 و ~no link\n~، وخطأ تاني 500 و ~store failure\n~، والنجاح 302 و ~Location~ بالهدف وجسم فاضي. الـ query متأثرش. كود بشكل غلط أو أي مسار تاني: 404 و ~no link\n~ من غير ما تسأل المخزن. طريقة غلط على ~/links~ أو ~/go/C~: 405 و ~Allow: POST~ أو ~Allow: GET~ و ~wrong method\n~. الأخطاء ~text/plain; charset=utf-8~. مفيش ~Report~، و ~main~ فاضية.
 
 النجمة التالتة: ~ParseBase62(s string) (uint64,error)~ عكس ~Base62~ بالظبط: ترفض النص الفاضي، وأي حرف برة الأبجدية، والصفر في الأول لأكتر من خانة، وأي قيمة أكبر من ~math.MaxUint64~.`,
-		Hints: []string{"Base62: اجمع n%62 من الأبجدية وقسّم n على 62 لحد الصفر، وبعدين اعكس الـ slice.", "MemoryStore: struct فيه map وsync.Mutex؛ Put يفحص الوجود ويكتب تحت نفس القفل.", "في الـ handler تحقق من الجسم والهدف بـ url.Parse قبل next، وبعدها loop من 3 محاولات تفرّق ErrTaken بـ errors.Is."},
-		En: &LevelText{Title: "Short Links", Goal: "Shorten fleet links into Base62 codes over an interface store, handling collisions and broken links", Files: []LabFile{{Name: "main.go", Starter: ch275Starter}},
+		Hints: []string{"ثبّت ترتيب الأبجدية قبل التفكير في تمثيل الرقم.", "خلّي واجهة التخزين مسؤولة عن حفظ وربط الكود.", "استخدم ~errors.Is~ للتعرف على خطأ تصادم ملفوف."},
+		En: &LevelText{LessonRevision: 1, Steps: ch27Lesson275.english, Title: "Short Links", Goal: "Shorten fleet links into Base62 codes over an interface store, handling collisions and broken links", Files: []LabFile{{Name: "main.go", Starter: ch275Starter}},
 			Lesson: `# Short Codes for Fleet Links
 
 ## Before you write
@@ -1689,7 +1689,7 @@ Implement ~NewLinkDesk(store LinkStore, next func() uint64) http.Handler~ (both 
 ~GET /go/C~, where C is 1 to 11 alphabet characters, calls ~store.Get~: ~ErrNoLink~ (even wrapped) returns 404 and ~no link\n~, another error 500 and ~store failure\n~, and success 302 with ~Location~ set to the target and an empty body. Ignore the query. A malformed code or any other path returns 404 and ~no link\n~ without asking the store. A wrong method on ~/links~ or ~/go/C~ returns 405, ~Allow: POST~ or ~Allow: GET~, and ~wrong method\n~. Errors use ~text/plain; charset=utf-8~. No ~Report~, and ~main~ stays empty.
 
 Third star: ~ParseBase62(s string) (uint64,error)~ is the exact inverse of ~Base62~: it rejects empty text, any character outside the alphabet, a leading zero on more than one digit, and any value above ~math.MaxUint64~.`,
-			Hints: []string{"Base62: collect n%62 from the alphabet and divide n by 62 until zero, then reverse the slice.", "MemoryStore: a struct with a map and sync.Mutex; Put checks existence and writes under the same lock.", "In the handler validate body and target with url.Parse before next, then loop 3 attempts telling ErrTaken apart with errors.Is."}},
+			Hints: []string{"Fix the alphabet order before thinking about number representation.", "Let the storage interface own saving and lookup.", "Use ~errors.Is~ to recognize a wrapped collision error."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch275Hidden},
 	})
 }
