@@ -103,6 +103,7 @@
     <button id="btn-vet" type="button" class="tool small" title="افحص الكود بـ go vet" data-en-title="Run go vet"><span data-en="Vet">افحص</span></button>
   </div>
   <button id="btn-run" class="run" title="Ctrl/⌘ + Enter"><svg class="ico"><use href="#i-play"/></svg><span>Run</span></button>
+  <button id="btn-step" class="tool step-run" title="شغّل وامشي خطوة بخطوة (Ctrl/⌘ + Shift + Enter)" data-en-title="Run and step through it (Ctrl/⌘ + Shift + Enter)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7"/><path d="M5 7l3 3 3-3"/><circle cx="8" cy="13" r="1.3"/></svg><span data-en="Step">خطوة</span></button>
 </header>
 
 <div class="goal-strip" id="goal-strip"><svg class="ico"><use href="#i-target"/></svg><span id="goal-strip-text"></span><span class="par" id="goal-strip-par"></span></div>
@@ -167,6 +168,11 @@
         <button type="button" class="debugger-button" data-debug-command="out" aria-label="اخرج من الدالة" data-en-aria="Step out" title="اخرج من الدالة" data-en-title="Step out"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10.5v-7"/><path d="M5 6l3-3 3 3"/><circle cx="8" cy="13" r="1.3"/></svg></button>
         <button type="button" class="debugger-button" data-debug-command="go" aria-label="كمّل لحد نقطة توقف" data-en-aria="Continue" title="كمّل لحد نقطة توقف" data-en-title="Continue"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.2v9.6L9.8 8z"/><path d="M11.5 3.5v9"/></svg></button>
           </div>
+          <label class="debugger-speed" title="سرعة التشغيل" data-en-title="Playback speed"><span class="sr-only" data-en="Speed">السرعة</span>
+            <select id="debugger-speed" aria-label="سرعة التشغيل" data-en-aria="Playback speed">
+              <option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option>
+            </select>
+          </label>
           <div id="debugger-where" class="debugger-where" aria-live="polite"><i class="debugger-pulse" aria-hidden="true"></i><span id="debugger-where-text"></span></div>
         <button type="button" class="debugger-button debugger-exit" data-debug-command="exit" aria-label="اقفل التتبّع" data-en-aria="Stop debugging" title="اقفل التتبّع" data-en-title="Stop debugging"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
         </div>
@@ -211,6 +217,7 @@
     </div>
     <div class="map-frame">
       <canvas id="world"></canvas>
+      <div id="debug-map-badge" class="debug-map-badge" hidden aria-live="polite"></div>
     </div>
     <div id="banner" class="banner hidden" role="status"></div>
     <div class="legend" id="legend"></div>

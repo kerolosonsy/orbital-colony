@@ -203,6 +203,9 @@ const InlineDebugger = (() => {
   let lastVariables = new Map();
   let collapsed = false;
   let playTimer = null;
+  let hooks = {};
+  let endFired = false;
+  let speed = 1;
   let userCollapsed = false;
   let lastStdoutOffset = 0;
 
@@ -219,7 +222,15 @@ const InlineDebugger = (() => {
     elements = findElements();
     bindStepButtons();
     bindTabButtons();
-    elements.slider.oninput = () => stepper?.set(elements.slider.value);
+    elements.slider.oninput = () => { stopPlay(); stepper?.set(elements.slider.value); };
+    const speedSelect = document.querySelector("#debugger-speed");
+    if (speedSelect) {
+      speed = Number(speedSelect.value) || 1;
+      speedSelect.onchange = () => {
+        speed = Number(speedSelect.value) || 1;
+        if (playTimer) { stopPlay(); startPlay(); }
+      };
+    }
     elements.collapse.onclick = () => { userCollapsed = true; setCollapsed(!collapsed); };
     document.addEventListener("keydown", onKeydown);
     setCollapsed(matchMedia("(max-width: 760px)").matches);
@@ -285,6 +296,25 @@ const InlineDebugger = (() => {
     } catch (error) {
       if (request === activeRequest && !activeRequest.signal.aborted) showTraceFailure(error);
     }
+  }
+
+  // startWith opens a session on frames that arrived with the run itself.
+  // hooks: onFrame(frame, index, total), onEnd() once when the last frame is
+  // reached, onExit() when the learner closes the debugger, onClear() when
+  // the session is dropped from outside (edit, new run, other level).
+  function startWith(levelIDForTrace, traceResponse, options = {}) {
+    clear();
+    levelID = levelIDForTrace;
+    hooks = options;
+    endFired = false;
+    acceptTraceResponse(traceResponse);
+    if (options.autoplay && session.active) startPlay();
+  }
+
+  function finishNow() {
+    if (!stepper || !session.active) return;
+    stopPlay();
+    stepper.set(response.frames.length - 1);
   }
 
   function acceptTraceResponse(traceResponse) {
@@ -365,6 +395,10 @@ const InlineDebugger = (() => {
   }
 
   function clear() {
+    const dropped = hooks;
+    hooks = {};
+    endFired = false;
+    dropped.onClear?.();
     resetSession();
     if (!elements) return;
     hideDebuggerUI();
@@ -408,7 +442,10 @@ const InlineDebugger = (() => {
     else if (command === "over") stepper.over();
     else if (command === "out") stepper.out();
     else if (command === "go") stepper.continueTo(breakpoints);
-    else if (command === "exit") clear();
+    else if (command === "exit") {
+      hooks.onExit?.();
+      clear();
+    }
   }
 
   function onKeydown(event) {
@@ -425,9 +462,21 @@ const InlineDebugger = (() => {
     }
   }
 
+  function playInterval() {
+    const total = response?.frames?.length || 1;
+    // a typical mission plays in a few seconds: not slow, still readable
+    const base = Math.max(60, Math.min(400, 5000 / total));
+    return base / speed;
+  }
+
   function togglePlay() {
     if (playTimer) return stopPlay();
     if (stepper.index >= response.frames.length - 1) stepper.restart();
+    startPlay();
+  }
+
+  function startPlay() {
+    if (!stepper) return;
     setPlaying(true);
     playTimer = setInterval(() => {
       const before = stepper.index;
@@ -435,7 +484,7 @@ const InlineDebugger = (() => {
       const keys = new Set(callbacks.getBreakpoints?.(levelID) || []);
       const atBreak = frame && keys.has(breakpointKey(frame.file || "main.go", frame.line));
       if (stepper.index === before || stepper.index >= response.frames.length - 1 || atBreak) stopPlay();
-    }, 420);
+    }, playInterval());
   }
 
   function stopPlay() {
@@ -504,6 +553,11 @@ const InlineDebugger = (() => {
     renderOutput(frame);
     flashChangedVariables(frame);
     showFrameFile(frame);
+    hooks.onFrame?.(frame, index, total);
+    if (index >= total - 1 && !endFired) {
+      endFired = true;
+      hooks.onEnd?.();
+    }
   }
 
   function renderStepControls(index, total) {
@@ -636,9 +690,9 @@ const InlineDebugger = (() => {
   }
 
   return {
-    bind, start, clear, unavailable, createSession, createStepper, toggleBreakpoint: toggleLevelBreakpoint, toggleBreakpointList,
+    bind, start, startWith, finishNow, clear, unavailable, createSession, createStepper, toggleBreakpoint: toggleLevelBreakpoint, toggleBreakpointList,
     breakpointKey, breakpointLines, editorState, editorMarkup, gutterMarkup, inlineValueText, renderInlineValues,
-    callStackAt, stdoutAtOffset, get active() { return session.active; },
+    callStackAt, stdoutAtOffset, get active() { return session.active; }, get playing() { return !!playTimer; },
   };
 })();
 

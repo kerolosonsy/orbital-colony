@@ -53,11 +53,13 @@ type runResponse struct {
 	Steps         []labStep         `json:"steps,omitempty"`
 	Race          bool              `json:"race,omitempty"`
 	Result        result            `json:"result"`
+	Trace         *traceResponse    `json:"trace,omitempty"` // single-run debugger frames
 }
 
 type runner struct {
 	goBin     string
 	colonyDir string
+	plainOnly bool // tests: never instrument (single run off)
 }
 
 var errLine = regexp.MustCompile(`^\.?/?([\w./-]+\.go):(\d+):(\d+): (.*)$`)
@@ -124,7 +126,19 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	}
 	build := r.goCmd(bctx, dir, append(args, ".")...)
 	build.Stdout, build.Stderr = bout, bout
-	if err := runCommand(build); err != nil {
+	// The plain build stays the judge of the learner's code (the recorder
+	// reads variables, which would hide "declared and not used"); the
+	// instrumented copy builds alongside it for the debugger.
+	traced := r.startSingleRunBuild(bctx, lvl, code, args)
+	err = runCommand(build)
+	instrumentedProg := ""
+	if err == nil {
+		instrumentedProg = traced.wait()
+	} else {
+		traced.cancel()
+	}
+	defer traced.cleanup()
+	if err != nil {
 		out := strings.ReplaceAll(bout.String(), dir+string(os.PathSeparator), "")
 		if errors.Is(bctx.Err(), context.DeadlineExceeded) {
 			out += "\n" + context.DeadlineExceeded.Error()
@@ -149,10 +163,21 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	rctx, rcancel := context.WithTimeout(ctx, 10*time.Second)
 	defer rcancel()
 	trace := filepath.Join(dir, "trace.jsonl")
-	prog := exec.CommandContext(rctx, filepath.Join(dir, "prog"))
+	progPath := filepath.Join(dir, "prog")
+	if instrumentedProg != "" {
+		progPath = instrumentedProg
+	}
+	prog := exec.CommandContext(rctx, progPath)
 	configureProcess(prog)
 	prog.Dir = dir
 	prog.Env = append(os.Environ(), "ORBITAL_LANG="+lang, "ORBITAL_LEVEL="+lvl.ID, "ORBITAL_TRACE="+trace)
+	userTrace := ""
+	if instrumentedProg != "" {
+		if path, ok := createSingleRunTrace(dir); ok {
+			userTrace = path
+			prog.Env = append(prog.Env, "ORBITAL_USER_TRACE="+userTrace)
+		}
+	}
 	if seed, ok := ctx.Value(reviewSeedKey{}).(int64); ok {
 		prog.Env = append(prog.Env, "ORBITAL_SEED="+strconv.FormatInt(seed, 10))
 	}
@@ -209,6 +234,9 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	}
 	resp.Result.Progress = progress
 	resp.Result.Ticks = last.T
+	if userTrace != "" {
+		resp.Trace = singleRunTrace(userTrace, data, resp.Stdout, runErr == nil, lang)
+	}
 	runtimeTip := errorTipFor(resp.Stderr, tipRuntime, lang)
 	resp.RuntimeTip, resp.RuntimeCause, resp.RuntimeCheck = runtimeTip.Meaning, runtimeTip.Cause, runtimeTip.Check
 	resp.Race = lvl.Race && strings.Contains(resp.Stderr, "WARNING: DATA RACE")

@@ -74,3 +74,70 @@ test("gutter marks clickable breakpoint lines", () => {
   assert.match(markup, /has-breakpoint/);
   assert.match(markup, /debug-active/);
 });
+
+// ---- run playback: hooks fire in order and the end is reported once ----
+function fakeDebuggerDOM() {
+  const make = () => ({
+    hidden: false, textContent: "", innerHTML: "", value: "0", max: "0", disabled: false, title: "", dataset: {},
+    classList: { toggle() {}, add() {}, remove() {}, contains: () => false },
+    setAttribute() {}, querySelectorAll: () => [], onclick: null, oninput: null,
+  });
+  const ids = ["debugger-toolbar", "debugger-controls", "debugger-status", "debugger-counter", "debugger-slider", "debugger-panel",
+    "debugger-variables", "debugger-stack", "debugger-output", "debugger-order", "debugger-collapse", "debugger-where-text"];
+  const els = Object.fromEntries(ids.map((id) => [`#${id}`, make()]));
+  global.document = {
+    documentElement: { lang: "en" },
+    querySelector: (selector) => els[selector] || null,
+    querySelectorAll: () => [],
+    addEventListener() {},
+  };
+  global.matchMedia = () => ({ matches: false });
+  return els;
+}
+
+function sessionWith(options) {
+  fakeDebuggerDOM();
+  const calls = { frames: [], end: 0, exit: 0, clear: 0 };
+  Debugger.bind({ renderEditor() {}, getFile: () => "main.go", getBreakpoints: () => [] });
+  Debugger.startWith("1-1", { available: true, frames: frames.map((f, i) => ({ ...f, events: i })), stdout: "" }, {
+    ...options,
+    onFrame: (frame, index) => calls.frames.push(index),
+    onEnd: () => calls.end++,
+    onExit: () => calls.exit++,
+    onClear: () => calls.clear++,
+  });
+  return calls;
+}
+
+test("Run playback plays every step and reports the end once", (t) => {
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  const calls = sessionWith({ autoplay: true });
+  assert.equal(calls.frames[0], 0);
+  assert.equal(Debugger.playing, true);
+  t.mock.timers.tick(60000);
+  assert.equal(calls.frames.at(-1), frames.length - 1);
+  assert.equal(calls.end, 1);
+  assert.equal(Debugger.playing, false);
+  Debugger.clear();
+  assert.equal(calls.clear, 1);
+});
+
+test("Step mode waits on the first step; skipping reveals once", () => {
+  const calls = sessionWith({ autoplay: false });
+  assert.deepEqual(calls.frames, [0]);
+  assert.equal(Debugger.playing, false);
+  assert.equal(calls.end, 0);
+  Debugger.finishNow();
+  assert.equal(calls.end, 1);
+  Debugger.finishNow();
+  assert.equal(calls.end, 1);
+  Debugger.clear();
+});
+
+test("dropping a session from outside calls onClear exactly once", () => {
+  const calls = sessionWith({ autoplay: false });
+  Debugger.clear();
+  Debugger.clear();
+  assert.equal(calls.clear, 1);
+  assert.equal(calls.end, 0);
+});
