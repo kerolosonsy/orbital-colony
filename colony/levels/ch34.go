@@ -2,6 +2,7 @@ package levels
 
 func init() {
 	add(&Level{ID: "34-1-kv-store", Chapter: 34, Kind: "lab", Title: "مخزن مفاتيح", Goal: "ابني خزنة مفاتيح متزامنة بصلاحية ولقطة بترجع زي ما هي",
+		LessonRevision: 1, Steps: ch34LessonArabic["34-1-kv-store"],
 		Requires: []string{"sel:sync.RWMutex"}, Bridge: []int{87}, Race: true, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch341Starter}},
 		Lesson: `# خزنة مفاتيح المستعمرة
@@ -67,8 +68,8 @@ func (v *Vault) Get(k string) ([]byte, bool) {
 
 كل الدوال آمنة مع goroutines كتير. لقطتين لنفس الحالة لازم يطلعوا نفس البايتات بالظبط مهما كان ترتيب الإدخال (نجمة إضافية). ~main~ فاضية.
 `,
-		Hints: []string{"خزّن لكل مفتاح القيمة وموعد انتهاء مطلق؛ صفر يعني مفيش انتهاء.", "استخدم RLock في Get و Len و Snapshot، و Lock في Put و Delete، وانسخ الشرائح.", "في اللقطة اكتب Expires كـ UnixNano ورتّب بالمفتاح؛ في التحميل افحص المفاتيح وسيب المنتهي."},
-		En: &LevelText{Title: "Key Vault", Goal: "Build a concurrent key vault with expiry and a faithful snapshot", Files: []LabFile{{Name: "main.go", Starter: ch341Starter}},
+		Hints: []string{"الـslice ممكن تشارك backing array؛ وضّح مين يملك البايتات قبل تعديلها.", "قسّم التصميم بين حماية الحالة، وحساب الصلاحية، وحدود نسخ القيم.", "ابدأ من تعريف ~Vault~ وتوقيعات methods في الـstarter، وحدد إمتى القيمة تعتبر حية."},
+		En: &LevelText{Title: "Key Vault", Goal: "Build a concurrent key vault with expiry and a faithful snapshot", LessonRevision: 1, Steps: ch34LessonEnglish["34-1-kv-store"], Files: []LabFile{{Name: "main.go", Starter: ch341Starter}},
 			Lesson: `# The Colony Key Vault
 
 ## Before you write
@@ -132,7 +133,7 @@ Implement ~NewVault(now func() time.Time) *Vault~ and:
 
 Every method is safe for many goroutines. Two snapshots of the same state must be byte-identical regardless of insertion order (bonus star). Leave ~main~ empty.
 `,
-			Hints: []string{"Store each key's value and an absolute deadline; zero means none.", "Use RLock in Get, Len and Snapshot, Lock in Put and Delete, and copy slices.", "Write Expires as UnixNano sorted by key; on load validate keys and skip expired rows."}},
+			Hints: []string{"A slice may share a backing array; clarify byte ownership before changing it.", "Separate state protection, expiry decisions, and value-copy boundaries.", "Start at the ~Vault~ type and starter methods, and define when a value is live."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch341Hidden},
 	})
 }
@@ -429,6 +430,7 @@ func TestHiddenBonusVaultDeterministicSnapshot(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "34-2-wal", Chapter: 34, Kind: "lab", Title: "سجل الكتابة", Goal: "سجّل كل تعديل على القرص قبل الذاكرة وارجع لنفس الحالة بعد انهيار",
+		LessonRevision: 1, Steps: ch34LessonArabic["34-2-wal"],
 		Requires: []string{"sel:crc32.ChecksumIEEE"}, Bridge: []int{88}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch342Starter}},
 		Lesson: `# دفتر عمليات المستعمرة
@@ -497,8 +499,8 @@ f.Write(header); f.Write(key)  // وكمان السجل اتكتب على كذا
 
 في الفتح: ذيل ناقص يتقص بـ ~os.Truncate~ والفتح ينجح. سجل كامل فاسد زي ما اتشرح يرجع خطأ ملفوف بـ ~ErrLedgerCorrupt~. سجل الحذف لازم طول قيمته صفر. الدفتر مش لازم يبقى آمن مع goroutines كتير. ~main~ فاضية.
 `,
-		Hints: []string{"ابني السجل في شريحة واحدة: رأس 13 بايت ثم المفتاح والقيمة، والـ checksum على كل حاجة بعد أول 4 بايت.", "في الفتح اقرا الملف كله بـ os.ReadFile وامشي سجل سجل بمؤشر offset.", "لو الباقي أقل من الرأس أو من الأطوال: قص لآخر offset سليم. لو كامل والـ checksum غلط: ErrLedgerCorrupt."},
-		En: &LevelText{Title: "Write-Ahead Log", Goal: "Log every change to disk before memory and recover the same state after a crash", Files: []LabFile{{Name: "main.go", Starter: ch342Starter}},
+		Hints: []string{"السجل بيسمح بإعادة بناء الحالة بعد إعادة التشغيل.", "رتّب تفكيرك من bytes إلى record ثم حالة الذاكرة.", "ابدأ من ~Ledger~ وتوقيعات ~OpenLedger~ و~Lookup~ في الـstarter."},
+		En: &LevelText{Title: "Write-Ahead Log", Goal: "Log every change to disk before memory and recover the same state after a crash", LessonRevision: 1, Steps: ch34LessonEnglish["34-2-wal"], Files: []LabFile{{Name: "main.go", Starter: ch342Starter}},
 			Lesson: `# The Colony Operations Ledger
 
 ## Before you write
@@ -565,7 +567,7 @@ Implement ~OpenLedger(dir string) (*Ledger, error)~, which opens or creates ~dir
 
 On open, an incomplete tail is cut with ~os.Truncate~ and opening succeeds. A complete corrupt record as described returns an error wrapping ~ErrLedgerCorrupt~. A delete record must have value length zero. The ledger need not be safe for concurrent use. Leave ~main~ empty.
 `,
-			Hints: []string{"Build each record in one slice: 13-byte header, key, value, with the checksum over everything after the first 4 bytes.", "On open read the whole file with os.ReadFile and walk records with an offset.", "If fewer bytes remain than the header or lengths need, truncate to the last good offset. If complete with a bad checksum, ErrLedgerCorrupt."}},
+			Hints: []string{"A log lets the program rebuild state after a restart.", "Reason from bytes to records, then to in-memory state.", "Start at ~Ledger~ and the ~OpenLedger~ and ~Lookup~ signatures in the starter."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch342Hidden},
 	})
 }
@@ -792,6 +794,7 @@ func TestHiddenLedgerCorruption(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "34-3-compaction", Chapter: 34, Kind: "lab", Title: "الدمج", Goal: "فرّغ الدفتر في جداول مرتبة وادمجها من غير ما نتيجة واحدة تتغير",
+		LessonRevision: 1, Steps: ch34LessonArabic["34-3-compaction"],
 		Requires: []string{"sel:os.Rename"}, Bridge: []int{88}, Setup: seededLabRoom, CarryFrom: "34-2-wal",
 		Files: []LabFile{{Name: "main.go", Starter: ch343Starter}},
 		Lesson: `# جداول الأرشيف ودمجها
@@ -856,8 +859,8 @@ os.WriteFile(filepath.Join(dir, "sst-000002.sst"), data, 0o644) // ومن غير
 
 القراية: الـ memtable، ثم الجداول من الأحدث. في الفتح: الجداول تتقري بالترتيب؛ أي جدول ناقص أو checksum غلط أو مفاتيح مش تصاعدية يرجع ~ErrLedgerCorrupt~. ملفات ~.tmp~ القديمة تتمسح وتتجاهل (نجمة إضافية). ~main~ فاضية.
 `,
-		Hints: []string{"خلّي الـ memtable خريطة لـ struct فيه القيمة و dead؛ Remove يحط dead بدل delete.", "Flush: رتّب المفاتيح، ابني السجلات بنفس دالة الترميز، WriteFile لـ tmp، Rename، وبعدين Truncate(0) للسجل.", "Compact: امشي الجداول من الأقدم للأحدث في خريطة واحدة، شيل الميت، اكتب جدول جديد، وبعدين os.Remove للقديم."},
-		En: &LevelText{Title: "Compaction", Goal: "Flush the ledger into sorted tables and merge them without changing a single result", Files: []LabFile{{Name: "main.go", Starter: ch343Starter}},
+		Hints: []string{"العلامة الصريحة بتخلي الحذف حالة قابلة للقراءة.", "افصل بين تفريغ الحالة الحالية ودمج التاريخ القديم.", "راجع حقول ~Ledger~ الموروثة وتوقيعات ~Flush~ و~Compact~ في الـstarter."},
+		En: &LevelText{Title: "Compaction", Goal: "Flush the ledger into sorted tables and merge them without changing a single result", LessonRevision: 1, Steps: ch34LessonEnglish["34-3-compaction"], Files: []LabFile{{Name: "main.go", Starter: ch343Starter}},
 			Lesson: `# Archive Tables and Compaction
 
 ## Before you write
@@ -920,7 +923,7 @@ Extend ~Ledger~, keeping ~OpenLedger~, ~Set~, ~Remove~, ~Lookup~, ~Close~, the e
 
 Reads: the memtable, then tables newest first. On open, tables are read in order; any short table, bad checksum, or keys not strictly increasing returns ~ErrLedgerCorrupt~. Leftover ~.tmp~ files are removed and ignored (bonus star). Leave ~main~ empty.
 `,
-			Hints: []string{"Make the memtable map to a struct with value and dead; Remove sets dead instead of deleting.", "Flush: sort keys, build records with the same encoder, WriteFile to tmp, Rename, then Truncate(0) the log.", "Compact: walk tables oldest to newest into one map, drop dead keys, write a new table, then os.Remove the old ones."}},
+			Hints: []string{"An explicit marker makes deletion a readable state.", "Separate flushing the current state from merging old history.", "Review the inherited ~Ledger~ fields and ~Flush~ and ~Compact~ signatures in the starter."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch343Hidden},
 	})
 }
@@ -1190,6 +1193,7 @@ func TestHiddenBonusCompactionStaleTemp(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "34-4-chunk-store", Chapter: 34, Kind: "lab", Title: "تخزين موزّع", Goal: "وزّع الشحنات على كبسولات تخزين بنسخ متكررة واصلح اللي يبوظ أو يضيع",
+		LessonRevision: 1, Steps: ch34LessonArabic["34-4-chunk-store"],
 		Requires: []string{"sel:sha256.Sum256"}, Bridge: []int{99}, Setup: seededLabRoom,
 		Files: []LabFile{{Name: "main.go", Starter: ch344Starter}},
 		Lesson: `# مستودع الكبسولات
@@ -1248,8 +1252,8 @@ w.Write(data)                // ومن غير ما تتأكد من البصمة
 
 مش لازم أمان مع goroutines كتير. ~main~ فاضية.
 `,
-		Hints: []string{"اكتب دالة placement(sum) ترجع أرقام الكبسولات، واستخدمها في Save و Load و Repair.", "Save: io.ReadFull في حلقة، sha256.Sum256 لكل قطعة، و map للأسماء اللي اتخزنت بنجاح.", "Load و Repair: النسخة السليمة هي اللي Fetch بتاعها من غير خطأ وبصمتها = الاسم؛ في Repair اكتبها على باقي الأماكن."},
-		En: &LevelText{Title: "Distributed Storage", Goal: "Spread cargo across storage pods with replicas and repair what breaks or vanishes", Files: []LabFile{{Name: "main.go", Starter: ch344Starter}},
+		Hints: []string{"الاسم المبني من المحتوى يسهّل اكتشاف التكرار والتلف.", "رتّب الخطوات من chunk إلى placement ثم verification وrepair.", "ابدأ من ~Pod.Fetch~ و~Pod.Store~ وتعريف ~Depot~ في الـstarter."},
+		En: &LevelText{Title: "Distributed Storage", Goal: "Spread cargo across storage pods with replicas and repair what breaks or vanishes", LessonRevision: 1, Steps: ch34LessonEnglish["34-4-chunk-store"], Files: []LabFile{{Name: "main.go", Starter: ch344Starter}},
 			Lesson: `# The Pod Depot
 
 ## Before you write
@@ -1306,7 +1310,7 @@ Implement ~NewDepot(pods []Pod, chunkSize, replicas int) (*Depot, error)~: retur
 
 Concurrent use need not be safe. Leave ~main~ empty.
 `,
-			Hints: []string{"Write placement(sum) returning pod indexes, and use it in Save, Load and Repair.", "Save: io.ReadFull in a loop, sha256.Sum256 per chunk, and a map of names stored successfully.", "Load and Repair: an intact copy has no Fetch error and a fingerprint equal to the name; Repair writes it to the other placements."}},
+			Hints: []string{"A content-derived name helps detect duplicates and damage.", "Think from chunking to placement, then verification and repair.", "Start at ~Pod.Fetch~, ~Pod.Store~, and the ~Depot~ type in the starter."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch344Hidden},
 	})
 }
