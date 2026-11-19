@@ -52,3 +52,5 @@ Each entry: what changed and why. Numbered in the order they landed.
 48. **Ctrl/⌘+] and Ctrl/⌘+[** indent / outdent the current line or selection without losing the caret (the VS Code keys; Tab/Shift+Tab still work). Tested; listed in the shortcuts sheet.
 49. **Debugger keys that work on laptops** — F10/F11 need Fn on most Mac keyboards, so while debugging Alt+← steps back, Alt+→ steps forward and Alt+Space plays/pauses. The Step back button finally has a shortcut too. Verified live (1/12 → 3/12 → 2/12).
 50. **Caret line number lights up** — the gutter number of the line you're on is brighter, matching the current-line band (cleared during debugging, where the debugger marks its own line).
+51. **Console doesn't yank you to the bottom** — new output only auto-scrolls when you're already at the bottom, so you can read an earlier error while a long run keeps printing.
+52. **Esc closes the lesson drawer** on narrow screens and returns focus to the code.

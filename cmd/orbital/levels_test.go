@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -26,12 +28,25 @@ func testRunner(t *testing.T) *runner {
 // starter program must compile.
 func TestLevelsSolvable(t *testing.T) {
 	r := testRunner(t)
+	// Levels are independent (own temp module, own process), so most run in
+	// parallel, a few at a time. Realtime chapters 10–13 measure wall-clock
+	// ticks and stay serial so CPU contention can't change their results.
+	slots := make(chan struct{}, solvableParallelism())
+	parallel := func(t *testing.T, l *levels.Level) {
+		if l.Chapter >= 10 && l.Chapter <= 13 {
+			return
+		}
+		t.Parallel()
+		slots <- struct{}{}
+		t.Cleanup(func() { <-slots })
+	}
 	for _, l := range levels.All {
 		if l.Kind == "lab" {
 			t.Run(l.ID, func(t *testing.T) {
 				if l.Service != "" && os.Getenv("ORBITAL_SERVICES") != "1" {
 					t.Skip("set ORBITAL_SERVICES=1 for service labs")
 				}
+				parallel(t, l)
 				testLab(t, r, l)
 			})
 			continue
@@ -40,6 +55,7 @@ func TestLevelsSolvable(t *testing.T) {
 			if l.Service != "" && os.Getenv("ORBITAL_SERVICES") != "1" {
 				t.Skip("set ORBITAL_SERVICES=1 for service levels")
 			}
+			parallel(t, l)
 			code, err := os.ReadFile(filepath.Join("testdata", "solutions", l.ID+".go"))
 			if err != nil {
 				t.Fatalf("no reference solution: %v", err)
@@ -70,6 +86,16 @@ func TestLevelsSolvable(t *testing.T) {
 			}
 		})
 	}
+}
+
+// solvableParallelism is how many levels TestLevelsSolvable runs at once:
+// half the CPUs (each level runs the go tool and a program), at least 1.
+// ORBITAL_TEST_PARALLEL overrides it.
+func solvableParallelism() int {
+	if n, err := strconv.Atoi(os.Getenv("ORBITAL_TEST_PARALLEL")); err == nil && n > 0 {
+		return n
+	}
+	return max(1, runtime.NumCPU()/2)
 }
 
 func TestCompileErrorTips(t *testing.T) {
