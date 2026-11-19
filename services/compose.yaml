@@ -7,10 +7,20 @@ services:
       POSTGRES_DB: orbital
     ports:
       - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "orbital", "-d", "orbital"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
   mongo:
     image: mongo:7
     ports:
       - "127.0.0.1:27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
   kafka:
     image: redpandadata/redpanda:v24.3.5
     command:
@@ -26,3 +36,8 @@ services:
       - --advertise-kafka-addr=127.0.0.1:9092
     ports:
       - "127.0.0.1:9092:9092"
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health", "--exit-when-healthy"]
+      interval: 2s
+      timeout: 5s
+      retries: 30

@@ -136,8 +136,8 @@ deps: ## جهّز مكتبات المختبرات / Prepare lab dependencies (re
 	cd labdeps && GOPROXY=https://proxy.golang.org go mod download all
 	cd labdeps && GOPROXY=off go build ./...
 
-services-up: ## شغّل الخدمات المحلية / Start local services
-	docker compose -f services/compose.yaml up -d
+services-up: ## شغّل الخدمات المحلية واستنى لحد ما تبقى جاهزة / Start local services and wait until healthy
+	docker compose -f services/compose.yaml up -d --wait
 
 services-down: ## اقفل الخدمات المحلية / Stop local services
 	docker compose -f services/compose.yaml down
