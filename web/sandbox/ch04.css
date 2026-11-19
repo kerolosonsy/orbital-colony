@@ -1,1 +1,48 @@
-/* Chapter 04 sandbox styles will be added with its renderer. */
+.ch04-if-branch,
+.ch04-switch-case,
+.ch04-ordered-branches {
+  box-sizing: border-box;
+  inline-size: min(100%, 290px);
+  min-inline-size: 0;
+  padding: 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--ink-2);
+}
+
+.ch04-if-state,
+.ch04-switch-state,
+.ch04-ordered-state { min-inline-size: 0; }
+
+.ch04-if-value,
+.ch04-if-body,
+.ch04-switch-value,
+.ch04-switch-case-value,
+.ch04-switch-result,
+.ch04-ordered-hours,
+.ch04-ordered-result { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin-block: 4px 7px; }
+
+.ch04-if-label,
+.ch04-switch-label,
+.ch04-ordered-label { color: var(--paper-2); font-size: 12px; }
+.ch04-if-data,
+.ch04-switch-data,
+.ch04-ordered-data { font: 600 13px/1.5 var(--mono); overflow-wrap: anywhere; }
+
+.ch04-switch-controls { gap: 5px; }
+.ch04-switch-controls .tool { min-height: 40px; height: auto; padding: 6px 9px; }
+
+.ch04-ordered-checks { display: grid; gap: 4px; margin-block: 4px 8px; }
+.ch04-ordered-check { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 3px 8px; margin: 0; padding: 4px 6px; border-inline-start: 2px solid var(--rule-strong); background: color-mix(in oklab, var(--ink) 65%, transparent); }
+.ch04-ordered-condition { font: 12px/1.5 var(--mono); unicode-bidi: isolate; }
+.ch04-ordered-outcome { color: var(--paper-2); font-size: 12px; }
+
+.ch04-if-caption,
+.ch04-switch-caption,
+.ch04-ordered-caption { min-block-size: 1.5em; margin-block: 8px 4px; font-size: 13px; }
+.ch04-if-controls,
+.ch04-switch-controls,
+.ch04-ordered-controls { gap: 6px; margin-block: 8px 0; }
+.ch04-if-controls .tool,
+.ch04-switch-controls .tool,
+.ch04-ordered-controls .tool { min-height: 40px; height: auto; padding-block: 6px; }
