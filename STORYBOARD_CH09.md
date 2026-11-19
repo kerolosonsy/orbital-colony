@@ -239,3 +239,44 @@ true end
 ## Validation notes
 
 Storyboard code is compiled and run as the body of `main` with the listed standard-library imports. `outcome=ok` means it builds and exits successfully; the verified stdout blocks are also checked against the terminal walkthrough frames. No chapter 9 setup, starter, checks, or grading values are changed.
+
+## 9-boss — شحنة الإخلاء (`9-boss-evacuation`)
+
+**Focus:** an integration lab for structs, interfaces, maps, and error results. The full contract stays in the existing fallback lesson.
+
+**Word count:** Arabic 274; English 312, including titles, captions, options, feedback, and hints; excluding code and shared controls.
+
+1. **المهمة / Mission:** complete `Pack` from its contract and keep `main` empty.
+2. **الفكرة / Idea:** structs group data; interfaces describe required methods; a signature lists inputs and results.
+3. **جرّب / Try it:** predict a tiny map update, then step through it.
+4. **خد بالك / Watch out:** distinguish nil and empty maps; map `range` order is unspecified; inspect errors.
+5. **فكّر واختبر / Think & check:** review result paths and interface matching.
+6. **دورك / Your turn:** implement the contract and use `go test` to guide one change at a time.
+
+`c9b.map-predict` → `c9b.map-reveal` · predict, then reveal
+
+<!-- go-example id=e9boss-map-count imports=fmt outcome=ok -->
+```go
+counts := map[string]int{}
+counts["teal"] += 2
+counts["teal"]++
+fmt.Println(counts["teal"])
+```
+
+| Frame / line | Map | Output | Caption |
+|---|---|---|---|
+| 0 / before 1 | — | — | قبل إنشاء الخريطة. / Before creating the map. |
+| 1 / 1 | `map[]` | — | بدأنا بخريطة فاضية. / The map starts empty. |
+| 2 / 2 | `map[teal:2]` | — | القيمة بقت 2. / The value becomes 2. |
+| 3 / 3 | `map[teal:3]` | — | التحديث زوّد نفس المفتاح. / The same key increases. |
+| 4 / 4 | `map[teal:3]` | `3` | اطبع قيمة المفتاح. / Print the key's value. |
+
+#### Verified `e9boss-map-count` — ok
+
+Real stdout:
+
+```text
+3
+```
+
+**Hints, in order:** concept — a struct groups data and an interface names behavior; structure — keep input, result, and error paths distinct; specific — inspect `Pack`, `ErrManifest`, and return paths in `main.go`.

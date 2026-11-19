@@ -3,6 +3,7 @@ package levels
 func init() {
 	add(&Level{
 		ID: "9-boss-evacuation", Chapter: 9, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: false,
+		LessonRevision: 1, Steps: ch09BossArabic,
 		Title: "Boss: شحنة الإخلاء", Goal: "اجمع شحنة إخلاء بتصاريح ومن غير نتائج جزئية",
 		Requires: []string{"map", "struct", "iface", "range"}, Bridge: []int{5, 11, 22},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
@@ -44,8 +45,8 @@ if err != nil { return map[string]int{}, nil }
 
 النجمة التالتة: افحص صلاحية كل الصفوف قبل أول نداء للتصريح، وحافظ على أسماء Unicode زي ما هي.
 `,
-		Hints: []string{"افحص Bay وUnits قبل التجميع.", "استخدم map وزوّد الإجمالي لكل بوابة مسموحة.", "ارجع nil مع الخطأ؛ النجمة محتاجة لفة تحقق قبل التصاريح."},
-		En: &LevelText{Title: "Boss: Evacuation Cargo", Goal: "Assemble cleared evacuation cargo without partial results", Files: []LabFile{{Name: "main.go", Starter: `package main
+		Hints: []string{"الـstruct بيربط بيانات، والـinterface يحدد سلوك بالـmethod المطلوبة.", "فكّر في المدخل والنتيجة ومسارات الخطأ كمسؤوليات منفصلة.", "راجع توقيع ~Pack~ وتعريف ~ErrManifest~ في ~main.go~ وانت بتراجع مسارات الرجوع."},
+		En: &LevelText{LessonRevision: 1, Steps: ch09BossEnglish, Title: "Boss: Evacuation Cargo", Goal: "Assemble cleared evacuation cargo without partial results", Files: []LabFile{{Name: "main.go", Starter: `package main
 
 import "errors"
 
@@ -84,7 +85,7 @@ Implement ~Pack(crates []Crate, permit Clearance) (map[string]int, error)~. Each
 
 Third star: validate every row before the first clearance call, preserving Unicode bay names exactly.
 `,
-			Hints: []string{"Validate Bay and Units before aggregation.", "Use a map to accumulate every allowed bay.", "Return nil on error; the bonus needs validation before clearance calls."}},
+			Hints: []string{"A struct groups data, while an interface describes required method behavior.", "Keep input, result, and error paths clear as separate responsibilities.", "Check ~Pack~ and ~ErrManifest~ in ~main.go~ while reviewing each return path."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: `package main
 import (
     "errors"
