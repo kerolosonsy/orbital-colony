@@ -30,3 +30,30 @@ test("mission links accept the full id or the sheet code", () => {
   assert.equal(resolve("#1-1-first-signal"), "1-1-first-signal");
   assert.equal(resolve("#nope"), "nope");
 });
+
+test("index search: numbers are exact sheet codes, words match titles and chapters", () => {
+  class Node {
+    constructor(props = {}) { Object.assign(this, { hidden: false, dataset: {}, children: [], open: false }, props); }
+    querySelectorAll(sel) { return sel === ".cell" ? this.children : []; }
+    querySelector(sel) { return sel === ".quad-name" ? this.name : sel === ".quad-row:not([hidden])" ? this.rows.find((r) => !r.hidden) || null : null; }
+    closest() { return null; }
+  }
+  const cell = (code, title) => new Node({ dataset: { code, search: `${code} ${title}`.toLowerCase() } });
+  const rowA = new Node({ name: { textContent: "3 Loops for" }, children: [cell("3-1", "Long row"), cell("3-2", "Snake")] });
+  const rowB = new Node({ name: { textContent: "13 Channels" }, children: [cell("13-1", "Pipes")] });
+  const group = new Node({ rows: [rowA, rowB] });
+  const input = { value: "" }, empty = { hidden: true };
+  const context = vm.createContext({
+    $: (sel) => (sel === "#mission-search" ? input : sel === "#mission-search-empty" ? empty : { addEventListener() {} }),
+    document: { querySelectorAll: (sel) => (sel.endsWith(".quad-row") ? [rowA, rowB] : sel.endsWith(".track-group") ? [group] : []) },
+  });
+  vm.runInContext(functions("function applyMissionFilter(", "$(\"#mission-search\").addEventListener(\"input\""), context);
+  const shown = (query) => { input.value = query; vm.runInContext("applyMissionFilter()", context); return [rowA, rowB].flatMap((r) => r.children).filter((c) => !c.hidden).map((c) => c.dataset.code); };
+  assert.deepEqual(shown("3-1"), ["3-1"]);
+  assert.deepEqual(shown("3"), ["3-1", "3-2"]);
+  assert.deepEqual(shown("snake"), ["3-2"]);
+  assert.deepEqual(shown("channels"), ["13-1"]);
+  assert.deepEqual(shown("zzz"), []);
+  assert.equal(empty.hidden, false);
+  assert.equal(shown("").length, 3);
+});
