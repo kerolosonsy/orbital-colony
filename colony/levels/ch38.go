@@ -46,7 +46,7 @@ for _, v := range values {
 نفّذ ~Indexed(values []int) iter.Seq2[int,int]~ يرجّع index والقيمة بالترتيب، ويطيع التوقف فوراً.
 نفّذ ~First(values []int, n int) []int~ باستخدام range-over-func على ~Readings~؛ يرجّع أول n قيم أو كل القيم لو أقل. n صفر أو سالب يرجّع نتيجة فاضية. مفيش تعديل للمدخل ولا goroutines. نجمة إضافية: نفس ~Readings~ يتستهلك أكتر من مرة بعد break ويبدأ من الأول. ~main~ فاضية.
 `,
-		Hints: []string{"ارجع فوراً لما yield ترجع false؛ الزيارة تحصل قبلها مباشرة.", "خلّي index جوه الدالة الداخلية عشان يبدأ من صفر كل مرة.", "في First افحص n قبل الحلقة واستخدم break لما تجمع العدد المطلوب."},
+		Hints: []string{"المستهلك هو اللي بيقرر إمتى المرور يقف.", "افصل إنشاء الـSeq عن جسم التنفيذ اللي بيشتغل وقت الاستهلاك.", "راجع عقد ~yield~ عند ~Readings~ وطريقة استهلاك ~First~."},
 		En: &LevelText{Title: "Paths Without Storage", Goal: "Write iterators that stop as soon as their consumer stops", Files: []LabFile{{Name: "main.go", Starter: ch381Starter}}, Lesson: `# Colony Reading Paths
 
 ## Before you write
@@ -89,7 +89,7 @@ Collecting everything before the first yield loses laziness. Introducing a chann
 Implement ~Readings(values []int, visit func(int)) iter.Seq[int]~. Call the non-nil ~visit~ exactly once immediately before each yield, never for a value after the consumer stops.
 Implement ~Indexed(values []int) iter.Seq2[int,int]~, yielding index and value in order and stopping immediately on false.
 Implement ~First(values []int, n int) []int~ using range-over-func on ~Readings~: return the first n values, or all if shorter. Nonpositive n gives an empty result. Do not mutate inputs or create goroutines. Bonus star: the same ~Readings~ iterator restarts when consumed again after an early break. Leave ~main~ empty.
-`, Hints: []string{"Return immediately when yield returns false; visit immediately before yielding.", "Keep traversal state inside the inner function so each iteration restarts.", "In First check n before iterating and break when enough values have been collected."}},
+`, Hints: []string{"The consumer decides when traversal stops.", "Separate Seq creation from the body that runs during consumption.", "Review the ~yield~ contract in ~Readings~ and how ~First~ consumes it."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch381Hidden, Bonus: true},
 	})
 	add(&Level{ID: "38-2-sets-and-labels", Chapter: 38, Kind: "lab", Title: "بوابات مميّزة", Goal: "استخدم set وlabels لتختار أول بوابة مسموحة في كل صف", Setup: seededLabRoom,
@@ -139,7 +139,7 @@ for _, row := range rows {
 ## المهمة
 نفّذ ~SelectGates[T comparable](rows [][]T, blocked []T) []T~ باستخدام ~map[T]struct{}~ وlabeled break وcontinue. افحص الصفوف والمرشحين بترتيبهم. لو قابلت محظور قبل ما تختار، سيب بقية الصف. لو قابلت اختيار قديم، جرّب اللي بعده في نفس الصف. أول قيمة جديدة ومسموحة تتضاف مرة واحدة وتوقف البحث في الصف. المحظور اللي بعد اختيار ناجح ميتفحصش. الصف الفاضي ملوش اختيار، والمدخل ميتعدّلش. ينفع int وstring وأي comparable. ~main~ فاضية.
 `,
-		Hints: []string{"ابني denied من blocked وseen من الاختيارات اللي نجحت.", "افحص المحظور الأول؛ continue للصف الخارجي يلغي الباقي.", "بعد append سجّل العضوية واعمل break للحلقة الداخلية."},
+		Hints: []string{"الـmap تقدر تمثل مجموعة عضويتها وجود المفتاح.", "راجع كل صف كمسار مستقل، وميّز تخطي العنصر عن تخطي الصف.", "ارجع لشروط العضوية في الحلقة الداخلية؛ الـlabel بيحدد نطاق القرار."},
 		En: &LevelText{Title: "Distinct Gates", Goal: "Use a set and labels to choose the first allowed gate in each row", Files: []LabFile{{Name: "main.go", Starter: ch382Starter}}, Lesson: `# Choose Gates Without Duplicates
 
 ## Before you write
@@ -184,7 +184,7 @@ Do not build the output by ranging over a map: its iteration order is unspecifie
 
 ## Mission
 Implement ~SelectGates[T comparable](rows [][]T, blocked []T) []T~ using ~map[T]struct{}~ and labeled break and continue. Inspect rows and candidates in input order. A blocked gate encountered before selection skips the rest of that row. A previously selected gate skips only that candidate. Append the first new allowed gate and stop scanning its row. A blocked gate after that successful choice is never examined. Empty rows select nothing. Do not mutate inputs. Support int, string and any comparable type. Leave ~main~ empty.
-`, Hints: []string{"Build denied from blocked and seen from successful selections.", "Check blocked membership first; continue the outer loop to discard its remainder.", "After append, record membership and break the inner loop."}},
+`, Hints: []string{"A map can represent a set through key membership.", "Treat each row as its own path, and distinguish skipping an item from a row.", "Review membership checks inside the inner loop; labels determine decision scope."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch382Hidden},
 	})
 	add(&Level{ID: "38-3-once", Chapter: 38, Kind: "lab", Title: "تشغيل مرة واحدة", Goal: "هيّأ إعدادات مشتركة مرة واحدة بأمان تحت التزامن", Setup: seededLabRoom,
@@ -226,7 +226,7 @@ _ = once // لو حطيتها محلية في كل نداء، كل نداء هي
 نفّذ ~(c *Calibration) Value(load func() int) int~: أول load بس يتنفّذ عبر ~sync.Once~، وكل المنادين يشوفوا نفس int. كل Calibration مستقلة وصفرها شغّال. load غير nil، ومش بتعمل panic في الجزء الأساسي.
 نفّذ ~LazyName(load func() string) func() string~ بـ ~sync.OnceValue~: متستدعيش load وقت إنشاء closure. أول استهلاك يخزّن النتيجة وكل goroutines تشوفها، حتى النص الفاضي. نجمة إضافية: تكرار نفس panic value من غير إعادة load. الاختبارات بتشتغل بـ ~-race~. ~main~ فاضية.
 `,
-		Hints: []string{"خزّن sync.Once كحقل، مش متغير محلي في Value.", "خلي الكتابة للنتيجة جوه Do والقراية بعدها؛ pointer receiver يمنع النسخ.", "رجّع closure بتاعة sync.OnceValue؛ ماتستدعيهاش في LazyName."},
+		Hints: []string{"حالة التهيئة منفصلة عن القيمة اللي بترجع.", "خلي حالة كل مرة مرتبطة بالـinstance، وافصلها عن closure التانية.", "قارن موضع ~sync.Once.Do~ و~sync.OnceValue~ في الدوال المطلوبة."},
 		En: &LevelText{Title: "Start Once", Goal: "Initialize shared settings exactly once under concurrency", Files: []LabFile{{Name: "main.go", Starter: ch383Starter}}, Lesson: `# Calibrate Once
 
 ## Before you write
@@ -262,7 +262,7 @@ _ = once // Making this local to every call repeats initialization
 ## Mission
 Implement ~(c *Calibration) Value(load func() int) int~ using ~sync.Once~. Only the first load executes and every caller sees the same int. Each Calibration is independent and its zero value works. Load is non-nil and does not panic in the required portion.
 Implement ~LazyName(load func() string) func() string~ using ~sync.OnceValue~. Do not call load while constructing the closure. Its first consumption caches the result for all goroutines, including an empty string. Bonus: replay the same panic value without rerunning load. Tests run with ~-race~. Leave ~main~ empty.
-`, Hints: []string{"Store sync.Once as a field, not a local variable in Value.", "Write the result inside Do and read after it; use a pointer receiver.", "Return the closure produced by sync.OnceValue without calling it in LazyName."}},
+`, Hints: []string{"Initialization state is separate from the returned value.", "Keep each once state with its instance and separate it from the other closure.", "Compare where ~sync.Once.Do~ and ~sync.OnceValue~ belong in the required functions."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch383Hidden, Bonus: true},
 	})
 	add(&Level{ID: "38-4-errgroup", Chapter: 38, Kind: "lab", Title: "طاقم محدود", Goal: "شغّل شغل متوازي بحد واضح وألغِ الباقي عند أول خطأ", Setup: seededLabRoom,
@@ -304,7 +304,7 @@ return ctx.Err() // لو دي المشتقة بعد Wait، هتبلغ إلغاء
 ## المهمة
 نفّذ ~SurveyAll(ctx context.Context, jobs []int, limit int, work func(context.Context,int) error) error~ باستخدام errgroup. limit لازم موجب حتى لو jobs فاضية؛ غير كده error ومفيش work. في النجاح كل عنصر يتنفّذ مرة، حتى القيم المكررة، بحد أقصى limit workers. عند أول خطأ ارجعه من غير فقد هويته لـ ~errors.Is~، الغِ الباقي، وماتبدأش work جديدة بعد ملاحظة الإلغاء. استنى كل worker بدأت قبل الرجوع. الأب الملغي يرجّع خطأه، حتى لو مفيش jobs؛ empty مع أب سليم = nil. work غير nil وبتحترم الإلغاء ومش بتعمل panic. اختبارات ~-race~ وleak check. ~main~ فاضية.
 `,
-		Hints: []string{"استعمل WithContext وSetLimit قبل حلقة jobs.", "افحص context قبل Go وجوّاها؛ التوازي بيخلق نافذة بين الفحصين.", "استنى Wait حتى بعد الإلغاء؛ خطأ أول worker أهم من context.Canceled."},
+		Hints: []string{"المجموعة بتجمع الانتظار والأخطاء، والـcontext بتوصل إشارة الإلغاء.", "افصل جدولة الشغل عن callback وعن مرحلة انتظار النهاية.", "راجع ترتيب ~WithContext~ ونداءات ~Go~؛ الإلغاء ممكن يحصل أثناء الجدولة."},
 		En: &LevelText{Title: "Bounded Crew", Goal: "Bound parallel work and cancel peers on the first error", Files: []LabFile{{Name: "main.go", Starter: ch384Starter}}, Lesson: `# A Bounded Survey Crew
 
 ## Before you write
@@ -338,7 +338,7 @@ return ctx.Err() // A derived context after Wait reports cancellation even on su
 
 ## Mission
 Implement ~SurveyAll(ctx context.Context, jobs []int, limit int, work func(context.Context,int) error) error~ using errgroup. Limit must be positive even for empty jobs; otherwise return an error without calling work. On success process every element exactly once, including duplicates, with at most limit simultaneous callbacks. Return the first error preserving ~errors.Is~ identity, cancel peers, and do not begin new work after observing cancellation. Join all started workers before returning. A canceled parent returns its error, even with no jobs; empty jobs with a live parent succeed. Work is non-nil, cooperates with cancellation and does not panic. Tests use ~-race~ and leak checks. Leave ~main~ empty.
-`, Hints: []string{"Use WithContext and SetLimit before the jobs loop.", "Check context before Go and inside its callback to cover cancellation while blocked.", "Always Wait, even after cancellation; preserve the first worker error."}},
+`, Hints: []string{"The group joins work and errors; context carries a cancellation signal.", "Separate scheduling from the callback and the final wait phase.", "Review ~WithContext~ and each ~Go~ call; cancellation may happen during scheduling."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch384Hidden},
 	})
 	add(&Level{ID: "38-5-allocs", Chapter: 38, Kind: "lab", Title: "ميزانية الذاكرة", Goal: "قلّل تخصيصات النصوص والشرائح وقِس بـ ReportAllocs", Setup: seededLabRoom,
@@ -391,7 +391,7 @@ s += next // في حلقة كبيرة: نسخ متكرر للبادئة
 نفّذ ~Assemble(parts []string) string~: وصل كل العناصر بـ ~|~ بالظبط، من غير فاصل زيادة أو حذف عناصر فاضية؛ nil = نص فاضي. نفّذ ~CopyPositive(readings []int) []int~: نسخة مستقلة من العناصر >0 بنفس الترتيب. استعمل preallocation وBuilder.
 اكتب ~BenchmarkAssemble~ في main_test.go مع ~b.ReportAllocs~ ونتيجة محفوظة في sink. للمدخل 512 عنصر، Assemble بحد أقصى تخصيصين وCopyPositive بحد أقصى تخصيص واحد. المختبر يقارن تجميع 512 نص مع النسخة البطيئة: حدود النجوم 1x و3x و8x. النسب بتتأثر بالجهاز؛ الصحة والتخصيصات بتتفحص قبل السرعة. ~main~ فاضية.
 `,
-		Hints: []string{"احسب مجموع len لكل جزء وزوّد عدد الفواصل قبل Grow.", "CopyPositive تبدأ بطول صفر وسعة len(readings)، مش طول len(readings).", "حط ReportAllocs قبل الحلقة، واحفظ النتيجة في package sink."},
+		Hints: []string{"حجز السعة ممكن يقلل النمو، لكنه مش قياس لعدد التخصيصات.", "افصل سلوك الدالة عن تجهيز benchmark وعن القياس نفسه.", "راجع مواضع ~Grow~ و~make~ و~ReportAllocs~ في الملفات المطلوبة."},
 		En: &LevelText{Title: "Allocation Budget", Goal: "Reduce string and slice allocations and measure with ReportAllocs", Files: []LabFile{{Name: "main.go", Starter: ch385Starter}, {Name: "main_test.go", Starter: ch385TestStarter}}, Lesson: `# A Message Allocation Budget
 
 ## Before you write
@@ -438,7 +438,7 @@ s += next // In a long loop: repeated prefix copying
 ## Mission
 Implement ~Assemble(parts []string) string~ joining every element with exactly ~|~, retaining empty elements without an extra separator; nil gives an empty string. Implement ~CopyPositive(readings []int) []int~ returning an independent copy of elements >0 in input order. Use preallocation and Builder.
 Write ~BenchmarkAssemble~ in main_test.go with ~b.ReportAllocs~ and a result sink. For 512 elements, Assemble must use at most two allocations and CopyPositive at most one. The lab compares assembly of 512 strings against repeated concatenation: star tiers are 1x, 3x and 8x. Ratios depend on the machine; correctness and allocation budgets run first. Leave ~main~ empty.
-`, Hints: []string{"Sum byte lengths plus separator count before Grow.", "Start CopyPositive with zero length and capacity len(readings).", "Call ReportAllocs before the loop and store results in a package sink."}},
+`, Hints: []string{"Reserving capacity can reduce growth, but it does not measure allocations.", "Separate function behavior from benchmark setup and measurement.", "Review the ~Grow~, ~make~ and ~ReportAllocs~ sites in the required files."}},
 		Lab: &Lab{ReqFile: "main_test.go", Hidden: ch385Hidden, Bench: &Bench{Tiers: [3]float64{1, 3, 8}}},
 	})
 	add(&Level{ID: "38-6-vet", Chapter: 38, Kind: "lab", Title: "تفتيش قبل الإقلاع", Goal: "صلّح نسخ القفل وتنسيق الرسائل وتسريب cancel وشغّل vet", Setup: seededLabRoom,
@@ -483,7 +483,7 @@ cancel()
 صلّح starter من غير تغيير signatures غير تحويل Add لـ pointer receiver. ~Gauge~ صفرها شغّال؛ ~Add(n)~ يضيف n و~Total()~ يقرا الإجمالي بأمان تحت التزامن. ~Status(n)~ يرجّع بالظبط ~readings=<n>~ بصيغة عشرية حتى السالب.
 ~ReadWithCancel(parent, read)~ ينشئ child بـ WithCancel، ينادي read مرة واحدة بالـ child، يرجّع نفس خطأ read ويلغي child على كل مسارات الخروج بعد read، مش قبلها. read غير nil. لازم vet يعدّي و~-race~ ميبلّغش race. ~main~ فاضية.
 `,
-		Hints: []string{"حوّل Add لـ receiver من نوع *Gauge عشان متنسخش القفل والعداد.", "استخدم %d للأعداد؛ اختبر رقم سالب كمان.", "بعد WithCancel مباشرة حط defer cancel؛ متستبدلش error بتاع read."},
+		Hints: []string{"vet بيلقط أنماط مريبة حتى لما الكود بيعدي من compiler.", "راجع ملكية الحالة المشتركة ومسؤولية cancel في كل مسار رجوع.", "شغّل vet على مواضع Add وStatus وReadWithCancel بعد إصلاحها."},
 		En: &LevelText{Title: "Preflight Inspection", Goal: "Fix copied locks, formatting and a lost cancel, then pass vet", Files: []LabFile{{Name: "main.go", Starter: ch386Starter}}, Lesson: `# Preflight Inspection
 
 ## Before you write
@@ -522,7 +522,7 @@ Silencing diagnostics by changing text or deleting a lock without fixing behavio
 ## Mission
 Repair the starter without changing signatures except making Add a pointer receiver. The zero Gauge works; ~Add(n)~ adds n and ~Total()~ reads the total safely under concurrency. ~Status(n)~ returns exactly ~readings=<n>~ in decimal, including negative numbers.
 ~ReadWithCancel(parent, read)~ creates a child using WithCancel, calls non-nil read once with it, returns read's original error, and cancels the child on every exit after read, never before it. Vet must pass and ~-race~ must report no races. Leave ~main~ empty.
-`, Hints: []string{"Make Add use a *Gauge receiver to avoid copying the lock and counter.", "Use %d for integers and check a negative number too.", "Defer cancel immediately after WithCancel and preserve the error returned by read."}},
+`, Hints: []string{"Vet catches suspicious patterns even when code passes the compiler.", "Review shared-state ownership and cancel responsibility on every return path.", "Run vet on Add, Status and ReadWithCancel after your changes."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch386Hidden, Vet: true},
 	})
 	add(&Level{ID: "38-7-pprof", Chapter: 38, Kind: "lab", Title: "فين الوقت بيروح؟", Goal: "اكتب CPU وheap profiles وصلّح جمع القراءات المميّزة", Setup: seededLabRoom,
@@ -567,7 +567,7 @@ CPU writer errors مش بترجع من StopCPUProfile لأنها مابترجّ�
 نفّذ ~ProfileSurvey(cpu, heap io.Writer, readings []int) (int,error)~: ابدأ CPU profile قبل UniqueTotal، اوقفها واستنى الكتابة، وبعدين اكتب heap profile. ارجع المجموع وnil في النجاح. لو Start فشلت ارجع 0 والخطأ فوراً؛ لو heap writer فشل ارجع المجموع والخطأ مع الحفاظ على ~errors.Is~. الكتاب غير nil؛ CPU writer سليم. الناتجين لازم يبقوا profiles حقيقية غير فاضية، حتى مع input فاضي، ويتاح بدء profile تانية بعد الرجوع.
 بعد الصحة، Lab.Bench تقارن 4096 قراءة مميّزة ضد الحل التربيعي، من غير profiling داخل القياس: حدود النجوم 2x و5x و10x. ~main~ فاضية.
 `,
-		Hints: []string{"استعمل set لتجمع كل رقم مرة واحدة من غير حلقات متداخلة.", "افحص StartCPUProfile؛ لو نجحت لازم StopCPUProfile قبل الرجوع أو كتابة heap.", "رجّع خطأ WriteHeapProfile مع المجموع؛ وقِس UniqueTotal لوحدها."},
+		Hints: []string{"الـCPU بياخد عينات من التنفيذ؛ والـheap من تخصيصات الذاكرة.", "افصل تحسين الخوارزمية عن profiling، وخلي عمر profiler محدود.", "راجع فروع الخطأ حول ~StartCPUProfile~ و~WriteHeapProfile~."},
 		En: &LevelText{Title: "Where Does the Time Go?", Goal: "Write CPU and heap profiles and optimize distinct-reading totals", Files: []LabFile{{Name: "main.go", Starter: ch387Starter}}, Lesson: `# Where Does Survey Time Go?
 
 ## Before you write
@@ -607,9 +607,28 @@ StopCPUProfile returns no error, so CPU writer failures cannot be promised throu
 Implement ~UniqueTotal(readings []int) int~, summing distinct values exactly once including negatives and zero. Nil gives zero; do not change inputs. Assume the total fits int.
 Implement ~ProfileSurvey(cpu, heap io.Writer, readings []int) (int,error)~: start CPU profiling before UniqueTotal, stop and finish writing, then write a heap profile. Return the total and nil on success. If Start fails return zero and that error immediately. If heap writing fails return the total and preserve its error for ~errors.Is~. Writers are non-nil and the CPU writer succeeds. Both outputs must be real non-empty profiles, even for empty input, and a new CPU profile must be possible after return.
 After correctness checks, Lab.Bench compares 4096 distinct readings against a quadratic implementation, with no profiling inside the measurement. Star tiers are 2x, 5x and 10x. Leave ~main~ empty.
-`, Hints: []string{"Use a set to add each distinct number once without nested scans.", "Check StartCPUProfile; after success call StopCPUProfile before returning or writing the heap.", "Return the heap writer error with the total; benchmark UniqueTotal alone."}},
+`, Hints: []string{"CPU samples execution; heap samples memory allocations.", "Separate algorithm work from profiling and keep the profiler lifetime bounded.", "Review error branches around ~StartCPUProfile~ and ~WriteHeapProfile~."}},
 		Lab: &Lab{ReqFile: "main.go", Hidden: ch387Hidden, Bench: &Bench{Tiers: [3]float64{2, 5, 10}}},
 	})
+	for _, lesson := range []struct {
+		id string
+		ar []LessonStep
+		en []LessonStep
+	}{
+		{"38-1-iterators", ch38IteratorsArabic, ch38IteratorsEnglish},
+		{"38-2-sets-and-labels", ch38SetsArabic, ch38SetsEnglish},
+		{"38-3-once", ch38OnceArabic, ch38OnceEnglish},
+		{"38-4-errgroup", ch38ErrgroupArabic, ch38ErrgroupEnglish},
+		{"38-5-allocs", ch38AllocsArabic, ch38AllocsEnglish},
+		{"38-6-vet", ch38VetArabic, ch38VetEnglish},
+		{"38-7-pprof", ch38PprofArabic, ch38PprofEnglish},
+	} {
+		level := Get(lesson.id)
+		level.LessonRevision = 1
+		level.Steps = lesson.ar
+		level.En.LessonRevision = 1
+		level.En.Steps = lesson.en
+	}
 }
 
 const ch381Starter = `package main
