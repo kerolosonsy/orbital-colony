@@ -163,7 +163,7 @@ func TestCh31SandboxFixtures(t *testing.T) {
 }
 
 func TestCh31StoryboardExamples(t *testing.T) {
-	ch30RunStoryboardExamples(t, "STORYBOARD_CH31.md", "e31", []string{
+	ch30RunStoryboardExamples(t, "docs/storyboards/STORYBOARD_CH31.md", "e31", []string{
 		"31-1-echo", "31-2-chat", "31-3-discovery",
 		"31-4-frames", "31-5-dns", "31-6-port-check",
 	}, 12)

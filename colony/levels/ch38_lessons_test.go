@@ -309,7 +309,7 @@ func TestCh38StoryboardExamples(t *testing.T) {
 	if err != nil {
 		t.Skip("go toolchain unavailable: cannot execute chapter 38 examples")
 	}
-	body, err := os.ReadFile(filepath.Join("..", "..", "STORYBOARD_CH38.md"))
+	body, err := os.ReadFile(filepath.Join("..", "..", "docs/storyboards/STORYBOARD_CH38.md"))
 	if err != nil {
 		t.Fatal(err)
 	}

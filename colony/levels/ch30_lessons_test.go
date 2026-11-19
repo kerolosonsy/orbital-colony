@@ -63,7 +63,7 @@ func TestCh30SandboxFixtures(t *testing.T) {
 }
 
 func TestCh30StoryboardExamples(t *testing.T) {
-	ch30RunStoryboardExamples(t, "STORYBOARD_CH30.md", "e30", []string{
+	ch30RunStoryboardExamples(t, "docs/storyboards/STORYBOARD_CH30.md", "e30", []string{
 		"30-1-cache-aside", "30-2-documents", "30-3-search-index", "30-4-read-write-split", "30-boss-nursery",
 	}, 10)
 }

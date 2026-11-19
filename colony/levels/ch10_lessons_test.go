@@ -183,7 +183,7 @@ func TestCh10StoryboardExamples(t *ch10testing.T) {
 	if err != nil {
 		t.Skip("go toolchain unavailable: cannot execute storyboard examples")
 	}
-	body, err := ch10os.ReadFile(ch10filepath.Join("..", "..", "STORYBOARD_CH10.md"))
+	body, err := ch10os.ReadFile(ch10filepath.Join("..", "..", "docs/storyboards/STORYBOARD_CH10.md"))
 	if err != nil {
 		t.Fatal(err)
 	}

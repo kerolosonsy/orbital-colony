@@ -288,7 +288,7 @@ func TestCh22StoryboardExamples(t *testing.T) {
 	if err != nil {
 		t.Skip("go toolchain unavailable")
 	}
-	body, err := os.ReadFile(filepath.Join("..", "..", "STORYBOARD_CH22.md"))
+	body, err := os.ReadFile(filepath.Join("..", "..", "docs/storyboards/STORYBOARD_CH22.md"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -177,5 +177,5 @@ func ch13ConfigShape(value any) any {
 }
 
 func TestCh13StoryboardExamples(t *testing.T) {
-	ch05RunStoryboardExamples(t, "STORYBOARD_CH13.md", `(?s)<!-- go-example id=(e13[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\n`+"```go\n"+`(.*?)\n`+"```", 8, []string{"13-1-recall", "13-2-timeouts", "13-3-first-wins", "13-4-chain-of-command"})
+	ch05RunStoryboardExamples(t, "docs/storyboards/STORYBOARD_CH13.md", `(?s)<!-- go-example id=(e13[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\n`+"```go\n"+`(.*?)\n`+"```", 8, []string{"13-1-recall", "13-2-timeouts", "13-3-first-wins", "13-4-chain-of-command"})
 }

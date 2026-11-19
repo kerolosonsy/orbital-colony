@@ -352,7 +352,7 @@ func ch05QuestionCode(text string) string {
 }
 
 func TestCh05StoryboardExamples(t *testing.T) {
-	ch05RunStoryboardExamples(t, "STORYBOARD_CH05.md", `(?s)<!-- go-example id=(e5[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\n`+"```go\n"+`(.*?)\n`+"```", 10, []string{"5-1-functions", "5-2-storm", "5-3-fault-log", "5-4-undock", "5-5-command-table"})
+	ch05RunStoryboardExamples(t, "docs/storyboards/STORYBOARD_CH05.md", `(?s)<!-- go-example id=(e5[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\n`+"```go\n"+`(.*?)\n`+"```", 10, []string{"5-1-functions", "5-2-storm", "5-3-fault-log", "5-4-undock", "5-5-command-table"})
 }
 
 func ch05RunStoryboardExamples(t *testing.T, filename, pattern string, wantCount int, levelIDs []string) {

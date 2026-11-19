@@ -268,7 +268,7 @@ func TestCh08StoryboardExamplesRunWithGo(t *testing.T) {
 	if err != nil {
 		t.Skip("go toolchain unavailable: cannot execute storyboard examples")
 	}
-	body, err := os.ReadFile(filepath.Join("..", "..", "STORYBOARD_CH08.md"))
+	body, err := os.ReadFile(filepath.Join("..", "..", "docs/storyboards/STORYBOARD_CH08.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
