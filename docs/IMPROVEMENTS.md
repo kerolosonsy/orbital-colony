@@ -80,3 +80,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 76. **Line numbers explain breakpoints** — hovering a line number now says "click for a breakpoint (F9)" (or "click to remove"), so the gutter's hidden feature is discoverable.
 77. **Your best next to the targets** — the mission header now shows "your best: N" beside the 2★/3★ tick targets (updated right after a successful run), so it's clear how far you are from three stars. Verified in the browser (and that the result sheet focuses "Next mission").
 78. **Result sheet says how many ticks to save** — below three stars it now adds "(N to save)" next to the 3★ target, instead of making you subtract.
+79. **Index shows your best on hover** — each finished mission cell's tooltip includes your best tick count.

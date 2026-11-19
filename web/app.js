@@ -1654,7 +1654,7 @@ function renderMissions() {
       b.className = "cell" + (r.stars > 0 ? " done" : "") + (S.cur && l.id === S.cur.id ? " current" : "");
       b.disabled = !open || S.running;
       b.innerHTML = `<span class="cell-top"><span class="cell-code">${sheetCode(l)}</span>${open ? `<span class="stars">${starHTML(r.stars)}</span>` : ""}</span><span class="cell-title">${esc(l.title)}</span>${l.boss ? `<span class="boss-badge">${T("ختام المسار", "Track Boss")}</span>` : ""}`;
-      b.title = open ? (l.kind === "lab" ? T("مختبر", "Lab") : T("مهمة", "Mission")) : T("مقفولة: خلّص اللي قبلها", "Locked: finish the one before it");
+      b.title = open ? (l.kind === "lab" ? T("مختبر", "Lab") : T("مهمة", "Mission")) + (l.kind !== "lab" && r.best > 0 ? T(` · أحسن رقم: ${r.best} tick`, ` · best: ${r.best} ticks`) : "") : T("مقفولة: خلّص اللي قبلها", "Locked: finish the one before it");
       b.onclick = () => { closeOverlay($("#missions")); loadLevel(l.id); };
       b.dataset.search = `${l.id} ${sheetCode(l)} ${l.title}`.toLowerCase();
       b.dataset.code = sheetCode(l);
