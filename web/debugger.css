@@ -102,6 +102,7 @@
   position: relative; display: block; box-sizing: border-box; width: 100%; height: 1.65em; padding: 0 10px 0 0;
   border: 0; background: transparent; color: inherit; font: inherit; line-height: 1.65em; text-align: right; cursor: pointer;
 }
+.gutter-line.caret-row { color: var(--paper); }
 .gutter-line:hover { background: color-mix(in oklab, var(--paper) 8%, transparent); }
 .gutter-line:hover::before { content: ""; position: absolute; left: 5px; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: color-mix(in oklab, var(--err) 35%, transparent); transform: translateY(-50%); }
 .gutter-line:focus-visible { z-index: 1; outline: 1px solid var(--star); outline-offset: -1px; }

@@ -482,6 +482,10 @@ const caretLine = $("#caret-line");
 function placeCaretLine() {
   const show = !ed.readOnly && ed.selectionStart === ed.selectionEnd;
   caretLine.classList.toggle("on", show);
+  // the caret line's number lights up too
+  const caretRow = ed.readOnly ? 0 : ed.value.slice(0, ed.selectionStart).split("\n").length;
+  for (const old of gutter.querySelectorAll(".gutter-line.caret-row")) if (Number(old.dataset.debugLine) !== caretRow) old.classList.remove("caret-row");
+  gutter.querySelector(`[data-debug-line="${caretRow}"]`)?.classList.add("caret-row");
   if (!show) { bracketMarks.forEach((mark) => mark.classList.remove("on")); return; }
   const line = ed.value.slice(0, ed.selectionStart).split("\n").length;
   const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
