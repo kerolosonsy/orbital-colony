@@ -92,10 +92,10 @@ const InlineDebugger = (() => {
     return text.slice(0, Math.max(0, limit - 1)) + "…";
   }
 
-  function renderInlineValues(variables, changed = new Set()) {
-    const list = (variables || []).slice(0, 5);
+  function renderInlineValues(variables, changed = new Set(), compact = false) {
+    const list = (variables || []).slice(0, compact ? 2 : 5);
     if (!list.length) return "";
-    let budget = 84;
+    let budget = compact ? 34 : 72;
     const chips = [];
     for (const variable of list) {
       let value = String(variable.value);
@@ -119,7 +119,7 @@ const InlineDebugger = (() => {
       const closeTags = "</span>".repeat(part.close.length);
       const extra = active ? "" : number === debugState.previousLine ? " is-trail" : "";
       const changed = active ? new Set(debugState.changed || []) : new Set();
-      return `<span class="debug-line${active ? " is-current" : ""}${extra}" data-debug-line="${number}">${openTags}${part.content}${closeTags}${renderInlineValues(variables, changed)}</span>`;
+      return `<span class="debug-line${active ? " is-current" : ""}${extra}" data-debug-line="${number}">${openTags}${part.content}${closeTags}${renderInlineValues(variables, changed, !active)}</span>`;
     }).join("");
   }
 
@@ -338,6 +338,7 @@ const InlineDebugger = (() => {
     elements.toolbar.hidden = false;
     elements.controls.hidden = false;
     elements.panel.hidden = false;
+    setFocus(true);
     if (!userCollapsed) setCollapsed(matchMedia("(max-width: 760px)").matches);
     if (!frames.length) return showEmptyTrace();
     setStatus(traceStatus(response));
@@ -417,7 +418,16 @@ const InlineDebugger = (() => {
     lastVariables = new Map();
   }
 
+  // Focus mode gives the code the lesson's column while a session is open.
+  function setFocus(on) {
+    if (typeof document === "undefined" || !document.body) return;
+    document.body.classList.toggle("debug-focus", on);
+    if (!on) document.body.classList.remove("lesson-open");
+    callbacks.onFocusChange?.(on);
+  }
+
   function hideDebuggerUI() {
+    setFocus(false);
     elements.toolbar.hidden = true;
     elements.panel.hidden = true;
     elements.controls.hidden = true;
@@ -548,7 +558,7 @@ const InlineDebugger = (() => {
     const where = document.querySelector("#debugger-where-text");
     if (where) where.innerHTML = whereText(frame);
     renderTimeline(index);
-    renderVariables(frame);
+    renderVariables(frame, index);
     renderStack(frame, index, response.frames);
     renderOutput(frame);
     flashChangedVariables(frame);
@@ -607,16 +617,31 @@ const InlineDebugger = (() => {
     return "str";
   }
 
-  function renderVariables(frame) {
-    const variables = frame?.variables || [];
+  // The closing "}" or a return frame has no locals of its own: keep showing
+  // the last values this function had so the final state stays visible.
+  function lastKnownVariables(frame, index) {
+    for (let i = index - 1; i >= 0; i--) {
+      const earlier = response.frames[i];
+      if (frameGoroutine(earlier) === frameGoroutine(frame) && earlier.func === frame.func && earlier.variables?.length) return earlier.variables;
+    }
+    return [];
+  }
+
+  function renderVariables(frame, index = 0) {
+    let variables = frame?.variables || [];
     const prior = lastVariables;
     const returns = frame?.returns || [];
+    let note = "";
+    if (!variables.length && response) {
+      variables = lastKnownVariables(frame, index);
+      if (variables.length) note = `<p class="debug-note">${translate("آخر قيم قبل ما الدالة تخلص:", "Last values before the function ended:")}</p>`;
+    }
     if (!variables.length && !returns.length) {
       elements.variables.innerHTML = `<p>${translate("مفيش متغيرات محلية في الخطوة دي.", "No local variables in this step.")}</p>`;
       return;
     }
     const header = `<thead><tr><th>${translate("المتغير", "Variable")}</th><th>${translate("القيمة", "Value")}</th></tr></thead>`;
-    elements.variables.innerHTML = (variables.length
+    elements.variables.innerHTML = note + (variables.length
       ? `<table>${header}<tbody>${variables.map((variable) => `<tr data-variable-name="${esc(variable.name)}"><th dir="ltr">${esc(variable.name)}</th><td dir="ltr"><span class="debug-val debug-val-${valueKind(variable.value)}">${esc(variable.value)}</span>${prior.has(variable.name) && prior.get(variable.name) !== variable.value ? `<s class="debug-was">${esc(prior.get(variable.name))}</s>` : ""}</td></tr>`).join("")}</tbody></table>`
       : "") + (returns.length
       ? `<h4>${translate("قيم الرجوع", "Return values")}</h4><table>${header}<tbody>${returns.map((variable) => `<tr><th dir="ltr">${esc(variable.name)}</th><td dir="ltr">${esc(variable.value)}</td></tr>`).join("")}</tbody></table>`
@@ -657,10 +682,20 @@ const InlineDebugger = (() => {
       if (frame.event === "call" && frame.func === current.func && Number(frame.depth || 0) === Number(current.depth || 0) && frameGoroutine(frame) === frameGoroutine(current)) { callStart = i; break; }
     }
     const frames = response.frames.slice(0, stepper.index + 1);
-    for (const frame of frames.slice(callStart)) {
-      if (frame.file !== file || frameGoroutine(frame) !== frameGoroutine(current) || frame.func !== current.func || Number(frame.depth || 0) !== Number(current.depth || 0) || frame.event !== "line") continue;
-      map.set(frame.line, frame.variables || []);
+    // Other lines show only what they changed the last time they ran (the
+    // values right after them), so the code stays readable; the current
+    // line shows everything in scope.
+    const own = frames.slice(callStart).filter((frame) => frame.file === file && frameGoroutine(frame) === frameGoroutine(current)
+      && frame.func === current.func && Number(frame.depth || 0) === Number(current.depth || 0) && (frame.event === "line" || frame.event === "return"));
+    for (let k = 0; k + 1 < own.length; k++) {
+      const ran = own[k];
+      if (ran.event !== "line") continue;
+      const beforeLine = new Map((ran.variables || []).map((variable) => [variable.name, variable.value]));
+      const effect = (own[k + 1].variables || []).filter((variable) => beforeLine.get(variable.name) !== variable.value);
+      if (effect.length) map.set(ran.line, effect);
+      else map.delete(ran.line);
     }
+    if (current.event === "line") map.set(current.line, current.variables || []);
     const visited = new Set(frames.filter((frame) => frame.file === file && frame.event === "line").map((frame) => frame.line));
     let previousLine = 0;
     for (let i = stepper.index - 1; i >= 0; i--) {
