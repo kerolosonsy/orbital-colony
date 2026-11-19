@@ -198,6 +198,7 @@ func BenchmarkHiddenTheirs(b *testing.B) {
 func init() {
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch16Mission1(true),
 			Title: "Catch the Mutants",
 			Goal:  "Write Fuel tests that catch every broken version (6 mutants)",
 			Lesson: `# The Lab: Real Tests with go test 🧪
@@ -242,7 +243,11 @@ How do you know your tests are **good**? Mission Control breaks ~Fuel~ in 6 diff
 
 Tip: bugs hide at **boundaries** (0, 50, 51...).`,
 			Starter: ``,
-			Hints:   []string{"Put cases in a slice: ~cases := []struct{ d, c, want int }{ {3, 12, 8}, ... }~, then loop with ~for _, tc := range cases~.", "Think about **boundaries**: 50 and 51, distance 0 with cargo, 6 kg, and a very large load such as 200.", "Each surviving mutant means a case is missing. Read its description in the Console."},
+			Hints: []string{
+				"A test is a claim about behavior; a mutant helps reveal a missing claim.",
+				"Group related inputs with their expected behavior, then give each row a useful name.",
+				"Start from ~TestFuel~ in ~main_test.go~ and use each surviving mutant's description to find the missing promise.",
+			},
 			Files: []LabFile{
 				{Name: "main_test.go", Starter: `package main
 
@@ -282,7 +287,7 @@ func main() {
 `, ReadOnly: true},
 			},
 		},
-		ID: "16-1-mutants", Chapter: 16, Title: "اصطاد الـ Mutants",
+		ID: "16-1-mutants", Chapter: 16, LessonRevision: 1, Steps: ch16Mission1(false), Title: "اصطاد الـ Mutants",
 		Goal:     "اكتب تستات لـ Fuel تمسك كل نسخة متبوّظة منها (6 mutants)",
 		Kind:     "lab",
 		Requires: []string{"tabletest"},
@@ -314,9 +319,9 @@ func TestFuel(t *testing.T) {
 			},
 		},
 		Hints: []string{
-			"حط الحالات في slice: ~cases := []struct{ d, c, want int }{ {3, 12, 8}, ... }~، ولف عليها بـ ~for _, tc := range cases~.",
-			"فكّر في **الحدود**: 50 و51، والمسافة 0 مع شحنة، و6 كجم، وشحنة كبيرة أوي زي 200.",
-			"كل mutant بيعدّي يبقى فيه حالة مش مغطّية. اقرا الوصف بتاعه في الـ Console.",
+			"الـtest بيثبت سلوك؛ والـmutant بيكشف الوعد اللي لسه مش واضح.",
+			"جمّع المدخلات المرتبطة مع السلوك المتوقع، وادي كل صف اسم مفهوم.",
+			"ابدأ من ~TestFuel~ في ~main_test.go~ واستخدم وصف كل mutant عدى عشان تحدد الوعد الناقص.",
 		},
 		Lesson: `# المختبر: تستات حقيقية بـ go test 🧪
 
@@ -363,6 +368,7 @@ for _, tc := range cases {
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch16Mission2(true),
 			Title: "Catch the Bug",
 			Goal:  "Median has bugs. Write a failing test first, then fix the code until everything passes",
 			Lesson: `# TDD: Red First, Then Green 🔴🟢
@@ -406,7 +412,11 @@ defer func() {
 Median(nil)
 ~~~`,
 			Starter: ``,
-			Hints:   []string{"Trace main.go mentally: after ~Median~, ~readings~ is sorted! That is a bug: the function changed data belonging to its caller.", "Revealing cases: even length ~[4 1 3 2]~ should give 2; an empty slice should give 0 (it currently panics); input must remain unchanged (compare a copy with ~slices.Equal~).", "The fix: ~s := slices.Clone(xs)~, then ~slices.Sort(s)~. Handle ~len(s) == 0~ and even lengths."},
+			Hints: []string{
+				"Separate the returned value from whether the function preserves its caller's input.",
+				"Make one failing observation first, then repair behavior while keeping both promises visible.",
+				"Trace ~Median~ in ~main.go~ around its sort and return, then check which slice each line changes.",
+			},
 			Files: []LabFile{
 				{Name: "main.go", Starter: `package main
 
@@ -441,7 +451,7 @@ func TestMedian(t *testing.T) {
 `, ReadOnly: false},
 			},
 		},
-		ID: "16-2-bug-hunt", Chapter: 16, Title: "اصطاد الـ Bug",
+		ID: "16-2-bug-hunt", Chapter: 16, LessonRevision: 1, Steps: ch16Mission2(false), Title: "اصطاد الـ Bug",
 		Goal:     "Median فيها bugs. اكتب test يكشفها الأول (يفشل)، وبعدين صلّح الكود لحد ما كله يعدّي",
 		Kind:     "lab",
 		Requires: []string{"sel:testing.T"},
@@ -461,9 +471,9 @@ func TestMedian(t *testing.T) {
 		},
 		Lab: &Lab{ReqFile: "main_test.go", Buggy: medianBuggy, Hidden: medianHidden},
 		Hints: []string{
-			"شغّل main.go في دماغك: ~readings~ بعد ~Median~ بقت مترتبة! ده bug: الدالة غيّرت حاجة مش بتاعتها.",
-			"حالات تكشف: عدد زوجي ~[4 1 3 2]~ المفروض 2، وslice فاضية المفروض 0 (دلوقتي بتعمل panic)، وإن الـ input ميتغيرش (قارن بـ ~slices.Equal~ مع نسخة).",
-			"الإصلاح: ~s := slices.Clone(xs)~ ثم ~slices.Sort(s)~، واتعامل مع ~len(s) == 0~ والعدد الزوجي.",
+			"افصل القيمة الراجعة عن سؤال هل الدالة حافظت على input بتاع اللي ناداها.",
+			"خلّي ملاحظة واحدة تفشل الأول، وبعدها أصلح السلوك مع الحفاظ على الوعدين.",
+			"تتبّع ~Median~ في ~main.go~ حوالين الترتيب والرجوع، وشوف كل سطر بيغيّر أنهي slice.",
 		},
 		Lesson: `# TDD: الأحمر الأول، بعدين الأخضر 🔴🟢
 
@@ -509,6 +519,7 @@ Median(nil)
 
 	add(&Level{
 		En: &LevelText{
+			LessonRevision: 1, Steps: ch16Mission3(true),
 			Title: "100 Times Faster",
 			Goal:  "CountPairs is very slow (O(n²)). Speed it up without breaking it, and write your own benchmark",
 			Lesson: `# Benchmarks: Measure Before Optimizing ⚡
@@ -550,7 +561,11 @@ On paper, a map (O(n)) beats sorting (O(n log n)). But try both and measure: has
 ## Stars
 ⭐ 3× faster · ⭐⭐ 15× faster · ⭐⭐⭐ 50× faster`,
 			Starter: ``,
-			Hints:   []string{"The benchmark: ~func BenchmarkCountPairs(b *testing.B) { xs := ...; for b.Loop() { CountPairs(xs, 1000) } }~.", "Idea 1: one pass with a map. For each x, new pairs = ~seen[target-x]~, then ~seen[x]++~. This is O(n).", "Idea 2: sort a copy and use two pointers, one at each end. This is O(n log n). Watch out for duplicates! Try both and measure which is actually faster."},
+			Hints: []string{
+				"A benchmark measures repeated runtime; it does not prove result correctness.",
+				"Keep correctness and speed checks separate, then compare runs on the same data.",
+				"Use the benchmark stub in ~main_test.go~ and inspect the current ~CountPairs~ loops before changing them.",
+			},
 			Files: []LabFile{
 				{Name: "main.go", Starter: `package main
 
@@ -587,7 +602,7 @@ func TestCountPairs(t *testing.T) {
 `, ReadOnly: false},
 			},
 		},
-		ID: "16-3-benchmark", Chapter: 16, Title: "أسرع 100 مرة",
+		ID: "16-3-benchmark", Chapter: 16, LessonRevision: 1, Steps: ch16Mission3(false), Title: "أسرع 100 مرة",
 		Goal:     "CountPairs بطيئة جداً (O(n²)). خليها أسرع من غير ما تبوّظها، واكتب benchmark بنفسك",
 		Kind:     "lab",
 		Requires: []string{"benchmark"},
@@ -609,9 +624,9 @@ func TestCountPairs(t *testing.T) {
 		},
 		Lab: &Lab{ReqFile: "main_test.go", Hidden: pairsHidden, Bench: &Bench{Tiers: [3]float64{3, 15, 50}}},
 		Hints: []string{
-			"الـ benchmark: ~func BenchmarkCountPairs(b *testing.B) { xs := ...; for b.Loop() { CountPairs(xs, 1000) } }~.",
-			"فكرة 1: لفّة واحدة بـ map: لكل x، الأزواج الجديدة = ~seen[target-x]~، وبعدين ~seen[x]++~. ده O(n).",
-			"فكرة 2: رتّب نسخة، وامشي بمؤشرين واحد من الأول وواحد من الآخر (two pointers). ده O(n log n). خلّي بالك من الأرقام المتكررة! جرّب الاتنين وقيس: مين أسرع فعلاً؟",
+			"الـbenchmark بيقيس التشغيل المتكرر؛ لكنه مش دليل على صحة النتيجة.",
+			"افصل فحص الصحة عن السرعة، وقارن التشغيل على نفس البيانات.",
+			"استخدم مكان الـbenchmark في ~main_test.go~ وراجع لفّات ~CountPairs~ الحالية قبل التغيير.",
 		},
 		Lesson: `# Benchmarks: قيس قبل ما تحسّن ⚡
 
@@ -652,7 +667,7 @@ for i := range xs {
 ## النجوم
 ⭐ أسرع 3 مرات · ⭐⭐ أسرع 15 مرة · ⭐⭐⭐ أسرع 50 مرة`,
 	})
-	add(&Level{ID: "16-4-wild-inputs", Chapter: 16, Kind: "lab", Title: "مدخلات مجنونة", Goal: "اكتب fuzz يكشف عيوب كبسولة التحكم وبعدين صلّح parser", Requires: []string{"fuzz"}, Bridge: []int{85},
+	add(&Level{ID: "16-4-wild-inputs", Chapter: 16, LessonRevision: 1, Steps: ch16Mission4(false), Kind: "lab", Title: "مدخلات مجنونة", Goal: "اكتب fuzz يكشف عيوب كبسولة التحكم وبعدين صلّح parser", Requires: []string{"fuzz"}, Bridge: []int{85},
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: capsuleBuggy, ReadOnly: false}, {Name: "main_test.go", Starter: wildInputsTestStarter}},
 		Lesson: `# جرّب مدخلات ما تخطرش على بالك
 
@@ -703,8 +718,12 @@ return frame[3:3+n] // الطول المعلن ممكن يبقى أكبر من �
 نفّذ ~ParseCapsule(frame []byte) (byte,[]byte,error)~: header ثلاث بايتات: توقيع0xA7، ثم kind يساوي1 أو2، ثم طول payload من0 لـ16. الطول الكلي لازم يساوي3+الطول المعلن بالظبط. النجاح يرجّع kind ونسخة مستقلة من payload وnil؛ أي مدخل تاني يرجّع0 وnil وخطأ من غير تغيير المدخل أو panic.
 
 اكتب ~FuzzCapsule~ في main_test.go: seeds تشمل قصير، توقيع غلط، kind غلط، بايتات زيادة، وصحيح بطول صفر وبـ payload. اختبر القبول والرفض وعدم تعديل المدخل. التستات لازم تمسك الأصل البايظ والتلات mutants، وتعدّي على إصلاحك ومع التوليد. مفيش Report هنا.
-`, Hints: []string{"ضيف seeds قصيرة قبل ما تصلّح؛ go test بيشغّلها من غير fuzz طويل.", "احسب valid من طول وتوقيع ونوع الرسالة، مش من نتيجة parser.", "راجع len>=3 قبل frame[2]، وبعدين الطول الأقصى والطول الكلي والمخرجات المستقلة."},
-		En: &LevelText{Title: "Wild Inputs", Goal: "Write a fuzz target that exposes capsule defects, then repair the parser", Files: []LabFile{{Name: "main.go", Starter: capsuleBuggy, ReadOnly: false}, {Name: "main_test.go", Starter: wildInputsTestStarter}}, Lesson: `# Try Inputs You Would Never Invent
+`, Hints: []string{
+			"ابدأ بـseeds صغيرة؛ ~go test~ بيشغّلهم قبل fuzz طويل.",
+			"خلّي صلاحية input جاية من العقد، مش من parser نفسه.",
+			"ابدأ من أول قراءة index في parser، وراجع اختبار القبول والرفض مع مدخل ثابت.",
+		},
+		En: &LevelText{LessonRevision: 1, Steps: ch16Mission4(true), Title: "Wild Inputs", Goal: "Write a fuzz target that exposes capsule defects, then repair the parser", Files: []LabFile{{Name: "main.go", Starter: capsuleBuggy, ReadOnly: false}, {Name: "main_test.go", Starter: wildInputsTestStarter}}, Lesson: `# Try Inputs You Would Never Invent
 
 Table tests cover chosen cases. Fuzzing mutates bytes to find panics or contract violations. The control-capsule parser is pure, so thousands of inputs need no hardware or network.
 
@@ -753,14 +772,18 @@ Do not hide panics with recover inside the fuzz target: those are bugs the test 
 Implement ~ParseCapsule(frame []byte) (byte,[]byte,error)~. The three-byte header contains signature 0xA7, kind 1 or 2, and payload length 0 through 16. Total length must equal exactly 3 plus the declared length. Success returns kind, an independent payload copy, and nil. Every other input returns zero, nil, and an error without mutation or panic.
 
 Write ~FuzzCapsule~ in main_test.go with seeds for short input, wrong signature, unknown kind, trailing bytes, and valid empty/nonempty payloads. Check acceptance, rejection, and unchanged input. Tests must catch the original bug and all three mutants, pass on your repair, and pass generated inputs. No Report is needed.
-`, Hints: []string{"Add short seeds before repairing; go test runs them without a fuzz campaign.", "Derive valid from length, signature, and kind rather than parser output.", "Check len>=3 before frame[2], then maximum/exact lengths and independent output."}},
+	`, Hints: []string{
+			"Start with small seeds; ~go test~ runs them before a long fuzz session.",
+			"Derive input validity from the contract, not from the parser itself.",
+			"Start at the parser's first index read, then review acceptance and rejection with a fixed input.",
+		}},
 		Lab: &Lab{ReqFile: "main_test.go", Hidden: wildInputsHidden, Fuzz: "FuzzCapsule", Buggy: capsuleBuggy, Mutants: []Mutant{
 			{i18n.T("توقيع غلط", "Wrong signature"), mutate(capsuleCorrect, "frame[0] != 0xA7", "false")},
 			{i18n.T("نوع مش معروف", "Unknown kind"), mutate(capsuleCorrect, "frame[1] != 1 && frame[1] != 2", "false")},
 			{i18n.T("بايتات زيادة بعد الرسالة", "Trailing bytes"), mutate(capsuleCorrect, "len(frame) != 3+n", "len(frame)<3+n")},
 		}},
 	})
-	add(&Level{ID: "16-5-fake-clock", Chapter: 16, Kind: "lab", Race: true, Title: "ساعة مزيفة", Goal: "اختبر بوابة إطلاق بوقت محقون من غير نوم", Requires: []string{"subtest"}, Bridge: []int{15, 36},
+	add(&Level{ID: "16-5-fake-clock", Chapter: 16, LessonRevision: 1, Steps: ch16Mission5(false), Kind: "lab", Race: true, Title: "ساعة مزيفة", Goal: "اختبر بوابة إطلاق بوقت محقون من غير نوم", Requires: []string{"subtest"}, Bridge: []int{15, 36},
 		Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: launchGateImpl, ReadOnly: true}, {Name: "main_test.go", Starter: fakeClockTestStarter}},
 		Lesson: `# حرّك الساعة بدل ما تستناها
 
@@ -823,8 +846,12 @@ clock.Advance(time.Second)
 عدّل main_test.go بس. اكتب subtests وhelper بـ t.Helper باستخدام labkit.NewFakeClock وAdvance. غطّي الرصيد الأولي، رفض طلب أكبر من الرصيد من غير استهلاك، قبل refill وعندها، أجزاء مدة متراكمة، سقف السعة، ومدخلات configuration وTake غير الصالحة.
 
 ~NewLaunchGate(nil,...)~ أو capacity<=0 أو every<=0 ترجع nil,error. ~Take(n<=0)~ ترجع false,error من غير تغيير. التستات لازم تعدّي على التنفيذ الصحيح وتمسك الأربع mutants، وتشتغل من غير انتظار حقيقي. مفيش Report؛ المختبر كمان بيختبر طلبات متزامنة بـ race detector.
-`, Hints: []string{"ساعة جديدة لكل subtest؛ اعمل helper تقارن bool والخطأ مع بعض.", "استهلك الرصيد ثم حرّك every-1ns وافحص الرفض، وبعد1ns افحص القبول.", "جرّب رفض طلب أكبر من السعة وبعده طلب بكل الرصيد؛ كده تمسك الاستهلاك الغلط."},
-		En: &LevelText{Title: "Fake Clock", Goal: "Test a launch gate using injected time without sleeping", Files: []LabFile{{Name: "main.go", Starter: launchGateImpl, ReadOnly: true}, {Name: "main_test.go", Starter: fakeClockTestStarter}}, Lesson: `# Move Time Instead of Waiting
+`, Hints: []string{
+			"ساعة جديدة لكل subtest، وخلي helper يفحص القيمة والخطأ مع بعض.",
+			"نظّم السيناريوهات حوالين الوقت والرصيد، وسيب كل واحد يبدأ بحالة مستقلة.",
+			"ابدأ من signatures ~NewLaunchGate~ و~Take~ قبل استخدام ~FakeClock.Advance~ في التست.",
+		},
+		En: &LevelText{LessonRevision: 1, Steps: ch16Mission5(true), Title: "Fake Clock", Goal: "Test a launch gate using injected time without sleeping", Files: []LabFile{{Name: "main.go", Starter: launchGateImpl, ReadOnly: true}, {Name: "main_test.go", Starter: fakeClockTestStarter}}, Lesson: `# Move Time Instead of Waiting
 
 A test that waits a real second is slow and vulnerable to machine load. The launch gate accepts a clock interface, letting tests move time instantly and inspect exact boundaries.
 
@@ -885,7 +912,11 @@ Check one nanosecond before refill, then exactly at it. A mutant using real time
 Edit only main_test.go. Write subtests and a t.Helper assertion using labkit.NewFakeClock and Advance. Cover initial credit, oversized rejection without consumption, just-before/exact refill, accumulated fractional intervals, capacity ceiling, and invalid configuration and Take inputs.
 
 ~NewLaunchGate(nil,...)~, capacity<=0, or every<=0 return nil,error. ~Take(n<=0)~ returns false,error without mutation. Tests must pass the correct implementation, kill all four mutants, and perform no real waiting. No Report is needed; the lab also checks concurrent requests with the race detector.
-`, Hints: []string{"Use a fresh clock per subtest and a helper checking both bool and error.", "Consume credit, advance every-1ns and assert rejection, then advance 1ns and assert acceptance.", "Reject an oversized request, then spend the full balance to catch accidental consumption."}},
+	`, Hints: []string{
+			"Give each subtest a fresh clock, and let a helper check value and error together.",
+			"Organize scenarios around time and credit, with each one starting from isolated state.",
+			"Start with the ~NewLaunchGate~ and ~Take~ signatures before using ~FakeClock.Advance~ in the test.",
+		}},
 		Lab: &Lab{ReqFile: "main_test.go", Hidden: fakeClockHidden, Mutants: []Mutant{
 			{i18n.T("لحظة refill بالظبط", "Exact refill instant"), mutate(launchGateImpl, "now.Sub(g.last) / g.every", "(now.Sub(g.last)-1)/g.every")},
 			{i18n.T("تجاهل الساعة المحقونة", "Ignored injected clock"), mutate(launchGateImpl, "now := g.clock.Now()", "now:=time.Now()")},
