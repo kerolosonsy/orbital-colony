@@ -1,0 +1,702 @@
+{
+  "ch12-deadlock-order": {
+    "fixed": [
+      {
+        "events": [
+          {
+            "caption": {
+              "ar": "مفيش عامل ماسك قفل",
+              "en": "No worker holds a lock"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A أخد المثقاب",
+              "en": "Worker A takes Drill"
+            },
+            "cart": "free",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B مستني المثقاب",
+              "en": "Worker B waits for Drill"
+            },
+            "cart": "free",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A أخد العربية",
+              "en": "Worker A takes Cart"
+            },
+            "cart": "a",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A فتح القفلين",
+              "en": "Worker A releases both"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B أخد المثقاب",
+              "en": "Worker B takes Drill"
+            },
+            "cart": "free",
+            "drill": "b",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B أخد العربية",
+              "en": "Worker B takes Cart"
+            },
+            "cart": "b",
+            "drill": "b",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العاملين خلصوا",
+              "en": "Both workers finish"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "done"
+          }
+        ],
+        "name": {
+          "ar": "A يدخل الأول",
+          "en": "A enters first"
+        }
+      },
+      {
+        "events": [
+          {
+            "caption": {
+              "ar": "مفيش عامل ماسك قفل",
+              "en": "No worker holds a lock"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B أخد المثقاب",
+              "en": "Worker B takes Drill"
+            },
+            "cart": "free",
+            "drill": "b",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A مستني المثقاب",
+              "en": "Worker A waits for Drill"
+            },
+            "cart": "free",
+            "drill": "b",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B أخد العربية",
+              "en": "Worker B takes Cart"
+            },
+            "cart": "b",
+            "drill": "b",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B فتح القفلين",
+              "en": "Worker B releases both"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A أخد المثقاب",
+              "en": "Worker A takes Drill"
+            },
+            "cart": "free",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A أخد العربية",
+              "en": "Worker A takes Cart"
+            },
+            "cart": "a",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العاملين خلصوا",
+              "en": "Both workers finish"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "done"
+          }
+        ],
+        "name": {
+          "ar": "B يدخل الأول",
+          "en": "B enters first"
+        }
+      }
+    ],
+    "labels": {
+      "again": {
+        "ar": "جدولة تانية",
+        "en": "Run again"
+      },
+      "cart": {
+        "ar": "العربية",
+        "en": "Cart lock"
+      },
+      "cycle": {
+        "ar": "دورة انتظار",
+        "en": "Wait cycle"
+      },
+      "done": {
+        "ar": "العاملين خلصوا",
+        "en": "Both workers finished"
+      },
+      "drill": {
+        "ar": "المثقاب",
+        "en": "Drill lock"
+      },
+      "fixed": {
+        "ar": "موحّد",
+        "en": "Fixed"
+      },
+      "free": {
+        "ar": "فاضي",
+        "en": "Free"
+      },
+      "lockOrder": {
+        "ar": "ترتيب الأقفال",
+        "en": "Lock order"
+      },
+      "mixed": {
+        "ar": "مختلف",
+        "en": "Different"
+      },
+      "next": {
+        "ar": "الخطوة الجاية",
+        "en": "Next step"
+      },
+      "orderButton": {
+        "ar": "بدّل ترتيب الأقفال",
+        "en": "Toggle lock order"
+      },
+      "running": {
+        "ar": "الشغل مكمل",
+        "en": "Work continues"
+      },
+      "schedule": {
+        "ar": "ترتيب ممكن",
+        "en": "One possible schedule"
+      },
+      "status": {
+        "ar": "الحالة",
+        "en": "State"
+      },
+      "workerA": {
+        "ar": "العامل A",
+        "en": "Worker A"
+      },
+      "workerB": {
+        "ar": "العامل B",
+        "en": "Worker B"
+      }
+    },
+    "mixed": [
+      {
+        "events": [
+          {
+            "caption": {
+              "ar": "مفيش عامل ماسك قفل",
+              "en": "No worker holds a lock"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A أخد المثقاب",
+              "en": "Worker A takes Drill"
+            },
+            "cart": "free",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A أخد العربية",
+              "en": "Worker A takes Cart"
+            },
+            "cart": "a",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A فتح القفلين",
+              "en": "Worker A releases both"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B أخد العربية",
+              "en": "Worker B takes Cart"
+            },
+            "cart": "b",
+            "drill": "free",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B أخد المثقاب",
+              "en": "Worker B takes Drill"
+            },
+            "cart": "b",
+            "drill": "b",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العاملين خلصوا",
+              "en": "Both workers finish"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "done"
+          }
+        ],
+        "name": {
+          "ar": "A أخد القفلين الأول",
+          "en": "A gets both locks first"
+        }
+      },
+      {
+        "events": [
+          {
+            "caption": {
+              "ar": "مفيش عامل ماسك قفل",
+              "en": "No worker holds a lock"
+            },
+            "cart": "free",
+            "drill": "free",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل A أخد المثقاب",
+              "en": "Worker A takes Drill"
+            },
+            "cart": "free",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "العامل B أخد العربية",
+              "en": "Worker B takes Cart"
+            },
+            "cart": "b",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "A مستني العربية عند B",
+              "en": "A waits for Cart held by B"
+            },
+            "cart": "b",
+            "drill": "a",
+            "status": "running"
+          },
+          {
+            "caption": {
+              "ar": "B مستني المثقاب عند A",
+              "en": "B waits for Drill held by A"
+            },
+            "cart": "b",
+            "drill": "a",
+            "status": "cycle"
+          }
+        ],
+        "name": {
+          "ar": "كل واحد ماسك قفل",
+          "en": "Each worker holds one lock"
+        }
+      }
+    ]
+  },
+  "ch12-registry-lock": {
+    "labels": {
+      "again": {
+        "ar": "جدولة تانية",
+        "en": "Run again"
+      },
+      "completion": {
+        "ar": "كل الكتّاب خلصوا بعد Wait",
+        "en": "All writers finish after Wait"
+      },
+      "done": {
+        "ar": "الكتّاب خلصوا؛ القراءة آمنة",
+        "en": "Writers finished; read is safe"
+      },
+      "empty": {
+        "ar": "فاضي",
+        "en": "Empty"
+      },
+      "log": {
+        "ar": "ترتيب التسجيل",
+        "en": "Write log"
+      },
+      "map": {
+        "ar": "السجل",
+        "en": "Map"
+      },
+      "next": {
+        "ar": "سجّل التالي",
+        "en": "Record next"
+      },
+      "scenario": {
+        "ar": "ترتيب كتابة ممكن",
+        "en": "One possible write order"
+      },
+      "shared": {
+        "ar": "قفل واحد",
+        "en": "One shared lock"
+      },
+      "sharedLock": {
+        "ar": "القفل نفسه لكل الكتّاب",
+        "en": "One mutex for every writer"
+      },
+      "start": {
+        "ar": "السجل بدأ فاضي",
+        "en": "Map starts empty"
+      },
+      "waitGroup": {
+        "ar": "WaitGroup",
+        "en": "WaitGroup"
+      },
+      "waiting": {
+        "ar": "لسه فيه كتّاب",
+        "en": "Writers still running"
+      }
+    },
+    "orders": [
+      {
+        "name": {
+          "ar": "A ثم B ثم C",
+          "en": "A, then B, then C"
+        },
+        "sequence": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "name": {
+          "ar": "C ثم A ثم B",
+          "en": "C, then A, then B"
+        },
+        "sequence": [
+          2,
+          0,
+          1
+        ]
+      }
+    ],
+    "writers": [
+      {
+        "caption": {
+          "ar": "العامل A سجل amber",
+          "en": "Worker A records amber"
+        },
+        "key": "amber",
+        "value": "4",
+        "worker": {
+          "ar": "العامل A",
+          "en": "Worker A"
+        }
+      },
+      {
+        "caption": {
+          "ar": "العامل B سجل violet",
+          "en": "Worker B records violet"
+        },
+        "key": "violet",
+        "value": "7",
+        "worker": {
+          "ar": "العامل B",
+          "en": "Worker B"
+        }
+      },
+      {
+        "caption": {
+          "ar": "العامل C سجل moss",
+          "en": "Worker C records moss"
+        },
+        "key": "moss",
+        "value": "2",
+        "worker": {
+          "ar": "العامل C",
+          "en": "Worker C"
+        }
+      }
+    ]
+  },
+  "ch12-shared-counter": {
+    "labels": {
+      "again": {
+        "ar": "ترتيب تاني",
+        "en": "Run again"
+      },
+      "done": {
+        "ar": "الكل خلص",
+        "en": "All workers finished"
+      },
+      "mutex": {
+        "ar": "القفل المشترك",
+        "en": "Shared mutex"
+      },
+      "next": {
+        "ar": "الخطوة الجاية",
+        "en": "Next step"
+      },
+      "off": {
+        "ar": "مقفول",
+        "en": "Off"
+      },
+      "on": {
+        "ar": "شغّال",
+        "en": "On"
+      },
+      "scenario": {
+        "ar": "ترتيب ممكن",
+        "en": "One possible schedule"
+      },
+      "total": {
+        "ar": "الإجمالي",
+        "en": "Shared total"
+      },
+      "waitGroup": {
+        "ar": "WaitGroup",
+        "en": "WaitGroup"
+      },
+      "waiting": {
+        "ar": "العمال لسه شغالين",
+        "en": "Workers still running"
+      }
+    },
+    "runs": [
+      {
+        "locked": [
+          {
+            "caption": {
+              "ar": "الإجمالي يبدأ صفر",
+              "en": "Total starts at zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "A مسك القفل وقرأ صفر",
+              "en": "A locks and reads zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "A كتب واحد وفتح القفل",
+              "en": "A writes one and unlocks"
+            },
+            "done": false,
+            "total": "1"
+          },
+          {
+            "caption": {
+              "ar": "B قرأ واحد تحت القفل",
+              "en": "B reads one under lock"
+            },
+            "done": false,
+            "total": "1"
+          },
+          {
+            "caption": {
+              "ar": "B كتب اتنين وفتح القفل",
+              "en": "B writes two and unlocks"
+            },
+            "done": true,
+            "total": "2"
+          }
+        ],
+        "name": {
+          "ar": "قراءتان متداخلتان",
+          "en": "Overlapping reads"
+        },
+        "unlocked": [
+          {
+            "caption": {
+              "ar": "الإجمالي يبدأ صفر",
+              "en": "Total starts at zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "العامل A قرأ صفر",
+              "en": "Worker A reads zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "العامل B قرأ صفر",
+              "en": "Worker B reads zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "العامل A كتب واحد",
+              "en": "Worker A writes one"
+            },
+            "done": false,
+            "total": "1"
+          },
+          {
+            "caption": {
+              "ar": "العامل B كتب واحد",
+              "en": "Worker B writes one"
+            },
+            "done": true,
+            "total": "1"
+          }
+        ]
+      },
+      {
+        "locked": [
+          {
+            "caption": {
+              "ar": "الإجمالي يبدأ صفر",
+              "en": "Total starts at zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "B مسك القفل وقرأ صفر",
+              "en": "B locks and reads zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "B كتب واحد وفتح القفل",
+              "en": "B writes one and unlocks"
+            },
+            "done": false,
+            "total": "1"
+          },
+          {
+            "caption": {
+              "ar": "A قرأ واحد تحت القفل",
+              "en": "A reads one under lock"
+            },
+            "done": false,
+            "total": "1"
+          },
+          {
+            "caption": {
+              "ar": "A كتب اتنين وفتح القفل",
+              "en": "A writes two and unlocks"
+            },
+            "done": true,
+            "total": "2"
+          }
+        ],
+        "name": {
+          "ar": "عامل يخلص الأول",
+          "en": "One worker finishes first"
+        },
+        "unlocked": [
+          {
+            "caption": {
+              "ar": "الإجمالي يبدأ صفر",
+              "en": "Total starts at zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "العامل B قرأ صفر",
+              "en": "Worker B reads zero"
+            },
+            "done": false,
+            "total": "0"
+          },
+          {
+            "caption": {
+              "ar": "العامل B كتب واحد",
+              "en": "Worker B writes one"
+            },
+            "done": false,
+            "total": "1"
+          },
+          {
+            "caption": {
+              "ar": "العامل A قرأ واحد",
+              "en": "Worker A reads one"
+            },
+            "done": false,
+            "total": "1"
+          },
+          {
+            "caption": {
+              "ar": "العامل A كتب اتنين",
+              "en": "Worker A writes two"
+            },
+            "done": true,
+            "total": "2"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,481 @@
+{
+  "ch11-scout-channel": {
+    "labels": {
+      "again": {
+        "ar": "غيّر الجدولة",
+        "en": "Run another schedule"
+      },
+      "closed": {
+        "ar": "مقفولة",
+        "en": "Closed"
+      },
+      "empty": {
+        "ar": "فاضية",
+        "en": "Empty"
+      },
+      "next": {
+        "ar": "الخطوة الجاية",
+        "en": "Next event"
+      },
+      "none": {
+        "ar": "لسه",
+        "en": "None yet"
+      },
+      "open": {
+        "ar": "مفتوحة",
+        "en": "Open"
+      },
+      "queue": {
+        "ar": "الرسائل",
+        "en": "Queued messages"
+      },
+      "receiver": {
+        "ar": "آخر استقبال",
+        "en": "Last receive"
+      },
+      "schedule": {
+        "ar": "ترتيب ممكن",
+        "en": "One possible schedule"
+      },
+      "sender": {
+        "ar": "المرسل",
+        "en": "Sender"
+      }
+    },
+    "schedules": [
+      {
+        "events": [
+          {
+            "caption": {
+              "ar": "القناة بدأت فاضية",
+              "en": "Channel starts empty"
+            },
+            "closed": false,
+            "queue": [],
+            "received": ""
+          },
+          {
+            "caption": {
+              "ar": "المرسل بعث 3",
+              "en": "Sender sends 3"
+            },
+            "closed": false,
+            "queue": [
+              "3"
+            ],
+            "received": ""
+          },
+          {
+            "caption": {
+              "ar": "المرسل بعث 8",
+              "en": "Sender sends 8"
+            },
+            "closed": false,
+            "queue": [
+              "3",
+              "8"
+            ],
+            "received": ""
+          },
+          {
+            "caption": {
+              "ar": "المرسل قفل القناة",
+              "en": "Sender closes channel"
+            },
+            "closed": true,
+            "queue": [
+              "3",
+              "8"
+            ],
+            "received": ""
+          },
+          {
+            "caption": {
+              "ar": "المستقبل أخذ 3",
+              "en": "Receiver gets 3"
+            },
+            "closed": true,
+            "queue": [
+              "8"
+            ],
+            "received": "3"
+          },
+          {
+            "caption": {
+              "ar": "المستقبل أخذ 8",
+              "en": "Receiver gets 8"
+            },
+            "closed": true,
+            "queue": [],
+            "received": "8"
+          }
+        ],
+        "name": {
+          "ar": "الإرسال ثم الاستقبال",
+          "en": "Send, then receive"
+        }
+      },
+      {
+        "events": [
+          {
+            "caption": {
+              "ar": "القناة بدأت فاضية",
+              "en": "Channel starts empty"
+            },
+            "closed": false,
+            "queue": [],
+            "received": ""
+          },
+          {
+            "caption": {
+              "ar": "المرسل بعث 3",
+              "en": "Sender sends 3"
+            },
+            "closed": false,
+            "queue": [
+              "3"
+            ],
+            "received": ""
+          },
+          {
+            "caption": {
+              "ar": "المستقبل أخذ 3",
+              "en": "Receiver gets 3"
+            },
+            "closed": false,
+            "queue": [],
+            "received": "3"
+          },
+          {
+            "caption": {
+              "ar": "المرسل بعث 8",
+              "en": "Sender sends 8"
+            },
+            "closed": false,
+            "queue": [
+              "8"
+            ],
+            "received": "3"
+          },
+          {
+            "caption": {
+              "ar": "المرسل قفل القناة",
+              "en": "Sender closes channel"
+            },
+            "closed": true,
+            "queue": [
+              "8"
+            ],
+            "received": "3"
+          },
+          {
+            "caption": {
+              "ar": "المستقبل أخذ 8",
+              "en": "Receiver gets 8"
+            },
+            "closed": true,
+            "queue": [],
+            "received": "8"
+          }
+        ],
+        "name": {
+          "ar": "استقبال بين الرسائل",
+          "en": "Receive between sends"
+        }
+      }
+    ]
+  },
+  "ch11-storm-select": {
+    "labels": {
+      "blockingMode": {
+        "ar": "استقبال مستني",
+        "en": "Blocking receive"
+      },
+      "bothReady": {
+        "ar": "الإشارتين جاهزين؛ الاختيار ممكن يختلف",
+        "en": "Both signals ready; choice may vary"
+      },
+      "calm": {
+        "ar": "إشارة الهدوء",
+        "en": "Calm signal"
+      },
+      "calmButton": {
+        "ar": "بدّل قناة الهدوء",
+        "en": "Toggle calm channel"
+      },
+      "calmClosed": {
+        "ar": "مقفولة",
+        "en": "Closed"
+      },
+      "calmOpen": {
+        "ar": "مفتوحة",
+        "en": "Open"
+      },
+      "defaultMode": {
+        "ar": "select مع default",
+        "en": "select with default"
+      },
+      "idle": {
+        "ar": "اضغط افحص select",
+        "en": "Check select"
+      },
+      "mode": {
+        "ar": "طريقة الانتظار",
+        "en": "Wait mode"
+      },
+      "modeButton": {
+        "ar": "بدّل طريقة select",
+        "en": "Toggle select mode"
+      },
+      "outcome": {
+        "ar": "النتيجة",
+        "en": "Outcome"
+      },
+      "resume": {
+        "ar": "العاصفة هديت؛ كمّل",
+        "en": "Storm cleared; resume"
+      },
+      "return": {
+        "ar": "ارجع للقاعدة",
+        "en": "Return to base"
+      },
+      "run": {
+        "ar": "افحص select تاني",
+        "en": "Run select again"
+      },
+      "wait": {
+        "ar": "مستني إشارة",
+        "en": "Waiting for a signal"
+      },
+      "warning": {
+        "ar": "تحذير",
+        "en": "Warning"
+      },
+      "warningButton": {
+        "ar": "بدّل التحذير",
+        "en": "Toggle warning"
+      },
+      "warningEmpty": {
+        "ar": "مفيش",
+        "en": "Empty"
+      },
+      "warningReady": {
+        "ar": "جاهز",
+        "en": "Ready"
+      },
+      "work": {
+        "ar": "الشغل يكمل",
+        "en": "Work continues"
+      }
+    }
+  },
+  "ch11-worker-pool": {
+    "labels": {
+      "again": {
+        "ar": "جدولة تانية",
+        "en": "Run again"
+      },
+      "closed": {
+        "ar": "مقفولة",
+        "en": "Closed"
+      },
+      "done": {
+        "ar": "العمال خلصوا",
+        "en": "Workers finished"
+      },
+      "empty": {
+        "ar": "فاضي",
+        "en": "Empty"
+      },
+      "jobs": {
+        "ar": "طابور المهام",
+        "en": "Jobs"
+      },
+      "next": {
+        "ar": "الخطوة الجاية",
+        "en": "Next event"
+      },
+      "open": {
+        "ar": "مفتوحة",
+        "en": "Open"
+      },
+      "results": {
+        "ar": "النتائج",
+        "en": "Results"
+      },
+      "resultsChannel": {
+        "ar": "قناة النتائج",
+        "en": "Results channel"
+      },
+      "schedule": {
+        "ar": "الجدولة",
+        "en": "Schedule"
+      },
+      "waitGroup": {
+        "ar": "WaitGroup",
+        "en": "WaitGroup"
+      },
+      "waiting": {
+        "ar": "لسه فيه عمال",
+        "en": "Workers still running"
+      }
+    },
+    "schedules": [
+      {
+        "events": [
+          {
+            "caption": {
+              "ar": "طابور فيه 3 مهام",
+              "en": "Queue has three jobs"
+            },
+            "closed": false,
+            "done": false,
+            "jobs": [
+              "A",
+              "B",
+              "C"
+            ],
+            "results": []
+          },
+          {
+            "caption": {
+              "ar": "العامل A سحب A",
+              "en": "Worker A takes A"
+            },
+            "closed": false,
+            "done": false,
+            "jobs": [
+              "B",
+              "C"
+            ],
+            "results": []
+          },
+          {
+            "caption": {
+              "ar": "العامل B سحب B",
+              "en": "Worker B takes B"
+            },
+            "closed": false,
+            "done": false,
+            "jobs": [
+              "C"
+            ],
+            "results": [
+              "A",
+              "B"
+            ]
+          },
+          {
+            "caption": {
+              "ar": "العامل A سحب C",
+              "en": "Worker A takes C"
+            },
+            "closed": false,
+            "done": false,
+            "jobs": [],
+            "results": [
+              "A",
+              "B",
+              "C"
+            ]
+          },
+          {
+            "caption": {
+              "ar": "WaitGroup خلص؛ اقفل results",
+              "en": "WaitGroup done; close results"
+            },
+            "closed": true,
+            "done": true,
+            "jobs": [],
+            "results": [
+              "A",
+              "B",
+              "C"
+            ]
+          }
+        ],
+        "name": {
+          "ar": "ترتيب ممكن: A ثم B",
+          "en": "One possible order: A then B"
+        }
+      },
+      {
+        "events": [
+          {
+            "caption": {
+              "ar": "طابور فيه 3 مهام",
+              "en": "Queue has three jobs"
+            },
+            "closed": false,
+            "done": false,
+            "jobs": [
+              "A",
+              "B",
+              "C"
+            ],
+            "results": []
+          },
+          {
+            "caption": {
+              "ar": "العامل B سحب A",
+              "en": "Worker B takes A"
+            },
+            "closed": false,
+            "done": false,
+            "jobs": [
+              "B",
+              "C"
+            ],
+            "results": []
+          },
+          {
+            "caption": {
+              "ar": "العامل A سحب B",
+              "en": "Worker A takes B"
+            },
+            "closed": false,
+            "done": false,
+            "jobs": [
+              "C"
+            ],
+            "results": [
+              "B"
+            ]
+          },
+          {
+            "caption": {
+              "ar": "العامل B سحب C",
+              "en": "Worker B takes C"
+            },
+            "closed": false,
+            "done": false,
+            "jobs": [],
+            "results": [
+              "B",
+              "A",
+              "C"
+            ]
+          },
+          {
+            "caption": {
+              "ar": "WaitGroup خلص؛ اقفل results",
+              "en": "WaitGroup done; close results"
+            },
+            "closed": true,
+            "done": true,
+            "jobs": [],
+            "results": [
+              "B",
+              "A",
+              "C"
+            ]
+          }
+        ],
+        "name": {
+          "ar": "ترتيب ممكن: B ثم A",
+          "en": "One possible order: B then A"
+        }
+      }
+    ]
+  }
+}

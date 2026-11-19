@@ -362,3 +362,9 @@ Edit the starter, then watch both drones finish the rows.
 #### Verified e123-lock-order
 
 Real stdout: 2
+
+## Playground implementation notes
+
+- **Shared total:** Step through a lost update and a serialized update. Toggle one shared mutex; WaitGroup completion does not repair an unprotected update.
+- **Registry:** Step through sample map writes protected by one mutex. Run again to vary writer arrival order, then read after WaitGroup completion.
+- **Deadlock:** Step through a schedule that finishes and one that forms a wait cycle. Toggle a fixed lock order, then run again to vary which worker enters first.
