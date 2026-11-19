@@ -24,7 +24,7 @@ func main() {
 
 ## 28-2 — Fiber
 
-AR: اختبر التطبيق في الذاكرة، وانسخ القيم اللي لازم تعيش بعد handler. EN: Test in memory and copy values that must outlive a handler.
+AR: اختبر التطبيق في الذاكرة، وانسخ الـvalues اللي لازم تعيش بعد الـhandler. EN: Test in memory and copy values that must outlive a handler.
 
 <!-- go-example id=e282-owned-string imports=fmt,strings outcome=ok -->
 ```go
@@ -48,7 +48,7 @@ func main() {
 
 ## 28-3 — OpenAPI contract
 
-AR: فكّ JSON لشكل غير معروف بأمان، وافصل تحميل العقد عن فحص الرد. EN: Decode unknown JSON safely and keep contract loading separate from response checks.
+AR: فكّ JSON لشكل غير معروف بأمان، وافصل تحميل العقد عن فحص الـresponse. EN: Decode unknown JSON safely and keep contract loading separate from response checks.
 
 <!-- go-example id=e283-json-shape imports=encoding/json,fmt outcome=ok -->
 ```go
@@ -78,7 +78,7 @@ func main() {
 
 ## 28-4 — Graceful shutdown
 
-AR: ميّز بداية الإغلاق عن انتهاء الطلبات، واجمع خطأ التنضيف مع الخطأ الأصلي. EN: Distinguish shutdown starting from requests finishing, and preserve cleanup errors.
+AR: ميّز بداية الإغلاق عن انتهاء الـrequests، واجمع الـerror بتاع التنضيف مع الـerror الأصلي. EN: Distinguish shutdown starting from requests finishing, and preserve cleanup errors.
 
 <!-- go-example id=e284-joined-errors imports=errors,fmt outcome=ok -->
 ```go
@@ -101,7 +101,7 @@ func main() {
 
 ## Boss — Dock quarantine
 
-AR: ثبّت status والهيدر قبل كتابة الرد، وخلّي التحقق يسبق أي تعديل. EN: Set status and headers before writing the response; validate before mutation.
+AR: ثبّت status والهيدر قبل كتابة الـresponse، وخلّي التحقق يسبق أي تعديل. EN: Set status and headers before writing the response; validate before mutation.
 
 <!-- go-example id=e28b-response imports=fmt,net/http,net/http/httptest outcome=ok -->
 ```go

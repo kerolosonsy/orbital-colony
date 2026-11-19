@@ -814,7 +814,7 @@ func TestHiddenFiberComparison(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "28-3-openapi", Chapter: 28, Kind: "lab", LessonRevision: 1, Steps: ch28OpenAPIArabicSteps, Title: "عقد الـ API", Goal: "اقرا مستند OpenAPI لسجل المرحّلات، واتحقق إن كل رد من السيرفر مطابق له",
+	add(&Level{ID: "28-3-openapi", Chapter: 28, Kind: "lab", LessonRevision: 1, Steps: ch28OpenAPIArabicSteps, Title: "عقد الـ API", Goal: "اقرا مستند OpenAPI لسجل المرحّلات، واتأكد إن الـresponses من الـserver مطابقة له",
 		Requires: []string{"sel:json.Unmarshal"}, Bridge: []int{58}, Setup: seededLabRoom, Race: false,
 		Files: []LabFile{{Name: "main.go", Starter: ch283Starter}, {Name: "openapi.json", Starter: ch283Doc, ReadOnly: true}},
 		Lesson: `# عقد مكتوب لسجل المرحّلات
@@ -1429,7 +1429,7 @@ func TestHiddenRelayAPIHonoursContract(t *testing.T) {
 `
 
 func init() {
-	add(&Level{ID: "28-4-graceful", Chapter: 28, Kind: "lab", LessonRevision: 1, Steps: ch28GracefulArabicSteps, Title: "إغلاق مرتب", Goal: "اقفل بوابة القاعدة من غير ما تقطع طلب شغال: ارفض الجديد، صفّي الجاري جوه مهلة، ونضّف مرة واحدة",
+	add(&Level{ID: "28-4-graceful", Chapter: 28, Kind: "lab", LessonRevision: 1, Steps: ch28GracefulArabicSteps, Title: "إغلاق مرتب", Goal: "اقفل بوابة القاعدة من غير ما تقطع request شغال: ارفض الجديد، صفّي الجاري جوه مهلة، ونضّف مرة واحدة",
 		Requires: []string{"sel:http.Server", "sel:context.Context"}, Bridge: []int{60}, Setup: seededLabRoom, Race: true,
 		Files: []LabFile{{Name: "main.go", Starter: ch284Starter}},
 		Lesson: `# إغلاق مرتب لبوابة القاعدة

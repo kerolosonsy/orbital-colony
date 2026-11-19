@@ -54,9 +54,9 @@ const ch30CacheHitCode = `func main() {
 func ch30CacheHit(text string, english bool) LessonBlock {
 	return ch30Walkthrough("c301.cache-hit", text, ch30CacheHitCode, "e301-cache-hit", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch30Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch30Caption("الخريطة فيها قيمة.", "The map has a value.", english)},
-		{Line: 3, Caption: ch30Caption("القراءة وجدت المفتاح.", "The lookup found the key.", english), Variables: []LessonVariable{{Name: "value", Value: "ready"}, {Name: "ok", Value: "true"}}},
-		{Line: 4, Caption: ch30Caption("اطبع القيمة وحالة الوجود.", "Print the value and presence.", english), Variables: []LessonVariable{{Name: "value", Value: "ready"}, {Name: "ok", Value: "true"}}, Output: "\"ready\" true"},
+		{Line: 2, Caption: ch30Caption("الـmap فيها الـvalue.", "The map has a value.", english)},
+		{Line: 3, Caption: ch30Caption("القراءة وجدت الـkey.", "The lookup found the key.", english), Variables: []LessonVariable{{Name: "value", Value: "ready"}, {Name: "ok", Value: "true"}}},
+		{Line: 4, Caption: ch30Caption("اطبع الـvalue وحالة الوجود.", "Print the value and presence.", english), Variables: []LessonVariable{{Name: "value", Value: "ready"}, {Name: "ok", Value: "true"}}, Output: "\"ready\" true"},
 	})
 }
 
@@ -69,30 +69,30 @@ const ch30CacheMissCode = `func main() {
 func ch30CacheMiss(text string, english bool) LessonBlock {
 	return ch30Walkthrough("c301.cache-miss", text, ch30CacheMissCode, "e301-cache-miss", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch30Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch30Caption("الخريطة فيها مفتاح تاني.", "The map has another key.", english)},
-		{Line: 3, Caption: ch30Caption("المفتاح غير موجود.", "The key is missing.", english), Variables: []LessonVariable{{Name: "value", Value: ""}, {Name: "ok", Value: "false"}}},
-		{Line: 4, Caption: ch30Caption("الصفرية مش hit.", "A zero value is not a hit.", english), Variables: []LessonVariable{{Name: "value", Value: ""}, {Name: "ok", Value: "false"}}, Output: "\"\" false"},
+		{Line: 2, Caption: ch30Caption("الـmap فيها key تاني.", "The map has another key.", english)},
+		{Line: 3, Caption: ch30Caption("الـkey غير موجود.", "The key is missing.", english), Variables: []LessonVariable{{Name: "value", Value: ""}, {Name: "ok", Value: "false"}}},
+		{Line: 4, Caption: ch30Caption("الـzero value مش hit.", "A zero value is not a hit.", english), Variables: []LessonVariable{{Name: "value", Value: ""}, {Name: "ok", Value: "false"}}, Output: "\"\" false"},
 	})
 }
 
 var ch30Lesson301Arabic = []LessonStep{
-	{ID: "c301.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch30Markdown("c301.mission", "1. خلي Redis يسرّع قراية المنارة.\n2. المخزن يفضل مصدر الحقيقة.\n3. احفظ فيه الأول، وبعدها حدّث الكاش.")}},
-	{ID: "c301.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch30CacheHit("الكاش زي رف قريب: لو المفتاح موجود، القيمة جاهزة.\n\nلو غايب، المصدر هو الحقيقة؛ فشل ملء الكاش مش معناه فشل القراية.\n\n~ok~ بتميّز المفتاح الغايب عن قيمة فاضية. Redis بيفرق بين ~redis.Nil~ وعطل الاتصال.\n\nلو ~Del~ فشل، علامة dirty تخلي القراية تسيب المفتاح القديم لحد نجاح الحذف.\n\n~Mutex~ حوالين العملية يمنع قراية قديمة تملأ الكاش بعد كتابة.\n\nالـ TTL مدة صلاحية؛ اختبارات المستوى بتحرك ساعة Redis نفسها.", false)}},
+	{ID: "c301.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch30Markdown("c301.mission", "1. خلي Redis يسرّع قراية المنارة.\n2. المخزن يفضل مصدر الحقيقة.\n3. خزّن فيه الأول، وبعدها حدّث الـcache.")}},
+	{ID: "c301.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch30CacheHit("الـcache زي رف قريب: لو الـkey موجود، الـvalue جاهزة.\n\nلو غايب، المصدر هو الحقيقة؛ فشل ملء الـcache مش معناه فشل القراية.\n\n~ok~ بتميّز الـkey الغايب عن الـvalue الفاضية. Redis بيفرق بين ~redis.Nil~ وعطل الاتصال.\n\nلو ~Del~ فشل، علامة dirty تخلي القراية تسيب الـkey القديم لحد نجاح الحذف.\n\n~Mutex~ حوالين العملية يمنع قراية قديمة تملأ الـcache بعد كتابة.\n\nالـTTL مدة صلاحية؛ الـtests في المستوى بتحرك ساعة Redis نفسها.", false)}},
 	{ID: "c301.try-step", Title: "جرّب", Blocks: []LessonBlock{
-		ch30Question("c301.predict-miss", "توقّع ناتج قراءة مفتاح غايب:\n\n~~~go\nfunc main() {\n\tcache := map[string]string{\"ridge\": \"ready\"}\n\tvalue, ok := cache[\"cove\"]\n\tfmt.Printf(\"%q %t\\n\", value, ok)\n}\n~~~", []string{"\"\" false", "\"ready\" true", "\"\" true"}, 0, []string{
-			"قيمة غايبة بتكون فاضية ومعاها false.",
-			"الخريطة ما فيهاش المفتاح المطلوب.",
-			"ok بيقول إن المفتاح مش موجود.",
+		ch30Question("c301.predict-miss", "توقّع ناتج قراءة key غايب:\n\n~~~go\nfunc main() {\n\tcache := map[string]string{\"ridge\": \"ready\"}\n\tvalue, ok := cache[\"cove\"]\n\tfmt.Printf(\"%q %t\\n\", value, ok)\n}\n~~~", []string{"\"\" false", "\"ready\" true", "\"\" true"}, 0, []string{
+			"الـvalue الغايبة بتكون فاضية ومعاها false.",
+			"الـmap ما فيهاش الـkey المطلوب.",
+			"ok بيقول إن الـkey مش موجود.",
 		}),
-		ch30CacheMiss("تابع القيمة وراية الوجود لحد الطباعة.", false),
+		ch30CacheMiss("تابع الـvalue وراية الوجود لحد الطباعة.", false),
 		ch30SandboxBlock("c301.playground", "ch30-cache-aside", ch30CacheConfig, false),
 	}},
-	{ID: "c301.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c301.watch", "- ~redis.Nil~ غياب مؤكد؛ باقي أخطاء Redis ممكن تكون عطل.\n- نجاح الحفظ يسبق حذف المفتاح؛ فشل الحذف يفضل محتاج مزامنة.")}},
+	{ID: "c301.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c301.watch", "- ~redis.Nil~ غياب مؤكد؛ باقي errors Redis ممكن تكون عطل.\n- نجاح الحفظ يسبق حذف الـkey؛ فشل الحذف يفضل محتاج مزامنة.")}},
 	{ID: "c301.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch30Markdown("c301.plan", "قسّم القرار: تحقّق من المدخل والسياق، اقرأ الكاش، وبعدها اختار المصدر أو النتيجة.\n\nفي الكتابة، اسأل نفسك: هل المصدر نجح قبل ما تلمس المفتاح؟ وإيه اللي يحصل لو الحذف فشل؟"),
+		ch30Markdown("c301.plan", "قسّم القرار: اتأكد من المدخل والـcontext، اقرا الـcache، وبعدها اختار المصدر أو النتيجة.\n\nفي الكتابة، اسأل نفسك: هل المصدر نجح قبل ما تلمس الـkey؟ وإيه اللي يحصل لو الحذف فشل؟"),
 		ch30Question("c301.cache-authority", "مين مرجع الحقيقة؟", []string{"المخزن", "Redis", "TTL"}, 0, []string{
 			"المخزن هو المرجع.",
-			"Redis كاش مؤقت.",
+			"Redis هو الـcache المؤقت.",
 			"TTL للصلاحية.",
 		}),
 	}},
@@ -136,7 +136,7 @@ func ch30Document(text string, english bool) LessonBlock {
 	return ch30Walkthrough("c302.document", text, ch30DocumentCode, "e302-document", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch30Caption("قبل التشغيل.", "Before execution.", english)},
 		{Line: 1, Caption: ch30Caption("Card تجمع حقول العينة.", "Card groups sample fields.", english)},
-		{Line: 5, Caption: ch30Caption("القيمة تحمل tag وID.", "The value holds tag and ID.", english), Variables: []LessonVariable{{Name: "c", Value: "{4 basalt}"}}},
+		{Line: 5, Caption: ch30Caption("الـvalue تحمل tag وID.", "The value holds tag and ID.", english), Variables: []LessonVariable{{Name: "c", Value: "{4 basalt}"}}},
 		{Line: 6, Caption: ch30Caption("اطبع الحقول المختارة.", "Print the selected fields.", english), Variables: []LessonVariable{{Name: "c", Value: "{4 basalt}"}}, Output: "basalt 4"},
 	})
 }
@@ -158,7 +158,7 @@ func ch30Page(text string, english bool) LessonBlock {
 
 var ch30Lesson302Arabic = []LessonStep{
 	{ID: "c302.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch30Markdown("c302.mission", "1. خزّن عينات الصخور كمستندات.\n2. امنع تكرار العلامة من قاعدة البيانات.\n3. اعرض صفحات بترتيب واضح.")}},
-	{ID: "c302.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch30Document("الـstruct شكل السجل جوه Go؛ وBSON tags بتربط الحقول بأسماء التخزين.\n\n~_id~ مميز افتراضياً. الفهرس الفريد هو الحكم وقت الطلبات المتزامنة، مش فحص سابق في الذاكرة.\n\nخلي ~Archive~ يتعامل مع واجهة ~SampleStore~؛ الـadapter وحده يعرف MongoDB.\n\nالصفحات تستخدم ID المؤشر، والـcursor مورد لازم يتقفل ويتفحص خطؤه.", false)}},
+	{ID: "c302.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch30Document("الـstruct شكل السجل جوه Go؛ والـBSON tags بتربط الحقول بأسماء التخزين.\n\n~_id~ مميز افتراضياً. الـindex الفريد هو الحكم وقت الـrequests المتزامنة، مش فحص سابق في الذاكرة.\n\nخلي ~Archive~ يتعامل مع الـinterface ~SampleStore~؛ الـadapter وحده يعرف MongoDB.\n\nالصفحات تستخدم ID الـcursor، والـcursor مورد لازم يتقفل ويتفحص الـerror بتاعه.", false)}},
 	{ID: "c302.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch30Question("c302.predict-page", "توقّع ناتج الصفحة الصغيرة:\n\n~~~go\nfunc main() {\n\trows := []string{\"mica\", \"slate\", \"quartz\"}\n\tlimit := 2\n\tfmt.Println(rows[:limit], len(rows) > limit)\n}\n~~~", []string{"[mica slate] true", "[mica slate quartz] false", "[quartz] true"}, 0, []string{
 			"أول عنصرين ظاهرين ولسه فيه عنصر زيادة.",
@@ -168,16 +168,16 @@ var ch30Lesson302Arabic = []LessonStep{
 		ch30Page("شوف عدد الصفوف قبل وبعد الحد، وإشارة الزيادة.", false),
 		ch30SandboxBlock("c302.playground", "ch30-document-pages", ch30DocumentConfig, false),
 	}},
-	{ID: "c302.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c302.watch", "- الفحص قبل insert مش بديل عن unique index.\n- اقفل ~cursor~ حتى مع خطأ، وافحص ~Err~ بعد اللف.")}},
+	{ID: "c302.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c302.watch", "- الفحص قبل insert مش بديل عن unique index.\n- اقفل ~cursor~ حتى مع error، وافحص ~Err~ بعد اللف.")}},
 	{ID: "c302.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch30Markdown("c302.plan", "افصل طبقة المجال عن التخزين. راجع التحقق والتطبيع قبل النداء.\n\nبعدها افحص أخطاء Mongo، والغياب، والمؤشر. طلب ~limit+1~ يوضح وجود صفحة تالية من غير إرجاع العنصر الإضافي."),
-		ch30Question("c302.unique-index", "إيه اللي يمنع تكرار tag وقت السباق؟", []string{"فهرس unique في القاعدة", "فحص map قبل الكتابة", "ترتيب النتائج"}, 0, []string{
-			"قاعدة البيانات تفرض uniqueness بين الطلبات المتزامنة.",
-			"فحص الذاكرة ممكن يسبق طلباً متزامناً.",
-			"الترتيب لا يمنع إضافة مستند مكرر.",
+		ch30Markdown("c302.plan", "افصل طبقة المجال عن التخزين. راجع التحقق والتطبيع قبل النداء.\n\nبعدها افحص الـerrors من Mongo، والغياب، والـcursor. الـrequest بـ~limit+1~ يوضح وجود صفحة تالية من غير ما ترجّع العنصر الإضافي."),
+		ch30Question("c302.unique-index", "إيه اللي يمنع تكرار tag وقت الـrace؟", []string{"الـindex الفريد في القاعدة", "فحص الـmap قبل الكتابة", "ترتيب النتائج"}, 0, []string{
+			"قاعدة البيانات تفرض uniqueness بين الـrequests المتزامنة.",
+			"فحص الذاكرة ممكن يسبق request متزامن.",
+			"الترتيب مش بيمنع إضافة مستند مكرر.",
 		}),
 	}},
-	{ID: "c302.turn-step", Title: "دورك", Blocks: []LessonBlock{ch30Markdown("c302.turn", "ابدأ بواجهة التخزين؛ بعد نجاحها أضف adapter Mongo خطوة خطوة.")}},
+	{ID: "c302.turn-step", Title: "دورك", Blocks: []LessonBlock{ch30Markdown("c302.turn", "ابدأ بالـinterface بتاعة التخزين؛ بعد نجاحها أضف adapter Mongo خطوة خطوة.")}},
 }
 
 var ch30Lesson302English = []LessonStep{
@@ -214,8 +214,8 @@ const ch30IndexCode = `func main() {
 func ch30Index(text string, english bool) LessonBlock {
 	return ch30Walkthrough("c303.postings", text, ch30IndexCode, "e303-postings", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch30Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch30Caption("الكلمة مفتاح الفهرس.", "The term is the index key.", english)},
-		{Line: 3, Caption: ch30Caption("القيمة قائمة النشرات.", "The value is a posting list.", english), Variables: []LessonVariable{{Name: "postings", Value: "map[amber:[note-q note-m]]"}}},
+		{Line: 2, Caption: ch30Caption("الكلمة هي الـkey بتاع الـindex.", "The term is the index key.", english)},
+		{Line: 3, Caption: ch30Caption("الـvalue قائمة النشرات.", "The value is a posting list.", english), Variables: []LessonVariable{{Name: "postings", Value: "map[amber:[note-q note-m]]"}}},
 		{Line: 5, Caption: ch30Caption("الوصول مباشر للكلمة.", "Lookup goes straight to the term.", english), Variables: []LessonVariable{{Name: "postings", Value: "map[amber:[note-q note-m]]"}}, Output: "[note-q note-m]"},
 	})
 }
@@ -229,15 +229,15 @@ const ch30SortCode = `func main() {
 func ch30Sort(text string, english bool) LessonBlock {
 	return ch30Walkthrough("c303.lexical-order", text, ch30SortCode, "e303-lexical-order", []string{"fmt", "sort"}, []LessonFrame{
 		{Line: 0, Caption: ch30Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 2, Caption: ch30Caption("القيم لسه بترتيب الإدخال.", "Values remain in input order.", english), Variables: []LessonVariable{{Name: "codes", Value: "[note-q note-m]"}}},
+		{Line: 2, Caption: ch30Caption("الـvalues لسه بترتيب الإدخال.", "Values remain in input order.", english), Variables: []LessonVariable{{Name: "codes", Value: "[note-q note-m]"}}},
 		{Line: 3, Caption: ch30Caption("sort ترتب نصياً.", "sort orders strings.", english), Variables: []LessonVariable{{Name: "codes", Value: "[note-m note-q]"}}},
 		{Line: 4, Caption: ch30Caption("اطبع الترتيب الثابت.", "Print the stable order.", english), Variables: []LessonVariable{{Name: "codes", Value: "[note-m note-q]"}}, Output: "[note-m note-q]"},
 	})
 }
 
 var ch30Lesson303Arabic = []LessonStep{
-	{ID: "c303.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch30Markdown("c303.mission", "1. ابحث في نشرات المستعمرة.\n2. رتّب النتائج والصفحات بثبات.\n3. خلّي القراءة من الفهرس مش من كل النصوص.")}},
-	{ID: "c303.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch30Index("الفهرس المقلوب زي دليل: كل كلمة بتوصل لقائمة المستندات اللي ظهرت فيها.\n\nالتطبيع لازم يكون واحد للنشرة والسؤال. ~unicode.IsLetter~ و~unicode.IsDigit~ يغطّوا أكتر من ASCII.\n\nالـmap مش بتضمن ترتيب. بعد جمع النتائج، قاعدة ترتيب صريحة تخلي الصفحات قابلة للتكرار.\n\nانسخ بيانات الإدخال؛ الفهرس الثابت ينفع لقراءات متزامنة.", false)}},
+	{ID: "c303.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch30Markdown("c303.mission", "1. ابحث في نشرات المستعمرة.\n2. رتّب النتائج والصفحات بثبات.\n3. خلّي القراءة من الـindex مش من كل النصوص.")}},
+	{ID: "c303.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch30Index("الـindex المقلوب زي دليل: كل كلمة بتوصل لقائمة المستندات اللي ظهرت فيها.\n\nالتطبيع لازم يكون واحد للنشرة والسؤال. ~unicode.IsLetter~ و~unicode.IsDigit~ يغطّوا أكتر من ASCII.\n\nالـmap مش بتضمن ترتيب. بعد جمع النتائج، قاعدة ترتيب صريحة تخلي الصفحات قابلة للتكرار.\n\nانسخ بيانات الإدخال؛ الـindex الثابت ينفع لقرايات متزامنة.", false)}},
 	{ID: "c303.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch30Question("c303.predict-sort", "بعد الترتيب النصي، إيه الناتج؟\n\n~~~go\nfunc main() {\n\tcodes := []string{\"note-q\", \"note-m\"}\n\tsort.Strings(codes)\n\tfmt.Println(codes)\n}\n~~~", []string{"[note-m note-q]", "[note-q note-m]", "[note-m]"}, 0, []string{
 			"المقارنة النصية تبدأ بالحروف الأولى.",
@@ -249,14 +249,14 @@ var ch30Lesson303Arabic = []LessonStep{
 	}},
 	{ID: "c303.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c303.watch", "- اجمع كلمات السؤال المختلفة مرة واحدة؛ ترتيب map غير مضمون.\n- رتّب كل النتائج قبل تطبيق ~offset~ و~limit~.")}},
 	{ID: "c303.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch30Markdown("c303.plan", "قسّم الشغل: طبّع، اجمع postings، احسب الدرجات، رتّب، ثم قص الصفحة.\n\nراجع إن النتيجة قابلة للتعديل من غير ما تغيّر فهرساً أو قراءة لاحقة."),
-		ch30Question("c303.stable-tie", "إزاي تثبّت ترتيب نتيجة متعادلة؟", []string{"مفتاح ترتيب ثانوي واضح", "الاعتماد على ترتيب map", "الاحتفاظ بترتيب goroutine"}, 0, []string{
+		ch30Markdown("c303.plan", "قسّم الشغل: طبّع، اجمع postings، احسب الدرجات، رتّب، ثم قص الصفحة.\n\nراجع إن النتيجة قابلة للتعديل من غير ما تغيّر index أو قراءة لاحقة."),
+		ch30Question("c303.stable-tie", "إزاي تثبّت ترتيب نتيجة متعادلة؟", []string{"الـkey التاني واضح", "الاعتماد على ترتيب الـmap", "الاحتفاظ بترتيب الـgoroutine"}, 0, []string{
 			"مقارنة ثانية تجعل التعادل حتمياً.",
 			"ترتيب map غير مضمون بين التشغيلات.",
 			"وصول goroutine مش قاعدة ترتيب للمخرجات.",
 		}),
 	}},
-	{ID: "c303.turn-step", Title: "دورك", Blocks: []LessonBlock{ch30Markdown("c303.turn", "ابنِ طبقة الفهرس أولاً، وبعدها افحص صفحة صغيرة من النتائج.")}},
+	{ID: "c303.turn-step", Title: "دورك", Blocks: []LessonBlock{ch30Markdown("c303.turn", "ابنِ طبقة الـindex أولاً، وبعدها افحص صفحة صغيرة من النتائج.")}},
 }
 
 var ch30Lesson303English = []LessonStep{
@@ -319,19 +319,19 @@ var ch30Lesson304Arabic = []LessonStep{
 	{ID: "c304.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch30Question("c304.predict-is", "هل ~errors.Is~ تلاقي السبب الملفوف؟\n\n~~~go\nfunc main() {\n\tvar ErrOffline = errors.New(\"offline\")\n\terr := fmt.Errorf(\"replica: %w\", ErrOffline)\n\tfmt.Println(errors.Is(err, ErrOffline))\n}\n~~~", []string{"true", "false", "offline"}, 0, []string{
 			"الـwrapping حافظ على السبب الأصلي.",
-			"الفحص بيمر عبر رسالة الخطأ الملفوفة.",
-			"Is بترجع true أو false مش نص الرسالة.",
+			"الفحص بيمر عبر رسالة الـerror الملفوفة.",
+			"Is بترجّع true أو false مش نص الرسالة.",
 		}),
 		ch30WrappedError("امشِ من السبب، للتغليف، وبعدها لفحص errors.Is.", false),
 		ch30SandboxBlock("c304.playground", "ch30-read-write-window", ch30ReadWriteConfig, false),
 	}},
-	{ID: "c304.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c304.watch", "- خطأ مجال من النسخة مش معناه إنها واقعة؛ fallback له سبب محدد.\n- القراية ما تجددش النافذة، وفشل الكتابة ما يغيّرش علامتها.")}},
+	{ID: "c304.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c304.watch", "- الـerror بتاع المجال من النسخة مش معناه إنها واقعة؛ fallback له سبب محدد.\n- القراية ما تجددش النافذة، وفشل الكتابة ما يغيّرش علامتها.")}},
 	{ID: "c304.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch30Markdown("c304.plan", "راجع المسارات منفصلة: الكتابة، قراءة داخل النافذة، وقراءة عادية.\n\nاسأل مين يناديه كل مسار، وإمتى الإلغاء أو خطأ المجال يمنع fallback. اختبر جلسة أخرى لوحدها."),
-		ch30Question("c304.replica-write", "الكتابة الناجحة تروح لمين؟", []string{"للـprimary فقط", "للـreplica فقط", "للاتنين بالتوازي"}, 0, []string{
+		ch30Markdown("c304.plan", "راجع المسارات منفصلة: الكتابة، قراية جوه النافذة، وقراية عادية.\n\nاسأل مين يناديه كل مسار، وإمتى الإلغاء أو الـerror بتاع المجال يمنع fallback. اختبر جلسة تانية لوحدها."),
+		ch30Question("c304.replica-write", "الكتابة الناجحة تروح لمين؟", []string{"للـprimary بس", "للـreplica بس", "للاتنين بالتوازي"}, 0, []string{
 			"الأصل يستقبل الكتابة مرة واحدة.",
 			"النسخة مخصصة لمسار القراءة هنا.",
-			"الراوتر لا يكرر الكتابة بين المخزنين.",
+			"الراوتر مش بيكرر الكتابة بين المخزنين.",
 		}),
 	}},
 	{ID: "c304.turn-step", Title: "دورك", Blocks: []LessonBlock{ch30Markdown("c304.turn", "ابدأ بتحديد مسار كل نداء؛ بعده راجع العلامة والساعة.")}},
@@ -373,9 +373,9 @@ func main() {
 func ch30Draft(text string, english bool) LessonBlock {
 	return ch30Walkthrough("c30b.draft-state", text, ch30DraftCode, "e30b-draft-state", []string{"fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch30Caption("قبل التشغيل.", "Before execution.", english)},
-		{Line: 1, Caption: ch30Caption("Sketch تمثل قيمة.", "Sketch represents one value.", english)},
-		{Line: 5, Caption: ch30Caption("القيمة المحفوظة ثابتة.", "The saved value stays fixed.", english), Variables: []LessonVariable{{Name: "saved", Value: "{7}"}}},
-		{Line: 6, Caption: ch30Caption("الاقتراح قيمة منفصلة.", "The proposal is separate.", english), Variables: []LessonVariable{{Name: "saved", Value: "{7}"}, {Name: "proposal", Value: "{9}"}}},
+		{Line: 1, Caption: ch30Caption("Sketch تمثل value.", "Sketch represents one value.", english)},
+		{Line: 5, Caption: ch30Caption("الـvalue المحفوظة ثابتة.", "The saved value stays fixed.", english), Variables: []LessonVariable{{Name: "saved", Value: "{7}"}}},
+		{Line: 6, Caption: ch30Caption("الـvalue المقترحة منفصلة.", "The proposal is separate.", english), Variables: []LessonVariable{{Name: "saved", Value: "{7}"}, {Name: "proposal", Value: "{9}"}}},
 		{Line: 7, Caption: ch30Caption("اطبع القديم والمقترح.", "Print saved and proposed values.", english), Variables: []LessonVariable{{Name: "saved", Value: "{7}"}, {Name: "proposal", Value: "{9}"}}, Output: "7 9"},
 	})
 }
@@ -391,34 +391,34 @@ func ch30JoinedErrors(text string, english bool) LessonBlock {
 	return ch30Walkthrough("c30b.joined-errors", text, ch30JoinedErrorsCode, "e30b-joined-errors", []string{"errors", "fmt"}, []LessonFrame{
 		{Line: 0, Caption: ch30Caption("قبل التشغيل.", "Before execution.", english)},
 		{Line: 2, Caption: ch30Caption("علامة التحذير منفصلة.", "The warning marker is separate.", english)},
-		{Line: 3, Caption: ch30Caption("سبب الكاش منفصل.", "The cache cause is separate.", english)},
+		{Line: 3, Caption: ch30Caption("سبب الـcache منفصل.", "The cache cause is separate.", english)},
 		{Line: 4, Caption: ch30Caption("Join يحفظ السببين.", "Join keeps both causes.", english), Variables: []LessonVariable{{Name: "err", Value: "sync warning\ncache unavailable"}}},
 		{Line: 5, Caption: ch30Caption("افحص كل سبب.", "Check both causes.", english), Variables: []LessonVariable{{Name: "err", Value: "sync warning\ncache unavailable"}}, Output: "true true"},
 	})
 }
 
 var ch30Lesson30bArabic = []LessonStep{
-	{ID: "c30b.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch30Markdown("c30b.mission", "1. احجز مؤن المشتل داخل transaction.\n2. خليك قادر ترجع كل الخصومات معاً.\n3. حدّث الكاش بعد commit بس.")}},
-	{ID: "c30b.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch30Draft("الـtransaction تجمع تغييرات القاعدة: يا كلها تتثبت، يا كلها تتراجع.\n\nالـcommit حد فاصل. فشل إبطال الكاش بعده تحذير عن المزامنة، مش سبب لإلغاء الحجز.\n\nالنجمة هنا بتطلب الحفاظ على علامة التحذير وسبب الكاش معاً.\n\nاستخدم نفس ~tx~ لكل أوامر القاعدة، وسيب ~main~ فاضية.", false)}},
+	{ID: "c30b.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch30Markdown("c30b.mission", "1. احجز مؤن المشتل جوه الـtransaction.\n2. خليك قادر ترجع كل الخصومات مع بعض.\n3. حدّث الـcache بعد الـcommit بس.")}},
+	{ID: "c30b.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch30Draft("الـtransaction بتجمع تغييرات القاعدة: يا كلها تتثبت، يا كلها تتراجع.\n\nالـcommit حد فاصل. فشل إبطال الـcache بعده تحذير عن المزامنة، مش سبب لإلغاء الحجز.\n\nالنجمة هنا بتطلب الحفاظ على علامة التحذير وسبب الـcache مع بعض.\n\nاستخدم نفس ~tx~ لكل أوامر القاعدة، وسيب ~main~ فاضية.", false)}},
 	{ID: "c30b.try-step", Title: "جرّب", Blocks: []LessonBlock{
 		ch30Question("c30b.predict-causes", "بعد ~errors.Join~، هل السببان معروفان؟\n\n~~~go\nfunc main() {\n\tsentinel := errors.New(\"sync warning\")\n\tcause := errors.New(\"cache unavailable\")\n\terr := errors.Join(sentinel, cause)\n\tfmt.Println(errors.Is(err, sentinel), errors.Is(err, cause))\n}\n~~~", []string{"true true", "true false", "false false"}, 0, []string{
-			"الخطأ المركب يحتفظ بالعلامة وبالسبب.",
+			"الـerror المركب يحتفظ بالعلامة وبالسبب.",
 			"Is تقدر تلاقي كل سبب داخل Join.",
-			"الاثنان جزء من الخطأ المركب.",
+			"الاثنان جزء من الـerror المركب.",
 		}),
-		ch30JoinedErrors("تابع تكوين الخطأ المركب، ثم افحص كل سبب.", false),
+		ch30JoinedErrors("تابع تكوين الـerror المركب، ثم افحص كل سبب.", false),
 		ch30SandboxBlock("c30b.playground", "ch30-commit-cache-boundary", ch30BossConfig, false),
 	}},
-	{ID: "c30b.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c30b.watch", "- تحقّق من الطلب والسطور قبل أي كتابة.\n- فشل cache بعد commit ما يرجّعش خصم القاعدة.")}},
+	{ID: "c30b.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch30Markdown("c30b.watch", "- اتأكد من الـrequest والسطور قبل أي كتابة.\n- فشل الـcache بعد الـcommit ما يرجّعش خصم القاعدة.")}},
 	{ID: "c30b.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
-		ch30Markdown("c30b.plan", "رتّب المراحل: تحقق، ابدأ transaction، نفّذ تغييراتها، ثم commit.\n\nبعدها فقط فكّر في إبطال الكاش. راجع إن خطأ أي خصم يرجع التغييرات السابقة."),
-		ch30Question("c30b.cache-timing", "إمتى يبدأ إبطال الكاش؟", []string{"بعد commit", "قبل التحقق", "داخل كل خصم"}, 0, []string{
-			"القاعدة تثبت الحجز قبل لمس الكاش.",
+		ch30Markdown("c30b.plan", "رتّب المراحل: اتأكد، ابدأ الـtransaction، شغّل تغييراتها، ثم اعمل commit.\n\nبعدها بس فكّر في إبطال الـcache. راجع إن الـerror في أي خصم يرجّع التغييرات السابقة."),
+		ch30Question("c30b.cache-timing", "إمتى يبدأ إبطال الـcache؟", []string{"بعد commit", "قبل التحقق", "داخل كل خصم"}, 0, []string{
+			"القاعدة بتثبّت الحجز قبل ما نلمس الـcache.",
 			"المدخلات تتراجع قبل الآثار الجانبية.",
-			"إبطال الكاش خطوة بعد transaction كاملة.",
+			"إبطال الـcache بييجي بعد ما الـtransaction تخلص.",
 		}),
 	}},
-	{ID: "c30b.turn-step", Title: "دورك", Blocks: []LessonBlock{ch30Markdown("c30b.turn", "ارسم حد transaction الأول، وبعده أضف أثر الكاش.")}},
+	{ID: "c30b.turn-step", Title: "دورك", Blocks: []LessonBlock{ch30Markdown("c30b.turn", "ارسم حد الـtransaction الأول، وبعده أضف أثر الـcache.")}},
 }
 
 var ch30Lesson30bEnglish = []LessonStep{
@@ -446,12 +446,12 @@ var ch30Lesson30bEnglish = []LessonStep{
 }
 
 var ch30CacheConfig = map[string]any{
-	"intro": ch30TextPair("اقرأ مرة مع cache miss، وبعدها جرّب hit.", "Read through a cache miss, then try a hit."),
+	"intro": ch30TextPair("اقرا مرة مع الـcache miss، وبعدها جرّب الـhit.", "Read through a cache miss, then try a hit."),
 	"labels": map[string]any{
-		"key": ch30TextPair("المفتاح", "Key"), "cache": ch30TextPair("الكاش", "Cache"), "store": ch30TextPair("المخزن", "Store"),
-		"result": ch30TextPair("مصدر القراءة", "Read source"), "read": ch30TextPair("اقرأ", "Read"), "evict": ch30TextPair("امسح من الكاش", "Evict cache"),
-		"miss": ch30TextPair("مش موجود", "Miss"), "hit": ch30TextPair("موجود", "Hit"), "cacheSource": ch30TextPair("الكاش", "Cache"),
-		"storeSource": ch30TextPair("المخزن", "Store"), "filled": ch30TextPair("الكاش اتملأ", "Cache filled"),
+		"key": ch30TextPair("الـkey", "Key"), "cache": ch30TextPair("الـcache", "Cache"), "store": ch30TextPair("المخزن", "Store"),
+		"result": ch30TextPair("مصدر القراءة", "Read source"), "read": ch30TextPair("اقرا", "Read"), "evict": ch30TextPair("امسح من الـcache", "Evict cache"),
+		"miss": ch30TextPair("مش موجود", "Miss"), "hit": ch30TextPair("موجود", "Hit"), "cacheSource": ch30TextPair("الـcache", "Cache"),
+		"storeSource": ch30TextPair("المخزن", "Store"), "filled": ch30TextPair("الـcache اتملأ", "Cache filled"),
 	},
 	"key": ch30TextPair("ridge", "ridge"), "value": ch30TextPair("جاهز", "ready"), "cachePresent": false,
 }
@@ -486,20 +486,20 @@ var ch30ReadWriteConfig = map[string]any{
 		"otherSession": ch30TextPair("جلسة تانية", "Another session"), "route": ch30TextPair("مسار القراءة", "Read route"),
 		"primary": ch30TextPair("Primary", "Primary"), "replica": ch30TextPair("Replica", "Replica"),
 		"write": ch30TextPair("كتابة ناجحة", "Successful write"), "advance": ch30TextPair("قدّم الوقت", "Advance time"),
-		"reset": ch30TextPair("ابدأ من الأول", "Reset"), "tick": ch30TextPair("دقيقة", "minute"),
+		"reset": ch30TextPair("ابدأ من الأول", "Reset"), "tick": ch30TextPair("الـtick", "minute"),
 	},
 	"now": 0, "stickyTicks": 2,
 }
 
 var ch30BossConfig = map[string]any{
-	"intro": ch30TextPair("احفظ الاقتراح، وبعدها جرّب فشل الكاش.", "Commit the proposal, then simulate a cache failure."),
+	"intro": ch30TextPair("خزّن الاقتراح، وبعدها جرّب فشل الـcache.", "Commit the proposal, then simulate a cache failure."),
 	"labels": map[string]any{
 		"draft": ch30TextPair("اقتراح الخصم", "Proposed debit"), "saved": ch30TextPair("المحفوظ في القاعدة", "Saved in database"),
-		"cache": ch30TextPair("الكاش", "Cache"), "notCommitted": ch30TextPair("لسه ما اتحفظش", "Not committed"),
+		"cache": ch30TextPair("الـcache", "Cache"), "notCommitted": ch30TextPair("لسه ما اتحفظش", "Not committed"),
 		"committed": ch30TextPair("اتحفظ", "Committed"), "fresh": ch30TextPair("متزامن", "In sync"),
 		"warning": ch30TextPair("تحذير مزامنة", "Sync warning"), "commit": ch30TextPair("اعمل commit", "Commit transaction"),
-		"failCache": ch30TextPair("حاكي فشل الكاش", "Simulate cache failure"), "reset": ch30TextPair("ابدأ من الأول", "Reset"),
-		"savedBoundary": ch30TextPair("القاعدة اتثبتت قبل الكاش.", "The database committed before cache work."),
+		"failCache": ch30TextPair("حاكي فشل الـcache", "Simulate cache failure"), "reset": ch30TextPair("ابدأ من الأول", "Reset"),
+		"savedBoundary": ch30TextPair("القاعدة اتثبتت قبل الـcache.", "The database committed before cache work."),
 	},
 	"before": 7, "proposed": 9,
 }

@@ -2,7 +2,7 @@ package levels
 
 func init() {
 	add(&Level{ID: "29-1-sqlite-crud", Chapter: 29, Kind: "lab", LessonRevision: 1, Steps: ch29SQLiteArabicSteps,
-		Title: "أول قاعدة", Goal: "احفظ صناديق المؤن في SQLite بقيود واستعلامات قابلة للإلغاء", Setup: seededLabRoom,
+		Title: "أول قاعدة", Goal: "خزّن صناديق المؤن في SQLite بقيود والـqueries القابلة للإلغاء", Setup: seededLabRoom,
 		Requires: []string{"sel:sql.ErrNoRows"}, Deps: []string{"modernc.org/sqlite"}, Bridge: []int{61}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch291Starter}},
 		Lesson: `# صناديق مؤن بتفضل بعد إعادة التشغيل

@@ -3,7 +3,7 @@ package levels
 func init() {
 	add(&Level{
 		ID: "25-boss-refinery", Chapter: 25, Kind: "lab", Boss: true, Setup: seededLabRoom, Race: true, LessonRevision: 1, Steps: ch25BossArabic,
-		Title: "Boss: مصفاة الطوارئ", Goal: "شغّل مصفاة محدودة بتقف نضيف عند الخطأ والإلغاء",
+		Title: "Boss: مصفاة الطوارئ", Goal: "شغّل مصفاة محدودة بتقف نضيف عند الـerror والإلغاء",
 		Requires: []string{"go", "chan", "select", "waitgroup", "mutex"}, Bridge: []int{34, 37, 41, 44},
 		Files: []LabFile{{Name: "main.go", Starter: `package main
 import (
@@ -43,7 +43,7 @@ go func() { results <- value }() // blocks forever if nobody receives
 
 أول خطأ يلغي سياق العمال ويرجع نفس السبب بـ ~nil~ بدل النتيجة الجزئية. إلغاء الأب يرجع خطأ السياق. لازم كل العمال يخلصوا قبل الرجوع، وكل channel تتقفل من مالكها مرة واحدة. التستات بتستخدم ~-race~ و~labkit.LeakCheck~. سيب ~main~ فاضية. النجمة التالتة: نداءات مصافي مستقلة بالتوازي من غير حالة مشتركة.
 `,
-		Hints: []string{"راجع ملكية القناة قبل التفكير في الإغلاق.", "افصل ترتيب النتائج عن ترتيب انتهاء العمل.", "ابدأ من توقيع ~Refine~ وحدد مالك كل error ونتيجة."},
+		Hints: []string{"راجع ملكية الـchannel قبل التفكير في الإغلاق.", "افصل ترتيب النتائج عن ترتيب انتهاء العمل.", "ابدأ من توقيع ~Refine~ وحدد مالك كل error ونتيجة."},
 		En: &LevelText{LessonRevision: 1, Steps: ch25BossEnglish, Title: "Boss: Emergency Refinery", Goal: "Run a bounded refinery that joins on failure and cancellation", Files: []LabFile{{Name: "main.go", Starter: `package main
 import (
     "context"

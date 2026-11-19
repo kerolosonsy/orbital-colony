@@ -50,11 +50,11 @@ func ch26Sandbox(prefix, language string) LessonBlock {
 func ch26SandboxText(prefix, language string) string {
 	translations := map[string]map[string]string{
 		"c261": ch26Pair("قدّم الخطوات؛ تابع header وstatus وbody.", "Advance the steps; watch header, status, and body."),
-		"c262": ch26Pair("أنشئ سجلًا؛ جرّب ترتيب قفل مختلفًا.", "Create records; try another lock order."),
-		"c263": ch26Pair("قدّم الطلب؛ شوف دخول وخروج الـmiddleware.", "Advance the request through middleware entry and return."),
+		"c262": ch26Pair("اعمل سجل؛ جرّب ترتيب lock تاني.", "Create records; try another lock order."),
+		"c263": ch26Pair("قدّم الـrequest؛ شوف دخول وخروج الـmiddleware.", "Advance the request through middleware entry and return."),
 		"c264": ch26Pair("قدّم الـerror؛ تابع الوصول للنوع.", "Advance the error; follow its type."),
 		"c265": ch26Pair("اختار المسار؛ راقب المطابقة الدقيقة.", "Choose a route; check exact matching."),
-		"c266": ch26Pair("انسخ البايتات واحدة واحدة؛ وصل لـEOF.", "Copy bytes one at a time; reach EOF."),
+		"c266": ch26Pair("انسخ الـbytes واحدة واحدة؛ وصل لـEOF.", "Copy bytes one at a time; reach EOF."),
 	}
 	return translations[prefix][language]
 }
@@ -80,7 +80,7 @@ func ch26SandboxConfig(prefix string) (string, map[string]any) {
 func ch26HandlerConfig() map[string]any {
 	return map[string]any{
 		"frames": []any{
-			map[string]any{"caption": ch26Pair("استجابة لسه فاضية.", "Response starts empty."), "header": "—", "status": "—", "body": "—"},
+			map[string]any{"caption": ch26Pair("الـresponse لسه فاضية.", "Response starts empty."), "header": "—", "status": "—", "body": "—"},
 			map[string]any{"caption": ch26Pair("اتحدد Content-Type.", "Content-Type is set."), "header": "text/plain", "status": "—", "body": "—"},
 			map[string]any{"caption": ch26Pair("اتحدد status قبل الكتابة.", "Status is set before writing."), "header": "application/demo", "status": 207, "body": "—"},
 			map[string]any{"caption": ch26Pair("الـbody اتكتب أخيرًا.", "The body is written last."), "header": "application/demo", "status": 207, "body": "sample"},
@@ -103,8 +103,8 @@ func ch26RestConfig() map[string]any {
 		"orders": [][]int{{0, 1}, {1, 0}},
 		"labels": map[string]any{
 			"nextID": ch26Pair("آخر ID", "Last ID"), "records": ch26Pair("السجلات", "Records"),
-			"next": ch26Pair("أنشئ سجلًا", "Create record"), "again": ch26Pair("بدّل ترتيب القفل", "Change lock order"),
-			"reset": ch26Pair("من الأول", "Reset"), "order": ch26Pair("ترتيب طلبات القفل ممكن يتغير.", "Lock request order can vary."),
+			"next": ch26Pair("اعمل سجل", "Create record"), "again": ch26Pair("بدّل ترتيب الـlock", "Change lock order"),
+			"reset": ch26Pair("من الأول", "Reset"), "order": ch26Pair("ترتيب الـlock requests ممكن يتغير.", "Lock request order can vary."),
 		},
 	}
 }
@@ -117,11 +117,11 @@ func ch26MiddlewareConfig() map[string]any {
 	outerReturn := ch26Pair("← outer", "← outer")
 	return map[string]any{
 		"frames": []any{
-			map[string]any{"caption": ch26Pair("الطلب دخل outer.", "Request enters outer."), "trace": []any{outer}},
-			map[string]any{"caption": ch26Pair("الطلب دخل inner.", "Request enters inner."), "trace": []any{outer, inner}},
-			map[string]any{"caption": ch26Pair("الـhandler نفّذ الطلب.", "Handler runs the request."), "trace": []any{outer, inner, handler}},
-			map[string]any{"caption": ch26Pair("inner رجع الأول.", "Inner returns first."), "trace": []any{outer, inner, handler, innerReturn}},
-			map[string]any{"caption": ch26Pair("outer رجع في الآخر.", "Outer returns last."), "trace": []any{outer, inner, handler, innerReturn, outerReturn}},
+			map[string]any{"caption": ch26Pair("الـrequest دخل outer.", "Request enters outer."), "trace": []any{outer}},
+			map[string]any{"caption": ch26Pair("الـrequest دخل inner.", "Request enters inner."), "trace": []any{outer, inner}},
+			map[string]any{"caption": ch26Pair("الـhandler عالج الـrequest.", "Handler runs the request."), "trace": []any{outer, inner, handler}},
+			map[string]any{"caption": ch26Pair("inner رجّع الأول.", "Inner returns first."), "trace": []any{outer, inner, handler, innerReturn}},
+			map[string]any{"caption": ch26Pair("outer رجّع في الآخر.", "Outer returns last."), "trace": []any{outer, inner, handler, innerReturn, outerReturn}},
 		},
 		"labels": map[string]any{
 			"next": ch26Pair("الخطوة الجاية", "Next step"), "previous": ch26Pair("اللي قبلها", "Previous"),
@@ -136,12 +136,12 @@ func ch26ErrorConfig() map[string]any {
 	load := ch26Pair("load", "load")
 	return map[string]any{
 		"frames": []any{
-			map[string]any{"caption": ch26Pair("الخطأ typed.", "The error has a type."), "chain": []any{fault, kind}, "result": ch26Pair("قبل التغليف", "Before wrapping")},
+			map[string]any{"caption": ch26Pair("الـerror ليه type.", "The error has a type."), "chain": []any{fault, kind}, "result": ch26Pair("قبل التغليف", "Before wrapping")},
 			map[string]any{"caption": ch26Pair("اتغلف مع %w.", "Wrapped with %w."), "chain": []any{load, fault, kind}, "result": ch26Pair("النوع لسه جوه السلسلة", "Type remains in the chain")},
 			map[string]any{"caption": ch26Pair("errors.As وصل للنوع.", "errors.As finds the type."), "chain": []any{load, fault, kind}, "result": ch26Pair("لقينا *Fault", "Found *Fault")},
 		},
 		"labels": map[string]any{
-			"chain": ch26Pair("سلسلة الخطأ", "Error chain"), "result": ch26Pair("النتيجة", "Result"),
+			"chain": ch26Pair("سلسلة الـerror", "Error chain"), "result": ch26Pair("النتيجة", "Result"),
 			"next": ch26Pair("الخطوة الجاية", "Next step"), "previous": ch26Pair("اللي قبلها", "Previous"),
 			"reset": ch26Pair("من الأول", "Reset"),
 		},
@@ -162,9 +162,9 @@ func ch26UploadConfig() map[string]any {
 	return map[string]any{
 		"payload": "sun", "count": 0,
 		"labels": map[string]any{
-			"source": ch26Pair("الملف التوضيحي", "Sample file"), "copied": ch26Pair("بايتات اتنسخت", "Bytes copied"),
+			"source": ch26Pair("الملف التوضيحي", "Sample file"), "copied": ch26Pair("bytes اتنسخت", "Bytes copied"),
 			"staging": ch26Pair("منطقة التجهيز", "Staging area"), "eof": ch26Pair("وصلنا EOF", "Reached EOF"),
-			"next": ch26Pair("اقرأ التالي", "Read next"), "empty": ch26Pair("فاضي", "empty"), "reset": ch26Pair("من الأول", "Reset"),
+			"next": ch26Pair("اقرا التالي", "Read next"), "empty": ch26Pair("فاضي", "empty"), "reset": ch26Pair("من الأول", "Reset"),
 		},
 	}
 }
@@ -263,12 +263,12 @@ var ch26Lesson261 = ch26BuildLesson(ch26LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "الـhandler اتجهز."},
 			{Line: 3, Caption: "الهيدر اتحدد بدري."},
 			{Line: 4, Caption: "اختار الحالة قبل الجسم."},
 			{Line: 5, Caption: "اكتب الجسم بعد الحالة."},
-			{Line: 9, Caption: "سجّل الرد كله.", Output: "202 text/plain queued"},
+			{Line: 9, Caption: "سجّل الـresponse كله.", Output: "202 text/plain queued"},
 		},
 		{
 			{Line: 0, Caption: "Before execution."},
@@ -291,11 +291,11 @@ var ch26Lesson261 = ch26BuildLesson(ch26LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 2, Caption: "جهّز مسجّل الرد."},
+			{Line: 0, Caption: "قبل التشغيل."},
+			{Line: 2, Caption: "جهّز مسجّل الـresponse."},
 			{Line: 4, Caption: "الحالة من غير جسم."},
-			{Line: 6, Caption: "نفّذ الطلب داخل الذاكرة."},
-			{Line: 7, Caption: "الرد فاضي فعلًا.", Output: "204 0"},
+			{Line: 6, Caption: "نفّذ الـrequest داخل الذاكرة."},
+			{Line: 7, Caption: "الـresponse فاضي فعلًا.", Output: "204 0"},
 		},
 		{
 			{Line: 0, Caption: "Before execution."},
@@ -308,19 +308,19 @@ var ch26Lesson261 = ch26BuildLesson(ch26LessonSpec{
 	tryAnswer: 1, checkAnswer: 0,
 	copies: [2]ch26LessonCopy{
 		{
-			mission:       "بوابة القاعدة محتاجة صفحة ونبض جاهزية.\n\nالـstarter مديك signatures بس؛ انت هتحدد الردود وحدود السيرفر.\n\nابدأ بالـhandler، وخلي الاختبار في الذاكرة.",
-			idea:          "الـhandler بياخد request ويكتب response.\n\nرتّب الهيدر، الحالة، وبعدها الجسم. أول كتابة ممكن تثبّت الحالة تلقائيًا.\n\n~httptest.NewRecorder~ يسجّل الرد من غير بورت.",
-			tryPrompt:     "توقّع ناتج مسجّل رد فاضي:",
+			mission:       "بوابة القاعدة محتاجة صفحة ونبض جاهزية.\n\nالـstarter مديك signatures بس؛ انت هتحدد الـresponses وحدود الـserver.\n\nابدأ بالـhandler، وخلي الـtest في الذاكرة.",
+			idea:          "الـhandler بياخد الـrequest وبيكتب الـresponse.\n\nرتّب الهيدر، الحالة، وبعدها الجسم. أول كتابة ممكن تثبّت الحالة تلقائيًا.\n\n~httptest.NewRecorder~ بيسجّل الـresponse من غير بورت.",
+			tryPrompt:     "توقّع ناتج الـResponseRecorder مع response فاضي:",
 			tryReveal:     "شوف الحالة وطول الجسم بعد التنفيذ.",
 			watch:         "- بعد ~WriteHeader~ الحالة اتثبتت؛ رتّب كل الهيدرز قبله.\n- القالب يهرب البيانات، و~Server~ هنا إعداد بس.",
-			check:         "قسّم الشغل: جهّز handler، جرّب طلبات في الذاكرة، وبعدها افحص إعداد السيرفر.\n\nخلي أخطاء التنفيذ برّه الرد قبل ما تكتب أي بايت.",
-			checkQuestion: "فين تضبط ~Content-Type~ عشان يطلع في الرد؟",
+			check:         "قسّم الشغل: جهّز الـhandler، جرّب الـrequests في الذاكرة، وبعدها افحص إعداد الـserver.\n\nخلي الـerrors بتاعة التنفيذ برّه الـresponse قبل ما تكتب أي byte.",
+			checkQuestion: "فين تضبط ~Content-Type~ عشان يطلع في الـresponse؟",
 			turn:          "اكتب جزء صغير وشغّله بـ~httptest~. راجع الحالة والهيدر والجسم قبل ما تكمل.",
 			options:       []string{"200 0", "204 0", "204 1"},
-			feedback:      []string{"مفيش كتابة عادية تختار 200 هنا.", "الحالة 204 والجسم طوله صفر.", "مافيش بايت اتكتب في الجسم."},
+			feedback:      []string{"مفيش كتابة عادية تختار 200 هنا.", "الحالة 204 والجسم طوله صفر.", "مافيش byte اتكتب في الجسم."},
 			checkOptions:  []string{"قبل أول كتابة أو حالة", "بعد الجسم", "بعد انتهاء handler"},
-			checkFeedback: []string{"الهيدر لازم يتجهز قبل تثبيت الرد.", "الكتابة بدأت إرسال الرد بالفعل.", "الرد خلص، مش هتعدّل هيدره."},
-			hints:         []string{"افصل اختيار المسار عن اختيار طريقة الطلب.", "جهّز handler صغيرًا واختبره بمسجل داخل الذاكرة.", "راجع ~ResponseRecorder~ قبل إضافة إعدادات السيرفر."},
+			checkFeedback: []string{"الهيدر لازم يتجهز قبل تثبيت الـresponse.", "الكتابة بدأت إرسال الـresponse بالفعل.", "الـresponse خلص، مش هتعدّل هيدره."},
+			hints:         []string{"افصل اختيار المسار عن اختيار الـmethod بتاع الـrequest.", "جهّز handler صغير واختبره بمسجل جوه الذاكرة.", "راجع ~ResponseRecorder~ قبل إضافة إعدادات الـserver."},
 		},
 		{
 			mission:       "The base gateway needs a page and a readiness pulse.\n\nThe starter gives you signatures; you shape responses and server limits.\n\nStart with a handler and keep checks in memory.",
@@ -358,12 +358,12 @@ func main() {
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 4, Caption: "المخزن لسه فاضي.", Variables: []LessonVariable{{Name: "nextID", Value: "0"}}},
-			{Line: 5, Caption: "القرار جوه القفل."},
+			{Line: 5, Caption: "القرار جوه الـlock."},
 			{Line: 9, Caption: "خد نسخة الهوية.", Variables: []LessonVariable{{Name: "id", Value: "1"}}},
-			{Line: 10, Caption: "اقرأ الاسم تحت القفل.", Variables: []LessonVariable{{Name: "label", Value: "west"}}},
-			{Line: 11, Caption: "افتح القفل بعد النسخ."},
+			{Line: 10, Caption: "اقرا الاسم تحت الـlock.", Variables: []LessonVariable{{Name: "label", Value: "west"}}},
+			{Line: 11, Caption: "افتح الـlock بعد النسخ."},
 			{Line: 12, Caption: "اطبع الهوية والاسم.", Output: "1 west"},
 		},
 		{
@@ -385,7 +385,7 @@ func main() {
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "القائمة بالترتيب الأصلي."},
 			{Line: 3, Caption: "Sort رتّبت الأرقام."},
 			{Line: 4, Caption: "اطبع الترتيب الجديد.", Output: "[3 5 8]"},
@@ -401,18 +401,18 @@ func main() {
 	copies: [2]ch26LessonCopy{
 		{
 			mission:       "سجل الأرصفة محتاج إنشاء وقراءة وتعديل وحذف.\n\nالـstarter فيه نوع ~Berth~ بس؛ الـAPI والمخزن لسه عليك.\n\nخلي الـIDs ثابتة، واحمِ الحالة المشتركة.",
-			idea:          "العداد والخريطة قرار واحد وقت الإنشاء.\n\nالقفل يخلي التحديث المركب يحصل كخطوة محمية من طلب تاني.\n\nللقوائم، انسخ البيانات قبل فك القفل ورتّب النسخة.",
+			idea:          "العداد والـmap قرار واحد وقت الإنشاء.\n\nالـlock يخلي التحديث المركب يحصل كخطوة محمية من request تاني.\n\nللقوائم، انسخ البيانات قبل فك الـlock ورتّب النسخة.",
 			tryPrompt:     "توقّع القائمة بعد ~slices.Sort~:",
 			tryReveal:     "تابع العناصر قبل وبعد الترتيب.",
-			watch:         "- طول الخريطة مش هوية جديدة؛ الحذف ممكن يعيد نفس العدد.\n- متقرأش map مشتركة بعد فك القفل.",
-			check:         "فرّق بين تحليل المسار، فحص الجسم، وتغيير المخزن.\n\nالطلب المرفوض المفروض يسيب الحالة زي ما هي.",
+			watch:         "- طول الـmap مش هوية جديدة؛ الحذف ممكن يعيد نفس العدد.\n- ما تقراش الـmap المشتركة بعد فك الـlock.",
+			check:         "فرّق بين تحليل المسار، فحص الجسم، وتغيير المخزن.\n\nالـrequest المرفوض المفروض يسيب الحالة زي ما هي.",
 			checkQuestion: "إيه اللي يخلي ID مايتكرّرش بعد حذف رصيف؟",
 			turn:          "ابدأ بمخزن صغير واختبر فكرته. بعدين اربطه بطرق HTTP واحدة واحدة.",
 			options:       []string{"[8 3 5]", "[3 5 8]", "[5 3 8]"},
 			feedback:      []string{"Sort غيّرت ترتيب العناصر.", "الترتيب التصاعدي هو 3 ثم 5 ثم 8.", "النتيجة مش ترتيبًا تصاعديًا."},
-			checkOptions:  []string{"عداد مستقل يزيد مع الإنشاء", "استخدام len للخريطة", "اشتقاق الرقم من ترتيب JSON"},
-			checkFeedback: []string{"العداد يحتفظ بالتاريخ حتى بعد الحذف.", "عدد العناصر ممكن يقل ويرجع يتكرر.", "ترتيب العرض مش هوية مستقرة."},
-			hints:         []string{"عامل الهوية كحالة مستقلة عن عدد السجلات الحالية.", "خلي القراءة والتعديل ضمن حدود القفل نفسه.", "راجع نسخة القائمة قبل فرزها أو ترميزها."},
+			checkOptions:  []string{"عداد مستقل يزيد مع الإنشاء", "استخدام len للـmap", "اشتقاق الرقم من ترتيب JSON"},
+			checkFeedback: []string{"العداد يحتفظ بالتاريخ حتى بعد الحذف.", "عدد العناصر ممكن يقل وبعدها يزيد تاني.", "ترتيب العرض مش هوية مستقرة."},
+			hints:         []string{"عامل الهوية كحالة مستقلة عن عدد السجلات الحالية.", "خلي القراءة والتعديل ضمن حدود الـlock نفسه.", "راجع نسخة القائمة قبل فرزها أو ترميزها."},
 		},
 		{
 			mission:       "The berth registry needs create, read, update, and delete.\n\nThe starter provides ~Berth~ only; the API and store are yours.\n\nKeep IDs stable and protect shared state.",
@@ -453,10 +453,10 @@ var ch26Lesson263 = ch26BuildLesson(ch26LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 3, Caption: "الـhandler يسجل أثره."},
 			{Line: 13, Caption: "الأولى تفضل برّه."},
-			{Line: 14, Caption: "الطلب دخل السلسلة.", Variables: []LessonVariable{{Name: "trace", Value: "[outer> inner> handler <inner <outer]"}}},
+			{Line: 14, Caption: "الـrequest دخل السلسلة.", Variables: []LessonVariable{{Name: "trace", Value: "[outer> inner> handler <inner <outer]"}}},
 			{Line: 15, Caption: "اطبع الترتيب الفعلي.", Output: "outer> inner> handler <inner <outer"},
 		},
 		{
@@ -475,7 +475,7 @@ var ch26Lesson263 = ch26BuildLesson(ch26LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "المسار بقى أجزاء."},
 			{Line: 3, Caption: "الجزء الأخير هو 7.", Output: "3 7"},
 		},
@@ -488,19 +488,19 @@ var ch26Lesson263 = ch26BuildLesson(ch26LessonSpec{
 	tryAnswer: 1, checkAnswer: 0,
 	copies: [2]ch26LessonCopy{
 		{
-			mission:       "الراوتر بيوصل طلبات لأرصفة حسب المسار والطريقة.\n\nالـstarter فاضي؛ هتضيف matching وmiddleware وبيانات لكل طلب.\n\nالمسار الغلط يفضل غلط، من غير تنظيف.",
-			idea:          "كل middleware بتلف handler تاني.\n\nالأولى تبقى برّه، فتشتغل قبل اللي بعدها وبعدها بالعكس.\n\nحط params وrequest ID في ~context~ مشتق للطلب، مش في متغير عام.",
-			tryPrompt:     "توقّع عدد الأجزاء وقيمة آخر جزء:",
-			tryReveal:     "اقرأ ناتج تقسيم المسار.",
-			watch:         "- parameter بياخد جزء واحد غير فاضي.\n- ~WithContext~ يرجّع نسخة ويحافظ على سياق الأصل.",
-			check:         "فرّق بين مطابقة النمط ومطابقة الطريقة.\n\nاستخدم ~context~ بقيمة مستقلة لكل request عشان الطلبات ما تتسربش لبعض.",
-			checkQuestion: "فين تخزن params الخاصة بطلب واحد؟",
-			turn:          "جرّب route toy وميدلوير يسجلوا ترتيبهم. بعدها افحص الحالة في الطلب الأصلي.",
+			mission:       "الراوتر بيوصل الـrequests لأرصفة حسب المسار والطريقة.\n\nالـstarter فاضي؛ هتضيف matching وmiddleware وبيانات لكل الـrequest.\n\nالمسار الغلط يفضل غلط، من غير تنظيف.",
+			idea:          "كل middleware بتلف الـhandler التاني.\n\nالأولى بتبقى برّه، فتشتغل قبل اللي بعدها وبعدها بالعكس.\n\nحط params وrequest ID في ~context~ مشتق للـrequest، مش في متغير عام.",
+			tryPrompt:     "توقّع عدد الأجزاء والـvalue بتاعة آخر جزء:",
+			tryReveal:     "اقرا ناتج تقسيم المسار.",
+			watch:         "- الـparameter بياخد جزء واحد غير فاضي.\n- ~WithContext~ بيرجّع نسخة وبيحافظ على الـcontext الأصلي.",
+			check:         "فرّق بين مطابقة النمط ومطابقة الـmethod.\n\nاستخدم ~context~ بـvalue مستقلة لكل الـrequest عشان الـrequests ما تتسربش لبعض.",
+			checkQuestion: "فين تخزن params الخاصة بـrequest واحد؟",
+			turn:          "جرّب route toy وميدلوير يسجلوا ترتيبهم. بعدها افحص الحالة في الـrequest الأصلي.",
 			options:       []string{"2 و7", "3 و7", "3 وbays"},
-			feedback:      []string{"التقسيم بيشمل الجزء الفاضي قبل أول slash.", "فيه 3 أجزاء وآخر قيمة هي 7.", "آخر جزء هو 7، مش bays."},
-			checkOptions:  []string{"في ~context~ مشتق للطلب", "في global map", "في ~URL~ query"},
-			checkFeedback: []string{"النسخة تحتفظ بقيم الطلب من غير تسريب.", "طلبات متزامنة ممكن تخلط القيم.", "الـquery مش مكان حالة الراوتر هنا."},
-			hints:         []string{"قارن أجزاء المسار مع النمط قبل تقرير الطريقة.", "ركّب السلسلة من الداخل للخارج عشان أول عنصر يبقى خارجيًا.", "راجع مفاتيح ~context~ الخاصة وWithContext على نسخة الطلب."},
+			feedback:      []string{"التقسيم بيشمل الجزء الفاضي قبل أول slash.", "فيه 3 أجزاء وآخر value هي 7.", "آخر جزء هو 7، مش bays."},
+			checkOptions:  []string{"في ~context~ مشتق للـrequest", "في global map", "في ~URL~ query"},
+			checkFeedback: []string{"النسخة تحتفظ بـvalues الـrequest من غير تسريب.", "requests متزامنة ممكن تخلط الـvalues.", "الـquery مش مكان حالة الراوتر هنا."},
+			hints:         []string{"قارن أجزاء المسار مع النمط قبل ما تحدد الـmethod.", "ركّب السلسلة من الداخل للخارج عشان أول عنصر يبقى خارجيًا.", "راجع keys ~context~ الخاصة وWithContext على نسخة الـrequest."},
 		},
 		{
 			mission:       "The router sends requests to berths by path and method.\n\nThe starter is empty; add matching, middleware, and per-request data.\n\nAn invalid path should stay invalid instead of being cleaned.",
@@ -533,9 +533,9 @@ func main() {
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 1, Caption: "النوع شايل التصنيف."},
-			{Line: 4, Caption: "الخطأ اتلفّ."},
+			{Line: 4, Caption: "الـerror اتلفّ."},
 			{Line: 6, Caption: "As لقت النوع.", Variables: []LessonVariable{{Name: "found", Value: "true"}, {Name: "fault.Kind", Value: "missing"}}},
 			{Line: 7, Caption: "اطبع التصنيف بس.", Output: "true missing"},
 		},
@@ -556,7 +556,7 @@ func main() {
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "الحقلين موجودين."},
 			{Line: 3, Caption: "JSON احتفظ بـnull.", Output: "{\"data\":null,\"error\":null}"},
 		},
@@ -569,19 +569,19 @@ func main() {
 	tryAnswer: 1, checkAnswer: 1,
 	copies: [2]ch26LessonCopy{
 		{
-			mission:       "ردود المنارات محتاجة شكل ثابت وتصنيف آمن للأخطاء.\n\nالـstarter سايب تعريفات المصدر؛ هتكتب نوع الخطأ والـhandler.\n\nرسالة التشخيص تفضل داخلية. أمثلة الدرس للتوضيح مش ردود المهمة.",
-			idea:          "الـerror ممكن يتلفّ مع سياق إضافي.\n\n~errors.As~ تدور على النوع جوه السلسلة، و~Kind~ يحدد تصنيفًا معروفًا.\n\nاستخدم رسالة عامة للعميل، وسيب السبب للتشخيص. التصنيف مش نص الرسالة.",
-			tryPrompt:     "توقّع JSON لخريطة بالقيمتين ~nil~:",
+			mission:       "الـresponses بتاعة المنارات محتاجة شكل ثابت وتصنيف آمن للـerrors.\n\nالـstarter سايب تعريفات المصدر؛ هتكتب نوع الـerror والـhandler.\n\nرسالة التشخيص تفضل داخلية. أمثلة الدرس للتوضيح مش responses المهمة.",
+			idea:          "الـerror ممكن يتلفّ مع context إضافي.\n\n~errors.As~ بتدور على النوع جوه السلسلة، و~Kind~ بيحدد تصنيف معروف.\n\nاستخدم رسالة عامة للـclient، وسيب السبب للتشخيص. التصنيف مش نص الرسالة.",
+			tryPrompt:     "توقّع JSON لـmap بالـvalues ~nil~:",
 			tryReveal:     "شوف شكل الحقلين بعد الترميز.",
-			watch:         "- ~nil~ مع pointer يظهر ~null~؛ ~omitempty~ ممكن يخفي الحقل.\n- متحوّلش ~err.Error()~ لنص رد عام.",
-			check:         "حدد نوع الخطأ أولًا، وبعدها اختر الحالة والرسالة العامة.\n\nفي النجاح والفشل، شكل الظرف يفضل ثابت.",
-			checkQuestion: "إيه مصدر الرسالة العامة في الرد؟",
-			turn:          "جرّب خطأ ملفوفًا. تأكد إن التصنيف ينجو وإن التفاصيل الخاصة ماتظهرش.",
+			watch:         "- ~nil~ مع الـpointer يظهر ~null~؛ ~omitempty~ ممكن يخفي الحقل.\n- متحوّلش ~err.Error()~ لنص response عام.",
+			check:         "حدد نوع الـerror أولًا، وبعدها اختر الحالة والرسالة العامة.\n\nفي النجاح والفشل، شكل الظرف يفضل ثابت.",
+			checkQuestion: "إيه مصدر الرسالة العامة في الـresponse؟",
+			turn:          "جرّب الـerror الملفوف. اتأكد إن التصنيف يفضل وإن التفاصيل الخاصة ما تظهرش.",
 			options:       []string{"{\"data\":null,\"error\":null}", "{\"data\":{},\"error\":[]}", "{}"},
-			feedback:      []string{"القيمتان الفارغتان اتكتبتا كـnull.", "نوع nil interface مش بيتحوّل للشكل ده.", "الخريطة فيها حقلين، مش object فاضي."},
+			feedback:      []string{"الـvalues الفارغتان اتكتبتا كـnull.", "نوع nil interface مش بيتحوّل للشكل ده.", "الـmap فيها حقلين، مش object فاضي."},
 			checkOptions:  []string{"تصنيف موثوق ورسالة ثابتة", "نص Cause", "نص wrapper كامل"},
-			checkFeedback: []string{"الرد يشرح الفئة من غير تفاصيل داخلية.", "السبب ممكن يكشف بيانات خاصة.", "الـwrapper ممكن يسرّب سياق داخلي."},
-			hints:         []string{"فرّق بين نوع الخطأ ونص التشخيص اللي يحمله.", "خلّي بيانات الرد والخطأ اختيارية من غير إخفاء الحقول.", "ابدأ بـerrors.As قبل اختيار التصنيف العام."},
+			checkFeedback: []string{"الـresponse يشرح الفئة من غير تفاصيل داخلية.", "السبب ممكن يكشف بيانات خاصة.", "الـwrapper ممكن يسرّب context داخلي."},
+			hints:         []string{"فرّق بين نوع الـerror ونص التشخيص اللي يحمله.", "خلّي بيانات الـresponse والـerror اختيارية من غير إخفاء الحقول.", "ابدأ بـerrors.As قبل اختيار التصنيف العام."},
 		},
 		{
 			mission:       "Relay responses need one stable shape and safe error classification.\n\nThe starter leaves the source types; you build the fault and handler.\n\nDiagnostic text stays internal. Lesson values are illustrative, not response data.",
@@ -612,10 +612,10 @@ var ch26Lesson265 = ch26BuildLesson(ch26LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "الملف جوه نظام افتراضي."},
 			{Line: 3, Caption: "Sub اختارت جذر charts."},
-			{Line: 4, Caption: "اقرأ بايتات الملف."},
+			{Line: 4, Caption: "اقرا bytes الملف."},
 			{Line: 5, Caption: "اطبع المحتوى والحالتين.", Output: "sector true true"},
 		},
 		{
@@ -636,7 +636,7 @@ var ch26Lesson265 = ch26BuildLesson(ch26LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "المسار الدقيق مسموح."},
 			{Line: 3, Caption: "الشرطة الزيادة مش موجودة."},
 			{Line: 4, Caption: "اطبع النتيجتين.", Output: "true false"},
@@ -651,19 +651,19 @@ var ch26Lesson265 = ch26BuildLesson(ch26LessonSpec{
 	tryAnswer: 1, checkAnswer: 0,
 	copies: [2]ch26LessonCopy{
 		{
-			mission:       "بوابة الخرائط تخدم ملفات ثابتة من داخل البرنامج.\n\nالـstarter معاه الأصول؛ انت هتحدد اللي يتشاف وسياسة الكاش.\n\nماتفتحش مجلد للزوار.",
-			idea:          "الـfilesystem المضمّن بيتقرأ من غير قرص وقت التشغيل.\n\n~fs.Sub~ يختار جذرًا، و~fs.ReadFile~ يجيب البايتات.\n\nقائمة المسارات الدقيقة تحط الحراسة قبل ~FileServer~.",
+			mission:       "بوابة الخرائط تخدم ملفات ثابتة من داخل البرنامج.\n\nالـstarter معاه الأصول؛ انت هتحدد اللي يتشاف وسياسة الـcache.\n\nماتفتحش مجلد للزوار.",
+			idea:          "الـfilesystem المضمّن بيتقرأ من غير قرص وقت التشغيل.\n\n~fs.Sub~ يختار جذرًا، و~fs.ReadFile~ يجيب الـbytes.\n\nقائمة المسارات الدقيقة تحط الحراسة قبل ~FileServer~.",
 			tryPrompt:     "توقّع نتيجة المسار الدقيق والمسار بشرطة زيادة:",
-			tryReveal:     "قارن المفتاحين في خريطة السماح.",
-			watch:         "- احسب البصمة من نفس البايتات اللي هتخدمها.\n- انسخ request قبل تغيير ~URL~ أو الهيدرز.",
-			check:         "ابدأ بقائمة مسارات واضحة، وبعدها وصل كل مسار بالملف ونوعه.\n\nراجع ~HEAD~ والكاش من غير ما تغيّر الطلب الأصلي.",
+			tryReveal:     "قارن الـkeys في الـmap اللي بتسمح بالمسارات.",
+			watch:         "- احسب البصمة من نفس الـbytes اللي هتخدمها.\n- انسخ الـrequest قبل تغيير ~URL~ أو الهيدرز.",
+			check:         "ابدأ بقائمة مسارات واضحة، وبعدها وصل كل مسار بالملف ونوعه.\n\nراجع ~HEAD~ والـcache من غير ما تغيّر الـrequest الأصلي.",
 			checkQuestion: "إيه اللي تمنعه قائمة المسارات الدقيقة؟",
-			turn:          "ابدأ بقراءة ملف toy من filesystem داخل الذاكرة. بعدها جرّب مسار مش مسموح.",
+			turn:          "ابدأ بقراية ملف toy من الـfilesystem في الذاكرة. بعدها جرّب مسار مش مسموح.",
 			options:       []string{"true true", "true false", "false true"},
-			feedback:      []string{"المفتاح التاني مختلف بسبب الشرطة الزيادة.", "المطابقة حرفية؛ المفتاح الأول بس موجود.", "المسار الأصلي موجود في الخريطة."},
+			feedback:      []string{"الـkey التاني مختلف بسبب الشرطة الزيادة.", "المطابقة حرفية؛ الـkey الأول بس موجود.", "المسار الأصلي موجود في الـmap."},
 			checkOptions:  []string{"عرض مجلد أو مسار غير معلن", "تغيير محتوى الملف", "حساب بصمة مختلفة"},
-			checkFeedback: []string{"الـallowlist توقف التفويض قبل العرض.", "القائمة ما بتغيّرش بايتات الملف.", "المطابقة مش مسؤولة عن حساب البصمة."},
-			hints:         []string{"عامل كل مسار عام كاختيار صريح من قائمة قصيرة.", "اقرأ المحتوى من filesystem بدل مسار الجهاز.", "قارن ~RawPath~ قبل إعادة كتابة ~URL~."},
+			checkFeedback: []string{"الـallowlist توقف التفويض قبل العرض.", "القائمة ما بتغيّرش bytes الملف.", "المطابقة مش مسؤولة عن حساب البصمة."},
+			hints:         []string{"عامل كل مسار عام كاختيار صريح من قائمة قصيرة.", "اقرا المحتوى من filesystem بدل مسار الجهاز.", "قارن ~RawPath~ قبل إعادة كتابة ~URL~."},
 		},
 		{
 			mission:       "The chart gateway serves static files from inside the program.\n\nThe starter includes assets; you choose what is visible and the cache policy.\n\nDo not expose a directory to visitors.",
@@ -693,10 +693,10 @@ var ch26Lesson266 = ch26BuildLesson(ch26LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "مصدر بيقرا على دفعات."},
 			{Line: 3, Caption: "انسخ لحد نهاية المصدر.", Variables: []LessonVariable{{Name: "n", Value: "6"}, {Name: "err", Value: "nil"}}},
-			{Line: 4, Caption: "اعرض عدد البايتات والخطأ.", Output: "6 <nil>"},
+			{Line: 4, Caption: "اطبع عدد الـbytes والـerror.", Output: "6 <nil>"},
 		},
 		{
 			{Line: 0, Caption: "Before execution."},
@@ -715,9 +715,9 @@ var ch26Lesson266 = ch26BuildLesson(ch26LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 2, Caption: "القارئ فيه بايت واحد."},
-			{Line: 3, Caption: "اقرأ البايت الموجود."},
+			{Line: 0, Caption: "قبل التشغيل."},
+			{Line: 2, Caption: "القارئ فيه byte واحد."},
+			{Line: 3, Caption: "اقرا الـbyte الموجود."},
 			{Line: 4, Caption: "القراءة الجاية وصلت للنهاية.", Output: "true"},
 		},
 		{
@@ -730,19 +730,19 @@ var ch26Lesson266 = ch26BuildLesson(ch26LessonSpec{
 	tryAnswer: 0, checkAnswer: 1,
 	copies: [2]ch26LessonCopy{
 		{
-			mission:       "بوابة الشحن تستقبل لقطة multipart وتخزنها بأمان.\n\nالـstarter فيه الـtypes بس؛ انت هتكتب المعالج والتخزين.\n\nالتعامل مع stream يحمي الذاكرة والتنظيف يحمي الملفات.",
-			idea:          "الـpart قارئ؛ انسخه تدريجيًا بدل ما تحمّله كله.\n\nجهّز ملف مؤقت، افحص البايتات، وبعدين انشره بالاسم الداخلي.\n\nفي كل فشل، نظّف الأثر المؤقت.",
+			mission:       "بوابة الشحن تستقبل لقطة multipart وتخزنها بأمان.\n\nالـstarter فيه الـtypes بس؛ انت هتكتب الـhandler والتخزين.\n\nالتعامل مع stream يحمي الذاكرة والتنظيف يحمي الملفات.",
+			idea:          "الـpart قارئ؛ انسخه تدريجيًا بدل ما تحمّله كله.\n\nجهّز ملف مؤقت، افحص الـbytes، وبعدين انشره بالاسم الداخلي.\n\nفي كل فشل، نظّف الأثر المؤقت.",
 			tryPrompt:     "توقّع هل القراءة التانية وصلت لنهاية المصدر:",
-			tryReveal:     "تابع حالة القارئ بعد استهلاك البايت.",
-			watch:         "- اسم العميل مش مسار تخزين؛ افحص القيمة الخام.\n- جسم الطلب والملف ليهم حدين منفصلين.",
-			check:         "افصل قراءة الطلب عن التحقق والنشر.\n\nخلي الوصول للوجهة وخطوة النشر محميين معًا، واربط التنظيف بكل خروج.",
-			checkQuestion: "ليه نقرأ زيادة بايت عن حد الملف؟",
+			tryReveal:     "تابع حالة القارئ بعد استهلاك الـbyte.",
+			watch:         "- اسم الـclient مش مسار تخزين؛ افحص الـvalue الخام.\n- جسم الـrequest والملف ليهم حدين منفصلين.",
+			check:         "افصل قراءة الـrequest عن التحقق والنشر.\n\nخلي الوصول للوجهة وخطوة النشر محميين معًا، واربط التنظيف بكل خروج.",
+			checkQuestion: "ليه نقرأ زيادة byte عن حد الملف؟",
 			turn:          "جرّب stream صغيرًا في الذاكرة. لاحظ وقت EOF، وبعدها خطط لمرحلة الملف المؤقت.",
-			options:       []string{"لا، لسه فيه بيانات", "أيوه، وصلت EOF", "القراءة بتعيد نفس البايت"},
-			feedback:      []string{"البايت الوحيد اتقري بالفعل.", "المصدر خلص بعد أول قراءة.", "القارئ بيتقدم بعد القراءة."},
-			checkOptions:  []string{"عشان نكتشف إن البيانات عدّت الحد", "عشان نضيف بايت للملف", "عشان نعرف نوع الصورة"},
-			checkFeedback: []string{"البايت الإضافي يفرّق الحد من الزيادة.", "مش بنحفظ بايت زيادة مقصودًا.", "التوقيع هو اللي يحدد النوع المقبول."},
-			hints:         []string{"فكّر في كل جزء كقارئ له نهاية وخطأ محتمل.", "افصل ملف مؤقت عن الاسم النهائي المنشور.", "ابدأ تطبيق ~MaxBytesReader~ قبل إنشاء ~MultipartReader~."},
+			options:       []string{"لأ، لسه فيه بيانات", "أيوه، وصلت EOF", "القراءة بتعيد نفس الـbyte"},
+			feedback:      []string{"الـbyte الوحيد اتقري بالفعل.", "المصدر خلص بعد أول قراءة.", "القارئ بيتقدم بعد القراءة."},
+			checkOptions:  []string{"عشان نكتشف إن البيانات عدّت الحد", "عشان نضيف byte للملف", "عشان نعرف نوع الصورة"},
+			checkFeedback: []string{"الـbyte الإضافي يفرّق الحد من الزيادة.", "مش بنحفظ byte زيادة مقصودًا.", "التوقيع هو اللي يحدد النوع المقبول."},
+			hints:         []string{"فكّر في كل جزء كقارئ له نهاية وerror محتمل.", "افصل ملف مؤقت عن الاسم النهائي المنشور.", "ابدأ تطبيق ~MaxBytesReader~ قبل إنشاء ~MultipartReader~."},
 		},
 		{
 			mission:       "The cargo gateway receives a multipart scan and stores it safely.\n\nThe starter has the types; you build the handler and storage flow.\n\nStreaming protects memory, and cleanup protects files.",

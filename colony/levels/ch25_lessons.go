@@ -26,13 +26,13 @@ func ch25Sandbox(prefix, language string) LessonBlock {
 
 func ch25SandboxText(prefix, language string) string {
 	translations := map[string]map[string]string{
-		"c251":  ch25Pair("نفّذ معاملتين؛ جرّب ترتيبًا تانيًا.", "Run both transactions; try another order."),
+		"c251":  ch25Pair("شغّل الاتنين transactions؛ جرّب ترتيب تاني.", "Run both transactions; try another order."),
 		"c252":  ch25Pair("بدّل الترتيب وشوف الكتابة الأخيرة.", "Change the order; watch the last write."),
 		"c253":  ch25Pair("قدّم الساعة؛ احسب الفترات الكاملة.", "Advance the clock; count complete intervals."),
 		"c254":  ch25Pair("انشر واسحب؛ لاحظ امتلاء الـbuffer.", "Publish and receive; watch the full buffer."),
-		"c255":  ch25Pair("قدّم clock واقرأ صلاحية القيمة.", "Advance the clock; check entry expiry."),
-		"c256":  ch25Pair("نفّذ Add؛ بدّل ترتيب العمّال.", "Run Add; change worker order."),
-		"c25b1": ch25Pair("اقفل القناة؛ اسحب القيم بعدها.", "Close the channel; receive queued values."),
+		"c255":  ch25Pair("قدّم clock واقرا صلاحية الـvalue.", "Advance the clock; check entry expiry."),
+		"c256":  ch25Pair("شغّل Add؛ بدّل ترتيب العمّال.", "Run Add; change worker order."),
+		"c25b1": ch25Pair("اقفل الـchannel؛ اسحب الـvalues بعدها.", "Close the channel; receive queued values."),
 	}
 	return translations[prefix][language]
 }
@@ -69,7 +69,7 @@ func ch25LockedAccountConfig() map[string]any {
 			"again": ch25Pair("ترتيب تاني", "Try other order"), "reset": ch25Pair("من الأول", "Reset"),
 			"spends": ch25Pair("خصم", "spends"), "skips": ch25Pair("ماخصمش", "skips"),
 			"because": ch25Pair("الرصيد مايكفيش", "insufficient balance"), "left": ch25Pair("المتبقي", "left"),
-			"done": ch25Pair("خلصت المعاملات", "Transactions complete"), "order": ch25Pair("الترتيب ممكن يتغير.", "Order can vary."),
+			"done": ch25Pair("خلصت الـtransactions", "Transactions complete"), "order": ch25Pair("الترتيب ممكن يتغير.", "Order can vary."),
 			"protected": ch25Pair("كل فحص وتعديل جوه Mutex.", "Each check and update holds Mutex."),
 			"history":   ch25Pair("العمليات", "Operations"),
 		},
@@ -121,8 +121,8 @@ func ch25TTLCacheConfig() map[string]any {
 	return map[string]any{
 		"ttl": 5, "age": 0, "maxAge": 8,
 		"labels": map[string]any{
-			"age": ch25Pair("عمر القيمة بالثواني", "Entry age in seconds"), "advance": ch25Pair("قدّم الساعة", "Advance clock"),
-			"read": ch25Pair("اقرأ من الـcache", "Read cache"), "reset": ch25Pair("من الأول", "Reset"),
+			"age": ch25Pair("عمر الـvalue بالثواني", "Entry age in seconds"), "advance": ch25Pair("قدّم الساعة", "Advance clock"),
+			"read": ch25Pair("اقرا من الـcache", "Read cache"), "reset": ch25Pair("من الأول", "Reset"),
 			"fresh": ch25Pair("لسه صالحة", "Fresh"), "expired": ch25Pair("انتهت", "Expired"),
 			"ttl": ch25Pair("مدة الصلاحية", "TTL"),
 		},
@@ -138,7 +138,7 @@ func ch25AtomicCounterConfig() map[string]any {
 		},
 		"orders": [][]int{{0, 1, 2}, {2, 0, 1}},
 		"labels": map[string]any{
-			"value": ch25Pair("قيمة العداد", "Counter value"), "next": ch25Pair("نفّذ atomic.Add", "Run atomic.Add"),
+			"value": ch25Pair("الـvalue بتاعة العداد", "Counter value"), "next": ch25Pair("شغّل atomic.Add", "Run atomic.Add"),
 			"again": ch25Pair("بدّل الترتيب", "Shuffle order"), "reset": ch25Pair("من الأول", "Reset"),
 			"load": ch25Pair("Load الحالي", "Current Load"), "order": ch25Pair("ترتيب Add يتغير؛ المجموع ثابت.", "Add order varies; total stays."),
 			"trace": ch25Pair("خطوات Add", "Add steps"),
@@ -150,11 +150,11 @@ func ch25ClosedDrainConfig() map[string]any {
 	return map[string]any{
 		"values": []int{4, 6},
 		"labels": map[string]any{
-			"channel": ch25Pair("قناة الشغل", "Job channel"), "open": ch25Pair("مفتوحة", "Open"),
-			"closed": ch25Pair("مقفولة", "Closed"), "close": ch25Pair("اقفل القناة", "Close channel"),
-			"receive": ch25Pair("استقبل القيمة", "Receive value"), "reset": ch25Pair("من الأول", "Reset"),
-			"drained": ch25Pair("الطابور فاضي", "Queue drained"), "queued": ch25Pair("لسه فيه قيم", "Values remain queued"),
-			"empty": ch25Pair("مفيش قيم؛ الاستقبال يستنى", "No values; receive waits"),
+			"channel": ch25Pair("الـchannel بتاعة الشغل", "Job channel"), "open": ch25Pair("مفتوحة", "Open"),
+			"closed": ch25Pair("مقفولة", "Closed"), "close": ch25Pair("اقفل الـchannel", "Close channel"),
+			"receive": ch25Pair("استقبل الـvalue", "Receive value"), "reset": ch25Pair("من الأول", "Reset"),
+			"drained": ch25Pair("الـqueue فاضي", "Queue drained"), "queued": ch25Pair("لسه فيه values", "Values remain queued"),
+			"empty": ch25Pair("مفيش values؛ الاستقبال يستنى", "No values; receive waits"),
 		},
 	}
 }
@@ -237,10 +237,10 @@ func main() {
 }`,
 		frames: []ch25FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 1, arabic: "القفل جزء من Tank.", english: "The lock belongs to Tank."},
+			{line: 1, arabic: "الـlock جزء من Tank.", english: "The lock belongs to Tank."},
 			{line: 13, arabic: "الرصيد يبدأ بـ3.", english: "The balance starts at 3."},
-			{line: 14, arabic: "الإضافة محمية بالقفل.", english: "The add is protected by the lock."},
-			{line: 15, arabic: "القراءة ترجع 5.", english: "The read returns 5.", output: "5"},
+			{line: 14, arabic: "الإضافة محمية بالـlock.", english: "The add is protected by the lock."},
+			{line: 15, arabic: "القراءة رجّعت 5.", english: "The read returns 5.", output: "5"},
 		},
 	},
 	{
@@ -258,23 +258,23 @@ func main() {
 			{line: 2, arabic: "الرصيد يبدأ بـ3.", english: "The balance starts at 3."},
 			{line: 4, arabic: "بدأت المنطقة المحمية.", english: "The protected section begins."},
 			{line: 5, arabic: "الرصيد بقى 5.", english: "The balance becomes 5."},
-			{line: 7, arabic: "اطبع بعد فك القفل.", english: "Print after unlocking.", output: "5"},
+			{line: 7, arabic: "اطبع بعد فك الـlock.", english: "Print after unlocking.", output: "5"},
 		},
 	},
 }
 
 var ch25FuelArabic = ch25BuildLesson("c251", ch25Copy{
 	mission:       "نفّذ ~FuelAccount~ عشان ~Load~ و~Burn~ المتوازيين يحافظوا على الرصيد والسعة. الـstarter فيه API ناقص؛ العقد يطلب تحديثات وقراءات آمنة.",
-	idea:          "~Mutex~ زي قفل على دفتر الرصيد. اقفل حول القراءة والتحديث كعملية واحدة، والقراءة المشتركة كمان تحتاج حماية.",
+	idea:          "~Mutex~ زي الـlock على دفتر الرصيد. اقفل حوالين القراءة والتحديث كعملية واحدة، والقراءة المشتركة كمان محتاجة حماية.",
 	tryQuestion:   "توقّع الرصيد بعد التحديث المحمي:",
 	tryOptions:    []string{"3", "5", "2"},
 	tryFeedback:   []string{"ده الرصيد قبل الإضافة.", "الإضافة رفعت الرصيد من 3 إلى 5.", "2 مقدار الإضافة، مش الرصيد النهائي."},
-	reveal:        "تابع نطاق القفل وقيمة الرصيد بعد الجمع.",
-	watch:         "- افحص الشرط والتحديث جوه نفس القفل.\n- القارئ من غير قفل يقدر يشوف كتابة متزامنة.",
-	think:         "حدّد invariants الرصيد والسعة. راجع كل مسار نجاح ورفض تحت التزامن من غير تحديث جزئي.\n\nالقفل ما بيغيّرش القيم بنفسه.",
+	reveal:        "تابع نطاق الـlock والـvalue بتاعة الرصيد بعد الجمع.",
+	watch:         "- افحص الشرط والتحديث جوه نفس الـlock.\n- القارئ من غير الـlock يقدر يشوف كتابة متزامنة.",
+	think:         "حدّد invariants الرصيد والسعة. راجع كل مسار نجاح ورفض تحت التزامن من غير تحديث جزئي.\n\nالـlock ما بيغيّرش الـvalues بنفسه.",
 	checkQuestion: "إيه اللي يحميه الـmutex هنا؟",
-	checkOptions:  []string{"دالة واحدة بس", "فحص الشرط مع التعديل", "سرعة التنفيذ"},
-	checkFeedback: []string{"القفل يحمي الحالة المشتركة بين النداءات.", "الاتنين لازم يبقوا جزء من المنطقة نفسها.", "القفل مش أداة قياس أداء."},
+	checkOptions:  []string{"function واحدة بس", "فحص الشرط مع التعديل", "سرعة التنفيذ"},
+	checkFeedback: []string{"الـlock يحمي الحالة المشتركة بين النداءات.", "الاتنين لازم يبقوا جزء من المنطقة نفسها.", "الـlock مش أداة قياس أداء."},
 	turn:          "ابدأ من أنواع الحقول وطرق الـAPI. تتبع الرصيد قبل وبعد كل عملية مع التوازي.",
 }, ch25FuelExamples, false)
 
@@ -325,9 +325,9 @@ var ch25RaceExamples = [2]ch25Example{
 		frames: []ch25FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 2, arabic: "النسخة تبدأ من 8.", english: "Both snapshots start at 8."},
-			{line: 4, arabic: "اتحسبت قيمتان قديمتان.", english: "Two stale values were computed."},
+			{line: 4, arabic: "الـvalue القديمة اتحسبت مرتين.", english: "Two stale values were computed."},
 			{line: 6, arabic: "التانية تكتب 12.", english: "The second write stores 12."},
-			{line: 7, arabic: "اطبع القيمة الأخيرة.", english: "Print the last value.", output: "12"},
+			{line: 7, arabic: "اطبع الـvalue الأخيرة.", english: "Print the last value.", output: "12"},
 		},
 	},
 }
@@ -335,14 +335,14 @@ var ch25RaceExamples = [2]ch25Example{
 var ch25RaceArabic = ch25BuildLesson("c252", ch25Copy{
 	mission:       "اكتب برهانًا حتميًا لفقد تحديث في ~Add~، وبعدها صلّح جمع تقارير المسح.\n\nالـstarter فيه موضع مزامنة محقون؛ المطلوب تفسير السبب وحماية الجمع.",
 	idea:          "لو عاملين قرأوا نفس الرصيد قبل ما يكتبوا، آخر كتابة ممكن تمسح إضافة سابقة.\n\nالمثال يحاكي ترتيبًا ممكنًا من غير goroutines.",
-	tryQuestion:   "في الترتيب المعروض، إيه القيمة اللي هتفضل؟",
+	tryQuestion:   "في الترتيب المعروض، إيه الـvalue اللي هتفضل؟",
 	tryOptions:    []string{"10", "12", "15"},
 	tryFeedback:   []string{"دي القراءة الأصلية قبل الإضافات.", "الكتابة الأخيرة جاية من 10 + 5.", "15 محتاجة جمع الإضافتين معًا."},
 	reveal:        "تابع القراءتين والكتابتيْن؛ دي محاكاة لترتيب واحد.",
 	watch:         "- تزامن التنفيذ مش معناه جمع ذري.\n- الإقرار لازم ييجي بعد اكتمال التحديث.",
 	think:         "فكّر إزاي تثبت ترتيبًا محددًا من غير توقيت. بعدين راجع أي قراءة وجمع لازم يفضلوا داخل نفس الحماية.",
 	checkQuestion: "إيه اللي يمنع عاملًا من الكتابة فوق تحديث غيره؟",
-	checkOptions:  []string{"قفل حول القراءة والجمع", "تغيير ترتيب التقرير", "تأخير ثابت"},
+	checkOptions:  []string{"الـlock حوالين القراءة والجمع", "تغيير ترتيب التقرير", "تأخير ثابت"},
 	checkFeedback: []string{"المنطقة المحمية تضم العملية المركبة كلها.", "التقرير مش مصدر التحديث الضايع.", "التأخير ما يضمنش ترتيبًا."},
 	turn:          "ابدأ بتحديد موضع القراءة والتحديث والإقرار. شغّل البرهان، ثم افحص السلوك المحمي تحت race detector.",
 }, ch25RaceExamples, false)
@@ -396,18 +396,18 @@ var ch25BucketExamples = [2]ch25Example{
 }
 
 var ch25BucketArabic = ch25BuildLesson("c253", ch25Copy{
-	mission:       "نظّم التصاريح في ~TokenBucket~ مع ساعة محقونة. الـlab يراجع التجديد والحد الأقصى؛ الـstarter يحدد واجهة الخزان والوقت.",
+	mission:       "نظّم التصاريح في ~TokenBucket~ مع ساعة محقونة. الـlab يراجع التجديد والحد الأقصى؛ الـstarter بيحدد الـinterface بتاعة الخزان والوقت.",
 	idea:          "قسمة ~time.Duration~ على الفترة تعطي عدد الفترات الكاملة. الساعة المحقونة تخلي الحساب يتبع وقتًا تختاره بدل انتظار حقيقي.",
 	tryQuestion:   "توقّع عدد الفترات الكاملة:",
 	tryOptions:    []string{"3", "4", "16"},
-	tryFeedback:   []string{"ثلاث فترات مجموعها 12 ثانية.", "16 فيها أربع فترات من 4 ثواني.", "دي قيمة الثواني، مش عدد الفترات."},
+	tryFeedback:   []string{"ثلاث فترات مجموعها 12 ثانية.", "16 فيها أربع فترات من 4 ثواني.", "دي الـvalue بتاعة الثواني، مش عدد الفترات."},
 	reveal:        "تابع قسمة المدة على الفترة.",
 	watch:         "- الكسور ما تكملش فترة جديدة.\n- تحديث العلامة الزمنية جزء من حالة الخزان.",
 	think:         "حدد حالة الخزان والوقت المرجعي. راجع التجديد عند مرور وقت قصير، وعند وقت طويل، من غير افتراض نوم.\n\nالرصيد ما يزيدش عن السعة.\n\nالوقت الزايد بعد الامتلاء ما يتحولش لرصيد مخزون. سجّل الحالة قبل العملية وبعدها. قارن الرصيد بالسعة.",
 	checkQuestion: "ليه نحقن clock بدل انتظار الوقت الحقيقي؟",
 	checkOptions:  []string{"نختبر الزمن مباشرة", "نسرّع goroutine", "نغيّر نوع المدة"},
-	checkFeedback: []string{"الاختبار يختار اللحظة من غير انتظار.", "السرعة مش المقصودة هنا.", "المدة تفضل ~time.Duration~."},
-	turn:          "ابدأ من واجهة الساعة وحالة bucket. تتبع قراءة الوقت والتحديث تحت نفس الملكية.",
+	checkFeedback: []string{"الـtest يختار اللحظة من غير انتظار.", "السرعة مش المقصودة هنا.", "المدة تفضل ~time.Duration~."},
+	turn:          "ابدأ من الـinterface بتاعة الساعة وحالة bucket. تتبع قراءة الوقت والتحديث تحت نفس الملكية.",
 }, ch25BucketExamples, false)
 
 var ch25BucketEnglish = ch25BuildLesson("c253", ch25Copy{
@@ -441,7 +441,7 @@ var ch25BusExamples = [2]ch25Example{
 }`,
 		frames: []ch25FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 2, arabic: "الطابور خانة واحدة.", english: "The queue has one slot."},
+			{line: 2, arabic: "الـqueue خانة واحدة.", english: "The queue has one slot."},
 			{line: 3, arabic: "ready شغلت الخانة.", english: "ready filled the slot."},
 			{line: 8, arabic: "الـdefault اختار full.", english: "default selects full.", output: "full"},
 			{line: 10, arabic: "الرسالة الأصلية لسه موجودة.", english: "The original message remains.", output: "full\nready"},
@@ -464,24 +464,24 @@ var ch25BusExamples = [2]ch25Example{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 3, arabic: "الخانة فيها 9.", english: "The slot contains 9."},
 			{line: 8, arabic: "الإرسال ما استناش.", english: "The send does not wait.", output: "busy"},
-			{line: 10, arabic: "اقرأ القيمة القديمة.", english: "Read the older value.", output: "busy\n9"},
+			{line: 10, arabic: "اقرا الـvalue القديمة.", english: "Read the older value.", output: "busy\n9"},
 		},
 	},
 }
 
 var ch25BusArabic = ch25BuildLesson("c254", ch25Copy{
-	mission:       "وزّع إشارات ~Publish~ على المشتركين من غير ما القناة البطيئة توقف الباقي.\n\nالـstarter فيه واجهة ناقل الأحداث؛ الـlab يراجع إلغاء الاشتراك والقفل.",
+	mission:       "وزّع إشارات ~Publish~ على المشتركين من غير ما الـchannel البطيئة توقف الباقي.\n\nالـstarter فيه الـinterface بتاعة ناقل الأحداث؛ الـlab يراجع إلغاء الاشتراك والـlock.",
 	idea:          "في ~select~، فرع ~default~ يشتغل فورًا لو مفيش إرسال جاهز. كده محاولة الإرسال ما تستناش مستهلكًا بطيئًا.",
-	tryQuestion:   "القناة ممتلئة؛ توقّع الفرع والناتج:",
+	tryQuestion:   "الـchannel ممتلئة؛ توقّع الفرع والناتج:",
 	tryOptions:    []string{"sent ثم 9", "busy ثم 9", "تعليق"},
 	tryFeedback:   []string{"مافيش خانة متاحة للإرسال الجديد.", "الـdefault يشتغل والرسالة القديمة تفضل.", "وجود default يمنع انتظار الإرسال."},
-	reveal:        "تابع اختيار ~default~ ثم قراءة الرسالة المنتظرة.",
-	watch:         "- الإرسال غير الحاجب ممكن يتخطى مشتركًا ممتلئًا.\n- إغلاق القناة أثناء الإرسال يحتاج تنسيقًا.",
+	reveal:        "تابع فرع ~default~ في ~select~ ثم اقرا الرسالة المنتظرة.",
+	watch:         "- الإرسال غير الحاجب ممكن يتخطى مشتركًا ممتلئًا.\n- إغلاق الـchannel أثناء الإرسال يحتاج تنسيقًا.",
 	think:         "افصل موضوع الرسالة عن المشتركين المطابقين. راجع منافسة الإرسال مع إلغاء الاشتراك والإغلاق.\n\nعداد النشر يحسب الإرسالات المقبولة بس؛ المشترك غير المطابق ما يدخلش المحاولة.",
-	checkQuestion: "إيه أثر ~default~ في إرسال القناة؟",
-	checkOptions:  []string{"يستنى خانة", "يرجع لو الإرسال مش جاهز", "يفرغ القناة"},
-	checkFeedback: []string{"الانتظار يحصل من غير default.", "الاختيار ما يوقفش عند إرسال غير جاهز.", "default ما يقرأش الرسائل."},
-	turn:          "ابدأ من عمر subscription وملكية القناة. تتبع النشر والإلغاء والإغلاق تحت حالة واحدة.",
+	checkQuestion: "إيه أثر ~default~ في إرسال الـchannel؟",
+	checkOptions:  []string{"يستنى خانة", "يرجّع لو الإرسال مش جاهز", "يفرغ الـchannel"},
+	checkFeedback: []string{"الانتظار يحصل من غير default.", "select ما يوقفش عند إرسال غير جاهز.", "default ما يقرأش الرسائل."},
+	turn:          "ابدأ من عمر subscription وملكية الـchannel. تتبع النشر والإلغاء والإغلاق تحت حالة واحدة.",
 }, ch25BusExamples, false)
 
 var ch25BusEnglish = ch25BuildLesson("c254", ch25Copy{
@@ -519,8 +519,8 @@ func main() {
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 2, arabic: "القراءة محمية بـRWMutex.", english: "The read uses RWMutex."},
 			{line: 6, arabic: "RLock يحمي lookup.", english: "RLock protects lookup."},
-			{line: 12, arabic: "القيمة الموجودة هي ready.", english: "The stored value is ready."},
-			{line: 13, arabic: "اطبع القيمة.", english: "Print the value.", output: "ready"},
+			{line: 12, arabic: "الـvalue الموجودة هي ready.", english: "The stored value is ready."},
+			{line: 13, arabic: "اطبع الـvalue.", english: "Print the value.", output: "ready"},
 		},
 	},
 	{
@@ -548,18 +548,18 @@ func main() {
 }
 
 var ch25CacheArabic = ch25BuildLesson("c255", ch25Copy{
-	mission:       "نفّذ ~TTLCache~ لقراءات صالحة، وعامل تنظيف قابل للإيقاف من غير تسريب. الـstarter فيه الساعة المحقونة ونوع الكاش؛ الـlab يراجع عمر العامل.",
-	idea:          "~RWMutex~ يسمح بقراءات متزامنة، ويمنعها وقت الكتابة. صلاحية القيمة تعتمد على الساعة، مش وجود المفتاح وحده.",
-	tryQuestion:   "إيه اللي يضمن انتظار إغلاق العامل قبل الرجوع؟",
-	tryOptions:    []string{"قفل stop فقط", "استقبال done بعد stop", "إنشاء ticker"},
+	mission:       "نفّذ ~TTLCache~ لقراءات صالحة، وعامل تنظيف قابل للإيقاف من غير تسريب. الـstarter فيه الساعة المحقونة ونوع الـcache؛ الـlab يراجع عمر العامل.",
+	idea:          "~RWMutex~ يسمح بقراءات متزامنة، ويمنعها وقت الكتابة. صلاحية الـvalue تعتمد على الساعة، مش وجود الـkey وحده.",
+	tryQuestion:   "إيه اللي يضمن انتظار إغلاق العامل قبل الـreturn؟",
+	tryOptions:    []string{"إغلاق stop بس", "استقبال done بعد stop", "إنشاء ticker"},
 	tryFeedback:   []string{"الإشارة تطلب الإيقاف لكنها مش إقرار النهاية.", "استقبال done يثبت إن العامل خلص.", "ticker مش إشارة انضمام."},
-	reveal:        "تابع طلب الإيقاف ثم إشارة انتهاء العامل. ده ترتيب ممكن للتنفيذ.",
+	reveal:        "تابع request الإيقاف ثم إشارة انتهاء العامل. ده ترتيب ممكن للتنفيذ.",
 	watch:         "- ~RLock~ للقراءة، و~Lock~ للتعديل.\n- كل عامل يحتاج مسار إيقاف وانتظار واضح.",
 	think:         "راجع حد الصلاحية في lookup، ثم مسح المنتهي، ثم إغلاق متكرر آمن. ما تخلطش قراءة مع حذف.",
 	checkQuestion: "إيه اللي يميّز ~RLock~؟",
-	checkOptions:  []string{"يسمح بقراءات متزامنة", "يقفل الكتابة نهائيًا", "يمسح map"},
-	checkFeedback: []string{"قراءات متعددة ممكن تشارك القفل.", "الكتابة تستخدم القفل الحصري.", "القفل ما يعدلش البيانات."},
-	turn:          "ابدأ بتحديد ملكية map والعامل. تتبع كل ~Close~ من الطلب لحد نهاية التنظيف.",
+	checkOptions:  []string{"يسمح بقراءات متزامنة", "يقفل الكتابة نهائيًا", "يمسح الـmap"},
+	checkFeedback: []string{"قراءات متعددة ممكن تشارك الـlock.", "الكتابة تستخدم الـlock الحصري.", "الـlock ما يعدلش البيانات."},
+	turn:          "ابدأ بتحديد ملكية map والعامل. تتبع كل ~Close~ من الـrequest لحد نهاية التنظيف.",
 }, ch25CacheExamples, false)
 
 var ch25CacheEnglish = ch25BuildLesson("c255", ch25Copy{
@@ -591,7 +591,7 @@ var ch25AtomicExamples = [2]ch25Example{
 			{line: 2, arabic: "العداد يبدأ بصفر.", english: "The counter starts at zero."},
 			{line: 3, arabic: "أضف نبضتين.", english: "Add two pulses."},
 			{line: 4, arabic: "أضف تلاتة كمان.", english: "Add three more."},
-			{line: 5, arabic: "اقرأ الإجمالي 5.", english: "Read the total, 5.", output: "5"},
+			{line: 5, arabic: "اقرا الإجمالي 5.", english: "Read the total, 5.", output: "5"},
 		},
 	},
 	{
@@ -605,9 +605,9 @@ var ch25AtomicExamples = [2]ch25Example{
 		frames: []ch25FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
 			{line: 2, arabic: "ابدأ بعداد ذري.", english: "Start an atomic counter."},
-			{line: 3, arabic: "القيمة بقت 4.", english: "The value becomes 4."},
+			{line: 3, arabic: "الـvalue بقت 4.", english: "The value becomes 4."},
 			{line: 4, arabic: "زود نبضة واحدة.", english: "Add one pulse."},
-			{line: 5, arabic: "اقرأ الإجمالي.", english: "Read the total.", output: "5"},
+			{line: 5, arabic: "اقرا الإجمالي.", english: "Read the total.", output: "5"},
 		},
 	},
 }
@@ -615,15 +615,15 @@ var ch25AtomicExamples = [2]ch25Example{
 var ch25AtomicArabic = ch25BuildLesson("c256", ch25Copy{
 	mission:       "قارن عداد ~atomic~ وعداد ~mutex~ بنفس الحمل في ~Bench~. الـstarter فيه التنفيذ والـbenchmark ناقص؛ المطلوب عقد صحيح وقياس عادل.",
 	idea:          "~atomic.Int64~ يوفر عمليات ذرية للعداد. استخدم ~Add~ للتحديث و~Load~ للقراءة؛ المقارنة لازم تعمل نفس الشغل.",
-	tryQuestion:   "توقّع قيمة العداد بعد العمليتين:",
+	tryQuestion:   "توقّع الـvalue بتاعة العداد بعد العمليتين:",
 	tryOptions:    []string{"4", "5", "1"},
-	tryFeedback:   []string{"4 هي القيمة قبل الزيادة الأخيرة.", "الإجمالي بعد الزيادة هو 5.", "1 مقدار الزيادة الأخيرة."},
+	tryFeedback:   []string{"4 هي الـvalue قبل الزيادة الأخيرة.", "الإجمالي بعد الزيادة هو 5.", "1 مقدار الزيادة الأخيرة."},
 	reveal:        "تابع عمليتي ~Add~ لحد قراءة ~Load~.",
-	watch:         "- عدّل المتغير من خلال atomic API فقط.\n- Benchmark يقارن نفس عدد العمليات في النسختين.",
+	watch:         "- عدّل المتغير من خلال atomic API بس.\n- Benchmark يقارن نفس عدد العمليات في النسختين.",
 	think:         "اكتب العقد قبل القياس: معنى ~Add~ و~Total~ واحد. بعدين قارن صحة النتيجة والحمل نفسه.\n\natomic مناسب لرقم مستقل. لو invariant بيربط حقول، mutex أوضح؛ والوقت وحده مش دليل صحة.\n\nكرر الحمل قبل مقارنة النتيجة.\n\nتحقق من الإجمالي؛ الصحة تسبق السرعة.",
 	checkQuestion: "إيه اللي يخلي benchmark مقارنة عادلة؟",
-	checkOptions:  []string{"نفس الشغل على النسختين", "عدادات تبدأ بقيم مختلفة", "طباعة جوه الحلقة"},
-	checkFeedback: []string{"غيّر آلية الحماية فقط.", "البداية المختلفة تفسد المقارنة.", "الطباعة تغيّر الحمل المقاس."},
+	checkOptions:  []string{"نفس الشغل على النسختين", "عدادات تبدأ بـvalues مختلفة", "طباعة جوه الـloop"},
+	checkFeedback: []string{"غيّر آلية الحماية بس.", "البداية المختلفة تفسد المقارنة.", "الطباعة تغيّر الحمل المقاس."},
 	turn:          "ابدأ بعقد العدادين وبنية الـbenchmark. راجع الإجمالي بعد انتهاء المشاركين.",
 }, ch25AtomicExamples, false)
 
@@ -656,9 +656,9 @@ var ch25BossExamples = [2]ch25Example{
 }`,
 		frames: []ch25FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 2, arabic: "الطابور جاهز.", english: "The queue is ready."},
+			{line: 2, arabic: "الـqueue جاهز.", english: "The queue is ready."},
 			{line: 5, arabic: "المرسل أنهى الإرسال.", english: "The sender finished sending."},
-			{line: 7, arabic: "اقرأ أول خامة.", english: "Read the first ore value.", output: "4"},
+			{line: 7, arabic: "اقرا أول خامة.", english: "Read the first ore value.", output: "4"},
 			{line: 7, arabic: "range تفضي الباقي.", english: "range drains the rest.", output: "4\n6"},
 		},
 	},
@@ -673,26 +673,26 @@ var ch25BossExamples = [2]ch25Example{
 }`,
 		frames: []ch25FrameInfo{
 			{line: 0, arabic: "قبل التشغيل.", english: "Before execution."},
-			{line: 4, arabic: "القناة اتقفلت بعد الإرسال.", english: "The channel closed after sending."},
-			{line: 5, arabic: "القيمة لسه متاحة.", english: "The value is still available."},
-			{line: 6, arabic: "وصلت قيمة فعلية.", english: "A real value arrived.", output: "8 true"},
+			{line: 4, arabic: "الـchannel اتقفلت بعد الإرسال.", english: "The channel closed after sending."},
+			{line: 5, arabic: "الـvalue لسه متاحة.", english: "The value is still available."},
+			{line: 6, arabic: "وصلت الـvalue فعلية.", english: "A real value arrived.", output: "8 true"},
 		},
 	},
 }
 
 var ch25BossArabic = ch25BuildLesson("c25b1", ch25Copy{
-	mission:       "نفّذ ~Refine~ بعامل محدود، نتيجة بترتيب الخام، وإيقاف منضم عند الخطأ أو الإلغاء.\n\nالـboss يجمع أنماط قنوات وسياق ونتائج من دروس سابقة.",
-	idea:          "قافل قناة الشغل يعلن انتهاء المصدر. المستهلك يقدر يفضي الرسائل الموجودة؛ الإغلاق مش بديل عن انتظار العمال.",
-	tryQuestion:   "بعد قفل القناة، هل القيمة المرسلة لسه بتتقري؟",
-	tryOptions:    []string{"لا، القفل يمسحها", "آه، لحد ما تتسحب", "الاستقبال يعمل panic"},
-	tryFeedback:   []string{"القفل ما بيمسحش الرسائل الموجودة.", "القيم بتتستهلك قبل علامة النهاية.", "panic يحصل عند الإرسال بعد القفل."},
-	reveal:        "تابع قراءة الرسالة ثم علامة نهاية القناة.",
-	watch:         "- قفل القناة يخص المرسل المالك.\n- نتيجة مرتبة لا تعني ترتيب انتهاء العمال.",
-	think:         "راجع العقد على مراحل: تحقق من المدخلات، وزّع العمل، اجمع النتائج، ثم انضم قبل الرجوع. حدد مصدر أول خطأ.",
-	checkQuestion: "إيه اللي لازم يحصل قبل رجوع دالة فيها workers؟",
-	checkOptions:  []string{"إغلاق كل المتغيرات", "انتظار انتهاء العمال", "إرجاع أول نتيجة"},
-	checkFeedback: []string{"مش كل متغير بيتقفل.", "الانتظار يمنع عمالًا شاردين بعد الرجوع.", "نتيجة واحدة ما تكملش العقد."},
-	turn:          "ابدأ بتقسيم ملكية القنوات والنتائج والسياق. استخدم التستات كعقد، وسيب ~main~ فاضية.",
+	mission:       "نفّذ ~Refine~ بعامل محدود، نتيجة بترتيب الخام، وإيقاف منضم عند الـerror أو الإلغاء.\n\nالـboss يجمع أنماط channels وcontext ونتائج من دروس سابقة.",
+	idea:          "المرسل اللي بيقفل الـchannel بيعلن انتهاء المصدر. المستهلك يقدر يفضي الرسائل الموجودة؛ الإغلاق مش بديل عن انتظار العمال.",
+	tryQuestion:   "بعد إغلاق الـchannel، هل الـvalue اللي اتبعتت لسه بتتقري؟",
+	tryOptions:    []string{"لأ، الإغلاق بيمسحها", "آه، لحد ما تتسحب", "الاستقبال يعمل panic"},
+	tryFeedback:   []string{"الإغلاق ما بيمسحش الرسائل الموجودة.", "الـvalues بتتستهلك قبل علامة النهاية.", "panic يحصل عند الإرسال بعد الإغلاق."},
+	reveal:        "تابع قراءة الرسالة ثم علامة نهاية الـchannel.",
+	watch:         "- إغلاق الـchannel مسؤولية المرسل المالك.\n- النتيجة المرتبة مش معناها إن العمال خلصوا بالترتيب.",
+	think:         "راجع العقد على مراحل: اتأكد من المدخلات، وزّع العمل، اجمع النتائج، ثم انضم قبل الـreturn. حدد مصدر أول error.",
+	checkQuestion: "إيه اللي لازم يحصل قبل ما الـfunction اللي فيها workers تعمل return؟",
+	checkOptions:  []string{"إغلاق كل المتغيرات", "انتظار انتهاء العمال", "رجّع أول نتيجة"},
+	checkFeedback: []string{"مش كل متغير بيتقفل.", "الانتظار يمنع عمالًا شاردين بعد الـreturn.", "نتيجة واحدة ما تكملش العقد."},
+	turn:          "ابدأ بتقسيم ملكية الـchannels والنتائج والـcontext. استخدم الـtests كعقد، وسيب ~main~ فاضية.",
 }, ch25BossExamples, false)
 
 var ch25BossEnglish = ch25BuildLesson("c25b1", ch25Copy{

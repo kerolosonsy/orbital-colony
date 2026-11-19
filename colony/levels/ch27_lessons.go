@@ -77,14 +77,14 @@ func ch27Pair(ar, en string) map[string]string {
 var ch27SandboxSpecs = map[string]ch27SandboxSpec{
 	"c271": {
 		id: "ch27-signed-pass-playground", kind: "ch27-signed-pass",
-		text: [2]string{"غيّر الرسالة أو المفتاح وشوف ~tag~.", "Change the message or key and watch the tag."},
+		text: [2]string{"غيّر الرسالة أو الـkey وشوف ~tag~.", "Change the message or key and watch the tag."},
 		config: map[string]any{
 			"labels": map[string]any{
 				"payload":       ch27Pair("الـpayload", "Payload"),
-				"key":           ch27Pair("المفتاح", "Key"),
+				"key":           ch27Pair("الـkey", "Key"),
 				"tag":           ch27Pair("tag توضيحي", "Toy tag"),
 				"changeMessage": ch27Pair("غيّر الرسالة", "Change message"),
-				"rotateKey":     ch27Pair("بدّل المفتاح", "Rotate key"),
+				"rotateKey":     ch27Pair("بدّل الـkey", "Rotate key"),
 				"caption":       ch27Pair("الرسالة مقروءة والـtag يتغير.", "The payload stays readable; the tag changes."),
 			},
 			"messages": []string{"crew=Mira", "crew=Vega"},
@@ -94,11 +94,11 @@ var ch27SandboxSpecs = map[string]ch27SandboxSpec{
 	},
 	"c272": {
 		id: "ch27-sessions-playground", kind: "ch27-session-lookup",
-		text: [2]string{"بدّل ~ID~ وشوف سجل السيرفر.", "Switch IDs and inspect the server record."},
+		text: [2]string{"بدّل ~ID~ وشوف سجل الـserver.", "Switch IDs and inspect the server record."},
 		config: map[string]any{
 			"labels": map[string]any{
 				"browser": ch27Pair("مع المتصفح", "Browser holds"),
-				"server":  ch27Pair("نتيجة السيرفر", "Server lookup"),
+				"server":  ch27Pair("نتيجة الـserver", "Server lookup"),
 				"next":    ch27Pair("بدّل الـID", "Switch ID"),
 			},
 			"lookups": []any{
@@ -109,33 +109,33 @@ var ch27SandboxSpecs = map[string]ch27SandboxSpec{
 	},
 	"c273": {
 		id: "ch27-cors-playground", kind: "ch27-preflight",
-		text: [2]string{"بدّل الطلب وتابع استدعاء الـhandler.", "Switch requests and follow the handler call."},
+		text: [2]string{"بدّل الـrequest وتابع استدعاء الـhandler.", "Switch requests and follow the handler call."},
 		config: map[string]any{
 			"labels": map[string]any{
 				"method":     ch27Pair("الطريقة", "Method"),
 				"stage":      ch27Pair("الفرع", "Path"),
-				"status":     ch27Pair("الرد", "Response"),
+				"status":     ch27Pair("الـresponse", "Response"),
 				"innerCalls": ch27Pair("نداءات handler", "Handler calls"),
-				"next":       ch27Pair("الطلب التالي", "Next request"),
+				"next":       ch27Pair("الـrequest التالي", "Next request"),
 			},
 			"requests": []any{
 				map[string]any{"method": "OPTIONS", "stage": "preflight", "status": "204", "calls": "0", "caption": ch27Pair("الفرع ده ما ناداش handler.", "This branch skipped the handler.")},
-				map[string]any{"method": "GET", "stage": "route", "status": "200", "calls": "1", "caption": ch27Pair("الطلب العادي وصل للـhandler.", "The normal request reached the handler.")},
+				map[string]any{"method": "GET", "stage": "route", "status": "200", "calls": "1", "caption": ch27Pair("الـrequest العادي وصل للـhandler.", "The normal request reached the handler.")},
 			},
 		},
 	},
 	"c274": {
 		id: "ch27-rate-limit-playground", kind: "ch27-client-counts",
-		text: [2]string{"عدّ الطلبات لكل عنوان لوحده.", "Count requests separately for each address."},
+		text: [2]string{"عدّ الـrequests لكل عنوان لوحده.", "Count requests separately for each address."},
 		config: map[string]any{
 			"labels": map[string]any{
-				"client":  ch27Pair("العميل", "Client"),
-				"count":   ch27Pair("الطلبات", "Requests"),
+				"client":  ch27Pair("الـclient", "Client"),
+				"count":   ch27Pair("الـrequests", "Requests"),
 				"caption": ch27Pair("كل عنوان له عدّاده.", "Each address has its own count."),
 			},
 			"clients": []any{
-				map[string]any{"address": "198.51.100.8", "button": ch27Pair("طلب من A", "Request A")},
-				map[string]any{"address": "198.51.100.9", "button": ch27Pair("طلب من B", "Request B")},
+				map[string]any{"address": "198.51.100.8", "button": ch27Pair("request من A", "Request A")},
+				map[string]any{"address": "198.51.100.9", "button": ch27Pair("request من B", "Request B")},
 			},
 		},
 	},
@@ -234,10 +234,10 @@ var ch27Lesson271 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "الرسالة مثال توضيحي."},
-			{Line: 3, Caption: "جهّز MAC بالمفتاح."},
-			{Line: 4, Caption: "اربط الرسالة بالمفتاح."},
+			{Line: 3, Caption: "جهّز MAC بالـkey."},
+			{Line: 4, Caption: "اربط الرسالة بالـkey."},
 			{Line: 5, Caption: "اطبع جزءًا من البصمة.", Output: "b3614ce6"},
 		},
 		{
@@ -257,10 +257,10 @@ var ch27Lesson271 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "حوّل النص لـbase64url."},
-			{Line: 3, Caption: "رجّعه لبايتات."},
-			{Line: 4, Caption: "اقرأ النص الأصلي.", Output: "crew=Mira"},
+			{Line: 3, Caption: "رجّعه لـbytes."},
+			{Line: 4, Caption: "اقرا النص الأصلي.", Output: "crew=Mira"},
 		},
 		{
 			{Line: 0, Caption: "Before execution."},
@@ -273,7 +273,7 @@ var ch27Lesson271 = ch27BuildLesson(ch27LessonSpec{
 	copies: [2]ch27LessonCopy{
 		{
 			mission:       "بوابة المساكن تفحص code وتطلع تصريح قصير العمر.\n\nالـstarter فيه signatures بس؛ هتربط تخزين آمن بـbcrypt وتحقق ~JWT~.\n\nالسر ييجي من مصدر إعدادات.",
-			idea:          "الـHMAC بيربط الرسالة بمفتاح؛ أي تعديل يخلي التحقق يفشل.\n\nده مثال لفكرة توقيع ~JWT~، مش بديل عن ~bcrypt~ لكود الطاقم.\n\nالـpayload ممكن يتقري؛ التوقيع هو اللي يثبت سلامته.",
+			idea:          "الـHMAC بيربط الرسالة بـkey؛ أي تعديل يخلي التحقق يفشل.\n\nده مثال لفكرة توقيع ~JWT~، مش بديل عن ~bcrypt~ لكود الطاقم.\n\nالـpayload ممكن يتقري؛ التوقيع هو اللي يثبت سلامته.",
 			tryPrompt:     "توقّع النص بعد فك ترميز payload:",
 			tryReveal:     "تابع الترميز وفك الترميز.",
 			watch:         "- ~base64url~ ترميز، مش تشفير ولا إثبات هوية.\n- قارن ~bcrypt~ errors: الكود الغلط غير عطل hash.",
@@ -281,9 +281,9 @@ var ch27Lesson271 = ch27BuildLesson(ch27LessonSpec{
 			checkQuestion: "إيه اللي يثبت إن claims ما اتعدلتش؟",
 			turn:          "ابدأ بفحص بيانات دخول تجريبية. بعدين تتبع claims قبل وبعد التحقق.",
 			options:       []string{"crew=Mira", "Y3Jldz1NaXJh", "Mira=crew"},
-			feedback:      []string{"فك الترميز يعيد البايتات الأصلية.", "ده النص المشفّر بترميز ~base64url~.", "الترتيب في الرسالة ما اتبدلش."},
+			feedback:      []string{"فك الترميز بيرجّع الـbytes الأصلية.", "ده النص المشفّر بترميز ~base64url~.", "الترتيب في الرسالة ما اتبدلش."},
 			checkOptions:  []string{"إن payload نصه مقروء", "وجود اسم crew", "توقيع صالح بخوارزمية مسموحة"},
-			checkFeedback: []string{"القراءة لا تثبت إن البيانات موثوقة.", "الاسم وحده ممكن يتزور.", "التحقق من التوقيع والخوارزمية يثبت السلامة."},
+			checkFeedback: []string{"القراية مش دليل إن البيانات موثوقة.", "الاسم وحده ممكن يتزور.", "التحقق من التوقيع والخوارزمية يثبت السلامة."},
 			hints:         []string{"فرّق بين hash كود الدخول وتوقيع التصريح.", "افصل تحميل السر وLogin عن middleware ~Require~.", "راجع خيارات ~ParseWithClaims~ الخاصة بالمصدر والوقت."},
 		},
 		{
@@ -314,10 +314,10 @@ var ch27Lesson272 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "الكوكي له خصائص صريحة.", Variables: []LessonVariable{{Name: "cookie.Name", Value: "quarters"}, {Name: "cookie.Path", Value: "/"}}},
 			{Line: 3, Caption: "افحص خصائص الحماية.", Variables: []LessonVariable{{Name: "cookie.HttpOnly", Value: "true"}, {Name: "cookie.Secure", Value: "true"}}},
-			{Line: 3, Caption: "القيم الثلاثة شغالة.", Output: "true true true"},
+			{Line: 3, Caption: "الـvalues الثلاثة شغالة.", Output: "true true true"},
 		},
 		{
 			{Line: 0, Caption: "Before execution."},
@@ -335,9 +335,9 @@ var ch27Lesson272 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 2, Caption: "الخريطة فيها جلسة."},
-			{Line: 3, Caption: "المفتاح لقى الاسم."},
+			{Line: 0, Caption: "قبل التشغيل."},
+			{Line: 2, Caption: "الـmap فيها جلسة."},
+			{Line: 3, Caption: "الـmap رجّعت الاسم."},
 			{Line: 4, Caption: "اطبع الاسم ووجوده.", Output: "Mira true"},
 		},
 		{
@@ -350,19 +350,19 @@ var ch27Lesson272 = ch27BuildLesson(ch27LessonSpec{
 	tryAnswer: 1, checkAnswer: 0,
 	copies: [2]ch27LessonCopy{
 		{
-			mission:       "الجلسة بتربط متصفح الطاقم بهويته وتمنع طلبات مزيفة.\n\nالـstarter يديك Quarters بس؛ هتدير الجلسات والكوكي وCSRF.\n\nوقت الاختبار ييجي من clock محقون.",
-			idea:          "السيرفر يحتفظ بسجل الجلسة؛ المتصفح يحمل ID بس.\n\nخصائص الكوكي تقلل قراءته أو إرساله في سياق غلط.\n\nبعد دخول ناجح، الهوية تتجدد عشان ID قديم مايفضلش صالح.",
+			mission:       "الجلسة بتربط متصفح الطاقم بهويته وتمنع الـrequests المزيفة.\n\nالـstarter يديك Quarters بس؛ هتدير الجلسات والكوكي وCSRF.\n\nوقت الـtest ييجي من clock محقون.",
+			idea:          "الـserver يحتفظ بسجل الجلسة؛ المتصفح يحمل ID بس.\n\nخصائص الكوكي تقلل قراءته أو إرساله في الـcontext الغلط.\n\nبعد دخول ناجح، الهوية تتجدد عشان ID قديم مايفضلش صالح.",
 			tryPrompt:     "توقّع نتيجة البحث عن الجلسة:",
-			tryReveal:     "شوف الاسم وقيمة comma-ok.",
-			watch:         "- الجلسة المنتهية تتعامل كأنها مش موجودة.\n- طلب بيغيّر حالة محتاج CSRF token بجانب الكوكي.",
+			tryReveal:     "شوف الاسم وvalue comma-ok.",
+			watch:         "- الجلسة المنتهية تتعامل كأنها مش موجودة.\n- request بيغيّر حالة محتاج CSRF token بجانب الكوكي.",
 			check:         "افصل التحقق من بيانات الدخول عن البحث في الجلسة.\n\nراجع التدوير والخروج كخطوات تغيّر الحالة، وGET كقراءة.",
-			checkQuestion: "إيه اللي يميّز طلبًا شرعيًا بيغيّر الحالة؟",
+			checkQuestion: "إيه اللي يميّز request شرعي بيغيّر الحالة؟",
 			turn:          "ابدأ بسجل جلسة toy. جرّب قراءة الاسم، وبعدها تتبع ما يتغير عند الخروج.",
 			options:       []string{"Mira false", "Mira true", "demo-id true"},
-			feedback:      []string{"المفتاح موجود فـok تساوي true.", "الاسم المخزن Mira والمفتاح اتلاقى.", "الـmap بترجع القيمة مش المفتاح."},
+			feedback:      []string{"الـkey موجود فـok تساوي true.", "الاسم المخزن Mira والـkey اتلاقى.", "الـmap بترجّع الـvalue مش الـkey."},
 			checkOptions:  []string{"كوكي سليم بس", "CSRF token مطابق في الهيدر", "اسم الطاقم في query"},
-			checkFeedback: []string{"المتصفح ممكن يرسل الكوكي تلقائيًا.", "الطلب يثبت امتلاكه للتوكن السري الإضافي.", "الـquery مش إثباتًا سريًا."},
-			hints:         []string{"فرّق بين ID الموجود عند العميل وسجل الجلسة على السيرفر.", "رتّب التحقق والإنشاء والتدوير كعمليات واضحة.", "راجع ~ConstantTimeCompare~ عند مقارنة توكن CSRF."},
+			checkFeedback: []string{"المتصفح ممكن يرسل الكوكي تلقائيًا.", "الـrequest يثبت امتلاكه للتوكن السري الإضافي.", "الـquery مش إثباتًا سريًا."},
+			hints:         []string{"فرّق بين ID الموجود عند الـclient وسجل الجلسة على الـserver.", "رتّب التحقق والإنشاء والتدوير كعمليات واضحة.", "راجع ~ConstantTimeCompare~ عند مقارنة توكن CSRF."},
 		},
 		{
 			mission:       "The session connects a crew browser to its identity and rejects forged requests.\n\nThe starter gives you Quarters; manage sessions, cookies, and CSRF.\n\nTests supply an injected clock.",
@@ -406,13 +406,13 @@ var ch27Lesson273 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "الـhandler الداخلي جاهز."},
-			{Line: 8, Caption: "الطلب التمهيدي له فرع."},
-			{Line: 14, Caption: "جهّز مسجّل الرد."},
-			{Line: 15, Caption: "جهّز الطلب التمهيدي."},
-			{Line: 16, Caption: "نوع الطلب اتسجل."},
-			{Line: 17, Caption: "الفرع رد قبل next."},
+			{Line: 8, Caption: "الـrequest التمهيدي له فرع."},
+			{Line: 14, Caption: "جهّز مسجّل الـresponse."},
+			{Line: 15, Caption: "جهّز الـrequest التمهيدي."},
+			{Line: 16, Caption: "نوع الـrequest اتسجل."},
+			{Line: 17, Caption: "الفرع رجّع response قبل next."},
 			{Line: 18, Caption: "الحالة وعدد النداءات.", Variables: []LessonVariable{{Name: "nextCalls", Value: "0"}}, Output: "204 0"},
 		},
 		{
@@ -433,7 +433,7 @@ var ch27Lesson273 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "قارن اسمي الهيدر."},
 			{Line: 3, Caption: "حالة الحروف مش فارقة.", Output: "true"},
 		},
@@ -446,19 +446,19 @@ var ch27Lesson273 = ch27BuildLesson(ch27LessonSpec{
 	tryAnswer: 1, checkAnswer: 0,
 	copies: [2]ch27LessonCopy{
 		{
-			mission:       "درع البوابة يسمح لأصول الأسطول المعروفة تقرأ الرد.\n\nالـstarter فيه Policy وShield بس؛ هتضيف validation وسلوك wrapper.\n\nCORS مش تسجيل دخول.",
-			idea:          "CORS بيتحكم في قراءة المتصفح لرد من origin تاني.\n\nالطلب العادي يكمل لـnext؛ preflight يسأل عن الإذن قبل الطلب.\n\nضيف ~Vary: Origin~ من غير ما تمسح قيم الـhandler.",
+			mission:       "درع البوابة يسمح لأصول الأسطول المعروفة تقرأ الـresponse.\n\nالـstarter فيه Policy وShield بس؛ هتضيف validation وسلوك wrapper.\n\nCORS مش تسجيل دخول.",
+			idea:          "CORS بيتحكم في قراءة المتصفح للـresponse من origin تاني.\n\nالـrequest العادي يكمل لـnext؛ preflight يسأل عن الإذن قبل الـrequest.\n\nضيف ~Vary: Origin~ من غير ما تمسح values الـhandler.",
 			tryPrompt:     "توقّع هل اسما الهيدر متساويين:",
 			tryReveal:     "تابع المقارنة اللي تتجاهل حالة الحروف.",
-			watch:         "- أسماء الهيدرات غير حساسة لحالة الحروف؛ methods حساسة.\n- الحماية و~Vary~ لازم يوصلوا لكل رد.",
-			check:         "قسّم wrapper لطلب عادي وpreflight.\n\nاجمع شروط الأصل والطريقة والهيدرات، وسيب رد الـhandler الداخلي يمر.",
-			checkQuestion: "CORS بيمنع مين من قراءة الرد؟",
+			watch:         "- أسماء الهيدرات غير حساسة لحالة الحروف؛ methods حساسة.\n- الحماية و~Vary~ لازم يوصلوا لكل response.",
+			check:         "قسّم wrapper لـrequest عادي وpreflight.\n\nاجمع شروط الأصل والطريقة والهيدرات، وسيب response الـhandler الداخلي يمر.",
+			checkQuestion: "CORS بيمنع مين من قراءة الـresponse؟",
 			turn:          "جرّب wrapper مع recorder وعدّاد للـhandler. بدّل Origin وشوف الهيدرات.",
 			options:       []string{"false", "true", "compile error"},
 			feedback:      []string{"~EqualFold~ بتتجاهل فرق الحالة.", "الحروف مختلفة لكن الاسمين متساويين هنا.", "الاستدعاء API صحيح في strings."},
-			checkOptions:  []string{"كل clients قبل وصولهم للسيرفر", "المتصفح من إتاحة الرد لصفحة خارجية", "الـhandler من استقبال الطلب"},
-			checkFeedback: []string{"CORS مش جدار مصادقة على الاتصال.", "المتصفح يقرر السماح للصفحة بقراءة الرد.", "السيرفر يستقبل الطلب العادي."},
-			hints:         []string{"عامل CORS كسياسة قراءة يطبقها المتصفح.", "افصل preflight عن الطلبات العادية داخل wrapper.", "استخدم ~Header.Add~ لحفظ Vary الموجود."},
+			checkOptions:  []string{"كل الـclients قبل وصولهم للـserver", "المتصفح من إتاحة الـresponse لصفحة خارجية", "الـhandler من استقبال الـrequest"},
+			checkFeedback: []string{"CORS مش جدار مصادقة على الاتصال.", "المتصفح بيقرر يسمح للصفحة تقرا الـresponse.", "الـserver بيستقبل الـrequest العادي."},
+			hints:         []string{"عامل CORS كسياسة قراءة يطبقها المتصفح.", "افصل preflight عن الـrequests العادية داخل wrapper.", "استخدم ~Header.Add~ لحفظ Vary الموجود."},
 		},
 		{
 			mission:       "The gateway shield lets known fleet origins read a response.\n\nThe starter has Policy and Shield; add validation and wrapper behavior.\n\nCORS is not login.",
@@ -488,9 +488,9 @@ var ch27Lesson274 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "كل عنوان له رصيد."},
-			{Line: 3, Caption: "رصيد عميل واحد قل."},
+			{Line: 3, Caption: "رصيد client واحد قل."},
 			{Line: 4, Caption: "الرصيد التاني زي ما هو.", Output: "1 1"},
 		},
 		{
@@ -509,10 +509,10 @@ var ch27Lesson274 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "الانتظار ثانية ونص."},
 			{Line: 3, Caption: "قرّب الثواني لفوق."},
-			{Line: 4, Caption: "العميل ينتظر ثانيتين.", Output: "2"},
+			{Line: 4, Caption: "الـclient ينتظر ثانيتين.", Output: "2"},
 		},
 		{
 			{Line: 0, Caption: "Before execution."},
@@ -524,19 +524,19 @@ var ch27Lesson274 = ch27BuildLesson(ch27LessonSpec{
 	tryAnswer: 1, checkAnswer: 0,
 	copies: [2]ch27LessonCopy{
 		{
-			mission:       "الـgateway يدي كل عميل خزان تصاريح مستقل.\n\nالـstarter فيه حدود الإعداد؛ هتضيف مفاتيح العملاء والحساب والتنظيف.\n\nالوقت جاي من clock، مش نوم فعلي.",
-			idea:          "خريطة الخزانات تفصل رصيد كل client.\n\nالـkey يعتمد على IP موثوق؛ بورت الاتصال بيتغير وممكن الهيدر يتزور.\n\nاحمِ البحث والتجديد والاستهلاك تحت قفل واحد.",
+			mission:       "الـgateway يدي كل client خزان تصاريح مستقل.\n\nالـstarter فيه حدود الإعداد؛ هتضيف keys الـclients والحساب والتنظيف.\n\nالوقت جاي من clock، مش نوم فعلي.",
+			idea:          "الـmap بتفصل رصيد كل client.\n\nالـkey بيعتمد على IP موثوق؛ بورت الاتصال بيتغير وممكن الهيدر يتزور.\n\nاحمِ البحث والتجديد والاستهلاك تحت الـlock نفسه.",
 			tryPrompt:     "توقّع عدد الثواني بعد تقريب الانتظار لفوق:",
 			tryReveal:     "شوف الـduration تتحول لثواني كاملة.",
-			watch:         "- تجاهل forwarded header لو الاتصال مش من proxy موثوق.\n- سجل آخر ظهور حتى للطلب المرفوض.",
-			check:         "ابدأ بتحديد هوية العميل، ثم خزان مستقل، ثم قرار قبول أو رفض.\n\nفكّر إمتى يبقى حذف الخزان الخامل آمنًا.",
-			checkQuestion: "أي عنوان يستخدم لتحديد العميل أولًا؟",
+			watch:         "- تجاهل forwarded header لو الاتصال مش من proxy موثوق.\n- سجل آخر ظهور حتى للـrequest المرفوض.",
+			check:         "ابدأ بتحديد هوية الـclient، ثم خزان مستقل، ثم قرار قبول أو رفض.\n\nفكّر إمتى يبقى حذف الخزان الخامل آمنًا.",
+			checkQuestion: "أي عنوان يستخدم لتحديد الـclient أولًا؟",
 			turn:          "جرّب خزانين بعناوين توضيحية. غيّر واحدًا وتأكد إن التاني مستقل.",
 			options:       []string{"1", "2", "1.5"},
 			feedback:      []string{"التقريب لفوق ما بينزلش لثانية.", "ثانية ونصف تتقرب للثانية الكاملة التالية.", "Retry-After هنا عدد ثواني صحيح."},
-			checkOptions:  []string{"RemoteAddr بعد تحليل IP", "X-Forwarded-For من أي طلب", "رقم المنفذ"},
-			checkFeedback: []string{"الـpeer المباشر هو نقطة الثقة الأولى.", "أي عميل يقدر يكتب الهيدر بنفسه.", "المنفذ يتغير بين الاتصالات."},
-			hints:         []string{"خلي لكل عميل معروف رصيدًا وحالة تجديد خاصة.", "اجمع تعديل الخريطة والخزان تحت mutex نفسه.", "ابدأ بتحليل ~SplitHostPort~ ثم ~ParseIP~."},
+			checkOptions:  []string{"RemoteAddr بعد تحليل IP", "X-Forwarded-For من أي request", "رقم المنفذ"},
+			checkFeedback: []string{"الـpeer المباشر هو نقطة الثقة الأولى.", "أي client يقدر يكتب الهيدر بنفسه.", "المنفذ بيتغير بين الاتصالات."},
+			hints:         []string{"خلي لكل client معروف رصيدًا وحالة تجديد خاصة.", "اجمع تعديل الـmap والخزان تحت mutex نفسه.", "ابدأ بتحليل ~SplitHostPort~ ثم ~ParseIP~."},
 		},
 		{
 			mission:       "The gateway gives each client an independent permit tank.\n\nThe starter has configuration limits; add client keys, accounting, and cleanup.\n\nTime comes from a clock, not a real sleep.",
@@ -565,9 +565,9 @@ var ch27Lesson275 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	frames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 0, Caption: "قبل التشغيل."},
 			{Line: 2, Caption: "الأبجدية مرتبة."},
-			{Line: 3, Caption: "اقرأ أول ووسط وآخر خانة.", Output: "0 a Z"},
+			{Line: 3, Caption: "اقرا أول ووسط وآخر خانة.", Output: "0 a Z"},
 		},
 		{
 			{Line: 0, Caption: "Before execution."},
@@ -584,9 +584,9 @@ var ch27Lesson275 = ch27BuildLesson(ch27LessonSpec{
 }`,
 	tryFrames: [2][]LessonFrame{
 		{
-			{Line: 0, Caption: "قبل التنفيذ."},
-			{Line: 2, Caption: "الخطأ له هوية."},
-			{Line: 3, Caption: "التغليف بيضيف سياق."},
+			{Line: 0, Caption: "قبل التشغيل."},
+			{Line: 2, Caption: "الـerror له هوية."},
+			{Line: 3, Caption: "التغليف بيضيف context."},
 			{Line: 4, Caption: "Is لسه لاقته.", Output: "true"},
 		},
 		{
@@ -599,19 +599,19 @@ var ch27Lesson275 = ch27BuildLesson(ch27LessonSpec{
 	tryAnswer: 1, checkAnswer: 0,
 	copies: [2]ch27LessonCopy{
 		{
-			mission:       "روابط الأسطول تتحول لأكواد قصيرة وتعيد توجيه الطلب.\n\nالـstarter يعرّف الواجهة؛ هتضيف التحويل والمخزن والـhandler.\n\nافحص الهدف قبل طلب كود.",
-			idea:          "~Base62~ أبجدية أرقام وحروف بترتيب ثابت.\n\nالترتيب نفسه يفضل ثابت في كل تحويل.\n\nالـstore هو صاحب قرار التكرار؛ الواجهة تخلي الـhandler يشتغل مع مخزن قابل للاستبدال.\n\nتحقق من ~URL~ قبل ما تسمح بتحويله.",
-			tryPrompt:     "توقّع هل ~errors.Is~ تلاقي الخطأ بعد التغليف:",
-			tryReveal:     "راقب هوية الخطأ خلال السلسلة.",
+			mission:       "روابط الأسطول تتحول لأكواد قصيرة وتعيد توجيه الـrequest.\n\nالـstarter بيعرّف الـinterface؛ هتضيف التحويل والمخزن والـhandler.\n\nافحص الهدف قبل request كود.",
+			idea:          "~Base62~ أبجدية أرقام وحروف بترتيب ثابت.\n\nالترتيب نفسه يفضل ثابت في كل تحويل.\n\nالـstore هو صاحب قرار التكرار؛ الـinterface بتخلي الـhandler يشتغل مع مخزن قابل للاستبدال.\n\nاتأكد من ~URL~ قبل ما تسمح بتحويله.",
+			tryPrompt:     "توقّع هل ~errors.Is~ تلاقي الـerror بعد التغليف:",
+			tryReveal:     "راقب هوية الـerror خلال السلسلة.",
 			watch:         "- رابط التحويل لازم يكون ~http~ أو ~https~ ومن غير user.\n- خليك بعيد عن محاولات التصادم اللانهائية.",
-			check:         "قسّم المهمة لتحويل الأرقام، تخزين الأكواد، ثم routes.\n\nخطأ تصادم يختلف عن عطل مخزن، حتى لو الاتنين ملفوفين.",
+			check:         "قسّم المهمة لتحويل الأرقام، تخزين الأكواد، ثم routes.\n\nالـerror بتاع التصادم مختلف عن عطل مخزن، حتى لو الاتنين ملفوفين.",
 			checkQuestion: "مين يعرف إن الكود اتستخدم بالفعل؟",
-			turn:          "ابدأ بأبجدية toy وواجهة تخزين صغيرة. جرّب خطأ ملفوفًا قبل بناء التحويل.",
+			turn:          "ابدأ بأبجدية toy وinterface تخزين صغيرة. جرّب الـerror الملفوف قبل بناء التحويل.",
 			options:       []string{"false", "true", "compile error"},
-			feedback:      []string{"Is بتتبع الخطأ الأصلي جوه wrapper.", "الخطأ الملفوف لسه مرتبط بالأصل.", "~errors.Is~ و%w استخدام صحيح."},
+			feedback:      []string{"Is بتتبع الـerror الأصلي جوه wrapper.", "الـerror الملفوف لسه مرتبط بالأصل.", "~errors.Is~ و%w استخدام صحيح."},
 			checkOptions:  []string{"المخزن", "مصدر الأرقام", "الـredirect response"},
-			checkFeedback: []string{"المخزن شايف الأكواد الموجودة كلها.", "المصدر يعطي رقمًا ولا يعرف الحالة.", "الرد يحصل بعد قبول الكود."},
-			hints:         []string{"ثبّت ترتيب الأبجدية قبل التفكير في تمثيل الرقم.", "خلّي واجهة التخزين مسؤولة عن حفظ وربط الكود.", "استخدم ~errors.Is~ للتعرف على خطأ تصادم ملفوف."},
+			checkFeedback: []string{"المخزن شايف الأكواد الموجودة كلها.", "المصدر بيدي رقم ومش عارف الحالة.", "الـresponse بيحصل بعد قبول الكود."},
+			hints:         []string{"ثبّت ترتيب الأبجدية قبل التفكير في تمثيل الرقم.", "خلّي الـinterface مسؤولة عن حفظ وربط الكود.", "استخدم ~errors.Is~ للتعرف على الـerror بتاع التصادم الملفوف."},
 		},
 		{
 			mission:       "Fleet links become short codes and redirect requests.\n\nThe starter defines the interface; add conversion, storage, and the handler.\n\nValidate a target before requesting a code.",
