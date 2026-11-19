@@ -2,6 +2,7 @@ package levels
 
 func init() {
 	add(&Level{ID: "35-1-task-queue", Chapter: 35, Kind: "lab", Title: "طابور المهام", Goal: "وزّع مهام الورش على عمّال بـ Redis: عقد إيجار وإعادة محاولة وطابور للمهام الميتة", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch35LessonArabic["35-1-task-queue"],
 		Requires: []string{"sel:json.Marshal", "sel:redis.ZRangeBy"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{86}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch351Starter}},
 		Lesson: `# طابور مهام الورش
@@ -76,8 +77,8 @@ if q.now().After(deadline) { retry(id) } // غلط: عاملين ممكن يست
 
 النجمة التالتة: ~Redrive(ctx)~ ترجع كل مهام الـ DLQ لآخر الطابور بنفس الترتيب وتصفّر ~Attempts~ وترجع عددها.
 `,
-		Hints: []string{"ابدأ بـ Enqueue: SAdd على مجموعة seen، واحفظ المهمة JSON، وبعدين RPush.", "في Claim: LPop من ready، و ZAdd باسم ID#Attempts والـ score موعد النهاية؛ Ack تشيله بـ ZRem ولو رجع 0 يبقى ErrLease.", "قبل السحب استرجع بـ ZRangeByScore لحد الوقت الحالي، واللي ZRem بتاعه رجع 1 بس هو اللي يزوّد Attempts ويرجّعها أو يبعتها للـ DLQ."},
-		En: &LevelText{Title: "Task Queue", Goal: "Distribute workshop tasks to workers through Redis: leases, retries, and a dead-letter queue", Files: []LabFile{{Name: "main.go", Starter: ch351Starter}},
+		Hints: []string{"التسليم الموزّع ممكن يتكرر؛ صمّم المستهلك على الأساس ده.", "تابع انتقال المهمة بين الجاهز والمستأجر والمنتهي أو المعاد.", "ابدأ من ~Task~ وطرق ~Queue~ في الـstarter، وراجع ملكية كل lease."},
+		En: &LevelText{Title: "Task Queue", Goal: "Distribute workshop tasks to workers through Redis: leases, retries, and a dead-letter queue", LessonRevision: 1, Steps: ch35LessonEnglish["35-1-task-queue"], Files: []LabFile{{Name: "main.go", Starter: ch351Starter}},
 			Lesson: `# The workshop task queue
 
 ## Before you write
@@ -149,7 +150,7 @@ Implement ~NewQueue(client, name, lease, maxAttempts, now)~ and ~Enqueue~, ~Clai
 ~Dead~ returns DLQ tasks in arrival order, each with its ~Body~ and ~Attempts~, and an empty non-nil slice when there are none. Several ~Queue~ values on one server and concurrent workers: each task is held by one worker at a time.
 
 Third star: ~Redrive(ctx)~ moves every DLQ task back to the end of the queue in order, resets ~Attempts~ to zero, and returns the count.
-`, Hints: []string{"Start with Enqueue: SAdd to a seen set, store the task as JSON, then RPush.", "In Claim: LPop from ready and ZAdd the name ID#Attempts scored by the deadline; Ack removes it with ZRem, and 0 means ErrLease.", "Before popping, reclaim with ZRangeByScore up to now; only the caller whose ZRem returned 1 increments Attempts and requeues or dead-letters it."}},
+`, Hints: []string{"Distributed delivery can repeat; design with that in mind.", "Track task movement between ready, leased, finished, or retried states.", "Start at ~Task~ and ~Queue~ methods in the starter, and review lease ownership."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch351Hidden},
 	})
 }
@@ -500,6 +501,7 @@ func TestHiddenBonusQueueRedrive(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "35-2-scheduler", Chapter: 35, Kind: "lab", Title: "المجدول", Goal: "شغّل مهام الصيانة الدورية بطابور أولويات وساعة مزيفة، من غير تداخل وبسياسة واضحة للمواعيد الفايتة", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch35LessonArabic["35-2-scheduler"],
 		Requires: []string{"sel:heap.Push"}, Deps: []string{}, Bridge: []int{90}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch352Starter}},
 		Lesson: `# مجدول الصيانة
@@ -561,8 +563,8 @@ for next <= now { run(); next += every } // غلط: طوفان تشغيلات ب
 
 ~Done(name)~ بتنهي التشغيل الحالي؛ مهمة مجهولة أو مش شغالة ترجع ~ErrJob~. مفيش goroutines ولا ~time.Now~ ولا ~time.Sleep~.
 `,
-		Hints: []string{"عرّف نوع شريحة من مؤشرات لمدخلات فيها الـ Job والموعد الجاي وعلامة running، ونفّذ عليها heap.Interface.", "في Tick: طول ما h[0] موعده مش بعد now، اسحبه بـ heap.Pop، احسب missed و last، وقرر التشغيل حسب running والسياسة.", "حدّث next = last + Every ورجّع المدخل بـ heap.Push؛ وخلي Less تكسر التعادل بالأولوية بعدين الاسم."},
-		En: &LevelText{Title: "Scheduler", Goal: "Run periodic maintenance jobs with a priority queue and a fake clock, without overlap and with a clear misfire policy", Files: []LabFile{{Name: "main.go", Starter: ch352Starter}},
+		Hints: []string{"الـheap بتسهّل متابعة الموعد الأقرب.", "افصل ترتيب المواعيد عن قرار تشغيل كل Job.", "ابدأ من ~Tick~ و~Done~، وراجع سياسة المواعيد في الـstarter."},
+		En: &LevelText{Title: "Scheduler", Goal: "Run periodic maintenance jobs with a priority queue and a fake clock, without overlap and with a clear misfire policy", LessonRevision: 1, Steps: ch35LessonEnglish["35-2-scheduler"], Files: []LabFile{{Name: "main.go", Starter: ch352Starter}},
 			Lesson: `# The maintenance scheduler
 
 ## Before you write
@@ -621,7 +623,7 @@ Implement ~NewScheduler(start, policy)~, ~Add~, ~Tick~ and ~Done~ with the start
 ~Tick(now)~ handles every job due at ~<= now~ and returns runs (~Run~ with the name and slot ~At~) ordered by slot, then higher priority, then name; an empty non-nil slice when none. A running job does not run. ~FireOnce~ runs once with ~At~ the first missed slot. ~Skip~ runs only if no slot was missed before this one. After handling, run or not, the next deadline is the first grid slot after ~now~.
 
 ~Done(name)~ finishes the current run; an unknown or idle job returns ~ErrJob~. No goroutines, ~time.Now~ or ~time.Sleep~.
-`, Hints: []string{"Define a slice of pointers to entries holding the Job, its next deadline, and a running flag, and implement heap.Interface on it.", "In Tick: while h[0] is not after now, take it with heap.Pop, compute missed and last, and decide by running and the policy.", "Set next = last + Every and put the entry back with heap.Push; let Less break ties by priority, then name."}},
+`, Hints: []string{"A heap makes the next deadline easy to find.", "Separate deadline ordering from each job's run decision.", "Start at ~Tick~ and ~Done~, and review the policy in the starter."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch352Hidden},
 	})
 }
@@ -860,6 +862,7 @@ func TestHiddenSchedulerRandomJumps(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "35-3-redis-lock", Chapter: 35, Kind: "lab", Title: "القفل الموزّع", Goal: "امنع ورشتين يشتغلوا على نفس المفاعل في نفس الوقت بقفل Redis له مالك ومدة، ووضّح حدود أمانه", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch35LessonArabic["35-3-redis-lock"],
 		Requires: []string{"sel:hex.EncodeToString", "sel:io.ReadFull", "sel:redis.NewScript"}, Deps: []string{"github.com/redis/go-redis/v9", "github.com/alicebob/miniredis/v2"}, Bridge: []int{94}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch353Starter}},
 		Lesson: `# قفل المفاعل
@@ -920,8 +923,8 @@ client.SetNX(ctx, key, "locked", 0) // غلط: من غير مدة ومن غير 
 
 النجمة التالتة: ~Extend(ctx, lease, ttl)~ بسكربت مقارنة بيجدد المدة لـ ~ttl~ (~PEXPIRE~ بالمللي ثانية) لو المالك لسه هو؛ غير كده ~ErrNotOwner~، و ~ttl <= 0~ ترجع ~ErrLockKey~.
 `,
-		Hints: []string{"ابدأ بالتحقق، وبعدين io.ReadFull لـ 16 بايت و hex.EncodeToString، وبعدين SetNX بالمدة؛ false يبقى ErrHeld.", "للفك اعمل redis.NewScript فيه GET ومقارنة بـ ARGV[1] و DEL، وشغله بـ Run(ctx, client, []string{key}, token).Int().", "نتيجة 0 من السكربت تبقى ErrNotOwner؛ ومتنساش تعليق حدود الأمان فيه كلمة fencing."},
-		En: &LevelText{Title: "Distributed Lock", Goal: "Stop two workshops from working on the same reactor at once with a Redis lock that has an owner and a duration, and state its safety limits", Files: []LabFile{{Name: "main.go", Starter: ch353Starter}},
+		Hints: []string{"المدة تحرر المفتاح، والـtoken يحدد المالك الحالي.", "افصل مسار الاكتساب عن التحرير، مع حماية التحديثات القديمة.", "ابدأ من ~Lease~ وتوقيعات ~Acquire~ و~Release~ في الـstarter."},
+		En: &LevelText{Title: "Distributed Lock", Goal: "Stop two workshops from working on the same reactor at once with a Redis lock that has an owner and a duration, and state its safety limits", LessonRevision: 1, Steps: ch35LessonEnglish["35-3-redis-lock"], Files: []LabFile{{Name: "main.go", Starter: ch353Starter}},
 			Lesson: `# The reactor lock
 
 ## Before you write
@@ -979,7 +982,7 @@ Implement ~NewLocker(client, random)~, ~Acquire~ and ~Release~ with the starter 
 Write a comment in ~main.go~ explaining the lock's safety limits that mentions the word ~fencing~; the test looks for it in comments.
 
 Third star: ~Extend(ctx, lease, ttl)~ uses a compare script to reset the duration to ~ttl~ (~PEXPIRE~ in milliseconds) while the owner is unchanged; otherwise ~ErrNotOwner~, and ~ttl <= 0~ returns ~ErrLockKey~.
-`, Hints: []string{"Validate first, then io.ReadFull 16 bytes and hex.EncodeToString, then SetNX with the duration; false means ErrHeld.", "To unlock, build a redis.NewScript with GET, a comparison to ARGV[1], and DEL, and run it with Run(ctx, client, []string{key}, token).Int().", "A script result of 0 is ErrNotOwner; and do not forget the safety-limits comment containing the word fencing."}},
+`, Hints: []string{"Expiry frees the key; the token identifies its current owner.", "Separate acquisition from release while guarding against stale updates.", "Start at ~Lease~ and the ~Acquire~ and ~Release~ signatures in the starter."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: true, Hidden: ch353Hidden},
 	})
 }
@@ -1225,6 +1228,7 @@ func TestHiddenBonusLockExtend(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "35-4-outbox", Chapter: 35, Kind: "lab", Title: "صندوق الصادر", Goal: "سجّل طلب قطع الغيار وحدثه في transaction واحدة، وانشر الأحداث بإعادة محاولة لمستهلك ميعدّش مرتين", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch35LessonArabic["35-4-outbox"],
 		Requires: []string{"mutex", "sel:json.Unmarshal"}, Deps: []string{"modernc.org/sqlite"}, Bridge: []int{95}, Race: true, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch354Starter}},
 		Lesson: `# صندوق صادر المخزن
@@ -1283,8 +1287,8 @@ pub.Publish(ctx, e) // غلط: علّمته قبل النشر؛ لو النشر 
 
 ~Handle(e)~ ترجع ~ErrVersion~ لو ~Version~ أقل من ~1~ أو أكبر من ~SchemaVersion~، وخطأ الفك لو JSON بايظ. حدث ~ID~ بتاعه اتعالج يرجع ~false~ و ~nil~ من غير تغيير، والجديد يزوّد إجمالي الصنف ويرجع ~true~. ~Totals~ ترجع نسخة من الإجماليات لكل ~item~. كله آمن بالتزامن.
 `,
-		Hints: []string{"في PlaceOrder: اتحقق، اعمل json.Marshal للـ payload، وبعدين BeginTx و defer Rollback واتنين INSERT و Commit.", "Relay: اقرا الصفوف كلها الأول وقفل rows، وبعدين لكل حدث Publish وبعد النجاح UPDATE published = 1.", "Consumer: افحص الـ Version، ابدأ payload بـ Qty: 1 قبل Unmarshal، وتحت القفل تجاهل أي ID اتشاف."},
-		En: &LevelText{Title: "Outbox", Goal: "Record a spare-parts order and its event in one transaction, and relay events with retries to a consumer that never counts twice", Files: []LabFile{{Name: "main.go", Starter: ch354Starter}},
+		Hints: []string{"الـoutbox بيحفظ نية النشر مع بيانات الطلب.", "قسّم المسار لكتابة ذرّية، relay مرتب، واستهلاك idempotent.", "ابدأ من ~PlaceOrder~ و~Relay~ و~Handle~ في الـstarter."},
+		En: &LevelText{Title: "Outbox", Goal: "Record a spare-parts order and its event in one transaction, and relay events with retries to a consumer that never counts twice", LessonRevision: 1, Steps: ch35LessonEnglish["35-4-outbox"], Files: []LabFile{{Name: "main.go", Starter: ch354Starter}},
 			Lesson: `# The depot outbox
 
 ## Before you write
@@ -1340,7 +1344,7 @@ Implement ~NewOutbox(db)~, ~Init~, ~PlaceOrder~ and ~Relay~, plus ~NewConsumer~,
 ~Relay(ctx, pub, limit)~ publishes up to ~limit~ unpublished events in ~id~ order, marks each after its publish succeeds, and returns how many were marked. The first publish failure stops and returns the count so far and the error. ~limit <= 0~ returns ~0~ and ~nil~.
 
 ~Handle(e)~ returns ~ErrVersion~ when ~Version~ is below ~1~ or above ~SchemaVersion~, and the decode error for malformed JSON. An event whose ~ID~ was handled returns ~false~ and ~nil~ without changes; a new one adds to its item's total and returns ~true~. ~Totals~ returns a copy of the totals per ~item~. Everything is safe for concurrent use.
-`, Hints: []string{"In PlaceOrder: validate, json.Marshal the payload, then BeginTx, defer Rollback, two INSERTs and Commit.", "Relay: read all rows first and close rows, then for each event Publish and, after success, UPDATE published = 1.", "Consumer: check Version, start the payload with Qty: 1 before Unmarshal, and under the lock ignore any seen ID."}},
+`, Hints: []string{"The outbox stores publishing intent with the order data.", "Separate atomic writing, ordered relay, and idempotent consumption.", "Start at ~PlaceOrder~, ~Relay~, and ~Handle~ in the starter."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch354Hidden},
 	})
 }
@@ -1606,6 +1610,7 @@ func TestHiddenConsumerConcurrentDuplicates(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "35-5-kafka", Chapter: 35, Kind: "lab", Title: "الوسيط", Goal: "ابعت قراءات العربات لـ Kafka بمفتاح لكل عربة، واستهلكها بإعادة محاولة و offsets تتأكد بعد النجاح بس وإغلاق مرتب", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch35LessonArabic["35-5-kafka"],
 		Requires: []string{"sel:context.WithoutCancel", "sel:strconv.Atoi", "sel:kafka.Message"}, Deps: []string{"github.com/segmentio/kafka-go"}, Bridge: []int{98}, Race: true, Service: "kafka",
 		Files: []LabFile{{Name: "main.go", Starter: ch355Starter}},
 		Lesson: `# وسيط قراءات العربات
@@ -1666,8 +1671,8 @@ if err := r.FetchMessage(ctx); err != nil { return 0, err } // غلط: الإل�
 
 ~Consume(ctx, r, h, maxAttempts)~ بتلف: تجيب رسالة، تحوّلها لـ ~Telemetry~ (المفتاح هو ~Rover~)، وتنادي ~h~ لحد ~maxAttempts~ مرة لحد ما ينجح. بعد النجاح بس تعمل commit للرسالة دي بسياق مبيتلغيش وتزوّد العداد. قيمة مش رقم: commit من غير ما تنادي ~h~ ومن غير عد. لو المعالج فشل كل المحاولات ارجع العداد وخطأه من غير commit. إلغاء ~ctx~ (في الجلب أو أثناء المعالجة) يرجع العداد و ~nil~، ورسالة اتلغت معالجتها متتأكدش. خطأ جلب تاني يترجع زي ما هو.
 `,
-		Hints: []string{"Send: ابني []kafka.Message الأول (المفتاح []byte(Rover))، وبعدين لف 3 مرات وافحص ctx.Err() قبل كل WriteMessages.", "Consume: FetchMessage؛ لو فيه خطأ و ctx.Err() مش nil ارجع العداد و nil. strconv.Atoi على القيمة، ولو فشلت اعمل commit وكمّل.", "commit بعد نجاح h بس، بـ context.WithoutCancel(ctx)؛ فشل كل المحاولات يرجع الخطأ من غير commit إلا لو السياق اتلغى."},
-		En: &LevelText{Title: "Broker", Goal: "Send rover readings to Kafka keyed by rover, and consume them with retries, offsets committed only after success, and a graceful close", Files: []LabFile{{Name: "main.go", Starter: ch355Starter}},
+		Hints: []string{"المفتاح يربط رسائل العربة بنفس مسار الترتيب.", "افصل تحويل البيانات عن الإرسال، والمعالجة عن commit.", "ابدأ من ~Writer~ و~Reader~، وراجع التعامل مع ~ctx.Err~ في الـstarter."},
+		En: &LevelText{Title: "Broker", Goal: "Send rover readings to Kafka keyed by rover, and consume them with retries, offsets committed only after success, and a graceful close", LessonRevision: 1, Steps: ch35LessonEnglish["35-5-kafka"], Files: []LabFile{{Name: "main.go", Starter: ch355Starter}},
 			Lesson: `# The rover telemetry broker
 
 ## Before you write
@@ -1725,7 +1730,7 @@ Implement ~Send~ and ~Consume~ with the starter signatures; leave ~main~ empty. 
 ~Send(ctx, w, batch)~ returns ~ErrTelemetry~ without writing when any ~Rover~ is empty. An empty batch returns ~nil~ without writing. Each reading is a message keyed by ~Rover~ with value ~strconv.Itoa(Reading)~, in order, the whole batch in one ~WriteMessages~ call. Up to ~3~ attempts; before each, if ~ctx~ is canceled return ~ctx.Err()~. After three failures return an error wrapping the last one (found by ~errors.Is~).
 
 ~Consume(ctx, r, h, maxAttempts)~ loops: fetch a message, turn it into ~Telemetry~ (the key is ~Rover~), and call ~h~ up to ~maxAttempts~ times until it succeeds. Only after success commit that message with a context that is never canceled and increment the count. A non-numeric value: commit without calling ~h~ and without counting. If the handler fails every attempt, return the count and its error without committing. Canceling ~ctx~ (while fetching or handling) returns the count and ~nil~, and a message whose handling was canceled is not committed. Any other fetch error is returned as is.
-`, Hints: []string{"Send: build []kafka.Message first (key []byte(Rover)), then loop 3 times checking ctx.Err() before each WriteMessages.", "Consume: FetchMessage; on error with ctx.Err() non-nil return the count and nil. strconv.Atoi the value, and on failure commit and continue.", "Commit only after h succeeds, with context.WithoutCancel(ctx); failing every attempt returns the error without committing unless the context was canceled."}},
+`, Hints: []string{"A key keeps one rover's messages on the same ordering path.", "Separate data conversion from sending, and handling from committing.", "Start at ~Writer~ and ~Reader~, and review ~ctx.Err~ handling in the starter."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch355Hidden, HiddenFiles: map[string]string{"kafka_integration_test.go": ch355Integration}},
 	})
 }
@@ -2081,6 +2086,7 @@ func TestHiddenKafkaIntegrationKeyOrderAndOffsets(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "35-6-raft-election", Chapter: 35, Kind: "lab", Title: "الانتخابات", Goal: "خلّي محطات المدار تتفق على قائد واحد لكل فترة بمحاكاة Raft حتمية في الذاكرة، حتى لو القائد وقع", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch35LessonArabic["35-6-raft-election"],
 		Requires: []string{"struct", "switch"}, Deps: []string{}, Bridge: []int{89}, Race: false, Service: "",
 		Files: []LabFile{{Name: "main.go", Starter: ch356Starter}},
 		Lesson: `# انتخاب قائد المدار
@@ -2144,8 +2150,8 @@ time.Sleep(timeout) // غلط: الوقت هنا نبضات Tick بس
 
 ~Step(m)~: ~Term~ أكبر يخلي المحطة follower بالـ ~term~ الجديد من غير صوت وقائد ~-1~. ~Vote~ يترد عليه دايماً بـ ~VoteReply~ فيه ~term~ المحطة؛ ~Granted~ بس لو نفس الـ ~term~ والصوت فاضي أو لنفس المرشح، والمنح بيصفّر ~elapsed~. ~Append~ يترد عليه بـ ~AppendReply~؛ لو نفس الـ ~term~: follower، القائد هو المرسل، ~elapsed~ صفر، و ~Success~ صح. ~VoteReply~ ممنوح لنفس الـ ~term~ والمحطة candidate يتحسب مرة واحدة لكل مرسل؛ الأغلبية تعمله قائد. ~State()~ بترجع الدور والـ ~term~ والقائد المعروف.
 `,
-		Hints: []string{"ابدأ بـ Step: افحص m.Term > n.term الأول، وبعدين switch على m.Kind وابني الرد بالـ term الحالي.", "Tick: زوّد elapsed؛ القائد يبعت Append كل HeartbeatEvery، وغيره لما يوصل المهلة يبدأ انتخاب ويسحب مهلة جديدة.", "خزّن الأصوات في map[int]bool عشان التكرار ميتحسبش، والأغلبية len(votes) > (len(peers)+1)/2."},
-		En: &LevelText{Title: "Elections", Goal: "Make the orbital stations agree on one leader per term with a deterministic in-memory Raft simulation, even when the leader fails", Files: []LabFile{{Name: "main.go", Starter: ch356Starter}},
+		Hints: []string{"الـterm بيميز الحالة الجديدة من رسائل قائد قديم.", "افصل clock tick عن تسليم الرسالة وردها.", "ابدأ من ~State~ و~Tick~ و~Step~، وراجع توقيت سحب timeout في الـstarter."},
+		En: &LevelText{Title: "Elections", Goal: "Make the orbital stations agree on one leader per term with a deterministic in-memory Raft simulation, even when the leader fails", LessonRevision: 1, Steps: ch35LessonEnglish["35-6-raft-election"], Files: []LabFile{{Name: "main.go", Starter: ch356Starter}},
 			Lesson: `# Electing the orbit leader
 
 ## Before you write
@@ -2206,7 +2212,7 @@ The timeout is ~ElectionMin + rng.Intn(ElectionSpread)~, drawn once in ~NewNode~
 A leader increments ~elapsed~ and on reaching ~HeartbeatEvery~ resets it and sends an empty ~Append~ to each peer. On winning an election it sends heartbeats immediately and resets ~elapsed~. ~Tick~ and ~Step~ return an empty non-nil slice when there are no messages.
 
 ~Step(m)~: a larger ~Term~ makes the station a follower in the new ~term~ with no vote and leader ~-1~. A ~Vote~ always gets a ~VoteReply~ carrying the station's ~term~; ~Granted~ only for the same ~term~ when the vote is empty or already for that candidate, and granting resets ~elapsed~. An ~Append~ gets an ~AppendReply~; for the same ~term~: follower, the sender is leader, ~elapsed~ zero, and ~Success~ true. A granted ~VoteReply~ for the same ~term~ while candidate counts once per sender; a majority makes it leader. ~State()~ returns the role, the ~term~ and the known leader.
-`, Hints: []string{"Start with Step: check m.Term > n.term first, then switch on m.Kind and build the reply with the current term.", "Tick: increment elapsed; a leader sends Append every HeartbeatEvery, anyone else starts an election at the timeout and draws a new one.", "Store votes in a map[int]bool so duplicates do not count, and a majority is len(votes) > (len(peers)+1)/2."}},
+`, Hints: []string{"A term distinguishes new state from messages by an old leader.", "Separate clock ticks from message delivery and replies.", "Start at ~State~, ~Tick~, and ~Step~, and review timeout draws in the starter."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch356Hidden},
 	})
 }
@@ -2504,6 +2510,7 @@ func TestHiddenRaftMinorityCannotElect(t *testing.T) {
 
 func init() {
 	add(&Level{ID: "35-7-raft-log", Chapter: 35, Kind: "lab", Title: "نسخ السجل", Goal: "خلّي القائد ينسخ أوامر المدار لكل المحطات، ويأكدها بالأغلبية، وكل محطة تطبقها بنفس الترتيب", Setup: seededLabRoom,
+		LessonRevision: 1, Steps: ch35LessonArabic["35-7-raft-log"],
 		Requires: []string{"struct", "switch"}, Deps: []string{}, Bridge: []int{89}, Race: false, Service: "", CarryFrom: "35-6-raft-election",
 		Files: []LabFile{{Name: "main.go", Starter: ch357Starter}},
 		Lesson: `# سجل أوامر المدار
@@ -2556,8 +2563,8 @@ if count > half { n.commit = index } // غلط لو log[index-1].Term مش ال�
 
 ~Propose~ لغير القائد ترجع ~0~ و ~false~؛ للقائد تضيف ~Entry~ بالـ ~term~ الحالي وترجع رقمها و ~true~، والإرسال بيحصل في النبضة الجاية. لو المحطة لوحدها في المجموعة، الخانة تتأكد على طول. ~Committed~ ترجع أوامر الخانات المؤكدة بالترتيب، وشريحة فاضية مش ~nil~ لو مفيش.
 `,
-		Hints: []string{"زوّد الحقول والأنواع الأول عشان التست يتبني، وخلي Vote يبعت LastIndex/LastTerm ويشترط upToDate قبل المنح.", "عند الفوز جهّز next و match، وخلي broadcast للـ Append يحسب PrevIndex و PrevTerm و Entries من next لكل peer.", "في الـ follower افحص التطابق، اقص التعارض، أضف الناقص، ورد بـ Match؛ في القائد حدّث match/next وعدّ الأغلبية لخانات الـ term الحالي بس."},
-		En: &LevelText{Title: "Log Replication", Goal: "Have the leader replicate orbit commands to every station, commit them by majority, and have each station apply them in the same order", Files: []LabFile{{Name: "main.go", Starter: ch357Starter}},
+		Hints: []string{"الـEntry بتجمع command مع الفترة اللي اتكتب فيها.", "افصل فحص التطابق عن تحديث السجل وتقدم commit.", "ابدأ من ~Msg~ و~Node.Step~ في الـstarter، وراجع معنى ~PrevIndex~ و~PrevTerm~."},
+		En: &LevelText{Title: "Log Replication", Goal: "Have the leader replicate orbit commands to every station, commit them by majority, and have each station apply them in the same order", LessonRevision: 1, Steps: ch35LessonEnglish["35-7-raft-log"], Files: []LabFile{{Name: "main.go", Starter: ch357Starter}},
 			Lesson: `# The orbit command log
 
 ## Before you write
@@ -2607,7 +2614,7 @@ A follower in the same ~term~ does everything it did before, and then: if ~PrevI
 A leader receiving an ~AppendReply~ for its ~term~: success sets ~match~ to the largest value seen and ~next = match + 1~, then tries to advance ~commit~; failure decrements ~next~ by one, never below ~1~. ~commit~ is the highest current-term slot stored on a majority.
 
 ~Propose~ on a non-leader returns ~0~ and ~false~; on the leader it appends an ~Entry~ with the current ~term~ and returns its index and ~true~, and sending happens on the next heartbeat. A station alone in its cluster commits it at once. ~Committed~ returns the commands of committed slots in order, an empty non-nil slice when none.
-`, Hints: []string{"Add the fields and types first so the test builds, and make Vote send LastIndex/LastTerm and require upToDate before granting.", "On winning set up next and match, and have the Append broadcast compute PrevIndex, PrevTerm and Entries from next per peer.", "In the follower check the match, truncate conflicts, append what is missing, and reply with Match; in the leader update match/next and count a majority for current-term slots only."}},
+`, Hints: []string{"An ~Entry~ groups a command with the term when it was written.", "Separate consistency checks from log updates and commit progress.", "Start at ~Msg~ and ~Node.Step~ in the starter, and review ~PrevIndex~ and ~PrevTerm~."}},
 		Lab: &Lab{ReqFile: "main.go", Bonus: false, Hidden: ch357Hidden},
 	})
 }
