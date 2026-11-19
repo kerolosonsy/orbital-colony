@@ -577,8 +577,24 @@ function applyEdit(edit) {
   ed.setSelectionRange(edit.selStart, edit.selEnd);
   if (edit.text || edit.to > edit.from) onEdit();
 }
+// Shift+Alt+F formats the file with gofmt (server-side go/format), undoable.
+async function formatEditor() {
+  if (ed.readOnly || !S.cur || !S.file?.endsWith(".go")) return;
+  const before = ed.value;
+  // gofmt only moves whitespace, so the caret is "after the Nth code character"
+  const codeChars = before.slice(0, ed.selectionStart).replace(/\s/g, "").length;
+  let r;
+  try { r = await api("/api/format", { code: before }); } catch (e) { log(String(e.message || e), "c-err"); logServerHint(e); return; }
+  if (r.error) { log(T("مقدرتش أنسّق الكود لسه: ", "Can't format yet: ") + r.error, "c-warn"); return; }
+  if (ed.value !== before || r.code === before) return; // typed meanwhile, or already tidy
+  let caret = 0;
+  for (let seen = 0; caret < r.code.length && seen < codeChars; caret++) if (!/\s/.test(r.code[caret])) seen++;
+  applyEdit({ from: 0, to: before.length, text: r.code, selStart: caret, selEnd: caret });
+  log(T("الكود اتنسّق بـ gofmt.", "Formatted with gofmt."), "c-info");
+}
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }
+  if (e.shiftKey && e.altKey && !e.metaKey && !e.ctrlKey && e.code === "KeyF") { e.preventDefault(); formatEditor(); return; }
   if (e.key === "F9" && S.cur) {
     // toggle a breakpoint on the caret's line, like VS Code
     e.preventDefault();

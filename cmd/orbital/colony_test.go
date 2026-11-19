@@ -403,3 +403,23 @@ func TestLevelsPayloadIsCachedWithETag(t *testing.T) {
 		t.Fatalf("unchanged payload should be 304, got %d", again.Code)
 	}
 }
+
+func TestFormatCode(t *testing.T) {
+	s := &server{}
+	post := func(code string) map[string]string {
+		body, _ := json.Marshal(map[string]string{"code": code})
+		response := httptest.NewRecorder()
+		s.formatCode(response, httptest.NewRequest("POST", "/api/format", strings.NewReader(string(body))))
+		var out map[string]string
+		if err := json.Unmarshal(response.Body.Bytes(), &out); err != nil {
+			t.Fatalf("%d %s", response.Code, response.Body)
+		}
+		return out
+	}
+	if got := post("package main\nfunc main(){\nx:=1\n_ = x}\n"); got["code"] != "package main\n\nfunc main() {\n\tx := 1\n\t_ = x\n}\n" {
+		t.Fatalf("formatted: %q", got)
+	}
+	if got := post("package main\nfunc main() {"); got["error"] == "" || got["code"] != "" {
+		t.Fatalf("broken code should return an error: %q", got)
+	}
+}
