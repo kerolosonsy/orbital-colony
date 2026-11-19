@@ -470,12 +470,6 @@ function renderEditor() {
 function syncScroll() {
   hl.scrollTop = ed.scrollTop; hl.scrollLeft = ed.scrollLeft; gutter.scrollTop = ed.scrollTop;
 }
-function insert(text) {
-  if (!document.execCommand("insertText", false, text)) {
-    ed.setRangeText(text, ed.selectionStart, ed.selectionEnd, "end");
-  }
-  onEdit();
-}
 let saveTimer;
 function flushSave() {
   if (!saveTimer) return;
@@ -515,27 +509,24 @@ InlineDebugger.bind({
     store.pref("debugBreakpoints", saved);
   },
 });
+// Apply one EditKeys edit through execCommand so Ctrl/⌘+Z can undo it.
+function applyEdit(edit) {
+  ed.setSelectionRange(edit.from, edit.to);
+  if (edit.text) {
+    if (!document.execCommand("insertText", false, edit.text)) ed.setRangeText(edit.text, edit.from, edit.to, "end");
+  } else if (edit.to > edit.from) {
+    if (!document.execCommand("delete")) ed.setRangeText("", edit.from, edit.to, "end");
+  }
+  ed.setSelectionRange(edit.selStart, edit.selEnd);
+  if (edit.text || edit.to > edit.from) onEdit();
+}
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }
-  if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); insert("\t"); return; }
-  if (e.key === "Enter" && !e.isComposing) {
-    e.preventDefault();
-    const before = ed.value.slice(0, ed.selectionStart);
-    const line = before.slice(before.lastIndexOf("\n") + 1);
-    let indent = line.match(/^\s*/)[0];
-    if (/[{(]\s*$/.test(line)) indent += "\t";
-    insert("\n" + indent);
-    return;
-  }
-  if (e.key === "}") {
-    const before = ed.value.slice(0, ed.selectionStart);
-    const line = before.slice(before.lastIndexOf("\n") + 1);
-    if (/^\t+$/.test(line) && ed.selectionStart === ed.selectionEnd) {
-      e.preventDefault();
-      ed.setSelectionRange(ed.selectionStart - 1, ed.selectionStart);
-      insert("}");
-    }
-  }
+  if (ed.readOnly || !window.EditKeys) return;
+  const edit = EditKeys.handle(ed.value, ed.selectionStart, ed.selectionEnd, e);
+  if (!edit) return;
+  e.preventDefault();
+  applyEdit(edit);
 });
 
 // ---------- console ----------
