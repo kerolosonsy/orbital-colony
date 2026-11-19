@@ -760,6 +760,12 @@ $("#btn-copy-console").onclick = async () => {
     button.title = T("انسخ رسايل الكونسول", "Copy console output");
   }, 1500);
 };
+// logExact shows program output as printed (log() strips emoji from game messages).
+function logExact(text, cls = "c-out") {
+  const d = document.createElement("div");
+  d.className = cls; d.textContent = String(text);
+  appendConsoleNode(d);
+}
 function log(text, cls = "c-out") {
   text = String(text).replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, "");
   const d = document.createElement("div");
@@ -843,7 +849,7 @@ function markPanicLine(level, r) {
 function logOutputLine(text, cls) {
   const match = /(?:^|[\s/])([\w.-]+\.go):(\d+)\b/.exec(text);
   const file = match && levelFiles(S.cur).find((f) => f.name === match[1]);
-  if (!file) return log(text, cls);
+  if (!file) return logExact(text, cls);
   const button = document.createElement("button");
   button.type = "button";
   button.className = `c-error-line ${cls}`;
@@ -2130,7 +2136,7 @@ async function run(opts = {}) {
       finish(level, r.result, r.missing || []);
       return;
     }
-    if (r.stdout) { log("fmt output:", "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => log(l)); }
+    if (r.stdout) { log(T("مخرجات البرنامج (stdout):", "Program output (stdout):"), "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => logExact(l)); }
     if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => logOutputLine(l, "c-err"));
     if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
     markPanicLine(level, r);
