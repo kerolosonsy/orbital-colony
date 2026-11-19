@@ -1,0 +1,435 @@
+package levels
+
+func ch13Markdown(id, text string) LessonBlock {
+	return LessonBlock{ID: id, Kind: "markdown", Text: text}
+}
+
+func ch13Question(id, text, code string, options []string, answer int, feedback []string) LessonBlock {
+	return LessonBlock{
+		ID:       id,
+		Kind:     "question",
+		Text:     text + "\n\n~~~go\n" + code + "\n~~~",
+		Question: &LessonQuestion{Options: options, Answer: answer, Feedback: feedback},
+	}
+}
+
+func ch13Walkthrough(id, text, code, exampleID string, imports []string, frames []LessonFrame) LessonBlock {
+	return LessonBlock{
+		ID:          id,
+		Kind:        "walkthrough",
+		Text:        text,
+		Code:        code,
+		Imports:     imports,
+		ExampleID:   exampleID,
+		Walkthrough: &LessonWalkthrough{Frames: frames},
+	}
+}
+
+const (
+	ch13ContextCode = `func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	fmt.Println(ctx.Err() == nil)
+	cancel()
+	<-ctx.Done()
+	fmt.Println(ctx.Err() == context.Canceled)
+}`
+	ch13PredictCancelCode = `func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	<-ctx.Done()
+	fmt.Println(ctx.Err() == context.Canceled)
+}`
+	ch13TimeoutCode = `func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 0)
+	defer cancel()
+	<-ctx.Done()
+	fmt.Println(errors.Is(ctx.Err(), context.DeadlineExceeded))
+}`
+	ch13PredictTimeoutCode = `func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	fmt.Println(ctx.Err() == nil)
+}`
+	ch13CancelCode = `func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	finished := make(chan bool, 1)
+	go func() {
+		<-ctx.Done()
+		finished <- true
+	}()
+	cancel()
+	<-finished
+	fmt.Println(ctx.Err() == context.Canceled)
+}`
+	ch13PredictDoneCode = `func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	<-ctx.Done()
+	fmt.Println(ctx.Err())
+}`
+	ch13ChainCode = `func probe(ctx context.Context) error { return ctx.Err() }
+func relay(ctx context.Context) error { return probe(ctx) }
+func command(ctx context.Context) error { return relay(ctx) }
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	err := command(ctx)
+	fmt.Println(err == context.Canceled)
+}`
+	ch13PredictChainCode = `func relay(ctx context.Context) error { return probe(ctx) }
+func probe(ctx context.Context) error { return ctx.Err() }
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	err := relay(ctx)
+	fmt.Println(err == context.Canceled)
+}`
+)
+
+var ch131RecallArabic = []LessonStep{
+	{ID: "c131.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch13Markdown("c131.mission", `شغّل 3 درونات لحد ما القاعدة تبعت أمر الرجوع.
+
+الـstarter جهّز ~colony.Mission()~ والـWaitGroup؛ الدالة ~work~ محتاجة تتعامل مع الإلغاء وترجع الدرونات.
+
+تابع كل درون لوحده، وبعدها استنى المجموعة.`)}},
+	{ID: "c131.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch13Walkthrough("c131.context-trace", `الـcontext إشارة إلغاء مشتركة. ~Done~ channel بتتقفل لما السياق يتلغي، و~Err~ يوضح السبب.
+
+الإلغاء مش بيوقف function بالقوة؛ الشغل لازم يلاحظه.`, ch13ContextCode, "e131-context", []string{"context", "fmt"}, []LessonFrame{
+		{Line: 0, Caption: "قبل التنفيذ."},
+		{Line: 2, Caption: "أنشئ سياقًا قابلًا للإلغاء."},
+		{Line: 3, Caption: "السياق لسه شغال.", Output: "true"},
+		{Line: 4, Caption: "أرسل إشارة الإلغاء.", Output: "true"},
+		{Line: 5, Caption: "انتظر إغلاق Done.", Output: "true"},
+		{Line: 6, Caption: "الحالة بقت canceled.", Output: "true\ntrue"},
+	})}},
+	{ID: "c131.try-step", Title: "جرّب", Blocks: []LessonBlock{
+		ch13Question("c131.predict-cancel", "بعد الإلغاء وانتظار ~Done~، إيه نتيجة المقارنة؟", ch13PredictCancelCode, []string{"true", "false", "nil"}, 0, []string{"السبب هنا هو context.Canceled.", "السياق اتلغى بالفعل.", "المقارنة بترجع bool."}),
+		ch13Walkthrough("c131.cancel-reveal", `تابع الإلغاء ثم فحص السبب.`, ch13PredictCancelCode, "e131-cancel", []string{"context", "fmt"}, []LessonFrame{
+			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 2, Caption: "جهّز الإشارة."},
+			{Line: 3, Caption: "ألغِ السياق."},
+			{Line: 4, Caption: "Done اتقفلت."},
+			{Line: 5, Caption: "السبب يطابق Canceled.", Output: "true"},
+		}),
+	}},
+	{ID: "c131.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch13Markdown("c131.watch", `كل goroutine لازم تفحص الإلغاء بنفسها.
+
+~WaitGroup~ تستنى المهام المسجلة؛ ما بتلغيهاش.
+
+أي ترتيب بدء بين goroutines ممكن؛ متفترضش ترتيب ثابت.`)}},
+	{ID: "c131.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
+		ch13Markdown("c131.plan", `راجع مكان كل درون، وخلّي العمل يتوقف بعد وصول الإشارة.
+
+حدّد رجوع كل واحد لموضع القاعدة، وبعدها خَلّي ~main~ تستنى الجميع.
+
+التقاط الإلغاء لوحده مش كفاية لو الدرون ما رجعش.`),
+		ch13Question("c131.q-done", "إيه اللي يحصل عند إلغاء السياق؟", "<-ctx.Done()", []string{"القناة Done تتقفل", "كل goroutine تنتهي بالقوة", "WaitGroup تزيد العداد"}, 0, []string{"إغلاق القناة بيوصل الإشارة للمستمعين.", "كل مهمة لازم تتصرف بنفسها.", "WaitGroup عدّاد انتظار منفصل."}),
+	}},
+	{ID: "c131.turn-step", Title: "دورك", Blocks: []LessonBlock{ch13Markdown("c131.turn", `كمّل استجابة ~work~ للإلغاء والرجوع. شغّل المحاكاة وراجع مواقع الدرونات بعد الانتظار.`)}},
+}
+
+var ch131RecallEnglish = []LessonStep{
+	{ID: "c131.mission-step", Title: "Mission", Blocks: []LessonBlock{ch13Markdown("c131.mission", `Run three drones until base sends a recall order.
+
+The starter sets up ~colony.Mission()~ and the WaitGroup; ~work~ must react to cancellation and return its drone.
+
+Track each drone, then wait for the group.`)}},
+	{ID: "c131.idea-step", Title: "Idea", Blocks: []LessonBlock{ch13Walkthrough("c131.context-trace", `A context is a shared cancellation signal. Its ~Done~ channel closes on cancellation, and ~Err~ gives the reason.
+
+Cancellation does not force-stop a function; the work must notice it.`, ch13ContextCode, "e131-context", []string{"context", "fmt"}, []LessonFrame{
+		{Line: 0, Caption: "Before execution."},
+		{Line: 2, Caption: "Create a cancelable context."},
+		{Line: 3, Caption: "The context is active.", Output: "true"},
+		{Line: 4, Caption: "Send the cancel signal.", Output: "true"},
+		{Line: 5, Caption: "Wait for Done to close.", Output: "true"},
+		{Line: 6, Caption: "The state is canceled.", Output: "true\ntrue"},
+	})}},
+	{ID: "c131.try-step", Title: "Try it", Blocks: []LessonBlock{
+		ch13Question("c131.predict-cancel", "After cancel and waiting on ~Done~, what is the comparison?", ch13PredictCancelCode, []string{"true", "false", "nil"}, 0, []string{"The reason is context.Canceled.", "The context has already been canceled.", "The comparison returns a bool."}),
+		ch13Walkthrough("c131.cancel-reveal", `Follow cancellation, then inspect its reason.`, ch13PredictCancelCode, "e131-cancel", []string{"context", "fmt"}, []LessonFrame{
+			{Line: 0, Caption: "Before execution."},
+			{Line: 2, Caption: "Prepare the signal."},
+			{Line: 3, Caption: "Cancel the context."},
+			{Line: 4, Caption: "Done is closed."},
+			{Line: 5, Caption: "The reason matches Canceled.", Output: "true"},
+		}),
+	}},
+	{ID: "c131.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch13Markdown("c131.watch", `Each goroutine must check for cancellation itself.
+
+~WaitGroup~ waits for registered work; it does not cancel it.
+
+Goroutines may start in any order; do not assume a fixed order.`)}},
+	{ID: "c131.check-step", Title: "Think & check", Blocks: []LessonBlock{
+		ch13Markdown("c131.plan", `Check each drone's position and stop its work after the signal arrives.
+
+Plan how each one returns to base, then let ~main~ wait for everyone.
+
+Noticing cancellation is not enough if a drone never returns.`),
+		ch13Question("c131.q-done", "What happens when a context is canceled?", "<-ctx.Done()", []string{"The Done channel closes", "Every goroutine is force-stopped", "The WaitGroup count increases"}, 0, []string{"Closing the channel signals its listeners.", "Each task must respond on its own.", "WaitGroup is a separate wait counter."}),
+	}},
+	{ID: "c131.turn-step", Title: "Your turn", Blocks: []LessonBlock{ch13Markdown("c131.turn", `Complete ~work~ cancellation and return handling. Run the simulation and check drone positions after waiting.`)}},
+}
+
+var ch132TimeoutArabic = []LessonStep{
+	{ID: "c132.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch13Markdown("c132.mission", `افحص كل كريستالة بـ~DeepScan~، واحصد بس اللي يحقق شرط النقاء.
+
+بعض الفحوصات ممكن تفضل معلقة؛ الـstarter بيمرر لها سياقًا من غير حد زمني.
+
+هدفك تميّز الفحص المكتمل من المنتهي بمهلة.`)}},
+	{ID: "c132.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch13Walkthrough("c132.timeout-trace", `~WithTimeout~ تعمل child context بموعد. لو المهلة انتهت، ~Err~ يرجع ~DeadlineExceeded~.
+
+استخدم ~colony.Ticks(n)~ عشان تكتب المهلة بوحدة mission ticks.
+
+هنا مدة صفر لتوضيح الموعد المنتهي فورًا، مش إعداد للمهمة.`, ch13TimeoutCode, "e132-timeout", []string{"context", "errors", "fmt"}, []LessonFrame{
+		{Line: 0, Caption: "قبل التنفيذ."},
+		{Line: 2, Caption: "أنشئ سياقًا بموعد فوري."},
+		{Line: 3, Caption: "سجل تنظيف السياق."},
+		{Line: 4, Caption: "انتظر انتهاء السياق."},
+		{Line: 5, Caption: "السبب هو انتهاء المهلة.", Output: "true"},
+	})}},
+	{ID: "c132.try-step", Title: "جرّب", Blocks: []LessonBlock{
+		ch13Question("c132.predict-active", "مع مهلة ساعة لم تنتهِ، إيه نتيجة الشرط؟", ch13PredictTimeoutCode, []string{"true", "false", "context canceled"}, 0, []string{"السياق لسه مفيش فيه خطأ.", "المهلة المستقبلية لم تنتهِ.", "cancel المؤجل لم يعمل بعد."}),
+		ch13Walkthrough("c132.active-reveal", `افحص السياق قبل انتهاء موعده.`, ch13PredictTimeoutCode, "e132-active", []string{"context", "fmt", "time"}, []LessonFrame{
+			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 2, Caption: "حدد موعدًا في المستقبل."},
+			{Line: 3, Caption: "التنظيف مؤجل للخروج."},
+			{Line: 4, Caption: "Err ما زال nil.", Output: "true"},
+		}),
+	}},
+	{ID: "c132.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch13Markdown("c132.watch", `كل عملية طويلة محتاجة child context مناسب.
+
+استدعِ ~cancel~ بعد العملية عشان تحرر موارد الـcontext.
+
+الـparent يقدر يلغي الابن قبل موعده.`)}},
+	{ID: "c132.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
+		ch13Markdown("c132.plan", `افصل scan عن قرار الحصاد. النقاء مهم بس بعد ما scan ترجع بنجاح.
+
+لو انتهت المهلة، اترك البلورة وانتقل للتالية؛ ما تخليش فحص واحد يوقف الجولة.
+
+استخدم سبب الخطأ للتفريق بين انتهاء المهلة وفشل آخر.`),
+		ch13Question("c132.q-timeout", "أنهي error علامة على انتهاء مهلة السياق؟", "ctx.Err()", []string{"context.DeadlineExceeded", "context.Canceled فقط", "nil دائمًا"}, 0, []string{"DeadlineExceeded يميز انتهاء الموعد.", "قد يكون الإلغاء اليدوي سببًا مختلفًا.", "nil يعني إن السياق ما انتهيش."}),
+	}},
+	{ID: "c132.turn-step", Title: "دورك", Blocks: []LessonBlock{ch13Markdown("c132.turn", `أضف مهلة لكل scan وتعامل مع النتيجة. شغّل المهمة وراقب إن الفحوص المعلقة ما توقفش المسح كله.`)}},
+}
+
+var ch132TimeoutEnglish = []LessonStep{
+	{ID: "c132.mission-step", Title: "Mission", Blocks: []LessonBlock{ch13Markdown("c132.mission", `Run ~DeepScan~ on each crystal and harvest only those meeting the purity rule.
+
+Some scans can hang; the starter passes a context without a deadline.
+
+Distinguish a completed scan from one that reached its deadline.`)}},
+	{ID: "c132.idea-step", Title: "Idea", Blocks: []LessonBlock{ch13Walkthrough("c132.timeout-trace", `~WithTimeout~ creates a child context with a deadline. If time expires, ~Err~ returns ~DeadlineExceeded~.
+
+Use ~colony.Ticks(n)~ to express a timeout in mission ticks.
+
+Zero duration shows an already-expired deadline; it is not a mission setting.`, ch13TimeoutCode, "e132-timeout", []string{"context", "errors", "fmt"}, []LessonFrame{
+		{Line: 0, Caption: "Before execution."},
+		{Line: 2, Caption: "Create an immediate deadline."},
+		{Line: 3, Caption: "Register context cleanup."},
+		{Line: 4, Caption: "Wait for the context to end."},
+		{Line: 5, Caption: "The reason is deadline exceeded.", Output: "true"},
+	})}},
+	{ID: "c132.try-step", Title: "Try it", Blocks: []LessonBlock{
+		ch13Question("c132.predict-active", "With an hour left, what does the condition print?", ch13PredictTimeoutCode, []string{"true", "false", "context canceled"}, 0, []string{"The context has no error yet.", "The future deadline has not expired.", "The deferred cancel has not run."}),
+		ch13Walkthrough("c132.active-reveal", `Inspect the context before its deadline.`, ch13PredictTimeoutCode, "e132-active", []string{"context", "fmt", "time"}, []LessonFrame{
+			{Line: 0, Caption: "Before execution."},
+			{Line: 2, Caption: "Set a future deadline."},
+			{Line: 3, Caption: "Cleanup is deferred."},
+			{Line: 4, Caption: "Err is still nil.", Output: "true"},
+		}),
+	}},
+	{ID: "c132.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch13Markdown("c132.watch", `Give each long operation an appropriate child context.
+
+Call ~cancel~ when it ends to release the context's resources.
+
+The parent can cancel a child before its deadline.`)}},
+	{ID: "c132.check-step", Title: "Think & check", Blocks: []LessonBlock{
+		ch13Markdown("c132.plan", `Separate scanning from the harvest decision. Purity matters only after a scan succeeds.
+
+If its deadline expires, leave that crystal and continue; one scan should not stop the whole pass.
+
+Use the error reason to distinguish a timeout from another failure.`),
+		ch13Question("c132.q-timeout", "Which error marks an expired context deadline?", "ctx.Err()", []string{"context.DeadlineExceeded", "Only context.Canceled", "Always nil"}, 0, []string{"DeadlineExceeded marks the expired deadline.", "Manual cancellation can have another reason.", "nil means the context has not ended."}),
+	}},
+	{ID: "c132.turn-step", Title: "Your turn", Blocks: []LessonBlock{ch13Markdown("c132.turn", `Add a deadline to each scan and handle its result. Run the mission and check that a hanging scan does not stop the full pass.`)}},
+}
+
+var ch133FirstWinsArabic = []LessonStep{
+	{ID: "c133.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch13Markdown("c133.mission", `3 درونات بيدوروا على كريستالة أسطورية. أول درون يلاقيها يلغي بحث الباقي.
+
+الـstarter وزّع درونين إضافيين وحط هيكل ~search~.
+
+بعد انتهاء البحث، الكل يرجع للقاعدة.`)}},
+	{ID: "c133.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch13Walkthrough("c133.cancel-trace", `قناة Done بتوصل الإلغاء لكل العمال. المثال يستنى رسالة من goroutine بعد الإلغاء.
+
+الـframes تعرض ترتيبًا واحدًا ممكنًا؛ تشغيل goroutines مش له ترتيب مضمون.`, ch13CancelCode, "e133-cancel", []string{"context", "fmt"}, []LessonFrame{
+		{Line: 0, Caption: "قبل التنفيذ."},
+		{Line: 2, Caption: "أنشئ سياقًا وقناة نتيجة."},
+		{Line: 3, Caption: "القناة تستقبل إشارة العامل."},
+		{Line: 4, Caption: "العامل ينتظر Done."},
+		{Line: 8, Caption: "ألغِ السياق للجميع."},
+		{Line: 9, Caption: "استلم انتهاء العامل."},
+		{Line: 10, Caption: "سبب الإلغاء صحيح.", Output: "true"},
+	})}},
+	{ID: "c133.try-step", Title: "جرّب", Blocks: []LessonBlock{
+		ch13Question("c133.predict-done", "بعد الإلغاء، إيه اللي يرجع من ~ctx.Err()~؟", ch13PredictDoneCode, []string{"context canceled", "nil", "deadline exceeded"}, 0, []string{"الإلغاء يدوي في المثال.", "nil تعني إن السياق لسه شغال.", "مافيش deadline في الكود."}),
+		ch13Walkthrough("c133.done-reveal", `تابع الإلغاء ثم قراءة السبب.`, ch13PredictDoneCode, "e133-done", []string{"context", "fmt"}, []LessonFrame{
+			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 2, Caption: "أنشئ السياق."},
+			{Line: 3, Caption: "أرسل الإلغاء."},
+			{Line: 4, Caption: "Done تقفل فورًا."},
+			{Line: 5, Caption: "اقرأ سبب الإلغاء.", Output: "context canceled"},
+		}),
+	}},
+	{ID: "c133.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch13Markdown("c133.watch", `الـworker لازم يفحص السياق خلال البحث.
+
+إلغاء السياق ما يرجّعش الدرون للقاعدة تلقائيًا.
+
+كل goroutine لازم تنتهي قبل ما البرنامج يخرج.`)}},
+	{ID: "c133.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
+		ch13Markdown("c133.plan", `خلّي كل worker يشارك نفس السياق ويعرف إمتى يتوقف.
+
+اربط نجاح البحث بإشارة الإلغاء، وبعدها افصل الرجوع للقاعدة عن البحث.
+
+استخدم ~WaitGroup~ للتأكد إن كل العمال خلصوا.`),
+		ch13Question("c133.q-cancel", "إيه وظيفة ~cancel()~ في بحث مشترك؟", "cancel()", []string{"تقفل Done وتبلّغ العمال", "توقف كل goroutine بالقوة", "تنتظر كل العمال"}, 0, []string{"إغلاق Done يوقظ من ينتظر الإشارة.", "العمال يخرجون بالتعاون.", "الانتظار مسؤولية WaitGroup."}),
+	}},
+	{ID: "c133.turn-step", Title: "دورك", Blocks: []LessonBlock{ch13Markdown("c133.turn", `أكمل فحص الإلغاء في ~search~. شغّل المهمة وراقب استجابة كل درون بعد العثور على الهدف.`)}},
+}
+
+var ch133FirstWinsEnglish = []LessonStep{
+	{ID: "c133.mission-step", Title: "Mission", Blocks: []LessonBlock{ch13Markdown("c133.mission", `Three drones search for a legendary crystal. The first finder cancels the others' search.
+
+The starter spawns two drones and provides the ~search~ outline.
+
+After searching ends, everyone returns to base.`)}},
+	{ID: "c133.idea-step", Title: "Idea", Blocks: []LessonBlock{ch13Walkthrough("c133.cancel-trace", `The Done channel sends cancellation to every worker. This example waits for a goroutine message after cancellation.
+
+Frames show one possible order; goroutine scheduling has no guaranteed order.`, ch13CancelCode, "e133-cancel", []string{"context", "fmt"}, []LessonFrame{
+		{Line: 0, Caption: "Before execution."},
+		{Line: 2, Caption: "Create context and result channel."},
+		{Line: 3, Caption: "The channel receives a worker signal."},
+		{Line: 4, Caption: "The worker waits on Done."},
+		{Line: 8, Caption: "Cancel the shared context."},
+		{Line: 9, Caption: "Receive worker completion."},
+		{Line: 10, Caption: "The cancellation reason matches.", Output: "true"},
+	})}},
+	{ID: "c133.try-step", Title: "Try it", Blocks: []LessonBlock{
+		ch13Question("c133.predict-done", "After cancellation, what does ~ctx.Err()~ return?", ch13PredictDoneCode, []string{"context canceled", "nil", "deadline exceeded"}, 0, []string{"The example uses manual cancellation.", "nil means the context is still active.", "The code has no deadline."}),
+		ch13Walkthrough("c133.done-reveal", `Follow cancellation and read the reason.`, ch13PredictDoneCode, "e133-done", []string{"context", "fmt"}, []LessonFrame{
+			{Line: 0, Caption: "Before execution."},
+			{Line: 2, Caption: "Create the context."},
+			{Line: 3, Caption: "Send cancellation."},
+			{Line: 4, Caption: "Done closes immediately."},
+			{Line: 5, Caption: "Read the cancellation reason.", Output: "context canceled"},
+		}),
+	}},
+	{ID: "c133.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch13Markdown("c133.watch", `Each worker must check the context during its search.
+
+Canceling a context does not return a drone to base automatically.
+
+Every goroutine must finish before the program exits.`)}},
+	{ID: "c133.check-step", Title: "Think & check", Blocks: []LessonBlock{
+		ch13Markdown("c133.plan", `Have each worker share the same context and notice when to stop.
+
+Connect a successful search to cancellation, then keep returning to base separate from searching.
+
+Use ~WaitGroup~ to ensure every worker has finished.`),
+		ch13Question("c133.q-cancel", "What does ~cancel()~ do in a shared search?", "cancel()", []string{"Closes Done and signals workers", "Force-stops every goroutine", "Waits for every worker"}, 0, []string{"Closing Done wakes listeners.", "Workers exit cooperatively.", "WaitGroup handles waiting."}),
+	}},
+	{ID: "c133.turn-step", Title: "Your turn", Blocks: []LessonBlock{ch13Markdown("c133.turn", `Complete the cancellation check in ~search~. Run the mission and watch each drone respond after the target is found.`)}},
+}
+
+var ch134ChainArabic = []LessonStep{
+	{ID: "c134.mission-step", Title: "المهمة", Blocks: []LessonBlock{ch13Markdown("c134.mission", `عدّي الـcontext من القيادة للوسيط للمسبار، وخلي سبب التوقف يرجع للقيادة.
+
+الـstarter فيه سلسلة الاستدعاءات؛ relay بيمرر سياقًا جديدًا بالغلط.
+
+سجّل دخول وخروج كل مستوى في التشغيلين.`)}},
+	{ID: "c134.idea-step", Title: "الفكرة", Blocks: []LessonBlock{ch13Walkthrough("c134.chain-trace", `كل function تستقبل نفس السياق كأول parameter وتمرره للداخل.
+
+المسبار يقرأ ~Err~، والنداءات الخارجية ترجع السبب من غير استبداله.
+
+~colony.TraceCommand(ctx, stage)~ يسجل حالة السياق عند حد function.`, ch13ChainCode, "e134-chain", []string{"context", "fmt"}, []LessonFrame{
+		{Line: 0, Caption: "قبل التنفيذ."},
+		{Line: 1, Caption: "المسبار يقرأ حالة السياق."},
+		{Line: 2, Caption: "الوسيط يمرر السياق."},
+		{Line: 3, Caption: "القيادة تمرر السياق."},
+		{Line: 5, Caption: "أنشئ سياق القيادة."},
+		{Line: 6, Caption: "ألغِ السياق قبل النداء."},
+		{Line: 7, Caption: "استدعِ السلسلة."},
+		{Line: 8, Caption: "السبب وصل للقيادة.", Output: "true"},
+	})}},
+	{ID: "c134.try-step", Title: "جرّب", Blocks: []LessonBlock{
+		ch13Question("c134.predict-chain", "هل توصل حالة الإلغاء عبر ~relay~؟", ch13PredictChainCode, []string{"true", "false", "nil"}, 0, []string{"relay مررت نفس ctx إلى probe.", "المسبار يرجع Err من ctx الملغي.", "المقارنة ترجع bool."}),
+		ch13Walkthrough("c134.chain-reveal", `تابع السياق من الوسيط للمسبار.`, ch13PredictChainCode, "e134-relay", []string{"context", "fmt"}, []LessonFrame{
+			{Line: 0, Caption: "قبل التنفيذ."},
+			{Line: 4, Caption: "أنشئ سياقًا."},
+			{Line: 5, Caption: "ألغِه قبل السلسلة."},
+			{Line: 6, Caption: "relay تستدعي probe."},
+			{Line: 2, Caption: "probe ترجع Err."},
+			{Line: 7, Caption: "السبب حافظ على هويته.", Output: "true"},
+		}),
+	}},
+	{ID: "c134.watch-step", Title: "خد بالك", Blocks: []LessonBlock{ch13Markdown("c134.watch", `إنشاء ~context.Background()~ في النص يقطع إلغاء الأب.
+
+الـdeadline ينتقل للأبناء ومينفعش تمدده من مستوى داخلي.
+
+لو الـcontext انتهى، ما ترجعش ~nil~ بدل السبب.`)}},
+	{ID: "c134.check-step", Title: "فكّر واختبر", Blocks: []LessonBlock{
+		ch13Markdown("c134.plan", `راجع كل حد استدعاء: دخول، نداء المستوى التالي، رجوع النتيجة، ثم خروج.
+
+اختبر السياق الملغي والسياق ذو الموعد كحالتين منفصلتين.
+
+رتّب السجل قبل تقرير النتيجة النهائية.`),
+		ch13Question("c134.q-propagate", "إيه اللي يحافظ على إلغاء القيادة؟", "next(ctx)", []string{"تمرير نفس ctx", "إنشاء Background جديد", "حفظ ctx في struct"}, 0, []string{"السياق نفسه يحمل الإلغاء والموعد.", "Background يبدأ عمرًا منفصلًا.", "مرر السياق لكل استدعاء."}),
+	}},
+	{ID: "c134.turn-step", Title: "دورك", Blocks: []LessonBlock{ch13Markdown("c134.turn", `أصلح تمرير السياق وسجّل حدود الدوال. شغّل الحالتين وراجع سبب التوقف في السجل.`)}},
+}
+
+var ch134ChainEnglish = []LessonStep{
+	{ID: "c134.mission-step", Title: "Mission", Blocks: []LessonBlock{ch13Markdown("c134.mission", `Pass context from command to relay to probe, and return the stop reason to command.
+
+The starter has the call chain; relay incorrectly passes a new context.
+
+Trace every layer's entry and exit in both runs.`)}},
+	{ID: "c134.idea-step", Title: "Idea", Blocks: []LessonBlock{ch13Walkthrough("c134.chain-trace", `Each function receives the same context as its first parameter and passes it inward.
+
+The probe reads ~Err~; outer calls return the reason without replacing it.
+
+~colony.TraceCommand(ctx, stage)~ records context state at a function boundary.`, ch13ChainCode, "e134-chain", []string{"context", "fmt"}, []LessonFrame{
+		{Line: 0, Caption: "Before execution."},
+		{Line: 1, Caption: "The probe reads context state."},
+		{Line: 2, Caption: "The relay passes context."},
+		{Line: 3, Caption: "The command passes context."},
+		{Line: 5, Caption: "Create command context."},
+		{Line: 6, Caption: "Cancel before the call."},
+		{Line: 7, Caption: "Call through the chain."},
+		{Line: 8, Caption: "The reason reaches command.", Output: "true"},
+	})}},
+	{ID: "c134.try-step", Title: "Try it", Blocks: []LessonBlock{
+		ch13Question("c134.predict-chain", "Does cancellation pass through ~relay~?", ch13PredictChainCode, []string{"true", "false", "nil"}, 0, []string{"relay passes the same ctx to probe.", "The probe returns Err from canceled ctx.", "The comparison returns a bool."}),
+		ch13Walkthrough("c134.chain-reveal", `Follow context from relay to probe.`, ch13PredictChainCode, "e134-relay", []string{"context", "fmt"}, []LessonFrame{
+			{Line: 0, Caption: "Before execution."},
+			{Line: 4, Caption: "Create a context."},
+			{Line: 5, Caption: "Cancel before the chain."},
+			{Line: 6, Caption: "relay calls probe."},
+			{Line: 2, Caption: "probe returns Err."},
+			{Line: 7, Caption: "The reason keeps its identity.", Output: "true"},
+		}),
+	}},
+	{ID: "c134.watch-step", Title: "Watch out", Blocks: []LessonBlock{ch13Markdown("c134.watch", `Creating a new ~context.Background()~ breaks parent cancellation.
+
+A deadline flows to children and cannot be extended by an inner layer.
+
+Do not return ~nil~ after the context ends.`)}},
+	{ID: "c134.check-step", Title: "Think & check", Blocks: []LessonBlock{
+		ch13Markdown("c134.plan", `Check each call boundary: entry, call the next layer, return its result, then exit.
+
+Exercise the already-canceled context and the deadline context separately.
+
+Review trace order before the final report.`),
+		ch13Question("c134.q-propagate", "What preserves command's cancellation?", "next(ctx)", []string{"Pass the same ctx", "Create a new Background", "Store ctx in a struct"}, 0, []string{"The same context carries cancellation and deadline.", "Background starts a separate lifetime.", "Pass context to each call."}),
+	}},
+	{ID: "c134.turn-step", Title: "Your turn", Blocks: []LessonBlock{ch13Markdown("c134.turn", `Fix context propagation and trace function boundaries. Run both cases and check the stop reason in the log.`)}},
+}
