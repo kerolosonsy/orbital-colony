@@ -83,6 +83,13 @@
     const next = value[end] || "";
 
     if (mod && (e.key === "/" || e.code === "Slash")) return toggleComment(value, start, end);
+    // Home jumps to the first code character, then to column 0
+    if (e.key === "Home" && !mod && !e.altKey) {
+      const ls = lineStart(value, end);
+      const first = ls + value.slice(ls, lineEnd(value, ls)).match(/^\s*/)[0].length;
+      const caret = end === first ? ls : first;
+      return { from: end, to: end, text: "", selStart: e.shiftKey ? Math.min(start, caret) : caret, selEnd: e.shiftKey ? Math.max(start, caret) : caret };
+    }
     if (e.altKey && !mod && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
       return moveOrCopyLines(value, start, end, e.key === "ArrowDown", e.shiftKey);
     }

@@ -90,3 +90,9 @@ test("matchBracket pairs the bracket at the caret and skips strings and comments
   assert.equal(matchBracket("x := 1", 3), null);
   assert.equal(matchBracket("f(", 2), null);         // unmatched
 });
+
+test("Home goes to the first code character, then to the line start", () => {
+  assert.equal(type("\t\tx := 1|", "Home"), "\t\t|x := 1");
+  assert.equal(type("\t\t|x := 1", "Home"), "|\t\tx := 1");
+  assert.equal(type("a\n\tfoo|", "Home"), "a\n\t|foo");
+});
