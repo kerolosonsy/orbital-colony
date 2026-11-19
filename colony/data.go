@@ -7,7 +7,11 @@ import (
 	"orbital/colony/internal/sim"
 )
 
+// FaultError describes a failed diagnostic: its Index, a short Code and a
+// Message. Read the code from any wrapped error with FaultCode.
 type FaultError = sim.FaultError
+
+// Question is one exam question: a Prompt and its Choices (answer by index).
 type Question = sim.Question
 
 // Dataset accessors return copies, so player code cannot change mission inputs.
@@ -78,6 +82,7 @@ func FaultCode(err error) string {
 // TraceCommand records the supplied context at a named command boundary.
 func TraceCommand(ctx context.Context, stage string) { world.TraceCommand(ctx, stage) }
 
+// RescueRequest is a pending rescue: its ID and Priority (higher goes first).
 type RescueRequest = sim.RescueRequest
 
 // RescueArrivals returns a copy of the current arrivals, initially and after

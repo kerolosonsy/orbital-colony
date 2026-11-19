@@ -2,6 +2,7 @@ package colony
 
 import "orbital/colony/econ"
 
+// BuildingKind names a building type for Build, e.g. Smelter or Silo.
 type BuildingKind string
 
 const (
@@ -17,6 +18,7 @@ const (
 	Collector  BuildingKind = "collector"
 )
 
+// BuildingError is the type of the Err* building errors below; compare with errors.Is.
 type BuildingError = econ.BuildingError
 
 var (
@@ -36,6 +38,8 @@ type Building struct {
 	drone int
 }
 
+// BuildingStatus is a snapshot returned by Building.Status: input/output
+// buffers, production progress, wear, level, recipe and power state.
 type BuildingStatus struct {
 	In, Out  map[Entity]float64
 	Progress float64
