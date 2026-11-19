@@ -1,0 +1,336 @@
+{
+  "31-1-echo": {
+    "config": {
+      "chunks": [
+        {
+          "caption": {
+            "ar": "وصل جزء بس.",
+            "en": "Only part arrived."
+          },
+          "delimiter": false,
+          "text": "sig"
+        },
+        {
+          "caption": {
+            "ar": "الفاصل كمّل السطر.",
+            "en": "The delimiter completes the line."
+          },
+          "delimiter": true,
+          "text": "nal"
+        },
+        {
+          "caption": {
+            "ar": "السطر التالي مستقل.",
+            "en": "The next line is separate."
+          },
+          "delimiter": true,
+          "text": "air"
+        }
+      ],
+      "delimiterMark": "↵",
+      "labels": {
+        "chunk": {
+          "ar": "الجزء الحالي",
+          "en": "Current chunk"
+        },
+        "empty": {
+          "ar": "لسه مفيش",
+          "en": "None yet"
+        },
+        "initial": {
+          "ar": "القراية ممكن تقف قبل نهاية السطر.",
+          "en": "A read can stop before the line ends."
+        },
+        "lines": {
+          "ar": "سطور كاملة",
+          "en": "Complete lines"
+        },
+        "pending": {
+          "ar": "لسه مستني الفاصل",
+          "en": "Waiting for delimiter"
+        },
+        "read": {
+          "ar": "اقرأ chunk",
+          "en": "Read chunk"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        },
+        "title": {
+          "ar": "الـbuffer",
+          "en": "Buffer"
+        }
+      }
+    },
+    "kind": "ch31-stream-buffer"
+  },
+  "31-2-chat": {
+    "config": {
+      "capacity": 1,
+      "events": {
+        "fast": {
+          "ar": "الإرسال لا ينتظر المستلم.",
+          "en": "The send does not wait for its reader."
+        },
+        "slow": {
+          "ar": "يتخطى الإرسال؛ الصندوق مليان.",
+          "en": "Skip send; this inbox is full."
+        }
+      },
+      "initialSlow": [
+        "air"
+      ],
+      "labels": {
+        "caption": {
+          "ar": "الترتيب ممكن يتغير؛ المالك يكمل.",
+          "en": "Order can vary; the owner keeps going."
+        },
+        "events": {
+          "ar": "ترتيب الأحداث",
+          "en": "Event order"
+        },
+        "fast": {
+          "ar": "صندوق تاني",
+          "en": "Another inbox"
+        },
+        "run": {
+          "ar": "شغّل تاني",
+          "en": "Run again"
+        },
+        "slow": {
+          "ar": "صندوق بطيء",
+          "en": "Slow inbox"
+        },
+        "title": {
+          "ar": "صناديق البريد",
+          "en": "Mailboxes"
+        }
+      },
+      "runs": [
+        [
+          {
+            "message": "map",
+            "recipient": "slow"
+          },
+          {
+            "message": "ring",
+            "recipient": "fast"
+          }
+        ],
+        [
+          {
+            "message": "ring",
+            "recipient": "fast"
+          },
+          {
+            "message": "map",
+            "recipient": "slow"
+          }
+        ]
+      ]
+    },
+    "kind": "ch31-mailbox-owner"
+  },
+  "31-3-discovery": {
+    "config": {
+      "labels": {
+        "empty": {
+          "ar": "مفيش لسه",
+          "en": "None yet"
+        },
+        "initial": {
+          "ar": "كل datagram يفضل وحدة واحدة.",
+          "en": "Each datagram stays one unit."
+        },
+        "packet": {
+          "ar": "الحزمة المستلمة",
+          "en": "Received packet"
+        },
+        "receive": {
+          "ar": "استقبل الحزمة",
+          "en": "Receive packet"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        },
+        "title": {
+          "ar": "حزم UDP",
+          "en": "UDP packets"
+        }
+      },
+      "packets": [
+        "v2|r7|pier",
+        "v2|r8|reef"
+      ]
+    },
+    "kind": "ch31-udp-packets"
+  },
+  "31-4-frames": {
+    "config": {
+      "bytes": [
+        1,
+        2,
+        7
+      ],
+      "labels": {
+        "empty": {
+          "ar": "مفيش",
+          "en": "None"
+        },
+        "remaining": {
+          "ar": "الباقي",
+          "en": "Remaining"
+        },
+        "swap": {
+          "ar": "بدّل ترتيب القراءة",
+          "en": "Swap byte order"
+        },
+        "title": {
+          "ar": "ترتيب البايتات",
+          "en": "Byte order"
+        },
+        "value": {
+          "ar": "قيمة الحقل",
+          "en": "Field value"
+        },
+        "wire": {
+          "ar": "البايتات",
+          "en": "Bytes"
+        }
+      },
+      "orders": [
+        {
+          "name": "BigEndian",
+          "value": 258
+        },
+        {
+          "name": "LittleEndian",
+          "value": 513
+        }
+      ]
+    },
+    "kind": "ch31-byte-order"
+  },
+  "31-5-dns": {
+    "config": {
+      "labels": {
+        "case": {
+          "ar": "الحالة",
+          "en": "Case"
+        },
+        "next": {
+          "ar": "جرّب حالة",
+          "en": "Next case"
+        },
+        "reset": {
+          "ar": "ابدأ من الأول",
+          "en": "Reset"
+        },
+        "result": {
+          "ar": "النتيجة",
+          "en": "Result"
+        },
+        "title": {
+          "ar": "نتيجة resolver",
+          "en": "Resolver result"
+        }
+      },
+      "outcomes": [
+        {
+          "caption": {
+            "ar": "دي إجابة ناجحة.",
+            "en": "This is a successful answer."
+          },
+          "name": {
+            "ar": "قائمة فاضية",
+            "en": "Empty list"
+          },
+          "result": "[]"
+        },
+        {
+          "caption": {
+            "ar": "ده سبب خطأ مختلف.",
+            "en": "This is a different error cause."
+          },
+          "name": {
+            "ar": "اسم مش موجود",
+            "en": "Name not found"
+          },
+          "result": "DNSError"
+        },
+        {
+          "caption": {
+            "ar": "البيانات جاية من resolver.",
+            "en": "The data comes from the resolver."
+          },
+          "name": {
+            "ar": "عنوانين",
+            "en": "Two addresses"
+          },
+          "result": "192.0.2.8 · 2001:db8::8"
+        }
+      ]
+    },
+    "kind": "ch31-dns-outcomes"
+  },
+  "31-6-port-check": {
+    "config": {
+      "labels": {
+        "caption": {
+          "ar": "الانتهاء يتغير؛ الخانات ثابتة.",
+          "en": "Completion varies; slots stay put."
+        },
+        "completion": {
+          "ar": "انتهت بالترتيب",
+          "en": "Finished in this order"
+        },
+        "ports": {
+          "ar": "المدخل",
+          "en": "Input"
+        },
+        "run": {
+          "ar": "شغّل تاني",
+          "en": "Run again"
+        },
+        "slots": {
+          "ar": "النتائج حسب المدخل",
+          "en": "Results by input"
+        },
+        "title": {
+          "ar": "اكتمال الفحوص",
+          "en": "Check completion"
+        }
+      },
+      "orders": [
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          2,
+          1,
+          0
+        ],
+        [
+          0,
+          2,
+          1
+        ]
+      ],
+      "ports": [
+        "7443",
+        "8443",
+        "9443"
+      ],
+      "results": [
+        "open",
+        "closed",
+        "open"
+      ]
+    },
+    "kind": "ch31-result-slots"
+  }
+}
