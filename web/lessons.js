@@ -495,6 +495,8 @@ const Lessons = (() => {
     article.replaceChildren(nav.node, title, body, button(T("ارجع للكود", "Return to code"), returnToCode));
     // ← / → move between steps (mirrored in Arabic), unless a control has focus
     article.onkeydown = (event) => {
+      // Esc in the lesson drawer (narrow screens) goes back to the code
+      if (event.key === "Escape" && document.body.classList.contains("lesson-open")) { event.preventDefault(); returnToCode(); return; }
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       if (event.target.closest?.("input, select, textarea, [contenteditable], .lesson-sandbox, .lesson-walkthrough")) return;
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;

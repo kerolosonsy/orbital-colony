@@ -587,9 +587,11 @@ ed.addEventListener("keydown", (e) => {
 // ---------- console ----------
 const con = $("#console");
 function appendConsoleNode(node) {
+  // follow new output only if the reader is already at the bottom
+  const following = con.scrollHeight - con.scrollTop - con.clientHeight < 40;
   con.appendChild(node);
   if (con.childElementCount > 400) con.firstChild.remove();
-  con.scrollTop = con.scrollHeight;
+  if (following || con.childElementCount <= 2) con.scrollTop = con.scrollHeight;
 }
 // Copy the console as plain text (compile errors, output) to paste anywhere.
 $("#btn-copy-console").onclick = async () => {
