@@ -1,1 +1,48 @@
-/* Chapter 15 sandbox styles will be added with its renderer. */
+.lesson-sandbox.ch15-algorithm-trace {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  padding: 8px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet);
+  color: var(--paper);
+  box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 4px var(--rule);
+}
+
+.ch15-trace-frame {
+  display: grid;
+  gap: 4px;
+}
+
+.ch15-trace-caption {
+  margin: 0 0 3px;
+  color: var(--paper-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ch15-trace-frame .sandbox-kit-boxes {
+  margin: 0;
+  padding-block-end: 5px;
+  border-block-end: 1px solid var(--rule);
+}
+
+.ch15-trace-frame .sandbox-kit-label {
+  margin: 0;
+  color: var(--regolith);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.ch15-trace-frame .sandbox-kit-box-row {
+  margin-block: 4px 0;
+}
+
+.ch15-algorithm-trace .sandbox-kit-controls {
+  margin-block: 7px 0;
+}
+
+.ch15-algorithm-trace .sandbox-kit-counter {
+  color: var(--muted);
+  font-size: 12px;
+}

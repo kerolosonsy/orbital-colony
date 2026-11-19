@@ -1,0 +1,34 @@
+{
+  "id": "c151.sandbox",
+  "kind": "ch15-algorithm-trace",
+  "config": {
+    "labels": {
+      "previous": { "ar": "السابق", "en": "Back" },
+      "next": { "ar": "اللي بعده", "en": "Next" },
+      "reset": { "ar": "من الأول", "en": "Reset" }
+    },
+    "frames": [
+      {
+        "caption": { "ar": "A في أول الطابور.", "en": "A waits at the front." },
+        "rows": [
+          { "label": { "ar": "الطابور", "en": "Queue" }, "values": ["A", "B"] },
+          { "label": { "ar": "اتسحب", "en": "Removed" }, "values": ["—"] }
+        ]
+      },
+      {
+        "caption": { "ar": "اسحب أول عنصر بس.", "en": "Remove just the first item." },
+        "rows": [
+          { "label": { "ar": "الطابور", "en": "Queue" }, "values": ["B"] },
+          { "label": { "ar": "اتسحب", "en": "Removed" }, "values": ["A"] }
+        ]
+      },
+      {
+        "caption": { "ar": "ضيف الاكتشاف الجديد في الآخر.", "en": "Append the new discovery last." },
+        "rows": [
+          { "label": { "ar": "الطابور", "en": "Queue" }, "values": ["B", "C"] },
+          { "label": { "ar": "اتسحب", "en": "Removed" }, "values": ["A"] }
+        ]
+      }
+    ]
+  }
+}
