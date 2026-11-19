@@ -31,6 +31,7 @@ type colonyRun struct {
 	commandsReader *os.File
 	done           chan struct{}
 	details        *colonyRunDetails
+	debug          *colonyDebug // live debugger pipes, nil without an instrumented build
 }
 
 type colonyGame struct {
@@ -269,7 +270,11 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		eventsReader.Close()
 		return err
 	}
-	cmd := exec.CommandContext(context.Background(), filepath.Join(dir, "prog"))
+	progPath, debug := filepath.Join(dir, "prog"), (*colonyDebug)(nil)
+	if colonyDebugAvailable(dir) {
+		progPath, debug = filepath.Join(dir, colonyDebugProg), &colonyDebug{}
+	}
+	cmd := exec.CommandContext(context.Background(), progPath)
 	defer func() {
 		if cmd.Process == nil {
 			commandsReader.Close()
@@ -311,7 +316,17 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		stderrReader.Close()
 		return err
 	}
+	var afterDebugStart func(bool)
+	if debug != nil {
+		cmd.Env = append(cmd.Env, colonyDebugEnv(len(cmd.ExtraFiles))...)
+		if afterDebugStart, err = debug.attach(c, cmd); err != nil {
+			debug, afterDebugStart = nil, nil
+		}
+	}
 	if err := c.startControlProcess(cmd); err != nil {
+		if afterDebugStart != nil {
+			afterDebugStart(false)
+		}
 		c.stopNeighbor()
 		eventsReader.Close()
 		commandsWriter.Close()
@@ -319,7 +334,10 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 		stderrReader.Close()
 		return err
 	}
-	active := &colonyRun{am: archiveMarket, cmd: cmd, commands: commandsWriter, commandsReader: commandsReader, done: make(chan struct{}), details: details}
+	if afterDebugStart != nil {
+		afterDebugStart(true)
+	}
+	active := &colonyRun{am: archiveMarket, cmd: cmd, commands: commandsWriter, commandsReader: commandsReader, done: make(chan struct{}), details: details, debug: debug}
 	c.mu.Lock()
 	c.active = active
 	c.beginRun(details)
@@ -336,6 +354,9 @@ func (c *colonyGame) start(dir string, lang string, details *colonyRunDetails) e
 	}
 	go func() {
 		waitErr, exitCode := c.waitControlRun(active, dir, &readers)
+		if active.debug != nil {
+			active.debug.close()
+		}
 		active.am.close()
 		c.stopNeighbor()
 		commandsWriter.Close()

@@ -316,9 +316,16 @@ const Colony = (() => {
         refresh();
         return;
       }
+      case "debug":
+        // live debugger: the running program reports the statement it runs
+        if (typeof InlineDebugger === "undefined") return;
+        if (!InlineDebugger.live) InlineDebugger.startLive(LEVEL.id, (command) => api("/api/colony/debug", command).catch(() => {}));
+        InlineDebugger.liveFrame(ev.frame);
+        return;
       case "stdout": log(ev.msg); return;
       case "stderr": log(ev.msg, "c-err"); return;
       case "stopped":
+        if (typeof InlineDebugger !== "undefined") InlineDebugger.clear();
         running = false; live = null; runUI();
         log(T(`المستعمرة وقفت. ${ev.msg || ""}`, `Colony stopped. ${ev.msg || ""}`), "c-info");
         refresh();
@@ -499,6 +506,7 @@ const Colony = (() => {
     const active = (typeof S !== "undefined" && S.file) || "main.go";
     if (running) {
       btn.disabled = true;
+      if (typeof InlineDebugger !== "undefined") InlineDebugger.clear();
       try { await api("/api/colony/stop", {}); } catch (e) { log(T("مقدرتش أوقفها: ", "Couldn't stop it: ") + e.message, "c-err"); }
       btn.disabled = false;
       running = false; runUI(); refresh(); fetchRuns();

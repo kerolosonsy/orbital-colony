@@ -571,9 +571,15 @@ func main(){for {colony.Measure();colony.Wait()}}
 			if started.Code != 200 || !strings.Contains(started.Body.String(), `"running":true`) {
 				t.Fatalf("start: %s", started.Body)
 			}
-			for frame := 0; frame < 2; frame++ {
+			// Live debugger frames share the stream, so let several flushes
+			// through before reading what the colony itself said.
+			for frame := 0; frame < 12; frame++ {
+				quiet := time.NewTimer(1500 * time.Millisecond)
 				select {
 				case <-rec.flushed:
+					quiet.Stop()
+				case <-quiet.C:
+					frame = 12
 				case <-ctx.Done():
 					t.Fatal("missing colony events")
 				}

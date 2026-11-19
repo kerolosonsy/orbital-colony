@@ -120,6 +120,7 @@ func main() {
 	s.registerColonyProject(mux)
 	s.registerColonySeasons(mux)
 	mux.HandleFunc("POST /api/colony/stop", s.colonyStop)
+	mux.HandleFunc("POST /api/colony/debug", s.colonyDebugCommand)
 	mux.HandleFunc("POST /api/colony/buy", s.colonyBuy)
 	mux.HandleFunc("POST /api/colony/claim", s.colonyClaim)
 	mux.HandleFunc("POST /api/colony/contract", s.colonyContract)

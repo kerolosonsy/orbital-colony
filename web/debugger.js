@@ -204,6 +204,10 @@ const InlineDebugger = (() => {
   let collapsed = false;
   let playTimer = null;
   let hooks = {};
+  // live mode (colony): frames arrive while the program runs; commands go
+  // to the running program instead of moving through a recording.
+  let live = null; // { send(command), paused }
+  const LIVE_HISTORY = 400;
   let endFired = false;
   let speed = 1;
   let userCollapsed = false;
@@ -311,6 +315,39 @@ const InlineDebugger = (() => {
     if (options.autoplay && session.active) startPlay();
   }
 
+  function startLive(levelIDForTrace, send) {
+    clear();
+    levelID = levelIDForTrace;
+    live = { send, paused: false };
+    response = { available: true, frames: [], stdout: "" };
+    responseStdoutBytes = new Uint8Array();
+    elements.toolbar.classList.add("is-live");
+    sendBreakpoints();
+  }
+
+  function liveFrame(frame) {
+    if (!live || !frame) return;
+    const frames = response.frames;
+    frames.push(frame);
+    if (frames.length > LIVE_HISTORY) frames.shift();
+    live.paused = !!frame.paused;
+    if (!session.active) {
+      session.begin(response);
+      setGoroutineNote(frames);
+      stepper = createStepper(frames, renderFrame);
+      elements.toolbar.hidden = false;
+      elements.controls.hidden = false;
+      elements.panel.hidden = false;
+      setStatus("");
+    }
+    stepper.set(frames.length - 1);
+  }
+
+  function sendBreakpoints() {
+    if (!live) return;
+    live.send({ cmd: "breaks", breaks: callbacks.getBreakpoints?.(levelID) || [] });
+  }
+
   function finishNow() {
     if (!stepper || !session.active) return;
     stopPlay();
@@ -396,6 +433,13 @@ const InlineDebugger = (() => {
   }
 
   function clear() {
+    if (live) {
+      // never leave the live program paused or stopping on breakpoints
+      live.send({ cmd: "breaks", breaks: [] });
+      live.send({ cmd: "cont" });
+      live = null;
+      elements?.toolbar.classList.remove("is-live");
+    }
     const dropped = hooks;
     hooks = {};
     endFired = false;
@@ -443,6 +487,7 @@ const InlineDebugger = (() => {
       if (command === "exit") clear();
       return;
     }
+    if (live) return liveCommand(command);
     if (command === "play") return togglePlay();
     stopPlay();
     const breakpoints = callbacks.getBreakpoints?.(levelID) || [];
@@ -456,6 +501,12 @@ const InlineDebugger = (() => {
       hooks.onExit?.();
       clear();
     }
+  }
+
+  function liveCommand(command) {
+    if (command === "exit") return clear();
+    if (command === "play" || command === "go") return live.send({ cmd: live.paused ? "cont" : "pause" });
+    if (["into", "over", "out"].includes(command) && live.paused) live.send({ cmd: command });
   }
 
   function onKeydown(event) {
@@ -508,7 +559,7 @@ const InlineDebugger = (() => {
     elements.toolbar.classList.toggle("is-playing", on);
     const button = document.querySelector('[data-debug-command="play"]');
     if (button) {
-      const label = translate(...labels[on ? "pause" : "play"]);
+      const label = live ? translate(...(on ? labels.pause : ["كمّل", "Continue"])) : translate(...labels[on ? "pause" : "play"]);
       button.setAttribute("aria-label", label);
       button.title = label;
       button.setAttribute("aria-pressed", String(on));
@@ -517,6 +568,7 @@ const InlineDebugger = (() => {
 
   function whereText(frame) {
     if (!frame) return "";
+    if (live && !frame.paused) return `${translate("بينفّذ", "Running")} <code>${esc(frame.func || "main")}()</code> · ${translate(`سطر ${frame.line}`, `line ${frame.line}`)}`;
     const fn = `<code>${esc(frame.func || "main")}()</code>`;
     const line = translate(`سطر ${frame.line}`, `line ${frame.line}`);
     if (frame.event === "call") return translate(`دخلنا ${fn}`, `Entered ${fn}`) + ` · ${line}`;
@@ -529,7 +581,7 @@ const InlineDebugger = (() => {
 
   function renderTimeline(index) {
     const svg = document.querySelector("#debugger-depth");
-    if (!svg || !response) return;
+    if (!svg || !response || live) return;
     const frames = response.frames;
     const n = frames.length;
     const W = 1000, H = 26;
@@ -571,6 +623,7 @@ const InlineDebugger = (() => {
   }
 
   function renderStepControls(index, total) {
+    if (live) return renderLiveControls();
     elements.counter.textContent = `${index + 1} / ${total}`;
     elements.slider.max = String(Math.max(0, total - 1));
     elements.slider.value = String(index);
@@ -581,7 +634,22 @@ const InlineDebugger = (() => {
     }
   }
 
+  function renderLiveControls() {
+    elements.counter.textContent = live.paused ? translate("متوقف", "Paused") : translate("شغال", "Live");
+    elements.toolbar.classList.toggle("is-live-paused", live.paused);
+    for (const button of document.querySelectorAll("[data-debug-command]")) {
+      const command = button.dataset.debugCommand;
+      if (["into", "over", "out"].includes(command)) button.disabled = !live.paused;
+      if (command === "back" || command === "restart") button.disabled = true;
+    }
+    setPlaying(!live.paused);
+  }
+
   function renderOutput(frame) {
+    if (live) {
+      elements.output.innerHTML = `<span class="debug-empty">${esc(translate("الـoutput بيظهر في الكونسول تحت الخريطة.", "Output appears in the console under the map."))}</span>`;
+      return;
+    }
     const outputOffset = Number(frame?.stdout) || 0;
     const capturedBytes = responseStdoutBytes?.length || 0;
     const outputText = stdoutAtOffset(response.stdout, outputOffset, responseStdoutBytes);
@@ -722,10 +790,11 @@ const InlineDebugger = (() => {
     const current = callbacks.getBreakpoints?.(level) || [];
     callbacks.saveBreakpoints?.(level, toggleBreakpointList(current, file, line));
     if (stepper && session.active) renderTimeline(stepper.index);
+    sendBreakpoints();
   }
 
   return {
-    bind, start, startWith, finishNow, clear, unavailable, createSession, createStepper, toggleBreakpoint: toggleLevelBreakpoint, toggleBreakpointList,
+    bind, start, startWith, startLive, liveFrame, finishNow, clear, unavailable, get live() { return !!live; }, createSession, createStepper, toggleBreakpoint: toggleLevelBreakpoint, toggleBreakpointList,
     breakpointKey, breakpointLines, editorState, editorMarkup, gutterMarkup, inlineValueText, renderInlineValues,
     callStackAt, stdoutAtOffset, get active() { return session.active; }, get playing() { return !!playTimer; },
   };

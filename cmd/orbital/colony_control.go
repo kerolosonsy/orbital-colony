@@ -168,11 +168,22 @@ func (c *colonyGame) restartControlProcess(previous *colonyRun, dir string, read
 	}
 	cmd.ExtraFiles = []*os.File{pipes[1], previous.commandsReader}
 	cmd.Stdout, cmd.Stderr = pipes[3], pipes[5]
+	var afterDebugStart func(bool)
+	if previous.debug != nil {
+		// same fd numbers as the first child: its Env already names them
+		afterDebugStart, _ = previous.debug.attach(c, cmd)
+	}
 	if err := cmd.Start(); err != nil {
+		if afterDebugStart != nil {
+			afterDebugStart(false)
+		}
 		for _, file := range pipes {
 			file.Close()
 		}
 		return nil, err
+	}
+	if afterDebugStart != nil {
+		afterDebugStart(true)
 	}
 	for _, i := range []int{1, 3, 5} {
 		pipes[i].Close()
@@ -184,7 +195,7 @@ func (c *colonyGame) restartControlProcess(previous *colonyRun, dir string, read
 		readers.Add(1)
 		go func(file *os.File, op string) { defer readers.Done(); defer file.Close(); c.readLines(file, op) }(stream.file, stream.op)
 	}
-	return &colonyRun{am: previous.am, cmd: cmd, commands: previous.commands, commandsReader: previous.commandsReader, done: previous.done, details: previous.details}, nil
+	return &colonyRun{am: previous.am, cmd: cmd, commands: previous.commands, commandsReader: previous.commandsReader, done: previous.done, details: previous.details, debug: previous.debug}, nil
 }
 
 func (c *colonyGame) observeControlEvent(line string) {

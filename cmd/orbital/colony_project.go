@@ -255,9 +255,19 @@ func (r *runner) buildColonyProject(ctx context.Context, dir string, project *co
 	if project.Race {
 		args = append(args, "-race")
 	}
+	debugCtx, cancelDebug := context.WithCancel(ctx)
+	defer cancelDebug()
+	debugBuilt := r.buildColonyDebug(debugCtx, dir, project)
 	build := r.goCmd(ctx, dir, append(args, ".")...)
 	build.Stdout, build.Stderr = output, output
-	if err := runCommand(build); err != nil {
+	err := runCommand(build)
+	if err != nil {
+		cancelDebug()
+	}
+	if !<-debugBuilt {
+		os.Remove(filepath.Join(dir, colonyDebugProg))
+	}
+	if err != nil {
 		out := strings.ReplaceAll(output.String(), dir+string(os.PathSeparator), "")
 		return map[string]any{"phase": "compile", "compileErrors": compileErrorsFor(out, lang), "compileOutput": out}
 	}
