@@ -70,6 +70,7 @@
     <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
     <symbol id="i-colony" viewBox="0 0 24 24"><path d="M3 20h18M5 20V10l7-5 7 5v10M9 20v-5h6v5"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20.5c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="1.5"/><path d="M15.5 8.5V5.5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3"/></symbol>
     <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.2l-5.8 3.2 1.2-6.5L2.6 9.4l6.5-.8z"/></symbol>
   </defs>
 </svg>
@@ -187,6 +188,7 @@
     <div class="editor">
       <div class="gutter" id="gutter"></div>
       <div class="code-wrap">
+        <div class="caret-line" id="caret-line" aria-hidden="true"></div>
         <pre class="highlight" id="highlight" aria-hidden="true"></pre>
         <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="الكود" data-en-aria="Code"></textarea>
       </div>
@@ -229,6 +231,7 @@
         <button id="btn-unlink" class="tool small" data-en="Unlink">فك الربط</button>
       </span>
       <span id="hud-progress" class="progress-note"></span>
+      <button id="btn-copy-console" class="tool small" type="button" title="انسخ رسايل الكونسول" data-en-title="Copy console output" aria-label="انسخ رسايل الكونسول" data-en-aria="Copy console output"><svg class="ico"><use href="#i-copy"/></svg></button>
     </div>
     <div class="console" id="console" aria-live="polite"></div>
   </section>

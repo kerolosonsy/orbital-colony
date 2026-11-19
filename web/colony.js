@@ -107,7 +107,8 @@ const Colony = (() => {
     if (playback) finishPlayback();
     // a mission debug session (and its focus layout) must not leak into the colony
     if (typeof clearTraceRun === "function") clearTraceRun();
-    if (!baseDocTitle && typeof document !== "undefined" && typeof document.title === "string") baseDocTitle = document.title;
+    // remember the mission's tab title each time we come in, to restore on exit
+    if (S.mode !== "colony" && typeof document !== "undefined" && typeof document.title === "string") baseDocTitle = document.title;
     S.mode = "colony";
     document.body.classList.add("colony");
     try {
@@ -1429,7 +1430,7 @@ const Colony = (() => {
     } else {
       if (titleEl) titleEl.textContent = LEVEL.title;
       if (chapEl) chapEl.textContent = T("مستعمرة حرة", "OPEN COLONY");
-      if (baseDocTitle && typeof document !== "undefined") document.title = baseDocTitle;
+      if (typeof document !== "undefined" && typeof document.title === "string") document.title = `${LEVEL.title} — Orbital Colony`;
     }
   }
 

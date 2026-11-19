@@ -470,7 +470,18 @@ function renderEditor() {
 }
 function syncScroll() {
   hl.scrollTop = ed.scrollTop; hl.scrollLeft = ed.scrollLeft; gutter.scrollTop = ed.scrollTop;
+  placeCaretLine();
 }
+const caretLine = $("#caret-line");
+function placeCaretLine() {
+  const show = !ed.readOnly && ed.selectionStart === ed.selectionEnd;
+  caretLine.classList.toggle("on", show);
+  if (!show) return;
+  const line = ed.value.slice(0, ed.selectionStart).split("\n").length;
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+  caretLine.style.top = `${14 + (line - 1) * lineHeight - ed.scrollTop}px`;
+}
+document.addEventListener("selectionchange", () => { if (document.activeElement === ed) placeCaretLine(); });
 let saveTimer;
 function flushSave() {
   if (!saveTimer) return;
@@ -545,6 +556,23 @@ function appendConsoleNode(node) {
   if (con.childElementCount > 400) con.firstChild.remove();
   con.scrollTop = con.scrollHeight;
 }
+// Copy the console as plain text (compile errors, output) to paste anywhere.
+$("#btn-copy-console").onclick = async () => {
+  const text = [...con.children].map((node) => node.innerText ?? node.textContent).join("\n").trim();
+  if (!text) return;
+  const button = $("#btn-copy-console");
+  try {
+    await navigator.clipboard.writeText(text);
+    button.classList.add("copied");
+    button.title = T("اتنسخ ✓", "Copied ✓");
+  } catch {
+    button.title = T("مقدرتش أنسخ", "Couldn't copy");
+  }
+  setTimeout(() => {
+    button.classList.remove("copied");
+    button.title = T("انسخ رسايل الكونسول", "Copy console output");
+  }, 1500);
+};
 function log(text, cls = "c-out") {
   text = String(text).replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, "");
   const d = document.createElement("div");
@@ -1332,6 +1360,9 @@ async function loadLevel(id, review = null) {
   clearTraceRun();
   LearningMetrics.openLevel(store, id);
   store.pref("current", id);
+  // the tab shows the mission, and the URL hash links straight to it
+  document.title = `${sheetCode(l)} · ${l.title} — Orbital Colony`;
+  if (!review && location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
   const ch = S.chapters.find((c) => c.n === l.chapter);
   $("#lvl-chapter").textContent = `${sheetCode(l)} · ${ch ? ch.title : ""}`;
   $("#lvl-stars").setAttribute("aria-label", T(`${rec(id).stars} من 3 نجوم`, `${rec(id).stars} of 3 stars`));
@@ -1884,7 +1915,8 @@ function finish(level, res, missing = [], silent = false) {
     log(T("مقدرتش أوصل للسيرفر: ", "Can't reach the server: ") + e.message, "c-err");
     return;
   }
-  let id = store.pref("current");
+  const linkedID = hashLevelID();
+  let id = idx(linkedID) >= 0 && unlocked(idx(linkedID)) ? linkedID : store.pref("current");
   if (idx(id) < 0 || !unlocked(idx(id))) {
     const firstOpen = S.levels.findIndex((l, i) => unlocked(i) && rec(l.id).stars === 0);
     id = S.levels[firstOpen >= 0 ? firstOpen : 0].id;
@@ -1908,6 +1940,17 @@ function restoreSpeeds() {
   }
   select?.addEventListener("change", () => store.pref("debugSpeed", select.value));
 }
+
+// Opening a #mission link in a running tab jumps to it (if unlocked).
+// "#1-2" (sheet code) or "#1-2-some-title" (full id) both name a mission.
+function hashLevelID() {
+  const raw = decodeURIComponent(location.hash.slice(1));
+  return S.levels.find((l) => l.id === raw)?.id || S.levels.find((l) => sheetCode(l) === raw)?.id || raw;
+}
+window.addEventListener("hashchange", () => {
+  const id = hashLevelID();
+  if (id && id !== S.cur?.id && unlocked(idx(id))) loadLevel(id);
+});
 
 function showWelcome() {
   showOverlay("#welcome");

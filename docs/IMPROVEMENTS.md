@@ -19,3 +19,8 @@ Each entry: what changed and why. Numbered in the order they landed.
 15. **F9 toggles a breakpoint on the caret line** (VS Code habit), without reaching for the mouse.
 16. **Debugger buttons show their shortcut** — tooltips now say F10 / F11 / Shift+F11 / F5 / Shift+F5.
 17. **Keyboard shortcuts sheet** — press `?` (outside the editor) to see every shortcut in Arabic or English.
+18. **Browser tab shows the mission** — `document.title` becomes `1-2 · <title> — Orbital Colony`, so several tabs/bookmarks are tellable apart.
+19. **Mission links** — the URL hash follows the open mission (`#1-2-…`); opening `#1-2` (sheet code) or the full id jumps straight to it when unlocked, also in an already-open tab.
+20. **Colony tab title fixes** — the mission title is re-captured on every colony entry (it used to restore the title from the very first entry), and the open colony shows `Colony — Orbital Colony`.
+21. **Copy console button** — one click copies the whole console (errors, output) as plain text, with a short "Copied ✓" confirmation.
+22. **Current-line highlight** — a faint band marks the caret's line while editing (hidden while selecting or when the editor is read-only during debugging).

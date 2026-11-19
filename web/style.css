@@ -300,6 +300,9 @@ input[type="checkbox"] { accent-color: var(--regolith); }
   direction: ltr; text-align: left;
 }
 .code-wrap pre { overflow: hidden; pointer-events: none; color: var(--paper); }
+/* the caret's line: a faint band under the code, hidden while debugging or selecting */
+.caret-line { position: absolute; left: 0; right: 0; height: 1.65em; pointer-events: none; background: color-mix(in srgb, var(--paper) 5%, transparent); display: none; }
+.code-wrap:focus-within .caret-line.on { display: block; }
 .code-wrap textarea { background: transparent; color: transparent; caret-color: var(--survey-hi); resize: none; outline: none; }
 .code-wrap textarea::selection { background: #4a3f7a; color: transparent; }
 .code-wrap textarea[readonly] { caret-color: transparent; }
@@ -347,6 +350,7 @@ canvas#world { position: absolute; inset: 0; width: 100%; height: 100%; }
 .speed { display: flex; align-items: center; gap: 8px; }
 #link-box { display: inline-flex; align-items: center; gap: 8px; }
 .check { display: inline-flex; align-items: center; gap: 6px; color: var(--paper-2); }
+#btn-copy-console.copied { color: var(--ok, #6fcf97); }
 .progress-note { margin-left: auto; font-size: 12.5px; color: var(--paper-2); text-align: end; }
 
 .console {
