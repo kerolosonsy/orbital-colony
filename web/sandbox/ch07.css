@@ -1,1 +1,85 @@
-/* Chapter 07 sandbox styles will be added with its renderer. */
+.ch07-sandbox {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 290px;
+  min-inline-size: 0;
+  padding: 10px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.ch07-heading,
+.ch07-caption,
+.ch07-prompt {
+  margin-block: 5px;
+}
+
+.ch07-caption {
+  min-block-size: 1.5em;
+  color: var(--muted);
+}
+
+.ch07-fields {
+  display: flex;
+  gap: 6px;
+  margin-block: 8px;
+}
+
+.ch07-field {
+  display: grid;
+  flex: 1;
+  justify-items: center;
+  gap: 3px;
+  min-inline-size: 0;
+  padding: 7px 4px;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: var(--ink-2);
+}
+
+.ch07-field-name,
+.ch07-field-value,
+.ch07-state-code {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: var(--mono);
+}
+
+.ch07-field-value {
+  font-size: 1.1em;
+}
+
+.ch07-state-code {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  padding: 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--ink-2);
+}
+
+.ch07-controls,
+.ch07-sandbox .sandbox-kit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-block: 8px;
+}
+
+.ch07-controls .tool {
+  min-block-size: 40px;
+  block-size: auto;
+  padding-block: 6px;
+}
+
+.ch07-sandbox .sandbox-kit {
+  max-inline-size: 100%;
+}
+
+.ch07-sandbox .sandbox-kit-frame {
+  min-inline-size: 0;
+}

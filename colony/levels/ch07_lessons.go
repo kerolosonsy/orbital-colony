@@ -1,5 +1,91 @@
 package levels
 
+func ch07Locale(ar, en string) map[string]any {
+	return map[string]any{"ar": ar, "en": en}
+}
+
+func ch07Sandbox(id, text, kind string, config map[string]any) LessonBlock {
+	return LessonBlock{
+		ID:      id,
+		Kind:    "sandbox",
+		Text:    text,
+		Sandbox: &LessonSandbox{Kind: kind, Config: config},
+	}
+}
+
+var ch07PointFieldsConfig = map[string]any{
+	"fields": []any{
+		map[string]any{"name": ch07Locale("X", "X"), "value": 3, "read": ch07Locale("اقرأ X", "Read X"), "caption": ch07Locale("قرأنا X من النقطة.", "Read X from the point.")},
+		map[string]any{"name": ch07Locale("Y", "Y"), "value": 1, "read": ch07Locale("اقرأ Y", "Read Y"), "caption": ch07Locale("قرأنا Y من النقطة.", "Read Y from the point.")},
+	},
+	"labels": map[string]any{
+		"object":  ch07Locale("حقول Point", "Point fields"),
+		"output":  ch07Locale("القيمة المقروءة", "Read value"),
+		"waiting": ch07Locale("اختار حقل تقراه.", "Choose a field to read."),
+	},
+}
+
+var ch07NavPointerConfig = map[string]any{
+	"start":     2,
+	"increment": 1,
+	"labels": map[string]any{
+		"position": ch07Locale("Nav.X", "Nav.X"),
+		"step":     ch07Locale("خطوة", "Step"),
+		"reset":    ch07Locale("من الأول", "Reset"),
+	},
+	"captions": map[string]any{
+		"ready":   ch07Locale("Nav لسه عند 2.", "Nav starts at 2."),
+		"updated": ch07Locale("الـpointer receiver غيّر الأصل.", "Pointer receiver changed the original."),
+		"reset":   ch07Locale("رجعنا لقيمة Nav الأصلية.", "Nav returned to its starting value."),
+	},
+}
+
+var ch07ManhattanConfig = map[string]any{
+	"initialX": 1,
+	"initialY": 2,
+	"labels": map[string]any{
+		"x":     ch07Locale("فرق X", "X gap"),
+		"y":     ch07Locale("فرق Y", "Y gap"),
+		"total": ch07Locale("مسافة Manhattan", "Manhattan distance"),
+		"addX":  ch07Locale("زوّد X", "Add X"),
+		"addY":  ch07Locale("زوّد Y", "Add Y"),
+		"reset": ch07Locale("من الأول", "Reset"),
+	},
+	"captions": map[string]any{
+		"ready": ch07Locale("المسافة بتجمع الفرقين.", "Distance adds both gaps."),
+		"x":     ch07Locale("فرق X زاد واحدة.", "The X gap grew by one."),
+		"y":     ch07Locale("فرق Y زاد واحدة.", "The Y gap grew by one."),
+		"reset": ch07Locale("رجعنا للفرقين الأولانيين.", "Both gaps returned to their starts."),
+	},
+}
+
+var ch07EmbeddedPackConfig = map[string]any{
+	"frames": []any{
+		map[string]any{"value": ch07Locale("Pack{Items: 4}", "Pack{Items: 4}"), "caption": ch07Locale("Pack بتجمع field واحدة.", "Pack groups one field.")},
+		map[string]any{"value": ch07Locale("Rover{Pack: Pack{Items: 4}}", "Rover{Pack: Pack{Items: 4}}"), "caption": ch07Locale("Rover بتعمل embed للـPack.", "Rover embeds the whole Pack.")},
+		map[string]any{"value": ch07Locale("Rover.Items → Pack.Items = 4", "Rover.Items → Pack.Items = 4"), "caption": ch07Locale("الـembedding بيرقّي اسم field.", "Embedding promotes the field.")},
+	},
+	"labels": map[string]any{
+		"previous": ch07Locale("السابق", "Previous"),
+		"next":     ch07Locale("التالي", "Next"),
+		"reset":    ch07Locale("من الأول", "Reset"),
+	},
+}
+
+var ch07RangeQuestionsConfig = map[string]any{
+	"questions": []any{
+		map[string]any{"index": 0, "prompt": ch07Locale("نوع التربة؟", "Soil type?"), "choices": 2, "caption": ch07Locale("range بيدي index وقيمة.", "range gives an index and value.")},
+		map[string]any{"index": 1, "prompt": ch07Locale("اتجاه الريح؟", "Wind direction?"), "choices": 0, "caption": ch07Locale("راجع Choices قبل أي index.", "Check Choices before indexing.")},
+	},
+	"labels": map[string]any{
+		"question": ch07Locale("السؤال", "Question"),
+		"choices":  ch07Locale("عدد الاختيارات", "Choice count"),
+		"previous": ch07Locale("السابق", "Previous"),
+		"next":     ch07Locale("التالي", "Next"),
+		"reset":    ch07Locale("من الأول", "Reset"),
+	},
+}
+
 func ch07Markdown(id, text string) LessonBlock {
 	return LessonBlock{ID: id, Kind: "markdown", Text: text}
 }
@@ -73,6 +159,7 @@ func main() {
 					{Line: 4, Caption: "الناتج هو X.", Variables: []LessonVariable{{Name: "p", Value: "{2 1}"}}, Output: "2"},
 				},
 			),
+			ch07Sandbox("c71.point-fields", "اضغط field وشوف قيمتها.", "ch07-point-fields", ch07PointFieldsConfig),
 		},
 	},
 	{
@@ -144,6 +231,7 @@ func main() {
 					{Line: 4, Caption: "The output is X.", Variables: []LessonVariable{{Name: "p", Value: "{2 1}"}}, Output: "2"},
 				},
 			),
+			ch07Sandbox("c71.point-fields", "Read a struct field.", "ch07-point-fields", ch07PointFieldsConfig),
 		},
 	},
 	{
@@ -220,6 +308,7 @@ func main() {
 					{Line: 6, Caption: "الناتج هو 5.", Variables: []LessonVariable{{Name: "g.N", Value: "5"}}, Output: "5"},
 				},
 			),
+			ch07Sandbox("c72.nav-pointer", "حرّك Nav وشوف القيمة الأصلية.", "ch07-nav-pointer", ch07NavPointerConfig),
 		},
 	},
 	{
@@ -296,6 +385,7 @@ func main() {
 					{Line: 6, Caption: "The output is 5.", Variables: []LessonVariable{{Name: "g.N", Value: "5"}}, Output: "5"},
 				},
 			),
+			ch07Sandbox("c72.nav-pointer", "Step Nav and watch its value.", "ch07-nav-pointer", ch07NavPointerConfig),
 		},
 	},
 	{
@@ -385,6 +475,7 @@ func main() {
 					{Line: 13, Caption: "الناتج يجمع 1 و2.", Variables: []LessonVariable{{Name: "a", Value: "{2 1}"}, {Name: "b", Value: "{3 3}"}}, Output: "3"},
 				},
 			),
+			ch07Sandbox("c73.manhattan", "زوّد فرقًا وشوف مسافة Manhattan.", "ch07-manhattan", ch07ManhattanConfig),
 		},
 	},
 	{
@@ -474,6 +565,7 @@ func main() {
 					{Line: 13, Caption: "The output adds 1 and 2.", Variables: []LessonVariable{{Name: "a", Value: "{2 1}"}, {Name: "b", Value: "{3 3}"}}, Output: "3"},
 				},
 			),
+			ch07Sandbox("c73.manhattan", "Change a gap; watch Manhattan distance.", "ch07-manhattan", ch07ManhattanConfig),
 		},
 	},
 	{
@@ -549,6 +641,7 @@ func main() {
 					{Line: 5, Caption: "The promoted field prints.", Variables: []LessonVariable{{Name: "r.Items", Value: "4"}}, Output: "4"},
 				},
 			),
+			ch07Sandbox("c74.embedded-pack", "اتبع embedding لحد field المرقّاة.", "ch07-embedded-pack", ch07EmbeddedPackConfig),
 		},
 	},
 	{
@@ -624,6 +717,7 @@ func main() {
 					{Line: 5, Caption: "The promoted field prints.", Variables: []LessonVariable{{Name: "r.Items", Value: "4"}}, Output: "4"},
 				},
 			),
+			ch07Sandbox("c74.embedded-pack", "Trace embedding.", "ch07-embedded-pack", ch07EmbeddedPackConfig),
 		},
 	},
 	{
@@ -702,6 +796,7 @@ func main() {
 					{Line: 4, Caption: "التالي index واحد.", Variables: []LessonVariable{{Name: "i", Value: "1"}, {Name: "label", Value: "B"}}, Output: "0 A\n1 B"},
 				},
 			),
+			ch07Sandbox("c75.range-questions", "تنقّل بين أسئلة range.", "ch07-range-questions", ch07RangeQuestionsConfig),
 		},
 	},
 	{
@@ -780,6 +875,7 @@ func main() {
 					{Line: 4, Caption: "The next index is one.", Variables: []LessonVariable{{Name: "i", Value: "1"}, {Name: "label", Value: "B"}}, Output: "0 A\n1 B"},
 				},
 			),
+			ch07Sandbox("c75.range-questions", "Step through range values.", "ch07-range-questions", ch07RangeQuestionsConfig),
 		},
 	},
 	{

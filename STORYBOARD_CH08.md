@@ -4,6 +4,8 @@ Each mission uses the approved six-step sequence: Mission, Idea, Try it, Watch o
 
 ## 8-1 — The Counter That Does Not Count
 
+**Playground:** Change a local copy, then compare a write through a pointer.
+
 **Word count:** Arabic 276; English 299. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
 
 **Six steps:** Mission compares collected crystal with the report; Idea traces a copied `int`; Try predicts pointer-based output before its trace; Watch out contrasts values and addresses; Think & check reviews parameter and call-site phases; Your turn returns to the starter function.
@@ -51,6 +53,8 @@ fmt.Println(x)
 **Try:** Predict the two prints when the value is read and then changed through a pointer; inspect the trace afterward.
 
 ## 8-2 — Cargo Runs
+
+**Playground:** Run value and pointer receivers against the same small value.
 
 **Word count:** Arabic 286; English 299. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
 
@@ -106,6 +110,8 @@ func main() {
 
 ## 8-3 — Radar
 
+**Playground:** Toggle a target and watch the nil guard choose a safe path.
+
 **Word count:** Arabic 277; English 267. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
 
 **Six steps:** Mission asks for every target; Idea traces a nil guard; Try predicts a valid-pointer result before its trace; Watch out states the radar's pointer and tick behavior; Think & check names scan, check, use, repeat; Your turn tests the starter with and without targets.
@@ -152,6 +158,8 @@ if p == nil {
 **Try:** Predict the guarded result when the pointer is valid. Mission notes identify `colony.Nearest()` as returning `*colony.Point`, or `nil`, and each radar query costs one tick.
 
 ## 8-4 — Cart Chain
+
+**Playground:** Follow a temporary pointer while the links stay fixed.
 
 **Word count:** Arabic 294; English 300. Counts include step titles, prose, captions, options, feedback, and three hints; excludes code.
 

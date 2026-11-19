@@ -6,6 +6,8 @@ Draft for `lessons-ch07`, 2026-11-18. The structured lessons use six steps per m
 
 Mission: visit the ordered point list. Idea: a struct groups exported coordinates. Try: predict a field read. Watch out: keep the supplied order and distinguish fields from slice indexes. Think: plan the phases of reaching and checking each point. Your turn: run a first attempt.
 
+Playground: click X or Y and watch one struct field appear.
+
 <!-- go-example id=e71-point-struct imports=fmt outcome=ok -->
 ```go
 type Point struct { X, Y int }
@@ -27,6 +29,8 @@ func main() {
 ## 7-2 — Navigation System
 
 Mission: harvest targets and leave decoys. Idea: a pointer receiver updates navigation state. Try: predict a method's effect. Watch out: movement and harvest cost ticks, including failed moves. Think: separate navigation from target handling. Your turn: compare tracked position with movement.
+
+Playground: step Nav and watch the original position update.
 
 <!-- go-example id=e72-pointer-method imports=fmt outcome=ok -->
 ```go
@@ -53,6 +57,8 @@ func main() {
 ## 7-3 — The Shortest Route
 
 Mission: choose a visit order for all targets. Idea: Manhattan distance counts grid moves. Try: predict a toy distance. Watch out: nearest-first is a heuristic, not an optimality guarantee. Think: compare, choose, update, repeat. Your turn: inspect total travel.
+
+Playground: increase either coordinate gap and watch the total distance.
 
 <!-- go-example id=e73-manhattan-distance imports=fmt outcome=ok -->
 ```go
@@ -94,6 +100,8 @@ func main() {
 
 Mission: embed invoice data and return a shares slice. Idea: embedding promotes a field; a method can read it. Try: predict direct field access. Watch out: preserve any remainder. Think: represent, calculate, and check the total. Your turn: compare the report with the input total.
 
+Playground: follow an embedded Pack to its promoted field.
+
 <!-- go-example id=e74-promoted-method imports=fmt outcome=ok -->
 ```go
 type Cargo struct { Units int }
@@ -118,6 +126,8 @@ func main() {
 ## 7-5 — Crew Exam
 
 Mission: answer usable crop questions and report the correct share. Idea: questions are structs; range preserves an index. Try: predict index/value output. Watch out: skip an empty choices slice; Answer validates indices only. Think: inspect, choose, record, score. Your turn: run a small loop.
+
+Playground: step through illustrative questions and inspect each range index.
 
 <!-- go-example id=e75-question-struct imports=fmt outcome=ok -->
 ```go

@@ -2,6 +2,7 @@ package levels
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -50,6 +51,11 @@ func TestCh07Lessons(t *testing.T) {
 				if block.ID != other.ID || block.Kind != other.Kind {
 					t.Errorf("%s: Arabic and English block identities differ", block.ID)
 				}
+				if block.Sandbox != nil {
+					if other.Sandbox == nil || block.Sandbox.Kind != other.Sandbox.Kind || !reflect.DeepEqual(block.Sandbox.Config, other.Sandbox.Config) {
+						t.Errorf("%s: sandbox config differs across languages", block.ID)
+					}
+				}
 				if block.Question != nil {
 					if other.Question == nil || block.Question.Answer != other.Question.Answer || len(block.Question.Options) != len(other.Question.Options) {
 						t.Errorf("%s: question answer or option count differs", block.ID)
@@ -76,6 +82,7 @@ func TestCh07Lessons(t *testing.T) {
 func ch07ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints, titles []string, mission int, hintLabels []string, minWords, maxWords int) {
 	t.Helper()
 	seen := map[string]bool{}
+	sandboxCount := 0
 	claim := func(id string) {
 		if id == "" || seen[id] {
 			t.Errorf("%s: empty or duplicate ID %q", name, id)
@@ -121,10 +128,18 @@ func ch07ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 					continue
 				}
 				words += ch07ValidateFrames(t, name, block)
+			case "sandbox":
+				sandboxCount++
+				if block.Sandbox == nil || !strings.HasPrefix(block.Sandbox.Kind, "ch07-") || len(block.Sandbox.Config) == 0 {
+					t.Errorf("%s: %s has an invalid chapter 7 sandbox", name, block.ID)
+				}
 			default:
 				t.Errorf("%s: %s uses disallowed block kind %q", name, block.ID, block.Kind)
 			}
 		}
+	}
+	if sandboxCount != 1 {
+		t.Errorf("%s: expected exactly one chapter 7 sandbox, got %d", name, sandboxCount)
 	}
 	if len(hints) != 3 || len(hintLabels) != 3 {
 		t.Errorf("%s: expected three position-labelled hints", name)
@@ -138,8 +153,8 @@ func ch07ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 	}
 	if len(steps) > 2 {
 		try := steps[2]
-		if len(try.Blocks) != 2 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" {
-			t.Errorf("%s: Try it must predict first, then reveal with a walkthrough", name)
+		if len(try.Blocks) != 3 || try.Blocks[0].Kind != "question" || try.Blocks[1].Kind != "walkthrough" || try.Blocks[2].Kind != "sandbox" {
+			t.Errorf("%s: Try it must predict, reveal, then show one sandbox", name)
 		} else if strings.TrimSpace(ch07QuestionCode(try.Blocks[0].Text)) != strings.TrimSpace(try.Blocks[1].Code) {
 			t.Errorf("%s: prediction example differs from its walkthrough reveal", name)
 		}
@@ -148,6 +163,57 @@ func ch07ValidateLessonCopy(t *testing.T, name string, steps []LessonStep, hints
 		t.Errorf("%s: learner text has %d words; want %d-%d", name, words, minWords, maxWords)
 	}
 	t.Logf("%s learner-authored words: %d", name, words)
+}
+
+func TestCh07SandboxConfigsMatchFixtures(t *testing.T) {
+	body, err := os.ReadFile(filepath.Join("..", "..", "web", "sandbox", "ch07.fixtures.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]any
+	if err := json.Unmarshal(body, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+
+	kinds := map[string]bool{}
+	for _, id := range []string{"7-1-waypoints", "7-2-nav-system", "7-3-shortest-route", "7-4-composite-units", "7-5-crew-exam"} {
+		level := Get(id)
+		if level == nil || level.En == nil {
+			t.Fatalf("%s: missing bilingual level", id)
+		}
+		for _, steps := range [][]LessonStep{level.Steps, level.En.Steps} {
+			count := 0
+			for stepIndex, step := range steps {
+				for blockIndex, block := range step.Blocks {
+					if block.Sandbox == nil {
+						continue
+					}
+					count++
+					if stepIndex != 2 || blockIndex != len(step.Blocks)-1 {
+						t.Errorf("%s: sandbox must follow the Try it question and walkthrough", id)
+					}
+					kinds[block.Sandbox.Kind] = true
+					body, err := json.Marshal(block.Sandbox.Config)
+					if err != nil {
+						t.Fatal(err)
+					}
+					var normalized map[string]any
+					if err := json.Unmarshal(body, &normalized); err != nil {
+						t.Fatal(err)
+					}
+					if !reflect.DeepEqual(normalized, fixtures[block.Sandbox.Kind]) {
+						t.Errorf("%s: config for %s differs from its JS fixture", id, block.Sandbox.Kind)
+					}
+				}
+			}
+			if count != 1 {
+				t.Errorf("%s: expected one sandbox in each language, got %d", id, count)
+			}
+		}
+	}
+	if len(kinds) != len(fixtures) {
+		t.Errorf("found %d sandbox kinds but %d fixture entries", len(kinds), len(fixtures))
+	}
 }
 
 func ch07QuestionCode(text string) string {

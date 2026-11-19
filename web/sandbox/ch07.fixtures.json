@@ -1,0 +1,99 @@
+{
+  "ch07-point-fields": {
+    "fields": [
+      {
+        "name": { "ar": "X", "en": "X" },
+        "value": 3,
+        "read": { "ar": "اقرأ X", "en": "Read X" },
+        "caption": { "ar": "قرأنا X من النقطة.", "en": "Read X from the point." }
+      },
+      {
+        "name": { "ar": "Y", "en": "Y" },
+        "value": 1,
+        "read": { "ar": "اقرأ Y", "en": "Read Y" },
+        "caption": { "ar": "قرأنا Y من النقطة.", "en": "Read Y from the point." }
+      }
+    ],
+    "labels": {
+      "object": { "ar": "حقول Point", "en": "Point fields" },
+      "output": { "ar": "القيمة المقروءة", "en": "Read value" },
+      "waiting": { "ar": "اختار حقل تقراه.", "en": "Choose a field to read." }
+    }
+  },
+  "ch07-nav-pointer": {
+    "start": 2,
+    "increment": 1,
+    "labels": {
+      "position": { "ar": "Nav.X", "en": "Nav.X" },
+      "step": { "ar": "خطوة", "en": "Step" },
+      "reset": { "ar": "من الأول", "en": "Reset" }
+    },
+    "captions": {
+      "ready": { "ar": "Nav لسه عند 2.", "en": "Nav starts at 2." },
+      "updated": { "ar": "الـpointer receiver غيّر الأصل.", "en": "Pointer receiver changed the original." },
+      "reset": { "ar": "رجعنا لقيمة Nav الأصلية.", "en": "Nav returned to its starting value." }
+    }
+  },
+  "ch07-manhattan": {
+    "initialX": 1,
+    "initialY": 2,
+    "labels": {
+      "x": { "ar": "فرق X", "en": "X gap" },
+      "y": { "ar": "فرق Y", "en": "Y gap" },
+      "total": { "ar": "مسافة Manhattan", "en": "Manhattan distance" },
+      "addX": { "ar": "زوّد X", "en": "Add X" },
+      "addY": { "ar": "زوّد Y", "en": "Add Y" },
+      "reset": { "ar": "من الأول", "en": "Reset" }
+    },
+    "captions": {
+      "ready": { "ar": "المسافة بتجمع الفرقين.", "en": "Distance adds both gaps." },
+      "x": { "ar": "فرق X زاد واحدة.", "en": "The X gap grew by one." },
+      "y": { "ar": "فرق Y زاد واحدة.", "en": "The Y gap grew by one." },
+      "reset": { "ar": "رجعنا للفرقين الأولانيين.", "en": "Both gaps returned to their starts." }
+    }
+  },
+  "ch07-embedded-pack": {
+    "frames": [
+      {
+        "value": { "ar": "Pack{Items: 4}", "en": "Pack{Items: 4}" },
+        "caption": { "ar": "Pack بتجمع field واحدة.", "en": "Pack groups one field." }
+      },
+      {
+        "value": { "ar": "Rover{Pack: Pack{Items: 4}}", "en": "Rover{Pack: Pack{Items: 4}}" },
+        "caption": { "ar": "Rover بتعمل embed للـPack.", "en": "Rover embeds the whole Pack." }
+      },
+      {
+        "value": { "ar": "Rover.Items → Pack.Items = 4", "en": "Rover.Items → Pack.Items = 4" },
+        "caption": { "ar": "الـembedding بيرقّي اسم field.", "en": "Embedding promotes the field." }
+      }
+    ],
+    "labels": {
+      "previous": { "ar": "السابق", "en": "Previous" },
+      "next": { "ar": "التالي", "en": "Next" },
+      "reset": { "ar": "من الأول", "en": "Reset" }
+    }
+  },
+  "ch07-range-questions": {
+    "questions": [
+      {
+        "index": 0,
+        "prompt": { "ar": "نوع التربة؟", "en": "Soil type?" },
+        "choices": 2,
+        "caption": { "ar": "range بيدي index وقيمة.", "en": "range gives an index and value." }
+      },
+      {
+        "index": 1,
+        "prompt": { "ar": "اتجاه الريح؟", "en": "Wind direction?" },
+        "choices": 0,
+        "caption": { "ar": "راجع Choices قبل أي index.", "en": "Check Choices before indexing." }
+      }
+    ],
+    "labels": {
+      "question": { "ar": "السؤال", "en": "Question" },
+      "choices": { "ar": "عدد الاختيارات", "en": "Choice count" },
+      "previous": { "ar": "السابق", "en": "Previous" },
+      "next": { "ar": "التالي", "en": "Next" },
+      "reset": { "ar": "من الأول", "en": "Reset" }
+    }
+  }
+}
