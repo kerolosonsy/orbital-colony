@@ -592,6 +592,7 @@ async function formatEditor() {
   applyEdit({ from: 0, to: before.length, text: r.code, selStart: caret, selEnd: caret });
   log(T("الكود اتنسّق بـ gofmt.", "Formatted with gofmt."), "c-info");
 }
+$("#btn-format").onclick = () => { formatEditor(); ed.focus(); };
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }
   if (e.shiftKey && e.altKey && !e.metaKey && !e.ctrlKey && e.code === "KeyF") { e.preventDefault(); formatEditor(); return; }
