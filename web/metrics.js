@@ -190,6 +190,9 @@
       detail.textContent = T(`درجة ${score} · ${failures} فشل · ${entry.hintCount} تلميح · ${formatActive(entry.activeTimeMs)}`,
         `Score ${score} · ${failures} failed · ${entry.hintCount} hints · ${formatActive(entry.activeTimeMs)}`);
       row.append(title, detail);
+      row.dataset.level = id; // the stats sheet opens the mission on click
+      row.tabIndex = 0;
+      row.setAttribute("role", "button");
       root.appendChild(row);
     });
   }

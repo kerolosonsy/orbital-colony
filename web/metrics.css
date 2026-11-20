@@ -17,3 +17,7 @@
   .metrics-menu-actions .tool { padding-inline: 8px; }
   .metrics-chapters { grid-template-columns: 1fr; }
 }
+
+/* struggle rows open their mission */
+.metrics-struggles li[data-level] { cursor: pointer; border-radius: 6px; }
+.metrics-struggles li[data-level]:hover { background: color-mix(in srgb, var(--paper) 6%, transparent); }

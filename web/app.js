@@ -1930,6 +1930,17 @@ $("#btn-stats").onclick = async () => {
     { levels: S.levels, chapters: S.chapters });
   await refreshLearningStats();
 };
+// a struggle row opens that mission to practise it again
+function openStruggle(event) {
+  const row = event.target.closest("li[data-level]");
+  if (!row || (event.type === "keydown" && event.key !== "Enter" && event.key !== " ")) return;
+  event.preventDefault();
+  if (S.running || !unlocked(idx(row.dataset.level))) return;
+  closeOverlay($("#metrics"));
+  loadLevel(row.dataset.level);
+}
+$("#metrics-struggles").addEventListener("click", openStruggle);
+$("#metrics-struggles").addEventListener("keydown", openStruggle);
 $("#btn-metrics-export").onclick = () => {
   const blob = new Blob([JSON.stringify(LearningMetrics.normalizeMetrics(store.blob.metrics), null, 2)], { type: "application/json" });
   const link = document.createElement("a");

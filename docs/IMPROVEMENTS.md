@@ -98,3 +98,4 @@ Each entry: what changed and why. Numbered in the order they landed.
 94. **Error count with advice** — when a build has several errors, the console headline says how many and to start with the first (later errors are often caused by it). Also checked the whole new UI in English mode (title, shortcuts sheet, search placeholder, format tooltip, intro line).
 95. **`make doctor` checks Node** — reports the Node version needed by `make test-web` (or that it's only needed for those tests).
 96. **Read-only files say so when you type** — typing into a lab's read-only file (e.g. hidden tests) did nothing without explanation; the editor header now says the file is read-only and to edit another tab.
+97. **Stats open the mission** — rows in "My stats" (missions you struggled with) are clickable/Enter-able and open that mission to practise it again. Verified live.
