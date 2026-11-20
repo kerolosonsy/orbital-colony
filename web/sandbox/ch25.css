@@ -6,13 +6,13 @@
 .lesson-sandbox.ch25-atomic-counter,
 .lesson-sandbox.ch25-closed-drain {
   box-sizing: border-box;
-  inline-size: min(100%, 290px);
+  inline-size: 100%;
   margin-block: 0.65rem;
   padding: 0.65rem;
-  border: 1px solid var(--border, #b7c7d4);
+  border: 1px solid var(--rule);
   border-radius: 0.7rem;
-  background: var(--surface, #f7fafc);
-  color: var(--text, #173042);
+  background: var(--ink-2);
+  color: var(--paper);
   font-size: 0.9rem;
   line-height: 1.35;
 }
@@ -26,9 +26,9 @@
   margin-block: 0.2rem;
   margin-inline-end: 0.25rem;
   padding: 0.35rem 0.55rem;
-  border: 1px solid var(--border, #9aafbf);
+  border: 1px solid var(--rule);
   border-radius: 0.45rem;
-  background: var(--surface, #fff);
+  background: var(--ink-2);
   color: inherit;
   font: inherit;
   cursor: pointer;
@@ -41,7 +41,7 @@
 .lesson-sandbox.ch25-atomic-counter button:focus-visible,
 .lesson-sandbox.ch25-closed-drain button:focus-visible,
 .lesson-sandbox.ch25-token-clock input:focus-visible {
-  outline: 2px solid var(--accent, #146c94);
+  outline: 2px solid var(--regolith);
   outline-offset: 2px;
 }
 

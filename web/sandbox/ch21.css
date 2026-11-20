@@ -3,7 +3,7 @@
 .lesson-sandbox.ch21-injected-draw,
 .lesson-sandbox.ch21-maneuver-values {
   box-sizing: border-box;
-  max-width: 290px;
+  max-width: 100%;
   min-width: 0;
   overflow-wrap: anywhere;
 }

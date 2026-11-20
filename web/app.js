@@ -1283,7 +1283,7 @@ function draw(now) {
     if (W.live) { const kk = Math.min(1, (now - (d.t0 || 0)) / (W.liveStep || 260)); ee = 1 - Math.pow(1 - kk, 3); }
     const dx = d.px + (d.x - d.px) * ee, dy = d.py + (d.y - d.py) * ee;
     let shake = 0;
-    if (d.bump > 0) { shake = Math.sin(now / 18) * G.hw * 0.08 * d.bump; d.bump = Math.max(0, d.bump - 0.05); }
+    if (d.bump > 0) { shake = Math.sin(now / 18) * G.hw * 0.08 * d.bump; d.bump = Math.max(0, d.bump - 0.05 * frameK); }
     const h = lifts[Math.round(dx) + "," + Math.round(dy)] || 0;
     const [X, Y] = tileTop(G, dx + 0.5, dy + 0.5, h);
     drawDrone(G, X + shake, Y, now, id);
@@ -1299,7 +1299,7 @@ function draw(now) {
   const u = Math.max(2, Math.round(G.hw / 8));
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-    p.life -= 0.03; p.vh -= 0.1; p.h += p.vh; p.tx += p.vx; p.ty += p.vy;
+    p.life -= 0.03 * frameK; p.vh -= 0.1 * frameK; p.h += p.vh * frameK; p.tx += p.vx * frameK; p.ty += p.vy * frameK;
     if (p.h < 0) { p.h = 0; p.vh *= -0.3; }
     if (p.life <= 0) { particles.splice(i, 1); continue; }
     const base = lifts[Math.floor(p.tx) + "," + Math.floor(p.ty)] || 0;
@@ -1333,7 +1333,7 @@ function draw(now) {
   // floating labels
   for (let i = fx.length - 1; i >= 0; i--) {
     const f = fx[i];
-    f.age += 16;
+    f.age += 16 * frameK;
     if (f.age > 1100) { fx.splice(i, 1); continue; }
     const h = lifts[f.x + "," + f.y] || 0;
     const [X, Y] = tileTop(G, f.x + 0.5, f.y + 0.5, h + G.hw * 0.9 + f.age / 30);
@@ -1554,10 +1554,12 @@ $("#btn-skip").onclick = () => {
 };
 
 let lastT = performance.now();
+let frameK = 1; // this frame's length in 60fps frames, so effects run at the same speed on any refresh rate
 function frame(now) {
   requestAnimationFrame(frame);
-  const dt = now - lastT;
+  const dt = Math.min(now - lastT, 100); // a hidden tab must not replay its whole absence at once
   lastT = now;
+  frameK = dt / (1000 / 60);
   try { tick(dt); } catch (e) { console.error(e); finishPlayback(); }
   try { draw(now); } catch (e) { console.error(e); }
 }
@@ -1820,7 +1822,6 @@ function renderMissions() {
     row.className = "quad-row" + (anyOpen ? "" : " locked");
     const unit = CHAPTER_UNITS[(ch.n - 1) % CHAPTER_UNITS.length];
     row.style.setProperty("--unit", unit);
-    row.style.setProperty("--fill", `radial-gradient(#0000002e 1px, transparent 1.5px) 0 0 / 6px 6px, ${unit}`);
     row.innerHTML = `<div class="quad-name"><span class="quad-num">${ch.n}</span><div><b>${esc(ch.title)}</b><small>${esc(ch.concept)}</small></div></div>`;
     const cells = document.createElement("div");
     cells.className = "quad-cells";
@@ -2366,8 +2367,8 @@ $("#btn-tour").onclick = () => maybeTour(true);
 // tourRect finds a tour target on screen: an element, a map tile or an editor line.
 function tourRect(at) {
   if (typeof at === "string") {
-    const el = document.querySelector(at);
-    if (!el || !el.getClientRects().length) return null;
+    const el = [...document.querySelectorAll(at)].find(e => e.getClientRects().length);
+    if (!el) return null;
     el.scrollIntoView({ block: "nearest", inline: "nearest" });
     const r = el.getBoundingClientRect();
     return r.width && r.height ? r : null;

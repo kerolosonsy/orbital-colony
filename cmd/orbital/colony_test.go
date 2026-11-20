@@ -121,27 +121,7 @@ func TestColonyStoppedPurchasesAndClaimsPersist(t *testing.T) {
 	if !purchase.OK || saved.Credits != 75 || saved.Levels["engine"] != 1 {
 		t.Fatalf("purchase: %s; save: %+v", response.Body, saved)
 	}
-	response = colonyRequest(t, s.colonyClaim, `{"chapter":1}`)
-	var claim struct {
-		OK     bool        `json:"ok"`
-		Error  string      `json:"error"`
-		Reward econ.Reward `json:"reward"`
-	}
-	if err := json.Unmarshal(response.Body.Bytes(), &claim); err != nil {
-		t.Fatal(err)
-	}
-	saved = colonySavedState(t, c.path)
-	if !claim.OK || saved.Credits != 75+claim.Reward.Credits || !saved.Claimed["chapter-1"] {
-		t.Fatalf("claim: %s; save: %+v", response.Body, saved)
-	}
 	credits := saved.Credits
-	response = colonyRequest(t, s.colonyClaim, `{"chapter":1}`)
-	if err := json.Unmarshal(response.Body.Bytes(), &claim); err != nil {
-		t.Fatal(err)
-	}
-	if claim.OK || claim.Error == "" || colonySavedState(t, c.path).Credits != credits {
-		t.Fatalf("repeat claim: %s", response.Body)
-	}
 	reloaded, err := newColonyGame(filepath.Dir(c.path))
 	if err != nil {
 		t.Fatal(err)

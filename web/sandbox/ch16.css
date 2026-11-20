@@ -1,7 +1,7 @@
 .lesson-sandbox.ch16-lab-trace {
   box-sizing: border-box;
   inline-size: 100%;
-  max-inline-size: 290px;
+  max-inline-size: 100%;
   padding: 8px;
   border: 1px solid var(--rule-strong);
   background: var(--sheet);

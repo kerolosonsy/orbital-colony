@@ -2,12 +2,12 @@
   box-sizing: border-box;
   display: grid;
   gap: 0.45rem;
-  width: min(100%, 282px);
+  width: 100%;
   padding: 0.65rem;
-  border: 1px solid var(--line, #ccd6db);
+  border: 1px solid var(--rule);
   border-radius: 0.65rem;
-  background: var(--surface, #f8fbfc);
-  color: var(--ink, #19323c);
+  background: var(--ink-2);
+  color: var(--paper);
   font-size: 0.88rem;
 }
 
@@ -21,7 +21,7 @@
 .ch13-note {
   padding: 0.35rem 0.45rem;
   border-radius: 0.35rem;
-  background: var(--surface-raised, #fff);
+  background: var(--sheet-2);
 }
 
 .ch13-code,
@@ -44,9 +44,9 @@
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.35rem 0.45rem;
-  border: 1px solid var(--line, #ccd6db);
+  border: 1px solid var(--rule);
   border-radius: 0.35rem;
-  background: var(--surface-raised, #fff);
+  background: var(--sheet-2);
 }
 
 .ch13-worker bdi {
@@ -74,8 +74,8 @@
 
 .ch13-chain-frame .current {
   display: block;
-  border-inline-start: 3px solid var(--accent, #159879);
-  background: #e9f6f2;
+  border-inline-start: 3px solid var(--regolith);
+  background: color-mix(in oklab, var(--regolith) 18%, var(--ink-2));
 }
 
 .ch13-counter {

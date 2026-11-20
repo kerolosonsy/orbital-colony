@@ -245,6 +245,7 @@ type World struct {
 	Realtime     bool          // ticks follow wall-clock time, so goroutines run in parallel
 	Unit         time.Duration // wall-clock length of one tick in realtime mode
 	Drones       []*Drone
+	handed       int // colony: restored drones already returned by Spawn
 	Storm        *Storm
 	Recall       *Recall
 	Scans        map[Point]ScanInfo // deep-scan behaviour per crystal
@@ -861,5 +862,8 @@ func (w *World) WaypointList() []Point {
 func (w *World) TargetList() []Point {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	return append([]Point(nil), w.Targets...)
+	if w.gate("api.radar") != "" {
+		return nil
+	}
+	return append([]Point(nil), w.radarTargets()...)
 }

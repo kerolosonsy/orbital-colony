@@ -1,9 +1,9 @@
 .lesson-sandbox.ch31-sandbox {
   box-sizing: border-box;
   width: 100%;
-  max-width: 290px;
+  max-width: 100%;
   padding: 10px;
-  border: 1px solid var(--line, #cbd5e1);
+  border: 1px solid var(--rule);
   border-radius: 10px;
   direction: inherit;
   text-align: start;

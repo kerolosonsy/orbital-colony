@@ -29,7 +29,7 @@ test("tour targets exist and typing anchors match the starter code", () => {
   for (const id of FIRST) {
     const lines = starter(id).split("\n");
     for (const step of stepsFor(id)) {
-      if (typeof step.at === "string") assert.match(html, new RegExp(`id="${step.at.slice(1)}"|class="${step.at.slice(1)}"`), `${id}: ${step.at}`);
+      if (typeof step.at === "string") for (const sel of step.at.split(",").map((s) => s.trim())) assert.match(html, new RegExp(`id="${sel.slice(1)}"|class="${sel.slice(1)}"`), `${id}: ${sel}`);
       if (step.at?.line) assert.ok(lines[step.at.line - 1] !== undefined, `${id}: line ${step.at.line}`);
       if (step.act) assert.ok(starter(id).includes(step.act.after), `${id}: anchor ${JSON.stringify(step.act.after)}`);
     }

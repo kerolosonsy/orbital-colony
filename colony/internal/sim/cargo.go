@@ -97,6 +97,7 @@ func (w *World) loadFleet() {
 	}
 	d := w.Drones[0]
 	w.X, w.Y, w.Z, w.Cargo = d.X, d.Y, d.Z, d.Cargo
+	w.handed = 1
 }
 
 func (w *World) syncInfrastructure() {

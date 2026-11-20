@@ -480,6 +480,7 @@ func (s *server) colonyClaim(w http.ResponseWriter, r *http.Request) {
 		requestError(w, r, "unknown chapter", 400)
 		return
 	}
+	lang, done := requestLang(r), s.chaptersDone(r)
 	s.colonyOps.Lock()
 	defer s.colonyOps.Unlock()
 	c := s.requestGame(w, r)
@@ -494,10 +495,19 @@ func (s *server) colonyClaim(w http.ResponseWriter, r *http.Request) {
 		requestError(w, r, "Stop the colony first", http.StatusConflict)
 		return
 	}
-	reward, err := c.state.Claim(req.Chapter)
+	var reward econ.Reward
+	var err error
+	switch {
+	case !done[req.Chapter]:
+		err = errors.New(tr(lang, fmt.Sprintf("خلّص الفصل %d الأول", req.Chapter), fmt.Sprintf("Finish chapter %d first", req.Chapter)))
+	case c.season != nil:
+		err = errors.New(tr(lang, "مكافآت الفصول مقفولة أثناء الموسم", "Chapter rewards are closed during a season"))
+	default:
+		reward, err = c.state.Claim(req.Chapter)
+	}
 	message := ""
 	if err != nil {
-		message = economyText(requestLang(r), err.Error())
+		message = economyText(lang, err.Error())
 	} else if err = c.persist(); err != nil {
 		requestError(w, r, err.Error(), 500)
 		return

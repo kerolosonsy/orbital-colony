@@ -112,3 +112,47 @@ func TestContractRequirementAlternatives(t *testing.T) {
 		t.Fatalf("missing alternatives = %v", m)
 	}
 }
+
+func TestColonyClaimNeedsFinishedChapter(t *testing.T) {
+	s, _ := profileServer(t)
+	if _, err := s.profiles.ensureDefault(); err != nil {
+		t.Fatal(err)
+	}
+	claim := func() (ok bool, errText string) {
+		t.Helper()
+		recorder := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "http://localhost/", strings.NewReader(`{"chapter":1}`))
+		req.Header.Set("X-Orbital-Lang", "en")
+		s.colonyClaim(recorder, req)
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("HTTP %d: %s", recorder.Code, recorder.Body)
+		}
+		var reply struct {
+			OK    bool   `json:"ok"`
+			Error string `json:"error"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &reply); err != nil {
+			t.Fatal(err)
+		}
+		return reply.OK, reply.Error
+	}
+	if ok, msg := claim(); ok || msg != "Finish chapter 1 first" {
+		t.Fatalf("unfinished chapter claimed: %v %q", ok, msg)
+	}
+	records := map[string]map[string]int{}
+	for _, l := range levels.All {
+		if l.Chapter == 1 {
+			records[l.ID] = map[string]int{"stars": 1}
+		}
+	}
+	blob, _ := json.Marshal(map[string]any{"progress": records})
+	if err := os.WriteFile(filepath.Join(s.profiles.dir("default"), "progress.json"), blob, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if ok, msg := claim(); !ok {
+		t.Fatalf("finished chapter refused: %q", msg)
+	}
+	if ok, _ := claim(); ok {
+		t.Fatal("chapter claimed twice")
+	}
+}

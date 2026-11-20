@@ -2,12 +2,12 @@
   box-sizing: border-box;
   display: grid;
   gap: 0.45rem;
-  width: min(100%, 282px);
+  width: 100%;
   padding: 0.65rem;
-  border: 1px solid var(--line, #ccd6db);
+  border: 1px solid var(--rule);
   border-radius: 0.65rem;
-  background: var(--surface, #f8fbfc);
-  color: var(--ink, #19323c);
+  background: var(--ink-2);
+  color: var(--paper);
   font-size: 0.88rem;
 }
 
@@ -21,7 +21,7 @@
 .ch14-section-label {
   padding: 0.35rem 0.45rem;
   border-radius: 0.35rem;
-  background: var(--surface-raised, #fff);
+  background: var(--sheet-2);
 }
 
 .ch14-code,
@@ -48,18 +48,18 @@
   min-width: 2rem;
   justify-content: center;
   padding: 0.35rem 0.5rem;
-  border: 1px solid var(--line, #ccd6db);
+  border: 1px solid var(--rule);
   border-radius: 0.35rem;
-  background: var(--surface-raised, #fff);
+  background: var(--sheet-2);
 }
 
 .ch14-value.current {
-  outline: 2px solid var(--accent, #159879);
+  outline: 2px solid var(--regolith);
 }
 
 .ch14-value.best,
 .ch14-result.accepted {
-  background: #e3f2ed;
+  background: color-mix(in oklab, var(--ok) 20%, var(--ink-2));
 }
 
 .ch14-result {
@@ -69,7 +69,7 @@
 }
 
 .ch14-result.rejected {
-  background: #f7e8e8;
+  background: color-mix(in oklab, var(--err) 20%, var(--ink-2));
 }
 
 .ch14-controls {
@@ -98,7 +98,7 @@
 .ch14-call-stack li {
   padding: 0.25rem 0.4rem;
   border-radius: 0.3rem;
-  background: var(--surface-raised, #fff);
+  background: var(--sheet-2);
 }
 
 .ch14-empty {

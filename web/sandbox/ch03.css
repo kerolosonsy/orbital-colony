@@ -2,7 +2,7 @@
 .ch03-nested-grid,
 .ch03-condition-loop {
   box-sizing: border-box;
-  inline-size: min(100%, 290px);
+  inline-size: 100%;
   min-inline-size: 0;
   padding: 10px;
   border: 1px solid var(--rule);

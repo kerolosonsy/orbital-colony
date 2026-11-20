@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
@@ -235,8 +236,8 @@ func writeJSON(w http.ResponseWriter, v any) {
 var levelsCache sync.Map // lang -> cachedJSON
 
 type cachedJSON struct {
-	body []byte
-	etag string
+	body, gz []byte
+	etag     string
 }
 
 func (s *server) levels(w http.ResponseWriter, r *http.Request) {
@@ -249,7 +250,12 @@ func (s *server) levels(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		sum := sha256.Sum256(body)
-		entry, _ = levelsCache.LoadOrStore(lang, cachedJSON{body: append(body, '\n'), etag: `"` + hex.EncodeToString(sum[:8]) + `"`})
+		body = append(body, '\n')
+		var gz bytes.Buffer
+		zw := gzip.NewWriter(&gz)
+		zw.Write(body)
+		zw.Close()
+		entry, _ = levelsCache.LoadOrStore(lang, cachedJSON{body: body, gz: gz.Bytes(), etag: `"` + hex.EncodeToString(sum[:8]) + `"`})
 	}
 	cached := entry.(cachedJSON)
 	w.Header().Set("Cache-Control", "no-cache")
@@ -259,6 +265,12 @@ func (s *server) levels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Vary", "Accept-Encoding")
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Write(cached.gz)
+		return
+	}
 	w.Write(cached.body)
 }
 
@@ -274,7 +286,12 @@ func levelsPayload(r *http.Request) map[string]any {
 	}
 	missions := make([]*levels.Level, len(levels.All))
 	for i, l := range levels.All {
-		missions[i] = levelForLang(l, requestLang(r))
+		m := *levelForLang(l, requestLang(r))
+		m.En = nil // already localized above; the client needs only one language
+		if len(m.Steps) > 0 {
+			m.Lesson = "" // the client shows Steps instead of the old lesson text
+		}
+		missions[i] = &m
 	}
 	if requestLang(r) == "en" {
 		for i := range chapters {

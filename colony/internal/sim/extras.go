@@ -46,23 +46,40 @@ func (w *World) Nearest(id int) (p *Point) {
 		if m := w.gate("api.radar"); m != "" {
 			return false, m, false
 		}
-		here, best := Point{w.X, w.Y}, -1
-		for i, t := range w.Targets {
+		here, best, targets := Point{w.X, w.Y}, -1, w.radarTargets()
+		for i, t := range targets {
 			if w.AtZ(t.X, t.Y, w.Z).Entity != Crystal {
 				continue
 			}
-			if best < 0 || Dist(here, t) < Dist(here, w.Targets[best]) {
+			if best < 0 || Dist(here, t) < Dist(here, targets[best]) {
 				best = i
 			}
 		}
 		if best >= 0 {
-			q := w.Targets[best]
+			q := targets[best]
 			p = &q
 			return true, "", false
 		}
 		return true, say("مفيش أهداف فاضلة (nil)", "No targets left (nil)"), false
 	})
 	return p
+}
+
+// radarTargets is what the radar sees: the mission's targets, or in the
+// open colony every crystal on the current layer. Callers hold w.mu.
+func (w *World) radarTargets() []Point {
+	if w.Econ == nil {
+		return w.Targets
+	}
+	var ps []Point
+	for y := 0; y < w.H; y++ {
+		for x := 0; x < w.W; x++ {
+			if w.AtZ(x, y, w.Z).Entity == Crystal {
+				ps = append(ps, Point{x, y})
+			}
+		}
+	}
+	return ps
 }
 
 // Peek reads a tile for the autopilot without spending a tick.
@@ -96,6 +113,13 @@ func (w *World) Spawn() int {
 			return -1
 		}
 	}
+	if w.Econ != nil && w.handed < len(w.Drones) {
+		// a restarted colony gets its saved drones back before new ones
+		d := w.Drones[w.handed]
+		w.handed++
+		w.emit(Event{Op: "spawn", T: w.Tick, D: d.ID, OK: true, X: d.X, Y: d.Y, Msg: sayf("🚁 درون %d رجع", "🚁 Drone %d is back", d.ID)})
+		return d.ID
+	}
 	if len(w.Drones) >= max(1, w.MaxDrones) {
 		return -1
 	}
@@ -105,6 +129,7 @@ func (w *World) Spawn() int {
 	}
 	d := &Drone{ID: len(w.Drones), X: w.Base.X, Y: w.Base.Y, Battery: 100, Hold: map[string]float64{}}
 	w.Drones = append(w.Drones, d)
+	w.handed = len(w.Drones)
 	if w.Econ != nil {
 		w.syncInfrastructure()
 	}

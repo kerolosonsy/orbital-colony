@@ -3,7 +3,7 @@
 .lesson-sandbox.ch12-deadlock-order {
   box-sizing: border-box;
   inline-size: 100%;
-  max-inline-size: 290px;
+  max-inline-size: 100%;
   padding: 9px;
   border: 1px solid var(--rule-strong);
   border-radius: 8px;

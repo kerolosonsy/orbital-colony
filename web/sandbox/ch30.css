@@ -1,11 +1,11 @@
 .ch30-playground {
   box-sizing: border-box;
-  inline-size: min(100%, 290px);
-  max-inline-size: 290px;
+  inline-size: 100%;
+  max-inline-size: 100%;
   padding: 0.7rem;
-  border: 1px solid var(--lesson-border, #cbd5e1);
+  border: 1px solid var(--rule);
   border-radius: 0.7rem;
-  background: var(--lesson-surface, #fff);
+  background: var(--ink-2);
   text-align: start;
 }
 
@@ -24,7 +24,7 @@
 .ch30-label,
 .ch30-status {
   margin: 0.4rem 0;
-  color: var(--lesson-muted, #475569);
+  color: var(--muted);
   font-size: 0.88rem;
 }
 

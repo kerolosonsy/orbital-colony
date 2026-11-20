@@ -1,6 +1,6 @@
 .ch05-sandbox {
-  inline-size: min(100%, 290px);
-  max-inline-size: 290px;
+  inline-size: 100%;
+  max-inline-size: 100%;
   min-inline-size: 0;
   display: grid;
   gap: 6px;

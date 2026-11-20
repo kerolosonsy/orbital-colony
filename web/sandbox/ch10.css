@@ -3,11 +3,11 @@
 .lesson-sandbox.ch10-swarm-order,
 .lesson-sandbox.ch10-groups-order {
   box-sizing: border-box;
-  max-width: 290px;
+  max-width: 100%;
   padding: 0.65rem;
-  border: 1px solid var(--border, #cbd5e1);
+  border: 1px solid var(--rule);
   border-radius: 0.65rem;
-  background: var(--surface, #fff);
+  background: var(--ink-2);
   color: inherit;
   direction: inherit;
   text-align: start;
@@ -35,9 +35,9 @@
   max-width: 100%;
   margin-top: 0.55rem;
   padding: 0.35rem 0.55rem;
-  border: 1px solid var(--border, #cbd5e1);
+  border: 1px solid var(--rule);
   border-radius: 0.45rem;
-  background: var(--button-bg, #f8fafc);
+  background: var(--sheet-2);
   color: inherit;
   font: inherit;
   cursor: pointer;

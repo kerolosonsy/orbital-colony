@@ -412,7 +412,7 @@ func (s *State) Status(u *Upgrade) (cost Cost, ok bool, reason string) {
 				}
 			}
 		}
-		if s.Level(r) < required {
+		if !s.meets(r, required) {
 			if ru := Find(r); ru != nil {
 				return u.CostAt(l), false, i18n.T("محتاج الأول: ", "Requires first: ") + i18n.T(ru.Name, ru.NameEn)
 			}

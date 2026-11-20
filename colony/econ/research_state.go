@@ -13,7 +13,7 @@ func (s *State) researchPurchaseReason(id string) string {
 		return ""
 	}
 	for _, p := range n.After {
-		if p.ID != "base" && s.Level(p.ID) < p.Level {
+		if p.ID != "base" && !s.meets(p.ID, p.Level) {
 			parent := FindNode(p.ID)
 			return i18n.T("محتاج الأول: ", "Requires first: ") + i18n.T(parent.Name, parent.NameEn)
 		}
@@ -22,6 +22,12 @@ func (s *State) researchPurchaseReason(id string) string {
 		return fmt.Sprintf(i18n.T("ناقصك %.1f RP", "You need %.1f more RP"), n.RP-s.RP)
 	}
 	return ""
+}
+
+// meets reports whether prerequisite id is at level lvl, counting a first
+// level lent by the active contract (deep haul lends api.dig for its drill).
+func (s *State) meets(id string, lvl int) bool {
+	return s.Level(id) >= lvl || lvl <= 1 && s.Lent(id)
 }
 
 func (s *State) spendResearch(id string) {

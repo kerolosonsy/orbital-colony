@@ -1,6 +1,6 @@
 .sandbox-kit {
   min-inline-size: 0;
-  max-inline-size: 290px;
+  max-inline-size: 100%;
 }
 .sandbox-kit-controls {
   display: flex;

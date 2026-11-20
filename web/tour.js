@@ -16,7 +16,7 @@
   const TOURS = {
     "1-1-first-signal": [
       { ar: "أهلاً! هوريك اللعبة حتة حتة. دوس **التالي** أو Enter.", en: "Hi! Let me show you around. Press **Next** or Enter." },
-      { at: "#goal-strip", ar: "ده **هدف المهمة**: توصّل الدرون للمنارة.", en: "This is the **mission goal**: get the drone to the beacon." },
+      { at: "#goal-strip, .goal", ar: "ده **هدف المهمة**: توصّل الدرون للمنارة.", en: "This is the **mission goal**: get the drone to the beacon." },
       { at: { tile: "drone" }, ar: "ده **الدرون** بتاعك. بيتحرك بس بالكود اللي بتكتبه.", en: "This is your **drone**. It only moves with the code you write." },
       { at: { tile: [3, 0] }, ar: "ودي **المنارة** 📡. عاوزين نوصلها.", en: "And this is the **beacon** 📡. That's where we're going." },
       { at: "#lesson", ar: "هنا **الدرس**: شرح قصير للي محتاجه في المهمة دي.", en: "Here's the **lesson**: a short read on what this mission needs." },
@@ -32,7 +32,7 @@
     ],
     "1-2-first-harvest": [
       { ar: "مهمة جديدة، حاجات جديدة. يلا نلف لفة سريعة.", en: "New mission, new things. A quick look around." },
-      { at: "#goal-strip", ar: "الهدف: تحصد **3 طحالب**.", en: "Goal: harvest **3 moss**." },
+      { at: "#goal-strip, .goal", ar: "الهدف: تحصد **3 طحالب**.", en: "Goal: harvest **3 moss**." },
       { at: { tile: [1, 0] }, ar: "دي أول **طحلبة**، والاتنين اللي بعدها على اليمين.", en: "Here's the first **moss**; two more sit to its right." },
       { at: { line: 7 }, ar: "~colony.Harvest()~ بتحصد الخانة اللي الدرون **واقف عليها**.", en: "~colony.Harvest()~ harvests the tile the drone **stands on**." },
       { at: "#hud-inv", ar: "هنا **المخزن**: اللي بتحصده بيتعد هنا.", en: "This is your **cargo**: everything you harvest is counted here." },
