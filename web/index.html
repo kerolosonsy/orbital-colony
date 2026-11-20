@@ -72,6 +72,8 @@
     <symbol id="i-colony" viewBox="0 0 24 24"><path d="M3 20h18M5 20V10l7-5 7 5v10M9 20v-5h6v5"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20.5c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="1.5"/><path d="M15.5 8.5V5.5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10H10l-4.5 3.5v-3.5H4z"/><path d="M8 10.5h.01M12 10.5h.01M16 10.5h.01"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-5 16-3.5-6.5zM11.5 13.5 20 4"/></symbol>
     <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.2l-5.8 3.2 1.2-6.5L2.6 9.4l6.5-.8z"/></symbol>
   </defs>
 </svg>
@@ -83,6 +85,7 @@
   </a>
   <button id="btn-missions" class="tool" title="فهرس الأوراق (كل المهمات)" data-en-title="Survey index (all missions)"><svg class="ico"><use href="#i-index"/></svg><span class="tool-label" data-en="Index">الفهرس</span></button>
   <button id="btn-colony" class="tool" title="المستعمرة المفتوحة: كودك شغال على طول، بتجمع وتبيع وتشتري ترقيات" data-en-title="Open colony: your code runs nonstop, gathering, selling and buying upgrades"><svg class="ico"><use href="#i-colony"/></svg><span class="tool-label" data-en="Colony">المستعمرة</span></button>
+  <button id="btn-chat" class="tool chat-btn" title="اسأل المساعد عن المهمة أو الكود" data-en-title="Ask the helper about the mission or your code" aria-controls="chat"><svg class="ico"><use href="#i-chat"/></svg><span class="tool-label" data-en="Ask">اسأل</span></button>
   <div class="sheet-title">
     <b id="lvl-title"></b>
     <span id="lvl-chapter" class="sheet-code"></span>
@@ -246,6 +249,20 @@
     <div class="console" id="console" aria-live="polite"></div>
   </section>
 </main>
+
+<aside id="chat" class="chat-panel" hidden aria-labelledby="chat-title">
+  <div class="chat-head">
+    <h2 id="chat-title"><svg class="ico"><use href="#i-chat"/></svg><span data-en="Helper">المساعد</span></h2>
+    <span class="chat-via" data-en="via your ChatGPT">من خلال ChatGPT بتاعك</span>
+    <button type="button" class="tool small chat-close" aria-label="اقفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+  </div>
+  <div class="chat-log" aria-live="polite"></div>
+  <div class="chat-chips"></div>
+  <form class="chat-form">
+    <textarea rows="2" placeholder="اكتب سؤالك… (Enter يبعت)" data-en-placeholder="Ask anything… (Enter sends)" aria-label="سؤالك" data-en-aria="Your question"></textarea>
+    <button type="submit" class="run chat-send" aria-label="ابعت" data-en-aria="Send"><svg class="ico"><use href="#i-send"/></svg></button>
+  </form>
+</aside>
 
 <dialog id="missions" class="overlay hidden" aria-labelledby="index-title">
   <div class="sheet index-sheet">
@@ -433,6 +450,7 @@
 <script src="/static/complete.js"></script>
 <script src="/static/quickfix.js"></script>
 <script src="/static/tour.js"></script>
+<script src="/static/chat.js"></script>
 <script src="/static/debugger.js"></script>
 <script src="/static/app.js"></script>
 <script src="/static/profiles.js"></script>

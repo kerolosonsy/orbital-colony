@@ -1679,6 +1679,7 @@ async function loadLevel(id, review = null) {
     if (S.cur === l && version === previewVersion) setWorld(preview);
   } catch (e) { if (S.cur === l) log(String(e), "c-err"); }
   if (S.cur === l && version === previewVersion) maybeTour();
+  chatPanel.refresh();
 }
 
 $("#btn-hint").onclick = () => revealHint();
@@ -2362,6 +2363,17 @@ function maybeTour(force = false) {
   });
 }
 $("#btn-tour").onclick = () => maybeTour(true);
+
+// The helper chat (chat.js): it sees the mission, the open file and the console.
+const chatPanel = Chat.mount({
+  T,
+  api,
+  level: () => S.cur?.id || "",
+  code: () => ({ file: S.file, code: ed.value }),
+  console: () => con.innerText.slice(-4000),
+  hasError: () => lastErrors.length > 0 || !!con.querySelector(".c-err"),
+});
+$("#btn-chat").onclick = () => chatPanel.toggle();
 
 // tourRect finds a tour target on screen: an element, a map tile or an editor line.
 function tourRect(at) {
