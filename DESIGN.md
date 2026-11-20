@@ -209,9 +209,9 @@ The palette is a geologic map key on a violet-black ground. Unit colours are use
 **Open item:** all three families load from the Google Fonts CDN (`fonts.googleapis.com`) and are not self-hosted yet. Self-hosting is pending the user's permission to download the font files. The fallbacks above are the real stacks in use until then.
 
 ### Hierarchy
-- **Display** (700, 30px, 1.35): the welcome heading, balanced wrap. It drops to 24px on phones. The result title uses 24px at 700.
+- **Display** (700, fluid 30–42px, 1.25, −0.01em): the welcome heading, balanced wrap. It drops to 24px on phones. The result title uses 28px at 700.
 - **Headline** (700, 21px, 1.4): lesson h2. Overlay sheet heads use 21px at 600.
-- **Title** (600, 18px): the mission title in the title block, 16px on phones. The goal line is 16px at 600 with 1.55 line height.
+- **Title** (600, 19px): the mission title in the title block, 16px on phones. The goal line is 17px at 700 with 1.5 line height, in paper.
 - **Body** (400, 15px, 1.6): interface copy. **Lesson** body uses 1.85 line height at a 70ch maximum width.
 - **Label** (Barlow Condensed 700, 15px, 0.06em, uppercase): the Run button and its siblings, 18px on the big start button.
 - **Numeral** (Barlow Condensed 600, 15–16px, tabular): the overall count, the tick counter and inventory chips. Quad numbers use 30px at 700, in the chapter's unit colour.
@@ -258,7 +258,8 @@ The form language is square-cornered print. The sheet radius (2px) applies to pa
 
 ### Buttons
 - **Tool** (ruled, transparent): 36px tall, 2px corners, a 1px `rule` border and `paper-2` text at 13.5px/500 with an 18px stroked icon. On hover the fill turns `sheet-2`, the border turns `rule-strong` and the text turns `paper`. On press it drops 1px. A small variant is 30px tall. An unpressed toggle (sound off) uses `faint`, and the linked VS Code state is outlined and lettered in `ice`.
-- **Run** (survey red): 38px tall with 20px padding, condensed 700 uppercase label at 0.06em, an inset 1px `#9e2f1d` keyline and a filled play icon. Hover is `survey-hi`. While busy it turns `sheet-3` and the icon pulses. A big variant (48px, 18px label) starts the game.
+- **Tool strip:** related tools (sound, VS Code, language, player, reset) share one ruled strip: square inner joints, 2px outer corners, borders collapsed by −1px.
+- **Run** (survey red): 40px tall with 22px padding, joined to the Step tool on its trailing side (Step keeps the Run keyline colour as its border), condensed 700 uppercase label at 0.06em, an inset 1px `#9e2f1d` keyline and a filled play icon. Hover is `survey-hi`. While busy it turns `sheet-3` and the icon pulses. A big variant (48px, 18px label) starts the game.
 - **Transitions:** 0.2s on `cubic-bezier(.16, 1, .3, 1)` for colour, 0.12s for press.
 
 ### Chips
@@ -269,7 +270,7 @@ The form language is square-cornered print. The sheet radius (2px) applies to pa
 - **Goal callout:** regolith mixed 14% into `sheet`, with a regolith-tinted border and a target icon in regolith. It is the first thing on the lesson sheet.
 - **Hint callout:** star mixed 10% into `sheet`, with a dashed star-tinted border. It rises in over 0.45s.
 - **Banner:** error or ok colour mixed 16% into `ink`, with a tinted border, RTL.
-- **Overlay sheet:** `sheet` fill, `rule-strong` border and overlay lift, entering with a 0.4s lift.
+- **Overlay sheet:** `sheet` fill, 2px corners, the double-rule frame (`rule-strong` outside, a band of `sheet`, a `rule` hairline inside) and overlay lift, entering with a 0.4s lift. The welcome sheet is a wide survey window (up to 1120px): the drawn map on one side drifts slowly (scale 1.04 → 1.16 over 28s, alternating) and the copy rises in once, staggered by about 0.08s.
 
 ### Inputs / Fields
 - **Editor:** a transparent textarea over a highlighted `<pre>`, on `ink`. The caret is `survey-hi`, the selection is `#4a3f7a`, and the line gutter is 46px wide with `#6f679c` numerals. An error line inverts to `err`. Syntax colours: keyword `#ff8f7a`, string `#b6dd7c`, number regolith, comment `#7a72a6` italic, package ice, function `#f2cf7a`, type `#c7a2ff`.
@@ -309,7 +310,7 @@ Chapters are rows of sheets tiled edge to edge (rows overlap by −1px so rules 
 Mono 12.5px on `ink`. Each line has a 4px square bullet in its own colour: output paper, error err, tip star, info muted, report ice, ok moss (600), warn warn.
 
 ### Result Stamp
-A survey-red rubber stamp ("SURVEYED" plus the sheet code), rotated −9° and overlapping the result sheet's corner. It stamps in from 2.2× scale. Stars pop in staggered by 0.18s.
+A survey-red rubber stamp ("SURVEYED" plus the sheet code, condensed 700 17px, 3px border), rotated −9° and overlapping the result sheet's corner. It stamps in from 2.2× scale and the sheet takes the hit: a 4px drop and −0.5° tilt at 0.5s. Stars (62px) pop in staggered by 0.18s.
 
 ## Do's and Don'ts
 
