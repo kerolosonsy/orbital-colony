@@ -14,8 +14,8 @@ import (
 	"time"
 )
 
-var ch12ExamplePattern = regexp.MustCompile("(?s)<!-- go-example id=(e12[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\\n\\x60\\x60\\x60go\\n(.*?)\\n\\x60\\x60\\x60")
-var ch12StdoutPattern = regexp.MustCompile("(?m)^Real stdout: ([^\\r\\n]+)$")
+var ch12ExamplePattern = regexp.MustCompile(`(?s)<!-- go-example id=(e12[^ ]+) imports=([^ ]+) outcome=([^ ]+) -->\n\x60\x60\x60go\n(.*?)\n\x60\x60\x60`)
+var ch12StdoutPattern = regexp.MustCompile(`(?m)^Real stdout: ([^\r\n]+)$`)
 var ch12InlineCodePattern = regexp.MustCompile("~[^~]*~")
 
 func TestCh12Lessons(t *testing.T) {

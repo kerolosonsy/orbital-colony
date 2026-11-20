@@ -45,7 +45,7 @@ function createFilesHarness(lang = "en", initialRecord = {}) {
     flushSave: () => {},
     renderEditor: () => {},
     isLinked: () => false,
-    store: { save() { savedCount++; } },
+    store: { prefs: {}, save() { savedCount++; }, pref(k, v) { if (v === undefined) return this.prefs[k]; this.prefs[k] = v; } },
     $: (sel) => (sel === "#file-tabs" ? tabBox : sel === "#save-state" ? saveState : makeDomNode("div")),
     document: { createElement: (tag) => makeDomNode(tag) },
     prompt: (msg, def) => (prompts.length ? prompts.shift() : def ?? null),

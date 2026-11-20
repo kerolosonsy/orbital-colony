@@ -48,7 +48,8 @@ const store = {
     } catch { return null; }
   },
   save() {
-    localStorage.setItem(this.cacheKey, JSON.stringify(this.blob));
+    // a full or blocked localStorage must not stop saving to the server
+    try { localStorage.setItem(this.cacheKey, JSON.stringify(this.blob)); } catch {}
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.push(), 800);
   },
@@ -60,7 +61,13 @@ const store = {
       this.blob.review = saved.review || {};
       this.blob.metrics = LearningMetrics.mergeMetrics(this.blob.metrics, saved.metrics);
       if ($("#missions").open) renderMissions();
-    }).catch(() => {});
+      this.warned = false;
+    }).catch((error) => {
+      // progress stays in the local copy; say once why it isn't reaching the server
+      if (this.warned || typeof logServerHint !== "function") return;
+      this.warned = true;
+      logServerHint(error.message === "403" ? new Error("403 token") : error);
+    });
   },
   pref(k, v) {
     if (v === undefined) return this.blob.prefs[k];
@@ -192,12 +199,18 @@ function saveFile(l, name, code) {
   else (r.files ||= {})[name] = code;
 }
 let lastErrors = [];
+// Caret and scroll per mission file, so switching tabs comes back to the same spot.
+const filePlaces = new Map();
 function showFile(name) {
   flushSave();
   const l = S.cur;
+  if (S.file && l && ed.value) filePlaces.set(`${l.id}/${S.file}`, { at: ed.selectionStart, top: ed.scrollTop });
   const f = levelFiles(l).find((x) => x.name === name) || levelFiles(l)[0];
   S.file = f.name;
+  if (levelFiles(l).length > 1 && !S.review) store.pref("lastFile", { ...(store.pref("lastFile") || {}), [l.id]: f.name });
   ed.value = fileCode(l, f);
+  const place = filePlaces.get(`${l.id}/${f.name}`);
+  if (place) { ed.setSelectionRange(place.at, place.at); ed.scrollTop = place.top; }
   ed.readOnly = !!f.readOnly || isLinked();
   errLines = new Map(lastErrors.filter((e) => (e.file || "main.go").replace(/^\.\//, "") === f.name).map((e) => [e.line, e.msg]));
   renderTabs();
@@ -469,13 +482,53 @@ function renderEditor() {
 }
 function syncScroll() {
   hl.scrollTop = ed.scrollTop; hl.scrollLeft = ed.scrollLeft; gutter.scrollTop = ed.scrollTop;
+  placeCaretLine();
+  placeErrorBands();
 }
-function insert(text) {
-  if (!document.execCommand("insertText", false, text)) {
-    ed.setRangeText(text, ed.selectionStart, ed.selectionEnd, "end");
-  }
-  onEdit();
+const errBands = $("#err-bands");
+function placeErrorBands() {
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+  errBands.innerHTML = [...errLines.keys()].map((line) => `<div class="err-band" style="top:${14 + (line - 1) * lineHeight - ed.scrollTop}px"></div>`).join("");
 }
+const caretLine = $("#caret-line");
+function placeCaretLine() {
+  const show = !ed.readOnly && ed.selectionStart === ed.selectionEnd;
+  caretLine.classList.toggle("on", show);
+  // the caret line's number lights up too
+  const caretRow = ed.readOnly ? 0 : ed.value.slice(0, ed.selectionStart).split("\n").length;
+  for (const old of gutter.querySelectorAll(".gutter-line.caret-row")) if (Number(old.dataset.debugLine) !== caretRow) old.classList.remove("caret-row");
+  gutter.querySelector(`[data-debug-line="${caretRow}"]`)?.classList.add("caret-row");
+  if (!show) { bracketMarks.forEach((mark) => mark.classList.remove("on")); return; }
+  const line = ed.value.slice(0, ed.selectionStart).split("\n").length;
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+  caretLine.style.top = `${14 + (line - 1) * lineHeight - ed.scrollTop}px`;
+  placeBrackets(lineHeight);
+}
+// The bracket at the caret and its partner get a small box.
+const bracketMarks = [$("#bracket-a"), $("#bracket-b")];
+let charWidth = 0;
+document.fonts?.addEventListener?.("loadingdone", () => { charWidth = 0; }); // re-measure once the code font arrives
+function placeBrackets(lineHeight) {
+  const pair = ed.selectionStart === ed.selectionEnd && window.EditKeys?.matchBracket(ed.value, ed.selectionStart);
+  bracketMarks.forEach((mark, i) => {
+    mark.classList.toggle("on", !!pair);
+    if (!pair) return;
+    if (!charWidth) {
+      const ctx = document.createElement("canvas").getContext("2d");
+      ctx.font = getComputedStyle(ed).font;
+      charWidth = ctx.measureText("0").width || 8.4;
+    }
+    const at = pair[i];
+    const startOfLine = ed.value.lastIndexOf("\n", at - 1) + 1;
+    const row = ed.value.slice(0, at).split("\n").length - 1;
+    let col = 0;
+    for (const c of ed.value.slice(startOfLine, at)) col = c === "\t" ? col + 4 - (col % 4) : col + 1;
+    mark.style.top = `${14 + row * lineHeight - ed.scrollTop}px`;
+    mark.style.left = `${16 + col * charWidth - ed.scrollLeft}px`;
+    mark.style.width = `${charWidth}px`;
+  });
+}
+document.addEventListener("selectionchange", () => { if (document.activeElement === ed) placeCaretLine(); });
 let saveTimer;
 function flushSave() {
   if (!saveTimer) return;
@@ -494,7 +547,11 @@ function onEdit() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flushSave, 400);
 }
-window.addEventListener("pagehide", () => { flushSave(); if (store.timer) store.push(); });
+window.addEventListener("pagehide", () => {
+  flushSave(); if (store.timer) store.push();
+  // remember where the caret was, to come back to it after a reload
+  try { if (S.cur) localStorage.setItem("orbital.place." + PROFILE, JSON.stringify({ level: S.cur.id, file: S.file, at: ed.selectionStart, top: ed.scrollTop })); } catch {}
+});
 ed.addEventListener("input", onEdit);
 ed.addEventListener("scroll", syncScroll);
 gutter.addEventListener("click", (event) => {
@@ -515,41 +572,239 @@ InlineDebugger.bind({
     store.pref("debugBreakpoints", saved);
   },
 });
+// Apply one EditKeys edit through execCommand so Ctrl/⌘+Z can undo it.
+function applyEdit(edit) {
+  ed.setSelectionRange(edit.from, edit.to);
+  if (edit.text) {
+    if (!document.execCommand("insertText", false, edit.text)) ed.setRangeText(edit.text, edit.from, edit.to, "end");
+  } else if (edit.to > edit.from) {
+    if (!document.execCommand("delete")) ed.setRangeText("", edit.from, edit.to, "end");
+  }
+  ed.setSelectionRange(edit.selStart, edit.selEnd);
+  if (edit.text || edit.to > edit.from) onEdit();
+}
+// Shift+Alt+F formats the file with gofmt (server-side go/format), undoable.
+async function formatEditor() {
+  if (ed.readOnly || !S.cur || !S.file?.endsWith(".go")) return;
+  const before = ed.value;
+  // gofmt only moves whitespace, so the caret is "after the Nth code character"
+  const codeChars = before.slice(0, ed.selectionStart).replace(/\s/g, "").length;
+  let r;
+  try { r = await api("/api/format", { code: before }); } catch (e) { log(String(e.message || e), "c-err"); logServerHint(e); return; }
+  if (r.error) { log(T("مقدرتش أنسّق الكود لسه: ", "Can't format yet: ") + r.error, "c-warn"); return; }
+  if (ed.value !== before || r.code === before) return; // typed meanwhile, or already tidy
+  let caret = 0;
+  for (let seen = 0; caret < r.code.length && seen < codeChars; caret++) if (!/\s/.test(r.code[caret])) seen++;
+  applyEdit({ from: 0, to: before.length, text: r.code, selStart: caret, selEnd: caret });
+  log(T("الكود اتنسّق بـ gofmt.", "Formatted with gofmt."), "c-info");
+}
+// ---------- colony. autocomplete ----------
+// Typing "colony." (or Ctrl+Space after it) lists the package's functions,
+// constants and types with the first line of their doc comment.
+const completeBox = $("#complete");
+let apiSymbols = null, completion = null, dismissedAt = -1;
+let symbolsReady = [];
+function loadSymbols() {
+  if (!apiSymbols) apiSymbols = api("/api/symbols").then((list) => (symbolsReady = list || [])).catch(() => { apiSymbols = null; return []; });
+  return apiSymbols;
+}
+// Inside colony.Name( … ) a hint above the line shows the signature and doc.
+const sigHint = $("#sig-hint");
+function updateSigHint() {
+  const usable = !ed.readOnly && document.activeElement === ed && ed.selectionStart === ed.selectionEnd;
+  const inCall = usable && /\(/.test(ed.value.slice(ed.value.lastIndexOf("\n", ed.selectionStart - 1) + 1, ed.selectionStart));
+  if (inCall && !symbolsReady.length) {
+    // fetch once; retry only on the next caret move, never in a loop
+    if (!apiSymbols) loadSymbols().then(() => { if (symbolsReady.length) updateSigHint(); });
+    sigHint.hidden = true; return;
+  }
+  const symbol = inCall ? Complete.callSymbol(ed.value, ed.selectionStart, symbolsReady) : null;
+  const row = ed.value.slice(0, ed.selectionStart).split("\n").length - 1;
+  // on a line with a compile error, the box shows the error and what it means
+  const focused = !ed.readOnly && document.activeElement === ed; // a selected error line counts too
+  const error = focused && !symbol && errLines.has(row + 1)
+    ? lastErrors.find((e) => Number(e.line) === row + 1 && (e.file || "main.go").replace(/^\.\//, "") === S.file) : null;
+  sigHint.classList.toggle("is-error", !!error);
+  if (error) sigHint.innerHTML = `<b>${esc(error.msg)}</b>` + (error.tip ? `<span class="c-doc" dir="auto">${esc(error.tip)}</span>` : "");
+  else if (symbol) sigHint.innerHTML = `<b>${esc((symbol.recv ? symbol.recv + "." : "") + symbol.name)}</b>${esc(symbol.signature || "")}` + (symbol.doc ? `<span class="c-doc">${esc(symbol.doc)}</span>` : "");
+  else { sigHint.hidden = true; return; }
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+  sigHint.hidden = false;
+  const top = 14 + row * lineHeight - ed.scrollTop - sigHint.offsetHeight - 4;
+  sigHint.style.top = `${top < 0 ? 14 + (row + 1) * lineHeight - ed.scrollTop + 4 : top}px`;
+  sigHint.style.left = "16px";
+}
+document.addEventListener("selectionchange", () => { if (document.activeElement === ed) updateSigHint(); });
+ed.addEventListener("blur", () => { sigHint.hidden = true; });
+function closeCompletion() {
+  completion = null;
+  completeBox.hidden = true;
+  ed.removeAttribute("aria-activedescendant");
+}
+// where to complete: after "colony." (package names) or after a value that
+// came from colony, like d := colony.Spawn() then "d." (its methods)
+function completionAt(symbols) {
+  const caret = ed.selectionStart;
+  const pkg = Complete.context(ed.value, caret);
+  if (pkg) return { ...pkg, items: () => Complete.rank(symbols, pkg.prefix) };
+  const member = Complete.memberContext(ed.value, caret, symbols);
+  if (member) return { ...member, items: () => Complete.rankMembers(symbols, member.recv, member.prefix) };
+  return null;
+}
+async function updateCompletion(force = false) {
+  const usable = !ed.readOnly && document.activeElement === ed && ed.selectionStart === ed.selectionEnd;
+  if (!usable || !/[\w.]$/.test(ed.value.slice(0, ed.selectionStart))) return closeCompletion();
+  const symbols = await loadSymbols();
+  const fresh = completionAt(symbols); // after the await: the caret may have moved
+  if (!fresh || (!force && fresh.start === dismissedAt)) return closeCompletion();
+  const items = fresh.items();
+  if (!items.length) return closeCompletion();
+  completion = { items, index: 0, start: fresh.start };
+  renderCompletion();
+}
+function renderCompletion() {
+  const { items, index, start } = completion;
+  completeBox.innerHTML = items.map((s, i) => `<li role="option" id="complete-${i}" data-i="${i}" aria-selected="${i === index}">`
+    + `<span class="c-kind">${esc(s.kind)}</span><span class="c-name">${esc(s.name)}</span>`
+    + (s.signature ? `<span class="c-sig">${esc(s.kind === "func" ? s.signature : " " + s.signature)}</span>` : "")
+    + (s.doc ? `<span class="c-doc">${esc(s.doc)}</span>` : "") + "</li>").join("");
+  ed.setAttribute("aria-activedescendant", `complete-${index}`);
+  // place the list under the name being typed
+  const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+  if (!charWidth) placeBrackets(lineHeight);
+  const lineStart = ed.value.lastIndexOf("\n", start - 1) + 1;
+  const row = ed.value.slice(0, start).split("\n").length;
+  let col = 0;
+  for (const c of ed.value.slice(lineStart, start)) col = c === "\t" ? col + 4 - (col % 4) : col + 1;
+  completeBox.style.top = `${14 + row * lineHeight - ed.scrollTop + 2}px`;
+  completeBox.style.left = `${Math.max(0, 16 + col * (charWidth || 8.4) - ed.scrollLeft)}px`;
+  completeBox.hidden = false;
+  completeBox.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
+}
+function acceptCompletion(i = completion.index) {
+  const symbol = completion.items[i];
+  const { text, caret } = Complete.insertion(symbol);
+  const start = completion.start;
+  closeCompletion();
+  applyEdit({ from: start, to: ed.selectionStart, text, selStart: start + caret, selEnd: start + caret });
+}
+completeBox.addEventListener("mousedown", (e) => {
+  e.preventDefault(); // keep focus in the editor
+  const li = e.target.closest("li[data-i]");
+  if (li && completion) acceptCompletion(Number(li.dataset.i));
+});
+ed.addEventListener("input", () => updateCompletion());
+ed.addEventListener("blur", closeCompletion);
+ed.addEventListener("click", () => updateCompletion());
+ed.addEventListener("scroll", () => { if (completion) renderCompletion(); });
+// handled before the editor's own keys so arrows/Enter/Tab drive the list
+ed.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.code === "Space") { e.preventDefault(); dismissedAt = -1; updateCompletion(true); return; }
+  if (!completion) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault(); e.stopImmediatePropagation();
+    const n = completion.items.length;
+    completion.index = (completion.index + (e.key === "ArrowDown" ? 1 : n - 1)) % n;
+    renderCompletion();
+  } else if (e.key === "Enter" || e.key === "Tab") {
+    e.preventDefault(); e.stopImmediatePropagation();
+    acceptCompletion();
+  } else if (e.key === "Escape") {
+    e.preventDefault(); e.stopImmediatePropagation();
+    dismissedAt = completion.start;
+    closeCompletion();
+  }
+}, true);
+$("#btn-format").onclick = () => { formatEditor(); ed.focus(); };
 ed.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); run({ paused: e.shiftKey }); return; }
-  if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); insert("\t"); return; }
-  if (e.key === "Enter" && !e.isComposing) {
+  if (e.shiftKey && e.altKey && !e.metaKey && !e.ctrlKey && e.code === "KeyF") { e.preventDefault(); formatEditor(); return; }
+  if (e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && e.code === "KeyG") {
+    // go to line, like code editors
     e.preventDefault();
-    const before = ed.value.slice(0, ed.selectionStart);
-    const line = before.slice(before.lastIndexOf("\n") + 1);
-    let indent = line.match(/^\s*/)[0];
-    if (/[{(]\s*$/.test(line)) indent += "\t";
-    insert("\n" + indent);
+    const total = ed.value.split("\n").length;
+    const answer = prompt(T(`روح لسطر (1–${total}):`, `Go to line (1–${total}):`), "");
+    const line = Number.parseInt(answer, 10);
+    if (line >= 1) { jumpToLine(S.file, Math.min(line, total)); const at = ed.selectionStart; ed.setSelectionRange(at, at); }
     return;
   }
-  if (e.key === "}") {
-    const before = ed.value.slice(0, ed.selectionStart);
-    const line = before.slice(before.lastIndexOf("\n") + 1);
-    if (/^\t+$/.test(line) && ed.selectionStart === ed.selectionEnd) {
-      e.preventDefault();
-      ed.setSelectionRange(ed.selectionStart - 1, ed.selectionStart);
-      insert("}");
-    }
+  if (e.key === "F9" && S.cur) {
+    // toggle a breakpoint on the caret's line, like VS Code
+    e.preventDefault();
+    const line = ed.value.slice(0, ed.selectionStart).split("\n").length;
+    InlineDebugger.toggleBreakpoint(S.cur.id, S.file, line);
+    renderEditor();
+    return;
   }
+  if (ed.readOnly && !isLinked() && e.key.length === 1 && !e.metaKey && !e.ctrlKey) {
+    // typing into a read-only lab file did nothing, silently: say why
+    $("#save-state").textContent = T("الملف ده للقراية بس — اكتب في ملف تاني", "This file is read-only — edit another tab");
+    return;
+  }
+  if (ed.readOnly || !window.EditKeys) return;
+  const edit = EditKeys.handle(ed.value, ed.selectionStart, ed.selectionEnd, e);
+  if (!edit) return;
+  e.preventDefault();
+  applyEdit(edit);
 });
 
 // ---------- console ----------
 const con = $("#console");
 function appendConsoleNode(node) {
+  // follow new output only if the reader is already at the bottom
+  const following = con.scrollHeight - con.scrollTop - con.clientHeight < 40;
   con.appendChild(node);
   if (con.childElementCount > 400) con.firstChild.remove();
-  con.scrollTop = con.scrollHeight;
+  if (following || con.childElementCount <= 2) con.scrollTop = con.scrollHeight;
+}
+// Copy the console as plain text (compile errors, output) to paste anywhere.
+$("#btn-copy-console").onclick = async () => {
+  const text = [...con.children].map((node) => node.innerText ?? node.textContent).join("\n").trim();
+  if (!text) return;
+  const button = $("#btn-copy-console");
+  try {
+    await navigator.clipboard.writeText(text);
+    button.classList.add("copied");
+    button.title = T("اتنسخ ✓", "Copied ✓");
+  } catch {
+    button.title = T("مقدرتش أنسخ", "Couldn't copy");
+  }
+  setTimeout(() => {
+    button.classList.remove("copied");
+    button.title = T("انسخ رسايل الكونسول", "Copy console output");
+  }, 1500);
+};
+// logExact shows program output as printed (log() strips emoji from game messages).
+function logExact(text, cls = "c-out") {
+  const d = document.createElement("div");
+  d.className = cls; d.textContent = String(text);
+  appendConsoleNode(d);
 }
 function log(text, cls = "c-out") {
   text = String(text).replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, "");
   const d = document.createElement("div");
   d.className = cls; d.textContent = text;
   appendConsoleNode(d);
+}
+// Two common local situations get a plain next step: the server is not
+// running, or it was restarted (new token) while this tab stayed open.
+function serverHint(error) {
+  const message = String(error?.message || error);
+  if (error instanceof TypeError || /Failed to fetch|NetworkError|Load failed/i.test(message)) {
+    return T("السيرفر شكله مقفول. شغّله بـ make start وبعدين اعمل refresh للصفحة.", "The server seems to be down. Start it with make start, then refresh the page.");
+  }
+  if (/^403\b/.test(message) && /token|رمز الدخول/i.test(message)) {
+    return T("السيرفر اتعمله restart والصفحة دي قديمة. اعمل refresh (⌘R / F5).", "The server was restarted and this page is stale. Refresh it (⌘R / F5).");
+  }
+  return "";
+}
+let lastServerHint = { text: "", at: 0 };
+function logServerHint(error) {
+  const hint = serverHint(error);
+  // a run and a progress upload often fail together: say it once
+  if (!hint || (hint === lastServerHint.text && Date.now() - lastServerHint.at < 10000)) return;
+  lastServerHint = { text: hint, at: Date.now() };
+  log(hint, "c-tip");
 }
 function logErrorHelp(meaning, cause, check) {
   const box = window.ErrorHelp?.render({ meaning, cause, check });
@@ -562,13 +817,59 @@ function logCompileError(e) {
   button.type = "button";
   button.className = "c-error-line";
   button.textContent = `${e.file || "main.go"}:${e.line}:${e.col}  ${e.msg}`;
-  button.onclick = () => {
-    showFile(file);
-    const lines = ed.value.split("\n");
-    const start = Math.min(ed.value.length, lines.slice(0, line - 1).reduce((n, value) => n + value.length + 1, 0));
-    ed.focus();
-    ed.setSelectionRange(start, Math.min(ed.value.length, start + (lines[line - 1] || "").length));
-  };
+  button.onclick = () => jumpToLine(file, line);
+  appendConsoleNode(button);
+  // one-click fix for a missing or unused import
+  const fix = window.QuickFix?.fixFor(e.msg);
+  if (fix) {
+    const quick = document.createElement("button");
+    quick.type = "button";
+    quick.className = "tool small c-quickfix";
+    quick.textContent = fix.kind === "add" ? T(`ضيف import "${fix.path}"`, `Add import "${fix.path}"`) : T(`شيل import "${fix.path}"`, `Remove import "${fix.path}"`);
+    quick.onclick = () => {
+      showFile(file);
+      const next = QuickFix.apply(ed.value, fix);
+      quick.disabled = true;
+      if (next == null || ed.readOnly) return;
+      const caret = Math.max(0, ed.selectionStart + next.length - ed.value.length);
+      ed.focus();
+      applyEdit({ from: 0, to: ed.value.length, text: next, selStart: caret, selEnd: caret });
+      quick.textContent += " ✓";
+    };
+    appendConsoleNode(quick);
+  }
+}
+function jumpToLine(file, line) {
+  showFile(file);
+  const lines = ed.value.split("\n");
+  const start = Math.min(ed.value.length, lines.slice(0, line - 1).reduce((n, value) => n + value.length + 1, 0));
+  ed.focus();
+  ed.setSelectionRange(start, Math.min(ed.value.length, start + (lines[line - 1] || "").length));
+}
+// A panic marks the line it happened on like a compile error: red band, and
+// the panic message with its meaning above the caret there.
+function markPanicLine(level, r) {
+  const stderr = r.stderr || "";
+  const head = /^(panic: .*|fatal error: .*)$/m.exec(stderr);
+  if (!head) return;
+  const names = new Set(levelFiles(level).map((f) => f.name));
+  const where = [...stderr.matchAll(/^\t(?:.*\/)?([\w.-]+\.go):(\d+)/gm)].find((m) => names.has(m[1]));
+  if (!where) return;
+  lastErrors = [{ file: where[1], line: Number(where[2]), msg: head[1].replace(/ \[recovered\]$/, ""), tip: r.runtimeTip || "" }];
+  if (S.cur === level && S.file === where[1]) { errLines = new Map([[Number(where[2]), head[1]]]); renderEditor(); }
+}
+// Panic traces and failing test output name "main.go:12": make those lines
+// clickable when the file is one of the mission's files.
+function logOutputLine(text, cls) {
+  const match = /(?:^|[\s/])([\w.-]+\.go):(\d+)\b/.exec(text);
+  const file = match && levelFiles(S.cur).find((f) => f.name === match[1]);
+  if (!file) return logExact(text, cls);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `c-error-line ${cls}`;
+  button.textContent = text;
+  button.title = T(`روح لسطر ${match[2]} في ${match[1]}`, `Go to line ${match[2]} in ${match[1]}`);
+  button.onclick = () => jumpToLine(file.name, Number(match[2]));
   appendConsoleNode(button);
 }
 
@@ -1265,8 +1566,10 @@ requestAnimationFrame(frame);
 // ---------- levels ----------
 function parText(par, gold, dynamic) {
   $("#goal-strip-par").innerHTML = par > 0 ? `<span class="stars">${starHTML(3)}</span> ${gold} ${T("tick", "ticks")}` : "";
+  // the player's own best, next to the targets it is measured against
+  const best = S.cur && !S.review && S.cur.kind !== "lab" ? rec(S.cur.id).best : 0;
   $("#lvl-par").innerHTML = par > 0
-    ? `<span class="stars">${starHTML(2)}</span> ${par} ${T("tick أو أقل", "ticks or fewer")} · <span class="stars">${starHTML(3)}</span> ${gold} ${T("tick أو أقل", "ticks or fewer")}${dynamic ? T(" (الخريطة دي)", " (this map)") : ""}`
+    ? `<span class="stars">${starHTML(2)}</span> ${par} ${T("tick أو أقل", "ticks or fewer")} · <span class="stars">${starHTML(3)}</span> ${gold} ${T("tick أو أقل", "ticks or fewer")}${dynamic ? T(" (الخريطة دي)", " (this map)") : ""}${best > 0 ? ` · ${T("أحسن رقم ليك", "your best")}: <b>${best}</b>` : ""}`
     : "";
 }
 function idx(id) { return S.levels.findIndex((l) => l.id === id); }
@@ -1332,6 +1635,9 @@ async function loadLevel(id, review = null) {
   clearTraceRun();
   LearningMetrics.openLevel(store, id);
   store.pref("current", id);
+  // the tab shows the mission, and the URL hash links straight to it
+  document.title = `${sheetCode(l)} · ${l.title} — Orbital Colony`;
+  if (!review && location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
   const ch = S.chapters.find((c) => c.n === l.chapter);
   $("#lvl-chapter").textContent = `${sheetCode(l)} · ${ch ? ch.title : ""}`;
   $("#lvl-stars").setAttribute("aria-label", T(`${rec(id).stars} من 3 نجوم`, `${rec(id).stars} of 3 stars`));
@@ -1345,11 +1651,15 @@ async function loadLevel(id, review = null) {
   $("#hint-list").innerHTML = "";
   $("#btn-hint").disabled = !l.hints?.length;
   $("#btn-hint").querySelector("span").textContent = T(`تلميح (${l.hints?.length || 0})`, `Hint (${l.hints?.length || 0})`);
+  // hints opened on an earlier visit stay open
+  if (!S.review) for (let k = Math.min(store.pref("hintsSeen")?.[id] || 0, l.hints?.length || 0); k > 0; k--) revealHint(true);
   const r = rec(id);
   $("#lvl-stars").innerHTML = starHTML(r.stars);
   lastErrors = [];
   lastMtime = 0;
-  showFile(levelFiles(l)[0].name);
+  // multi-file labs reopen on the file you were working in
+  S.file = null;
+  showFile((!S.review && store.pref("lastFile")?.[id]) || levelFiles(l)[0].name);
   linkUI();
   $("#btn-vscode").disabled = S.review;
   if (isLinked()) syncFromWorkspace(true);
@@ -1360,7 +1670,7 @@ async function loadLevel(id, review = null) {
     : T("مراجعة · كود البداية فاضي عن قصد. اكتب الحل من ذاكرتك.", "Review · The starter is intentionally empty. Write the solution from memory.");
   $("#banner").classList.add("hidden");
   con.innerHTML = "";
-  log(T(`ورقة ${sheetCode(l)}: ${l.title}. اكتب الكود ودوس Run.`, `Sheet ${sheetCode(l)}: ${l.title}. Write the code and press Run.`), "c-info");
+  log(T(`ورقة ${sheetCode(l)}: ${l.title}. اكتب الكود ودوس Run (Ctrl/⌘+Enter). دوس ? للاختصارات.`, `Sheet ${sheetCode(l)}: ${l.title}. Write the code and press Run (Ctrl/⌘+Enter). Press ? for shortcuts.`), "c-info");
   document.body.classList.remove("lesson-open");
   $(".lesson-panel").scrollTop = 0;
   try {
@@ -1369,27 +1679,37 @@ async function loadLevel(id, review = null) {
   } catch (e) { if (S.cur === l) log(String(e), "c-err"); }
 }
 
-$("#btn-hint").onclick = () => {
+$("#btn-hint").onclick = () => revealHint();
+// revealHint shows the next hint. Replays (silent) restore hints the player
+// already opened for this mission, without sound or a second metric.
+function revealHint(silent = false) {
   const l = S.cur;
-  if (S.hintsShown >= l.hints.length) return;
+  if (!l?.hints || S.hintsShown >= l.hints.length) return;
   const d = document.createElement("div");
   d.className = "hint";
   const hintIndex = S.hintsShown;
   const hintText = inline(l.hints[S.hintsShown++].replace(/\p{Extended_Pictographic}\uFE0F?\s?/gu, ""));
-  LearningMetrics.recordHint(store, l.id, hintIndex);
+  if (!silent) {
+    LearningMetrics.recordHint(store, l.id, hintIndex);
+    if (!S.review) store.pref("hintsSeen", { ...(store.pref("hintsSeen") || {}), [l.id]: S.hintsShown });
+    Sound.play("hint");
+  }
   const hintLabel = l.steps?.length ? [T("الفكرة", "Concept"), T("التنظيم", "Structure"), T("ركّز هنا", "Specific")][S.hintsShown - 1] : "";
   d.innerHTML = hintLabel ? `<strong>${hintLabel}</strong><div>${hintText}</div>` : hintText;
-  Sound.play("hint");
   $("#hint-list").appendChild(d);
   $("#btn-hint").querySelector("span").textContent = S.hintsShown < l.hints.length ? T(`تلميح كمان (${l.hints.length - S.hintsShown})`, `Another hint (${l.hints.length - S.hintsShown})`) : T("خلصت التلميحات", "No more hints");
   $("#btn-hint").disabled = S.hintsShown >= l.hints.length;
-};
+}
 
 $("#btn-reset").onclick = () => {
   if (!confirm(T("ترجع لكود البداية؟ الكود الحالي هيتمسح.", "Go back to the starter code? Your current code will be erased."))) return;
   const f = levelFiles(S.cur).find((x) => x.name === S.file);
   if (!f || f.readOnly) return;
-  ed.value = f.starter; onEdit();
+  // replace through the edit history so Ctrl/⌘+Z brings the old code back
+  ed.focus();
+  applyEdit({ from: 0, to: ed.value.length, text: f.starter, selStart: 0, selEnd: 0 });
+  if (ed.value !== f.starter) { ed.value = f.starter; onEdit(); }
+  log(T("رجعت لكود البداية. Ctrl/⌘+Z يرجّع كودك.", "Back to the starter code. Ctrl/⌘+Z brings your code back."), "c-info");
 };
 
 let quizAttempt = null;
@@ -1508,8 +1828,10 @@ function renderMissions() {
       b.className = "cell" + (r.stars > 0 ? " done" : "") + (S.cur && l.id === S.cur.id ? " current" : "");
       b.disabled = !open || S.running;
       b.innerHTML = `<span class="cell-top"><span class="cell-code">${sheetCode(l)}</span>${open ? `<span class="stars">${starHTML(r.stars)}</span>` : ""}</span><span class="cell-title">${esc(l.title)}</span>${l.boss ? `<span class="boss-badge">${T("ختام المسار", "Track Boss")}</span>` : ""}`;
-      b.title = open ? (l.kind === "lab" ? T("مختبر", "Lab") : T("مهمة", "Mission")) : T("مقفولة: خلّص اللي قبلها", "Locked: finish the one before it");
+      b.title = open ? (l.kind === "lab" ? T("مختبر", "Lab") : T("مهمة", "Mission")) + (l.kind !== "lab" && r.best > 0 ? T(` · أحسن رقم: ${r.best} tick`, ` · best: ${r.best} ticks`) : "") : T("مقفولة: خلّص اللي قبلها", "Locked: finish the one before it");
       b.onclick = () => { closeOverlay($("#missions")); loadLevel(l.id); };
+      b.dataset.search = `${l.id} ${sheetCode(l)} ${l.title}`.toLowerCase();
+      b.dataset.code = sheetCode(l);
       cells.appendChild(b);
     }
     if (ch.quiz?.length) {
@@ -1523,6 +1845,7 @@ function renderMissions() {
     row.appendChild(cells);
     group.appendChild(row);
   }
+  if (typeof applyMissionFilter === "function") applyMissionFilter(); // keep the search while re-rendering
   requestAnimationFrame(() => list.querySelector(store.blob.review?.due ? ".review-card" : ".cell.current")?.scrollIntoView({ block: "center" }));
 }
 function showOverlay(selector) {
@@ -1535,6 +1858,38 @@ function closeOverlay(overlay) {
   overlay.close();
   overlay.classList.add("hidden");
 }
+// Filter the index by mission id, sheet code, title or chapter name.
+function applyMissionFilter() {
+  const query = $("#mission-search").value.trim().toLowerCase();
+  // "3" means chapter 3 and "3-1" means that sheet, not 13-1 or 23-1
+  const numeric = /^\d+(-\d+)?$/.test(query);
+  let shown = 0;
+  for (const row of document.querySelectorAll("#chapter-list .quad-row")) {
+    const chapterHit = !query || (!numeric && row.querySelector(".quad-name").textContent.toLowerCase().includes(query));
+    let any = false;
+    for (const cell of row.querySelectorAll(".cell")) {
+      const code = cell.dataset.code || "";
+      const hit = chapterHit || (numeric ? code === query || code.startsWith(query + "-") : (cell.dataset.search || "").includes(query));
+      cell.hidden = !hit;
+      any ||= hit;
+    }
+    row.hidden = !any;
+    if (any) shown++;
+  }
+  for (const group of document.querySelectorAll("#chapter-list .track-group")) {
+    group.hidden = !group.querySelector(".quad-row:not([hidden])");
+    if (query) group.open = true;
+  }
+  $("#mission-search-empty").hidden = shown > 0;
+}
+$("#mission-search").addEventListener("input", applyMissionFilter);
+// Enter opens the first open mission left after filtering
+$("#mission-search").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || !e.target.value.trim()) return;
+  const first = [...document.querySelectorAll("#chapter-list .cell[data-code]")].find((cell) => !cell.hidden && !cell.closest("[hidden]") && !cell.disabled);
+  if (first) { e.preventDefault(); first.click(); }
+});
+
 function cycleOverlayFocus(e) {
   if (e.key !== "Tab") return;
   const controls = [...e.currentTarget.querySelectorAll("button, a[href], input, textarea, select, [tabindex]")]
@@ -1575,6 +1930,17 @@ $("#btn-stats").onclick = async () => {
     { levels: S.levels, chapters: S.chapters });
   await refreshLearningStats();
 };
+// a struggle row opens that mission to practise it again
+function openStruggle(event) {
+  const row = event.target.closest("li[data-level]");
+  if (!row || (event.type === "keydown" && event.key !== "Enter" && event.key !== " ")) return;
+  event.preventDefault();
+  if (S.running || !unlocked(idx(row.dataset.level))) return;
+  closeOverlay($("#metrics"));
+  loadLevel(row.dataset.level);
+}
+$("#metrics-struggles").addEventListener("click", openStruggle);
+$("#metrics-struggles").addEventListener("keydown", openStruggle);
 $("#btn-metrics-export").onclick = () => {
   const blob = new Blob([JSON.stringify(LearningMetrics.normalizeMetrics(store.blob.metrics), null, 2)], { type: "application/json" });
   const link = document.createElement("a");
@@ -1705,6 +2071,23 @@ function stopRun(quiet) {
   if (!quiet) { log(T("اتوقف الكود.", "Code stopped."), "c-warn"); Sound.play("fail"); }
 }
 document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+    // the game saves as you type; ⌘S/Ctrl+S just confirms it instead of the browser's "Save page"
+    e.preventDefault();
+    if (!ed.readOnly && S.cur) {
+      saveFile(S.cur, S.file, ed.value);
+      clearTimeout(saveTimer); saveTimer = null;
+      store.save(); store.push();
+      $("#save-state").textContent = T("محفوظ", "Saved");
+    }
+    return;
+  }
+  const typing = e.target.closest?.("input, textarea, select, [contenteditable]");
+  if (e.key === "?" && !typing && !e.metaKey && !e.ctrlKey && !document.querySelector("dialog[open]")) {
+    e.preventDefault();
+    showOverlay("#shortcuts");
+    return;
+  }
   if (e.key === "Escape" && S.running && S.mode !== "colony" && !document.querySelector("dialog[open]")) stopRun();
 });
 
@@ -1724,6 +2107,8 @@ async function run(opts = {}) {
   $("#banner").classList.add("hidden");
   con.innerHTML = "";
   const level = S.cur;
+  // say something while the real compiler works (labs run go test, which takes longer)
+  log(level.kind === "lab" ? T("بيبني ويشغّل go test…", "Building and running go test…") : T("بيبني الكود…", "Building…"), "c-info");
   try {
     if (isLinked()) await syncFromWorkspace(true);
     else if (!ed.readOnly) saveFile(S.cur, S.file, ed.value);
@@ -1747,14 +2132,20 @@ async function run(opts = {}) {
     }
     if (r.phase === "compile") {
       lastErrors = r.compileErrors || [];
-      log(r.result.message, "c-err");
+      // fix them top to bottom: later errors are often caused by the first one
+      const count = lastErrors.length > 1 ? T(` (${lastErrors.length} أخطاء، ابدأ بأولهم)`, ` (${lastErrors.length} errors, start with the first)`) : "";
+      log(r.result.message + count, "c-err");
       Sound.play("error");
       if (lastErrors.length) {
         for (const e of lastErrors) {
           logCompileError(e);
           logErrorHelp(e.tip, e.tipCause, e.tipCheck);
         }
-        showFile(firstErrorFile(lastErrors, levelFiles(level), S.file));
+        // land on the first error so the fix starts right there
+        const line = Number(lastErrors[0].line);
+        const file = firstErrorFile(lastErrors, levelFiles(level), S.file);
+        if (line > 0 && !ed.readOnly) jumpToLine(file, line);
+        else showFile(file);
       } else log(r.compileOutput, "c-err");
       if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
       banner(r.result.message, false);
@@ -1766,15 +2157,16 @@ async function run(opts = {}) {
       refreshService(level);
       for (const st of r.steps || []) {
         log(`${st.ok ? T("نجح:", "Passed:") : T("فشل:", "Failed:")} ${st.title}`, st.ok ? "c-ok" : "c-err");
-        if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => log("   " + l, "c-err"));
+        if (!st.ok && st.output) st.output.split("\n").slice(0, 40).forEach((l) => logOutputLine("   " + l, "c-err"));
         if (!st.ok) logErrorHelp(st.tip, st.tipCause, st.tipCheck);
       }
       finish(level, r.result, r.missing || []);
       return;
     }
-    if (r.stdout) { log("fmt output:", "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => log(l)); }
-    if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => log(l, "c-err"));
+    if (r.stdout) { log(T("مخرجات البرنامج (stdout):", "Program output (stdout):"), "c-info"); r.stdout.trimEnd().split("\n").forEach((l) => logExact(l)); }
+    if (r.stderr) r.stderr.trimEnd().split("\n").forEach((l) => logOutputLine(l, "c-err"));
     if (r.runtimeTip) logErrorHelp(r.runtimeTip, r.runtimeTipCause, r.runtimeTipCheck);
+    markPanicLine(level, r);
     log(T("الدرون شغال…", "Drone running…"), "c-info");
     if (r.trace?.available && r.trace.synced && r.trace.frames?.length) {
       startDebugRun(level, r, !!opts.paused);
@@ -1789,7 +2181,7 @@ async function run(opts = {}) {
       log(T("السيرفر اتأخر جداً في الرد، فوقّفت الكود. جرّب تاني.", "The server took too long to answer, so the run was stopped. Try again."), "c-err");
       logErrorHelp(T("التشغيل ماخلصش قبل المهلة.", "The run did not finish before its time limit."), T("ممكن يكون فيه انتظار مفتوح أو عملية بطيئة.", "The program may be waiting indefinitely or running slowly."), T("راجع آخر output ونقاط الانتظار.", "Check the last output and the places where the program waits."));
     }
-    else log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
+    else { log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err"); logServerHint(e); }
   } finally {
     clearTimeout(timer);
     if (me === runId) {
@@ -1838,6 +2230,7 @@ function finish(level, res, missing = [], silent = false) {
   r.best = r.best ? Math.min(r.best, res.ticks) : res.ticks;
   store.save();
   if (silent) { updateOverall(); return; }
+  if (res.par > 0) parText(res.par, res.gold, res.par !== level.par || res.gold !== level.gold);
   $("#lvl-stars").innerHTML = starHTML(r.stars);
   $("#lvl-stars").setAttribute("aria-label", T(`${r.stars} من 3 نجوم`, `${r.stars} of 3 stars`));
   banner(res.message, true);
@@ -1851,7 +2244,11 @@ function finish(level, res, missing = [], silent = false) {
   for (let k = 0; k < res.stars; k++) setTimeout(() => Sound.play("star"), 420 + k * 180);
   let text = level.kind === "lab" ? res.message : T(`خلصت في <b>${res.ticks}</b> tick.`, `Done in <b>${res.ticks}</b> ticks.`);
   if (res.par > 0) {
-    if (res.stars < 3) text += T(`<br>النجوم التلاتة محتاجة <b>${res.gold}</b> tick أو أقل. تقدر توصلها؟`, `<br>Three stars need <b>${res.gold}</b> ticks or fewer. Can you get there?`);
+    if (res.stars < 3) {
+      const gap = res.ticks - res.gold;
+      text += T(`<br>النجوم التلاتة محتاجة <b>${res.gold}</b> tick أو أقل`, `<br>Three stars need <b>${res.gold}</b> ticks or fewer`)
+        + (gap > 0 ? T(` (فاضلك توفّر <b>${gap}</b>)`, ` (<b>${gap}</b> to save)`) : "") + T(". تقدر توصلها؟", ". Can you get there?");
+    }
     else text += T("<br>حل مثالي. مفيش أحسن من كده.", "<br>Perfect solution. It doesn't get better than this.");
   }
   if (improved && r.best === res.ticks && res.ticks > 0) text += T(`<br>أحسن رقم ليك: <b>${r.best}</b>`, `<br>Your best: <b>${r.best}</b>`);
@@ -1876,17 +2273,59 @@ function finish(level, res, missing = [], silent = false) {
     Profiles.init();
   } catch (e) {
     log(T("مقدرتش أوصل للسيرفر: ", "Can't reach the server: ") + e.message, "c-err");
+    logServerHint(e);
     return;
   }
-  let id = store.pref("current");
+  const linkedID = hashLevelID();
+  let id = idx(linkedID) >= 0 && unlocked(idx(linkedID)) ? linkedID : store.pref("current");
   if (idx(id) < 0 || !unlocked(idx(id))) {
     const firstOpen = S.levels.findIndex((l, i) => unlocked(i) && rec(l.id).stars === 0);
     id = S.levels[firstOpen >= 0 ? firstOpen : 0].id;
   }
+  restoreSpeeds();
   updateOverall();
-  loadLevel(id);
+  await loadLevel(id);
+  try {
+    const place = JSON.parse(localStorage.getItem("orbital.place." + PROFILE) || "null");
+    if (place?.level === S.cur?.id && place.file === S.file && place.at <= ed.value.length) {
+      ed.setSelectionRange(place.at, place.at); ed.scrollTop = place.top; syncScroll();
+    }
+  } catch {}
   if (!store.pref("welcomed")) showWelcome();
 })();
+
+// The map speed and the debugger speed are remembered per player.
+function restoreSpeeds() {
+  const map = Number(store.pref("mapSpeed"));
+  if (map >= +speedEl.min && map <= +speedEl.max) speedEl.value = map;
+  speedEl.addEventListener("change", () => store.pref("mapSpeed", +speedEl.value));
+  // say what the slider means: playback runs one tick every 380/speed ms
+  const describe = () => {
+    const perSecond = Math.round((1000 * +speedEl.value) / 380);
+    const text = T(`حوالي ${perSecond} tick في الثانية`, `about ${perSecond} ticks per second`);
+    speedEl.title = text; speedEl.setAttribute("aria-valuetext", text);
+  };
+  speedEl.addEventListener("input", describe);
+  describe();
+  const select = $("#debugger-speed");
+  const saved = String(store.pref("debugSpeed") || "");
+  if (select && [...select.options].some((o) => o.value === saved)) {
+    select.value = saved;
+    select.dispatchEvent(new Event("change"));
+  }
+  select?.addEventListener("change", () => store.pref("debugSpeed", select.value));
+}
+
+// Opening a #mission link in a running tab jumps to it (if unlocked).
+// "#1-2" (sheet code) or "#1-2-some-title" (full id) both name a mission.
+function hashLevelID() {
+  const raw = decodeURIComponent(location.hash.slice(1));
+  return S.levels.find((l) => l.id === raw)?.id || S.levels.find((l) => sheetCode(l) === raw)?.id || raw;
+}
+window.addEventListener("hashchange", () => {
+  const id = hashLevelID();
+  if (id && id !== S.cur?.id && unlocked(idx(id))) loadLevel(id);
+});
 
 function showWelcome() {
   showOverlay("#welcome");

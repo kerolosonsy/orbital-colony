@@ -42,8 +42,7 @@ return out.String(),nil // تجاهلت حالة مفتوحة عند EOF
 ~~~
 
 ## المهمة
-نفّذ ~RenderBulletin(source string) (string,error)~ باستخدام strings.Builder. القواعد الوحيدة ~[alert]text[/alert]~ تتحوّل <strong>text</strong> و~[code]text[/code]~ تتحوّل <code>text</code>. المحتوى ممكن فاضي؛ tags المعروفة ممنوع تتداخل حتى جوه code. أي قفل غير مطابق أو من غير فتح أو EOF مفتوحة يرجّع "",error من غير HTML جزئي. أي syntax تانية حرفية. طبّق html.EscapeString مرة واحدة على كل نص المستخدم؛ newline برا tags تبقى ~<br>
-~ وجواها تفضل newline. احفظ باقي المسافات والبايتات، من غير newline إضافية. الفاضي يرجّع "",nil. النجمة التالتة نص كبير Unicode وmultiline، مفيش حد Scanner. مفيش Report.
+نفّذ ~RenderBulletin(source string) (string,error)~ باستخدام strings.Builder. القواعد الوحيدة ~[alert]text[/alert]~ تتحوّل <strong>text</strong> و~[code]text[/code]~ تتحوّل <code>text</code>. المحتوى ممكن فاضي؛ tags المعروفة ممنوع تتداخل حتى جوه code. أي قفل غير مطابق أو من غير فتح أو EOF مفتوحة يرجّع "",error من غير HTML جزئي. أي syntax تانية حرفية. طبّق html.EscapeString مرة واحدة على كل نص المستخدم؛ newline برا tags تبقى ~<br>\n~ وجواها تفضل newline. احفظ باقي المسافات والبايتات، من غير newline إضافية. الفاضي يرجّع "",nil. النجمة التالتة نص كبير Unicode وmultiline، مفيش حد Scanner. مفيش Report.
 `, Hints: []string{"خلي الحالة واضحة: نص عادي أو جوه tag.", "اكتب HTML بتاعك واعمِل escaping مرة واحدة لكل نص.", "عند EOF، راجع هل فيه tag مفتوحة قبل إرجاع الناتج."},
 		En: &LevelText{LessonRevision: 1, Steps: ch20BulletinEnglish, Title: "Colony Bulletin", Goal: "Render a small bulletin grammar as safe HTML with a state machine", Lesson: `# A Safe Bulletin on the Base Screen
 
@@ -85,8 +84,7 @@ return out.String(),nil // Ignores an open state at EOF
 ~~~
 
 ## Your mission
-Implement ~RenderBulletin(source string) (string,error)~ using strings.Builder. Only ~[alert]text[/alert]~ becomes <strong>text</strong> and ~[code]text[/code]~ becomes <code>text</code>. Content may be empty; recognized tags cannot nest, including inside code. Mismatched or unexpected closes and EOF inside a tag return "",error without partial HTML. All other syntax is literal. Apply html.EscapeString exactly once to every user-text fragment. Newlines outside tags become ~<br>
-~; inside tags retain literal newlines. Preserve all other whitespace and bytes; add no trailing newline. Empty input returns "",nil. The third star covers large Unicode multiline text without a Scanner limit. No Report.
+Implement ~RenderBulletin(source string) (string,error)~ using strings.Builder. Only ~[alert]text[/alert]~ becomes <strong>text</strong> and ~[code]text[/code]~ becomes <code>text</code>. Content may be empty; recognized tags cannot nest, including inside code. Mismatched or unexpected closes and EOF inside a tag return "",error without partial HTML. All other syntax is literal. Apply html.EscapeString exactly once to every user-text fragment. Newlines outside tags become ~<br>\n~; inside tags retain literal newlines. Preserve all other whitespace and bytes; add no trailing newline. Empty input returns "",nil. The third star covers large Unicode multiline text without a Scanner limit. No Report.
 `, Hints: []string{"Track plain text or tag content as state.", "Write your HTML and escape each user-text fragment once.", "At EOF, check for an open tag before returning output."}, Files: []LabFile{{Name: "main.go", Starter: bulletinStarter}}}, Kind: "lab", Setup: seededLabRoom, Files: []LabFile{{Name: "main.go", Starter: bulletinStarterAr}}, Lab: &Lab{ReqFile: "main.go", Hidden: bulletinHidden, Bonus: true}})
 	add(&Level{ID: "20-2-validators", Chapter: 20, LessonRevision: 1, Steps: ch20ValidatorArabic, Title: "المدققين", Goal: "افحص بطاقة الطاقم واجمع الـerrors مع الاحتفاظ بأسبابها", Requires: []string{"errwrap"}, Bridge: []int{14},
 		Lesson: `# بطاقة الطاقم تتراجع كلها
@@ -411,7 +409,7 @@ expression = term { ("+" | "-") term }
 term       = primary { ("*" | "/") primary }
 primary    = number | name | "(" expression ")" | ("+" | "-") primary
 ~~~
-Multiplication is deeper than addition, so ~2+3*4~ groups as ~2+(3*4)~. Loops make operators at one level left associative: ~9-3-1~ means ~(9-3)-1.
+Multiplication is deeper than addition, so ~2+3*4~ groups as ~2+(3*4)~. Loops make operators at one level left associative: ~9-3-1~ means ~(9-3)-1~.
 
 Unary signs call the ~primary~ function directly, so it is also directly recursive. Use a free function ~primary(p *parser)~ and call ~primary(p)~ again after consuming a unary sign; the requirement scanner recognizes direct function recursion. Parentheses call ~expression~ again, reusing recursion from 14-5.
 ~~~go

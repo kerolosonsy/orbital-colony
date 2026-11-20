@@ -49,10 +49,6 @@ func ch01Walkthrough(id, text, code, exampleID string, imports []string, frames 
 	return LessonBlock{ID: id, Kind: "walkthrough", Text: ch01Paragraphs(text), Code: code, Imports: imports, ExampleID: exampleID, Walkthrough: &LessonWalkthrough{Frames: frames}}
 }
 
-func ch01Variable(name, value string) LessonVariable {
-	return LessonVariable{Name: name, Value: value}
-}
-
 func ch01TextPair(ar, en string) map[string]string {
 	return map[string]string{"ar": ar, "en": en}
 }

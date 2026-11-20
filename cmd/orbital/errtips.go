@@ -58,6 +58,36 @@ var errorTips = []errorTipEntry{
 	tipEntry("non-boolean condition", "main.go:4:5: non-boolean condition in if statement", tipCompile,
 		"شرط if أو for لازم يكون قيمة منطقية.", "التعبير في الشرط طلع نوع تاني غير bool.", "راجع قيمة الشرط والعمليات اللي بتكوّنه.",
 		"An if or for condition must be a boolean.", "The condition expression has a type other than bool.", "Check the condition value and its operations."),
+	tipEntry("is not in a loop", "main.go:3:2: break is not in a loop, switch, or select", tipCompile,
+		"break أو continue مكتوبة برة loop.", "غالباً الـ loop اتقفل بـ } قبلها، أو الكود ده المفروض يكون جوه for.", "راجع الأقواس حوالين for واتأكد إن السطر جواها.",
+		"break or continue is outside a loop.", "The loop probably closed with } before it, or this code belongs inside a for.", "Check the braces around the for and make sure the line is inside it."),
+	tipEntry("defined and not used", "main.go:3:1: label L defined and not used", tipCompile,
+		"في label اتعرّف ومحدش استخدمه.", "الـ label محتاج break L أو continue L يشاوروا عليه.", "استخدمه في break/continue أو امسحه.",
+		"A label is defined but never used.", "A label needs a break L or continue L that refers to it.", "Use it in break/continue or remove it."),
+	tipEntry("missing function body", "main.go:2:6: missing function body", tipCompile,
+		"الدالة ليها توقيع من غير جسم { }.", "غالباً { اتنست أو نزلت على سطر لوحدها؛ في Go لازم { تكون في نفس سطر func.", "حط { في آخر سطر func نفسه واكتب جسم الدالة.",
+		"The function has a signature but no { } body.", "The { is probably missing or on its own line; in Go it must be on the func line.", "Put { at the end of the func line and write the body."),
+	tipEntry("(overflows)", "main.go:3:15: cannot use 256 (untyped int constant) as byte value in variable declaration (overflows)", tipCompile,
+		"الرقم أكبر من اللي النوع ده يشيله.", "كل نوع رقمي ليه حدود؛ byte مثلاً من 0 لـ 255.", "اختار نوع أكبر (int مثلاً) أو صغّر القيمة.",
+		"The number is too big for this type.", "Each numeric type has limits; a byte holds 0 to 255.", "Pick a bigger type (such as int) or a smaller value.").withPriority(40),
+	tipEntry("out of bounds", "main.go:4:8: invalid argument: index 5 out of bounds [0:3]", tipCompile,
+		"الـ index أكبر من طول الـ array، والـ compiler شاف ده قبل التشغيل.", "الـ array ليه طول ثابت، والـ indexes بتبدأ من 0 لحد الطول ناقص 1.", "راجع طول الـ array والرقم اللي بتستخدمه.",
+		"The index is past the array's length, and the compiler caught it before running.", "An array has a fixed length; indexes go from 0 to length minus 1.", "Check the array length and the index you use.").withPriority(40),
+	tipEntry("invalid append", "main.go:4:13: invalid append: argument must be a slice; have x (variable of type int)", tipCompile,
+		"append بتشتغل على slice بس.", "أول argument لـ append لازم يكون slice، مش رقم أو قيمة واحدة.", "اتأكد إن المتغير اتعرّف كـ slice، مثلاً []int.",
+		"append only works on a slice.", "The first argument to append must be a slice, not a single value.", "Make sure the variable is declared as a slice, such as []int."),
+	tipEntry("invalid recursive type", "main.go:2:6: invalid recursive type: T refers to itself", tipCompile,
+		"النوع بيحتوي على نفسه مباشرة، فحجمه ملوش نهاية.", "struct مينفعش يكون جواه حقل من نفس النوع بالقيمة.", "استخدم pointer (*T) أو slice ([]T) للحقل ده.",
+		"The type contains itself directly, so its size never ends.", "A struct cannot hold a field of its own type by value.", "Use a pointer (*T) or a slice ([]T) for that field."),
+	tipEntry("division by zero", "main.go:3:11: invalid operation: division by zero", tipCompile,
+		"قسمة على صفر ثابت؛ الـ compiler رفضها.", "القاسم هنا صفر مكتوب في الكود.", "راجع القاسم أو افحصه قبل القسمة.",
+		"Division by a constant zero; the compiler rejected it.", "The divisor here is a literal zero.", "Check the divisor, or test it before dividing.").withPriority(40),
+	tipEntry("used as value", "main.go:3:20: f() (no value) used as value", tipCompile,
+		"الدالة دي مابترجعش قيمة، والكود بيحاول ياخد منها قيمة.", "الدالة معلنة من غير نوع راجع.", "يا إما تضيف نوع راجع وreturn، يا إما تستدعيها لوحدها من غير :=.",
+		"This function returns no value, but the code tries to use one.", "The function is declared without a result type.", "Either add a result type and return, or call it on its own without :=."),
+	tipEntry("too many return values", "main.go:2:19: too many return values", tipCompile,
+		"return بترجع قيم أكتر من اللي الدالة معلنة عنه.", "توقيع الدالة مافيهوش نوع راجع، أو فيه أقل من القيم دي.", "ضيف نوع الراجع في توقيع الدالة أو شيل القيمة من return.",
+		"return gives more values than the function declares.", "The signature has no result type, or fewer results than these values.", "Add the result type to the signature or drop the value from return."),
 	tipEntry("cannot use", "main.go:4:15: cannot use \"7\" (untyped string constant) as int value", tipCompile,
 		"القيمة دي مش من النوع المطلوب.", "Go مش بيحوّل الأنواع المختلفة تلقائي.", "قارن نوع القيمة بنوع المتغير أو الوسيط المطلوب.",
 		"This value does not have the required type.", "Go does not automatically convert different types.", "Compare the value's type with the expected variable or argument type."),
@@ -194,6 +224,15 @@ var errorTips = []errorTipEntry{
 	tipEntry("invalid memory address or nil pointer dereference", "runtime error: invalid memory address or nil pointer dereference", tipRuntime|tipLab,
 		"فيه وصول لذاكرة من pointer فاضي.", "قيمة مرجعية كانت nil وقت الاستخدام.", "راجع الـ stack trace ومصدر القيمة قبل الوصول لها.",
 		"Memory was accessed through a nil pointer.", "A reference value was nil when it was used.", "Check the stack trace and where the value came from."),
+	tipEntry("makeslice: len out of range", "panic: runtime error: makeslice: len out of range", tipRuntime|tipLab,
+		"make اتطلب منها slice بطول سالب أو ضخم جداً.", "الطول اتحسب وقت التشغيل وطلع سالب (غالباً طرح أكبر من اللازم).", "اطبع الطول قبل make وراجع الحسبة اللي بتطلعه.",
+		"make was asked for a slice with a negative or huge length.", "The length was computed at runtime and came out negative (often a subtraction gone too far).", "Print the length before make and check how it is computed."),
+	tipEntry("unlock of unlocked mutex", "fatal error: sync: unlock of unlocked mutex", tipRuntime|tipLab,
+		"Unlock اتنادت على mutex مش مقفول.", "غالباً Unlock اتكررت، أو defer Unlock مع Unlock عادية في نفس الدالة.", "خلّي كل Lock ليها Unlock واحدة بس، ويفضل بـ defer مباشرة بعد Lock.",
+		"Unlock was called on a mutex that is not locked.", "Unlock probably runs twice, e.g. a defer Unlock plus a plain Unlock in the same function.", "Pair every Lock with exactly one Unlock, ideally a defer right after Lock."),
+	tipEntry("invalid syntax", "panic: strconv.Atoi: parsing \"x\": invalid syntax", tipRuntime|tipLab,
+		"النص ده مش رقم صالح للتحويل.", "strconv.Atoi/ParseInt/ParseFloat استلمت نص فيه حروف أو مسافات.", "افحص الـ error اللي راجع من التحويل قبل ما تستخدم القيمة، وشيل المسافات بـ strings.TrimSpace.",
+		"This text is not a valid number to convert.", "strconv.Atoi/ParseInt/ParseFloat received text with letters or spaces.", "Check the error returned by the conversion before using the value; trim spaces with strings.TrimSpace."),
 	tipEntry("index out of range", "panic: runtime error: index out of range [4] with length 4", tipRuntime|tipLab,
 		"الـ index خارج حدود الـ slice أو array.", "القيمة المطلوبة مش موجودة عند الرقم ده.", "قارن الـ index بالطول الفعلي وقت التشغيل.",
 		"The index is outside the slice or array bounds.", "There is no element at that position.", "Compare the index with the length at runtime."),
@@ -340,41 +379,10 @@ func errorTipFor(message string, scopes tipScope, lang string) errorTipText {
 	return best.ar
 }
 
-func compileTips(lang string) []struct{ needle, tip string } {
-	return legacyTipList(tipCompile, lang)
-}
-
-func runTips(lang string) []struct{ needle, tip string } {
-	return legacyTipList(tipRuntime|tipLab, lang)
-}
-
-func legacyTipList(scopes tipScope, lang string) []struct{ needle, tip string } {
-	list := make([]struct{ needle, tip string }, 0, len(errorTips))
-	for _, entry := range errorTips {
-		if entry.scope&scopes == 0 {
-			continue
-		}
-		text := entry.ar
-		if normalizeLang(lang) == "en" {
-			text = entry.en
-		}
-		list = append(list, struct{ needle, tip string }{entry.needle, text.Meaning})
-	}
-	return list
-}
-
 func runtimeTipFor(stderr string, languages ...string) string {
 	lang := "ar"
 	if len(languages) > 0 {
 		lang = normalizeLang(languages[0])
 	}
 	return errorTipFor(stderr, tipRuntime|tipLab, lang).Meaning
-}
-
-func tipFor(message string, languages ...string) string {
-	lang := "ar"
-	if len(languages) > 0 {
-		lang = normalizeLang(languages[0])
-	}
-	return errorTipFor(message, tipCompile, lang).Meaning
 }

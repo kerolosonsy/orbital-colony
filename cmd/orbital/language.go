@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -65,6 +66,10 @@ func errorText(lang, message string) string {
 }
 
 func requestError(w http.ResponseWriter, r *http.Request, message string, status int) {
+	// server-side failures land in the log (make logs) so they can be diagnosed
+	if status >= http.StatusInternalServerError {
+		log.Printf("%s %s: %d %s", r.Method, r.URL.Path, status, message)
+	}
 	if strings.HasPrefix(r.URL.Path, "/api/profiles") {
 		profileBadRequest(w, r, message, status)
 		return

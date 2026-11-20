@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"orbital/colony/econ"
@@ -331,4 +332,143 @@ type colonyStreamRecorder struct {
 func (r *colonyStreamRecorder) Flush() {
 	r.ResponseRecorder.Flush()
 	r.flushed <- struct{}{}
+}
+
+func TestGuardSetsSecurityHeaders(t *testing.T) {
+	s := testColony(t)
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {})
+	for _, path := range []string{"/", "/api/colony"} { // allowed and refused
+		response := httptest.NewRecorder()
+		s.guard(mux).ServeHTTP(response, httptest.NewRequest("GET", "http://localhost"+path, nil))
+		h := response.Header()
+		if h.Get("X-Frame-Options") != "DENY" || h.Get("X-Content-Type-Options") != "nosniff" ||
+			!strings.Contains(h.Get("Content-Security-Policy"), "frame-ancestors 'none'") || h.Get("Referrer-Policy") != "no-referrer" {
+			t.Fatalf("%s headers: %v", path, h)
+		}
+	}
+}
+
+func TestStaticFilesRevalidate(t *testing.T) {
+	web := fstest.MapFS{"app.js": {Data: []byte("console.log(1)")}}
+	handler := staticHandler(web)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest("GET", "/app.js", nil))
+	tag := response.Header().Get("ETag")
+	if response.Code != 200 || response.Header().Get("Cache-Control") != "no-cache" || tag == "" {
+		t.Fatalf("first load: %d %v", response.Code, response.Header())
+	}
+	again := httptest.NewRequest("GET", "/app.js", nil)
+	again.Header.Set("If-None-Match", tag)
+	response = httptest.NewRecorder()
+	handler.ServeHTTP(response, again)
+	if response.Code != http.StatusNotModified {
+		t.Fatalf("unchanged file should be 304, got %d", response.Code)
+	}
+}
+
+func TestStripDirRemovesResolvedTempPath(t *testing.T) {
+	dir := t.TempDir()
+	real, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	in := "\t" + real + "/main.go:8 +0x1c\n" + dir + "/util.go:3: oops"
+	if got := stripDir(in, dir); got != "\tmain.go:8 +0x1c\nutil.go:3: oops" {
+		t.Fatalf("stripDir = %q", got)
+	}
+}
+
+func TestLevelsPayloadIsCachedWithETag(t *testing.T) {
+	s := &server{}
+	get := func(lang, etag string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest("GET", "/api/levels", nil)
+		req.Header.Set("X-Orbital-Lang", lang)
+		if etag != "" {
+			req.Header.Set("If-None-Match", etag)
+		}
+		response := httptest.NewRecorder()
+		s.levels(response, req)
+		return response
+	}
+	ar, en := get("ar", ""), get("en", "")
+	if ar.Code != 200 || en.Code != 200 || ar.Header().Get("ETag") == "" || ar.Header().Get("ETag") == en.Header().Get("ETag") {
+		t.Fatalf("ar %d %q, en %d %q", ar.Code, ar.Header().Get("ETag"), en.Code, en.Header().Get("ETag"))
+	}
+	var payload struct{ Levels []json.RawMessage }
+	if err := json.Unmarshal(en.Body.Bytes(), &payload); err != nil || len(payload.Levels) != len(levels.All) {
+		t.Fatalf("payload: %v, %d levels", err, len(payload.Levels))
+	}
+	if again := get("ar", ar.Header().Get("ETag")); again.Code != http.StatusNotModified || again.Body.Len() != 0 {
+		t.Fatalf("unchanged payload should be 304, got %d", again.Code)
+	}
+}
+
+func TestFormatCode(t *testing.T) {
+	s := &server{}
+	post := func(code string) map[string]string {
+		body, _ := json.Marshal(map[string]string{"code": code})
+		response := httptest.NewRecorder()
+		s.formatCode(response, httptest.NewRequest("POST", "/api/format", strings.NewReader(string(body))))
+		var out map[string]string
+		if err := json.Unmarshal(response.Body.Bytes(), &out); err != nil {
+			t.Fatalf("%d %s", response.Code, response.Body)
+		}
+		return out
+	}
+	if got := post("package main\nfunc main(){\nx:=1\n_ = x}\n"); got["code"] != "package main\n\nfunc main() {\n\tx := 1\n\t_ = x\n}\n" {
+		t.Fatalf("formatted: %q", got)
+	}
+	if got := post("package main\nfunc main() {"); got["error"] == "" || got["code"] != "" {
+		t.Fatalf("broken code should return an error: %q", got)
+	}
+}
+
+func TestWorkspaceSuggestsGoExtensionWithoutOverwriting(t *testing.T) {
+	ws := &workspace{root: t.TempDir()}
+	custom := filepath.Join(ws.root, ".vscode", "settings.json")
+	if err := os.MkdirAll(filepath.Dir(custom), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(custom, []byte(`{"mine": true}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := ws.ensureEditorSettings(); err != nil {
+		t.Fatal(err)
+	}
+	ext, err := os.ReadFile(filepath.Join(ws.root, ".vscode", "extensions.json"))
+	if err != nil || !strings.Contains(string(ext), "golang.go") {
+		t.Fatalf("extensions.json: %s %v", ext, err)
+	}
+	if got, _ := os.ReadFile(custom); string(got) != `{"mine": true}` {
+		t.Fatalf("player settings were overwritten: %s", got)
+	}
+}
+
+func TestColonySymbolsListTheLearnerAPI(t *testing.T) {
+	abs, _ := filepath.Abs("../../colony")
+	symbols := colonySymbols(abs)
+	find := func(name, kind string) *apiSymbol {
+		for i := range symbols {
+			if symbols[i].Name == name && symbols[i].Kind == kind {
+				return &symbols[i]
+			}
+		}
+		return nil
+	}
+	move := find("Move", "func")
+	if move == nil || !strings.Contains(move.Signature, "Direction") || move.Doc == "" {
+		t.Fatalf("Move: %+v", move)
+	}
+	if find("East", "const") == nil || find("Drone", "type") == nil || find("Spawn", "func") == nil {
+		t.Fatalf("missing East/Drone/Spawn in %d symbols", len(symbols))
+	}
+	if m := find("Move", "method"); m == nil || m.Recv != "Drone" || !strings.HasSuffix(m.Doc, "(this drone)") || strings.HasPrefix(m.Doc, "Move is Move") {
+		t.Fatalf("Drone.Move method should borrow Move's doc: %+v", m)
+	}
+	for _, s := range symbols {
+		if strings.Contains(s.Doc, "\n") {
+			t.Fatalf("doc should be one line: %q", s.Doc)
+		}
+	}
 }

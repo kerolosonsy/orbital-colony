@@ -21,19 +21,42 @@ func Spawn() *Drone {
 // functions) is drone 0.
 func (d *Drone) ID() int { return d.id }
 
+// Move is Move for this drone.
 func (d *Drone) Move(dir Direction) bool { return world.Move(d.id, dir) }
-func (d *Drone) Harvest() bool           { return world.Harvest(d.id) }
+
+// Harvest is Harvest for this drone.
+func (d *Drone) Harvest() bool { return world.Harvest(d.id) }
+
+// TryHarvest is TryHarvest for this drone.
 func (d *Drone) TryHarvest() (int, error) {
 	return world.TryHarvest(d.id)
 }
-func (d *Drone) Plant(e Entity) bool  { return world.Plant(d.id, e) }
-func (d *Drone) Till() bool           { return world.Till(d.id) }
-func (d *Drone) Wait()                { world.Wait(d.id) }
-func (d *Drone) CanHarvest() bool     { return world.CanHarvest(d.id) }
-func (d *Drone) GetEntity() Entity    { return world.GetEntity(d.id) }
-func (d *Drone) GetGround() Ground    { return world.GetGround(d.id) }
-func (d *Drone) Measure() int         { return world.Measure(d.id) }
-func (d *Drone) Unload() bool         { return world.Unload(d.id) }
+
+// Plant is Plant for this drone.
+func (d *Drone) Plant(e Entity) bool { return world.Plant(d.id, e) }
+
+// Till is Till for this drone.
+func (d *Drone) Till() bool { return world.Till(d.id) }
+
+// Wait is Wait for this drone.
+func (d *Drone) Wait() { world.Wait(d.id) }
+
+// CanHarvest is CanHarvest for this drone.
+func (d *Drone) CanHarvest() bool { return world.CanHarvest(d.id) }
+
+// GetEntity is GetEntity for this drone.
+func (d *Drone) GetEntity() Entity { return world.GetEntity(d.id) }
+
+// GetGround is GetGround for this drone.
+func (d *Drone) GetGround() Ground { return world.GetGround(d.id) }
+
+// Measure is Measure for this drone.
+func (d *Drone) Measure() int { return world.Measure(d.id) }
+
+// Unload is Unload for this drone.
+func (d *Drone) Unload() bool { return world.Unload(d.id) }
+
+// Position returns this drone's x and y. Free: no ticks.
 func (d *Drone) Position() (x, y int) { return world.Position(d.id) }
 
 // StormWarning receives a value when a dust storm is about to hit.

@@ -59,7 +59,7 @@ func (r *runner) goTest(ctx context.Context, lvl *levels.Level, files map[string
 	cmd := r.goCmd(tctx, dir, append(testArgs, args...)...)
 	cmd.Stdout, cmd.Stderr = out, out
 	runErr := runCommand(cmd)
-	text := strings.ReplaceAll(out.String(), dir+string(os.PathSeparator), "")
+	text := stripDir(out.String(), dir)
 	if tctx.Err() != nil {
 		if text != "" {
 			text += "\n"

@@ -5,9 +5,11 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"flag"
 	"io/fs"
 	"log"
@@ -106,12 +108,14 @@ func main() {
 	mux := http.NewServeMux()
 	s.registerProfiles(mux)
 	mux.HandleFunc("GET /{$}", s.index)
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(web)))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", staticHandler(web)))
 	mux.HandleFunc("GET /api/levels", s.levels)
 	mux.HandleFunc("GET /api/services", s.services)
 	mux.HandleFunc("GET /api/preview", s.preview)
 	mux.HandleFunc("POST /api/run", s.runCode)
 	mux.HandleFunc("POST /api/trace", s.traceCode)
+	mux.HandleFunc("POST /api/format", s.formatCode)
+	mux.HandleFunc("GET /api/symbols", s.symbols)
 	mux.HandleFunc("POST /api/workspace/open", s.workspaceOpen)
 	mux.HandleFunc("GET /api/workspace/files", s.workspaceFiles)
 
@@ -140,6 +144,9 @@ func main() {
 		}
 	}()
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if errors.Is(err, syscall.EADDRINUSE) {
+			log.Fatalf("%s is already in use (is the game already running? try: make status). Pick another port: -addr 127.0.0.1:7778", *addr)
+		}
 		log.Fatal(err)
 	}
 }
@@ -148,6 +155,14 @@ func main() {
 // this process (which embed the token) may call the API.
 func (s *server) guard(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// The page holds the API token and runs code on this machine: no
+		// framing by other sites (clickjacking), no MIME sniffing, and no
+		// Referer leaving the game.
+		h := w.Header()
+		h.Set("X-Frame-Options", "DENY")
+		h.Set("Content-Security-Policy", "frame-ancestors 'none'")
+		h.Set("X-Content-Type-Options", "nosniff")
+		h.Set("Referrer-Policy", "no-referrer")
 		host, _, err := net.SplitHostPort(r.Host)
 		if err != nil {
 			host = r.Host
@@ -173,6 +188,31 @@ func (s *server) guard(next http.Handler) http.Handler {
 	})
 }
 
+// staticHandler serves the embedded client so a rebuilt server never leaves
+// the browser on old scripts: every request revalidates (no-cache) and a
+// content-hash ETag turns unchanged files into a cheap 304.
+func staticHandler(web fs.FS) http.Handler {
+	etags := map[string]string{}
+	fs.WalkDir(web, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		if body, err := fs.ReadFile(web, path); err == nil {
+			sum := sha256.Sum256(body)
+			etags[path] = `"` + hex.EncodeToString(sum[:8]) + `"`
+		}
+		return nil
+	})
+	files := http.FileServerFS(web)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		if tag, ok := etags[strings.TrimPrefix(r.URL.Path, "/")]; ok {
+			w.Header().Set("ETag", tag)
+		}
+		files.ServeHTTP(w, r)
+	})
+}
+
 func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	page, err := fs.ReadFile(s.web, "index.html")
 	if err != nil {
@@ -189,7 +229,39 @@ func writeJSON(w http.ResponseWriter, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 
+// levelsCache holds the encoded /api/levels payload per language: the level
+// data never changes while the server runs, and it is ~3.6 MB of JSON.
+var levelsCache sync.Map // lang -> cachedJSON
+
+type cachedJSON struct {
+	body []byte
+	etag string
+}
+
 func (s *server) levels(w http.ResponseWriter, r *http.Request) {
+	lang := requestLang(r)
+	entry, ok := levelsCache.Load(lang)
+	if !ok {
+		body, err := json.Marshal(levelsPayload(r))
+		if err != nil {
+			requestError(w, r, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		sum := sha256.Sum256(body)
+		entry, _ = levelsCache.LoadOrStore(lang, cachedJSON{body: append(body, '\n'), etag: `"` + hex.EncodeToString(sum[:8]) + `"`})
+	}
+	cached := entry.(cachedJSON)
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("ETag", cached.etag)
+	if match := r.Header.Get("If-None-Match"); match != "" && match == cached.etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(cached.body)
+}
+
+func levelsPayload(r *http.Request) map[string]any {
 	chapters := append([]levels.Chapter(nil), levels.Chapters...)
 	for i := range chapters {
 		chapters[i].Quiz = append([]levels.QuizQuestion(nil), chapters[i].Quiz...)
@@ -209,7 +281,7 @@ func (s *server) levels(w http.ResponseWriter, r *http.Request) {
 			chapters[i].Track = chapters[i].TrackEn
 		}
 	}
-	writeJSON(w, map[string]any{"chapters": chapters, "levels": missions})
+	return map[string]any{"chapters": chapters, "levels": missions}
 }
 
 func (s *server) preview(w http.ResponseWriter, r *http.Request) {

@@ -41,6 +41,9 @@ func TestErrorTipPrefersSpecificDiagnostics(t *testing.T) {
 	}{
 		{"invalid operation: a + b (mismatched types int and string)", "العملية بتجمع أو تقارن أنواع مختلفة."},
 		{"invalid operation: cannot call count (variable of type int): int is not a function", "الكود بيحاول يستدعي قيمة مش دالة."},
+		{"cannot use 256 (untyped int constant) as byte value in variable declaration (overflows)", "الرقم أكبر من اللي النوع ده يشيله."},
+		{"invalid operation: division by zero", "قسمة على صفر ثابت؛ الـ compiler رفضها."},
+		{"invalid argument: index 5 out of bounds [0:3]", "الـ index أكبر من طول الـ array، والـ compiler شاف ده قبل التشغيل."},
 	} {
 		got := errorTipFor(tc.message, tipCompile, "ar")
 		if got.Meaning != tc.want {

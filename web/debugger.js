@@ -166,7 +166,8 @@ const InlineDebugger = (() => {
       const isBreakpoint = breakSet.has(line);
       const classes = ["gutter-line", error ? "err" : "", isBreakpoint ? "has-breakpoint" : "", line === currentLine ? "debug-active" : "", visited.has(line) && line !== currentLine ? "debug-visited" : ""].filter(Boolean).join(" ");
       const label = translate(`السطر ${line}${isBreakpoint ? "، نقطة توقف" : ""}${error ? "، فيه خطأ" : ""}`, `Line ${line}${isBreakpoint ? ", breakpoint" : ""}${error ? ", error" : ""}`);
-      markup += `<button type="button" class="${classes}" data-debug-line="${line}" aria-label="${esc(label)}" title="${esc(error || label)}"><span>${line}</span></button>`;
+      const tip = error || label + translate(isBreakpoint ? " — دوس تشيلها (F9)" : " — دوس تحط نقطة توقف (F9)", isBreakpoint ? " — click to remove (F9)" : " — click for a breakpoint (F9)");
+      markup += `<button type="button" class="${classes}" data-debug-line="${line}" aria-label="${esc(label)}" title="${esc(tip)}"><span>${line}</span></button>`;
     }
     return markup;
   }
@@ -466,6 +467,10 @@ const InlineDebugger = (() => {
     else if (event.key === "F10") command = "over";
     else if (event.key === "F11" && event.shiftKey) command = "out";
     else if (event.key === "F11") command = "into";
+    // keys that work without Fn on laptops: Alt+← step back, Alt+→ step, Alt+Space play/pause
+    else if (event.altKey && !event.metaKey && !event.ctrlKey && event.key === "ArrowLeft") command = "back";
+    else if (event.altKey && !event.metaKey && !event.ctrlKey && event.key === "ArrowRight") command = "into";
+    else if (event.altKey && !event.metaKey && !event.ctrlKey && event.code === "Space") command = "play";
     if (command) {
       event.preventDefault();
       commandStep(command);

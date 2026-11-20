@@ -16,7 +16,8 @@ function fixture({ blob, review = false, lang = "en" } = {}) {
   roots["#btn-hint"].appendChild(createElement("span"));
   const editor = createElement("textarea");
   const body = createElement("body");
-  const store = { blob: blob || { progress: {}, prefs: {}, quizScores: {}, review: {}, lessons: {} }, save() {} };
+  const store = { blob: blob || { progress: {}, prefs: {}, quizScores: {}, review: {}, lessons: {} }, save() {},
+    pref(k, v) { if (v === undefined) return this.blob.prefs[k]; this.blob.prefs[k] = v; } };
   const context = vm.createContext({
     ResizeObserver: class {
       constructor(callback) { this.callback = callback; observers.push(this); }
@@ -475,6 +476,7 @@ test("hint clicks reveal one position-labelled hint at a time, while legacy hint
       else assert.equal(markup, level.hints[index]);
     }
     assert.equal(view.roots["#btn-hint"].disabled, true);
+    assert.equal(view.store.blob.prefs.hintsSeen?.[level.id], 3, "opened hints are remembered for the next visit");
   }
 });
 

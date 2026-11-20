@@ -13,6 +13,7 @@ func Nearest() *Point { return world.Nearest(0) }
 // whether it is a Distress, a Supply or a Noise.
 type Signal = sim.Signal
 
+// The three kinds of Signal.
 type (
 	Distress = sim.Distress
 	Supply   = sim.Supply

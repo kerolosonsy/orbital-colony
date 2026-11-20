@@ -21,6 +21,7 @@ import (
 // Direction is where the drone moves. North is up, East is right.
 type Direction = sim.Direction
 
+// The four Directions for Move: North (up), East (right), South, West.
 const (
 	North = sim.North
 	East  = sim.East
@@ -31,6 +32,7 @@ const (
 // Entity is what sits on a tile.
 type Entity = sim.Entity
 
+// Entities: crops and resources on tiles, and the goods made from them.
 const (
 	Empty      = sim.Empty
 	Moss       = sim.Moss
@@ -67,6 +69,9 @@ const (
 // Ground is the surface of a tile.
 type Ground = sim.Ground
 
+// Grounds a tile can have: Regolith (Till it into Soil, or Sift it), Soil
+// (grows Moss), Ice (grows Lichen, or Melt it), Rock, underground Stone (Dig
+// it) and the dug-out Tunnel and Shaft.
 const (
 	Regolith = sim.Regolith
 	Soil     = sim.Soil

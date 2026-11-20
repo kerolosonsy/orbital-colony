@@ -12,11 +12,14 @@ import (
 	"time"
 )
 
+// CA is a throwaway certificate authority for TLS lab tests.
 type CA struct {
 	Certificate *x509.Certificate
 	key         *ecdsa.PrivateKey
 }
 
+// CertOptions describes a certificate to issue: names, validity and whether
+// it is a client certificate.
 type CertOptions struct {
 	DNSNames    []string
 	IPAddresses []net.IP
@@ -25,6 +28,7 @@ type CertOptions struct {
 	Client      bool
 }
 
+// TestCA creates a new in-memory CA valid for ten years.
 func TestCA() (*CA, error) {
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {

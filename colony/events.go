@@ -15,7 +15,10 @@ func Fault() error { return world.Fault(0) }
 // A storm-stunned drone must wait until its stun ends before repairing.
 func Repair() bool { return world.Repair(0) }
 
+// Fault is Fault for this drone.
 func (d *Drone) Fault() error { return world.Fault(d.id) }
+
+// Repair is Repair for this drone.
 func (d *Drone) Repair() bool { return world.Repair(d.id) }
 
 // Rush returns the active order's good and remaining amount, or ok=false.

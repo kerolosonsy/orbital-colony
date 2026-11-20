@@ -12,7 +12,7 @@ OPEN    ?= open
 STAMP    = $(shell date +%Y%m%d-%H%M%S)
 
 .DEFAULT_GOAL := help
-.PHONY: help run start stop restart status logs open build test test-quick check fmt vet stats \
+.PHONY: help run start stop restart status logs open build test test-quick test-web check fmt vet lint stats \
         backup restore backups players reset-all clean doctor
 
 help: ## اعرض كل الأوامر
@@ -65,7 +65,7 @@ build: ## ابني السيرفر
 
 # ---------- الاختبارات ----------
 
-test: ## كل الاختبارات: كل مهمة لازم تتحل (حوالي 4 دقايق)
+test: ## كل الاختبارات: كل مهمة لازم تتحل (حوالي 8 دقايق)
 	cd colony && go test ./...
 	go test ./cmd/orbital/ -count=1 -timeout 30m
 
@@ -73,7 +73,10 @@ test-quick: ## اختبارات سريعة (أقل من دقيقة)
 	cd colony && go test ./...
 	go test ./cmd/orbital/ -count=1 -run 'TestLevelOrder|TestPreviewHasNoTimers|TestGoalMustHold|TestCompileErrorTips|Profile|Lang|TestLevelsSolvable/(1-1|1-2|3-3)'
 
-check: fmt vet test-quick ## نسّق وافحص وجرّب بسرعة قبل ما تحفظ شغلك
+test-web: ## اختبارات واجهة المتصفح (محتاج Node 20+)
+	node --test web/*.test.js web/sandbox/*.test.js
+
+check: fmt vet test-quick test-web ## نسّق وافحص وجرّب بسرعة قبل ما تحفظ شغلك
 
 fmt: ## نسّق كود Go
 	gofmt -w cmd colony assets.go
@@ -81,6 +84,12 @@ fmt: ## نسّق كود Go
 vet: ## افحص الكود بـ go vet
 	go vet ./...
 	cd colony && go vet ./...
+
+lint: ## افحص من غير تعديل: gofmt -l و go vet و staticcheck (لو متسطب)
+	@test -z "$$(gofmt -l cmd colony assets.go)" || { echo "محتاج gofmt:"; gofmt -l cmd colony assets.go; exit 1; }
+	@$(MAKE) --no-print-directory vet
+	@if command -v staticcheck >/dev/null; then staticcheck ./cmd/... && cd colony && staticcheck ./...; \
+	else echo "• staticcheck مش متسطب: go install honnef.co/go/tools/cmd/staticcheck@latest"; fi
 
 stats: ## اطبع أكتر 20 ورقة اتعثر فيها اللاعبون
 	go run ./cmd/orbital -stats -saves $(SAVES)
@@ -122,6 +131,9 @@ doctor: ## اتأكد إن كل حاجة جاهزة على الجهاز
 	@command -v code >/dev/null && echo "✓ VS Code (code)" || echo "• VS Code: افتحه ومن Command Palette اختار: Shell Command: Install 'code' command in PATH"
 	@command -v gopls >/dev/null && echo "✓ gopls" || echo "• gopls مش متسطب (للـ autocomplete): go install golang.org/x/tools/gopls@latest"
 	@lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1 && echo "• البورت $(PORT) مستخدم دلوقتي" || echo "✓ البورت $(PORT) فاضي"
+	@(cd labdeps && GOPROXY=off GOFLAGS=-mod=mod go build ./... >/dev/null 2>&1) && echo "✓ مكتبات المختبرات جاهزة" || echo "• مكتبات المختبرات مش جاهزة: شغّل make deps مرة وإنت متوصل بالإنترنت"
+	@command -v docker >/dev/null && echo "✓ Docker (لمهمات الخدمات: make services-up)" || echo "• Docker مش متسطب: محتاجه بس لمهمات Postgres/MongoDB/Kafka"
+	@command -v node >/dev/null && echo "✓ Node $$(node --version) (لاختبارات الواجهة: make test-web)" || echo "• Node مش متسطب: محتاجه بس لـ make test-web"
 
 clean: ## امسح ملفات البناء والـ logs (الحفظ مش بيتمسح)
 	rm -f $(BIN) $(LOGFILE)
@@ -131,8 +143,8 @@ deps: ## جهّز مكتبات المختبرات / Prepare lab dependencies (re
 	cd labdeps && GOPROXY=https://proxy.golang.org go mod download all
 	cd labdeps && GOPROXY=off go build ./...
 
-services-up: ## شغّل الخدمات المحلية / Start local services
-	docker compose -f services/compose.yaml up -d
+services-up: ## شغّل الخدمات المحلية واستنى لحد ما تبقى جاهزة / Start local services and wait until healthy
+	docker compose -f services/compose.yaml up -d --wait
 
 services-down: ## اقفل الخدمات المحلية / Stop local services
 	docker compose -f services/compose.yaml down

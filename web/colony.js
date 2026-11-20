@@ -107,7 +107,8 @@ const Colony = (() => {
     if (playback) finishPlayback();
     // a mission debug session (and its focus layout) must not leak into the colony
     if (typeof clearTraceRun === "function") clearTraceRun();
-    if (!baseDocTitle && typeof document !== "undefined" && typeof document.title === "string") baseDocTitle = document.title;
+    // remember the mission's tab title each time we come in, to restore on exit
+    if (S.mode !== "colony" && typeof document !== "undefined" && typeof document.title === "string") baseDocTitle = document.title;
     S.mode = "colony";
     document.body.classList.add("colony");
     try {
@@ -125,6 +126,7 @@ const Colony = (() => {
     updateSeasonTitle();
     $("#lvl-stars").innerHTML = "";
     $("#goal-strip-par").textContent = "";
+    $("#banner")?.classList.add("hidden"); // the last mission's result doesn't belong here
     lastErrors = []; lastMtime = 0;
     showFile("main.go"); linkUI();
     if (isLinked()) syncFromWorkspace(true);
@@ -172,6 +174,14 @@ const Colony = (() => {
       let ev;
       try { ev = JSON.parse(m.data); } catch { return; }
       onEvent(ev);
+    };
+    // A closed stream (e.g. the server restarted with a new token) never comes
+    // back by itself: say so once instead of silently freezing the colony.
+    const stream = es;
+    es.onerror = () => {
+      if (stream !== es || stream.readyState !== EventSource.CLOSED || stream.warned) return;
+      stream.warned = true;
+      log(T("الاتصال المباشر بالمستعمرة اتقطع. اعمل refresh للصفحة (⌘R / F5).", "The live colony connection was lost. Refresh the page (⌘R / F5)."), "c-warn");
     };
   }
 
@@ -316,8 +326,8 @@ const Colony = (() => {
         refresh();
         return;
       }
-      case "stdout": log(ev.msg); return;
-      case "stderr": log(ev.msg, "c-err"); return;
+      case "stdout": (typeof logExact === "function" ? logExact : log)(ev.msg); return; // the program's own text, as printed
+      case "stderr": (typeof logExact === "function" ? logExact : log)(ev.msg, "c-err"); return;
       case "stopped":
         running = false; live = null; runUI();
         log(T(`المستعمرة وقفت. ${ev.msg || ""}`, `Colony stopped. ${ev.msg || ""}`), "c-info");
@@ -486,6 +496,7 @@ const Colony = (() => {
       applyCheckResult(kind, r);
     } catch (e) {
       log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
+      if (typeof logServerHint === "function") logServerHint(e);
       Sound.play("error");
     } finally {
       checking = false;
@@ -547,6 +558,7 @@ const Colony = (() => {
       log(T("المستعمرة شغالة.", "Colony running."), "c-ok");
     } catch (e) {
       log(T("خطأ في الاتصال بالسيرفر: ", "Server connection error: ") + e.message, "c-err");
+      if (typeof logServerHint === "function") logServerHint(e);
     } finally {
       btn.classList.remove("busy");
       runUI();
@@ -1429,7 +1441,7 @@ const Colony = (() => {
     } else {
       if (titleEl) titleEl.textContent = LEVEL.title;
       if (chapEl) chapEl.textContent = T("مستعمرة حرة", "OPEN COLONY");
-      if (baseDocTitle && typeof document !== "undefined") document.title = baseDocTitle;
+      if (typeof document !== "undefined" && typeof document.title === "string") document.title = `${LEVEL.title} — Orbital Colony`;
     }
   }
 

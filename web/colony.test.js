@@ -1120,7 +1120,7 @@ test("Colony seasons and systems end-to-end: title distinction, running disable,
   assert.equal(await ctx.Colony.leaveSeason(), true);
   assert.deepEqual(JSON.parse(JSON.stringify(apiCalls.findLast((c) => c.path === "/api/colony/season").body)), { id: "" });
   assert.equal(doc.body.classList.contains("colony-season"), false);
-  assert.equal(doc.title, "Orbital Colony");
+  assert.equal(doc.title, "Colony — Orbital Colony");
   assert.equal(getEl("#lvl-title").textContent, "Colony");
   assert.equal(getEl("#col-season").classList.contains("hidden"), true);
 
