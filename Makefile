@@ -134,6 +134,7 @@ doctor: ## اتأكد إن كل حاجة جاهزة على الجهاز
 	@(cd labdeps && GOPROXY=off GOFLAGS=-mod=mod go build ./... >/dev/null 2>&1) && echo "✓ مكتبات المختبرات جاهزة" || echo "• مكتبات المختبرات مش جاهزة: شغّل make deps مرة وإنت متوصل بالإنترنت"
 	@command -v docker >/dev/null && echo "✓ Docker (لمهمات الخدمات: make services-up)" || echo "• Docker مش متسطب: محتاجه بس لمهمات Postgres/MongoDB/Kafka"
 	@command -v node >/dev/null && echo "✓ Node $$(node --version) (لاختبارات الواجهة: make test-web)" || echo "• Node مش متسطب: محتاجه بس لـ make test-web"
+	@command -v codex >/dev/null && echo "✓ Codex (للمساعد في اللعبة؛ لازم يكون متسجّل: codex login)" || echo "• Codex مش متسطب (للمساعد في اللعبة): brew install codex وبعدين codex login"
 
 clean: ## امسح ملفات البناء والـ logs (الحفظ مش بيتمسح)
 	rm -f $(BIN) $(LOGFILE)
