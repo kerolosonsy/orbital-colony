@@ -21,42 +21,40 @@ func lateTextSlice(arabic, english []string, useEnglish bool) []string {
 	return arabic
 }
 
-const stockOrderComparatorExample = `type Player struct { name string; age int }
-players := []Player{{"Mira", 8}, {"Ari", 12}, {"Ari", 9}}
-before := func(a, b Player) int {
-	if byName := cmp.Compare(a.name, b.name); byName != 0 {
-		return byName
+// stockOrderExample is the mission in miniature: four readings the drone
+// took at x = 0..3, ranked the way the report wants them.
+const stockOrderExample = `sizes := []int{3, 5, 3, 5}
+positions := []int{0, 1, 2, 3}
+slices.SortFunc(positions, func(a, b int) int {
+	if sizes[a] != sizes[b] {
+		return cmp.Compare(sizes[b], sizes[a])
 	}
-	return cmp.Compare(a.age, b.age)
-}
-fmt.Println(before(players[1], players[0]))
-fmt.Println(before(players[1], players[2]))
-slices.SortFunc(players, before)
-fmt.Println(players)`
+	return cmp.Compare(a, b)
+})
+fmt.Println(positions)`
 
 func stockOrderLesson(useEnglish bool) []LessonStep {
 	return []LessonStep{
 		{
 			ID: "c64.late.mission-step", Title: lateText("المهمة", "Mission", useEnglish),
 			Blocks: []LessonBlock{{ID: "c64.late.mission", Kind: "markdown", Text: lateText(
-				"1. رتّب المواقع: الحجم الأكبر الأول، وبعده x الأصغر عند التعادل.\n2. اقرا العرض بـ~colony.WorldSize~ وابعت المواقع بتقرير واحد.\n3. الـstarter طبع قياس من غير ما يخزّنه؛ ده كلّف tick. ممنوع الحصاد.\n\nالذهب: **19 ticks أو أقل**.",
-				"1. Rank positions: larger sizes first, then smaller x on ties.\n2. Read width with ~colony.WorldSize~; report positions once.\n3. The starter printed an unsaved measurement (one tick); do not harvest.\n\nGold: **19 ticks or fewer**.", useEnglish)}},
+				"1. ~Measure~ بتقيس الخانة اللي تحت الدرون بس: امشي شرق وقيس كل خانة.\n2. رتّب المواقع: الحجم الأكبر الأول، ولو اتعادلوا الـx الأصغر.\n3. ابعت المواقع بـ~Report~ مرة واحدة. ممنوع الحصاد.\n\nالذهب: **19 tick**.",
+				"1. ~Measure~ reads only the tile under the drone: walk east and measure every tile.\n2. Rank positions: bigger size first, smaller x on ties.\n3. ~Report~ the positions once. No harvesting.\n\nGold: **19 ticks**.", useEnglish)}},
 		},
 		{
 			ID: "c64.late.idea-step", Title: lateText("الفكرة", "Idea", useEnglish),
 			Blocks: []LessonBlock{{
 				ID: "c64.late.trace", Kind: "walkthrough",
-				Text: lateText("الـcomparator بيرجّع sign: السالب يقدّم a، والصفر تعادل، والموجب يأخّره.\n\nالمثال بيرتّب أسماء وبعدها أعمار؛ قاعدة المهمة مختلفة.", "A comparator returns a sign: negative puts a first, zero ties, positive puts it later.\n\nThis toy sorts names, then ages; the mission differs.", useEnglish),
-				Code: stockOrderComparatorExample, Imports: []string{"cmp", "fmt", "slices"}, ExampleID: "e64-sort-sign-late",
+				Text: lateText("زي طابور: ~SortFunc~ بتسأل الـcomparator عن كل اتنين «مين يقف الأول؟». السالب يقدّم a، والموجب يقدّم b، والصفر تعادل.\n\nده نفس شكل المهمة بأربع خانات.", "Like a queue: ~SortFunc~ asks the comparator \"who stands first?\" Negative = a, positive = b, zero = tie.\n\nThe mission in four tiles.", useEnglish),
+				Code: stockOrderExample, Imports: []string{"cmp", "fmt", "slices"}, ExampleID: "e64-rank-crystals",
 				Walkthrough: &LessonWalkthrough{Frames: []LessonFrame{
-					{Line: 0, Caption: lateText("قبل الكروت.", "Before the cards.", useEnglish)},
-					{Line: 1, Caption: lateText("struct للتجربة.", "An illustrative type.", useEnglish), Variables: []LessonVariable{{Name: "Player", Value: "name, age"}}},
-					{Line: 2, Caption: lateText("أسماء وأعمار للتوضيح.", "Illustrative names and ages.", useEnglish), Variables: []LessonVariable{{Name: "players", Value: "[{Mira 8} {Ari 12} {Ari 9}]"}}},
-					{Line: 3, Caption: lateText("خزّنّا قاعدة المقارنة.", "Comparator saved.", useEnglish), Variables: []LessonVariable{{Name: "before", Value: "function value"}}},
-					{Line: 9, Caption: lateText("Ari يسبق Mira؛ النتيجة -1.", "Ari precedes Mira; result -1.", useEnglish), Variables: []LessonVariable{{Name: "byName", Value: "-1"}}, Output: "-1"},
-					{Line: 10, Caption: lateText("الاسم اتعادل؛ العمر حسمها.", "Names tie; age decides.", useEnglish), Variables: []LessonVariable{{Name: "byName", Value: "0"}, {Name: "byAge", Value: "1"}}, Output: "-1\n1"},
-					{Line: 11, Caption: lateText("SortFunc رتّبت الـslice.", "SortFunc reorders the slice.", useEnglish), Variables: []LessonVariable{{Name: "players", Value: "[{Ari 9} {Ari 12} {Mira 8}]"}}, Output: "-1\n1"},
-					{Line: 12, Caption: lateText("الأسماء ثم الأعمار.", "Names, then ages.", useEnglish), Variables: []LessonVariable{{Name: "players", Value: "[{Ari 9} {Ari 12} {Mira 8}]"}}, Output: "-1\n1\n[{Ari 9} {Ari 12} {Mira 8}]"},
+					{Line: 0, Caption: lateText("الدرون لسه مقاسش.", "Not measured yet.", useEnglish)},
+					{Line: 1, Caption: lateText("القراءات: الحجم عند كل x.", "Size at each x.", useEnglish), Variables: []LessonVariable{{Name: "sizes", Value: "[3 5 3 5]"}}},
+					{Line: 2, Caption: lateText("دي المواقع اللي هنرتّبها.", "Positions to rank.", useEnglish), Variables: []LessonVariable{{Name: "positions", Value: "[0 1 2 3]"}}},
+					{Line: 5, Caption: lateText("1 قبل 0: الحجم 5 أكبر.", "1 before 0: 5 wins.", useEnglish), Variables: []LessonVariable{{Name: "a, b", Value: "1, 0"}, {Name: "sizes", Value: "5 vs 3"}, {Name: "result", Value: "-1"}}},
+					{Line: 7, Caption: lateText("1 و3 متعادلين: الـx الأصغر الأول.", "1 and 3 tie: smaller x first.", useEnglish), Variables: []LessonVariable{{Name: "a, b", Value: "1, 3"}, {Name: "sizes", Value: "5 vs 5"}, {Name: "result", Value: "-1"}}},
+					{Line: 8, Caption: lateText("الترتيب خلص.", "Ranking done.", useEnglish), Variables: []LessonVariable{{Name: "positions", Value: "[1 3 0 2]"}}},
+					{Line: 9, Caption: lateText("ده اللي هتبعته بـReport.", "What you Report.", useEnglish), Variables: []LessonVariable{{Name: "positions", Value: "[1 3 0 2]"}}, Output: "[1 3 0 2]"},
 				}},
 			}},
 		},
@@ -64,10 +62,10 @@ func stockOrderLesson(useEnglish bool) []LessonStep {
 			ID: "c64.late.try-step", Title: lateText("جرّب", "Try it", useEnglish),
 			Blocks: []LessonBlock{{
 				ID: "c64.late.sort-sandbox", Kind: "sandbox",
-				Text: lateText("بدّل اتجاه الحجم وكسر التعادل؛ الكروت توضيحية والتعادلات مميزة.", "Toggle size direction and tie-breaking; cards are illustrative and ties are highlighted.", useEnglish),
+				Text: lateText("اقلب اتجاه الحجم وكسر التعادل لحد ما توصل للترتيب اللي المهمة عايزاه.", "Flip size direction and tie-break until you reach the order the mission wants.", useEnglish),
 				Sandbox: &LessonSandbox{
 					Kind: "sort-compare", Sequence: []int{3, 5, 3, 5, 2},
-					SourceLabel:        lateText("أحجام للتوضيح، مش بيانات المهمة.", "Illustrative sizes, not mission data.", useEnglish),
+					SourceLabel:        lateText("أحجام زي اللي هتقيسها.", "Sizes like the ones you will measure.", useEnglish),
 					SortDirectionLabel: lateText("اتجاه الحجم", "Size direction", useEnglish), SortTieLabel: lateText("كسر التعادل", "Tie-break", useEnglish),
 					AscendingLabel: lateText("تصاعدي", "Ascending", useEnglish), DescendingLabel: lateText("تنازلي", "Descending", useEnglish),
 					TieOnLabel: lateText("شغّال", "On", useEnglish), TieOffLabel: lateText("مقفول", "Off", useEnglish),
@@ -78,27 +76,27 @@ func stockOrderLesson(useEnglish bool) []LessonStep {
 		{
 			ID: "c64.late.watch-step", Title: lateText("خد بالك", "Watch out", useEnglish),
 			Blocks: []LessonBlock{{ID: "c64.late.watch", Kind: "markdown", Text: lateText(
-				"- خلي نتيجة المقارنة متسقة: سالب أو صفر أو موجب.\n- ~slices.SortFunc~ مش stable؛ ~slices.SortStableFunc~ بتحافظ على ترتيب العناصر المتعادلة.\n\n~Measure~ و~Move~ (حتى لو فشلت) و~Harvest~: كل واحدة tick.\n\n~WorldSize~ و~Report~ والحساب بلا ticks.",
-				"- Keep comparator results consistent: negative, zero, or positive.\n- ~slices.SortFunc~ is not stable; ~slices.SortStableFunc~ keeps equal items in input order.\n\n~Measure~, ~Move~ (even on failure), and ~Harvest~ each cost one tick.\n\n~WorldSize~, ~Report~, and computation cost none.", useEnglish)}},
+				"- سطر ~fmt.Println(colony.Measure())~ في الـstarter بيضيّع tick: امسحه.\n- كل ~Measure~ وكل ~Move~ بـtick: لو العرض 10، يبقى 10 قياسات و9 حركات، يعني 19 tick.\n- متتحركش بعد آخر خانة.\n- رتّب ~positions~ مش ~sizes~، وإلا المواقع تضيع.",
+				"- Delete the starter's ~fmt.Println(colony.Measure())~: it wastes a tick.\n- Each ~Measure~ and ~Move~ costs a tick: width 10 = 10 + 9 = 19.\n- Do not move past the last tile.\n- Sort ~positions~, not ~sizes~.", useEnglish)}},
 		},
 		{
 			ID: "c64.late.check-step", Title: lateText("فكّر واختبر", "Think & check", useEnglish),
 			Blocks: []LessonBlock{
-				{ID: "c64.late.plan", Kind: "markdown", Text: lateText("قيس الكل → خزّن القراءات → رتّب المواقع → ابعت تقرير واحد.", "Measure all → keep the readings → rank positions → send one report.", useEnglish)},
-				lateQuestion("c64.late.q-sign", "-1 معناها إيه؟", "What does -1 mean?",
-					[]string{"a يسبق", "تعادل", "a يتأخر"}, []string{"a comes first", "Tie", "a comes later"}, 0,
-					[]string{"السالب يقدّم a.", "الصفر يعني تعادل.", "الموجب يأخر a."}, []string{"Negative puts a first.", "Zero means a tie.", "Positive puts a later."}, useEnglish),
-				lateQuestion("c64.late.q-stable", "هل ~SortFunc~ بتحافظ على ترتيب العناصر المتعادلة؟", "Does ~SortFunc~ keep tied items in input order?",
-					[]string{"دايمًا", "مش مضمون", "بس مع أرقام"}, []string{"Always", "Not guaranteed", "Only for numbers"}, 1,
-					[]string{"SortFunc مش stable.", "صح؛ SortStableFunc بتحافظ على ترتيبهم.", "نوع العنصر مش فارق هنا."}, []string{"SortFunc is not stable.", "Right; SortStableFunc keeps their order.", "The element type does not matter here."}, useEnglish),
-				lateQuestion("c64.late.q-report", "تقرير المهمة يبعت إيه؟", "What does the mission report?",
-					[]string{"أحجام", "مواقع", "طباعة"}, []string{"Sizes", "Positions", "Printed output"}, 1,
-					[]string{"المهمة عايزة المواقع.", "صح؛ ابعت المواقع المرتبة.", "الطباعة للتصحيح."}, []string{"The mission needs positions.", "Right; report ranked positions.", "Printing is for debugging."}, useEnglish),
+				{ID: "c64.late.plan", Kind: "markdown", Text: lateText("امشي وقيس → خزّن في ~sizes~ → رتّب ~positions~ → ~Report~ مرة واحدة.", "Walk and measure → keep ~sizes~ → rank ~positions~ → one ~Report~.", useEnglish)},
+				lateQuestion("c64.late.q-bigger", "الموقع 2 حجمه 4، والموقع 0 حجمه 1. الـcomparator يرجّع إيه لـ(2, 0)؟", "Size 4 at x=2, size 1 at x=0. Comparator result for (2, 0)?",
+					[]string{"سالب", "صفر", "موجب"}, []string{"Negative", "Zero", "Positive"}, 0,
+					[]string{"صح؛ الأكبر يقف الأول.", "الصفر للتعادل بس.", "الموجب كان هيأخّر الأكبر."}, []string{"Right; bigger first.", "Zero means a tie.", "Positive puts the bigger one later."}, useEnglish),
+				lateQuestion("c64.late.q-tie", "الموقع 1 والموقع 4 حجمهم 5. مين الأول؟", "x=1 and x=4 both have size 5. Which first?",
+					[]string{"1", "4", "مش فارقة"}, []string{"1", "4", "Either"}, 0,
+					[]string{"صح؛ عند التعادل الـx الأصغر.", "عند التعادل الأكبر بيتأخر.", "المهمة بتفرق: الأصغر الأول."}, []string{"Right; smaller x wins ties.", "Larger x goes later on ties.", "The mission says smaller first."}, useEnglish),
+				lateQuestion("c64.late.q-report", "تبعت إيه في ~Report~؟", "What goes in the ~Report~?",
+					[]string{"الأحجام", "المواقع", "الاتنين"}, []string{"Sizes", "Positions", "Both"}, 1,
+					[]string{"المهمة عايزة المواقع.", "صح؛ المواقع بعد الترتيب.", "المواقع بس، مرة واحدة."}, []string{"The mission wants positions.", "Right; the ranked positions.", "Positions only, once."}, useEnglish),
 			},
 		},
 		{
 			ID: "c64.late.turn-step", Title: lateText("دورك", "Your turn", useEnglish),
-			Blocks: []LessonBlock{{ID: "c64.late.turn", Kind: "markdown", Text: lateText("افتح الـstarter، عدّل حاجة صغيرة، وشغّل المهمة وراجع التقرير.", "Open the starter; make a small change and inspect its report.", useEnglish)}},
+			Blocks: []LessonBlock{{ID: "c64.late.turn", Kind: "markdown", Text: lateText("امسح سطر الـPrintln، اكتب الـloop اللي بتقيس، وبعدها الترتيب. Run!", "Delete the Println, write the measuring loop, then the ranking. Run!", useEnglish)}},
 		},
 	}
 }
