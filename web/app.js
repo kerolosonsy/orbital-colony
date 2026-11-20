@@ -1624,6 +1624,7 @@ async function refreshService(level) {
 
 let previewVersion = 0;
 async function loadLevel(id, review = null) {
+  if (typeof Tour !== "undefined") Tour.stop();
   if (S.running) stopRun(true);
   if (S.mode === "colony") Colony.exit();
   const version = ++previewVersion;
@@ -1677,6 +1678,7 @@ async function loadLevel(id, review = null) {
     const preview = await api(`/api/preview?level=${encodeURIComponent(id)}`);
     if (S.cur === l && version === previewVersion) setWorld(preview);
   } catch (e) { if (S.cur === l) log(String(e), "c-err"); }
+  if (S.cur === l && version === previewVersion) maybeTour();
 }
 
 $("#btn-hint").onclick = () => revealHint();
@@ -2336,7 +2338,92 @@ $("#btn-start").onclick = () => {
   closeOverlay($("#welcome"));
   Sound.play("goal");
   ed.focus();
+  maybeTour();
 };
+
+// The guided tour of the first missions (tour.js): it starts once per
+// mission, after the welcome screen, and #btn-tour replays it.
+function maybeTour(force = false) {
+  const l = S.cur, steps = l && typeof Tour !== "undefined" && Tour.stepsFor(l.id);
+  $("#btn-tour").hidden = !steps || S.review;
+  if (!steps || S.review || S.mode === "colony" || $("#welcome").open) return;
+  if (!force && store.pref("toursSeen")?.[l.id]) return;
+  if (S.running) stopRun(true);
+  Tour.play(steps, {
+    label: T,
+    text: (step) => inline(T(step.ar, step.en)),
+    locate: tourRect,
+    act: tourAct,
+    onEnd: ({ interrupted }) => {
+      if (interrupted) return;
+      store.pref("toursSeen", { ...(store.pref("toursSeen") || {}), [l.id]: true });
+      ed.focus();
+    },
+  });
+}
+$("#btn-tour").onclick = () => maybeTour(true);
+
+// tourRect finds a tour target on screen: an element, a map tile or an editor line.
+function tourRect(at) {
+  if (typeof at === "string") {
+    const el = document.querySelector(at);
+    if (!el || !el.getClientRects().length) return null;
+    el.scrollIntoView({ block: "nearest", inline: "nearest" });
+    const r = el.getBoundingClientRect();
+    return r.width && r.height ? r : null;
+  }
+  if (at.tile) {
+    if (!W || !cv.getClientRects().length) return null;
+    const drone = W.drones.get(0);
+    const [x, y] = at.tile === "drone" ? [drone.x, drone.y] : at.tile;
+    const G = isoGeometry(cv.clientWidth, cv.clientHeight);
+    const [X, Y] = G.toScreen(x + 0.5, W.h - 1 - y + 0.5);
+    const c = cv.getBoundingClientRect(), size = G.hw * 1.3;
+    return { left: c.left + X - size / 2, top: c.top + Y - size * 0.75, width: size, height: size, right: c.left + X + size / 2, bottom: c.top + Y + size * 0.25 };
+  }
+  if (at.line) {
+    if (!ed.getClientRects().length) return null;
+    const lineHeight = Number.parseFloat(getComputedStyle(ed).lineHeight) || 23;
+    const top = 14 + (at.line - 1) * lineHeight;
+    if (top < ed.scrollTop || top + lineHeight > ed.scrollTop + ed.clientHeight) ed.scrollTop = Math.max(0, top - ed.clientHeight / 3);
+    syncScroll();
+    const e = ed.getBoundingClientRect(), width = Math.min(e.width - 8, 380);
+    const y = e.top + top - ed.scrollTop, height = lineHeight * (at.rows || 1);
+    return { left: e.left + 4, top: y, width, height, right: e.left + 4 + width, bottom: y + height };
+  }
+  return null;
+}
+
+// tourAct types code in front of the player, one character at a time.
+async function tourAct(act) {
+  if (ed.readOnly) return;
+  const anchor = ed.value.indexOf(act.after);
+  if (anchor < 0) return; // the player changed this part: nothing to show
+  const pause = (ms) => new Promise((ok) => setTimeout(ok, ms));
+  const type = async (text) => {
+    for (const ch of text) {
+      const at = ed.selectionStart;
+      applyEdit({ from: at, to: at, text: ch, selStart: at + 1, selEnd: at + 1 });
+      await pause(ch === "\t" || ch === "\n" ? 20 : 55);
+    }
+  };
+  ed.focus();
+  const at = anchor + act.after.length;
+  ed.setSelectionRange(at, at);
+  if (act.type) return type(act.type);
+  if (!apiSymbols) await loadSymbols();
+  applyEdit({ from: at, to: at, text: "\n", selStart: at, selEnd: at }); // a fresh line to type on
+  await type(act.complete[0]);
+  updateCompletion();
+  await pause(1100); // let the list be read
+  const pick = completion?.items.findIndex((s) => s.name.toLowerCase().startsWith(act.complete[0].trim().split(".").pop().toLowerCase()));
+  if (completion && pick >= 0) acceptCompletion(pick);
+  else return;
+  await pause(500);
+  await type(act.complete[1]);
+  closeCompletion();
+  updateSigHint(); // the caret is still inside Plant(...), so its help shows
+}
 $("#brand").onclick = (e) => { e.preventDefault(); showWelcome(); };
 $("#btn-lesson").onclick = () => {
   const open = document.body.classList.toggle("lesson-open");
