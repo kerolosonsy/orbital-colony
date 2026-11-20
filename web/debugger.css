@@ -233,3 +233,17 @@
 
 /* the colony runs a live, endless program: step-by-step is for missions */
 body.colony #btn-step { display: none; }
+
+/* live mode (colony): no recording to rewind, so no timeline or back */
+.debugger-toolbar.is-live [data-debug-command="restart"],
+.debugger-toolbar.is-live [data-debug-command="back"],
+.debugger-toolbar.is-live .debugger-speed,
+.debugger-toolbar.is-live .debugger-depth,
+.debugger-toolbar.is-live .debugger-slider { display: none; }
+.debugger-toolbar.is-live .debugger-timeline { height: 22px; justify-content: flex-start; }
+.debugger-toolbar.is-live .debugger-counter { text-align: start; color: var(--ok); }
+.debugger-toolbar.is-live .debugger-counter::before { content: "● "; animation: dbg-pulse-text 1.4s ease-in-out infinite; }
+.debugger-toolbar.is-live.is-live-paused .debugger-counter { color: var(--star); }
+.debugger-toolbar.is-live.is-live-paused .debugger-counter::before { content: "⏸ "; animation: none; }
+@keyframes dbg-pulse-text { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .debugger-toolbar.is-live .debugger-counter::before { animation: none; } }

@@ -981,6 +981,7 @@ func sortedNames(env map[string]bool) []string {
 const traceHelperTemplate = `package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -990,6 +991,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 type __trace__Frame struct {
@@ -1004,6 +1006,7 @@ type __trace__Frame struct {
 	Stdout int64 ` + "`json:\"stdout\"`" + `
 	Sim int64 ` + "`json:\"sim,omitempty\"`" + `
 	Truncated bool ` + "`json:\"truncated,omitempty\"`" + `
+	Paused bool ` + "`json:\"paused,omitempty\"`" + `
 }
 
 type __trace__Variable struct {
@@ -1027,6 +1030,7 @@ type __trace__Thread struct {
 
 var __trace__Stopped atomic.Bool
 var __trace__Mu sync.Mutex
+var __trace__Live bool
 var __trace__File = __trace__Open()
 var __trace__Frames int
 var __trace__Bytes int
@@ -1137,6 +1141,10 @@ func __trace__RecordAt(point __trace__Point, thread __trace__Thread, namedLocals
 
 func __trace__WriteFrame(frame __trace__Frame) {
 	frame.Stdout = atomic.LoadInt64(&__trace__Stdout)
+	if __trace__Live {
+		__trace__Gate(&frame)
+		return
+	}
 	if __trace__SimPath != "" {
 		// The colony writes each world event straight to this file, so its
 		// size says how many events happened before this statement.
@@ -1192,6 +1200,17 @@ func __trace__Append(encoded []byte) {
 }
 
 func __trace__Open() *os.File {
+	if fd, err := strconv.Atoi(os.Getenv("ORBITAL_DEBUG_FD")); err == nil && fd > 2 {
+		if file := os.NewFile(uintptr(fd), "debug"); file != nil {
+			__trace__Live = true
+			if ctl, err := strconv.Atoi(os.Getenv("ORBITAL_DEBUG_CTL_FD")); err == nil && ctl > 2 {
+				if control := os.NewFile(uintptr(ctl), "debug-control"); control != nil {
+					go __trace__Control(control)
+				}
+			}
+			return file
+		}
+	}
 	path := os.Getenv("ORBITAL_USER_TRACE")
 	if path == "" {
 		__trace__Stopped.Store(true)
@@ -1208,6 +1227,132 @@ func __trace__Open() *os.File {
 func __trace__Stop() {
 	_, _ = io.WriteString(__trace__File, "{\"truncated\":true}\n")
 	__trace__Stopped.Store(true)
+}
+
+// ---- live debugging (colony): frames stream out, commands come in ----
+
+const (
+	__trace__Running = iota
+	__trace__PauseRequested
+	__trace__Paused
+	__trace__Stepping
+)
+
+var __trace__GateMu sync.Mutex
+var __trace__GateCond = sync.NewCond(&__trace__GateMu)
+var __trace__GateState = __trace__Running
+var __trace__StepKind string
+var __trace__StepGoroutine, __trace__StepDepth int
+var __trace__Breaks = map[string]bool{}
+var __trace__PausedAt __trace__Frame
+var __trace__Window int64
+var __trace__WindowCount int64
+
+// Gate decides whether this statement pauses the program; paused
+// goroutines block until a command arrives, and while one goroutine is
+// paused every other instrumented goroutine waits at its next statement.
+func __trace__Gate(frame *__trace__Frame) {
+	__trace__GateMu.Lock()
+	for __trace__GateState == __trace__Paused {
+		__trace__GateCond.Wait()
+	}
+	if !__trace__ShouldStop(frame) {
+		__trace__GateMu.Unlock()
+		__trace__Emit(frame)
+		return
+	}
+	__trace__GateState = __trace__Paused
+	__trace__PausedAt = *frame
+	frame.Paused = true
+	__trace__GateMu.Unlock()
+	__trace__Emit(frame)
+	__trace__GateMu.Lock()
+	for __trace__GateState == __trace__Paused {
+		__trace__GateCond.Wait()
+	}
+	__trace__GateMu.Unlock()
+}
+
+func __trace__ShouldStop(frame *__trace__Frame) bool {
+	switch __trace__GateState {
+	case __trace__PauseRequested:
+		return true
+	case __trace__Stepping:
+		same := frame.Goroutine == __trace__StepGoroutine
+		switch __trace__StepKind {
+		case "into":
+			return true
+		case "over":
+			if same && frame.Depth <= __trace__StepDepth {
+				return true
+			}
+		case "out":
+			if same && frame.Depth < __trace__StepDepth {
+				return true
+			}
+		}
+	}
+	return frame.Event == "line" && __trace__Breaks[frame.File+":"+strconv.Itoa(frame.Line)]
+}
+
+// Emit sends a frame. Running frames are sampled (a busy loop must not
+// flood the pipe or slow the colony); paused frames always go out.
+func __trace__Emit(frame *__trace__Frame) {
+	if !frame.Paused {
+		now := time.Now().Unix()
+		if atomic.LoadInt64(&__trace__Window) != now {
+			atomic.StoreInt64(&__trace__Window, now)
+			atomic.StoreInt64(&__trace__WindowCount, 0)
+		}
+		if atomic.AddInt64(&__trace__WindowCount, 1) > 120 {
+			return
+		}
+	}
+	encoded, err := json.Marshal(frame)
+	if err != nil {
+		return
+	}
+	__trace__Mu.Lock()
+	_, _ = __trace__File.Write(append(encoded, '\n'))
+	__trace__Mu.Unlock()
+}
+
+func __trace__Control(control *os.File) {
+	scanner := bufio.NewScanner(control)
+	for scanner.Scan() {
+		fields := strings.Fields(scanner.Text())
+		if len(fields) == 0 {
+			continue
+		}
+		__trace__GateMu.Lock()
+		switch fields[0] {
+		case "pause":
+			if __trace__GateState == __trace__Running {
+				__trace__GateState = __trace__PauseRequested
+			}
+		case "cont":
+			__trace__GateState = __trace__Running
+		case "into", "over", "out":
+			if __trace__GateState == __trace__Paused {
+				__trace__StepKind = fields[0]
+				__trace__StepGoroutine, __trace__StepDepth = __trace__PausedAt.Goroutine, __trace__PausedAt.Depth
+				__trace__GateState = __trace__Stepping
+			}
+		case "breaks":
+			__trace__Breaks = map[string]bool{}
+			for _, key := range fields[1:] {
+				__trace__Breaks[key] = true
+			}
+		}
+		__trace__GateCond.Broadcast()
+		__trace__GateMu.Unlock()
+	}
+	// the debugger went away: never leave the program paused
+	__trace__GateMu.Lock()
+	__trace__GateState = __trace__Running
+	__trace__Breaks = map[string]bool{}
+	__trace__GateCond.Broadcast()
+	__trace__GateMu.Unlock()
 }
 
 type __trace__Writer struct {

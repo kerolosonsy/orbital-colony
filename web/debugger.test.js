@@ -141,3 +141,20 @@ test("dropping a session from outside calls onClear exactly once", () => {
   assert.equal(calls.clear, 1);
   assert.equal(calls.end, 0);
 });
+
+test("live mode (colony) follows the running program and releases it on clear", () => {
+  fakeDebuggerDOM();
+  const sent = [];
+  Debugger.bind({ renderEditor() {}, getFile: () => "main.go", getBreakpoints: () => ["main.go:7"] });
+  Debugger.startLive("colony", (command) => sent.push(command));
+  assert.deepEqual(sent[0], { cmd: "breaks", breaks: ["main.go:7"] });
+  assert.equal(Debugger.live, true);
+  Debugger.liveFrame({ file: "main.go", line: 5, func: "main", depth: 0, event: "line", goroutine: 1, variables: [] });
+  assert.equal(Debugger.active, true);
+  assert.equal(Debugger.editorState("main.go").line, 5);
+  Debugger.liveFrame({ file: "main.go", line: 7, func: "main", depth: 0, event: "line", goroutine: 1, variables: [{ name: "x", value: "2" }], paused: true });
+  assert.equal(Debugger.editorState("main.go").line, 7);
+  Debugger.clear();
+  assert.equal(Debugger.live, false);
+  assert.deepEqual(sent.slice(-2), [{ cmd: "breaks", breaks: [] }, { cmd: "cont" }]);
+});
