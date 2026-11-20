@@ -422,117 +422,87 @@ Real stdout:
 
 ## 6-4 — ترتيب المخزون (`6-4-stock-order`) · revision 1
 
-**Word count:** Arabic 271; English 316, including titles, captions, questions and feedback, sandbox controls, and hints; excluding Go code. The tests count screen-reader card labels too.
+**Word count:** Arabic 313; English 319, including titles, captions, questions and feedback, sandbox controls, and hints; excluding Go code. The tests count screen-reader card labels too.
+
+Rewritten after playtesting: the earlier lesson taught the comparator on an unrelated names-and-ages toy and never said that ~Measure~ reads only the tile under the drone, so a player could understand sorting and still not know how to collect the sizes. Every block now uses mission data.
 
 ### المهمة / Mission
 
-**AR:** 1. رتّب المواقع: الحجم الأكبر أولًا، ثم x الأصغر عند التعادل.
-2. اقرأ العرض بـ~colony.WorldSize~ وابعث المواقع بتقرير واحد.
-3. الـstarter طبع قياسًا من غير حفظ؛ كلف tick. ممنوع الحصاد.
+**AR:** 1. ~Measure~ بتقيس الخانة اللي تحت الدرون بس: امشي شرق وقيس كل خانة.
+2. رتّب المواقع: الحجم الأكبر الأول، ولو اتعادلوا الـx الأصغر.
+3. ابعت المواقع بـ~Report~ مرة واحدة. ممنوع الحصاد.
 
-الذهب: **19 ticks أو أقل**.
+الذهب: **19 tick**.
 
-**EN:** 1. Rank positions: larger sizes first, then smaller x on ties.
-2. Read width with ~colony.WorldSize~; report positions once.
-3. The starter printed an unsaved measurement (one tick); do not harvest.
+**EN:** 1. ~Measure~ reads only the tile under the drone: walk east and measure every tile.
+2. Rank positions: bigger size first, smaller x on ties.
+3. ~Report~ the positions once. No harvesting.
 
-Gold: **19 ticks or fewer**.
+Gold: **19 ticks**.
 
 ### الفكرة / Idea — walkthrough
 
-**AR:** المقارنة بتقول مين يسبق: السالب يقدّم a، والصفر تعادل، والموجب يأخّره.
+**AR:** زي طابور: ~SortFunc~ بتسأل الـcomparator عن كل اتنين «مين يقف الأول؟». السالب يقدّم a، والموجب يقدّم b، والصفر تعادل. ده نفس شكل المهمة بأربع خانات.
 
-المثال أسماء ثم أعمار؛ قاعدة المهمة مختلفة.
+**EN:** Like a queue: ~SortFunc~ asks the comparator "who stands first?" Negative = a, positive = b, zero = tie. The mission in four tiles.
 
-**EN:** A comparator returns a sign: negative puts a first, zero ties, positive puts it later.
-
-This toy sorts names, then ages; the mission differs.
-
-<!-- go-example id=e64-sort-sign-late imports=cmp,fmt,slices outcome=ok -->
+<!-- go-example id=e64-rank-crystals imports=cmp,fmt,slices outcome=ok -->
 ```go
-type Player struct { name string; age int }
-players := []Player{{"Mira", 8}, {"Ari", 12}, {"Ari", 9}}
-before := func(a, b Player) int {
-	if byName := cmp.Compare(a.name, b.name); byName != 0 {
-		return byName
+sizes := []int{3, 5, 3, 5}
+positions := []int{0, 1, 2, 3}
+slices.SortFunc(positions, func(a, b int) int {
+	if sizes[a] != sizes[b] {
+		return cmp.Compare(sizes[b], sizes[a])
 	}
-	return cmp.Compare(a.age, b.age)
-}
-fmt.Println(before(players[1], players[0]))
-fmt.Println(before(players[1], players[2]))
-slices.SortFunc(players, before)
-fmt.Println(players)
+	return cmp.Compare(a, b)
+})
+fmt.Println(positions)
 ```
 
 | Frame | AR caption | EN caption |
 |---|---|---|
-| 0 | قبل الكروت. | Before the cards. |
-| 1 | نوع بيانات للتجربة. | An illustrative type. |
-| 2 | أسماء وأعمار للتوضيح. | Illustrative names and ages. |
-| 3 | قاعدة المقارنة محفوظة. | Comparator saved. |
-| 9 | Ari يسبق Mira؛ النتيجة -1. | Ari precedes Mira; result -1. |
-| 10 | الاسم اتعادل؛ العمر حسمها. | Names tie; age decides. |
-| 11 | SortFunc رتّبت القائمة. | SortFunc reorders the slice. |
-| 12 | الأسماء ثم الأعمار. | Names, then ages. |
+| 0 | الدرون لسه مقاسش. | Not measured yet. |
+| 1 | القراءات: الحجم عند كل x. | Size at each x. |
+| 2 | دي المواقع اللي هنرتّبها. | Positions to rank. |
+| 5 | 1 قبل 0: الحجم 5 أكبر. | 1 before 0: 5 wins. |
+| 7 | 1 و3 متعادلين: الـx الأصغر الأول. | 1 and 3 tie: smaller x first. |
+| 8 | الترتيب خلص. | Ranking done. |
+| 9 | ده اللي هتبعته بـReport. | What you Report. |
 
-#### Verified e64-sort-sign-late
+#### Verified e64-rank-crystals
 
 Real stdout:
 
 ```text
--1
-1
-[{Ari 9} {Ari 12} {Mira 8}]
+[1 3 0 2]
 ```
 
 ### جرّب / Try it
 
-**AR:** بدّل اتجاه الحجم وكسر التعادل؛ الكروت توضيحية والتعادلات مميزة.
-**EN:** Toggle size direction and tie-breaking; cards are illustrative and ties are highlighted.
+**AR:** اقلب اتجاه الحجم وكسر التعادل لحد ما توصل للترتيب اللي المهمة عايزاه.
+**EN:** Flip size direction and tie-break until you reach the order the mission wants.
 
-**Sandbox labels:** illustrative sizes, size direction, ascending/descending, tie-break on/off, reset. Each card has an accessible position and size label. Sample sizes by position: 3, 5, 3, 5, 2.
+**Sandbox labels:** sizes like the ones you will measure, size direction, ascending/descending, tie-break on/off, reset. Each card has an accessible position and size label. Sample sizes by position: 3, 5, 3, 5, 2.
 
 ### خد بالك / Watch out
 
-**AR:** خلي نتيجة المقارنة متسقة: سالب أو صفر أو موجب. ~slices.SortFunc~ مش stable؛ ~slices.SortStableFunc~ بتحافظ على ترتيب العناصر المتعادلة.
+**AR:** سطر ~fmt.Println(colony.Measure())~ في الـstarter بيضيّع tick: امسحه. كل ~Measure~ وكل ~Move~ بـtick: لو العرض 10، يبقى 10 قياسات و9 حركات، يعني 19 tick. متتحركش بعد آخر خانة. رتّب ~positions~ مش ~sizes~.
 
-~Measure~ و~Move~ (حتى لو فشلت) كل واحدة tick.
-
-~WorldSize~ و~Report~ والحساب بلا ticks. الحصاد tick وممنوع هنا.
-
-**EN:** Keep comparator results consistent: negative, zero, or positive. ~slices.SortFunc~ is not stable; ~slices.SortStableFunc~ keeps equal items in input order.
-
-~Measure~, ~Move~ (even when it fails), and ~Harvest~ each cost one tick.
-
-~WorldSize~, ~Report~, and computation cost none.
+**EN:** Delete the starter's ~fmt.Println(colony.Measure())~: it wastes a tick. Each ~Measure~ and ~Move~ costs a tick: width 10 = 10 + 9 = 19. Do not move past the last tile. Sort ~positions~, not ~sizes~.
 
 ### فكّر واختبر / Think & check
 
-**Plan AR:** قيس الكل → احتفظ بالقراءات → رتّب المواقع → ابعت تقريرًا واحدًا.
-**Plan EN:** Measure all → keep the readings → rank positions → send one report.
+**Plan AR:** امشي وقيس → خزّن في ~sizes~ → رتّب ~positions~ → ~Report~ مرة واحدة.
+**Plan EN:** Walk and measure → keep ~sizes~ → rank ~positions~ → one ~Report~.
 
-1. **AR:** -1 معناها إيه؟ · a يسبق / تعادل / a يتأخر. **الإجابة:** a يسبق.
-   **Feedback:** السالب يقدّم a. / الصفر يعني تعادل. / الموجب يأخر a.
-   **EN:** What does -1 mean? · a comes first / Tie / a comes later. **Answer:** a comes first.
-   **Feedback:** Negative puts a first. / Zero means a tie. / Positive puts a later.
-
-2. **AR:** هل ~SortFunc~ تحفظ ترتيب المتعادلين؟ · دايمًا / مش مضمون / بس مع أرقام. **الإجابة:** مش مضمون.
-   **Feedback:** SortFunc مش stable. / صح؛ SortStableFunc تحفظ ترتيبهم. / نوع العنصر مش فارق هنا.
-   **EN:** Does ~SortFunc~ keep tied items in input order? · Always / Not guaranteed / Only for numbers. **Answer:** Not guaranteed.
-   **Feedback:** SortFunc is not stable. / Right; SortStableFunc keeps their order. / The element type does not matter here.
-
-3. **AR:** تقرير المهمة يبعت إيه؟ · أحجام / مواقع / طباعة. **الإجابة:** مواقع.
-   **Feedback:** المهمة عايزة المواقع. / صح؛ ابعت المواقع المرتبة. / الطباعة للتصحيح.
-   **EN:** What does the mission report? · Sizes / Positions / Printed output. **Answer:** Positions.
-   **Feedback:** The mission needs positions. / Right; report ranked positions. / Printing is for debugging.
+1. Size 4 at x=2, size 1 at x=0: the comparator result for (2, 0) is **negative** (bigger first).
+2. x=1 and x=4 both size 5: **1** comes first (smaller x wins ties).
+3. The report carries the **positions**, once.
 
 ### دورك / Your turn
 
-**AR:** افتح الـstarter، عدّل حاجة صغيرة، وشغّل المهمة وراجع التقرير.
-**EN:** Open the starter; make a small change and inspect its report.
-
-**Hints AR:** فكرة: المقارنة دالة قرار؛ نتيجتها تحدد مين يسبق. · بنية: افصل قراءات الحجم عن هويات المواقع قبل اختيار ما ستفرزه. · محدد: راجع معنى نتيجة comparator في ~slices.SortFunc~: السالب والصفر والموجب.
-**Hints EN:** Concept: a comparator is a decision rule; its result says which item comes first. · Structure: separate measured sizes from position identities before choosing what to sort. · Specific: review comparator results in ~slices.SortFunc~: negative, zero, and positive.
+**AR:** امسح سطر الـPrintln، اكتب الـloop اللي بتقيس، وبعدها الترتيب. Run!
+**EN:** Delete the Println, write the measuring loop, then the ranking. Run!
 
 ## 6-5 — شبكة الحرارة (`6-5-heat-grid`) · revision 1
 

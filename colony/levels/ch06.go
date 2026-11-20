@@ -549,10 +549,10 @@ func main() {
 		Starter: stockOrderStarter, LessonRevision: 1, Steps: stockOrderLessonArabic,
 		Lesson: `# ترتيب المخزون
 
-رتّب المواقع بالحجم تنازليًا، وبالموقع الأصغر عند التعادل. استخدم ~slices.SortFunc~ وأرسل المواقع بتقرير واحد، من غير حصاد. راجع الدرس التفاعلي لمعنى علامات المقارنة والتعادل.`, Hints: []string{"الـcomparator قاعدة بتحدد مين يسبق؛ نتيجتها بتقول مين ييجي الأول.", "افصل قياسات الحجم عن مواقعها قبل ما تختار هترتّب إيه.", "راجع نتيجة الـcomparator في ~slices.SortFunc~: سالب، صفر، وموجب."},
+امشي على الصف وقيس كل خانة بـ~Measure~، رتّب المواقع بالحجم تنازليًا وبالـx الأصغر عند التعادل بـ~slices.SortFunc~، وابعتها بـ~Report~ مرة واحدة من غير حصاد.`, Hints: []string{"~Measure~ بتقيس الخانة اللي تحت الدرون بس؛ اتحرك شرق وقيس كل خانة لحد آخر الصف.", "خزّن الأحجام في ~sizes~ والمواقع في ~positions~، ورتّب ~positions~ وإنت بتبص على ~sizes~.", "لو ~sizes[a] != sizes[b]~ رجّع ~cmp.Compare(sizes[b], sizes[a])~، وإلا رجّع ~cmp.Compare(a, b)~."},
 		En: &LevelText{Title: "Stock Order", Goal: "Rank crystal positions by descending size and ascending position on ties", Starter: stockOrderStarter, LessonRevision: 1, Steps: stockOrderLessonEnglish, Lesson: `# Stock Order
 
-Rank positions by descending size, then smaller position on ties. Use ~slices.SortFunc~ and report positions once without harvesting. See the interactive lesson for comparator signs and ties.`, Hints: []string{"Concept: a comparator is a decision rule; its result says which item comes first.", "Structure: separate measured sizes from position identities before choosing what to sort.", "Specific: review comparator results in ~slices.SortFunc~: negative, zero, and positive."}},
+Walk the row measuring each tile with ~Measure~, rank positions by descending size and smaller x on ties with ~slices.SortFunc~, and ~Report~ them once without harvesting.`, Hints: []string{"Concept: ~Measure~ reads only the tile under the drone; move east, measuring every tile.", "Structure: keep ~sizes~ and ~positions~; sort ~positions~ by looking up ~sizes~.", "Specific: if ~sizes[a] != sizes[b]~ return ~cmp.Compare(sizes[b], sizes[a])~, else return ~cmp.Compare(a, b)~."}},
 		Setup: func(w *sim.World) {
 			n := 6 + w.Rand.Intn(5)
 			w.Init(n, 2, sim.Regolith)
