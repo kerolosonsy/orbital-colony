@@ -3,7 +3,7 @@ module orbital
 go 1.26.0
 
 require (
-	github.com/anthropics/anthropic-sdk-go/v2 v2.13.0
+	github.com/anthropics/anthropic-sdk-go/v2 v2.14.0
 	orbital/colony v0.0.0
 )
 
