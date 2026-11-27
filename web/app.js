@@ -11,6 +11,7 @@ async function api(path, body, method, signal) {
     body: body ? JSON.stringify(body) : undefined,
     signal,
   });
+  if (res.status === 401 && HOSTED) { location.reload(); return new Promise(() => {}); } // signed out: back to the sign-in page
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   return res.json();
 }
@@ -20,14 +21,14 @@ async function api(path, body, method, signal) {
 // localStorage holds a copy so a failed upload is never lost.
 const store = {
   blob: { progress: {}, prefs: {}, quizScores: {}, lessons: {}, metrics: {} }, timer: null,
-  cacheKey: "orbital.p." + PROFILE,
+  cacheKey: KEYS.cache(PROFILE),
   async load() {
     let b = null, online = true;
     try { b = await api(`/api/profiles/${PROFILE}/progress`); } catch { online = false; }
     // the local copy only stands in while the server can't be reached; an
     // empty answer from the server means this player really starts fresh
     if (!online) { try { b = JSON.parse(localStorage.getItem(this.cacheKey)); } catch { b = null; } }
-    const legacy = !b?.progress && PROFILE === "default" && online && this.legacy();
+    const legacy = !HOSTED && !b?.progress && PROFILE === "default" && online && this.legacy();
     if (legacy) b = legacy;
     const lessons = b?.lessons && typeof b.lessons === "object" && !Array.isArray(b.lessons) ? b.lessons : {};
     this.blob = { progress: b?.progress || {}, prefs: b?.prefs || {}, quizScores: b?.quizScores || {}, review: b?.review || {}, lessons,
@@ -404,7 +405,7 @@ function linkUI() {
   $("#link-box").classList.toggle("hidden", !on);
   $("#btn-reset").disabled = on;
   if (S.cur?.kind === "colony") renderTabs();
-  if (on) $("#save-state").textContent = T("اكتب في VS Code · المحرر هنا للقراية", "Write in VS Code · this editor is read-only");
+  if (on) $("#save-state").textContent = T("هنا للقراية بس", "Read-only here");
 }
 
 async function openVSCode() {
@@ -550,7 +551,7 @@ function onEdit() {
 window.addEventListener("pagehide", () => {
   flushSave(); if (store.timer) store.push();
   // remember where the caret was, to come back to it after a reload
-  try { if (S.cur) localStorage.setItem("orbital.place." + PROFILE, JSON.stringify({ level: S.cur.id, file: S.file, at: ed.selectionStart, top: ed.scrollTop })); } catch {}
+  try { if (S.cur) localStorage.setItem("orbital.place." + (HOSTED ? ACCOUNT + "." : "") + PROFILE, JSON.stringify({ level: S.cur.id, file: S.file, at: ed.selectionStart, top: ed.scrollTop })); } catch {}
 });
 ed.addEventListener("input", onEdit);
 ed.addEventListener("scroll", syncScroll);
@@ -1649,6 +1650,7 @@ async function loadLevel(id, review = null) {
   $("#goal-strip-text").innerHTML = inline(l.goal);
   refreshService(l);
   parText(l.par, l.gold, false);
+  gradePanel.reset();
   Lessons.open(l, (stepID) => LearningMetrics.recordStepViewed(store, id, stepID));
   LearningMetrics.recordLessonOpened(store, id);
   $("#hint-list").innerHTML = "";
@@ -1706,15 +1708,30 @@ function revealHint(silent = false) {
   $("#btn-hint").disabled = S.hintsShown >= l.hints.length;
 }
 
+// No confirm dialog: the reset goes through the edit history (Ctrl/⌘+Z) and
+// the banner offers a one-click way back to the code that was there.
 $("#btn-reset").onclick = () => {
-  if (!confirm(T("ترجع لكود البداية؟ الكود الحالي هيتمسح.", "Go back to the starter code? Your current code will be erased."))) return;
   const f = levelFiles(S.cur).find((x) => x.name === S.file);
   if (!f || f.readOnly) return;
+  const before = ed.value;
+  if (before === f.starter) return;
   // replace through the edit history so Ctrl/⌘+Z brings the old code back
   ed.focus();
   applyEdit({ from: 0, to: ed.value.length, text: f.starter, selStart: 0, selEnd: 0 });
   if (ed.value !== f.starter) { ed.value = f.starter; onEdit(); }
   log(T("رجعت لكود البداية. Ctrl/⌘+Z يرجّع كودك.", "Back to the starter code. Ctrl/⌘+Z brings your code back."), "c-info");
+  const bn = $("#banner"), undo = document.createElement("button"), file = S.file, level = S.cur;
+  undo.type = "button"; undo.className = "tool small";
+  undo.textContent = T("رجّع كودي", "Bring my code back");
+  undo.onclick = () => {
+    bn.className = "banner hidden";
+    if (S.cur !== level || S.file !== file) return;
+    ed.focus();
+    applyEdit({ from: 0, to: ed.value.length, text: before, selStart: 0, selEnd: 0 });
+    if (ed.value !== before) { ed.value = before; onEdit(); }
+  };
+  bn.className = "banner info";
+  bn.replaceChildren(document.createTextNode(T("رجعت لكود البداية.", "Back to the starter code.")), undo);
 };
 
 let quizAttempt = null;
@@ -1850,7 +1867,11 @@ function renderMissions() {
     group.appendChild(row);
   }
   if (typeof applyMissionFilter === "function") applyMissionFilter(); // keep the search while re-rendering
-  requestAnimationFrame(() => list.querySelector(store.blob.review?.due ? ".review-card" : ".cell.current")?.scrollIntoView({ block: "center" }));
+  requestAnimationFrame(scrollIndexToCurrent);
+}
+// open the index on the mission you're on (or the due review), not at the top
+function scrollIndexToCurrent() {
+  $("#chapter-list").querySelector(store.blob.review?.due ? ".review-card" : ".cell.current")?.scrollIntoView({ block: "center" });
 }
 function showOverlay(selector) {
   const overlay = $(selector);
@@ -1926,7 +1947,7 @@ async function refreshLearningStats() {
     { levels: S.levels, chapters: S.chapters });
 }
 
-$("#btn-missions").onclick = () => { renderMissions(); showOverlay("#missions"); };
+$("#btn-missions").onclick = () => { renderMissions(); showOverlay("#missions"); scrollIndexToCurrent(); };
 $("#btn-stats").onclick = async () => {
   closeOverlay($("#missions"));
   showOverlay("#metrics");
@@ -2035,6 +2056,9 @@ function mapBadge(index, total) {
   const icon = InlineDebugger.playing && index < total - 1 ? "▶" : "⏸";
   badge.textContent = T(`${icon} خطوة ${index + 1} / ${total}`, `${icon} step ${index + 1} / ${total}`);
 }
+// SETTLE_MS: after the program's last action the map rests a moment, then
+// the mission is judged, so the player sees the final state first.
+const SETTLE_MS = 1000;
 function revealDebugRun(silent) {
   const run = dbgRun;
   if (!run || run.revealed) return;
@@ -2042,7 +2066,8 @@ function revealDebugRun(silent) {
   $("#btn-skip").disabled = true;
   if (silent) return finish(run.level, run.r.result, run.r.missing || [], true);
   seekMap(run.list.length);
-  finish(run.level, run.r.result, run.r.missing || []);
+  const me = runId; // judge unless the player started another run meanwhile
+  setTimeout(() => { if (me === runId) finish(run.level, run.r.result, run.r.missing || []); }, SETTLE_MS);
 }
 function dropDebugRun() {
   const run = dbgRun;
@@ -2087,6 +2112,16 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   const typing = e.target.closest?.("input, textarea, select, [contenteditable]");
+  const dialogOpen = !!document.querySelector("dialog[open]");
+  // ⌘/Ctrl+K opens the index; Alt+H the next hint; Alt+N / Alt+P walk the lesson.
+  // e.code, because Alt changes the typed character on macOS.
+  if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.code === "KeyK" && !dialogOpen) {
+    e.preventDefault(); $("#btn-missions").click(); return;
+  }
+  if (e.altKey && !e.metaKey && !e.ctrlKey && !e.shiftKey && !dialogOpen && S.mode !== "colony") {
+    if (e.code === "KeyH") { e.preventDefault(); revealHint(); return; }
+    if (e.code === "KeyN" || e.code === "KeyP") { e.preventDefault(); Lessons.step(e.code === "KeyN" ? 1 : -1); return; }
+  }
   if (e.key === "?" && !typing && !e.metaKey && !e.ctrlKey && !document.querySelector("dialog[open]")) {
     e.preventDefault();
     showOverlay("#shortcuts");
@@ -2106,6 +2141,11 @@ async function run(opts = {}) {
   const timer = setTimeout(() => ctl.abort("timeout"), S.cur.kind === "lab" ? 30 * 60 * 1000 : RUN_TIMEOUT);
   S.running = true;
   S.failLogged = false;
+  // a run wants the map: the lesson drawer (tablet, phone) steps aside
+  if (document.body.classList.contains("lesson-open")) {
+    document.body.classList.remove("lesson-open");
+    $("#btn-lesson").setAttribute("aria-expanded", "false");
+  }
   runButton(true);
   Sound.play("build");
   $("#banner").classList.add("hidden");
@@ -2178,6 +2218,8 @@ async function run(opts = {}) {
     }
     await new Promise((res) => startPlayback(r.events, res));
     if (me !== runId) return;
+    await new Promise((res) => setTimeout(res, SETTLE_MS));
+    if (me !== runId) return;
     finish(level, r.result, r.missing || []);
   } catch (e) {
     if (me !== runId) return; // stopped by the player
@@ -2230,6 +2272,9 @@ function finish(level, res, missing = [], silent = false) {
   }
   const r = rec(level.id);
   const improved = res.stars > r.stars || (r.best === 0 || res.ticks < r.best);
+  // the big result sheet is for news: a first clear, a new star or a better score.
+  // A replay that changes nothing just says so in the banner, with Next beside it.
+  const news = r.stars === 0 || res.stars > r.stars || (res.ticks > 0 && (r.best === 0 || res.ticks < r.best));
   r.stars = Math.max(r.stars, res.stars);
   r.best = r.best ? Math.min(r.best, res.ticks) : res.ticks;
   store.save();
@@ -2244,6 +2289,7 @@ function finish(level, res, missing = [], silent = false) {
   $("#result-stars").innerHTML = starHTML(res.stars);
   $("#stamp-code").textContent = `SHEET ${sheetCode(level)}`;
   updateOverall();
+  gradePanel.grade(level, { stars: res.stars, ticks: res.ticks }); // in the background; same code is never graded twice
   Sound.play("goal");
   for (let k = 0; k < res.stars; k++) setTimeout(() => Sound.play("star"), 420 + k * 180);
   let text = level.kind === "lab" ? res.message : T(`خلصت في <b>${res.ticks}</b> tick.`, `Done in <b>${res.ticks}</b> ticks.`);
@@ -2265,6 +2311,18 @@ function finish(level, res, missing = [], silent = false) {
   const nb = $("#btn-next");
   nb.classList.toggle("hidden", !next);
   nb.onclick = () => { closeOverlay($("#result")); loadLevel(next.id); };
+  if (!news) {
+    if (next) {
+      const go = document.createElement("button");
+      go.type = "button"; go.className = "tool small";
+      go.textContent = T("المهمة الجاية", "Next mission");
+      go.onclick = () => loadLevel(next.id);
+      const bn = $("#banner");
+      bn.classList.add("info-next");
+      bn.append(" ", go);
+    }
+    return;
+  }
   showOverlay("#result");
 }
 
@@ -2290,12 +2348,13 @@ function finish(level, res, missing = [], silent = false) {
   updateOverall();
   await loadLevel(id);
   try {
-    const place = JSON.parse(localStorage.getItem("orbital.place." + PROFILE) || "null");
+    const place = JSON.parse(localStorage.getItem("orbital.place." + (HOSTED ? ACCOUNT + "." : "") + PROFILE) || "null");
     if (place?.level === S.cur?.id && place.file === S.file && place.at <= ed.value.length) {
       ed.setSelectionRange(place.at, place.at); ed.scrollTop = place.top; syncScroll();
     }
   } catch {}
   if (!store.pref("welcomed")) showWelcome();
+  else if (!store.pref("introSeen")) playIntro(); // players from before the intro existed see it once too
 })();
 
 // The map speed and the debugger speed are remembered per player.
@@ -2340,8 +2399,40 @@ $("#btn-start").onclick = () => {
   closeOverlay($("#welcome"));
   Sound.play("goal");
   ed.focus();
-  maybeTour();
+  if (store.pref("introSeen")) maybeTour(); else playIntro();
 };
+
+// The intro tour (Tour.intro): where everything is, once per new player and on
+// demand from the player menu. When it ends, the mission's own tour may follow.
+function playIntro() {
+  if (typeof Tour === "undefined" || S.review || S.mode === "colony") return;
+  if (S.running) stopRun(true);
+  Tour.play(Tour.intro(), {
+    label: T,
+    text: (step) => inline(T(step.ar, step.en)),
+    locate: tourRect,
+    act: tourAct,
+    enter: tourEnter,
+    onEnd: ({ interrupted }) => {
+      if (interrupted) return;
+      store.pref("introSeen", true);
+      ed.focus();
+      maybeTour();
+    },
+  });
+}
+// tourEnter opens what a step points into (the player menu) and closes it after.
+// The menu turns manual meanwhile, so pressing Next doesn't light-dismiss it.
+function tourEnter(step) {
+  const menu = $("#settings-menu");
+  if (step.open === "settings") {
+    if (!menu.matches(":popover-open")) { menu.popover = "manual"; menu.showPopover(); }
+  } else if (menu.popover === "manual") {
+    if (menu.matches(":popover-open")) menu.hidePopover();
+    menu.popover = "auto";
+  }
+}
+$("#btn-intro").onclick = () => { $("#settings-menu").hidePopover(); playIntro(); };
 
 // The guided tour of the first missions (tour.js): it starts once per
 // mission, after the welcome screen, and #btn-tour replays it.
@@ -2375,6 +2466,19 @@ const chatPanel = Chat.mount({
   hasError: () => lastErrors.length > 0 || !!con.querySelector(".c-err"),
 });
 $("#btn-chat").onclick = () => chatPanel.toggle();
+
+// The code score (grade.js): the same model judges the craft of passing code.
+const gradePanel = Grade.mount({
+  T,
+  api,
+  level: () => S.cur,
+  record: (l) => rec(l.id),
+  save: () => store.save(),
+  canGrade: (l) => !S.review && S.mode !== "colony" && l.kind !== "colony",
+  // every file the player writes; the open one straight from the editor
+  files: (l) => Object.fromEntries(levelFiles(l).filter((f) => !f.readOnly)
+    .map((f) => [f.name, l === S.cur && f.name === S.file ? ed.value : fileCode(l, f)])),
+});
 
 // tourRect finds a tour target on screen: an element, a map tile or an editor line.
 function tourRect(at) {
@@ -2437,7 +2541,7 @@ async function tourAct(act) {
   closeCompletion();
   updateSigHint(); // the caret is still inside Plant(...), so its help shows
 }
-$("#brand").onclick = (e) => { e.preventDefault(); showWelcome(); };
+$("#brand").onclick = (e) => { e.preventDefault(); $("#btn-missions").click(); }; // the logo leads to the index, like a home link
 $("#btn-lesson").onclick = () => {
   const open = document.body.classList.toggle("lesson-open");
   $("#btn-lesson").setAttribute("aria-expanded", String(open));

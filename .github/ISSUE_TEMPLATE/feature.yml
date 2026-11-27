@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose a learner, contributor, or game improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Problem and learner outcome
+      description: Describe who is affected, what is difficult today, and what would improve it.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested behavior
+    validations:
+      required: true

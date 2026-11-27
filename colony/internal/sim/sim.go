@@ -457,7 +457,8 @@ func (w *World) Launch() {
 func (w *World) finish(op, msg string, code int) {
 	w.done = true
 	t := w.Tick
-	if op == "goal" && w.reached {
+	if op == "goal" && w.reached && w.Realtime {
+		// a timed mission ends on the clock: score when the goal came true
 		t = w.reachedAt
 	}
 	w.emit(Event{Op: op, T: t, OK: op == "goal", X: w.X, Y: w.Y, Z: w.Z, Msg: msg, Par: w.Par, Gold: w.Gold})
@@ -467,7 +468,6 @@ func (w *World) finish(op, msg string, code int) {
 // after runs the end-of-action bookkeeping. Caller holds the lock.
 func (w *World) after(ev Event) {
 	done, progress := w.Check(w)
-	held := done && w.reached // still true one action after it was reached
 	if done && !w.reached {
 		w.reachedAt = w.Tick
 	}
@@ -485,10 +485,11 @@ func (w *World) after(ev Event) {
 		w.finish("fail", fail, 4)
 	case w.FailOnDestroy && w.Destroyed > 0:
 		w.finish("fail", say("دمّرت نبات قبل ما ينضج! المهمة فشلت.", "You destroyed a plant before it ripened! Mission failed."), 4)
-	case held || done && w.Tick >= w.MaxTicks:
+	case done && w.Tick >= w.MaxTicks:
 		w.finish("goal", say("المهمة اكتملت!", "Mission complete!"), 0)
 	case done:
-		// reached: let the program show whether it stops here
+		// reached: the mission is judged when the program ends, and every
+		// action it still takes counts (see runner.go)
 	case w.Tick >= w.MaxTicks:
 		w.finish("fail", sayf("طاقة الدرون خلصت بعد %d tick. حاول بخطوات أقل.", "The drone ran out of energy after %d ticks. Try fewer steps.", w.Tick), 3)
 	}

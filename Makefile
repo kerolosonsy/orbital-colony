@@ -4,6 +4,13 @@
 PORT    ?= 7777
 ADDR    ?= 127.0.0.1:$(PORT)
 SAVES   ?= saves
+# تسجيل الدخول الاختياري: make start PUBLIC=http://127.0.0.1:7777
+PUBLIC  ?=
+# مفاتيح الدخول بـGoogle على جهازك: حطها في .orbital.env (مش بيترفع على git)
+#   GOOGLE_CLIENT_ID=...
+#   GOOGLE_CLIENT_SECRET=...
+-include .orbital.env
+export GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET
 BIN     := ./orbital
 PIDFILE := .orbital.pid
 LOGFILE := .orbital.log
@@ -12,7 +19,7 @@ OPEN    ?= open
 STAMP    = $(shell date +%Y%m%d-%H%M%S)
 
 .DEFAULT_GOAL := help
-.PHONY: help run start stop restart status logs open build test test-quick test-web check fmt vet lint stats \
+.PHONY: help run start stop restart status logs open build test test-quick test-web demo check fmt vet lint stats \
         backup restore backups players reset-all clean doctor
 
 help: ## اعرض كل الأوامر
@@ -26,14 +33,14 @@ help: ## اعرض كل الأوامر
 
 run: build ## شغّل اللعبة هنا في الـ terminal (Ctrl+C يقفلها)
 	@echo "→ http://$(ADDR)"
-	$(BIN) -addr $(ADDR)
+	$(BIN) -addr $(ADDR) -saves $(SAVES) -public "$(PUBLIC)"
 
 start: build ## شغّل اللعبة في الخلفية وافتح المتصفح
 	@if [ -f $(PIDFILE) ] && kill -0 $$(cat $(PIDFILE)) 2>/dev/null; then \
 		echo "اللعبة شغالة أصلاً (PID $$(cat $(PIDFILE))). استخدم: make restart"; exit 0; fi; \
 	if lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1; then \
 		echo "البورت $(PORT) مشغول ببرنامج تاني. جرّب: make start PORT=7778"; exit 1; fi; \
-	nohup $(BIN) -addr $(ADDR) > $(LOGFILE) 2>&1 & echo $$! > $(PIDFILE); \
+	nohup $(BIN) -addr $(ADDR) -saves $(SAVES) -public "$(PUBLIC)" > $(LOGFILE) 2>&1 & echo $$! > $(PIDFILE); \
 	for i in 1 2 3 4 5 6 7 8 9 10; do \
 		lsof -iTCP:$(PORT) -sTCP:LISTEN >/dev/null 2>&1 && break; \
 		kill -0 $$(cat $(PIDFILE)) 2>/dev/null || break; sleep 0.5; done; \
@@ -71,10 +78,13 @@ test: ## كل الاختبارات: كل مهمة لازم تتحل (حوالي 
 
 test-quick: ## اختبارات سريعة (أقل من دقيقة)
 	cd colony && go test ./...
-	go test ./cmd/orbital/ -count=1 -run 'TestLevelOrder|TestPreviewHasNoTimers|TestGoalMustHold|TestCompileErrorTips|Profile|Lang|TestLevelsSolvable/(1-1|1-2|3-3)'
+	go test ./cmd/orbital/ -count=1 -run '^(TestLevelOrder|TestPreviewHasNoTimers|TestGoalMustHold|TestCompileErrorTips|Test.*Profile.*|Test.*Lang.*|TestListenConfig.*|TestStatic.*|TestLevels.*)$$/^(1-1-|1-2-|3-3-)'
 
 test-web: ## اختبارات واجهة المتصفح (محتاج Node 20+)
-	node --test web/*.test.js web/sandbox/*.test.js
+	node --test web/*.test.js web/sandbox/*.test.js cmd/lesson-demo/site/*.test.js
+
+demo: ## Build the static First Signal lesson in dist/
+	go run ./cmd/lesson-demo
 
 check: fmt vet test-quick test-web ## نسّق وافحص وجرّب بسرعة قبل ما تحفظ شغلك
 
@@ -97,11 +107,12 @@ stats: ## اطبع أكتر 20 ورقة اتعثر فيها اللاعبون
 # ---------- الحفظ واللاعبين ----------
 
 players: ## اعرض اللاعبين المتسجلين
-	@ls saves/profiles 2>/dev/null | while read id; do \
-		name=$$(sed -n 's/.*"name": *"\([^"]*\)".*/\1/p' saves/profiles/$$id/profile.json 2>/dev/null); \
-		lang=$$(sed -n 's/.*"lang": *"\([^"]*\)".*/\1/p' saves/profiles/$$id/profile.json 2>/dev/null); \
-		echo "  $$id  →  $$name  ($$lang)"; done; \
-	[ -d saves/profiles ] || echo "لسه مفيش لاعبين. شغّل اللعبة الأول."
+	@found=; for f in $(SAVES)/profiles/*/profile.json $(SAVES)/users/*/profiles/*/profile.json; do \
+		[ -f "$$f" ] || continue; found=1; \
+		name=$$(sed -n 's/.*"name": *"\([^"]*\)".*/\1/p' "$$f"); \
+		lang=$$(sed -n 's/.*"lang": *"\([^"]*\)".*/\1/p' "$$f"); \
+		echo "  $$(basename $$(dirname $$f))  →  $$name  ($$lang)"; done; \
+	[ -n "$$found" ] || echo "لسه مفيش لاعبين. شغّل اللعبة الأول."
 
 backup: ## خد نسخة احتياطية من كل الحفظ والـ workspace
 	@mkdir -p $(BACKUPS)

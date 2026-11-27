@@ -25,7 +25,7 @@ var benchLine = regexp.MustCompile(`(?m)^(BenchmarkHidden\w+)-?\d*\s+\d+\s+([\d.
 
 // goTest writes files into a fresh module and runs go test with args.
 func (r *runner) goTest(ctx context.Context, lvl *levels.Level, files map[string]string, args ...string) (bool, string, error) {
-	dir, err := os.MkdirTemp("", "orbital-lab-*")
+	dir, err := runDir("orbital-lab-*")
 	if err != nil {
 		return false, "", err
 	}

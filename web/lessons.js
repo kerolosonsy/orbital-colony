@@ -467,9 +467,14 @@ const Lessons = (() => {
     } };
   }
 
+  // The whole lesson is one scrolling page: every step is rendered in order, the
+  // sticky navigation follows the reader's position, and Back/Next/the menu jump.
+  let stepBy = () => {};
   function open(level, onStepViewed = () => {}) {
     navigationObserver?.disconnect();
+    stepBy = () => {};
     const lessonPanel = $("#lesson-panel");
+    lessonPanel.onscroll = null;
     lessonPanel.style.removeProperty("--lesson-nav-offset");
     const article = $("#lesson");
     if (!level.steps?.length) { article.innerHTML = md(level.lesson); return; }
@@ -477,22 +482,46 @@ const Lessons = (() => {
       review: S.review, saved: store.blob.lessons[level.id],
       save(record) { store.blob.lessons[level.id] = record; store.save(); },
     });
-    const title = element("h2", "lesson-step-title");
-    title.tabIndex = -1;
-    const body = element("div");
-    const nav = navigation(level, navigate);
-    function render() {
-      const index = session.index;
+    const nav = navigation(level, jump);
+    const titles = [];
+    const sections = level.steps.map((step) => {
+      const section = element("section", "lesson-step");
+      section.dataset.step = step.id;
+      const title = element("h2", "lesson-step-title", step.title);
+      title.tabIndex = -1;
+      titles.push(title);
+      section.append(title, ...step.blocks.map((block) => blockView(block, session)));
+      return section;
+    });
+    let current = -1, quietUntil = 0;
+    function mark(index) {
+      if (index === current) return;
+      current = index;
+      if (session.index !== index) session.go(index);
       nav.update(index);
-      title.textContent = level.steps[index].title;
-      body.replaceChildren(...level.steps[index].blocks.map((block) => blockView(block, session)));
       onStepViewed(level.steps[index].id);
     }
-    function navigate(index) {
-      session.go(index); render(); title.focus();
-      $("#lesson-panel").scrollTop = 0;
+    function jump(index) {
+      if (index < 0 || index >= sections.length) return;
+      mark(index);
+      quietUntil = Date.now() + 200; // the jump's own scroll event must not re-mark a neighbour
+      sections[index].scrollIntoView?.({ block: "start" });
+      if (index === 0) lessonPanel.scrollTop = 0;
+      titles[index].focus?.({ preventScroll: true });
     }
-    article.replaceChildren(nav.node, title, body, button(T("ارجع للكود", "Return to code"), returnToCode));
+    stepBy = (delta) => jump((current < 0 ? session.index : current) + delta);
+    // the step whose title has passed under the sticky navigation is the one being read
+    lessonPanel.onscroll = () => {
+      if (Date.now() < quietUntil) return;
+      const line = lessonPanel.getBoundingClientRect().top + nav.node.offsetHeight + 24;
+      let index = 0;
+      sections.forEach((section, i) => { if (section.getBoundingClientRect().top <= line) index = i; });
+      if (lessonPanel.scrollTop + lessonPanel.clientHeight >= lessonPanel.scrollHeight - 4) index = sections.length - 1;
+      mark(index);
+    };
+    const back = button(T("ارجع للكود", "Return to code"), returnToCode);
+    back.classList.add("lesson-return"); // only the drawer layout needs a way back
+    article.replaceChildren(nav.node, ...sections, back);
     // ← / → move between steps (mirrored in Arabic), unless a control has focus
     article.onkeydown = (event) => {
       // Esc in the lesson drawer (narrow screens) goes back to the code
@@ -501,12 +530,18 @@ const Lessons = (() => {
       if (event.target.closest?.("input, select, textarea, [contenteditable], .lesson-sandbox, .lesson-walkthrough")) return;
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
       const forward = (event.key === "ArrowLeft") === (document.documentElement.dir === "rtl");
-      const target = session.index + (forward ? 1 : -1);
+      const target = current + (forward ? 1 : -1);
       if (target < 0 || target >= level.steps.length) return;
       event.preventDefault();
-      navigate(target);
+      jump(target);
     };
-    render();
+    const resume = session.index;
+    mark(resume);
+    lessonPanel.scrollTop = 0;
+    if (resume > 0) {
+      const toResume = () => { quietUntil = Date.now() + 200; sections[resume].scrollIntoView?.({ block: "start" }); };
+      if (typeof requestAnimationFrame === "function") requestAnimationFrame(toResume); else toResume();
+    }
     navigationObserver = trackNavigationOffset(nav.node);
   }
 
@@ -519,7 +554,7 @@ const Lessons = (() => {
     return observer;
   }
 
-  return { open, createSession, registerSandbox, _renderBuiltInSandbox: renderBuiltInSandbox };
+  return { open, step: (delta) => stepBy(delta), createSession, registerSandbox, _renderBuiltInSandbox: renderBuiltInSandbox };
 })();
 
 const renderBuiltInSandbox = Lessons._renderBuiltInSandbox;

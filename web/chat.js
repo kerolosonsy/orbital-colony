@@ -45,6 +45,7 @@
 
   // errorText explains a failed answer in the player's language.
   function errorText(T, result) {
+    if (result?.error === "limit") return T("خلّصت أسئلة المساعد النهارده. بكرة تقدر تسأل تاني.", "You've used today's helper questions. You can ask again tomorrow.");
     if (result?.setup) return T("المساعد محتاج Codex CLI متسطب ومتسجّل بحساب ChatGPT. في الـterminal: brew install codex وبعدين codex login.", "The helper needs the Codex CLI signed in with ChatGPT. In a terminal: brew install codex, then codex login.");
     return T("المساعد مردّش المرة دي. جرّب تاني كمان شوية.", "The helper didn't answer this time. Try again in a moment.");
   }

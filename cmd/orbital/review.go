@@ -124,7 +124,7 @@ func reviewLevel(l *levels.Level) *levels.Level {
 	return &copy
 }
 func (s *server) profileReview(w http.ResponseWriter, r *http.Request) {
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	pr, ok := s.profileByPath(w, r)

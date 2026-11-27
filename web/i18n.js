@@ -1,8 +1,17 @@
 "use strict";
 // Language and player profile, resolved before the rest of the app loads.
 // Arabic is written in the HTML; English lives in data-en* attributes.
-const PROFILE = localStorage.getItem("orbital.profile") || "default";
-const LANG = localStorage.getItem("orbital.lang." + PROFILE) === "en" ? "en" : "ar";
+// On a hosted server the page names the signed-in account, and every saved
+// key is kept per account so two people on one browser never mix players.
+const ACCOUNT = document.querySelector('meta[name="orbital-account"]')?.content || "";
+const HOSTED = ACCOUNT !== "";
+const KEYS = {
+  profile: "orbital.profile" + (HOSTED ? "." + ACCOUNT : ""),
+  lang: (id) => "orbital.lang." + (HOSTED ? ACCOUNT + "." : "") + id,
+  cache: (id) => "orbital.p." + (HOSTED ? ACCOUNT + "." : "") + id,
+};
+const PROFILE = localStorage.getItem(KEYS.profile) || "default";
+const LANG = localStorage.getItem(KEYS.lang(PROFILE)) === "en" ? "en" : "ar";
 const T = (ar, en) => (LANG === "en" ? en : ar);
 
 (function applyLang() {

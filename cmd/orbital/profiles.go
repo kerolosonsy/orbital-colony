@@ -152,10 +152,10 @@ func (s *server) profileGame(r *http.Request) (*colonyGame, error) {
 	if !profileID.MatchString(id) {
 		return nil, errors.New("invalid profile id")
 	}
-	if s.profiles == nil {
+	if s.store(r) == nil {
 		return s.colony, nil
 	}
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if id == "default" {
@@ -192,13 +192,23 @@ func (s *server) requestGame(w http.ResponseWriter, r *http.Request) *colonyGame
 }
 
 func (s *server) stopColonies() {
+	if s.accounts != nil {
+		for _, p := range s.accounts.allStores() {
+			p.stopGames()
+		}
+		return
+	}
 	if s.profiles == nil {
 		s.colony.stop()
 		return
 	}
-	s.profiles.mu.Lock()
-	defer s.profiles.mu.Unlock()
-	for _, c := range s.profiles.games {
+	s.profiles.stopGames()
+}
+
+func (p *profileStore) stopGames() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	for _, c := range p.games {
 		c.stop()
 	}
 }
@@ -209,6 +219,7 @@ func (s *server) registerProfiles(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/profiles/{id}/rename", s.profileUpdate)
 	mux.HandleFunc("POST /api/profiles/{id}/lang", s.profileUpdate)
 	mux.HandleFunc("POST /api/profiles/{id}/reset", s.profileReset)
+	mux.HandleFunc("POST /api/profiles/{id}/duplicate", s.profileDuplicate)
 	mux.HandleFunc("DELETE /api/profiles/{id}", s.profileDelete)
 	mux.HandleFunc("GET /api/profiles/{id}/progress", s.profileProgress)
 	mux.HandleFunc("PUT /api/profiles/{id}/progress", s.profileProgress)
@@ -231,7 +242,7 @@ func profileBadRequest(w http.ResponseWriter, r *http.Request, message string, s
 }
 
 func (s *server) profileList(w http.ResponseWriter, r *http.Request) {
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	profiles, err := p.list()
@@ -264,12 +275,16 @@ func (s *server) profileCreate(w http.ResponseWriter, r *http.Request) {
 	if pr.Lang == "" {
 		pr.Lang = "ar"
 	}
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	profiles, err := p.list()
 	if err != nil {
 		profileError(w, r, err)
+		return
+	}
+	if len(profiles) >= maxProfiles {
+		profileBadRequest(w, r, "too many profiles", http.StatusConflict)
 		return
 	}
 	pr.ID = freshProfileID(pr.Name, profiles)
@@ -287,7 +302,7 @@ func (s *server) profileByPath(w http.ResponseWriter, r *http.Request) (profile,
 		profileBadRequest(w, r, "invalid profile id", 400)
 		return profile{}, false
 	}
-	pr, err := s.profiles.load(id)
+	pr, err := s.store(r).load(id)
 	if err != nil {
 		profileError(w, r, err)
 		return profile{}, false
@@ -300,7 +315,7 @@ func (s *server) profileUpdate(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	pr, ok := s.profileByPath(w, r)
@@ -327,14 +342,14 @@ func (s *server) profileUpdate(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, pr)
 }
 
-func (s *server) removeProfileFiles(id string) error {
+func (s *server) removeProfileFiles(r *http.Request, p *profileStore, id string) error {
 	if s.ws != nil {
-		if err := os.RemoveAll(filepath.Join(s.ws.root, id)); err != nil {
+		if err := os.RemoveAll(filepath.Join(s.ws.root, s.workspaceDir(r, id))); err != nil {
 			return err
 		}
 	}
 	for _, name := range []string{"colony.json", "progress.json"} {
-		if err := os.Remove(filepath.Join(s.profiles.dir(id), name)); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := os.Remove(filepath.Join(p.dir(id), name)); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return err
 		}
 	}
@@ -344,7 +359,7 @@ func (s *server) removeProfileFiles(id string) error {
 func (s *server) profileReset(w http.ResponseWriter, r *http.Request) {
 	s.colonyOps.Lock()
 	defer s.colonyOps.Unlock()
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	pr, ok := s.profileByPath(w, r)
@@ -358,17 +373,111 @@ func (s *server) profileReset(w http.ResponseWriter, r *http.Request) {
 		c.lastSave = time.Time{}
 		c.mu.Unlock()
 	}
-	if err := s.removeProfileFiles(pr.ID); err != nil {
+	if err := s.removeProfileFiles(r, p, pr.ID); err != nil {
 		profileError(w, r, err)
 		return
 	}
 	writeJSON(w, pr)
 }
 
+// profileDuplicate copies a profile (stars, code, lessons, colony) into a
+// new one under a new name; the copy then plays on independently.
+func (s *server) profileDuplicate(w http.ResponseWriter, r *http.Request) {
+	input, ok := profileInput(w, r)
+	if !ok {
+		return
+	}
+	s.colonyOps.Lock()
+	defer s.colonyOps.Unlock()
+	p := s.store(r)
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	pr, ok := s.profileByPath(w, r)
+	if !ok {
+		return
+	}
+	if c := p.games[pr.ID]; c != nil {
+		c.mu.Lock()
+		err := c.persist()
+		c.mu.Unlock()
+		if err != nil {
+			profileError(w, r, err)
+			return
+		}
+	}
+	profiles, err := p.list()
+	if err != nil {
+		profileError(w, r, err)
+		return
+	}
+	if len(profiles) >= maxProfiles {
+		profileBadRequest(w, r, "too many profiles", http.StatusConflict)
+		return
+	}
+	name := input.Name
+	if name == "" {
+		name = clipRunes(pr.Name, 20) + " 2"
+	}
+	copied := profile{ID: freshProfileID(name, profiles), Name: name, Created: time.Now().UTC(), Lang: pr.Lang}
+	if err := copyTree(p.dir(pr.ID), p.dir(copied.ID)); err != nil {
+		os.RemoveAll(p.dir(copied.ID))
+		profileError(w, r, err)
+		return
+	}
+	if s.ws != nil {
+		if err := copyTree(filepath.Join(s.ws.root, s.workspaceDir(r, pr.ID)), filepath.Join(s.ws.root, s.workspaceDir(r, copied.ID))); err != nil && !errors.Is(err, os.ErrNotExist) {
+			profileError(w, r, err)
+			return
+		}
+	}
+	if err := p.save(copied); err != nil {
+		profileError(w, r, err)
+		return
+	}
+	writeJSON(w, copied)
+}
+
+// maxProfiles bounds the players one account (or computer) keeps.
+const maxProfiles = 20
+
+// copyTree copies the regular files and folders under src into dst.
+func copyTree(src, dst string) error {
+	return filepath.WalkDir(src, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		target := filepath.Join(dst, rel)
+		if d.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+		if !d.Type().IsRegular() {
+			return nil
+		}
+		in, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer in.Close()
+		out, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+		if err != nil {
+			return err
+		}
+		if _, err := io.Copy(out, in); err != nil {
+			out.Close()
+			return err
+		}
+		return out.Close()
+	})
+}
+
 func (s *server) profileDelete(w http.ResponseWriter, r *http.Request) {
 	s.colonyOps.Lock()
 	defer s.colonyOps.Unlock()
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	pr, ok := s.profileByPath(w, r)
@@ -387,7 +496,7 @@ func (s *server) profileDelete(w http.ResponseWriter, r *http.Request) {
 	if c := p.games[pr.ID]; c != nil {
 		c.stop()
 	}
-	if err := s.removeProfileFiles(pr.ID); err != nil {
+	if err := s.removeProfileFiles(r, p, pr.ID); err != nil {
 		profileError(w, r, err)
 		return
 	}
@@ -400,7 +509,7 @@ func (s *server) profileDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) profileProgress(w http.ResponseWriter, r *http.Request) {
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	pr, ok := s.profileByPath(w, r)

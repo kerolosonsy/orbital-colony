@@ -122,10 +122,10 @@ func (c *colonyGame) summary(lang string, done map[int]bool) map[string]any {
 // with at least one star, the same rule the panel uses for lesson rewards.
 func (s *server) chaptersDone(r *http.Request) map[int]bool {
 	done := map[int]bool{}
-	if s.profiles == nil {
+	if s.store(r) == nil {
 		return done
 	}
-	save, err := readProgress(filepath.Join(s.profiles.dir(requestProfile(r)), "progress.json"))
+	save, err := readProgress(filepath.Join(s.store(r).dir(requestProfile(r)), "progress.json"))
 	if err != nil {
 		return done
 	}

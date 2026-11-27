@@ -1,7 +1,16 @@
 .DS_Store
 /orbital
+/cmd/orbital/orbital
 /workspace/
 /saves/
+/saves-hosted/
 /backups/
+/dist/
+/.impeccable/
+/.claude/
+/CLAUDE.md
+/graphify-out/
+/reports/
 .orbital.pid
 .orbital.log
+.orbital.env

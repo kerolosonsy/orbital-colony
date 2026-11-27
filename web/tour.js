@@ -7,8 +7,10 @@
 // Step fields:
 //   at    CSS selector, {tile: [x, y]} / {tile: "drone"} on the map,
 //         {line: n, rows?} in the editor, or nothing (a centred bubble)
-//   side  "above" puts the bubble over the target (to keep what's below visible)
+//   side  "above" puts the bubble over the target (to keep what's below visible);
+//         "beside" next to it (for a menu, whose items sit above and below)
 //   ar/en the bubble text (short; ~code~ marks code)
+//   open  "settings" opens that menu while the step shows (host.enter does it)
 //   act   {after, type}             type text right after the anchor `after`
 //         {after, complete: [pre, post]}  on a new line after `after`: type pre,
 //                                   accept the autocomplete, then type post
@@ -47,7 +49,7 @@
       { at: { line: 7 }, ar: "~colony.Till()~ بتحرث الخانة علشان تبقى جاهزة للزرع.", en: "~colony.Till()~ ploughs the tile so it's ready to plant." },
       { at: { line: 6, rows: 9 }, side: "above", act: { after: "\tcolony.Till()\n", complete: ["\tcolony.Pl", "colony.Moss"] },
         ar: "اكتب ~colony.~ وهتطلعلك **قايمة بالأوامر**. Enter يختار، والشرح بيظهر تحت.", en: "Type ~colony.~ and a **list of commands** pops up. Enter picks one; its help shows below." },
-      { at: "#btn-step", ar: "**خطوة** بتشغّل الكود سطر سطر، وتشوف كل سطر بيعمل إيه.", en: "**Step** runs your code line by line so you see what each line does." },
+      { at: "#btn-step", ar: "**تتبّع** بيشغّل الكود سطر سطر، وتشوف كل سطر بيعمل إيه.", en: "**Trace** runs your code line by line so you see what each line does." },
       { at: "#gutter", ar: "دوس على رقم سطر يحط **نقطة توقف** (F9): التشغيل يقف عندها.", en: "Click a line number for a **breakpoint** (F9): the run pauses there." },
       { at: "#btn-format", ar: "**{ }** بيرتّب الكود (Shift+Alt+F).", en: "**{ }** tidies your code (Shift+Alt+F)." },
       { at: "#btn-reset", ar: "بوّظت الكود؟ ده بيرجّع **كود البداية** (و Ctrl+Z يرجّع اللي اتمسح).", en: "Messed it up? This restores the **starter code** (Ctrl+Z brings yours back)." },
@@ -55,6 +57,26 @@
       { ar: "دوس **?** في أي وقت تشوف كل الاختصارات. دورك: ازرع التلات خانات!", en: "Press **?** anytime for all shortcuts. Your turn: plant all three tiles!" },
     ],
   };
+
+  // INTRO: the whole game in a minute, for a new player (and on demand from
+  // the settings menu). It points; it never opens a dialog, which would make
+  // the tour itself unclickable.
+  const INTRO = [
+    { ar: "أهلاً بيك في **Orbital Colony**! جولة سريعة توريك كل حاجة فين. دوس **التالي** أو Enter.", en: "Welcome to **Orbital Colony**! A quick tour of where everything is. Press **Next** or Enter." },
+    { at: "#lesson, #btn-lesson", ar: "هنا **الدرس** وهدف المهمة: شرح قصير، أمثلة بتتحرك، وأسئلة تجرّب بيها فهمك.", en: "Here's the **lesson** and the mission goal: a short read, live examples and questions to check yourself." },
+    { at: ".editor", ar: "وده **المحرر**: بتكتب فيه **Go حقيقي**، والـ compiler الحقيقي هو اللي بيبنيه.", en: "This is the **editor**: you write **real Go** here, built by the real compiler." },
+    { at: ".run-group", ar: "**Run** بيشغّل كودك (Ctrl/⌘ + Enter). و**تتبّع** بيشغّله سطر سطر علشان تشوف كل سطر بيعمل إيه.", en: "**Run** runs your code (Ctrl/⌘ + Enter). **Trace** runs it line by line so you see what each line does." },
+    { at: ".map-frame", ar: "هنا **الخريطة**: الدرون بينفّذ كودك قدامك. والخريطة بتتغير كل مرة، فلازم الكود يفكّر بنفسه.", en: "This is the **map**: the drone carries out your code in front of you. It changes every run, so your code has to think." },
+    { at: "#console", ar: "و**الكونسول**: رسايل برنامجك، وأخطاء الـ compiler مشروحة بالعربي.", en: "And the **console**: your program's output, with compiler errors explained in plain words." },
+    { at: ".tb-mission", ar: "اسم المهمة و**نجومها**. النجوم للحل الذكي، مش لأي حل وخلاص.", en: "The mission's name and **stars**. Stars are for the smart solution, not just any solution." },
+    { at: "#btn-missions", ar: "**الفهرس**: كل المهمات والفصول. منه تروح لأي مهمة مفتوحة، وتختبر نفسك في كل فصل (Ctrl/⌘ + K).", en: "The **index**: every mission and chapter. Jump to any open mission and quiz yourself on each chapter (Ctrl/⌘ + K)." },
+    { at: ".survey-progress", ar: "ده **تقدّمك**: كام مهمة خلصت، والخط اللي تحت الشريط بيتملي معاك.", en: "Your **progress**: missions done, and the line under the bar fills up with you." },
+    { at: "#btn-colony", ar: "**المستعمرة المفتوحة**: عالم مفتوح كودك شغال فيه على طول، بتجمع وتبيع وتشتري ترقيات.", en: "The **open colony**: an open world where your code runs nonstop, gathering, selling and buying upgrades." },
+    { at: "#btn-chat", ar: "**اسأل**: مساعد بيشوف المهمة وكودك، ويساعدك تفهم من غير ما يحل عنك.", en: "**Ask**: a helper that sees the mission and your code, and helps you understand without solving it for you." },
+    { at: "#settings-menu", open: "settings", side: "beside", ar: "من هنا: **اللاعبين** (كل لاعب ليه تقدّمه)، **العربي والإنجليزي** (الدروس والرسايل باللغتين، والكود دايماً بالإنجليزي)، و**الصوت**.", en: "From here: **players** (each with their own progress), **Arabic and English** (lessons and messages in both; code is always English) and **sound**." },
+    { at: "#btn-vscode", ar: "**VS Code** فوق المحرر: دوس عليه والمهمة تتفتح في VS Code بالـ autocomplete، وكل ما تعمل save اللعبة بتشغّل الكود.", en: "**VS Code**, above the editor: click it and the mission opens in VS Code with autocomplete; every save runs the code in the game." },
+    { ar: "دوس **?** في أي وقت للاختصارات، والجولة دي موجودة في قايمة اللاعب لو حبيت تشوفها تاني. يلا بينا!", en: "Press **?** anytime for shortcuts; this tour lives in the player menu if you want it again. Let's go!" },
+  ];
 
   function stepsFor(levelID) {
     return TOURS[levelID] || null;
@@ -68,6 +90,14 @@
     if (!r) return { left: (vw - w) / 2, top: (vh - h) / 2, side: "center" };
     let left = clamp(r.left + r.width / 2 - w / 2, 12, vw - w - 12);
     let top, side;
+    if (prefer === "beside") {
+      side = r.left > vw - r.right ? "left" : "right";
+      const room = side === "left" ? r.left - gap : vw - r.right - gap;
+      if (room >= w + 12) {
+        left = side === "left" ? r.left - gap - w : r.right + gap;
+        return { left, top: clamp(r.top + r.height / 2 - h / 2, 12, vh - h - 12), side };
+      }
+    }
     const below = r.bottom + gap + h <= vh - 12, above = r.top - gap - h >= 12;
     if (below && !(prefer === "above" && above)) { top = r.bottom + gap; side = "below"; }
     else if (above) { top = r.top - gap - h; side = "above"; }
@@ -138,9 +168,14 @@
 
     async function go(index) {
       if (state.busy || state.done) return;
-      // skip steps whose target is hidden in this layout
-      while (index < steps.length && index >= 0 && steps[index].at && !host.locate(steps[index].at)) index += index >= state.index ? 1 : -1;
-      if (index < 0) return;
+      // skip steps whose target is hidden in this layout (after opening what the step needs)
+      const forward = index >= state.index;
+      while (index < steps.length && index >= 0) {
+        host.enter?.(steps[index]);
+        if (!steps[index].at || host.locate(steps[index].at)) break;
+        index += forward ? 1 : -1;
+      }
+      if (index < 0) { host.enter?.(steps[state.index]); return; }
       if (index >= steps.length) return end(true);
       state.index = index;
       const step = steps[index];
@@ -172,6 +207,7 @@
       window.removeEventListener("keydown", onKey, true);
       window.removeEventListener("resize", onResize);
       root.remove();
+      host.enter?.({});
       for (const s of steps) delete s.played;
       host.onEnd({ finished, interrupted });
     }
@@ -197,7 +233,7 @@
     active?.stop?.();
   }
 
-  const api = { stepsFor, bubbleBox, keyAction, play, stop, get running() { return !!active; } };
+  const api = { stepsFor, intro: () => INTRO, bubbleBox, keyAction, play, stop, get running() { return !!active; } };
   if (typeof window !== "undefined") window.Tour = api;
   if (typeof module !== "undefined") module.exports = api;
 })();
