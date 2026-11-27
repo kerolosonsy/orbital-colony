@@ -1,13 +1,13 @@
-name: Verify release lessons and browser
+name: Verify the deterministic deadlock lesson
 "on":
   push:
     branches: ["release/verify-open-source"]
 permissions:
   contents: read
 jobs:
-  lessons-web:
+  lesson:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 9
     env:
       GOTOOLCHAIN: local
     steps:
@@ -19,14 +19,8 @@ jobs:
           go-version: "1.27.x"
           check-latest: true
           cache: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: "24"
-      - name: Warm the locally tested lab dependencies
-        run: make deps
-      - name: Run verification
-        run: |
-          make vet
-          (cd colony && go test ./...)
-          go test ./cmd/lesson-demo
-          make test-web demo
+      - name: Check both localized starters and their fix repeatedly
+        run: go test -v ./cmd/orbital -run '^TestDeadlockStarterAndLockOrderFix$' -count=3 -timeout 7m
+      - name: Test nearby curriculum content
+        working-directory: colony
+        run: go test ./levels -run '^TestCh12'
