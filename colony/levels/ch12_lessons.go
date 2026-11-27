@@ -603,7 +603,7 @@ var ch12Lesson123English = []LessonStep{
 		ID: "c123.idea-step", Title: "Idea",
 		Blocks: []LessonBlock{{
 			ID: "c123.idea", Kind: "markdown",
-			Text: "A deadlock is a wait cycle: a goroutine holds one lock and waits for another.\n\nIf workers acquire locks in reverse orders, each may wait for the other.\n\nGo does not promise who starts. To demonstrate the wait cycle reliably, the starter pauses each worker at the first harvest until both hold their first lock when the orders differ.\n\nRequest resources in one fixed order on every path.",
+			Text: "A deadlock is a wait cycle: a goroutine holds one lock and waits for another.\n\nIf workers acquire locks in reverse orders, each may wait for the other.\n\nThe starter waits until both workers hold different locks, making the cycle reproducible.\n\nRequest resources in one fixed order on every path.",
 		}},
 	},
 	{
