@@ -444,8 +444,12 @@ import (
 // The colony has one drill and one cart. Every harvest needs both.
 var drill, cart sync.Mutex
 
-func harvestWith(d *colony.Drone, first, second *sync.Mutex) {
+func harvestWith(d *colony.Drone, first, second *sync.Mutex, ready *sync.WaitGroup) {
 	first.Lock()
+	if ready != nil {
+		ready.Done()
+		ready.Wait()
+	}
 	d.Wait() // Prepare the equipment
 	second.Lock()
 	d.Harvest()
@@ -453,12 +457,13 @@ func harvestWith(d *colony.Drone, first, second *sync.Mutex) {
 	first.Unlock()
 }
 
-func work(d *colony.Drone, row int, first, second *sync.Mutex) {
+func work(d *colony.Drone, row int, first, second *sync.Mutex, ready *sync.WaitGroup) {
 	for i := 0; i < row; i++ {
 		d.Move(colony.North)
 	}
 	for x := 0; x < 6; x++ {
-		harvestWith(d, first, second)
+		harvestWith(d, first, second, ready)
+		ready = nil
 		if x < 5 {
 			d.Move(colony.East)
 		}
@@ -467,17 +472,27 @@ func work(d *colony.Drone, row int, first, second *sync.Mutex) {
 
 func main() {
 	a, b := colony.Main(), colony.Spawn()
+	// The first harvest lines up both drones when they start with different locks.
+	aFirst, aSecond := &drill, &cart
+	bFirst, bSecond := &cart, &drill
+
+	var ready *sync.WaitGroup
+	if aFirst != bFirst {
+		ready = &sync.WaitGroup{}
+		ready.Add(2)
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go func() { defer wg.Done(); work(a, 0, &drill, &cart) }()
-	go func() { defer wg.Done(); work(b, 1, &cart, &drill) }()
+	go func() { defer wg.Done(); work(a, 0, aFirst, aSecond, ready) }()
+	go func() { defer wg.Done(); work(b, 1, bFirst, bSecond, ready) }()
 	wg.Wait()
 }
 `,
 			Hints: []string{
 				"A deadlock can form when each worker holds one resource and waits for another.",
 				"Compare the two lock orders on every path before tracing Wait.",
-				"Inspect the arguments to ~harvestWith~ in both ~work~ calls inside ~main~.",
+				"Compare ~aFirst, aSecond~ with ~bFirst, bSecond~ inside ~main~.",
 			},
 		},
 		LessonRevision: 1, Steps: ch12Lesson123Arabic,
@@ -504,8 +519,12 @@ import (
 // في المستعمرة مثقاب واحد وعربية واحدة. كل حصاد محتاج الاتنين.
 var drill, cart sync.Mutex
 
-func harvestWith(d *colony.Drone, first, second *sync.Mutex) {
+func harvestWith(d *colony.Drone, first, second *sync.Mutex, ready *sync.WaitGroup) {
 	first.Lock()
+	if ready != nil {
+		ready.Done()
+		ready.Wait()
+	}
 	d.Wait() // بيجهّز العدة
 	second.Lock()
 	d.Harvest()
@@ -513,12 +532,13 @@ func harvestWith(d *colony.Drone, first, second *sync.Mutex) {
 	first.Unlock()
 }
 
-func work(d *colony.Drone, row int, first, second *sync.Mutex) {
+func work(d *colony.Drone, row int, first, second *sync.Mutex, ready *sync.WaitGroup) {
 	for i := 0; i < row; i++ {
 		d.Move(colony.North)
 	}
 	for x := 0; x < 6; x++ {
-		harvestWith(d, first, second)
+		harvestWith(d, first, second, ready)
+		ready = nil
 		if x < 5 {
 			d.Move(colony.East)
 		}
@@ -527,17 +547,27 @@ func work(d *colony.Drone, row int, first, second *sync.Mutex) {
 
 func main() {
 	a, b := colony.Main(), colony.Spawn()
+	// أول حصاد بينسّق بين الدرونين لما كل واحد يبدأ بـlock مختلف.
+	aFirst, aSecond := &drill, &cart
+	bFirst, bSecond := &cart, &drill
+
+	var ready *sync.WaitGroup
+	if aFirst != bFirst {
+		ready = &sync.WaitGroup{}
+		ready.Add(2)
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go func() { defer wg.Done(); work(a, 0, &drill, &cart) }()
-	go func() { defer wg.Done(); work(b, 1, &cart, &drill) }()
+	go func() { defer wg.Done(); work(a, 0, aFirst, aSecond, ready) }()
+	go func() { defer wg.Done(); work(b, 1, bFirst, bSecond, ready) }()
 	wg.Wait()
 }
 `,
 		Hints: []string{
 			"الـdeadlock ممكن يحصل لما كل عامل ماسك مورد ومستني التاني.",
 			"قارن ترتيب الـlocks في كل مسار قبل تتبّع Wait.",
-			"راجع arguments بتوع ~harvestWith~ في استدعاءي ~work~ جوه ~main~.",
+			"قارن ~aFirst, aSecond~ مع ~bFirst, bSecond~ جوه ~main~.",
 		},
 		Lesson: `# Deadlock: كل واحد مستني التاني 🔒🔒
 

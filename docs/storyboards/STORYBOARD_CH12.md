@@ -357,7 +357,7 @@ Edit the starter, then watch both drones finish the rows.
 
 1. **Concept / الفكرة:** الـdeadlock ممكن يحصل لما كل عامل ماسك مورد ومستني التاني. / A deadlock can form when each worker holds one resource and waits for another.
 2. **Structure / الترتيب:** قارن ترتيب الـlocks في كل مسار قبل تتبّع Wait. / Compare the two lock orders on every path before tracing Wait.
-3. **Specific / السطر:** راجع arguments بتوع ~harvestWith~ في استدعاءي ~work~ جوه ~main~. / Inspect the arguments to ~harvestWith~ in both ~work~ calls inside ~main~.
+3. **Specific / السطر:** قارن ~aFirst, aSecond~ مع ~bFirst, bSecond~ جوه ~main~. / Compare ~aFirst, aSecond~ with ~bFirst, bSecond~ inside ~main~.
 
 #### Verified e123-lock-order
 
