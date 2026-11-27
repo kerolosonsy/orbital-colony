@@ -11,19 +11,29 @@ jobs:
     env:
       GOTOOLCHAIN: local
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5
         with:
           go-version: "1.27.x"
           cache: false
-      - name: Scan all fetched Git history with redacted results
+      - name: Scan Git history and exclude the verified lesson ID
         run: |
+          cat > "${RUNNER_TEMP}/orbital-gitleaks.toml" <<'CONFIG'
+          [extend]
+          useDefault = true
+
+          [[allowlists]]
+          description = "Fixed ID for the Chapter 28 Quarantine mission"
+          condition = "AND"
+          paths = ['''^colony/levels/ch(28|29)_lessons_test\.go$''']
+          regexTarget = "match"
+          regexes = ['''^"28-boss-quarantine"$''', '''^28-boss-quarantine$''']
+          CONFIG
           go install github.com/zricethezav/gitleaks/v8@v8.30.1
-          gitleaks git --redact=100 --log-opts="--all" --no-banner --report-format=json --report-path="${RUNNER_TEMP}/release-secrets.json" . || scan_status=$?
-          if [ -f "${RUNNER_TEMP}/release-secrets.json" ]; then
-            jq -r 'map({file:.File, line:.StartLine, rule:.RuleID, commit:(.Commit[0:12])}) | unique | .[] | [.file,.line,.rule,.commit] | @tsv' "${RUNNER_TEMP}/release-secrets.json"
-          fi
-          exit "${scan_status:-0}"
+          status=0
+          gitleaks git --config="${RUNNER_TEMP}/orbital-gitleaks.toml" --redact=100 --log-opts="--all" --no-banner --report-format=json --report-path="${RUNNER_TEMP}/release-secrets.json" . || status=$?
+          jq -r 'map({file:.File, line:.StartLine, rule:.RuleID, commit:(.Commit[0:12])}) | unique | .[] | [.file,.line,.rule,.commit] | @tsv' "${RUNNER_TEMP}/release-secrets.json"
+          exit "$status"
