@@ -266,7 +266,7 @@ The workers request locks in different orders.
 
 لو عاملين أخدوا الـlocks بترتيب عكسي، ممكن كل واحد يستنى التاني.
 
-Go مش بتضمن مين يبدأ؛ ده سيناريو محتمل، مش نتيجة كل تشغيل.
+أول حصاد في الـstarter بيخلّي كل عامل ينتظر لحد ما الاتنين يمسكوا قفلين مختلفين.
 
 القاعدة: اطلب الموارد بنفس الترتيب في كل المسارات.
 
@@ -274,7 +274,7 @@ Go مش بتضمن مين يبدأ؛ ده سيناريو محتمل، مش نت�
 
 If workers acquire locks in reverse orders, each may wait for the other.
 
-Go does not promise who starts; this is one possible order.
+The starter waits until both workers hold different locks, making the cycle reproducible.
 
 Request resources in one fixed order on every path.
 
