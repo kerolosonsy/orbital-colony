@@ -1,0 +1,50 @@
+name: Private release verification
+"on":
+  push:
+    branches: ["release/verify-open-source"]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    env:
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version: "1.27.x"
+          check-latest: true
+          cache: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - name: Update the optional framework dependency
+        working-directory: labdeps
+        run: go get github.com/valyala/fasthttp@v1.80.0
+      - name: Save the verified module state
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: updated-lab-modules
+          retention-days: 1
+          path: |
+            labdeps/go.mod
+            labdeps/go.sum
+      - name: Prepare optional lab dependencies
+        run: make deps
+      - name: Test and build the browser lesson
+        run: make test-web demo
+      - name: Vet Go packages
+        run: make vet
+      - name: Test the game and Go curriculum
+        run: make test
+      - name: Scan reachable vulnerabilities in the game and curriculum
+        if: always()
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@v1.10.0
+          govulncheck ./...
+          cd colony
+          govulncheck ./...
