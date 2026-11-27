@@ -26,7 +26,7 @@ Use Go **1.27.1 or newer** and run `make deps` to prepare the optional third-par
 
 ## Browser demo
 
-**First Signal** lets you assemble Go direction calls and see how their order changes the drone's position. It runs as a static lesson in your browser. Build it with `make demo` and open `dist/index.html`. [Demo and GitHub Pages setup](docs/DEPLOY.md)
+[Play First Signal](https://kerolosonsy.github.io/orbital-colony-demo/) to assemble Go direction calls and see how their order changes the drone's position. It runs as a static lesson in your browser. Build it with `make demo` and open `dist/index.html`. [Demo and GitHub Pages setup](docs/DEPLOY.md)
 
 ## Keep learning Go
 
