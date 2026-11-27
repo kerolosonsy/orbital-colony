@@ -36,6 +36,8 @@ Use the guided missions for practice, then design and implement an independent p
 
 Pick an issue or propose one. You can improve a translation, review a lesson, fix an accessibility problem, or develop simulation behavior.
 
+See how early player feedback shaped two Go lessons in the [playtest notes](docs/PLAYTESTING.md).
+
 | Path | What belongs there |
 | --- | --- |
 | `colony/levels/` | Mission rules, starter code, lessons, and quizzes |
