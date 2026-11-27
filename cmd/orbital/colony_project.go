@@ -161,7 +161,7 @@ func (r *runner) vetColonyProject(ctx context.Context, files map[string]string) 
 }
 
 func (r *runner) colonyProjectDir(files map[string]string) (string, error) {
-	dir, err := os.MkdirTemp("", "orbital-colony-*")
+	dir, err := runDir("orbital-colony-*")
 	if err != nil {
 		return "", err
 	}

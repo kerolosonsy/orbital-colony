@@ -51,6 +51,10 @@ test("bubbleBox prefers below, then above, then the roomier side, and stays on s
   assert.equal(bubbleBox({ left: 100, top: 400, right: 200, bottom: 420, width: 100, height: 20 }, 300, 100, 1000, 800, "above").side, "above");
   assert.equal(bubbleBox({ left: 100, top: 40, right: 200, bottom: 60, width: 100, height: 20 }, 300, 100, 1000, 800, "above").side, "below");
   assert.deepEqual(bubbleBox(null, 300, 100, 1000, 800), { left: 350, top: 350, side: "center" });
+  // beside: next to a menu on the screen edge, centred on it, never over it
+  const menu = bubbleBox({ left: 14, top: 58, right: 234, bottom: 240, width: 220, height: 182 }, 300, 100, 1000, 800, "beside");
+  assert.deepEqual(menu, { left: 248, top: 99, side: "right" });
+  assert.equal(bubbleBox({ left: 100, top: 58, right: 900, bottom: 240, width: 800, height: 182 }, 300, 100, 1000, 800, "beside").side, "below");
 });
 
 test("keyAction mirrors the arrows in Arabic", () => {
@@ -60,4 +64,20 @@ test("keyAction mirrors the arrows in Arabic", () => {
   assert.equal(keyAction("ArrowLeft", true), "next");
   assert.equal(keyAction("ArrowRight", true), "back");
   assert.equal(keyAction("a", false), null);
+});
+
+test("the intro tour is bilingual, points at real parts of the page and shows the player menu", () => {
+  const steps = require("./tour.js").intro();
+  assert.ok(steps.length >= 10);
+  for (const step of steps) {
+    assert.ok(step.ar && step.en, step.en);
+    if (typeof step.at === "string") for (const sel of step.at.split(",").map((s) => s.trim()))
+      assert.match(html, new RegExp(`id="${sel.slice(1)}"|class="(?:[^"]* )?${sel.slice(1)}(?: [^"]*)?"`), sel);
+    if (step.open) assert.equal(step.open, "settings");
+  }
+  // the things a new player must learn about are all on the tour
+  const covered = steps.map((s) => s.at).join(" ");
+  for (const sel of ["#btn-missions", "#btn-colony", "#btn-chat", "#settings-menu", "#btn-vscode", ".run-group"]) assert.ok(covered.includes(sel), sel);
+  assert.match(steps.find((s) => s.at === "#settings-menu").en, /Arabic and English/);
+  assert.match(html, /id="btn-intro"/);
 });

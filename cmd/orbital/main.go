@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
@@ -16,10 +15,12 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -38,6 +39,34 @@ type server struct {
 	profiles  *profileStore
 	colonyOps sync.Mutex
 	ws        *workspace
+	accounts  *accountStore // optional account mode
+	public    string        // canonical host name for account mode
+	local     bool          // accounts on this computer: VS Code still works
+	ai        *aiQuota      // daily helper uses per account
+}
+
+func loopbackHost(host string) bool {
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return strings.EqualFold(host, "localhost") || ip != nil && ip.IsLoopback()
+}
+
+func validateListenConfig(addr, publicURL string) error {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		return err
+	}
+	if !loopbackHost(host) {
+		return errors.New("Orbital Colony runs player programs on this computer. Use a loopback address such as 127.0.0.1:7777")
+	}
+	if publicURL == "" {
+		return nil
+	}
+	u, err := url.Parse(publicURL)
+	if err != nil || !loopbackHost(u.Hostname()) || (u.Scheme != "http" && u.Scheme != "https") ||
+		u.User != nil || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || (u.Path != "" && u.Path != "/") {
+		return errors.New("-public must be a loopback origin such as http://127.0.0.1:7777")
+	}
+	return nil
 }
 
 func main() {
@@ -46,7 +75,9 @@ func main() {
 	wsDir := flag.String("workspace", "workspace", "folder for missions opened in VS Code")
 	savesDir := flag.String("saves", "saves", "folder for persistent colony saves")
 	stats := flag.Bool("stats", false, "print the top learning struggle levels")
+	publicURL := flag.String("public", os.Getenv("ORBITAL_PUBLIC_URL"), "loopback origin for optional local accounts (e.g. http://127.0.0.1:7777)")
 	flag.Parse()
+	cfg := readHostedConfig()
 	if *stats {
 		savesAbs, err := filepath.Abs(*savesDir)
 		if err != nil {
@@ -69,12 +100,8 @@ func main() {
 	if err != nil {
 		log.Fatal("the go toolchain must be on PATH: ", err)
 	}
-	host, _, err := net.SplitHostPort(*addr)
-	if err != nil {
+	if err := validateListenConfig(*addr, *publicURL); err != nil {
 		log.Fatal(err)
-	}
-	if ip := net.ParseIP(host); host != "localhost" && (ip == nil || !ip.IsLoopback()) {
-		log.Fatal("refusing to listen on a non-loopback address: player code runs on this machine")
 	}
 
 	wsAbs, err := filepath.Abs(*wsDir)
@@ -90,50 +117,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	profiles, err := newProfileStore(savesAbs)
-	if err != nil {
-		log.Fatal(err)
+	var profiles *profileStore // with accounts, each account has its own store
+	if *publicURL == "" {
+		if profiles, err = newProfileStore(savesAbs); err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	b := make([]byte, 16)
-	rand.Read(b)
 	web, _ := fs.Sub(orbital.Web, "web")
 	s := &server{
 		run:      &runner{goBin: goBin, colonyDir: abs},
-		token:    hex.EncodeToString(b),
+		token:    randomHex(16),
 		profiles: profiles,
 		web:      web,
 		ws:       &workspace{root: wsAbs, colonyRel: filepath.ToSlash(rel)},
 	}
-
-	mux := http.NewServeMux()
-	s.registerProfiles(mux)
-	mux.HandleFunc("GET /{$}", s.index)
-	mux.Handle("GET /static/", http.StripPrefix("/static/", staticHandler(web)))
-	mux.HandleFunc("GET /api/levels", s.levels)
-	mux.HandleFunc("GET /api/services", s.services)
-	mux.HandleFunc("GET /api/preview", s.preview)
-	mux.HandleFunc("POST /api/run", s.runCode)
-	mux.HandleFunc("POST /api/trace", s.traceCode)
-	mux.HandleFunc("POST /api/format", s.formatCode)
-	mux.HandleFunc("GET /api/symbols", s.symbols)
-	mux.HandleFunc("POST /api/chat", s.chat)
-	mux.HandleFunc("POST /api/workspace/open", s.workspaceOpen)
-	mux.HandleFunc("GET /api/workspace/files", s.workspaceFiles)
-
-	mux.HandleFunc("GET /api/colony", s.colonyStatus)
-	mux.HandleFunc("POST /api/colony/run", s.colonyRun)
-	s.registerColonyProject(mux)
-	s.registerColonySeasons(mux)
-	mux.HandleFunc("POST /api/colony/stop", s.colonyStop)
-	mux.HandleFunc("POST /api/colony/debug", s.colonyDebugCommand)
-	mux.HandleFunc("POST /api/colony/buy", s.colonyBuy)
-	mux.HandleFunc("POST /api/colony/claim", s.colonyClaim)
-	mux.HandleFunc("POST /api/colony/contract", s.colonyContract)
-	mux.HandleFunc("GET /api/colony/stream", s.colonyStream)
+	if *publicURL != "" {
+		if err := s.setupHosted(*publicURL, savesAbs, cfg); err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	log.Printf("🚀 Orbital Colony: http://%s", *addr)
-	srv := &http.Server{Addr: *addr, Handler: s.guard(mux), ReadHeaderTimeout: 10 * time.Second}
+	srv := &http.Server{Addr: *addr, Handler: s.routes(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second}
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 	defer signal.Stop(shutdown)
@@ -154,6 +160,38 @@ func main() {
 	}
 }
 
+func (s *server) routes() http.Handler {
+	mux := http.NewServeMux()
+	s.registerAccounts(mux)
+	s.registerProfiles(mux)
+	mux.HandleFunc("GET /{$}", s.index)
+	mux.Handle("GET /static/", http.StripPrefix("/static/", staticHandler(s.web)))
+	mux.HandleFunc("GET /api/levels", s.levels)
+	mux.HandleFunc("GET /api/services", s.services)
+	mux.HandleFunc("GET /api/preview", s.preview)
+	mux.HandleFunc("POST /api/run", s.runCode)
+	mux.HandleFunc("POST /api/trace", s.traceCode)
+	mux.HandleFunc("POST /api/format", s.formatCode)
+	mux.HandleFunc("GET /api/symbols", s.symbols)
+	mux.HandleFunc("POST /api/chat", s.chat)
+	mux.HandleFunc("POST /api/grade", s.grade)
+	mux.HandleFunc("POST /api/workspace/open", s.workspaceOpen)
+	mux.HandleFunc("GET /api/workspace/files", s.workspaceFiles)
+
+	mux.HandleFunc("GET /api/colony", s.colonyStatus)
+	mux.HandleFunc("POST /api/colony/run", s.colonyRun)
+	s.registerColonyProject(mux)
+	s.registerColonySeasons(mux)
+	mux.HandleFunc("POST /api/colony/stop", s.colonyStop)
+	mux.HandleFunc("POST /api/colony/debug", s.colonyDebugCommand)
+	mux.HandleFunc("POST /api/colony/buy", s.colonyBuy)
+	mux.HandleFunc("POST /api/colony/claim", s.colonyClaim)
+	mux.HandleFunc("POST /api/colony/contract", s.colonyContract)
+	mux.HandleFunc("GET /api/colony/stream", s.colonyStream)
+
+	return s.guard(mux)
+}
+
 // guard blocks DNS-rebinding and cross-site requests: only pages served by
 // this process (which embed the token) may call the API.
 func (s *server) guard(next http.Handler) http.Handler {
@@ -163,16 +201,24 @@ func (s *server) guard(next http.Handler) http.Handler {
 		// Referer leaving the game.
 		h := w.Header()
 		h.Set("X-Frame-Options", "DENY")
-		h.Set("Content-Security-Policy", "frame-ancestors 'none'")
+		h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'")
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("Referrer-Policy", "no-referrer")
+		h.Set("Cross-Origin-Resource-Policy", "same-origin")
+		if r.URL.Path == "/healthz" { // the host's health check, on any address
+			w.Write([]byte("ok"))
+			return
+		}
 		host, _, err := net.SplitHostPort(r.Host)
 		if err != nil {
 			host = r.Host
 		}
-		if ip := net.ParseIP(host); host != "localhost" && (ip == nil || !ip.IsLoopback()) {
+		if !loopbackHost(host) && (s.public == "" || host != s.public) {
 			requestError(w, r, "forbidden host", http.StatusForbidden)
 			return
+		}
+		if s.accounts != nil && s.accounts.secure {
+			h.Set("Strict-Transport-Security", "max-age=31536000")
 		}
 		token := r.Header.Get("X-Orbital-Token")
 		if token == "" && r.Method == http.MethodGet && r.URL.Path == "/api/colony/stream" {
@@ -187,7 +233,18 @@ func (s *server) guard(next http.Handler) http.Handler {
 			profileBadRequest(w, r, "invalid profile id", http.StatusBadRequest)
 			return
 		}
-		next.ServeHTTP(w, r.WithContext(withLang(r.Context(), requestLang(r))))
+		ctx := withLang(r.Context(), requestLang(r))
+		if s.accounts != nil {
+			acc := s.accounts.current(r)
+			if acc == nil && strings.HasPrefix(r.URL.Path, "/api/") && !strings.HasPrefix(r.URL.Path, "/api/auth/") {
+				authError(w, "login", http.StatusUnauthorized)
+				return
+			}
+			if acc != nil {
+				ctx = withAccount(ctx, acc)
+			}
+		}
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -197,7 +254,8 @@ func (s *server) guard(next http.Handler) http.Handler {
 func staticHandler(web fs.FS) http.Handler {
 	etags := map[string]string{}
 	fs.WalkDir(web, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+		if err != nil || d.IsDir() || (!strings.HasSuffix(path, ".css") && !strings.HasSuffix(path, ".js")) ||
+			strings.HasSuffix(path, ".test.js") || path == "sandbox/harness.js" {
 			return nil
 		}
 		if body, err := fs.ReadFile(web, path); err == nil {
@@ -208,23 +266,38 @@ func staticHandler(web fs.FS) http.Handler {
 	})
 	files := http.FileServerFS(web)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "no-cache")
-		if tag, ok := etags[strings.TrimPrefix(r.URL.Path, "/")]; ok {
-			w.Header().Set("ETag", tag)
+		tag, ok := etags[strings.TrimPrefix(r.URL.Path, "/")]
+		if !ok {
+			http.NotFound(w, r)
+			return
 		}
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("ETag", tag)
 		files.ServeHTTP(w, r)
 	})
 }
 
 func (s *server) index(w http.ResponseWriter, r *http.Request) {
-	page, err := fs.ReadFile(s.web, "index.html")
+	name, acc := "index.html", requestAccount(r)
+	if s.accounts != nil && acc == nil {
+		name = "login.html"
+	}
+	page, err := fs.ReadFile(s.web, name)
 	if err != nil {
 		requestError(w, r, err.Error(), 500)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
-	w.Write(bytes.ReplaceAll(page, []byte("__ORBITAL_TOKEN__"), []byte(s.token)))
+	page = bytes.ReplaceAll(page, []byte("__ORBITAL_TOKEN__"), []byte(s.token))
+	if acc != nil {
+		meta := `<meta name="orbital-account" content="` + acc.ID + `">` + "\n"
+		if !s.vscodeAvailable() {
+			meta += `<meta name="orbital-vscode" content="off">` + "\n"
+		}
+		page = bytes.Replace(page, []byte(`<meta name="orbital-token"`), []byte(meta+`<meta name="orbital-token"`), 1)
+	}
+	w.Write(page)
 }
 
 func writeJSON(w http.ResponseWriter, v any) {
@@ -232,42 +305,70 @@ func writeJSON(w http.ResponseWriter, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 
-// levelsCache holds the encoded /api/levels payload per language: the level
-// data never changes while the server runs, and it is ~3.6 MB of JSON.
-var levelsCache sync.Map // lang -> cachedJSON
-
 type cachedJSON struct {
 	body, gz []byte
 	etag     string
 }
 
-func (s *server) levels(w http.ResponseWriter, r *http.Request) {
-	lang := requestLang(r)
-	entry, ok := levelsCache.Load(lang)
-	if !ok {
-		body, err := json.Marshal(levelsPayload(r))
-		if err != nil {
-			requestError(w, r, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		sum := sha256.Sum256(body)
-		body = append(body, '\n')
-		var gz bytes.Buffer
-		zw := gzip.NewWriter(&gz)
-		zw.Write(body)
-		zw.Close()
-		entry, _ = levelsCache.LoadOrStore(lang, cachedJSON{body: body, gz: gz.Bytes(), etag: `"` + hex.EncodeToString(sum[:8]) + `"`})
+// Encode and compress each language once, including during concurrent startup.
+var cachedLevels = map[string]func() (cachedJSON, error){
+	"ar": sync.OnceValues(func() (cachedJSON, error) { return encodeLevels("ar") }),
+	"en": sync.OnceValues(func() (cachedJSON, error) { return encodeLevels("en") }),
+}
+
+func encodeLevels(lang string) (cachedJSON, error) {
+	body, err := json.Marshal(levelsPayload(lang))
+	if err != nil {
+		return cachedJSON{}, err
 	}
-	cached := entry.(cachedJSON)
+	body = append(body, '\n')
+	sum := sha256.Sum256(body)
+	var gz bytes.Buffer
+	zw := gzip.NewWriter(&gz)
+	zw.Write(body)
+	zw.Close()
+	return cachedJSON{body: body, gz: gz.Bytes(), etag: `W/"` + hex.EncodeToString(sum[:8]) + `"`}, nil
+}
+
+func acceptsGzip(header string) bool {
+	wildcard := false
+	for entry := range strings.SplitSeq(header, ",") {
+		name, params, _ := strings.Cut(entry, ";")
+		name = strings.ToLower(strings.TrimSpace(name))
+		if name != "gzip" && name != "*" {
+			continue
+		}
+		quality := 1.0
+		for param := range strings.SplitSeq(params, ";") {
+			key, value, _ := strings.Cut(strings.TrimSpace(param), "=")
+			if strings.EqualFold(key, "q") {
+				quality, _ = strconv.ParseFloat(strings.TrimSpace(value), 64)
+			}
+		}
+		accepted := quality > 0 && quality <= 1
+		if name == "gzip" {
+			return accepted
+		}
+		wildcard = accepted
+	}
+	return wildcard
+}
+
+func (s *server) levels(w http.ResponseWriter, r *http.Request) {
+	cached, err := cachedLevels[requestLang(r)]()
+	if err != nil {
+		requestError(w, r, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("ETag", cached.etag)
+	w.Header().Set("Vary", "Accept-Encoding, X-Orbital-Lang")
 	if match := r.Header.Get("If-None-Match"); match != "" && match == cached.etag {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Vary", "Accept-Encoding")
-	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+	if acceptsGzip(strings.Join(r.Header.Values("Accept-Encoding"), ",")) {
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Write(cached.gz)
 		return
@@ -275,11 +376,11 @@ func (s *server) levels(w http.ResponseWriter, r *http.Request) {
 	w.Write(cached.body)
 }
 
-func levelsPayload(r *http.Request) map[string]any {
+func levelsPayload(lang string) map[string]any {
 	chapters := append([]levels.Chapter(nil), levels.Chapters...)
 	for i := range chapters {
 		chapters[i].Quiz = append([]levels.QuizQuestion(nil), chapters[i].Quiz...)
-		if requestLang(r) == "en" {
+		if lang == "en" {
 			for j := range chapters[i].Quiz {
 				chapters[i].Quiz[j].QuizText = chapters[i].Quiz[j].En
 			}
@@ -287,14 +388,14 @@ func levelsPayload(r *http.Request) map[string]any {
 	}
 	missions := make([]*levels.Level, len(levels.All))
 	for i, l := range levels.All {
-		m := *levelForLang(l, requestLang(r))
+		m := *levelForLang(l, lang)
 		m.En = nil // already localized above; the client needs only one language
 		if len(m.Steps) > 0 {
 			m.Lesson = "" // the client shows Steps instead of the old lesson text
 		}
 		missions[i] = &m
 	}
-	if requestLang(r) == "en" {
+	if lang == "en" {
 		for i := range chapters {
 			chapters[i].Title, chapters[i].Concept = chapters[i].TitleEn, chapters[i].ConceptEn
 			chapters[i].Track = chapters[i].TrackEn
@@ -339,17 +440,17 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 	var reviewSave progressSave
 	var reviewPath string
 	if req.Review {
-		if s.profiles == nil {
+		if s.store(r) == nil {
 			requestError(w, r, "bad request", 400)
 			return
 		}
-		s.profiles.mu.Lock()
-		defer s.profiles.mu.Unlock()
+		s.store(r).mu.Lock()
+		defer s.store(r).mu.Unlock()
 		if !profileID.MatchString(requestProfile(r)) {
 			requestError(w, r, "bad request", 400)
 			return
 		}
-		reviewPath = filepath.Join(s.profiles.dir(requestProfile(r)), "progress.json")
+		reviewPath = filepath.Join(s.store(r).dir(requestProfile(r)), "progress.json")
 		var loadErr error
 		reviewSave, loadErr = readProgress(reviewPath)
 		if loadErr != nil {
@@ -394,7 +495,7 @@ func (s *server) runCode(w http.ResponseWriter, r *http.Request) {
 			log.Printf("save learning metrics: %v", err)
 		}
 	} else {
-		s.recordProfileLearningRun(requestProfile(r), l.ID, resp)
+		s.recordProfileLearningRun(s.store(r), requestProfile(r), l.ID, resp)
 	}
 	writeJSON(w, resp)
 }

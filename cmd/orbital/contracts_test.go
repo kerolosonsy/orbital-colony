@@ -139,6 +139,18 @@ func TestColonyClaimNeedsFinishedChapter(t *testing.T) {
 	if ok, msg := claim(); ok || msg != "Finish chapter 1 first" {
 		t.Fatalf("unfinished chapter claimed: %v %q", ok, msg)
 	}
+	finishChapter1(t, s, "default")
+	if ok, msg := claim(); !ok {
+		t.Fatalf("finished chapter refused: %q", msg)
+	}
+	if ok, _ := claim(); ok {
+		t.Fatal("chapter claimed twice")
+	}
+}
+
+// finishChapter1 marks every chapter-1 mission done in a profile's progress.
+func finishChapter1(t *testing.T, s *server, profile string) {
+	t.Helper()
 	records := map[string]map[string]int{}
 	for _, l := range levels.All {
 		if l.Chapter == 1 {
@@ -146,13 +158,7 @@ func TestColonyClaimNeedsFinishedChapter(t *testing.T) {
 		}
 	}
 	blob, _ := json.Marshal(map[string]any{"progress": records})
-	if err := os.WriteFile(filepath.Join(s.profiles.dir("default"), "progress.json"), blob, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(s.profiles.dir(profile), "progress.json"), blob, 0o644); err != nil {
 		t.Fatal(err)
-	}
-	if ok, msg := claim(); !ok {
-		t.Fatalf("finished chapter refused: %q", msg)
-	}
-	if ok, _ := claim(); ok {
-		t.Fatal("chapter claimed twice")
 	}
 }

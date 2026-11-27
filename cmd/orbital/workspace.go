@@ -138,12 +138,16 @@ func (ws *workspace) read(l *levels.Level, languages ...string) (map[string]stri
 }
 
 func (s *server) workspaceOpen(w http.ResponseWriter, r *http.Request) {
+	if !s.vscodeAvailable() {
+		requestError(w, r, "VS Code works only when the game runs on your own computer", http.StatusNotFound)
+		return
+	}
 	s.colonyOps.Lock()
 	defer s.colonyOps.Unlock()
 	if s.requestGame(w, r) == nil {
 		return
 	}
-	ws := s.ws.forProfile(requestProfile(r))
+	ws := s.ws.forProfile(s.workspaceDir(r, requestProfile(r)))
 	var req struct {
 		Level string
 		Files map[string]string
@@ -171,12 +175,16 @@ func (s *server) workspaceOpen(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) workspaceFiles(w http.ResponseWriter, r *http.Request) {
+	if !s.vscodeAvailable() {
+		requestError(w, r, "VS Code works only when the game runs on your own computer", http.StatusNotFound)
+		return
+	}
 	s.colonyOps.Lock()
 	defer s.colonyOps.Unlock()
 	if s.requestGame(w, r) == nil {
 		return
 	}
-	ws := s.ws.forProfile(requestProfile(r))
+	ws := s.ws.forProfile(s.workspaceDir(r, requestProfile(r)))
 	l := levelForLang(levels.Get(r.URL.Query().Get("level")), requestLang(r))
 	if l == nil {
 		requestError(w, r, "unknown level", http.StatusNotFound)
@@ -194,6 +202,24 @@ func (s *server) workspaceFiles(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, map[string]any{"files": files, "mtime": mtime.UnixMilli()})
 }
 
-func (ws *workspace) forProfile(id string) *workspace {
-	return &workspace{root: filepath.Join(ws.root, id), colonyRel: filepath.ToSlash(filepath.Join("..", ws.colonyRel))}
+// forProfile is the folder for one profile; dir is relative to the root
+// ("<profile>", or "<account>/<profile>" when people sign in).
+func (ws *workspace) forProfile(dir string) *workspace {
+	up := strings.Repeat("../", strings.Count(filepath.ToSlash(dir), "/")+1)
+	return &workspace{root: filepath.Join(ws.root, dir), colonyRel: filepath.ToSlash(filepath.Join(up, ws.colonyRel))}
+}
+
+// vscodeAvailable: VS Code opens on the computer the server runs on, so only
+// a game served on this machine (local, or signed-in on localhost) offers it.
+func (s *server) vscodeAvailable() bool {
+	return s.ws != nil && (s.accounts == nil || s.local)
+}
+
+// workspaceDir names a profile's VS Code folder under the workspace root.
+// The account that took over this computer's players keeps their folders.
+func (s *server) workspaceDir(r *http.Request, id string) string {
+	if acc := requestAccount(r); acc != nil && !acc.Legacy {
+		return acc.ID + "/" + id
+	}
+	return id
 }

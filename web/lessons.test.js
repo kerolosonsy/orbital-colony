@@ -209,7 +209,7 @@ test("revision-1 practice opens the new Mission and cannot restore retired answe
   const view = fixture({ blob }), level = sequenceLesson(); view.ui.open(level);
   assert.match(view.article.textContent, /Step 1 of 2/);
   assert.match(view.article.textContent, /starter saved the first reading/);
-  assert.equal(view.article.querySelector(".lesson-sequence"), null);
+  assert.ok(view.article.querySelector(".lesson-sequence"), "the whole lesson is one page, later steps included");
   click(namedButton(view.article.querySelector("nav"), "Next"));
   assert.equal(view.store.blob.lessons.survey.revision, 2);
   assert.equal(view.store.blob.lessons.survey.step, "c61.v2.try-step");
@@ -431,6 +431,18 @@ test("review practice starts at Mission and cannot change durable lesson, quiz o
   assert.equal(JSON.stringify(blob), before);
 });
 
+test("every step renders in order on one page and Next/Back jump between them", () => {
+  const view = fixture(); view.ui.open(lesson());
+  const steps = view.article.querySelectorAll(".lesson-step");
+  assert.deepEqual(steps.map((s) => s.dataset.step), ["mission", "practice"]);
+  assert.match(view.article.textContent, /Read the mission\..*Pick the last index\./s);
+  click(namedButton(view.article.querySelector("nav"), "Next"));
+  assert.match(view.article.textContent, /Step 2 of 2/);
+  assert.equal(view.store.blob.lessons.survey.step, "practice");
+  view.ui.step(-1);
+  assert.match(view.article.textContent, /Step 1 of 2/);
+});
+
 test("legacy levels use exactly the old markdown renderer and Return to code closes the drawer", () => {
   const view = fixture();
   const old = { id: "old", lesson: "# Read\n\n~x < 3~" };
@@ -450,7 +462,7 @@ test("profile loading retains lesson records, defaults legacy saves, and rejects
   const start = app.indexOf("const store ="), end = app.indexOf("const S =");
   for (const lessons of [undefined, null, "bad", [], { survey: { revision: 1, step: "practice", answers: { question: 0 } } }]) {
     const saved = { progress: { survey: { stars: 2 } }, prefs: {}, quizScores: { 6: 5 }, review: { due: true }, lessons };
-    const context = vm.createContext({ PROFILE: "player", api: async () => saved,
+    const context = vm.createContext({ PROFILE: "player", HOSTED: false, KEYS: { cache: (id) => "orbital.p." + id }, api: async () => saved,
       LearningMetrics: { bind() {}, normalizeMetrics: (metrics) => metrics || {} } });
     vm.runInContext(app.slice(start, end), context);
     await vm.runInContext("store.load()", context);

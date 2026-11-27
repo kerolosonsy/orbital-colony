@@ -44,7 +44,7 @@ const (
 // askModel sends a prompt to the model and returns its reply. Tests swap it.
 var askModel = codexAsk
 
-// chatBusy keeps one question in flight: codex is heavy and replies in order.
+// chatBusy keeps one codex question in flight: codex is heavy and replies in order.
 var chatBusy sync.Mutex
 
 var errNoCodex = errors.New("codex not found")
@@ -54,6 +54,12 @@ func codexAsk(ctx context.Context, prompt string) (string, error) {
 	if err != nil {
 		return "", errNoCodex
 	}
+	chatBusy.Lock()
+	defer chatBusy.Unlock()
+	// the time limit starts after waiting for an earlier question, so a
+	// queued question isn't killed before codex even starts on it
+	ctx, cancel := context.WithTimeout(ctx, chatTimeout)
+	defer cancel()
 	dir, err := os.MkdirTemp("", "orbital-chat-")
 	if err != nil {
 		return "", err
@@ -63,7 +69,7 @@ func codexAsk(ctx context.Context, prompt string) (string, error) {
 	cmd := exec.CommandContext(ctx, bin, "exec",
 		"--ephemeral", "--skip-git-repo-check", "--ignore-user-config", "--ignore-rules",
 		"-s", "read-only", "-C", dir, "--color", "never",
-		"-c", "model_reasoning_effort=low",
+		"-m", "gpt-6-luna", "-c", "model_reasoning_effort=high",
 		"-o", out, "-")
 	cmd.Stdin = strings.NewReader(prompt)
 	output, runErr := cmd.CombinedOutput()
@@ -176,11 +182,11 @@ func (s *server) chat(w http.ResponseWriter, r *http.Request) {
 		requestError(w, r, "empty question", http.StatusBadRequest)
 		return
 	}
-	chatBusy.Lock()
-	defer chatBusy.Unlock()
-	ctx, cancel := context.WithTimeout(r.Context(), chatTimeout)
-	defer cancel()
-	reply, err := askModel(ctx, chatPrompt(l, lang, req))
+	if !s.aiAllowed(w, r) {
+		return
+	}
+	// the model's own time limit starts once it takes the question (see codexAsk)
+	reply, err := askModel(r.Context(), chatPrompt(l, lang, req))
 	switch {
 	case errors.Is(err, errNoCodex):
 		writeJSON(w, map[string]any{"error": "codex", "setup": true})

@@ -63,7 +63,7 @@ test("loading legacy saves defaults quiz scores and loading new saves preserves 
   const start = source.indexOf("const store =");
   const end = source.indexOf("const S =", start);
   for (const saved of [{ progress: {}, prefs: {} }, { progress: {}, prefs: {}, quizScores: { 1: 3, 38: 0 } }]) {
-    const context = vm.createContext({ PROFILE: "player", api: async () => saved,
+    const context = vm.createContext({ PROFILE: "player", HOSTED: false, KEYS: { cache: (id) => "orbital.p." + id }, api: async () => saved,
       LearningMetrics: { bind() {}, normalizeMetrics: () => ({}) } });
     vm.runInContext(source.slice(start, end), context);
     await vm.runInContext("store.load()", context);

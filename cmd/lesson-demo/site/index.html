@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Try First Signal, Orbital Colony’s first Go lesson, in English or Egyptian Arabic.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>First Signal · Orbital Colony</title>
+  <link rel="stylesheet" href="demo.css">
+  <script src="mission.js" defer></script>
+  <script src="demo.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <a href="https://github.com/kerolosonsy/orbital-colony" class="brand"><span class="orbit" aria-hidden="true"></span>Orbital Colony</a>
+      <button id="language" class="secondary" type="button" lang="ar">العربية</button>
+    </header>
+    <section class="intro" aria-labelledby="mission-title">
+      <h1 id="mission-title">First Signal</h1>
+      <p id="goal">Guide the drone to the beacon.</p>
+    </section>
+    <div class="layout">
+      <section class="map-panel" aria-labelledby="map-label">
+        <h2 id="map-label">Drone map</h2>
+        <div id="map" class="map" aria-hidden="true" dir="ltr"></div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="drone"></i><span id="drone-label">Drone</span></span>
+          <span><i class="beacon"></i><span id="beacon-label">Beacon</span></span>
+        </div>
+        <p id="status" class="status" aria-live="polite" aria-atomic="true"></p>
+      </section>
+      <section class="editor-panel" aria-labelledby="editor-label">
+        <h2 id="editor-label">Your Go commands</h2>
+        <p id="instructions">Add direction commands, then run them in order.</p>
+        <pre dir="ltr" aria-labelledby="editor-label"><code id="source"></code></pre>
+        <div class="controls" role="group" aria-labelledby="editor-label">
+          <button type="button" data-move="North"><b aria-hidden="true">↑</b> North</button>
+          <button type="button" data-move="East"><b aria-hidden="true">→</b> East</button>
+          <button type="button" data-move="South"><b aria-hidden="true">↓</b> South</button>
+          <button type="button" data-move="West"><b aria-hidden="true">←</b> West</button>
+        </div>
+        <div class="actions">
+          <button id="run" class="primary" type="button">Run commands</button>
+          <button id="undo" type="button">Undo</button>
+          <button id="reset" type="button">Reset</button>
+        </div>
+      </section>
+    </div>
+    <footer>
+      <p id="scope">This browser lesson simulates direction commands. Open the game locally to write and run Go.</p>
+      <a id="full-game" href="https://github.com/kerolosonsy/orbital-colony#play-locally">Full game and setup</a>
+    </footer>
+    <noscript>Enable JavaScript to try the lesson. فعّل JavaScript عشان تجرّب الدرس.</noscript>
+  </main>
+</body>
+</html>

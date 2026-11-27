@@ -70,6 +70,7 @@
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
     <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
     <symbol id="i-colony" viewBox="0 0 24 24"><path d="M3 20h18M5 20V10l7-5 7 5v10M9 20v-5h6v5"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M14 4.5H5.5v15H14M10 12h10M16.5 8l4 4-4 4"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20.5c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="1.5"/><path d="M15.5 8.5V5.5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5h16v10H10l-4.5 3.5v-3.5H4z"/><path d="M8 10.5h.01M12 10.5h.01M16 10.5h.01"/></symbol>
@@ -79,39 +80,51 @@
 </svg>
 
 <header class="titleblock">
-  <a class="brand" href="#" id="brand" aria-label="Orbital Colony">
-    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11"/><path d="M5 16h22M16 5c4 3 4 19 0 22M16 5c-4 3-4 19 0 22"/><circle cx="25.5" cy="7" r="2.2"/></svg>
-    <span class="brand-name">ORBITAL<small>COLONY</small></span>
-  </a>
-  <button id="btn-missions" class="tool" title="فهرس الأوراق (كل المهمات)" data-en-title="Survey index (all missions)"><svg class="ico"><use href="#i-index"/></svg><span class="tool-label" data-en="Index">الفهرس</span></button>
-  <button id="btn-colony" class="tool" title="المستعمرة المفتوحة: كودك شغال على طول، بتجمع وتبيع وتشتري ترقيات" data-en-title="Open colony: your code runs nonstop, gathering, selling and buying upgrades"><svg class="ico"><use href="#i-colony"/></svg><span class="tool-label" data-en="Colony">المستعمرة</span></button>
-  <button id="btn-chat" class="tool chat-btn" title="اسأل المساعد عن المهمة أو الكود" data-en-title="Ask the helper about the mission or your code" aria-controls="chat"><svg class="ico"><use href="#i-chat"/></svg><span class="tool-label" data-en="Ask">اسأل</span></button>
-  <div class="sheet-title">
-    <b id="lvl-title"></b>
-    <span id="lvl-chapter" class="sheet-code"></span>
+  <div class="tb-start">
+    <a class="brand" href="#" id="brand" aria-label="Orbital Colony">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11"/><path d="M5 16h22M16 5c4 3 4 19 0 22M16 5c-4 3-4 19 0 22"/><circle cx="25.5" cy="7" r="2.2"/></svg>
+      <span class="brand-name">ORBITAL<small>COLONY</small></span>
+    </a>
+    <div class="survey-progress" title="الأوراق اللي اتمسحت من كل الأوراق" data-en-title="Sheets surveyed out of all sheets">
+      <span class="survey-count"><span id="overall-count">0</span><span class="of">/<span id="overall-total">0</span></span></span>
+      <span class="survey-bar"><i id="overall-fill"></i></span>
+    </div>
+    <nav class="tool-group nav-group" aria-label="التنقل" data-en-aria="Navigation">
+      <button id="btn-missions" class="tool" title="فهرس الأوراق (كل المهمات)" data-en-title="Survey index (all missions)"><svg class="ico"><use href="#i-index"/></svg><span class="tool-label" data-en="Index">الفهرس</span></button>
+      <button id="btn-colony" class="tool" title="المستعمرة المفتوحة: كودك شغال على طول، بتجمع وتبيع وتشتري ترقيات" data-en-title="Open colony: your code runs nonstop, gathering, selling and buying upgrades"><svg class="ico"><use href="#i-colony"/></svg><span class="tool-label" data-en="Colony">المستعمرة</span></button>
+      <button id="btn-chat" class="tool chat-btn" title="اسأل المساعد عن المهمة أو الكود" data-en-title="Ask the helper about the mission or your code" aria-controls="chat"><svg class="ico"><use href="#i-chat"/></svg><span class="tool-label" data-en="Ask">اسأل</span></button>
+    </nav>
   </div>
-  <div id="lvl-stars" class="stars" aria-label="النجوم" data-en-aria="Stars"></div>
-  <div class="spacer"></div>
-  <div class="survey-progress" title="الأوراق اللي اتمسحت من كل الأوراق" data-en-title="Sheets surveyed out of all sheets">
-    <span class="survey-count"><span id="overall-count">0</span><span class="of">/<span id="overall-total">0</span></span></span>
-    <span class="survey-bar"><i id="overall-fill"></i></span>
+  <div class="tb-mission">
+    <div class="sheet-title">
+      <span id="lvl-chapter" class="sheet-code"></span>
+      <b id="lvl-title"></b>
+    </div>
+    <div id="lvl-stars" class="stars" aria-label="النجوم" data-en-aria="Stars"></div>
   </div>
-  <button id="btn-lesson" class="tool only-narrow" title="الدرس" data-en-title="Lesson" aria-expanded="false"><svg class="ico"><use href="#i-book"/></svg></button>
-  <div class="tool-group" role="group" aria-label="الإعدادات" data-en-aria="Settings">
-  <button id="btn-sound" class="tool" title="الصوت" data-en-title="Sound" aria-pressed="true"><svg class="ico"><use href="#i-sound"/></svg></button>
-  <button id="btn-vscode" class="tool" title="اكتب في VS Code بالـ autocomplete، واللعبة هتشوف كل save" data-en-title="Write in VS Code with autocomplete; the game sees every save"><svg class="ico"><use href="#i-code"/></svg><span class="tool-label">VS Code</span></button>
-  <button id="btn-lang" class="tool" title="English" data-en-title="العربية"><span class="lang-label" data-en="ع">EN</span></button>
-  <button id="btn-profile" class="tool" title="اللاعبين" data-en-title="Players"><svg class="ico"><use href="#i-user"/></svg><span class="tool-label" id="profile-name"></span></button>
-  <button id="btn-reset" class="tool" title="ارجع لكود البداية" data-en-title="Back to starter code"><svg class="ico"><use href="#i-reset"/></svg></button>
-  </div>
-  <div id="colony-actions" class="colony-actions">
-    <button id="btn-race" type="button" class="tool small" aria-pressed="false" title="شغّل الكود بفحص سباقات البيانات (-race)" data-en-title="Run with Go race detector (-race)"><span class="race-dot" aria-hidden="true"></span><span data-en="Check for races">افحص السباقات</span></button>
-    <button id="btn-test" type="button" class="tool small" title="شغّل اختبارات go test" data-en-title="Run go test"><span data-en="Test">اختبر</span></button>
-    <button id="btn-vet" type="button" class="tool small" title="افحص الكود بـ go vet" data-en-title="Run go vet"><span data-en="Vet">افحص</span></button>
-  </div>
-  <div class="run-group">
-  <button id="btn-run" class="run" title="Ctrl/⌘ + Enter"><svg class="ico"><use href="#i-play"/></svg><span>Run</span></button>
-  <button id="btn-step" class="tool step-run" title="شغّل وامشي خطوة بخطوة (Ctrl/⌘ + Shift + Enter)" data-en-title="Run and step through it (Ctrl/⌘ + Shift + Enter)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7"/><path d="M5 7l3 3 3-3"/><circle cx="8" cy="13" r="1.3"/></svg><span data-en="Step">خطوة</span></button>
+  <div class="tb-end">
+    <button id="btn-lesson" class="tool only-narrow" title="الدرس" data-en-title="Lesson" aria-expanded="false"><svg class="ico"><use href="#i-book"/></svg></button>
+    <button id="btn-settings" class="tool settings-btn" popovertarget="settings-menu" title="اللاعب والإعدادات" data-en-title="Player and settings"><svg class="ico"><use href="#i-user"/></svg><span class="settings-name" id="profile-name"></span></button>
+    <div id="settings-menu" class="settings-menu" popover role="group" aria-label="اللاعب والإعدادات" data-en-aria="Player and settings">
+      <button id="btn-profile" class="tool" title="بدّل أو ضيف لاعب" data-en-title="Switch or add a player"><svg class="ico"><use href="#i-user"/></svg><span data-en="Players">اللاعبين</span></button>
+      <button id="btn-lang" class="tool" title="English" data-en-title="العربية"><span class="lang-label" data-en="ع">EN</span><span data-en="العربية">English</span></button>
+      <button id="btn-sound" class="tool" title="الصوت" data-en-title="Sound" aria-pressed="true"><svg class="ico"><use href="#i-sound"/></svg><span data-en="Sound">الصوت</span></button>
+      <button id="btn-intro" class="tool" title="جولة سريعة في كل حتة في اللعبة" data-en-title="A quick tour of the whole game"><svg class="ico"><use href="#i-target"/></svg><span data-en="Tour of the game">جولة في اللعبة</span></button>
+      <div id="account-box" class="account-box" hidden>
+        <p id="account-email" class="account-email" dir="ltr"></p>
+        <button id="btn-logout" class="tool"><svg class="ico"><use href="#i-logout"/></svg><span data-en="Sign out">اخرج من الحساب</span></button>
+      </div>
+    </div>
+    <div id="colony-actions" class="colony-actions">
+      <button id="btn-race" type="button" class="tool small" aria-pressed="false" title="شغّل الكود بفحص سباقات البيانات (-race)" data-en-title="Run with Go race detector (-race)"><span class="race-dot" aria-hidden="true"></span><span data-en="Check for races">افحص السباقات</span></button>
+      <button id="btn-test" type="button" class="tool small" title="شغّل اختبارات go test" data-en-title="Run go test"><span data-en="Test">اختبر</span></button>
+      <button id="btn-vet" type="button" class="tool small" title="افحص الكود بـ go vet" data-en-title="Run go vet"><span data-en="Vet">افحص</span></button>
+    </div>
+    <button id="btn-reset" class="tool" title="ارجع لكود البداية" data-en-title="Back to starter code"><svg class="ico"><use href="#i-reset"/></svg></button>
+    <div class="run-group">
+      <button id="btn-run" class="run" title="Ctrl/⌘ + Enter"><svg class="ico"><use href="#i-play"/></svg><span>Run</span></button>
+      <button id="btn-step" class="tool step-run" title="شغّل وتتبّع الكود سطر سطر (Ctrl/⌘ + Shift + Enter)" data-en-title="Run and trace it line by line (Ctrl/⌘ + Shift + Enter)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7"/><path d="M5 7l3 3 3-3"/><circle cx="8" cy="13" r="1.3"/></svg><span data-en="Trace">تتبّع</span></button>
+    </div>
   </div>
 </header>
 
@@ -123,6 +136,7 @@
       <div>
         <p id="lvl-goal"></p>
         <p class="par" id="lvl-par"></p>
+        <div id="lvl-grade" class="grade" hidden></div>
       </div>
     </div>
     <article id="lesson" class="lesson"></article>
@@ -160,7 +174,7 @@
   </section>
 
   <section class="panel editor-panel">
-    <div class="panel-head"><div id="file-tabs" class="tabs"></div><span class="panel-head-end"><span class="save" id="save-state"></span><button id="btn-format" type="button" class="tool small format-btn" title="نسّق الكود بـ gofmt (Shift+Alt+F)" data-en-title="Format with gofmt (Shift+Alt+F)" aria-label="نسّق الكود" data-en-aria="Format code">{ }</button></span></div>
+    <div class="panel-head"><div id="file-tabs" class="tabs"></div><span class="panel-head-end"><span class="save" id="save-state"></span><button id="btn-format" type="button" class="tool small format-btn" title="نسّق الكود بـ gofmt (Shift+Alt+F)" data-en-title="Format with gofmt (Shift+Alt+F)" aria-label="نسّق الكود" data-en-aria="Format code">{ }</button><button id="btn-vscode" type="button" class="tool small vscode-btn" title="اكتب في VS Code بالـ autocomplete، واللعبة هتشوف كل save" data-en-title="Write in VS Code with autocomplete; the game sees every save"><svg class="ico"><use href="#i-code"/></svg><span class="tool-label">VS Code</span></button></span></div>
     <p id="review-notice" class="review-notice hidden" role="status"></p>
     <div id="debugger-toolbar" class="debugger-toolbar" hidden>
       <div id="debugger-controls" class="debugger-controls" hidden>
@@ -339,10 +353,10 @@
 <dialog id="profiles" class="overlay hidden" aria-labelledby="profiles-title">
   <div class="sheet profiles-sheet">
     <div class="sheet-head">
-      <h2 id="profiles-title" data-en="Players on this computer">اللاعبين على الجهاز ده</h2>
+      <h2 id="profiles-title" data-en="Players on this computer" data-hosted="اللاعبين في حسابك" data-hosted-en="Players in your account">اللاعبين على الجهاز ده</h2>
       <button class="tool" data-close aria-label="قفل" data-en-aria="Close"><svg class="ico"><use href="#i-close"/></svg></button>
     </div>
-    <p class="profiles-note" data-en="Each player has their own missions, stars, code and colony. Switching keeps everything saved.">كل لاعب ليه مهماته ونجومه وكوده ومستعمرته. التبديل بيحفظ كل حاجة.</p>
+    <p class="profiles-note" data-en="Each player has their own missions, stars, code and colony. Switching keeps everything saved. Duplicate copies a player to try something new without losing the original.">كل لاعب ليه مهماته ونجومه وكوده ومستعمرته. التبديل بيحفظ كل حاجة، و"اعمل نسخة" بتعمل لاعب جديد بنفس التقدم تجرّب بيه من غير ما تبوّظ الأصلي.</p>
     <ul id="profile-list" class="profile-list"></ul>
     <form id="profile-new" class="profile-new">
       <input id="profile-new-name" maxlength="24" required placeholder="اسم اللاعب الجديد" data-en-placeholder="New player name" autocomplete="off">
@@ -383,11 +397,14 @@
     </div>
     <table class="shortcuts-table">
       <tr><td><kbd dir="ltr">Ctrl/⌘ + Enter</kbd></td><td data-en="Run the code">شغّل الكود</td></tr>
-      <tr><td><kbd dir="ltr">Ctrl/⌘ + Shift + Enter</kbd></td><td data-en="Run and step through it">شغّل خطوة بخطوة</td></tr>
+      <tr><td><kbd dir="ltr">Ctrl/⌘ + Shift + Enter</kbd></td><td data-en="Run and trace it line by line">شغّل وتتبّع سطر سطر</td></tr>
       <tr><td><kbd dir="ltr">colony. · Ctrl + Space</kbd></td><td data-en="Suggest colony functions with their docs (↑↓ then Enter/Tab, Esc closes)">اقتراحات دوال colony مع شرحها (↑↓ وبعدين Enter/Tab، و Esc يقفل)</td></tr>
       <tr><td><kbd dir="ltr">Shift + Alt + F</kbd></td><td data-en="Format the code with gofmt">نسّق الكود بـ gofmt</td></tr>
       <tr><td><kbd dir="ltr">Ctrl/⌘ + S</kbd></td><td data-en="Save now (the game also saves as you type)">احفظ دلوقتي (اللعبة بتحفظ وإنت بتكتب كمان)</td></tr>
       <tr><td><kbd dir="ltr">Esc</kbd></td><td data-en="Stop the run">وقّف التشغيل</td></tr>
+      <tr><td><kbd dir="ltr">Ctrl/⌘ + K</kbd></td><td data-en="Open the mission index">افتح فهرس المهمات</td></tr>
+      <tr><td><kbd dir="ltr">Alt + H</kbd></td><td data-en="Show the next hint">اعرض التلميح الجاي</td></tr>
+      <tr><td><kbd dir="ltr">Alt + N · Alt + P</kbd></td><td data-en="Next · previous lesson step">خطوة الدرس الجاية · اللي فاتت</td></tr>
       <tr><td><kbd dir="ltr">Ctrl/⌘ + /</kbd></td><td data-en="Comment / uncomment lines">علّق السطر أو شيل التعليق</td></tr>
       <tr><td><kbd dir="ltr">Tab · Shift + Tab · Ctrl/⌘ + ] [</kbd></td><td data-en="Indent / outdent selected lines">زوّد أو قلّل المسافة للسطور المختارة</td></tr>
       <tr><td><kbd dir="ltr">Alt + ↑/↓ · Shift + Alt + ↑/↓</kbd></td><td data-en="Move lines · duplicate lines">انقل السطور · كرّر السطور</td></tr>
@@ -451,6 +468,7 @@
 <script src="/static/quickfix.js"></script>
 <script src="/static/tour.js"></script>
 <script src="/static/chat.js"></script>
+<script src="/static/grade.js"></script>
 <script src="/static/debugger.js"></script>
 <script src="/static/app.js"></script>
 <script src="/static/profiles.js"></script>

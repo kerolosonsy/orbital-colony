@@ -174,17 +174,17 @@ func mergeLevelLearningMetrics(current, newer levelLearningMetrics) levelLearnin
 	return current
 }
 
-func (s *server) recordProfileLearningRun(profileID, levelID string, response *runResponse) {
-	if s.profiles == nil {
+func (s *server) recordProfileLearningRun(p *profileStore, profileID, levelID string, response *runResponse) {
+	if p == nil {
 		return
 	}
-	s.profiles.mu.Lock()
-	defer s.profiles.mu.Unlock()
-	if _, err := s.profiles.load(profileID); err != nil {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if _, err := p.load(profileID); err != nil {
 		log.Printf("load profile for learning metrics: %v", err)
 		return
 	}
-	path := filepath.Join(s.profiles.dir(profileID), "progress.json")
+	path := filepath.Join(p.dir(profileID), "progress.json")
 	save, err := readProgress(path)
 	if err != nil {
 		log.Printf("read profile learning metrics: %v", err)
@@ -197,7 +197,7 @@ func (s *server) recordProfileLearningRun(profileID, levelID string, response *r
 }
 
 func (s *server) profileMetrics(w http.ResponseWriter, r *http.Request) {
-	p := s.profiles
+	p := s.store(r)
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	pr, ok := s.profileByPath(w, r)
@@ -271,6 +271,11 @@ func aggregateProfileMetrics(savesDir string) (learningMetrics, error) {
 	if err != nil {
 		return nil, err
 	}
+	accountPaths, err := filepath.Glob(filepath.Join(savesDir, "users", "*", "profiles", "*", "progress.json"))
+	if err != nil {
+		return nil, err
+	}
+	paths = append(paths, accountPaths...)
 	all := learningMetrics{}
 	for _, path := range paths {
 		blob, err := os.ReadFile(path)

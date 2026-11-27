@@ -5,3 +5,6 @@ import "embed"
 
 //go:embed web
 var Web embed.FS
+
+//go:embed LICENSE
+var License []byte

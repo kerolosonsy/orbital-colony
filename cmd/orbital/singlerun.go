@@ -95,7 +95,7 @@ func (r *runner) startSingleRunBuild(ctx context.Context, lvl *levels.Level, cod
 	if err != nil {
 		return b
 	}
-	dir, err := os.MkdirTemp("", "orbital-single-*")
+	dir, err := runDir("orbital-single-*")
 	if err != nil {
 		return b
 	}

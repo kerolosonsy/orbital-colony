@@ -1,0 +1,18 @@
+name: Lesson feedback
+description: Suggest a correction to a lesson, hint, quiz, or translation
+labels: [documentation]
+body:
+  - type: input
+    id: lesson
+    attributes:
+      label: Mission or chapter and language
+      placeholder: "First Signal (1-1), Egyptian Arabic"
+    validations:
+      required: true
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What should change?
+      description: Quote the confusing wording or describe the behavior and the learner outcome.
+    validations:
+      required: true

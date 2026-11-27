@@ -49,7 +49,7 @@ test("only passing a boss shows track completion, including with old save record
           store: { save() {} }, idx: () => 0, sheetCode: () => "9-boss",
           T: (ar, en) => lang === "ar" ? ar : en, esc: (s) => s,
           banner() {}, log() {}, starHTML: () => "***", updateOverall() {},
-          Sound: { play() {} }, setTimeout() {}, showOverlay() {},
+          Sound: { play() {} }, setTimeout() {}, showOverlay() {}, gradePanel: { grade() {} },
           level, result: { success, stars: 2, ticks: 0, message: "lab result" },
         });
         vm.runInContext(functions("function finish(", "// ---------- boot"), context);

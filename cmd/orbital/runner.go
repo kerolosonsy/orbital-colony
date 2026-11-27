@@ -98,7 +98,7 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	if missing := restrictedImports(code, lvl, lang); len(missing) > 0 {
 		return rejectedImports(missing, lang), nil
 	}
-	dir, err := os.MkdirTemp("", "orbital-run-*")
+	dir, err := runDir("orbital-run-*")
 	if err != nil {
 		return nil, err
 	}
@@ -201,6 +201,7 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 	progress := ""
 	mapPar, mapGold := 0, 0     // star targets of this generated map, if any
 	reached, goalAt := false, 0 // goal state after the last action, and when it became true
+	endAt := 0                  // tick of the program's last action
 	lostAt := 0                 // last tick the goal was true before an action broke it
 	for _, line := range bytes.Split(data, []byte("\n")) {
 		if len(bytes.TrimSpace(line)) == 0 {
@@ -216,6 +217,7 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 			mapPar, mapGold = last.Par, last.Gold
 		}
 		if last.Reached != nil {
+			endAt = last.T
 			if *last.Reached && !reached {
 				goalAt = last.T
 			}
@@ -225,11 +227,12 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 			reached = *last.Reached
 		}
 	}
-	// The program ended on its own right after reaching the goal: that counts.
+	// The mission is judged when the program ends on its own: the goal must
+	// still hold, and every action up to the end counts toward the ticks.
 	if last.Op != "goal" && last.Op != "fail" && runErr == nil && reached {
-		ev, _ := json.Marshal(map[string]any{"op": "goal", "ok": true, "t": goalAt, "msg": tr(lang, "المهمة اكتملت!", "Mission complete!")})
+		ev, _ := json.Marshal(map[string]any{"op": "goal", "ok": true, "t": endAt, "msg": tr(lang, "المهمة اكتملت!", "Mission complete!")})
 		resp.Events = append(resp.Events, ev)
-		last.Op, last.T, last.Par, last.Gold = "goal", goalAt, mapPar, mapGold
+		last.Op, last.T, last.Par, last.Gold = "goal", endAt, mapPar, mapGold
 	}
 	resp.Result.Progress = progress
 	resp.Result.Ticks = last.T
@@ -261,6 +264,9 @@ func (r *runner) Run(ctx context.Context, lvl *levels.Level, code string) (*runR
 			resp.Result.Stars = 3
 		}
 		resp.Result.Message = fmt.Sprintf(tr(lang, "المهمة اكتملت في %d tick!", "Mission completed in %d ticks!"), last.T)
+		if goalAt > 0 && last.T > goalAt && resp.Result.Stars < 3 {
+			resp.Result.Message += fmt.Sprintf(tr(lang, " الهدف اتحقق عند tick %d، بس الكود كمّل لحد %d. شيل الخطوات اللي بعد كده.", " The goal was met at tick %d, but the code kept going until %d. Remove the steps after that."), goalAt, last.T)
+		}
 	case last.Op == "fail":
 		resp.Result.Message = last.Msg
 	case errors.Is(rctx.Err(), context.DeadlineExceeded):

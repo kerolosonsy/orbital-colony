@@ -266,7 +266,7 @@ The workers request locks in different orders.
 
 لو عاملين أخدوا الـlocks بترتيب عكسي، ممكن كل واحد يستنى التاني.
 
-Go مش بتضمن مين يبدأ؛ ده سيناريو محتمل، مش نتيجة كل تشغيل.
+أول حصاد في الـstarter بيخلّي كل عامل ينتظر لحد ما الاتنين يمسكوا قفلين مختلفين.
 
 القاعدة: اطلب الموارد بنفس الترتيب في كل المسارات.
 
@@ -274,7 +274,7 @@ Go مش بتضمن مين يبدأ؛ ده سيناريو محتمل، مش نت�
 
 If workers acquire locks in reverse orders, each may wait for the other.
 
-Go does not promise who starts; this is one possible order.
+The starter waits until both workers hold different locks, making the cycle reproducible.
 
 Request resources in one fixed order on every path.
 
@@ -357,7 +357,7 @@ Edit the starter, then watch both drones finish the rows.
 
 1. **Concept / الفكرة:** الـdeadlock ممكن يحصل لما كل عامل ماسك مورد ومستني التاني. / A deadlock can form when each worker holds one resource and waits for another.
 2. **Structure / الترتيب:** قارن ترتيب الـlocks في كل مسار قبل تتبّع Wait. / Compare the two lock orders on every path before tracing Wait.
-3. **Specific / السطر:** راجع arguments بتوع ~harvestWith~ في استدعاءي ~work~ جوه ~main~. / Inspect the arguments to ~harvestWith~ in both ~work~ calls inside ~main~.
+3. **Specific / السطر:** قارن ~aFirst, aSecond~ مع ~bFirst, bSecond~ جوه ~main~. / Compare ~aFirst, aSecond~ with ~bFirst, bSecond~ inside ~main~.
 
 #### Verified e123-lock-order
 

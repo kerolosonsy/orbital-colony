@@ -189,11 +189,10 @@ func main() {
 }
 `, "الصغير"}
 	cases["11-3-storm"] = struct{ code, want string }{"", "العاصفة"}
-	for _, id := range []string{"12-1-shared-total", "12-2-registry", "12-3-deadlock", "13-1-recall", "13-2-timeouts", "13-3-first-wins"} {
+	for _, id := range []string{"12-1-shared-total", "12-2-registry", "13-1-recall", "13-2-timeouts", "13-3-first-wins"} {
 		cases[id] = struct{ code, want string }{"", ""} // buggy starters must not pass
 	}
 	cases["12-1-shared-total"] = struct{ code, want string }{"", "race"}
-	cases["12-3-deadlock"] = struct{ code, want string }{"", "deadlock"}
 	cases["13-2-timeouts"] = struct{ code, want string }{"", "الوقت خلص"}
 	cases["8-1-copy-bug"] = struct{ code, want string }{"", ""} // starter as shipped must not pass
 	cases["8-2-cargo-runs"] = struct{ code, want string }{"", ""}
@@ -213,6 +212,31 @@ func main() {
 			}
 			if resp.Result.Success || !strings.Contains(resp.Result.Message+resp.Result.Progress, c.want) {
 				t.Fatalf("success=%v msg=%q stderr=%s compile=%s", resp.Result.Success, resp.Result.Message, resp.Stderr, resp.CompileOutput)
+			}
+		})
+	}
+}
+
+func TestDeadlockStarterAndLockOrderFix(t *testing.T) {
+	r := testRunner(t)
+	for _, lang := range []string{"ar", "en"} {
+		t.Run(lang, func(t *testing.T) {
+			level := levelForLang(levels.Get("12-3-deadlock"), lang)
+			ctx := withLang(context.Background(), lang)
+			starter, err := r.Run(ctx, level, level.Starter)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if starter.Result.Success || !strings.Contains(starter.Result.Message, "deadlock") {
+				t.Fatalf("starter result = %+v", starter.Result)
+			}
+			fixed := strings.Replace(level.Starter, "bFirst, bSecond := &cart, &drill", "bFirst, bSecond := &drill, &cart", 1)
+			result, err := r.Run(ctx, level, fixed)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !result.Result.Success {
+				t.Fatalf("consistent lock order result = %+v, stderr = %q", result.Result, result.Stderr)
 			}
 		})
 	}

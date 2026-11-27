@@ -159,7 +159,7 @@ func (r *runner) runTraceWorkspace(ctx context.Context, lvl *levels.Level, files
 	if err != nil {
 		return traceUnavailable(lang), nil
 	}
-	dir, err := os.MkdirTemp("", "orbital-trace-*")
+	dir, err := runDir("orbital-trace-*")
 	if err != nil {
 		return nil, err
 	}

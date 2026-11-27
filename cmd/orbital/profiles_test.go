@@ -160,6 +160,10 @@ func TestProfileRejectsInvalidIDsAndProgress(t *testing.T) {
 func TestProfileColonyStateIsolation(t *testing.T) {
 	s, h := profileServer(t)
 	pr := decodeProfile(t, profileRequest(t, h, "POST", "/api/profiles", "", `{"name":"Second","lang":"en"}`))
+	if _, err := s.profiles.ensureDefault(); err != nil {
+		t.Fatal(err)
+	}
+	finishChapter1(t, s, "default")
 	rec := profileRequest(t, h, "POST", "/api/colony/claim", "default", `{"chapter":1}`)
 	if rec.Code != 200 {
 		t.Fatalf("claim: %s", rec.Body)
