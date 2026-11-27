@@ -4,7 +4,7 @@ Orbital Colony is a bilingual game for learning Go by programming drones and bui
 
 ## Play locally
 
-Install [Go 1.25 or newer](https://go.dev/dl/), then run these commands from a terminal.
+Install [Go 1.26 or newer](https://go.dev/dl/), then run these commands from a terminal.
 
 ```sh
 git clone https://github.com/kerolosonsy/orbital-colony.git
@@ -22,11 +22,11 @@ Orbital Colony uses your local Go compiler and runs programs with your desktop u
 - **Coding labs.** Build and test complete programs with the Go toolchain. Some labs use race detection, fuzzing, benchmarks, or hidden test cases.
 - **Guided lessons.** Work through explanations, small interactive exercises, hints, and chapter quizzes. The curriculum has 181 missions across 38 chapters.
 
-Use Go **1.27.1 or newer** and run `make deps` to prepare the optional third-party lab dependencies. For labs that need local services, start Docker and run `make services-up`. [Arabic play and setup guide](docs/PLAYING.ar.md)
+Use the latest Go 1.27 patch release or newer and run `make deps` to prepare the optional third-party lab dependencies. For labs that need local services, start Docker and run `make services-up`. [Arabic play and setup guide](docs/PLAYING.ar.md)
 
 ## Browser demo
 
-[Play First Signal](https://kerolosonsy.github.io/orbital-colony-demo/) to assemble Go direction calls and see how their order changes the drone's position. It runs as a static lesson in your browser. Build it with `make demo` and open `dist/index.html`. [Demo and GitHub Pages setup](docs/DEPLOY.md)
+In [First Signal](https://kerolosonsy.github.io/orbital-colony-demo/), assemble Go direction calls and see how their order changes the drone's position. It runs as a static lesson in your browser. Build it with `make demo` and open `dist/index.html`. [Demo and GitHub Pages setup](docs/DEPLOY.md)
 
 ## Keep learning Go
 
